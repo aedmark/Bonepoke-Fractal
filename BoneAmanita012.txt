@@ -66,43 +66,34 @@ class FactStipe:
     def __init__(self, decay_limit=20):
         self.facts = {}
         self.decay_limit = decay_limit
-        self.current_tick = 0
-
-        # The Physics of Opposites (Expanded)
-        # These are mutually exclusive states. If both appear, reality is breaking.
         self.conflict_map = {
-            'night': {'sun', 'daylight', 'noon', 'morning', 'solar', 'shadows'}, # Shadows require light source, tricky at night unless moon.
+            'night': {'sun', 'daylight', 'noon', 'morning', 'solar'}, # Removed 'shadows' (Moonlight creates shadows)
             'day': {'moon', 'midnight', 'stars', 'darkness'},
             'quiet': {'scream', 'bang', 'crash', 'loud', 'shout', 'roar', 'thud'},
-            'indoors': {'rain', 'wind', 'sky', 'grass', 'mud', 'clouds'}, # Unless broken roof
-            'alone': {'crowd', 'them', 'they', 'voices', 'people', 'handshake'},
-            'dead': {'breath', 'pulse', 'heartbeat', 'gasp', 'running', 'speaking'},
-            'silence': {'whisper', 'hum', 'noise', 'echo', 'music'}
+            'dead': {'breath', 'pulse', 'heartbeat', 'running', 'speaking'},
+            'silence': {'noise', 'music'} # Reduced list to allow for 'whisper' in silence
         }
 
     def check_consistency(self, current_text):
-        """
-        Scans for logical hallucinations.
-        """
         text_lower = current_text.lower()
         words = set(text_lower.split())
         violations = []
 
-        # LOGIC CHECK: Scan for impossible pairs
         for state, forbidden_set in self.conflict_map.items():
-            # If the state (e.g., 'night') is explicitly established or mentioned...
             if state in text_lower:
-                # ...check if any forbidden antonyms are also present.
                 conflicts = words.intersection(forbidden_set)
                 if conflicts:
-                    violations.append(f"REALITY BREAK: Context is '{state}', but detected '{list(conflicts)[0]}'.")
+                    # We flag it, but we don't assume malicious hallucination immediately.
+                    # We check if the conflict is "poetic" (adjacent words).
+                    # For now, we just soften the error message.
+                    violations.append(f"LOGIC TENSION: '{state}' vs '{list(conflicts)[0]}'. Intentional metaphor?")
 
         if violations:
-            # If logic breaks, we return a forceful intervention.
+            # Returns "valid: True" but with errors, so the engine doesn't crash/stop.
             return {
-                "valid": False,
+                "valid": True,
                 "errors": violations,
-                "intervention": "STOP. Logic Error. You cannot have sunlight at midnight. Revise."
+                "intervention": f"POETIC LICENSE CHECK: {violations[0]}"
             }
 
         return {"valid": True, "errors": [], "intervention": None}
@@ -141,17 +132,16 @@ class TheMuscaria:
     """
     def __init__(self):
         self.boredom_pressure = 0.0
-        self.pressure_threshold = 5.0
+        self.pressure_threshold = 11.0
         self.disruptions = [
-            "VIBE CHECK: Delete the last sentence. Replace with a sudden physical action.",
+            "VIBE CHECK: Open a window. Describe the air or the light.",
             "CUT THE CHEESE: Introduce a smell or temperature change immediately.",
-            "THE PIVOT: Reveal a contradiction in the narrator's intent.",
-            "NON-SEQUITUR: Scream (metaphorically) and change the subject.",
-            "SURREALIST: Replace an abstract concept with a wind chime.",
-            "GLITTER BOMB: Break the rhythm with a fragment.",
-            "VOID STARE: Stop explaining. Describe the thing itself.",
+            "THE PIVOT: Shift the perspective slightly. Who is watching?",
+            "NON-SEQUITUR: Say something goofy to throw off the boredom.",
+            "SURREALIST: Replace an abstract concept with something weird.",
+            "SIMPLIFICATION: Say the same thing, but in half the words.",
             "THE LIZARD KING: Raise the stakes. A threat has entered.",
-            "STOP THE PRESSES: You are using too many 'is' verbs. Make something explode."
+            "SENSORY ANCHOR: What does the surface feel like? Rough or smooth?",
         ]
 
     def check_for_boredom(self, metrics):
@@ -195,23 +185,31 @@ class TheWitchRing:
         text_lower = text.lower()
         words = text.split()
         word_count = len(words)
+        warnings = []
 
-        # 1. Minimum Effort Check
+        # 1. Minimum Effort Check (Lowered to 4)
         if word_count < 4:
              return {"accepted": False, "message": "THE YAGA: Too quiet. Speak up."}
 
-        # 2. Cliche Check
+        # 2. Cliche Check (Now a Warning, not a Block)
         for cliche in self.cliches:
             if cliche in text_lower:
-                return {"accepted": False, "message": f"THE YAGA: '{cliche}'? This meat is gray. Cook it again."}
+                warnings.append(f"The meat is gray ('{cliche}').")
 
         # 3. Sycophancy Check (Sugar vs. Meat)
         sugar_count = sum(1 for w in words if w in self.pleading_words)
+
+        meat_threshold = 12
         meat_count = word_count - sugar_count
 
-        # If meat count is low AND sugar is present, she rejects it.
-        if meat_count < 5 and sugar_count > 0:
-             return {"accepted": False, "message": "THE YAGA: You offer me only sweetness. Give me something to chew on."}
+        if meat_count < meat_threshold and sugar_count > 0:
+             warnings.append("Too much sugar, not enough meat.")
+
+        if warnings:
+            # PATCH: We return True (Accepted) but attach the insults so the
+            # Physics Engine can still run.
+            joined_warnings = " ".join(warnings)
+            return {"accepted": True, "message": f"THE YAGA GRUMBLES: {joined_warnings} (Proceeding with caution...)"}
 
         return {"accepted": True, "message": "DORMANT"}
 
@@ -224,9 +222,11 @@ class LinguisticPhysicsEngine:
     def __init__(self):
         # 1. Concrete Universals (Grounding words)
         self.universals = {
-            'hand', 'eye', 'blood', 'bone', 'breath', 'sweat', 'pulse', 'throat', 'skin', 'muscle',
-            'stone', 'light', 'dirt', 'water', 'rain', 'smoke', 'salt', 'rust', 'glass', 'mud', 'ash',
-            'door', 'key', 'roof', 'floor', 'chair', 'table', 'bread', 'knife', 'seed', 'root', 'wall'
+            'hand', 'eye', 'breath', 'skin', 'voice', # Kept the mild human elements
+            'stone', 'light', 'water', 'rain', 'mud', 'dirt', 'wind', # Nature
+            'wood', 'grain', 'iron', 'clay', 'paper', 'glass', 'fabric', # Craft
+            'door', 'key', 'roof', 'floor', 'chair', 'table', 'wall', # Structure
+            'path', 'road', 'horizon', 'shadow', 'weight', 'anchor' # Spatial
         }
 
         # 2. Abstract Concepts (High cognitive load)
@@ -239,21 +239,21 @@ class LinguisticPhysicsEngine:
 
         # 3. Verbs (We favor the present, but sometimes the past has equal weight)
         self.kinetic_verbs = {
-            'run', 'ran', 'hit', 'break', 'broke', 'broken',
+            run', 'ran', 'hit', 'break', 'broke', 'broken',
             'take', 'took', 'make', 'made',
             'press', 'build', 'built', 'weave', 'wove',
             'cut', 'throw', 'threw', 'drive', 'drove',
-            'grab', 'tear', 'tore', 'rip', 'crush', 'burn', 'shove', 'drag'
+            'lift', 'carry', 'place', 'hold', 'turn', 'open', 'close'
         }
         self.stative_verbs = {'is', 'are', 'was', 'were', 'seem', 'appear', 'have', 'has', 'consist'}
 
         # 4. Stylistic Profiles (Substrates)
         self.styles = {
-            'Moss': {'layer', 'nuance', 'deep', 'tapestry', 'accumulate', 'growth'},
-            'Crystal': {'logic', 'define', 'metric', 'precise', 'structure', 'perfect'},
-            'Fluid': {'flow', 'adapt', 'stream', 'dissolve', 'shift', 'absorb', 'leak'},
-            'Lattice': {'foundation', 'structure', 'design', 'plan', 'ensure', 'blueprint', 'cement'},
-            'Claret': {'ache', 'blood', 'fuck', 'bullshit', 'goddamn', 'love', 'maybe', 'hurt', 'mess', 'human'}
+            'Moss': {'layer', 'nuance', 'deep', 'root', 'grow', 'slow'},
+            'Crystal': {'logic', 'define', 'metric', 'clear', 'structure', 'frame'},
+            'Timber': {'build', 'weight', 'wood', 'grain', 'solid', 'beam', 'floor'},
+            'Lattice': {'foundation', 'structure', 'design', 'plan', 'support', 'connect'},
+            'Claret': {'ache', 'human', 'mess', 'love', 'maybe', 'bruise', 'honest'}
         }
 
         self.connectors = {'we', 'you', 'us', 'together', 'share'}
@@ -377,27 +377,28 @@ class EditorialTranslator:
         feedback_notes = {}
 
         # Drag Check (The Clarence Protocol)
-        if phys['narrative_drag'] > 2.0:
+        if phys['narrative_drag'] > 3.5:
             feedback_notes['Pacing'] = (
-                f"CLARENCE: Too slow (Drag: {phys['narrative_drag']}). "
-                "You are wading through molasses. Cut 'is/was' verbs. Inject kinetic vectors."
+                f"CLARENCE: The structure is buckling (Drag: {phys['narrative_drag']}). "
+                "The density is too high. Simplify the architecture."
+            )
+        elif phys['narrative_drag'] > 2.0:
+            feedback_notes['Pacing'] = (
+                f"CLARENCE: The pace is deliberate (Drag: {phys['narrative_drag']}). "
+                "This is acceptable for foundational work, but ensure it doesn't stagnate."
             )
         else:
-            feedback_notes['Pacing'] = "Clarence is satisfied with the velocity."
+            feedback_notes['Pacing'] = "Clarence is satisfied with the structural integrity."
 
-        # Grounding Check (The Eloise Protocol)
-        if phys['abstraction_entropy'] > 1:
+        # GROUNDING CHECK (Less aggressive)
+        if phys['abstraction_entropy'] > 2: # Raised from 1
             suggestion = random.choice(list(self.engine.universals))
             feedback_notes['Grounding'] = (
-                f"ELOISE: Too abstract (Entropy: {phys['abstraction_entropy']}). "
-                f"It floats away. Anchor it with a universal like '{suggestion}'."
+                f"ELOISE: It feels a bit airy (Entropy: {phys['abstraction_entropy']}). "
+                f"Place something solid here, like '{suggestion}', to hold it down."
             )
         else:
-            feedback_notes['Grounding'] = "Eloise feels the warmth is sufficient."
-
-        # Emergency Check
-        if stat['in_the_barrens']:
-            feedback_notes['CRITICAL'] = "THE BARRENS: Reader disengagement imminent. Pivot immediately."
+            feedback_notes['Grounding'] = "Eloise feels the room is furnished."
 
         return {
             "status": status,
@@ -627,38 +628,33 @@ class MetabolicReserve:
     You earn the right to be abstract by being concrete first.
     """
     def __init__(self, max_capacity=50):
-        self.atp = 20  # Start with some energy
+        self.atp = 33
         self.max_capacity = max_capacity
         self.status = "STABLE"
 
     def metabolize(self, metrics):
-        """
-        Calculates Energy Delta based on the Physics of the current text.
-        """
         phys = metrics['physics']
         delta = 0
 
-        # 1. EARN ATP (Good Habits)
-        if phys['narrative_drag'] < 1.5: delta += 5       # Speed Bonus
-        if phys['connection_density'] > 0.05: delta += 3  # Human Connection Bonus
+        # 1. EARN ATP
+        if phys['narrative_drag'] < 2.0: delta += 5
+        if phys['connection_density'] > 0.05: delta += 3
 
-        # 2. SPEND ATP (Expensive Habits)
-        # Abstraction costs energy. You must 'afford' your big words.
+        # 2. SPEND ATP
         if phys['abstraction_entropy'] > 0:
-            cost = int(phys['abstraction_entropy'] * 2)
+            # Capped cost. You can't lose more than 6 ATP per turn on vocab.
+            cost = min(6, int(phys['abstraction_entropy'] * 2))
             delta -= cost
 
         # 3. TOXICITY TAX
         if phys['toxicity_score'] > 0:
-            delta -= 10 # Heavy penalty for corporate speak
+            delta -= 5
 
-        # Apply and Clamp
         self.atp = max(0, min(self.atp + delta, self.max_capacity))
 
-        # Determine Status
-        if self.atp < 10: self.status = "STARVING"   # Strict Mode
-        elif self.atp > 40: self.status = "GLUTTON"  # Creative Mode
-        else: self.status = "STABLE"                 # Normal Mode
+        if self.atp < 6: self.status = "STARVING"
+        elif self.atp > 40: self.status = "GLUTTON"
+        else: self.status = "STABLE"
 
         return {
             "current_atp": self.atp,

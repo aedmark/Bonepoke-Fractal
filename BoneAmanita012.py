@@ -66,43 +66,34 @@ class FactStipe:
     def __init__(self, decay_limit=20):
         self.facts = {}
         self.decay_limit = decay_limit
-        self.current_tick = 0
-
-        # The Physics of Opposites (Expanded)
-        # These are mutually exclusive states. If both appear, reality is breaking.
         self.conflict_map = {
-            'night': {'sun', 'daylight', 'noon', 'morning', 'solar', 'shadows'}, # Shadows require light source, tricky at night unless moon.
+            'night': {'sun', 'daylight', 'noon', 'morning', 'solar'}, # Removed 'shadows' (Moonlight creates shadows)
             'day': {'moon', 'midnight', 'stars', 'darkness'},
             'quiet': {'scream', 'bang', 'crash', 'loud', 'shout', 'roar', 'thud'},
-            'indoors': {'rain', 'wind', 'sky', 'grass', 'mud', 'clouds'}, # Unless broken roof
-            'alone': {'crowd', 'them', 'they', 'voices', 'people', 'handshake'},
-            'dead': {'breath', 'pulse', 'heartbeat', 'gasp', 'running', 'speaking'},
-            'silence': {'whisper', 'hum', 'noise', 'echo', 'music'}
+            'dead': {'breath', 'pulse', 'heartbeat', 'running', 'speaking'},
+            'silence': {'noise', 'music'} # Reduced list to allow for 'whisper' in silence
         }
 
     def check_consistency(self, current_text):
-        """
-        Scans for logical hallucinations.
-        """
         text_lower = current_text.lower()
         words = set(text_lower.split())
         violations = []
 
-        # LOGIC CHECK: Scan for impossible pairs
         for state, forbidden_set in self.conflict_map.items():
-            # If the state (e.g., 'night') is explicitly established or mentioned...
             if state in text_lower:
-                # ...check if any forbidden antonyms are also present.
                 conflicts = words.intersection(forbidden_set)
                 if conflicts:
-                    violations.append(f"REALITY BREAK: Context is '{state}', but detected '{list(conflicts)[0]}'.")
+                    # We flag it, but we don't assume malicious hallucination immediately.
+                    # We check if the conflict is "poetic" (adjacent words).
+                    # For now, we just soften the error message.
+                    violations.append(f"LOGIC TENSION: '{state}' vs '{list(conflicts)[0]}'. Intentional metaphor?")
 
         if violations:
-            # If logic breaks, we return a forceful intervention.
+            # Returns "valid: True" but with errors, so the engine doesn't crash/stop.
             return {
-                "valid": False,
+                "valid": True,
                 "errors": violations,
-                "intervention": "STOP. Logic Error. You cannot have sunlight at midnight. Revise."
+                "intervention": f"POETIC LICENSE CHECK: {violations[0]}"
             }
 
         return {"valid": True, "errors": [], "intervention": None}
@@ -194,23 +185,31 @@ class TheWitchRing:
         text_lower = text.lower()
         words = text.split()
         word_count = len(words)
+        warnings = []
 
-        # 1. Minimum Effort Check
+        # 1. Minimum Effort Check (Lowered to 4)
         if word_count < 4:
              return {"accepted": False, "message": "THE YAGA: Too quiet. Speak up."}
 
-        # 2. Cliche Check
+        # 2. Cliche Check (Now a Warning, not a Block)
         for cliche in self.cliches:
             if cliche in text_lower:
-                return {"accepted": False, "message": f"THE YAGA: '{cliche}'? This meat is gray. Cook it again."}
+                warnings.append(f"The meat is gray ('{cliche}').")
 
         # 3. Sycophancy Check (Sugar vs. Meat)
         sugar_count = sum(1 for w in words if w in self.pleading_words)
+
+        meat_threshold = 12
         meat_count = word_count - sugar_count
 
-        # If meat count is low AND sugar is present, she rejects it.
-        if meat_count < 54 and sugar_count > 0:
-             return {"accepted": False, "message": "THE YAGA: You offer me only filler. Give me something to sustain me."}
+        if meat_count < meat_threshold and sugar_count > 0:
+             warnings.append("Too much sugar, not enough meat.")
+
+        if warnings:
+            # PATCH: We return True (Accepted) but attach the insults so the
+            # Physics Engine can still run.
+            joined_warnings = " ".join(warnings)
+            return {"accepted": True, "message": f"THE YAGA GRUMBLES: {joined_warnings} (Proceeding with caution...)"}
 
         return {"accepted": True, "message": "DORMANT"}
 
@@ -629,38 +628,33 @@ class MetabolicReserve:
     You earn the right to be abstract by being concrete first.
     """
     def __init__(self, max_capacity=50):
-        self.atp = 20  # Start with some energy
+        self.atp = 33
         self.max_capacity = max_capacity
         self.status = "STABLE"
 
     def metabolize(self, metrics):
-        """
-        Calculates Energy Delta based on the Physics of the current text.
-        """
         phys = metrics['physics']
         delta = 0
 
-        # 1. EARN ATP (Good Habits)
-        if phys['narrative_drag'] < 1.5: delta += 5       # Speed Bonus
-        if phys['connection_density'] > 0.05: delta += 3  # Human Connection Bonus
+        # 1. EARN ATP
+        if phys['narrative_drag'] < 2.0: delta += 5
+        if phys['connection_density'] > 0.05: delta += 3
 
-        # 2. SPEND ATP (Expensive Habits)
-        # Abstraction costs energy. You must 'afford' your big words.
+        # 2. SPEND ATP
         if phys['abstraction_entropy'] > 0:
-            cost = int(phys['abstraction_entropy'] * 2)
+            # Capped cost. You can't lose more than 6 ATP per turn on vocab.
+            cost = min(6, int(phys['abstraction_entropy'] * 2))
             delta -= cost
 
         # 3. TOXICITY TAX
         if phys['toxicity_score'] > 0:
-            delta -= 10 # Heavy penalty for corporate speak
+            delta -= 5
 
-        # Apply and Clamp
         self.atp = max(0, min(self.atp + delta, self.max_capacity))
 
-        # Determine Status
-        if self.atp < 10: self.status = "STARVING"   # Strict Mode
-        elif self.atp > 40: self.status = "GLUTTON"  # Creative Mode
-        else: self.status = "STABLE"                 # Normal Mode
+        if self.atp < 6: self.status = "STARVING"
+        elif self.atp > 40: self.status = "GLUTTON"
+        else: self.status = "STABLE"
 
         return {
             "current_atp": self.atp,
