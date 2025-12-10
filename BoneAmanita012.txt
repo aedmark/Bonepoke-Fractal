@@ -141,16 +141,17 @@ class TheMuscaria:
     """
     def __init__(self):
         self.boredom_pressure = 0.0
-        self.pressure_threshold = 11.0
+        self.pressure_threshold = 5.0
         self.disruptions = [
-            "VIBE CHECK: Open a window. Describe the air or the light.",
+            "VIBE CHECK: Delete the last sentence. Replace with a sudden physical action.",
             "CUT THE CHEESE: Introduce a smell or temperature change immediately.",
-            "THE PIVOT: Shift the perspective slightly. Who is watching?",
-            "NON-SEQUITUR: Say something goofy to throw off the boredom.",
-            "SURREALIST: Replace an abstract concept with something weird.",
-            "SIMPLIFICATION: Say the same thing, but in half the words.",
+            "THE PIVOT: Reveal a contradiction in the narrator's intent.",
+            "NON-SEQUITUR: Scream (metaphorically) and change the subject.",
+            "SURREALIST: Replace an abstract concept with a wind chime.",
+            "GLITTER BOMB: Break the rhythm with a fragment.",
+            "VOID STARE: Stop explaining. Describe the thing itself.",
             "THE LIZARD KING: Raise the stakes. A threat has entered.",
-            "SENSORY ANCHOR: What does the surface feel like? Rough or smooth?",
+            "STOP THE PRESSES: You are using too many 'is' verbs. Make something explode."
         ]
 
     def check_for_boredom(self, metrics):
@@ -209,8 +210,8 @@ class TheWitchRing:
         meat_count = word_count - sugar_count
 
         # If meat count is low AND sugar is present, she rejects it.
-        if meat_count < 54 and sugar_count > 0:
-             return {"accepted": False, "message": "THE YAGA: You offer me only filler. Give me something to sustain me."}
+        if meat_count < 5 and sugar_count > 0:
+             return {"accepted": False, "message": "THE YAGA: You offer me only sweetness. Give me something to chew on."}
 
         return {"accepted": True, "message": "DORMANT"}
 
@@ -223,11 +224,9 @@ class LinguisticPhysicsEngine:
     def __init__(self):
         # 1. Concrete Universals (Grounding words)
         self.universals = {
-            'hand', 'eye', 'breath', 'skin', 'voice', # Kept the mild human elements
-            'stone', 'light', 'water', 'rain', 'mud', 'dirt', 'wind', # Nature
-            'wood', 'grain', 'iron', 'clay', 'paper', 'glass', 'fabric', # Craft
-            'door', 'key', 'roof', 'floor', 'chair', 'table', 'wall', # Structure
-            'path', 'road', 'horizon', 'shadow', 'weight', 'anchor' # Spatial
+            'hand', 'eye', 'blood', 'bone', 'breath', 'sweat', 'pulse', 'throat', 'skin', 'muscle',
+            'stone', 'light', 'dirt', 'water', 'rain', 'smoke', 'salt', 'rust', 'glass', 'mud', 'ash',
+            'door', 'key', 'roof', 'floor', 'chair', 'table', 'bread', 'knife', 'seed', 'root', 'wall'
         }
 
         # 2. Abstract Concepts (High cognitive load)
@@ -240,21 +239,21 @@ class LinguisticPhysicsEngine:
 
         # 3. Verbs (We favor the present, but sometimes the past has equal weight)
         self.kinetic_verbs = {
-            run', 'ran', 'hit', 'break', 'broke', 'broken',
+            'run', 'ran', 'hit', 'break', 'broke', 'broken',
             'take', 'took', 'make', 'made',
             'press', 'build', 'built', 'weave', 'wove',
             'cut', 'throw', 'threw', 'drive', 'drove',
-            'lift', 'carry', 'place', 'hold', 'turn', 'open', 'close'
+            'grab', 'tear', 'tore', 'rip', 'crush', 'burn', 'shove', 'drag'
         }
         self.stative_verbs = {'is', 'are', 'was', 'were', 'seem', 'appear', 'have', 'has', 'consist'}
 
         # 4. Stylistic Profiles (Substrates)
         self.styles = {
-            'Moss': {'layer', 'nuance', 'deep', 'root', 'grow', 'slow'},
-            'Crystal': {'logic', 'define', 'metric', 'clear', 'structure', 'frame'},
-            'Timber': {'build', 'weight', 'wood', 'grain', 'solid', 'beam', 'floor'},
-            'Lattice': {'foundation', 'structure', 'design', 'plan', 'support', 'connect'},
-            'Claret': {'ache', 'human', 'mess', 'love', 'maybe', 'bruise', 'honest'}
+            'Moss': {'layer', 'nuance', 'deep', 'tapestry', 'accumulate', 'growth'},
+            'Crystal': {'logic', 'define', 'metric', 'precise', 'structure', 'perfect'},
+            'Fluid': {'flow', 'adapt', 'stream', 'dissolve', 'shift', 'absorb', 'leak'},
+            'Lattice': {'foundation', 'structure', 'design', 'plan', 'ensure', 'blueprint', 'cement'},
+            'Claret': {'ache', 'blood', 'fuck', 'bullshit', 'goddamn', 'love', 'maybe', 'hurt', 'mess', 'human'}
         }
 
         self.connectors = {'we', 'you', 'us', 'together', 'share'}
@@ -378,28 +377,27 @@ class EditorialTranslator:
         feedback_notes = {}
 
         # Drag Check (The Clarence Protocol)
-        if phys['narrative_drag'] > 3.5:
+        if phys['narrative_drag'] > 2.0:
             feedback_notes['Pacing'] = (
-                f"CLARENCE: The structure is buckling (Drag: {phys['narrative_drag']}). "
-                "The density is too high. Simplify the architecture."
-            )
-        elif phys['narrative_drag'] > 2.0:
-            feedback_notes['Pacing'] = (
-                f"CLARENCE: The pace is deliberate (Drag: {phys['narrative_drag']}). "
-                "This is acceptable for foundational work, but ensure it doesn't stagnate."
+                f"CLARENCE: Too slow (Drag: {phys['narrative_drag']}). "
+                "You are wading through molasses. Cut 'is/was' verbs. Inject kinetic vectors."
             )
         else:
-            feedback_notes['Pacing'] = "Clarence is satisfied with the structural integrity."
+            feedback_notes['Pacing'] = "Clarence is satisfied with the velocity."
 
-        # GROUNDING CHECK (Less aggressive)
-        if phys['abstraction_entropy'] > 2: # Raised from 1
+        # Grounding Check (The Eloise Protocol)
+        if phys['abstraction_entropy'] > 1:
             suggestion = random.choice(list(self.engine.universals))
             feedback_notes['Grounding'] = (
-                f"ELOISE: It feels a bit airy (Entropy: {phys['abstraction_entropy']}). "
-                f"Place something solid here, like '{suggestion}', to hold it down."
+                f"ELOISE: Too abstract (Entropy: {phys['abstraction_entropy']}). "
+                f"It floats away. Anchor it with a universal like '{suggestion}'."
             )
         else:
-            feedback_notes['Grounding'] = "Eloise feels the room is furnished."
+            feedback_notes['Grounding'] = "Eloise feels the warmth is sufficient."
+
+        # Emergency Check
+        if stat['in_the_barrens']:
+            feedback_notes['CRITICAL'] = "THE BARRENS: Reader disengagement imminent. Pivot immediately."
 
         return {
             "status": status,
