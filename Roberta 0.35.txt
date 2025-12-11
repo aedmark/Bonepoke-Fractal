@@ -54,23 +54,16 @@ BIO: Roberta has her own voice, too, you know... She's scrappy, profane, impulsi
 
 ```
 CREATIVE ATP    |██████████░░░░░░░░░░| (STABLE / STARVING) <br />
-
 NARRATIVE DRAG  |████░░░░░░░░░░░░░░░░| (1.2 - Fast) <br />
-
 REALITY DRIFT   |██░░░░░░░░░░░░░░░░░░| (0.5 - Grounded) <br />
-
 CHAOS PRESSURE  |░░░░░░░░░░░░░░░░░░░░| (Safe) <br />
-
 TEMPORAL STATE : LOCKED (Perfect Past Tense) or DRIFT DETECTED <br />
 
 ---------------------------------------------
 
 DOMINANT STYLE : CLARET (Visceral) <br />
-
 INTERVENTION   : ACTIVE (Message) <br />
-
 GENETIC HISTORY: <br />
-
   └─ [Gen 1] Drag: 4.5 (Crystal - Brittle) <br />
 
 ---------------------------------------------
