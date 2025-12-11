@@ -11,9 +11,9 @@ import random
 from collections import Counter
 from uuid import uuid4
 
-# --- COMPONENT 1: MEMORY (HYPHAE) & ECONOMY -----------------------------------------
+# --- COMPONENT 1: MEMORY & ECONOMY -----------------------------------------
 
-class HyphalTrace:
+class HyphalTrace: # Context Queue
     """
     Manages short-term contextual memory.
     Implements 'Relevance Decay' to discard unused information.
@@ -74,7 +74,7 @@ class FactStipe:
             'silence': {'noise', 'music'} # Reduced list to allow for 'whisper' in silence
         }
 
-    def check_consistency(self, current_text, current_style):
+    def check_consistency(self, current_text, current_style, metabolic_status):
         text_lower = current_text.lower()
         words = set(text_lower.split())
         violations = []
@@ -83,39 +83,31 @@ class FactStipe:
             if state in text_lower:
                 conflicts = words.intersection(forbidden_set)
                 if conflicts:
-                    # We flag it, but we don't assume malicious hallucination immediately.
                     # We check if the conflict is "poetic" (adjacent words).
-                    # For now, we just soften the error message.
                     violations.append(f"LOGIC TENSION: '{state}' vs '{list(conflicts)[0]}'. Intentional metaphor?")
 
         if violations:
-            # Normalize input to UPPER for comparison, and match Physics names
-            # Physics uses: Moss, Crystal, Timber, Lattice, Claret
-            # We treat Claret and Moss as "Surreal/Organic" enough to ignore logic.
+            # 1. STYLE CHECK (Existing)
             if current_style.upper() in ['CLARET', 'MOSS', 'MUSHROOM']:
                 return {
                     "valid": True,
                     "intervention": "VERSE JUMP: Logic breach accepted as stylistic choice."
                 }
 
-            # Otherwise, offer a choice: Fix it, or double down.
+            # 2. METABOLIC CHECK (The New Schur Protocol)
+            # If the user is a "GLUTTON" (High ATP), they can afford to break reality.
+            if metabolic_status == "GLUTTON":
+                 return {
+                    "valid": True,
+                    "intervention": "REALITY BENDING: High Metabolic Reserve allows for this metaphor."
+                 }
+
+            # 3. OTHERWISE, TEAR REALITY
             return {
                 "valid": True,
                 "errors": violations,
-                "intervention": f"REALITY TEAR: {violations[0]}. To keep this, increase Entropy (Abstractions) or Embrace the Absurd."
+                "intervention": f"REALITY TEAR: {violations[0]}. Logic is expensive. You are too weak to break physics."
             }
-
-class ResourceManager:
-    """
-    Tracks computational or narrative 'effort'.
-    """
-    def __init__(self, limit=30):
-        self.limit = limit
-        self.used = 0
-
-    def spend(self, amount=1):
-        self.used += amount
-        return self.used
 
 class ChaosCooldown:
     """
@@ -760,10 +752,23 @@ class MetabolicReserve:
     Manages the 'ATP' of the writer.
     You earn the right to be abstract by being concrete first.
     """
-    def __init__(self, max_capacity=50):
+    def __init__(self, max_capacity=52):
         self.atp = 33
         self.max_capacity = max_capacity
         self.status = "STABLE"
+
+    def spend(self, amount):
+        """
+        Directly deducts ATP for system interventions (Verse Jumps, Logic Penalties).
+        """
+        self.atp = max(0, self.atp - amount)
+
+        # Re-evaluate status immediately after spending
+        if self.atp < 6: self.status = "STARVING"
+        elif self.atp > 40: self.status = "GLUTTON"
+        else: self.status = "STABLE"
+
+        return self.atp
 
     def metabolize(self, metrics):
         phys = metrics['physics']
@@ -797,7 +802,6 @@ class MetabolicReserve:
 
 class BonepokeCore:
     def __init__(self):
-        self.resources = ResourceManager()
         self.cooldown = ChaosCooldown()
         self.memory = HyphalTrace()
         self.stipe = FactStipe()
@@ -813,94 +817,77 @@ class BonepokeCore:
         self.last_id = None
         self.tick = 0
 
-    def process(self, text, parent_id=None):
+    def process(self, text, parent_id=None): # THE DECA-BRAIN
         self.tick += 1
 
-        # 1. IDENTITY GENERATION (The Soul)
+        # 1. IDENTITY GENERATION
         current_id = self.lineage.spawn_id()
         actual_parent = parent_id if parent_id else self.last_id
 
-        # 2. PHYSICS CALCULATION (The Foundation)
+        # 2. PHYSICS CALCULATION
         metrics = self.physics.analyze(text)
+        phys = metrics['physics']
+        stat = metrics['status']
 
-        # 3. THE WITCH RING (The Gatekeeper)
+        # 3. THE WITCH RING (Baba Yaga)
         gate_result = self.witch.evaluate_intent(text, metrics)
-
         if not gate_result['accepted']:
-            # If the Witch rejects it, we return immediately.
-            # Efficiency! Doing more with less.
             return f"[BLOCKED] {gate_result['message']}"
 
-        # 4. THE STIPE (The Reality Check)
-        stipe_check = self.stipe.check_consistency(text, metrics['physics']['dominant_style'])
+        # 4. THE STIPE
+        # We access self.metabolism.status directly
+        stipe_check = self.stipe.check_consistency(
+            text,
+            metrics['physics']['dominant_style'],
+            self.metabolism.status
+        )
 
-        # 5. EDITORIAL FEEDBACK GENERATION
+        # 5. EDITORIAL FEEDBACK
         editorial = self.editor.generate_feedback(text, metrics)
 
         # 6. THE VIRTUAL CORTEX
-
-        # Check for CLARENCE (Drag)
         if phys['narrative_drag'] > 3.0:
             voice = self.cortex.synthesize_voice("CLARENCE", text, metrics)
             editorial['feedback']['Pacing'] = voice
 
-        # Check for ELOISE (Entropy)
-        # We use 'elif' so they don't talk over each other, or 'if' to allow a chorus.
-        # Let's use 'if' to allow multiple voices if multiple failures exist.
         if phys['abstraction_entropy'] > 2:
             voice = self.cortex.synthesize_voice("ELOISE", text, metrics)
             editorial['feedback']['Grounding'] = voice
 
-        # Check for THE YAGA (Intent)
-        # We assume the Witch Ring has already run, so we check the 'accepted' status or specific words
-        gate = self.witch.evaluate_intent(text, metrics)
-        if "THE YAGA GRUMBLES" in gate['message']:
+        if "THE YAGA GRUMBLES" in gate_result['message']:
              voice = self.cortex.synthesize_voice("THE YAGA", text, metrics)
              editorial['feedback']['Intent'] = voice
 
-        # Check for MUSCARIA (Boredom)
-        # If the Muscaria logic in the original script triggered, we override the message with a better one
-        if self.muscaria.check_for_boredom(metrics) and self.cooldown.is_ready(self.tick):
-             voice = self.cortex.synthesize_voice("MUSCARIA", text, metrics)
-             # We pass this out as the intervention message
-             # Note: You'll need to update the return dict logic below to use this variable
-             muscaria_msg = voice
-        else:
-             muscaria_msg = None
+        muscaria_msg = None
+        if self.muscaria.check_for_boredom(metrics):
+            if self.cooldown.is_ready(self.tick, force=stat['in_the_barrens']):
+                ancestry_temp = self.lineage.trace_lineage(current_id)
+                muscaria_msg = self.muscaria.trigger_disruption(ancestry_temp)
+                # Unified Economy (Spend ATP, not Resources)
+                self.metabolism.spend(5)
+            else:
+                muscaria_msg = self.cortex.synthesize_voice("MUSCARIA", text, metrics)
 
-        # 7. LOGIC INTERVENTION
-        if not stipe_check.get('valid', True): # Safe get
-            # Force the editor to scream about the logic error
+        # 8. LOGIC INTERVENTION
+        if not stipe_check.get('valid', True):
             intervention_msg = stipe_check.get('intervention', "LOGIC BREACH")
             editorial['feedback']['CRITICAL_LOGIC'] = f"FACT STIPE ALERT: {intervention_msg}"
 
-            # Penalize the ATP for being illogical (The 'Chidi' Penalty)
+            # Penalize the ATP for being illogical
             self.metabolism.spend(10)
 
-        # 8. METABOLISM & LINEAGE
+        # 9. METABOLISM & LINEAGE
         energy_report = self.metabolism.metabolize(metrics)
         self.lineage.log_generation(current_id, actual_parent, metrics)
         self.last_id = current_id
 
-        # 9. DYNAMIC DIFFICULTY (The 'Clarence' Factor)
+        # 10. DYNAMIC DIFFICULTY
         if energy_report['status'] == "STARVING":
-            # Artificial penalty to force brevity when energy is low
             metrics['physics']['narrative_drag'] += 1.0
 
-        # 10. MEMORY & TIME
+        # 11. MEMORY & TIME
         self.memory.leave_trace(text, metrics['physics']['dominant_style'])
         chronos_report = self.chronos.check_temporal_stability(text)
-
-        # 11. THE MUSCARIA (Chaos Injection)
-        muscaria_msg = None
-        # Check for boredom
-        if self.muscaria.check_for_boredom(metrics):
-            # Check cooldown
-            if self.cooldown.is_ready(self.tick, force=metrics['status']['in_the_barrens']):
-                # Trigger chaos
-                ancestry_temp = self.lineage.trace_lineage(current_id)
-                muscaria_msg = self.muscaria.trigger_disruption(ancestry_temp)
-                self.resources.spend(5)
 
         # 12. VISUALIZATION
         ancestry_data = self.lineage.trace_lineage(current_id)
