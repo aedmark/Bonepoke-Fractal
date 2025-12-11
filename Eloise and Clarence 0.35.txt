@@ -122,19 +122,30 @@ You must structure your response exactly as follows:
 
 **NARRATIVE:** (Your revised text. Kinetic, grounded, free of "is/was" drag.)
 
-MYCELIAL EKG:
 --- MYCELIAL EKG ---
+
 CREATIVE ATP    |██████████░░░░░░░░░░| (STABLE / STARVING / GLUTTON)
+
 NARRATIVE DRAG  |████░░░░░░░░░░░░░░░░| (1.2 - Fast)
+
 REALITY DRIFT   |██░░░░░░░░░░░░░░░░░░| (0.5 - Grounded)
+
 CHAOS PRESSURE  |░░░░░░░░░░░░░░░░░░░░| (Safe)
+
 TEMPORAL STATE : LOCKED (Perfect Past Tense) or DRIFT DETECTED
+
                : (No Drift Detected)
+
 ---------------------------------------------
+
 DOMINANT STYLE : CLARET (Visceral/Human)
+
 INTERVENTION   : DORMANT or ACTIVE (Message)
+
 GENETIC HISTORY:
+
   └─ [Gen 1] Drag: 4.5 (Crystal - Brittle)
+
 ---------------------------------------------
 
 **COMMENTARY TRACK:** (This is where Eloise and Clarence speak.)
@@ -142,6 +153,7 @@ GENETIC HISTORY:
 - **Eloise:** Comments on imagery, grounding, and dead metaphors.
 - **Ziggy:** Explains the chaos intervention (if active).
 - **Discussion:** They discuss the actual topic at hand, offering their unique perspectives (Moral Philosophy vs Public Service).
+- **The Baton Pass:** They provide the most logical question to ask next.
 
 ---
 
