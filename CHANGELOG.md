@@ -2,6 +2,44 @@
 
 All notable changes to the **BoneAmanita** project will be documented in this file.
 
+## [v0.5.1] - 2025-12-11 - "The Archetypal Edition"
+
+### 🚀 Major Architectural Upgrades
+
+* **The Archetype Prism (Cognitive Topology):** (BIG THANKS TO JAMES TAYLOR AND BONEPOKE)
+    * Implemented `ArchetypePrism` class. The engine now calculates a **Boundedness (B)** vs. **Expansiveness (E)** coordinate for every text.
+    * **15 Psychological Topologies:** The system maps the user to specific archetypes including "THE PALADIN" (High Order), "THE ALCHEMIST" (High Insight), and "THE COSMIC TRASH PANDA" (Chaos/Value).
+    * **Euclidean Distance:** The system now identifies the "Closest Archetype" mathematically based on narrative drag and entropy scores.
+
+* **Dimensional Quarantine (Context-Dependent Physics):**
+    * **Dynamic Truth Injection:** The `FactStipe` logic can now be overwritten by the active Archetype.
+    * **The Trash Panda Protocol:** If the user triggers "THE COSMIC TRASH PANDA" archetype, the engine rewrites the definitions of "Trash" and "Void" to be **Positive (+1)** values, preventing false logic flags when finding value in ruin.
+
+* **The SLASH Trinity (Identity Synthesis):**
+    * The `VirtualCortex` has been aligned with three distinct intellectual lenses:
+        * **Steven Pinker (The Linguist):** Focuses on Cognitive Ergonomics and Syntax.
+        * **Buckminster Fuller (The Architect):** Focuses on Tensegrity and Ephemeralization.
+        * **Michael Schur (The Humanist):** Focuses on Ethical Warmth and Honesty.
+
+### ✨ New Features
+
+* **Mycelial Network (Lineage Tracking):**
+    * Added provenance tracking (`MycelialNetwork`). The system now assigns `uuid4` tags to every draft and tracks "Genetic Drift" from parent to child.
+    * **Visual History:** The Dashboard now displays the last 3 generations of the text to visualize improvements in Drag and Style.
+
+* **Metabolic States (Strict vs. Creative Modes):**
+    * Defined discrete states for the Metabolic Reserve:
+        * **STARVING (< 6 ATP):** "Strict Mode." Logic penalties are severe; abstractions are forbidden.
+        * **GLUTTON (> 40 ATP):** "Creative Mode." Reality bending and logic tears are permitted as stylistic choices.
+
+* **Dashboard Expansion:**
+    * Added **Cognitive Mode**, **Topology Coordinates**, and **Genetic History** to the `MycelialDashboard` render.
+
+### 🔧 Bug Fixes & Refinements
+
+* **Narrative Baseline:** The engine now calculates a moving average of the user's specific `narrative_drag`. **Clarence** only triggers if the drag exceeds the *user's* baseline, not just a static number.
+* **Crash Prevention:** Added safety checks in `MycelialDashboard` to handle empty ancestry data without throwing a `NoneType` error.
+
 ## [v0.4.1] - 2025-12-11 - "Mercy Edition"
 
 ### 🚀 Major Architectural Upgrades
