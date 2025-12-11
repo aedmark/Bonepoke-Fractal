@@ -2,6 +2,33 @@
 
 All notable changes to the **BoneAmanita** project will be documented in this file.
 
+## [v0.4.1] - 2025-12-11 - "Mercy Edition"
+
+### 🚀 Major Architectural Upgrades
+
+* **Morphological Heuristics (The "Vision Correction"):**
+    * **Linguistic Physics:** Now supports suffix-based detection. The engine identifies **Abstract** words (`-ness`, `-ity`, `-tion`) and **Kinetic** flows (`-ing`) dynamically, even if the specific word is not in the hardcoded dictionary.
+    * **Fact Stipe v2.1:** Implemented "Root Seeking." The logic engine now strips suffixes (`-ed`, `-ly`, `-s`) to map complex words back to their elemental roots (e.g., detecting that "freezing" conflicts with "fire").
+
+* **Integrated Memory System (The "Hippocampus Wire"):**
+    * **Active Recall:** The `BonepokeCore` now actively calls `memory.recall()` to check for stylistic repetition.
+    * **Loop Detection:** **Clarence** has been upgraded with a new `loop_count` metric. He will now intervene if the user stays in the same stylistic mode (e.g., "Crystal") for more than 2 cycles, demanding a "Shift in Gears."
+
+* **Single Source of Truth (The "Brain Transplant"):**
+    * Refactored `VirtualCortex` to reference the **Master Dictionaries** in `LinguisticPhysicsEngine` and `TheWitchRing` directly.
+    * Eliminated "Phantom Limb" errors where the Cortex could not identify specific trigger words (like "assist") because its local lists were out of sync with the main engines.
+
+### ✨ New Features
+
+* **The Schur Patch (Narrative Mercy):**
+    * Implemented a "Seedling Protection" protocol. The system is now forbidden from flagging a text as "In The Barrens" (Dead Narrative) if the total word count is **< 15 words**. This prevents the system from "salting the earth" on short, punchy sentence fragments.
+
+### 🔧 Bug Fixes (The "Kill Screen" Patches)
+
+* **Critical Syntax Fix:** Closed a missing dictionary bracket in `LinguisticPhysicsEngine` that would have caused a `SyntaxError` on boot.
+* **Type Safety:** Added the missing `loop_count=0` argument to `VirtualCortex.synthesize_voice` to prevent `TypeError` crashes during memory recalls.
+* **Variable Scope:** Fixed a `NameError` in `FactStipe` by properly defining `strip_suffixes` before iteration.
+
 ## [v0.3.5] - 2023-10-27 - "The Fragility Check"
 
 ### 🚀 Major Architectural Upgrades
