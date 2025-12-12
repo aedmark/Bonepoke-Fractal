@@ -2,6 +2,41 @@
 
 All notable changes to the **BoneAmanita** project will be documented in this file.
 
+## [v0.5.2] - 2025-12-11 - "The Pressure Variant"
+
+### 🚀 Major Architectural Upgrades
+
+- **The Pressure Matrix (Archetypal Actuation):**
+    
+    - **From Map to Territory:** Implemented the `PressureMatrix` class based on the "Gospel of James" . The system now converts passive Archetype labels into active physics constraints.
+        
+    - **Variable Physics:** The laws of reality now shift based on _who_ is writing:
+        
+        - **THE PALADIN / ENGINEER:** `tolerance_mode = "DRACONIAN"`. Logic tears are fatal errors. Zero tolerance for contradiction.
+            
+        - **THE FOOL:** `tolerance_mode = "INVERTED"`. "Chaos Harvest" enabled. Reality tears are accepted and generate ATP instead of costing it.
+            
+        - **THE SPY:** `tolerance_mode = "LOOSE"`. "Deep Cover" protocol. Logic errors are detected internally but hidden from the user output.
+            
+        - **THE BARBARIAN:** Drag Multiplier set to **5.0x**. Adjectives and passive voice are punished with extreme prejudice ("Narrative Drag Annihilated").
+            
+- **Metabolic Gearing (Variable Economy):**
+    
+    - **Drag Multipliers:** Modified `MetabolicReserve` to support variable costs. While a Poet might pay standard ATP for high drag, a Barbarian is taxed heavily for hesitation.
+        
+
+### 🔧 Bug Fixes & Refinements (The "Temporal Paradox")
+
+- **Circular Dependency Resolution:**
+    
+    - Fixed a critical logic loop in `BonepokeCore.process` where `FactStipe` required `PressureSettings`, but `PressureSettings` required the `Archetype`, which required `FactStipe` results to identify.
+        
+    - **Optimistic Identification Strategy:** The engine now performs a "Pre-Cognitive Scan" (Optimistic Identification) to determine the Archetype before applying the pressure laws, effectively solving the initialization deadlock.
+        
+- **Trash Panda Compatibility:**
+    
+    - Ensured `THE COSMIC TRASH PANDA` falls through gracefully to standard physics in the Pressure Matrix, relying on its specific `_enforce_archetype_physics` override for value inversion (Trash = Treasure).
+
 ## [v0.5.1] - 2025-12-11 - "The Archetypal Edition"
 
 ### 🚀 Major Architectural Upgrades
