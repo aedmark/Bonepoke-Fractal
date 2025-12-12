@@ -2,6 +2,41 @@
 
 All notable changes to the **BoneAmanita** project will be documented in this file.
 
+### **DOCUMENTATION: CHANGELOG [v0.6]**
+
+**Version:** 0.6.0 ("The Hard Memory Variant") **Date:** 2025-12-12
+
+#### **🚀 NEW FEATURES**
+
+- **THE CODEX (Object Permanence):**
+    
+    - Implemented `TheCodex` class.
+        
+    - **Function:** Scans text for Proper Nouns (Entities) and maintains a frequency registry.
+        
+    - **Anti-Hallucination:** The top 5 "Reality Anchors" are now inextricably bound to the LLM's system prompt in `generate_instruction_block`. The AI can no longer "forget" who is in the room.
+        
+- **SURGICAL STEMMING (Chronos v2.5):**
+    
+    - Replaced the "Brutal" suffix-chopping logic with a Context-Aware Heuristic Engine.
+        
+    - **The Shield:** Explicitly protects academic/engine terms (`Physics`, `Chaos`, `Bias`) from being misidentified as verbs.
+        
+    - **The Radar:** Uses preceding articles (`The`, `A`) to lock words as Nouns.
+        
+- **THE 12-DIMENSIONAL MANIFOLD:**
+    
+    - Upgraded `MycelialDashboard` to render a 3x4 matrix of cognitive metrics, including **Truth Fidelity (ΔTF)** and **Diplomacy (DP)**.
+        
+
+#### **🔧 BUG FIXES**
+
+- **The Ghost Variable:** Fixed `self.last_input` not updating in `BonepokeCore`, which previously caused the Diplomacy metric to flatline.
+    
+- **The Echo Chamber:** Removed redundant calls to `physics.analyze()` inside the main process loop, saving Digital ATP.
+    
+- **Hygiene:** Consolidated all library imports (`re`, `uuid`, `collections`) to the file header.
+
 ## [v0.5.2] - 2025-12-11 - "The Pressure Variant"
 
 ### 🚀 Major Architectural Upgrades

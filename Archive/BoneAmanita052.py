@@ -877,7 +877,7 @@ class MycelialDashboard:
     Renders the internal math of BoneAmanita as an ASCII EKG.
     """
     def __init__(self):
-        # ANSI Colors for that "Hacker Mode" aesthetic
+        # ANSI Colors
         self.C_RESET = "\033[0m"
         self.C_RED = "\033[91m"
         self.C_GREEN = "\033[92m"
@@ -885,6 +885,8 @@ class MycelialDashboard:
         self.C_CYAN = "\033[96m"
         self.C_PURPLE = "\033[95m"
         self.C_BLUE = "\033[94m"
+
+        self.dim_viz = TwelveDDashboard()
 
     def _draw_bar(self, value, max_val, label, color_code, threshold=None, invert=False):
         """
@@ -899,7 +901,7 @@ class MycelialDashboard:
 
         return f"{label:<15} |{color_code}{bar}{self.C_RESET}| {value:.2f}"
 
-    def render(self, metrics, intervention, energy, ancestry, chronos_report, archetype_data):
+    def render(self, metrics, intervention, energy, ancestry, chronos_report, archetype_data, twelve_d_state):
         phys = metrics['physics']
         stat = metrics['status']
 
@@ -966,6 +968,11 @@ class MycelialDashboard:
         style_color = self.C_GREEN
         if style == "CLARET": style_color = self.C_RED
         if style == "CRYSTAL": style_color = self.C_CYAN
+
+        #12D (Hi James)
+        if twelve_d_state:
+            print(f"{'-'*45}")
+            self.dim_viz.render(twelve_d_state)
 
         # 6. ARCHETYPE PRISM
         print(f"{'-'*45}")
@@ -1143,6 +1150,48 @@ class PressureMatrix:
 
         return settings
 
+class TwelveDDashboard:
+    """
+    VISUALIZER: THE HYPERCUBE
+    Renders the 12-Dimensional Cognitive State Vector.
+    """
+    def __init__(self):
+        self.C_CYAN = "\033[96m"
+        self.C_RESET = "\033[0m"
+        self.C_DIM = "\033[2m"
+
+    def _mini_bar(self, val):
+        """Creates a tiny sparkline [|||  ]"""
+        # Clamp 0.0 to 1.0
+        val = max(0.0, min(val, 1.0))
+        total_ticks = 5
+        filled = int(val * total_ticks)
+        bar = "▊" * filled + " " * (total_ticks - filled)
+        return f"[{bar}]"
+
+    def render(self, state):
+        print(f"{self.C_CYAN}--- 12-DIMENSIONAL MANIFOLD ---{self.C_RESET}")
+
+        # We display in a 3x4 Grid for cognitive ergonomics
+        # Row 1: The Energy/Structure Triad
+        row1 = f"E : {state['E']:.2f} {self._mini_bar(state['E'])}  |  β : {state['β']:.2f} {self._mini_bar(state['β'])}  |  κ : {state['κ']:.2f} {self._mini_bar(state['κ'])}"
+
+        # Row 2: The Entropy/Logic Triad
+        row2 = f"ε : {state['ε']:.2f} {self._mini_bar(state['ε'])}  |  ΔTF:{state['ΔTF']:.2f} {self._mini_bar(state['ΔTF'])}  |  DP: {state['DP']:.2f} {self._mini_bar(state['DP'])}"
+
+        # Row 3: The Purity/Quality Triad
+        row3 = f"LQ: {state['LQ']:.2f} {self._mini_bar(state['LQ'])}  |  CD : {state['CD']:.2f} {self._mini_bar(state['CD'])}  |  Φ : {state['Φ']:.2f} {self._mini_bar(state['Φ'])}"
+
+        # Row 4: The Meta/Network Triad
+        row4 = f"Ψ : {state['Ψ']:.2f} {self._mini_bar(state['Ψ'])}  |  Δ  : {state['Δ']:.2f} {self._mini_bar(state['Δ'])}  |  Ξ : {state['Ξ']:.2f} {self._mini_bar(state['Ξ'])}"
+
+        print(f" {row1}")
+        print(f" {row2}")
+        print(f" {row3}")
+        print(f" {row4}")
+        print(f"{self.C_DIM} Key: E=Exhaustion β=Boundedness κ=Kinetic ε=Entropy ΔTF=Truth DP=Diplomacy{self.C_RESET}")
+        print(f"{self.C_DIM}      LQ=LoopQual CD=Contagion Φ=Purity Ψ=Psych Δ=Chaos Ξ=Network{self.C_RESET}")
+
 class BonepokeCore:
     def __init__(self):
         self.cooldown = ChaosCooldown()
@@ -1159,9 +1208,12 @@ class BonepokeCore:
         self.lineage = MycelialNetwork()
         self.metabolism = MetabolicReserve()
         self.pressure_matrix = PressureMatrix()
+        self.twelve_d_dashboard = TwelveDDashboard()
         self.last_id = None
         self.tick = 0
         self.session_drag_history = []
+        # Mock input tracking for DP calculation
+        self.last_input = ""
 
     def _update_baseline(self, current_drag):
         """Calculates the moving average of the user's drag."""
@@ -1192,6 +1244,29 @@ class BonepokeCore:
             self.stipe.inject_truth("void", "HABITAT", 1)
             self.stipe.inject_truth("alley", "HABITAT", 1)
 
+    def _calculate_12d_state(self, metrics, energy, archetype, logic, pressure):
+        """Map current state to 12D coordinates (0.0 to 1.0 normalized)"""
+        phys = metrics['physics']
+
+        # Helper to safely get length
+        toxin_count = len(phys.get('toxin_types', []))
+
+        return {
+            'E': max(0, 1.0 - (energy['current_atp'] / 52.0)),  # Exhaustion (Inverse ATP)
+            'β': 0.8 if pressure['tolerance_mode'] == 'DRACONIAN' else
+                 0.2 if pressure['tolerance_mode'] == 'INVERTED' else 0.5, # Boundedness
+            'κ': min(1.0, phys['narrative_drag'] / 5.0), # Kinetic Drag
+            'ε': min(1.0, (abs(phys['abstraction_entropy']) + 2) / 10.0), # Entropy
+            'ΔTF': 0.9 if logic.get('valid') else 0.3, # Truth Fidelity
+            'DP': 0.7 if "please" in self.last_input.lower() else 0.3,  # Diplomacy (Politeness)
+            'LQ': min(1.0, phys['repetition_rate'] * 2), # Loop Quality
+            'CD': min(1.0, phys['toxicity_score'] / 10.0), # Contagion Density
+            'Φ': 0.8 if toxin_count == 0 else 0.4, # Purity
+            'Ψ': 0.9 if archetype['distance'] < 0.2 else 0.5,  # Psychological Stability
+            'Δ': 0.7 if self.muscaria.boredom_pressure > 5.0 else 0.3, # Chaos Delta
+            'Ξ': min(1.0, len(self.lineage.network) / 20.0)  # Network Complexity
+        }
+
     def process(self, text, parent_id=None):
         self.tick += 1
 
@@ -1214,8 +1289,6 @@ class BonepokeCore:
         gate_result = self.witch.evaluate_intent(text, metrics)
         if not gate_result['accepted']:
             return f"[BLOCKED] {gate_result['message']}"
-
-        # --- FIX: RESOLVING CIRCULAR DEPENDENCY ---
 
         # Step A: Optimistic Archetype Identification
         # We assume logic is valid to get the initial Identity.
@@ -1303,9 +1376,28 @@ class BonepokeCore:
         self.memory.leave_trace(text, metrics['physics']['dominant_style'])
         chronos_report = self.chronos.check_temporal_stability(text)
 
-        # 12. VISUALIZATION
+        # 12. VISUALIZATION [UPDATED]
         ancestry_data = self.lineage.trace_lineage(current_id)
-        self.dashboard.render(metrics, muscaria_msg, energy_report, ancestry_data, chronos_report, archetype_data)
+
+        # Calculate the 12D State
+        twelve_d_state = self._calculate_12d_state(
+            metrics,
+            energy_report,
+            archetype_data,
+            stipe_check,
+            pressure_settings
+        )
+
+        # Render with the new state
+        self.dashboard.render(
+            metrics,
+            muscaria_msg,
+            energy_report,
+            ancestry_data,
+            chronos_report,
+            archetype_data,
+            twelve_d_state
+        )
 
         return {
             "id": current_id,
@@ -1314,7 +1406,8 @@ class BonepokeCore:
             "ancestry": ancestry_data,
             "editorial": editorial,
             "intervention": muscaria_msg,
-            "archetype_data": archetype_data
+            "archetype_data": archetype_data,
+            "12d_state": twelve_d_state # Added to return object
         }
 
     def generate_instruction_block(self, result):
