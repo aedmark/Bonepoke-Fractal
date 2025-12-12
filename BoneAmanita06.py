@@ -361,12 +361,12 @@ class TheWitchRing:
 class LinguisticPhysicsEngine:
     """
     Analyzes text properties using 'Bonepoke' data profiles.
-    Uses Regex Compilation for O(N) toxicity scanning.
+    v0.6.5 UPDATE: Implements 'The Mercy Rule' for contextual verb analysis.
     """
     def __init__(self):
         # 1. Concrete Universals (Grounding words)
         self.universals = {
-            'hand', 'eye', 'breath', 'skin', 'voice',
+            'hand', 'eye', 'breath', 'skin', 'voice', "air", "cloth",
             'stone', 'light', 'water', 'rain', 'mud', 'dirt', 'wind',
             'wood', 'grain', 'iron', 'clay', 'paper', 'glass', 'fabric',
             'door', 'key', 'roof', 'floor', 'chair', 'table', 'wall',
@@ -403,10 +403,8 @@ class LinguisticPhysicsEngine:
         self.self_refs = {'i', 'me', 'my', 'mine'}
         self.slang = {'vibe', 'trash', 'gonzo', 'wild', 'weird', 'mess', 'glitter', 'swamp'}
 
-        # --- NEW: MORPHOLOGICAL RULES ---
-        # Heuristics for detecting word physics based on shape.
+        # --- MORPHOLOGICAL RULES ---
         self.abstract_suffixes = ('ness', 'ity', 'tion', 'ment', 'ism', 'ence', 'ance', 'logy')
-        # We count 'ing' (gerunds) as kinetic flow, even if not verbs
         self.kinetic_suffixes = ('ing',)
 
         # 5. THE TOXICITY MAP (Categorized & Weighted)
@@ -426,8 +424,6 @@ class LinguisticPhysicsEngine:
         }
 
         # --- THE REGEX HARVESTER ---
-        # We flatten the dictionary into a single regex: \b(phrase1|phrase2|...)\b
-        # This makes the search O(1) relative to the number of forbidden phrases.
         self.flat_penalty_map = {}
         all_toxins = set()
 
@@ -436,12 +432,137 @@ class LinguisticPhysicsEngine:
                 self.flat_penalty_map[phrase] = weight
                 all_toxins.add(phrase)
 
-        # Compile the pattern. re.escape ensures punctuation (hyphens) don't break logic.
-        # \b ensures we match "paradigm" but not "paradigms" (unless we want to).
-        # We sort by length (descending) so "not just" matches before "not".
         sorted_toxins = sorted(list(all_toxins), key=len, reverse=True)
         pattern_str = r'\b(' + '|'.join(re.escape(t) for t in sorted_toxins) + r')\b'
         self.toxin_regex = re.compile(pattern_str, re.IGNORECASE)
+
+    def analyze(self, text):
+        # Normalize and clean for context scanning (remove punctuation attached to words)
+        text_lower = text.lower()
+        clean_text = text_lower.replace('.', ' ').replace(',', ' ').replace(';', ' ').replace('?', ' ').replace('!', ' ')
+        words = clean_text.split()
+        total_words = len(words) if words else 1
+
+        # Initialize counters
+        counts = {
+            'kinetic': 0, 'stative': 0, 'universal': 0,
+            'abstract': 0, 'slang': 0, 'connector': 0, 'self_ref': 0
+        }
+        style_scores = {k: 0 for k in self.styles}
+
+        # --- 1. THE CONTEXTUAL LOOP (The Mercy Rule) ---
+        for i, w in enumerate(words):
+
+            # Look-ahead for context (safe check)
+            next_word = words[i+1] if i + 1 < len(words) else ""
+            is_known_abstract = False
+            is_processed_as_verb = False
+
+            # --- A. VERB PHYSICS ---
+            if w in self.stative_verbs:
+                is_processed_as_verb = True
+
+                # MERCY RULE 1: The Motor (Auxiliary + Progressive)
+                # "is running" -> Counts as KINETIC (Active)
+                if next_word.endswith('ing'):
+                    counts['kinetic'] += 1
+
+                # MERCY RULE 2: The Anchor (Copula + Universal)
+                # "is stone" -> Counts as KINETIC (Structural)
+                elif next_word in self.universals:
+                    counts['kinetic'] += 1
+
+                # FALLBACK: The Crutch (Standard Stative)
+                # "is nice" -> Counts as STATIVE (High Drag)
+                else:
+                    counts['stative'] += 1
+
+            # Check for Kinetic Verbs (if not already processed as stative "is")
+            elif w in self.kinetic_verbs or w.endswith('ed'):
+                 counts['kinetic'] += 1
+                 is_processed_as_verb = True
+
+            # Catch-all for "running" (if used without 'is', or to double-count active phrases)
+            elif w.endswith(self.kinetic_suffixes):
+                 counts['kinetic'] += 1
+                 is_processed_as_verb = True
+
+            # --- B. NOUN/CONCEPT PHYSICS ---
+            if w in self.universals:
+                counts['universal'] += 1
+
+            if w in self.abstracts and w not in self.brand_safe:
+                counts['abstract'] += 1
+                is_known_abstract = True
+
+            if w in self.slang: counts['slang'] += 1
+            if w in self.connectors: counts['connector'] += 1
+            if w in self.self_refs: counts['self_ref'] += 1
+
+            # --- C. MORPHOLOGY FALLBACKS ---
+            if not is_known_abstract:
+                if w.endswith(self.abstract_suffixes):
+                    counts['abstract'] += 1
+
+            # --- D. STYLE SCORING ---
+            for style, markers in self.styles.items():
+                if w in markers: style_scores[style] += 1
+
+        # --- 2. TOXICITY CHECK (The Regex Sweep) ---
+        toxicity_score = 0.0
+        toxin_types_found = set()
+
+        matches = self.toxin_regex.findall(text_lower)
+        for match in matches:
+            weight = self.flat_penalty_map.get(match, 0)
+            toxicity_score += weight
+            if weight >= 3.0: toxin_types_found.add("CORP/CLICHÉ")
+            else: toxin_types_found.add("HEDGING")
+
+        # --- 3. METRIC CALCULATION ---
+
+        # Narrative Drag: Heavier weight on words, lighter divisor if action is high.
+        # Kinetic count might be higher now due to Mercy Rule, lowering Drag naturally.
+        action_score = (counts['kinetic'] * 2) + (counts['stative'] * 0.5) + 1
+
+        adjusted_words = total_words + (toxicity_score * 10)
+        narrative_drag = adjusted_words / action_score
+
+        abstraction_entropy = counts['abstract'] - counts['universal']
+
+        most_common = Counter(words).most_common(1)[0][1] if words else 0
+        repetition_rate = most_common / total_words
+        connection_density = counts['connector'] / total_words
+        dominant_style = max(style_scores, key=style_scores.get)
+
+        termination_pressure = (repetition_rate * 10) + (abstraction_entropy * 0.5) - (counts['universal'] * 0.2)
+        termination_pressure = max(0, termination_pressure)
+
+        in_the_barrens = False
+        if total_words > 15:
+             in_the_barrens = (termination_pressure > 2.0) and (connection_density < 0.02)
+
+        total_verbs = counts['kinetic'] + counts['stative']
+        kinetic_ratio = 0.0
+        if total_verbs > 0:
+            kinetic_ratio = counts['kinetic'] / total_verbs
+
+        return {
+            "physics": {
+                "narrative_drag": round(narrative_drag, 2),
+                "abstraction_entropy": abstraction_entropy,
+                "repetition_rate": round(repetition_rate, 2),
+                "connection_density": round(connection_density, 2),
+                "kinetic_ratio": round(kinetic_ratio, 2),
+                "dominant_style": dominant_style,
+                "toxicity_score": toxicity_score,
+                "toxin_types": list(toxin_types_found)
+            },
+            "status": {
+                "termination_pressure": round(termination_pressure, 2),
+                "in_the_barrens": in_the_barrens
+            }
+        }
 
     def analyze(self, text):
         text_lower = text.lower()

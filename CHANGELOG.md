@@ -58,6 +58,46 @@ All notable changes to the **BoneAmanita** project will be documented in this fi
 - **Metabolic Gearing (Variable Economy):**
     
     - **Drag Multipliers:** Modified `MetabolicReserve` to support variable costs. While a Poet might pay standard ATP for high drag, a Barbarian is taxed heavily for hesitation.
+
+  - **CORE LOGIC UPDATE: Contextual Verb Physics**
+
+    **Rationale:** The previous engine utilized a "Flat Penalty" system, flagging every instance of _to be_ (is, are, was, were) as High Narrative Drag. This unfairly penalized structural descriptions and progressive actions. The engine now distinguishes between "Lazy Passive" and "Structural Active."
+
+    - **Feature: Contextual Look-Ahead**
+    
+        - **Old Behavior:** Scanned words in isolation.
+        
+        - **New Behavior:** The engine now scans `word[i+1]` to determine the physics of the current verb.
+        
+    - **Rule A: "The Motor" (Auxiliary + Progressive)**
+    
+        - **Logic:** `is` + `[verb]-ing` (e.g., "is running") is no longer Stative.
+        
+        - **Effect:** These pairs are now calculated as **KINETIC**, lowering Narrative Drag significantly for ongoing actions.
+        
+    - **Rule B: "The Anchor" (Copula + Universal)**
+    
+        -   **Logic:** `is` + `[Universal Noun]` (e.g., "is stone") is no longer Stative.
+        
+        - **Effect:** These pairs are now calculated as **KINETIC** (Structural Integrity), allowing for descriptions of physical reality without penalty.
+        
+    - **Rule C: "The Crutch" (Passive/Abstract)**
+    
+        - **Logic:** `is` + `[Abstract/Adjective]` (e.g., "is nice", "is typical") remains **STATIVE**.
+        
+        - **Effect:** The drag penalty is maintained only for weak or passive construction.
+        
+
+### 2. OPTIMIZATION: Input Hygiene
+
+- **Refinement:** Enhanced string cleaning in the `analyze` function.
+    
+- **Change:** Replaced specific punctuation marks (`.`, `,`, `;`, `?`, `!`) with whitespace prior to splitting. This ensures that a word like "running!" is correctly identified as "running" by the morphology scanner.
+    
+
+### 3. METRIC IMPACT
+
+- **Narrative Drag:** Expect lower (better) Drag scores for texts that describe physical scenes or ongoing processes.
         
 
 ### 🔧 Bug Fixes & Refinements (The "Temporal Paradox")
