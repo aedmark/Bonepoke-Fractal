@@ -2,9 +2,57 @@
 
 All notable changes to the **BoneAmanita** project will be documented in this file.
 
-### **DOCUMENTATION: CHANGELOG [v0.6]**
 
-**Version:** 0.6.0 ("The Hard Memory Variant") **Date:** 2025-12-12
+## [v0.6.2] - 2025-12-14 - "The Fuller Build"
+
+### 🚀 ARCHITECTURAL EPHEMERALIZATION
+
+- **Pressure Matrix Dissolution:**
+    
+    - **Deleted:** The standalone `PressureMatrix` class has been vaporized.
+        
+    - **Integrated:** Physics constraints (Tolerance Mode, Drag Multipliers, Chaos Thresholds) are now defined directly within the `ArchetypePrism` dictionary.
+        
+    - **Result:** Reduced cyclomatic complexity and eliminated the dependency loop between the Core and the Matrix. "The logic is now in the door, not a separate room."
+        
+- **The Integrated Pinker Scan (Physics Engine Refactor):**
+    
+    - **Streamlined:** The `LinguisticPhysicsEngine.analyze` loop has been surgically altered.
+        
+    - **New Component:** Added internal helper `_classify_token` to separate identification logic from scoring logic.
+        
+    - **Mercy Rule v2:** The "Look-Ahead" logic for identifying _Kinetic Verbs_ (e.g., "is running", "is stone") is now encapsulated in the classifier, making the main loop readable and extensible.
+        
+- **Dashboard Ephemeralization:**
+    
+    - **Deleted:** The `TwelveDDashboard` (Hypercube) class has been removed.
+        
+    - **Refined:** The `MycelialDashboard` (EKG) is now the sole visualizer. It focuses exclusively on human-readable metrics (ATP, Drag, Entropy) rather than abstract Greek coefficients.
+        
+
+### ✨ QUALITY OF LIFE
+
+- **Prompt Synchronization:**
+    
+    - Updated the **System Prompt** (`SLASH 0.6.2`) to match the codebase reality.
+        
+    - Corrected the Archetype count (13, down from the erroneous 15).
+        
+    - Fixed typos in the Visualization section header.
+        
+
+### 🔧 BUG FIXES
+
+- **Syntax Patching:**
+    
+    - Fixed a critical `cclass` typo in `ArchetypePrism`.
+        
+    - Removed a "Phantom Limb" return statement in `MetabolicReserve`.
+        
+    - Fixed an argument mismatch in `MycelialDashboard.render` caused by the removal of the 12D state variable.
+    
+
+## [v0.6.0] - 2025-12-12 - "The Hard Memory Variant"
 
 #### **🚀 NEW FEATURES**
 
