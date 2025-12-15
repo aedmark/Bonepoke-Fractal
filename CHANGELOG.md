@@ -3,6 +3,7 @@
 All notable changes to the **BoneAmanita** project will be documented in this file.
 
 
+
 ## [v0.6.2] - 2025-12-14 - "The Fuller Build"
 
 ### 🚀 ARCHITECTURAL EPHEMERALIZATION
