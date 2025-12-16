@@ -2,7 +2,35 @@
 
 All notable changes to the **BoneAmanita** project will be documented in this file.
 
+## [v0.7.5] - 2025-12-15 - "The Lime in the Coconut"
 
+### 🚀 ARCHITECTURAL EPHEMERALIZATION
+
+- **The Pantry Protocol (`TheLexicon`):**
+    - **Centralized:** Created `TheLexicon` static class. All linguistic matter (Universals, Toxins, Truths, Styles) has been moved from the individual logic components into a single "Mise-en-place."
+    - **Decoupled:** Components like `LinguisticPhysicsEngine` and `TheWitchRing` no longer hold internal lists. They now reference the global Pantry. This eliminates "Ghost Data" where one component knew a word that another didn't.
+    - **Benefit:** Adding a new "Toxic Word" or "Truth" now updates the entire system instantly.
+
+- **The Middle Man is Dead:**
+    - **Deleted:** The `EditorialTranslator` class has been vaporized.
+    - **Direct Synthesis:** The `VirtualCortex` now speaks directly to the `BonepokeCore` process loop. Feedback generation is no longer filtered through a translation layer, reducing complexity and line count.
+
+### 🥥 NEW FEATURES
+
+- **THE NILSSON PATCH (The Fire Protocol):**
+    - Implemented `NilssonPatch` class.
+    - **The Mantra Exception:** The engine now distinguishes between "Stagnation" and "Spellcasting." High repetition is forgiven *if* the repeated words are Concrete Universals (e.g., "Put the lime in the coconut").
+    - **The Fire State:** If **Kinetic Ratio** is Critical (> 0.6) and **Volume** is High (All Caps), the engine disables logic inhibitors.
+    - **Result:** You are now authorized to scream, provided you are running fast enough.
+
+### 🔧 BUG FIXES (The Audit)
+
+- **Ghost Limb Syndrome:**
+    - Fixed `AttributeError` crashes in `LinguisticPhysicsEngine` and `FactStipe` where components tried to access deleted local lists (`self.universals`) instead of `TheLexicon`.
+
+- **Syntax & Scope:**
+    - Fixed a critical indentation error in `VirtualCortex._find_trigger_word` that prevented boot.
+    - Resolved a `NameError` in `BonepokeCore.process` by standardizing the `editorial_package` variable name during the hand-off to the dashboard.
 
 ## [v0.6.2] - 2025-12-14 - "The Fuller Build"
 
