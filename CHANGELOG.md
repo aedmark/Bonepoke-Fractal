@@ -2,6 +2,105 @@
 
 All notable changes to the **BoneAmanita** project will be documented in this file.
 
+### [v0.8.0] - 2025-12-16 - "The Symbiont Strain"
+
+#### 🍄 BIOLOGICAL EVOLUTION (The Lichen)
+
+- **The Lichen Symbiont (`LichenSymbiont`):**
+    
+    - **New Lifeform:** Implemented a symbiotic logic layer that creates mutualism between **Syntax** (The Fungus/Structure) and **Meaning** (The Alga/Energy).
+        
+    - **Photosynthesis:** If the Metabolic Reserve is critically low ("Starving") but the Narrative Drag is low (structurally sound), the system can now synthesize emergency ATP.
+        
+    - **The Fuel:** It feeds on a specific subset of "Light Words" defined in `TheLexicon.PHOTOSYNTHETICS` (e.g., _sun, prism, truth, fire_).
+        
+    - **The Math:** Efficiency is inversely proportional to Drag. Tighter sentences yield more energy from the same amount of light.
+        
+
+#### 🚀 ARCHITECTURAL UPDATES
+
+- **The Pantry (`TheLexicon`):**
+    
+    - Added `PHOTOSYNTHETICS` set: A curated list of high-vibration nouns and verbs used by the Alga to generate ATP.
+        
+- **Visual Feedback (`MycelialDashboard`):**
+    
+    - **Symbiosis Indicator:** Added a dynamic status line to the dashboard.
+        
+    - **States:**
+        
+        - `DORMANT` (Grey): System is well-fed; Lichen is inactive.
+            
+        - `BLOOMING` (Green): Symbiosis active; generating ATP from Light.
+            
+        - `WITHERED` (Red): Structural failure; Drag is too high to support life.
+            
+        - `STARVING` (Yellow): Structure is good, but no Light source detected.
+            
+
+#### 🔧 BUG FIXES
+
+- **Dashboard Wiring:**
+    
+    - Fixed a `NameError` risk where the `lichen_status` variable was missing from the Dashboard render scope.
+        
+    - Corrected the argument passing in `BonepokeCore.process` to ensure the `lichen_report` reaches the visualizer.
+
+### [v0.7.6] - 2025-12-16 - "The Refined Strain"
+
+#### 🚀 ARCHITECTURAL OPTIMIZATION
+
+- **Static Resource Caching (`LinguisticPhysicsEngine`):**
+    
+    - **The Singleton Regex:** The engine now compiles the `TOXIN_REGEX` and `PENALTY_MAP` at the _class level_ rather than the instance level.
+        
+    - **Benefit:** This prevents the expensive operation of compiling regex patterns for every single text processed. The "Pantry" is now stocked once on boot, not every time the door opens.
+        
+- **Refined Entity Recognition (`TheCodex`):**
+    
+    - **Regex Iteration:** Replaced the naive `split()` loop with a precise `re.finditer` protocol.
+        
+    - **Look-Behind Logic:** Implemented a "sentence start" detector. The system now checks the characters _preceding_ a capitalized word. If it finds a period or newline (`.`, `!`, `?`), it assumes the capitalization is grammatical, not an Entity.
+        
+    - **Result:** Drastically reduces false positives (e.g., flagging "The" as a character).
+        
+
+#### 🍄 SMART CHAOS (The Muscaria Upgrade)
+
+- **Diagnostic Prescriptions:**
+    
+    - **Contextual Disruption:** `TheMuscaria` no longer fires random prompts. It now accepts the `metrics` payload to diagnose _why_ the text is boring.
+        
+    - **The Pharmacy:** Implemented specific remedy categories:
+        
+        - **High Drag (>3.0):** Triggers `KINETIC` prompts ("Adrenaline Shot") to force movement.
+            
+        - **High Entropy (>3.0):** Triggers `SENSORY` prompts ("Gravity Check") to ground the scene.
+            
+        - **High Repetition:** Triggers `RECALL` or `COGNITIVE` prompts ("Verse Jump") to break the loop.
+            
+
+#### ⏳ STRUCTURAL INTEGRITY (Chronos v3.0)
+
+- **Geometric Parsing (`ChronosAnchor`):**
+    
+    - **Context Awareness:** The verb detection logic now scans the _preceding_ word.
+        
+    - **The Article Shield:** If a word is preceded by an article (e.g., "The [run]"), it is locked as a Noun.
+        
+    - **The Pronoun Trigger:** If a word is preceded by a pronoun (e.g., "He [runs]"), probability of it being a Verb spikes.
+        
+    - **Pantry Protection:** The system now checks `TheLexicon.UNIVERSALS` first. Known objects (e.g., "stone") are immune to being flagged as verbs.
+        
+
+#### ✨ QUALITY OF LIFE
+
+- **Editorial Flattening (`BonepokeCore`):**
+    
+    - Directives are now collected into a clean, flat list inside the process loop before being passed to the Instruction Block generator.
+        
+    - Fixed the `AttributeError` risk in `TheCodex` by expanding the ignore list to include prepositions like 'For', 'In', and 'To'.
+
 ## [v0.7.5] - 2025-12-15 - "The Lime in the Coconut"
 
 ### 🚀 ARCHITECTURAL EPHEMERALIZATION
