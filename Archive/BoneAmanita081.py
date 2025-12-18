@@ -1,8 +1,13 @@
 # ---------------------------------------------------------------------------
-# BONEAMANITA 0.8.0 (A VARIANT STRAIN OF THE BONEPOKE ENGINE) - "The Symbiont Strain"
+# BONEAMANITA 0.8.1 (PATCHED) - "The Symbiont Strain"
 # Architects: James Taylor & Andrew Edmark | Auditors: SLASH
 #
-# "Feed the soil, poison the weak. Logic is the stalk; chaos is the spore. Don't forget your towel."
+# "Feed the soil, poison the weak. Logic is the stalk; chaos is the spore.
+#  PATCH NOTES 0.8.1:
+#  - Fixed ZeroDivisionError in The Witch Ring & Nilsson Patch.
+#  - Optimized Regex compilation in The Codex.
+#  - Hardened Stemming logic in Chronos Anchor.
+#  - Implemented 'Metabolic Tax' for high ATP states."
 # ---------------------------------------------------------------------------
 
 import time
@@ -77,14 +82,12 @@ class TheLexicon:
         'scream': {'DECIBELS': 1}, 'silence': {'DECIBELS': -1},
         'run': {'VITALITY': 1}, 'dead': {'VITALITY': -1},
         'fire': {'THERMAL': 1}, 'ice': {'THERMAL': -1},
-        # (Add the rest of your truths here)
     }
 
     # 5. SPECIAL TRIGGERS
     MANTRA_TRIGGERS = {'lime', 'coconut', 'doctor', 'belly', 'morning'}
 
     # 6. PHOTOSYNTHETIC TRIGGERS (The Alga's Diet)
-    # Words that imply revelation, clarity, or energy source.
     PHOTOSYNTHETICS = {
         'sun', 'light', 'dawn', 'truth', 'clear', 'focus', 'beam', 'ray',
         'flash', 'spark', 'reveal', 'know', 'see', 'understand', 'lucid',
@@ -131,42 +134,33 @@ class HyphalTrace:
 class TheCodex:
     """
     Refactored for Precision.
-    Uses Regex to identify Entities without punctuation contamination.
+    PATCH 0.8.1: Moved Regex compilation to __init__ for performance.
     """
     def __init__(self):
         self.registry = {}
-        # Expanded Ignore List
         self.ignore_list = {
             'The', 'A', 'An', 'It', 'He', 'She', 'They', 'We', 'I', 'You',
             'This', 'That', 'But', 'And', 'Or', 'If', 'When', 'Then',
             'System', 'Analysis', 'Metrics', 'Drag', 'Entropy', 'For', 'In', 'To', 'Of'
         }
+        # OPTIMIZATION: Compile Once
+        self._entity_pattern = re.compile(r'\b[A-Z][a-z]+\b')
 
     def scan_for_entities(self, raw_text, current_tick):
         """
         Named Entity Recognition using Regex Iteration.
         """
-        # Regex: Word boundary, Capital letter, one or more lowercase letters.
-        # This intentionally excludes ALL-CAPS words (often acronyms or shouting)
-        # to focus on Proper Nouns/Names.
-        pattern = re.compile(r'\b[A-Z][a-z]+\b')
-
-        for match in pattern.finditer(raw_text):
+        for match in self._entity_pattern.finditer(raw_text):
             word = match.group()
             start_index = match.start()
 
             # RULE 1: IGNORE START OF SENTENCE
-            # We look backwards from the found word to see if it follows punctuation.
-            # We scan back up to 3 chars to skip space/quotes (e.g., ". The")
             is_start_of_sentence = False
             if start_index > 0:
-                # Look at the slice before the word
                 preceding_chars = raw_text[max(0, start_index-4):start_index]
-                # If we find a terminator, this is likely just a new sentence, not a Proper Noun.
                 if any(p in preceding_chars for p in ['.', '!', '?', '\n']):
                     is_start_of_sentence = True
 
-            # Special Case: The very first word of the text is usually not an entity.
             if start_index == 0:
                 is_start_of_sentence = True
 
@@ -193,7 +187,6 @@ class TheCodex:
             key=lambda item: item[1]['count'],
             reverse=True
         )
-        # Return top 5 most frequent entities
         return [k for k, v in sorted_entities[:5]]
 
 class FactStipe:
@@ -202,10 +195,9 @@ class FactStipe:
     Logic: Checks semantic polarity consistency.
     """
     def __init__(self):
-        pass # No local state needed for the manifold anymore
+        pass
 
     def inject_truth(self, word, dimension, polarity):
-        # Update the GLOBAL lexicon
         if word not in TheLexicon.TRUTHS:
             TheLexicon.TRUTHS[word] = {}
         TheLexicon.TRUTHS[word][dimension] = polarity
@@ -216,12 +208,10 @@ class FactStipe:
         trigger_words = {}
 
         for w in clean_words:
-            # Identify the target concept (Word or Root)
             target = None
             if w in TheLexicon.TRUTHS:
                 target = w
             else:
-                # Attempt to strip suffix to find a known root
                 for suffix in strip_suffixes:
                     if w.endswith(suffix):
                         candidate = w[:-len(suffix)]
@@ -229,7 +219,6 @@ class FactStipe:
                             target = candidate
                             break
 
-            # Map Dimensions if found
             if target:
                 for dim, polarity in TheLexicon.TRUTHS[target].items():
                     if dim not in active_dimensions:
@@ -239,36 +228,28 @@ class FactStipe:
                     active_dimensions[dim].add(polarity)
                     trigger_words[dim][polarity].append(w)
 
-        # 2. Detect Reality Tears & Calculate Voltage
         violations = []
-        voltage = 0.0 # New Metric: The power of the contradiction
+        voltage = 0.0
 
         for dim, polarities in active_dimensions.items():
             if 1 in polarities and -1 in polarities:
-                # We have a collision (e.g., Hot + Cold)
                 pos_words = ", ".join(trigger_words[dim][1])
                 neg_words = ", ".join(trigger_words[dim][-1])
 
-                # VSL CALCULATION:
-                # If the text is moving fast (High Kinetic Ratio), this is leverage.
-                # If the text is standing still, it is just a lie.
                 if kinetic_ratio > 0.4:
                     voltage += 5.0
                     violations.append(f"PARADOX IGNITED [{dim}]: '{pos_words}' colliding with '{neg_words}' at high velocity.")
                 else:
                     violations.append(f"LOGIC TEAR [{dim}]: Static contradiction detected.")
 
-        # 3. ADJUDICATE LOGIC (The Saprophyte Switch)
         if violations:
-            # If we generated Voltage (Good Instability)
             if voltage > 0:
                  return {
-                    "valid": True, # It is valid because it is powerful
+                    "valid": True,
                     "voltage": voltage,
                     "intervention": f"VOLATILE SEMANTIC LEVERAGE: Harvested {voltage} Voltage from {dim} paradox."
                 }
 
-            # If we just broke logic without moving (Bad Instability)
             return {
                 "valid": False,
                 "voltage": 0,
@@ -294,13 +275,11 @@ class ChaosCooldown:
 class TheMuscaria:
     """
     Refactored for Smart Chaos.
-    Injects diagnostic disruptions based on specific metric failures.
     """
     def __init__(self):
         self.boredom_pressure = 0.0
         self.pressure_threshold = 11.0
 
-        # --- THE PHARMACY (Categorized Disruptions) ---
         self.prescriptions = {
             'KINETIC': [
                 "ADRENALINE SHOT: Something just broke or fell. Describe the sound immediately.",
@@ -330,8 +309,6 @@ class TheMuscaria:
         repetition = metrics['physics'].get('repetition_rate', 0)
         abstraction = metrics['physics'].get('abstraction_entropy', 0)
 
-        # Calculate Pressure
-        # We weigh repetition heavily because it kills the reader fastest.
         pressure_increase = (drag * 0.2) + (repetition * 3.0) + (max(0, abstraction) * 0.1)
         self.boredom_pressure += pressure_increase
 
@@ -340,36 +317,20 @@ class TheMuscaria:
         return False
 
     def trigger_disruption(self, ancestry_data, metrics):
-        """
-        Diagnoses the text and prescribes the correct chaos.
-        """
         self.boredom_pressure = 0.0
         phys = metrics['physics']
 
-        # 1. DIAGNOSIS: HIGH DRAG (Sluggishness)
-        # If Drag is > 3.0, the text is moving too slow.
         if phys['narrative_drag'] > 3.0:
             return f"MUSCARIA [KINETIC]: {random.choice(self.prescriptions['KINETIC'])}"
-
-        # 2. DIAGNOSIS: HIGH ABSTRACTION (Floatiness)
-        # If Entropy is > 3, the text is ungrounded.
         elif phys['abstraction_entropy'] > 3.0:
             return f"MUSCARIA [SENSORY]: {random.choice(self.prescriptions['SENSORY'])}"
-
-        # 3. DIAGNOSIS: HIGH REPETITION (Stuttering)
-        # If we are repeating ourselves, we need to break the context entirely.
         elif phys['repetition_rate'] > 0.15:
-            # Attempt to pull from history (Ancestry)
             if ancestry_data and len(ancestry_data) > 1:
                 ancestor_id = ancestry_data[-2].get('id', 'UNK')
                 return f"MUSCARIA [RECALL]: VERSE JUMP. The echo of '{ancestor_id}' returns. Re-introduce a discarded object."
             else:
                 return f"MUSCARIA [COGNITIVE]: {random.choice(self.prescriptions['COGNITIVE'])}"
-
-        # 4. GENERIC BOREDOM (General Malaise)
         else:
-            # If everything is "okay" but we still triggered the threshold,
-            # just pick a random card to wake everyone up.
             all_options = self.prescriptions['KINETIC'] + self.prescriptions['SENSORY'] + self.prescriptions['COGNITIVE']
             return f"MUSCARIA [WILD]: {random.choice(all_options)}"
 
@@ -378,6 +339,7 @@ class TheMuscaria:
 class TheWitchRing:
     """
     THE GATEKEEPER
+    PATCH 0.8.1: Added ZeroDivisionError safeguard.
     """
     def __init__(self):
         self.cliches = {'once upon a time', 'dark and stormy', 'fix this'}
@@ -387,6 +349,10 @@ class TheWitchRing:
     def evaluate_intent(self, clean_words, metrics):
         count = len(clean_words)
         phys = metrics['physics']
+
+        # PATCH: Safety Check
+        if count == 0:
+            return {"accepted": False, "message": "THE YAGA: The void speaks not. Feed me words."}
 
         # 1. DENSITY CHECK
         meat_score = phys.get('kinetic', 0) + phys.get('universal', 0)
@@ -414,78 +380,50 @@ class TheWitchRing:
 class LinguisticPhysicsEngine:
     """
     Refactored for Performance: Implements Static Resource Caching.
-    Analyzes text properties using 'Bonepoke' data profiles and contextual verb analysis.
     """
 
-    # --- STATIC CACHE (The Pantry Shelf) ---
-    # We store these at the class level so we only compile them ONCE,
-    # regardless of how many instances of the engine are running.
     _TOXIN_REGEX = None
     _PENALTY_MAP = {}
 
     def __init__(self):
-        # MORPHOLOGY (Logic, not data)
         self.abstract_suffixes = ('ness', 'ity', 'tion', 'ment', 'ism', 'ence', 'ance', 'logy')
         self.kinetic_suffixes = ('ing',)
 
-        # RESOURCE CHECK
-        # If the Pantry is empty, fill it. If it's full, just grab the jar.
         if LinguisticPhysicsEngine._TOXIN_REGEX is None:
             LinguisticPhysicsEngine._compile_resources()
 
-        # Point instance variables to the static cache
         self.toxin_regex = LinguisticPhysicsEngine._TOXIN_REGEX
         self.flat_penalty_map = LinguisticPhysicsEngine._PENALTY_MAP
 
     @classmethod
     def _compile_resources(cls):
-        """
-        Compiles the regex patterns and penalty maps once and stores them in the class.
-        """
         all_toxins = set()
-
-        # REFERENCING THE PANTRY
         for category, phrases in TheLexicon.TOXIC_PATTERNS.items():
             for phrase, weight in phrases.items():
                 cls._PENALTY_MAP[phrase] = weight
                 all_toxins.add(phrase)
 
-        # Optimization: Sort by length (descending) to ensure greedy matching
-        # (e.g., match "rubber meets the road" before "rubber")
         sorted_toxins = sorted(list(all_toxins), key=len, reverse=True)
-
-        # Compile the Regex
         pattern_str = r'\b(' + '|'.join(re.escape(t) for t in sorted_toxins) + r')\b'
         cls._TOXIN_REGEX = re.compile(pattern_str, re.IGNORECASE)
 
     def _classify_token(self, w, next_word):
-        """
-        Determines the physics category of a token using Mercy Rules.
-        Returns: 'KINETIC', 'STATIVE', 'UNIVERSAL', 'ABSTRACT', 'SLANG', 'CONNECTOR', 'SELF_REF', or None.
-        """
-        # A. VERB PHYSICS (The Motor)
         if w in TheLexicon.STATIVE_VERBS:
-            # MERCY RULE 1: Auxiliary + Progressive (e.g., "was running")
             if next_word.endswith('ing'): return 'KINETIC'
-            # MERCY RULE 2: Copula + Universal (e.g., "is stone")
             elif next_word in TheLexicon.UNIVERSALS: return 'KINETIC'
-            # FALLBACK: The Crutch (True Stative)
             return 'STATIVE'
 
         if w in TheLexicon.KINETIC_VERBS or w.endswith('ed'): return 'KINETIC'
         if w.endswith(self.kinetic_suffixes): return 'KINETIC'
 
-        # B. NOUN/CONCEPT PHYSICS (The Mass)
         if w in TheLexicon.UNIVERSALS: return 'UNIVERSAL'
 
-        # Check specific abstract list first, then morphology
         if w in TheLexicon.ABSTRACTS:
             if w not in TheLexicon.BRAND_SAFE: return 'ABSTRACT'
-            else: return None # Brand safe words are neutral
+            else: return None
 
         if w.endswith(self.abstract_suffixes): return 'ABSTRACT'
 
-        # C. FLAVOR TEXT
         if w in TheLexicon.SLANG: return 'SLANG'
         if w in TheLexicon.CONNECTORS: return 'CONNECTOR'
         if w in TheLexicon.SELF_REFS: return 'SELF_REF'
@@ -493,37 +431,27 @@ class LinguisticPhysicsEngine:
         return None
 
     def analyze(self, token_data):
-        """
-        Implements The Integrated Pinker Scan (Refactored).
-        """
         words = token_data['clean_words']
         clean_text_for_regex = token_data['clean_text']
         total_words = token_data['total_words']
 
-        # Initialize counters (lowercase keys to match return values)
         counts = {
             'kinetic': 0, 'stative': 0, 'universal': 0,
             'abstract': 0, 'slang': 0, 'connector': 0, 'self_ref': 0
         }
         style_scores = {k: 0 for k in TheLexicon.STYLES}
 
-        # --- SINGLE PASS LOOP (The Integrated Pinker Scan) ---
         for i, w in enumerate(words):
-            # Look-Ahead Logic
             next_word = words[i+1] if i + 1 < len(words) else ""
-
-            # Physics Classification
             category = self._classify_token(w, next_word)
             if category:
                 key = category.lower()
                 if key in counts:
                     counts[key] += 1
 
-            # Style Scoring (Orthogonal check)
             for style, markers in TheLexicon.STYLES.items():
                 if w in markers: style_scores[style] += 1
 
-        # --- TOXICITY CHECK (Using Cached Regex) ---
         toxicity_score = 0.0
         toxin_types_found = set()
 
@@ -534,7 +462,6 @@ class LinguisticPhysicsEngine:
             if weight >= 3.0: toxin_types_found.add("CORP/CLICHÉ")
             else: toxin_types_found.add("HEDGING")
 
-        # --- METRIC CALCULATION ---
         action_score = (counts['kinetic'] * 2) + (counts['stative'] * 0.5) + 1
         adjusted_words = total_words + (toxicity_score * 10)
         narrative_drag = adjusted_words / action_score
@@ -581,10 +508,8 @@ class LinguisticPhysicsEngine:
 class ArchetypePrism:
     """
     The Psychological Topology Mapper.
-    Updated to include Physics Pressure Settings (formerly PressureMatrix).
     """
     def __init__(self):
-        # Default Physics Profile
         self.default_pressure = {
             "tolerance_mode": "STANDARD",
             "drag_multiplier": 1.0,
@@ -648,20 +573,15 @@ class ArchetypePrism:
                 "desc": "Weaponized absurdity. Truth through contradiction.",
                 "pressure": {
                     "tolerance_mode": "INVERTED",
-                    "chaos_threshold": 0.0, # Always allows chaos
+                    "chaos_threshold": 0.0,
                     "msg": "KAOS ENGINE: Paradoxes generate ATP. Bore me and you die."
                 }
             },
         }
 
     def get_pressure_settings(self, archetype_name):
-        """
-        Retrieves physics settings for the archetype, falling back to defaults.
-        """
         arch_data = self.archetypes.get(archetype_name, {})
         overrides = arch_data.get("pressure", {})
-
-        # Merge defaults with overrides
         settings = self.default_pressure.copy()
         settings.update(overrides)
         return settings
@@ -711,35 +631,36 @@ class ArchetypePrism:
 class ChronosAnchor:
     """
     Refactored for Structural Integrity.
-    Enforces Temporal Integrity by analyzing sentence geometry and known universals.
+    PATCH 0.8.1: Added Morphological Hardening to avoid false verb positives.
     """
     def __init__(self):
         self.pronouns = {'he', 'she', 'it', 'who', 'one', 'this', 'that', 'they', 'we'}
         self.articles = {'the', 'a', 'an', 'my', 'your', 'our', 'their', 'these', 'those', 'some', 'many', 'few', 'all', 'no'}
         self.aux_past = {'was', 'were', 'had', 'did'}
         self.aux_present = {'is', 'are', 'has', 'does'}
+        # PATCH: Safety Set
+        self.non_verb_s = {'yes', 'this', 'bus', 'gas', 'glass', 'grass', 'lens', 'chaos', 'bias'}
 
     def _is_likely_verb(self, word, prev_word):
         w = word.lower()
 
-        # 1. THE PANTRY CHECK (O(1) Lookup)
-        # If we already know this is a stone or a concept, it's not a verb.
+        # 1. THE PANTRY CHECK
         if w in TheLexicon.UNIVERSALS or w in TheLexicon.ABSTRACTS:
             return False
 
-        # 2. THE GEOMETRY CHECK (The Fuller Principle)
-        # Nouns are structurally supported by articles.
-        # e.g., "The [chaos]" -> Noun. "He [runs]" -> Verb.
+        # PATCH: Safety Set Check
+        if w in self.non_verb_s:
+            return False
+
+        # 2. THE GEOMETRY CHECK
         if prev_word.lower() in self.articles:
             return False
 
         # 3. THE PRONOUN TRIGGER
-        # If supported by a pronoun, the probability of being a verb spikes.
         if prev_word.lower() in self.pronouns:
             return True
 
-        # 4. MORPHOLOGY FALLBACK (The Pinker Scan)
-        # Handle the "s" ending (Third-person singular present)
+        # 4. MORPHOLOGY FALLBACK
         stem = w
         if w.endswith("ies") and len(w) > 4:
             stem = w[:-3]
@@ -750,9 +671,7 @@ class ChronosAnchor:
              if not w.endswith(("ss", "us", "is", "as", "os", "ys")):
                  stem = w[:-1]
 
-        # If we successfully stemmed it, it's likely a verb
         if stem != w:
-            # Safety: Ensure the stem has vowels (avoids "cwm" -> "cw" edge cases)
             if not any(char in 'aeiouy' for char in stem):
                 return False
             return True
@@ -760,30 +679,21 @@ class ChronosAnchor:
         return False
 
     def check_temporal_stability(self, clean_words):
-        """
-        Determines if the text is drifting between Past and Present tense.
-        """
         counts = {'PAST': 0, 'PRESENT': 0}
         total_signals = 0
 
         for i, w in enumerate(clean_words):
             prev = clean_words[i-1] if i > 0 else ""
 
-            # Explicit Markers
             if w in self.aux_past:
                 counts['PAST'] += 1
                 total_signals += 1
             elif w in self.aux_present:
                 counts['PRESENT'] += 1
                 total_signals += 1
-
-            # Morphological Markers
             elif w.endswith('ed') and len(w) > 3:
-                # "Red" is not a verb, "Bed" is not a verb. Length check helps.
                 counts['PAST'] += 0.5
                 total_signals += 0.5
-
-            # Heuristic Marker (The "s" test)
             elif self._is_likely_verb(w, prev):
                 counts['PRESENT'] += 0.5
                 total_signals += 0.5
@@ -794,7 +704,6 @@ class ChronosAnchor:
         past_ratio = counts['PAST'] / total_signals
         present_ratio = counts['PRESENT'] / total_signals
 
-        # THRESHOLDS
         if past_ratio > 0.8: return {"status": "LOCKED", "details": "PAST TENSE"}
         if present_ratio > 0.8: return {"status": "LOCKED", "details": "PRESENT TENSE"}
 
@@ -808,8 +717,7 @@ class VirtualCortex:
     Simulates a Neural Network using Procedural Text Generation.
     """
     def __init__(self):
-
-        # --- CLARENCE: THE ARCHITECT (Structure & Economy) ---
+        # CLARENCE
         self.clarence_templates = [
             "I am looking at a Drag Score of {drag}. It is giving me a headache. Cut the word '{target_word}'.",
             "This sentence is a bog. {drag} score? You are wading through stinky sludge.",
@@ -839,7 +747,7 @@ class VirtualCortex:
             "I am bored. We have been stuck in this {style} loop for too long."
         ]
 
-        # --- ELOISE: THE GARDENER (Senses & Atmosphere) ---
+        # ELOISE
         self.eloise_templates = [
             "I can't touch or feel this. The Entropy is {entropy}. Give me something I can hold onto.",
             "You say '{target_word}', but I see nothing. Show me the rust. Show me the light.",
@@ -861,7 +769,7 @@ class VirtualCortex:
             "You are sleepwalking. '{target_word}' is the first thing that came to mind. Wake up!"
         ]
 
-        # --- THE BABA YAGA: THE WITCH (Intent & Power) ---
+        # BABA YAGA
         self.yaga_templates = [
             "You offer me sweetness with ('{target_word}'). The Witch demands meat.",
             "Weakness. You are hiding behind politeness. Show your teeth.",
@@ -877,7 +785,7 @@ class VirtualCortex:
             "Cut the safety net. Remove '{target_word}' and let the sentence fall or fly."
         ]
 
-        # --- MUSCARIA: THE CHAOS ENGINE ---
+        # MUSCARIA
         self.muscaria_templates = [
             "BOREDOM ALERT. The text is gray. Suddenly, a bird flies into the window. Write about that.",
             "VERSE JUMP. What if this room was underwater? How would the light move?",
@@ -888,30 +796,19 @@ class VirtualCortex:
 
     def _find_trigger_word(self, clean_words, clean_text, category):
         targets = set()
+        if category == 'stative': targets = TheLexicon.STATIVE_VERBS
+        elif category == 'abstract': targets = TheLexicon.ABSTRACTS
+        elif category == 'sugar': targets = TheLexicon.SYCOPHANCY
+        elif category == 'corp': targets = set(TheLexicon.TOXIC_PATTERNS['CORP_SPEAK'].keys())
+        elif category == 'cliche': targets = set(TheLexicon.TOXIC_PATTERNS['LAZY_METAPHOR'].keys())
+        elif category == 'hedging': targets = set(TheLexicon.TOXIC_PATTERNS['WEAK_HEDGING'].keys())
 
-        # USE THE LEXICON DIRECTLY
-        if category == 'stative':
-            targets = TheLexicon.STATIVE_VERBS
-        elif category == 'abstract':
-            targets = TheLexicon.ABSTRACTS
-        elif category == 'sugar':
-            targets = TheLexicon.SYCOPHANCY
-        elif category == 'corp':
-            targets = set(TheLexicon.TOXIC_PATTERNS['CORP_SPEAK'].keys())
-        elif category == 'cliche':
-            targets = set(TheLexicon.TOXIC_PATTERNS['LAZY_METAPHOR'].keys())
-        elif category == 'hedging':
-            targets = set(TheLexicon.TOXIC_PATTERNS['WEAK_HEDGING'].keys())
-
-        # Scan for the offender (Single Words)
         for w in clean_words:
             if w in targets: return w
 
-        # Scan for Phrases
         if category in ['corp', 'cliche', 'hedging']:
              for phrase in targets:
-                 if phrase in clean_text:
-                     return phrase
+                 if phrase in clean_text: return phrase
 
         if category == 'corp': return "that buzzword"
         if category == 'cliche': return "that cliché"
@@ -925,28 +822,18 @@ class VirtualCortex:
         style = phys['dominant_style']
         response = ""
 
-        # --- CLARENCE LOGIC ---
         if agent == "CLARENCE":
             target = self._find_trigger_word(clean_words, clean_text, 'stative')
-
-            # 1. Check for Toxicity First (Priority 1)
             if 'CORP/CLICHÉ' in toxins:
                  template = random.choice(self.clarence_corp_templates)
                  target = self._find_trigger_word(clean_words, clean_text, 'corp')
-
-            # 2. Check for Critical Failure (Severity Logic)
             elif phys['narrative_drag'] > 4.0:
                  template = random.choice(self.clarence_critical)
-
-            # 3. Check for Loops
             elif loop_count > 2:
                 template = random.choice(self.clarence_loop_templates)
-
-            # 4. Standard
             else:
                 template = random.choice(self.clarence_templates)
 
-            # Format Safety
             response = template.format(
                 drag=phys['narrative_drag'],
                 target_word=target,
@@ -956,20 +843,13 @@ class VirtualCortex:
                 count=loop_count
             )
 
-        # --- ELOISE LOGIC ---
         elif agent == "ELOISE":
             target = self._find_trigger_word(clean_words, clean_text, 'abstract')
-
-            # 1. Check for Critical Abstraction (Severity Logic)
             if phys['abstraction_entropy'] > 6.0:
                  template = random.choice(self.eloise_critical)
-
-            # 2. Check for Cliches
             elif 'LAZY_METAPHOR' in toxins:
                 template = random.choice(self.eloise_cliche_templates)
                 target = self._find_trigger_word(clean_words, clean_text, 'cliche')
-
-            # 3. Standard
             else:
                 template = random.choice(self.eloise_templates)
 
@@ -978,22 +858,15 @@ class VirtualCortex:
                 target_word=target
             )
 
-        # --- BABA YAGA LOGIC ---
         elif agent == "THE BABA YAGA":
             target = self._find_trigger_word(clean_words, clean_text, 'sugar')
-
-            # 1. Check for Hedging
             if 'HEDGING' in toxins:
                 template = random.choice(self.yaga_hedging_templates)
                 target = self._find_trigger_word(clean_words, clean_text, 'hedging')
-
-            # 2. Standard
             else:
                 template = random.choice(self.yaga_templates)
-
             response = template.format(target_word=target)
 
-        # --- MUSCARIA LOGIC ---
         elif agent == "MUSCARIA":
             response = random.choice(self.muscaria_templates)
 
@@ -1028,6 +901,9 @@ class MycelialNetwork:
         return path[::-1]
 
 class MetabolicReserve:
+    """
+    PATCH 0.8.1: Implemented 'Sugar Crash' logic to burn excess ATP.
+    """
     def __init__(self, max_capacity=52):
         self.atp = 33
         self.max_capacity = max_capacity
@@ -1036,10 +912,13 @@ class MetabolicReserve:
 
     def spend(self, amount):
         self.atp = max(0, self.atp - amount)
+        self._update_status()
+        return self.atp
+
+    def _update_status(self):
         if self.atp < 6: self.status = "STARVING"
         elif self.atp > 40: self.status = "GLUTTON"
         else: self.status = "STABLE"
-        return self.atp
 
     def metabolize(self, metrics, voltage=0):
         phys = metrics['physics']
@@ -1059,17 +938,17 @@ class MetabolicReserve:
         if phys['toxicity_score'] > 0:
             delta -= 5
 
-        # THE SAPROPHYTE MECHANIC
-        # Now 'voltage' is defined in this scope
         if voltage > 0:
             delta += int(voltage * 2)
             self.status = "SUPERCRITICAL"
 
-        self.atp = max(0, min(self.atp + delta, self.max_capacity))
+        # PATCH: Metabolic Tax for Gluttony
+        # If we are swimming in sugar, we burn it faster.
+        if self.atp > 40:
+             delta -= 2
 
-        if self.atp < 6: self.status = "STARVING"
-        elif self.atp > 40: self.status = "GLUTTON"
-        else: self.status = "STABLE"
+        self.atp = max(0, min(self.atp + delta, self.max_capacity))
+        self._update_status()
 
         return {
             "current_atp": self.atp,
@@ -1081,46 +960,32 @@ class LichenSymbiont:
     """
     THE SURVIVALIST
     Mechanic: 'Photosynthesis of Meaning'
-    If the text is structurally sound (Fungus) but starving for energy,
-    the Alga converts 'Light Words' into emergency ATP.
     """
     def __init__(self):
         self.symbiosis_state = "DORMANT"
         self.stored_sugar = 0.0
 
     def photosynthesize(self, clean_words, phys_metrics, current_atp):
-        """
-        Attempt to generate energy from light if structure permits.
-        """
-        # 1. CHECK THE FUNGUS (Structural Integrity)
-        # Lichens need a stable surface. High Drag = Unstable.
         if phys_metrics['narrative_drag'] > 3.0:
             self.symbiosis_state = "WITHERED"
             return {"sugar_generated": 0, "msg": "Structure too weak for Lichen growth."}
 
-        # 2. CHECK THE ENVIRONMENT (Do we need help?)
-        # Lichens thrive where others die. Only activate if ATP is getting low.
         if current_atp > 20:
             self.symbiosis_state = "DORMANT"
             return {"sugar_generated": 0, "msg": "Nutrients sufficient. Symbiosis dormant."}
 
-        # 3. COUNT THE PHOTONS (Search for Light)
         light_count = sum(1 for w in clean_words if w in TheLexicon.PHOTOSYNTHETICS)
 
         if light_count == 0:
             self.symbiosis_state = "STARVING"
             return {"sugar_generated": 0, "msg": "No light source detected."}
 
-        # 4. PHOTOSYNTHESIS (The Conversion)
-        # Efficiency increases with Structural Solidity (Lower Drag = Higher Yield)
         efficiency = max(1.0, 4.0 - phys_metrics['narrative_drag'])
         sugar = round(light_count * efficiency)
 
         self.symbiosis_state = "BLOOMING"
         self.stored_sugar += sugar
 
-        # 5. RISK CHECK (Algal Bloom)
-        # If sugar exceeds structure significantly, we risk 'Purple Prose' (Toxic).
         warning = None
         if self.stored_sugar > 15:
              warning = "WARNING: Algal Bloom imminent. Too much revelation, not enough grounding."
@@ -1134,9 +999,6 @@ class LichenSymbiont:
 # --- COMPONENT 7: THE SCEHMATICS ---------------------------
 
 class MycelialDashboard:
-    """
-    The Mycelial DASHBOARD
-    """
     def __init__(self):
         self.C_RESET = "\033[0m"
         self.C_RED = "\033[91m"
@@ -1159,9 +1021,8 @@ class MycelialDashboard:
         return f"{label:<15} |{color_code}{bar}{self.C_RESET}| {val_float:.2f}"
 
     def render(self, metrics, intervention, energy, ancestry, chronos_report, archetype_data, lichen_report, voltage=0):
-        print(f"\n{self.C_CYAN}--- MYCELIAL EKG ---{self.C_RESET}")
+        print(f"\n{self.C_CYAN}--- MYCELIAL EKG [0.8.1]---{self.C_RESET}")
 
-        # SAFETY CHECK: Ensure metrics is a dict
         if not isinstance(metrics, dict) or 'physics' not in metrics:
             print(f"{self.C_RED}CRITICAL: Metrics corruption detected.{self.C_RESET}")
             return
@@ -1169,7 +1030,6 @@ class MycelialDashboard:
         phys = metrics.get('physics', {})
         stat = metrics.get('status', {})
 
-        # SAFETY CHECK: Ensure energy is a dict
         if not isinstance(energy, dict):
             energy = {'current_atp': 0, 'status': 'ERROR'}
 
@@ -1204,7 +1064,6 @@ class MycelialDashboard:
         if style == "CRYSTAL": style_color = self.C_CYAN
         print(f"DOMINANT STYLE : {style_color}{style}{self.C_RESET}")
 
-        # --- LICHEN RENDER LOGIC ---
         lichen_status = "DORMANT"
         if isinstance(lichen_report, dict):
             msg = lichen_report.get('msg', 'DORMANT')
@@ -1226,7 +1085,6 @@ class MycelialDashboard:
 
         print(self._draw_bar(voltage, 10.0, "TENSION VOLTAGE", self.C_RED, 1.0, False))
 
-        # SAFETY CHECK: Ensure ancestry is a list of dicts
         if isinstance(ancestry, list) and len(ancestry) > 1:
             print(f"\n{self.C_BLUE}GENETIC HISTORY:{self.C_RESET}")
             for node in ancestry[-3:]:
@@ -1237,39 +1095,31 @@ class MycelialDashboard:
 class NilssonPatch:
     """
     THE NILSSON OVERRIDE
-    "Everything is the opposite of what it is, isn't it?"
+    PATCH 0.8.1: ZeroDivision Safeguard added.
     """
     def __init__(self):
         TheLexicon.MANTRA_TRIGGERS = {'lime', 'coconut', 'doctor', 'belly', 'morning'}
 
     def evaluate_mantra(self, clean_words, repetition_rate):
-        """
-        MERCY RULE: Allows high repetition if the words are concrete universals.
-        (The 'Coconut' Exception)
-        """
-        # 1. Check for Repetition Severity
         if repetition_rate < 0.3:
-            return False # Not a mantra, just normal text
+            return False
 
-        # 2. Check for Specificity (Are we repeating meaningless words or concrete objects?)
         concrete_count = sum(1 for w in clean_words if w in TheLexicon.MANTRA_TRIGGERS)
-
-        # If we are repeating concrete objects, it is a SPELL, not an error.
         if concrete_count > 3:
             return True
 
         return False
 
     def detect_fire_state(self, raw_text, kinetic_ratio):
-        """
-        THE FIRE PROTOCOL
-        "We can make each other happy." -> "JUMP INTO THE FIRE."
-        Allows logic breaks if Kinetic Energy is critical.
-        """
-        caps_density = sum(1 for c in raw_text if c.isupper()) / len(raw_text)
+        # PATCH: Avoid Empty String Crash
+        if not raw_text:
+             return {"status": "DORMANT"}
+        text_len = len(raw_text)
+        if text_len == 0:
+             return {"status": "DORMANT"}
 
-        # If the text is moving fast (High Kinetic) AND loud (High Caps)
-        # We disable the Logic Inhibitors.
+        caps_density = sum(1 for c in raw_text if c.isupper()) / text_len
+
         if kinetic_ratio > 0.6 and caps_density > 0.2:
              return {
                  "status": "ACTIVE",
@@ -1319,9 +1169,6 @@ class BonepokeCore:
         self.tick += 1
         self.last_input = text
 
-        # -------------------------------------------------------------------
-        # 0. CENTRALIZED TOKENIZATION
-        # -------------------------------------------------------------------
         text_lower = text.lower()
         clean_text = text_lower.replace('.', ' ').replace(',', ' ').replace(';', ' ').replace('?', ' ').replace('!', ' ')
         clean_words = clean_text.split()
@@ -1335,12 +1182,10 @@ class BonepokeCore:
             'total_words': len(clean_words) if clean_words else 1
         }
 
-        # 1. METRICS & PHYSICS
         metrics = self.physics.analyze(token_data)
         phys = metrics['physics']
         stat = metrics['status']
 
-        # --- NILSSON INTERCEPT ---
         fire_state = self.nilsson.detect_fire_state(token_data['raw_text'], phys['kinetic_ratio'])
         is_mantra = self.nilsson.evaluate_mantra(token_data['clean_words'], phys['repetition_rate'])
 
@@ -1353,22 +1198,18 @@ class BonepokeCore:
             stat['termination_pressure'] = 0.0
             phys['narrative_drag'] = max(0, phys['narrative_drag'] - 2.0)
 
-        # 2. IDENTITY & MEMORY
         current_id = self.lineage.spawn_id()
         actual_parent = parent_id if parent_id else self.last_id
-        self.codex.scan_for_entities(token_data['raw_text'], self.tick) # Updated to use raw_text per Upgrade #5 Idea
+        self.codex.scan_for_entities(token_data['raw_text'], self.tick)
 
-        # 3. GATEKEEPING
         gate_result = self.witch.evaluate_intent(token_data['clean_words'], metrics)
         if not gate_result['accepted']:
             return f"[BLOCKED] {gate_result['message']}"
 
-        # 4. ARCHETYPE & STIPE
         prelim_archetype_data = self.prism.identify(metrics['physics'], {"valid": True})
         current_archetype = prelim_archetype_data['archetype']
         pressure_settings = self.prism.get_pressure_settings(current_archetype)
 
-        # Apply Overrides
         self.muscaria.pressure_threshold = pressure_settings["chaos_threshold"]
         self.metabolism.drag_multiplier = pressure_settings["drag_multiplier"]
 
@@ -1381,73 +1222,57 @@ class BonepokeCore:
         )
         current_voltage = stipe_check.get('voltage', 0.0)
 
-        # Enforce Archetype Physics
         self._enforce_archetype_physics(current_archetype)
         archetype_data = self.prism.identify(metrics['physics'], stipe_check)
 
-        # 5. CORTEX SYNTHESIS (Generating the Directives)
-        # We now build a flat list of instructions immediately.
         directives = []
 
-        # A. ARCHETYPE INSTRUCTION
         if pressure_settings['msg'] != "STANDARD PHYSICS":
             directives.append(f"ARCHETYPE PRESSURE: {pressure_settings['msg']}")
 
-        # B. VOICE SYNTHESIS
         current_style = phys['dominant_style']
         loop_count = len(self.memory.recall(current_style))
 
-        # Clarence (Structure)
         if phys['narrative_drag'] > 3.0 or loop_count > 2:
             msg = self.cortex.synthesize_voice("CLARENCE", token_data, metrics, loop_count)
             directives.append(f"PACING: {msg}")
 
-        # Eloise (Sensory)
         if phys['abstraction_entropy'] > 2:
             msg = self.cortex.synthesize_voice("ELOISE", token_data, metrics)
             directives.append(f"GROUNDING: {msg}")
 
-        # Baba Yaga (Intent)
         if "THE YAGA GRUMBLES" in gate_result['message']:
             msg = self.cortex.synthesize_voice("THE BABA YAGA", token_data, metrics)
             directives.append(f"INTENT: {msg}")
 
-        # C. LOGIC INTERVENTION
         if not stipe_check.get('valid', True):
             intervention_msg = stipe_check.get('intervention', "LOGIC BREACH")
             directives.append(f"CRITICAL LOGIC FAILURE: {intervention_msg}")
             self.metabolism.spend(10)
 
-        # D. CHAOS INTERVENTION (Muscaria)
         muscaria_msg = None
         if self.muscaria.check_for_boredom(metrics):
             if self.cooldown.is_ready(self.tick, force=stat['in_the_barrens']):
-                # Pass metrics for Smart Chaos (Upgrade #3)
                 ancestry_temp = self.lineage.trace_lineage(current_id)
                 muscaria_msg = self.muscaria.trigger_disruption(ancestry_temp, metrics)
                 self.metabolism.spend(5)
                 directives.append(f"CHAOS EVENT: {muscaria_msg}")
             else:
-                # Soft warning
                 muscaria_msg = self.cortex.synthesize_voice("MUSCARIA", token_data, metrics)
                 directives.append(f"CHAOS WARNING: {muscaria_msg}")
 
-        # E. NILSSON OVERRIDE
         if fire_state['status'] == 'ACTIVE':
             override_msg = f"NILSSON STATE: {fire_state['msg']}"
             directives.append(override_msg)
-            # Ensure this is visible on dashboard too
             if muscaria_msg: muscaria_msg += f" | {fire_state['msg']}"
             else: muscaria_msg = fire_state['msg']
 
-        # 6 LICHEN SYMBIOSIS CHECK
         lichen_report = self.lichen.photosynthesize(
             token_data['clean_words'],
             metrics['physics'],
             self.metabolism.atp
         )
 
-        # Inject the Sugar into Metabolism
         if lichen_report['sugar_generated'] > 0:
             self.metabolism.atp += lichen_report['sugar_generated']
             directives.append(f"LICHEN PROTOCOL: {lichen_report['msg']}")
@@ -1455,7 +1280,6 @@ class BonepokeCore:
         if lichen_report.get('warning'):
             directives.append(f"BIOHAZARD: {lichen_report['warning']}")
 
-        # 7. FINALIZING
         status_label = "Bloom" if len(raw_words) > 15 else "Seed"
         energy_report = self.metabolism.metabolize(metrics, voltage=current_voltage)
 
@@ -1468,13 +1292,11 @@ class BonepokeCore:
         chronos_report = self.chronos.check_temporal_stability(token_data['clean_words'])
         ancestry_data = self.lineage.trace_lineage(current_id)
 
-        # Render Dashboard
         self.dashboard.render(
             metrics, muscaria_msg, energy_report, ancestry_data,
             chronos_report, archetype_data, lichen_report, voltage=current_voltage
         )
 
-        # RETURN THE FLATTENED PACKAGE
         return {
             "id": current_id,
             "metrics": metrics,
@@ -1483,7 +1305,7 @@ class BonepokeCore:
             "archetype_data": archetype_data,
             "editorial": {
                 "status": status_label,
-                "directives": directives # <--- The new clean list
+                "directives": directives
             }
         }
 
@@ -1496,7 +1318,7 @@ class BonepokeCore:
         formatted_directives = "\n        - ".join(directives_list) if directives_list else "Maintain current course."
 
         return f"""
-        [SYSTEM OVERRIDE: BONEAMANITA ENGINE]
+        [SYSTEM OVERRIDE: BONEAMANITA ENGINE 0.8.1]
         CURRENT STATE: {result['energy']['status']} (ATP: {result['energy']['current_atp']})
         ARCHETYPE: {arch.get('archetype', 'Unknown')}
         REALITY ANCHORS (DO NOT HALLUCINATE):
@@ -1508,7 +1330,7 @@ class BonepokeCore:
 
 if __name__ == "__main__":
     engine = BonepokeCore()
-    print("--- BONEAMANITA v0.8.0: THE SYMBIONT STRAIN---")
+    print("--- BONEAMANITA v0.8.1: THE PATCHED STRAIN---")
 
     test_input = (
         "The system leverages the context to optimize workflow. "
@@ -1530,3 +1352,5 @@ if __name__ == "__main__":
         print("="*60)
         print(instruction)
         print("="*60)
+
+``

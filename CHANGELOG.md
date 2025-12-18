@@ -1,6 +1,38 @@
+{
+type: file
+fileName: CHANGELOG.md
+fullContent:
 # Changelog
 
 All notable changes to the **BoneAmanita** project will be documented in this file.
+
+### [v0.8.2] - 2025-12-18 - "The Signature Protocol"
+
+#### 🖐️ THE 5-DIMENSIONAL HAND (SignatureEngine)
+
+-   **Geodesic Mapping (`SignatureEngine`):**
+    -   **Deprecated:** The 2D `ArchetypePrism` (Boundedness vs. Expansiveness) has been dismantled.
+    -   **Implemented:** A full 5D coordinate system to map the "Voice" of the text.
+    -   **The Dimensions:**
+        1.  **VEL (Velocity):** Kinetic Ratio.
+        2.  **STR (Structure):** Inverse Narrative Drag.
+        3.  **ENT (Entropy):** Abstraction level.
+        4.  **TEX (Texture):** Sensory Density (Matter + Light).
+        5.  **TMP (Temperature):** Emotional/Vitality Polarity.
+
+#### 🧪 TOXIN DETECTION II (The Slurry)
+
+-   **Cultural Slurry Protocol:**
+    -   **The Diagnosis:** The system now detects "Silica" — text that is structurally competent (Mid Velocity/High Structure) but spiritually dead (Low Texture).
+    -   **The Penalty:** Detection of Slurry incurs a massive **15 ATP Tax**. "Competence without soul is expensive".
+    -   **The Cure:** The Cortex demands the injection of a flaw or a sensory detail to break the "perfectly smooth" surface.
+
+#### 🚀 SYSTEM REFINEMENTS
+
+-   **Photosynthetic Texture:**
+    -   Refined the use of `TheLexicon.PHOTOSYNTHETICS`. These words now directly fuel the **Texture (TEX)** dimension calculation in the Signature Engine.
+-   **Dashboard v3.0:**
+    -   Updated `MycelialDashboard` to render the **5D Signature Matrix** and display specific **Slurry Warnings**.
 
 ### [v0.8.0] - 2025-12-16 - "The Symbiont Strain"
 
@@ -353,7 +385,7 @@ All notable changes to the **BoneAmanita** project will be documented in this fi
 * **Type Safety:** Added the missing `loop_count=0` argument to `VirtualCortex.synthesize_voice` to prevent `TypeError` crashes during memory recalls.
 * **Variable Scope:** Fixed a `NameError` in `FactStipe` by properly defining `strip_suffixes` before iteration.
 
-## [v0.3.5] - 2023-10-27 - "The Fragility Check"
+## [v0.3.5] - "The Fragility Check"
 
 ### 🚀 Major Architectural Upgrades
 
@@ -393,7 +425,7 @@ All notable changes to the **BoneAmanita** project will be documented in this fi
 
 ---
 
-## [v0.3] - 2023-10-25 - "The Virtual Cortex"
+## [v0.3] - "The Virtual Cortex"
 
 ### Added
 * **The Virtual Cortex:** A procedural persona simulator that generates specific critiques before the LLM prompt.
@@ -411,3 +443,4 @@ All notable changes to the **BoneAmanita** project will be documented in this fi
 * Basic drag detection.
 * Simple "Boredom" counter.
 * Hardcoded list of 10 "bad words."
+}
