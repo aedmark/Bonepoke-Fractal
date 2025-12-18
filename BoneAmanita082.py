@@ -4,6 +4,7 @@
 #
 # "Slurry is the default. Significance is the exception.
 #  PATCH NOTES 0.8.2:
+#  - Based on https://medium.com/@utharian/the-layer-copyright-cant-see-cultural-slurry-vs-creative-signature-a85353e20751
 #  - Deprecated 2D ArchetypePrism.
 #  - Implemented 5D SignatureEngine (Velocity, Structure, Entropy, Texture, Temp).
 #  - Added 'Cultural Slurry' Detection (competence without soul).
