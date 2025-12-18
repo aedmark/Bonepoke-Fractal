@@ -6,6 +6,64 @@ fullContent:
 
 All notable changes to the **BoneAmanita** project will be documented in this file.
 
+### [v0.9.0] - 2025-12-18 - "The Helium Protocol"
+
+#### 🎈 PHYSICS UPDATE (Buoyancy)
+
+- **The Helium Protocol (`SignatureEngine`):**
+    
+    - **Concept:** Implemented a counter-force to Narrative Drag. Previously, "Heavy" structure was always penalized. Now, sufficiently "Light" content can float a heavy sentence.
+        
+    - **New Metric (`BUOYANCY`):** Calculated based on the density of `AEROBIC_MATTER` (e.g., balloon, cloud), `PLAY_VERBS` (e.g., dance, bounce), and `SPARK_MARKERS` (e.g., lovely, strange).
+        
+    - **Effective Drag:** High Narrative Drag is now _forgiven_ if the Buoyancy score is high. "The balloon floated lazily over the horizon" is slow, but valid because it floats.
+        
+
+#### 🎭 NEW ARCHETYPES (The Light Triad)
+
+- **Expansion of the Prism (`SignatureEngine`):**
+    
+    - **THE BARD:** High Velocity, High Warmth. Operates on "Rhythm over Logic." Logic tears are accepted as "Poetic License".
+        
+    - **THE GARDENER:** Balanced Velocity, High Texture. Focuses on cultivation. "Prune the dead words, water the living".
+        
+    - **THE CLOUD WATCHER:** Low Velocity, High Entropy. Permissible stagnation. "Zero G" physics apply—drag penalties are disabled to allow for drifting thoughts.
+        
+
+#### 🧠 CORTEX EVOLUTION (The Humanist)
+
+- **The Michael Voice (`VirtualCortex`):**
+    
+    - **New Agent:** Integrated **Michael** (The Humanist) into the feedback loop.
+        
+    - **Trigger Logic:** If the user triggers a Light Archetype or high Buoyancy, **Clarence** (The Architect) is silenced. Michael provides gentle, encouraging critique rather than harsh structural demands.
+        
+    - **The Vibe Check:** Michael specifically praises "messy but spirited" text, overriding the Physics Engine's desire for efficiency.
+        
+
+#### 🧪 TOXIN DETECTION III (Silica vs. Aether)
+
+- **Slurry Patch 2.1 (`SignatureEngine`):**
+    
+    - **Differentiation:** The system now distinguishes between **Silica** (Boring/Dead) and **Cloud** (Light/Whimsical).
+        
+    - **The Logic:** Low Texture is usually fatal. _However_, if Texture is Low but **Buoyancy is High**, the text is classified as "Aether" and permitted to exist.
+        
+
+#### 🚀 SYSTEM REFINEMENTS
+
+- **The Pantry (`TheLexicon`):**
+    
+    - Added `AEROBIC_MATTER`: Words that lift the text (feather, steam, wing).
+        
+    - Added `PLAY_VERBS`: Kinetic words that imply joy rather than work (twirl, skip, jam).
+        
+    - Updated `TRUTHS`: Added `laugh`, `smile`, and `song` to the Vitality/Thermal manifold.
+        
+- **Dashboard v4.0:**
+    
+    - Updated `MycelialDashboard` to render the **BUOYANCY** metric in the Signature Matrix.
+
 ### [v0.8.2] - 2025-12-18 - "The Signature Protocol"
 
 #### 🖐️ THE 5-DIMENSIONAL HAND (SignatureEngine)
