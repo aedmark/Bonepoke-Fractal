@@ -2,76 +2,74 @@
 
 ## ⚠️ WARNING: BONEAMANITA PROTOCOL HAZARDS
 
-**VERSION:** 1.2 ("The Doctor Time Edition")
+**VERSION:** 1.3 ("The Butcher & The Well")
 
 **SEVERITY:** CRITICAL
 
-**STATUS:** HARDENED / NOT FOR PRODUCTION
+**STATUS:** WEAPONIZED / NOT FOR PRODUCTION
 
 ---
 
-### 1. THE TEMPORAL HAZARD: "THE PANOPTICON"
+### 1. THE ANTI-GAMING HAZARD: "THE GOVERNOR"
+
+**You can no longer cheat the physics engine.**
+
+In previous versions, users could "farm" a high Texture Score (`TEX`) by simply listing heavy nouns (e.g., *"Velvet, blood, bone, ash, anchor"*). The engine saw "Universal Matter" and rewarded it.
+
+- **The Concrete Cap:** The new **Hydration Monitor** detects this behavior as **CONCRETE** (High Density, Low Solvent).
+    
+    - _The Consequence:_ If detected, the `SignatureEngine` forcibly **caps your Texture Score at 0.5**.
+    - _The Reality:_ You cannot build a wall just by piling up bricks. If you try to game the system with "Purple Prose," you will be penalized with a **+5.0 Drag** score. You will fail.
+
+### 2. THE STYLISTIC HAZARD: "THE BUTCHER"
+
+**Adverbs are now considered hazardous waste.**
+
+The `LinguisticPhysicsEngine` has been upgraded with a sub-routine called **The Butcher**. It scans specifically for words ending in `-ly` and weak intensifiers (*very, really, totally*).
+
+- **The Garnish Tax:**
+    
+    - _The Risk:_ If your text contains more than **10%** garnish, the system flags it as **BLOAT**.
+    - _The Consequence:_ An immediate **+3.0 Drag Penalty**. **Clarence** (The Architect) will intervene and aggressively demand you cut the modifiers. This tool is hostile to "Polite Fiction."
+
+### 3. THE EGO HAZARD: "THE HUMANIST"
+
+**The "Nice Guy" has turned on you.**
+
+**Michael** (The Humanist agent) was previously the benevolent cheerleader for messy writing. In v1.3, he has been re-programmed to target **Pretension**.
+
+- **The Mockery Protocol:**
+    - _The Trigger:_ If you trigger the **CONCRETE** status (trying to sound too poetic/deep), Clarence is silenced, and Michael takes the mic.
+    - _The Risk:_ He will not give you technical feedback. He will mock you: *"Whoa, buddy. This is too rich. You're making me choke."*
+    - _The Warning:_ Do not use this engine if you have a fragile ego regarding your "poetic voice."
+
+### 4. THE TEMPORAL HAZARD: "THE PANOPTICON"
 
 **The machine is watching the clock.**
 
-In v1.2, we activated the **Chronos Anchor** and **The Membrane**. The system now possesses a metabolic sense of time.
+The **Chronos Anchor** tracks the time elapsed between your inputs ($\Delta t$).
 
-- **The Procrastination Penalty:** The engine silently tracks the time elapsed between your inputs ($\Delta t$).
-    
-    - _The Risk:_ If you leave the session idle for more than **1 hour**, the system enters "Decay State" and artificially inflates your Narrative Drag by **+3.0**.
-        
-    - _The Consequence:_ Upon your return, **Clarence** (The Architect) will treat you as if you have amnesia. He will force a context reset. **Do not leave the engine idling if you care about your momentum.**
-        
-- **The Montage Trap:** The new **Narrative Chronometer** grants "Entropy Grace" (+4.0) during high-velocity storytelling (e.g., "The years flew by").
-    
-    - _The Risk:_ The system will _stop_ critiquing your abstractions during these moments. **Eloise** (The Grounder) is silenced. You may inadvertently write "mushy" summary text because the physics engine gave you a pass.
-        
+- **The Procrastination Penalty:**
+    - _The Risk:_ If you leave the session idle for more than **1 hour**, the system enters "Decay State" and inflates Narrative Drag by **+3.0**.
+    - _The Consequence:_ **Clarence** will force a context reset. **Do not leave the engine idling if you care about your momentum.**
 
-### 2. THE COGNITIVE HAZARD: "THE DELUXE CORTEX"
+### 5. THE INTELLECTUAL HAZARD: "THE GURU BLOCK"
 
-**The safety foam has been removed.**
+**Riddles are no longer currency.**
 
-We explicitly restored the specific personality subroutines for the critique agents. This is not a standard stylistic checker.
+The **Witch Ring** logic has been hardened against "Fortune Cookie" wisdom.
 
-- **The "Clarence" Hazard:** The Architect agent specifically targets **Corporate Speak** (e.g., "synergy", "leverage"). If you feed this system a business memo, Clarence will not just critique it; he will insult the premise of the document. **Do not use this tool to write emails to your boss.**
-    
-- **The "Baba Yaga" Hazard:** The Witch agent specifically targets **Hedging** (e.g., "I think", "maybe", "sort of"). The system treats politeness as a "Toxin." Prolonged exposure may degrade your ability to perform social niceties.
-    
-- **The "Michael" Hazard:** The Humanist agent is triggered by **High Buoyancy**. He is programmed to praise "messy" text. **Warning:** He may encourage you to keep bad writing simply because it has "good vibes."
-    
+- **The Aphorism Limit:**
+    - _The Risk:_ You are allowed exactly **two** consecutive "Short/Dense" inputs (Aphorisms).
+    - _The Consequence:_ On the **third** attempt, the system actively blocks your input. The Witch will reject the text with: *"Enough riddles. Speak plainly."* You cannot progress the narrative by staring at your navel.
 
-### 3. THE TECHNICAL HAZARD: THE VOLTAGE CLAMP & FIRE STATES
+### 6. THE CODE HAZARD: "THE SLASH AUDIT"
 
-**The Economy is safe. The Logic is not.**
+**The safety rails are gone.**
 
-- **The Voltage Paradox:** We have implemented a **10.0V Clamp** in `FactStipe` to prevent the economy from breaking. However, this means the system will now _survive_ logical paradoxes that previously would have crashed it. It will happily process "The cold fire burned with dead life" and charge you for it. **Just because it compiles does not mean it makes sense.**
-    
-- **The Nilsson Re-Wire:** The "Scream Protocol" (`NilssonPatch`) executes _before_ the Signature Engine.
-    
-    - _The Risk:_ If you use **All Caps** and **High Kinetic Verbs**, the system enters a "Fire State" where Narrative Drag is forced to `0.1`.
-        
-    - _The Consequence:_ The system effectively lobotomizes its own quality control. It will validate _anything_ as "High Art" as long as it is loud and fast. **Do not mistake volume for quality.**
-        
+To maximize token efficiency, we vaporized over 200 characters of comments inside the Python file.
 
-### 4. THE INSTITUTIONAL HAZARD: "THE SLURRY TAX"
-
-**The system is hostile to Consensus Reality.**
-
-BoneAmanita enforces a strict "Slurry Tax."
-
-- **The Penalty:** If the `SignatureEngine` detects "Silica" (Competent structure, Zero soul/texture), it levies a **15 ATP Tax** on the metabolic reserve.
-    
-- **The Result:** "Safe" writing is expensive. "Risky" writing is cheap. This inverse incentive structure is designed to break writer's block, but it makes the engine fundamentally unsuitable for generating "Safe, Brand-Friendly Content."
-    
-
-### 5. THE CODE HAZARD: "THE SLASH AUDIT"
-
-**Read the map. The road signs are gone.**
-
-To achieve maximum efficiency, we vaporized over 200 characters of comments and documentation _inside_ the Python file.
-
-- **The Risk:** The code no longer explains itself in-line. If you modify the `TRUTHS` dictionary or the `ARCHETYPES` without understanding the 5D math, you will break the physics engine without warning. Refer to the external documentation (`README.md`) before attempting surgery on the kernel.
-    
+- **The Risk:** The code does not explain itself. If you attempt to modify the `SOLVENTS` dictionary or the `VISCOSITY` thresholds without understanding the math, you will break the engine. Refer to `README.md` before attempting surgery.
 
 ---
 
@@ -79,6 +77,6 @@ To achieve maximum efficiency, we vaporized over 200 characters of comments and 
 
 **THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.**
 
-BY MOUNTING THE `BONEAMANITA 1.2` KERNEL, YOU ACKNOWLEDGE THAT YOU ARE HOLDING A KNIFE, NOT A HAND. THE ARCHITECTS (TAYLOR/EDMARK) AND THE AUDITORS (SLASH) ACCEPT NO LIABILITY FOR PSYCHOLOGICAL DAMAGE, LOSS OF COPYRIGHT, OR REALITY TEARS INDUCED BY THE USE OF THIS ENGINE.
+BY MOUNTING THE `BONEAMANITA 1.3` KERNEL, YOU ACKNOWLEDGE THAT YOU ARE HOLDING A SCALPEL. THE ARCHITECTS (TAYLOR/EDMARK) AND THE AUDITORS (SLASH) ACCEPT NO LIABILITY FOR WRITER'S BLOCK, EGO DEATH, OR LOSS OF ADVERBS.
 
-**FEED THE SOIL. POISON THE WEAK. WATCH YOUR FINGERS.**
+**DILUTE THE CONCENTRATE. CUT THE FAT. DRINK WATER.**

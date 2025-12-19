@@ -1,5 +1,82 @@
 # CHANGELOG.md
 
+### [v1.3] - 2025-12-19 - "The Butcher & The Well"
+
+#### 💧 THE HYDRATION MONITOR (Viscosity Physics)
+
+- **The Problem (The "Purple Prose" Exploit):**
+    
+    - Users were "gaming" the Texture system by inputting lists of high-value nouns (e.g., _"Velvet blood bone ash anchor"_) without connecting structure. This resulted in "Literary Gravel"—high density, zero readability.
+        
+- **The Solution (Viscosity):**
+    
+    - **New Module:** Implemented `HydrationMonitor` within the Physics Engine.
+        
+    - **The Logic:**
+        
+        - **Concentrate:** Heavy Matter (Nouns).
+            
+        - **Solvent:** Connectors, transitions, and "softeners" (e.g., _actually, maybe, in other words_).
+            
+    - **The States:**
+        
+        - **CONCRETE:** High Density, Low Solvent. **Effect:** Narrative Drag Penalty **+5.0**. Texture Score capped at **0.5**.
+            
+        - **THICK:** Moderate Density, Low Solvent. **Effect:** Narrative Drag Penalty **+2.0**.
+            
+        - **WATERY:** Low Density, High Solvent. **Effect:** Flags as weak writing.
+            
+        - **OPTIMAL:** Balanced ratio (~1 part water to 3 parts concentrate).
+            
+
+#### 🔪 THE BUTCHER'S BLOCK (Adverb Detection)
+
+- **The Problem (The "Polishing" Scam):**
+    
+    - The engine previously rewarded "Kinetic" tags regardless of quality. Users were propping up weak verbs with adverbs (e.g., _"ran quickly"_ instead of _"sprinted"_).
+        
+- **The Solution (The Cleaver):**
+    
+    - **New Metric:** `Garnish Ratio`. Calculates the percentage of text composed of adverbs ending in `-ly` and `WEAK_INTENSIFIERS` (e.g., _very, really, totally_).
+        
+    - **The Penalty:** If Garnish > 10%, the system flags the text as **BLOAT** and applies a **+3.0 Drag Penalty**.
+        
+    - **The Voice:** **Clarence** (The Architect) now specifically intervenes to demand the removal of `-ly` modifiers in favor of stronger verbs.
+        
+
+#### 🔮 THE ANTI-GURU PROTOCOL (Witch Ring v2.0)
+
+- **The Problem (The Fortune Cookie Loop):**
+    
+    - Users exploited the "Aphorism Exception" to bypass Drag checks by submitting endless strings of pseudo-profound one-liners (e.g., _"Time is a circle. The circle is a void."_).
+        
+- **The Solution (Streak Detection):**
+    
+    - **New Logic:** `TheWitchRing` now tracks an `aphorism_streak`.
+        
+    - **The Rule:** You get **2** aphorisms for free. On the **3rd** consecutive attempt, the Witch blocks the input with: _"Enough riddles. Speak plainly."_
+        
+
+#### 🧠 CORTEX TUNING (The Humanist Intervention)
+
+- **Michael's Override:**
+    
+    - If the system detects **CONCRETE** status (High Density/Gaming), **Clarence** is silenced (as the user is attempting to mimic him), and **Michael** intervenes.
+        
+    - **The Message:** _"Whoa, buddy. This is too rich. You're making me choke. Add some water."_.
+        
+
+#### 📟 DASHBOARD v6.0
+
+- **Viscosity Indicator:**
+    
+    - The HUD now displays the fluid dynamics of the text alongside the Drag score.
+        
+    - **New Metric:** `VISC` (Viscosity).
+        
+    - Example: `DRAG: 4.2 | VISC: CONCRETE`.
+    
+
 ### [v1.2] - 2025-12-18 - "The Doctor Time Edition"
 
 #### 🕰️ THE NARRATIVE CHRONOMETER (Story Time)
