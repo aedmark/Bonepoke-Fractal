@@ -1,5 +1,60 @@
 # CHANGELOG.md
 
+### [v1.2] - 2025-12-18 - "The Doctor Time Edition"
+
+#### 🕰️ THE NARRATIVE CHRONOMETER (Story Time)
+
+- **The Problem (Temporal Blindness):**
+    
+    - Previously, the engine treated "He waited a second" and "He waited a decade" identically. It penalized broad summaries ("The years flew by") as "High Entropy/Abstract," forcing the user to describe _every_ second of a ten-year jump.
+        
+- **The Solution (Narrative Velocity $\vec{v}_{n}$):**
+    
+    - **New Component:** Implemented `NarrativeChronometer`. This module scans specifically for **Micro-Markers** (breath, blink, instant) and **Macro-Markers** (year, era, century).
+        
+    - **The Logic:**
+        
+        - **MONTAGE (High Velocity):** "Years passed." -> **Effect:** Grants **Entropy Grace (+4.0)**. The system understands that summarizing time requires abstraction.
+            
+        - **BULLET TIME (Low Velocity):** "The glass shattered." -> **Effect:** Demands **Hyper-Texture**. If time stops, detail must increase.
+            
+        - **REALTIME:** Standard physics apply.
+            
+
+#### 🧠 CORTEX TUNING (Effective Physics)
+
+- **Context-Aware Triggers:**
+    
+    - **Effective Entropy:** The Cortex now calculates `eff_entropy` by subtracting the `entropy_grace` from the raw score.
+        
+    - **The Eloise Patch:** **Eloise** (The Gardener) is now silenced during **MONTAGE** states. She will no longer scream "GROUND THIS!" when you write "The eras drifted apart," because the _Narrative Time_ justifies the abstraction.
+        
+
+#### 🐛 CRITICAL REPAIRS (The Process Patch)
+
+- **Stability Fixes (`BonepokeCore`):**
+    
+    - **Variable Restoration:** Fixed a critical `NameError` crash in v1.1 where `directives`, `loop_count`, and `is_light` were accessed before initialization.
+        
+    - **Logic Restoration:** Re-connected the **Muscaria** boredom check and the **Lichen Symbiont** feedback loops, which were inadvertently severed during the Chronos surgery.
+        
+    - **Syntax Hardening:** Fixed a malformed f-string in the `MycelialDashboard` that caused a render failure.
+        
+
+#### 📟 DASHBOARD v5.0
+
+- **The Dual Clock:**
+    
+    - The HUD now tracks two distinct timelines:
+        
+        1. **CHRONOS (Real Time):** How long the user took to reply (affects **Drag**).
+            
+        2. **NARRATIVE (Story Time):** How much time passed in the fiction (affects **Entropy Tolerance**).
+            
+    - **New Indicator:** Added `N-VEL` (Narrative Velocity) to the status line.
+        
+        - Example: `TIME: FLOW (Real) | MONTAGE (Story)`
+
 ### [v1.1] - 2025-12-18 - "The Doctor Time Edition"
 
 #### ⏳ THE CHRONOS ANCHOR (Metabolic Time)
