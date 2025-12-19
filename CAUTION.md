@@ -2,7 +2,7 @@
 
 ## ⚠️ WARNING: BONEAMANITA PROTOCOL HAZARDS
 
-**VERSION:** 1.0.1 ("The Black Mirror")
+**VERSION:** 1.1 ("The Doctor Time Edition")
 
 **SEVERITY:** CRITICAL
 

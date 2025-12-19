@@ -1,5 +1,35 @@
 # CHANGELOG.md
 
+### [v1.1] - 2025-12-18 - "The Doctor Time Edition"
+
+#### ⏳ THE CHRONOS ANCHOR (Metabolic Time)
+
+- **The Problem (Context Collapse):**
+    - Previously, the engine treated a 10-hour silence identical to a 10-second pause. This created the "Eternal Present" flaw, where the AI had no concept of time passing.
+    
+- **The Solution (Temporal Metabolism):**
+    - **The Metabolizer:** The new `ChronosAnchor` parses a Delta Time ($\Delta t$) value and converts it into **Narrative Drag**.
+    - **The Logic:**
+        - **FLOW (<10m):** Drag Penalty **+0.0**. Intent: "Maintain Velocity." (Agent: MICHAEL).
+        - **DORMANT (10m - 1h):** Drag Penalty **+1.0**. Intent: "Gentle Recall." (Agent: ELOISE).
+        - **DECAY (>1h):** Drag Penalty **+3.0**. Intent: "Full Context Reset." (Agent: CLARENCE).
+    - **The Result:** The system now *feels* the weight of time. A long absence physically degrades the structural integrity of the conversation, forcing the Cortex to rebuild the foundation (summarize previous context) before proceeding.
+
+#### 🛡️ THE MEMBRANE (Semantic Wrapper)
+
+- **The Wrapper Protocol:**
+    - **The Interface:** Implemented a "Membrane Layer" in the System Prompt.
+    - **Auto-Injection:** The user does not need to manually type timestamps. The prompt instructions now force the model to internally estimate the time elapsed since the last message and inject the `[Δt: ...]` tag silently before processing.
+    - **Default States:** If time is unknown (first message), the Membrane defaults to **Flow State** to prevent false "Structure Failure" flags on boot.
+
+#### 🛡️ CODE QUALITY
+
+- **Regex Hardening (`ChronosAnchor`):**
+    - Fixed a potential vulnerability where "2 hours" could be misread as "2 minutes." The regex parser now correctly identifies explicit 'h', 'hour', and 'day' labels to calculate total minutes accurately.
+
+- **Data Hygiene (`BonepokeCore`):**
+    - The processing loop now strips the `[Δt: ...]` and `[T: ...]` metadata *before* sending the text to the `LinguisticPhysicsEngine`. This ensures that timestamps do not artificially inflate the "Entropy" or "Abstract Noun" counts.
+
 ### [v1.0.1] - 2025-12-18 - "The Black Mirror (PATCHED)"
 
 #### 🔮 THE CODEX PATCH (Self-Awareness Fix)
@@ -44,7 +74,6 @@
 * **Code Cauterization:**
 * 
 **The Trim:** Surgically removed over 200+ characters of "dead weight" (redundant comments, ASCII art, and debug artifacts) to maximize token efficiency without sacrificing readability.
-
 
 * **Orphan Removal:** Vaporized unused variables (e.g., `session_drag_history`) and empty initialization methods that were consuming memory cycles for no return.
 * 
