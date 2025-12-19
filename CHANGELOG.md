@@ -1,5 +1,42 @@
 # CHANGELOG.md
 
+### [v1.0.1] - 2025-12-18 - "The Black Mirror (PATCHED)"
+
+#### 🔮 THE CODEX PATCH (Self-Awareness Fix)
+
+- **Recursive Hallucination Fix (`TheCodex`):**
+    
+    - **The Glitch:** In v1.0.0, the Codex began scanning the `MycelialDashboard` output, identifying "Drag," "Entropy," and "System" as proper nouns (Entities) within the story.
+        
+    - **The Patch:** expanded the `ignore_list` to explicitly exclude `System`, `Analysis`, `Metrics`, `Drag`, and `Entropy`. The system no longer believes "Narrative Drag" is a protagonist.
+        
+
+#### 🌿 LICHEN REGULATION (The Algal Bloom)
+
+- **Photosynthetic Cap (`LichenSymbiont`):**
+    
+    - **The Risk:** Infinite energy generation via "Purple Prose" (stuffing a sentence with "light," "sun," "prism").
+        
+    - **The Safety Valve:** Implemented a toxicity warning for **Algal Blooms**. If a single sentence generates more than **15 ATP** via photosynthesis, the system flags it as dangerous over-growth.
+        
+
+#### ⚡ METABOLIC TUNING
+
+- **Capacity Calibration (`MetabolicReserve`):**
+    
+    - **The Tweak:** Adjusted `max_capacity` from the standard `50` to `52`.
+        
+    - **The Logic:** Provides a slight buffer for the "Creative Mode" (Glutton) threshold, ensuring that a single "Structural Active" sentence doesn't immediately knock a user out of the flow state.
+        
+
+#### 🪞 MIRROR TRAP REINFORCEMENT
+
+- **Regex Hardening (`TheMirrorTrap`):**
+    
+    - **Expanded Pattern:** The regex now accounts for contractions (`it's`, `that's`) and variations of negation (`never`, `not`) to catch lazy mirroring disguised as casual speech.
+        
+    - **The Catch:** Specifically targets the pattern `(it|this|that)[\'’]?s?\s+(not|never)...` to strictly enforce the "Define what it IS" rule.
+
 ### [v1.0.0] - 2025-12-18 - "The Black Mirror"
 
 #### ⚔️ THE SLASH AUDIT (Ephemeralization)
