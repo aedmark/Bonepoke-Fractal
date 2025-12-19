@@ -1,10 +1,40 @@
-{
-type: file
-fileName: CHANGELOG.md
-fullContent:
-# Changelog
+# CHANGELOG.md
 
-All notable changes to the **BoneAmanita** project will be documented in this file.
+### [v1.0.0] - 2025-12-18 - "The Black Mirror"
+
+#### ⚔️ THE SLASH AUDIT (Ephemeralization)
+
+* **Code Cauterization:**
+* 
+**The Trim:** Surgically removed over 200+ characters of "dead weight" (redundant comments, ASCII art, and debug artifacts) to maximize token efficiency without sacrificing readability.
+
+
+* **Orphan Removal:** Vaporized unused variables (e.g., `session_drag_history`) and empty initialization methods that were consuming memory cycles for no return.
+* 
+**Logic Patching:** Fixed `LinguisticPhysicsEngine` to ensure Class Variables (`_TOXIN_REGEX`) are properly initialized as Singletons, preventing memory leaks during repeated instantiation.
+
+#### ⚡ ECONOMY SAFEGUARDS (The Voltage Clamp)
+
+* **FactStipe Stabilization:**
+* **The Risk:** Previously, a sentence containing multiple paradoxes could theoretically generate infinite Voltage, breaking the Metabolic Reserve.
+* **The Fix:** Implemented a hard **Voltage Clamp**. The maximum return per sentence is now capped at **10.0 V**. You can break physics, but you cannot break the bank.
+
+#### 🧠 CORTEX RESTORATION (The Deluxe Protocol)
+
+* **The Auditor's Dilemma:**
+* **The Issue:** The initial optimization compressed the `VirtualCortex` into a generic responder, stripping **Clarence** of his specific hatred for "Corporate Speak" and **The Yaga** of her specific hunger for "Meat."
+* **The Restoration:** Re-injected the full, multi-modal personality matrix.
+* 
+**The Result:** **Clarence** will once again deduct 50 points specifically for saying "Synergy," and **Eloise** will explicitly complain if the text tastes like distilled water .
+
+#### 🔀 WIRING OPTIMIZATION
+
+* **The Nilsson Override:**
+* **Re-routed:** The processing loop in `BonepokeCore` has been re-wired.
+* **The Logic:** `NilssonPatch` (The Scream) now explicitly executes *after* `TheMirrorTrap` but *before* `SignatureEngine` identification.
+* 
+**The Effect:** If you are screaming "LIME IN THE COCONUT" while running at full speed, the system now correctly identifies this as High Velocity/Low Drag (The Jester/Bard) rather than penalizing you for the repetition.
+
 
 ### [v0.9.0] - 2025-12-18 - "The Helium Protocol"
 

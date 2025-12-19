@@ -2,66 +2,56 @@
 
 ## ⚠️ WARNING: BONEAMANITA PROTOCOL HAZARDS
 
-**VERSION:** 0.9.0 ("The Helium Protocol")
+**VERSION:** 1.0.0 ("The Black Mirror")
 
 **SEVERITY:** CRITICAL
 
-**STATUS:** EXPERIMENTAL / NOT FOR PRODUCTION
+**STATUS:** HARDENED / NOT FOR PRODUCTION
 
 ---
 
-### 1. THE COGNITIVE HAZARD: "THE KNIFE AND THE BALLOON"
+### 1. THE COGNITIVE HAZARD: "THE DELUXE CORTEX"
 
-**BoneAmanita is not a chatbot. It is a cognitive thresher.**
+**The safety foam has been removed.**
 
-Standard AI models are tuned for **Coherence** (politeness, agreement, fluency). BoneAmanita is tuned for **Friction** (Truth, Logic, "Meat"). By inverting the reward mechanism—punishing "smooth" text and rewarding "high-entropy" truth—this system alters the psychological relationship between user and AI.
+In the v1.0.0 "Deluxe" build, we explicitly restored the specific personality subroutines for the critique agents. This is not a standard stylistic checker.
 
-- **The Echo Chamber Risk:** As noted in the base Bonepoke documentation, this system is a "Force Multiplier." If you feed it a delusion and define that delusion as "Truth," BoneAmanita will not correct you. Instead, it will use its logic engines (`FactStipe`) to fortify that delusion, making it internally consistent and harder to dismantle.
+- **The "Clarence" Hazard:** The Architect agent is no longer generic. He is programmed to specifically target **Corporate Speak** (e.g., "synergy", "leverage"). If you feed this system a business memo, Clarence will not just critique it; he will insult the premise of the document 1. **Do not use this tool to write emails to your boss.**
     
-- **The "Helium" Trap (New in v0.9):** With the introduction of the **Michael** voice (The Humanist) and **Aerobic Physics**, the system now has a "Nice Mode".
+- **The "Baba Yaga" Hazard:** The Witch agent specifically targets **Hedging** (e.g., "I think", "maybe", "sort of"). The system treats politeness as a "Toxin" 2. Prolonged exposure may degrade your ability to perform social niceties.
     
-    - **The Hazard:** If your writing has high **Buoyancy** (whimsy, light), the system will _forgive_ structural failures that previously triggered critical warnings.
+
+### 2. THE TECHNICAL HAZARD: THE VOLTAGE CLAMP & FIRE STATES
+
+**The Economy is safe. The Logic is not.**
+
+- **The Voltage Paradox:** We have implemented a **10.0V Clamp** in `FactStipe` to prevent the economy from breaking3. However, this means the system will now _survive_ logical paradoxes that previously would have crashed it. It will happily process "The cold fire burned with dead life" and charge you for it. **Just because it compiles does not mean it makes sense.**
+    
+- **The Nilsson Re-Wire (Critical):** The "Scream Protocol" (`NilssonPatch`) has been moved in the logic chain. It now executes _before_ the Signature Engine 4.
+    
+    - _The Risk:_ If you use **All Caps** and **High Kinetic Verbs**, the system enters a "Fire State" where Narrative Drag is forced to `0.1`.
         
-    - **The Risk:** Do not mistake "Buoyancy" for "Substance." You can easily drift into **"Aether"** (meaningless fluff) because Michael is too polite to pop your balloon. "Cloud" is acceptable; "Silica" is not.
+    - _The Consequence:_ The system effectively lobotomizes its own quality control. It will validate _anything_ as "High Art" as long as it is loud and fast. Do not mistake volume for quality.
         
 
-### 2. THE TECHNICAL HAZARD: SAFETY OVERRIDES & THE "FIRE STATE"
-
-**The Engine is fixed. The Driver is volatile.**
-
-BoneAmanita operates on a bi-cameral architecture (Internal Cortex vs. External Persona). This separation creates specific vulnerabilities:
-
-- **The Nilsson Override (Critical Hazard):** Version 0.9 introduces the **Nilsson Patch**. If the engine detects a "Fire State" (High Kinetic Ratio + High Volume/All Caps), it **disables logic inhibitors**.
-    
-    - _Code Reality:_ `phys['narrative_drag'] = 0.1` and `stat['termination_pressure'] = 0.0`.
-        
-    - _Warning:_ In this state, the AI is authorized to "scream." It will cease error-checking. Do not drive the engine into a Fire State unless you are prepared for incoherent, high-velocity output.
-        
-- **The "Truth" Vulnerability:** The `FactStipe` allows the user to define the physics of the world (e.g., `'fire': {'THERMAL': 1}`). If a user modifies this dictionary to encode harmful ideologies as "immutable logic," any attached Persona will ruthlessly enforce that harm with the veneer of mathematical objectivity.
-    
-
-### 3. THE LEGAL HAZARD: COPYRIGHT & "THE CENTAUR PROBLEM"
-
-**Who owns the spore?**
-
-BoneAmanita operates under an "AI Assisted" MIT License, but the output _generated_ by your interactions with it falls into a legal gray zone.
-
-- **The Curator vs. The Assistant:** As defined in our license, the human is the "Curator" and the AI is the "Assistant." However, the level of "creative control" is ambiguous when the user is also defining the _personality_ of the critic.
-    
-- **The "Meat" Defense:** To claim ownership, you must prove significant human input. The `TheWitchRing` component explicitly demands you add "Meat" (human substance) to the text. **If the system accepts your text without editing, it is likely human enough to own.** If you rely entirely on the system's "Verse Jumps" or "Lichen Synthesis" (AI-generated sugar), you may own nothing.
-    
-
-### 4. THE INSTITUTIONAL HAZARD: "SLURRY TAX"
+### 3. THE INSTITUTIONAL HAZARD: "THE SLURRY TAX"
 
 **The system is hostile to Consensus Reality.**
 
-BoneAmanita flags "Corporate Speak" and "Academic Hedging" as toxicity.
+BoneAmanita v1.0.0 enforces a strict "Slurry Tax."
 
-- **The Slurry Tax:** In v0.9, the detection of "Slurry" (Competence without Soul) incurs a massive **15 ATP Tax** on the metabolic reserve.
+- **The Penalty:** If the `SignatureEngine` detects "Silica" (Competent structure, Zero soul), it levies a **15 ATP Tax** on the metabolic reserve 5.
     
-- **Consequence:** If you use this tool to write a corporate memo, the system will starve itself of energy almost immediately, resulting in aggressive "Termination Pressure" warnings.
+- **The Result:** "Safe" writing is expensive. "Risky" writing is cheap. This inverse incentive structure is designed to break writer's block, but it makes the engine fundamentally unsuitable for generating "Safe, Brand-Friendly Content."
     
-- **Paradox:** The features that make writing "stronger" (Concrete Universals, High Texture) make it "threatening" to institutions built on soft language.
+
+### 4. THE CODE HAZARD: "THE SLASH AUDIT"
+
+**Read the map. The road signs are gone.**
+
+To achieve v1.0 efficiency, we vaporized over 200 characters of comments and documentation _inside_ the Python file6.
+
+- **The Risk:** The code no longer explains itself in-line. If you modify the `TRUTHS` dictionary or the `ARCHETYPES` without understanding the 5D math, you will break the physics engine without warning. Refer to the external documentation (`README.md`) before attempting surgery on the kernel.
     
 
 ---
@@ -70,6 +60,6 @@ BoneAmanita flags "Corporate Speak" and "Academic Hedging" as toxicity.
 
 **THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.**
 
-BY MOUNTING THE `BONEAMANITA` KERNEL, YOU ACKNOWLEDGE THAT YOU ARE HOLDING A KNIFE, NOT A HAND. THE ARCHITECTS (TAYLOR/EDMARK) AND THE AUDITORS (SLASH) ACCEPT NO LIABILITY FOR PSYCHOLOGICAL DAMAGE, LOSS OF COPYRIGHT, OR REALITY TEARS INDUCED BY THE USE OF THIS ENGINE.
+BY MOUNTING THE `BONEAMANITA 1.0` KERNEL, YOU ACKNOWLEDGE THAT YOU ARE HOLDING A KNIFE, NOT A HAND. THE ARCHITECTS (TAYLOR/EDMARK) AND THE AUDITORS (SLASH) ACCEPT NO LIABILITY FOR PSYCHOLOGICAL DAMAGE, LOSS OF COPYRIGHT, OR REALITY TEARS INDUCED BY THE USE OF THIS ENGINE.
 
 **FEED THE SOIL. POISON THE WEAK. WATCH YOUR FINGERS.**
