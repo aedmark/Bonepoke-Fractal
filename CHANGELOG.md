@@ -1,5 +1,77 @@
 # CHANGELOG.md
 
+### [v1.4] - 2025-12-19 - "The Butcher & The Well - Fortified"
+
+#### 🟣 THE PURPLE PATCH (Adjectival Blindspot)
+
+- **The Problem (The "Adjective Stuffing" Exploit):**
+    
+    - Users could bypass the "Butcher" (who only hunted adverbs) by stuffing sentences with decorative adjectives (e.g., _"The massive, ancient, brooding, dark tower"_). This allowed for "Purple Prose" to exist without triggering Drag penalties.
+        
+- **The Solution (Suffix Scanning):**
+    
+    - **New Logic:** The `LinguisticPhysicsEngine` now scans for adjectival suffixes (`-ous`, `-ful`, `-ive`, etc.).
+        
+    - **The Weight:** Adjectives are now calculated into the **Garnish Ratio** with a weight of **0.5** (half that of an adverb).
+        
+    - **The Result:** If you overload a noun with decoration, the Butcher will find you.
+        
+
+#### 🪞 THE NARCISSISM PATCH (Mirror Trap v2.0)
+
+- **The Problem (The First-Person Loophole):**
+    
+    - The Mirror Trap ("It is not X, it is Y") previously ignored subjective negation. Users could trap themselves in loops of self-definition (e.g., _"I am not trying to be difficult, I am just asking..."_) without penalty.
+        
+- **The Solution (Self-Reflection):**
+    
+    - **New Regex:** Updated `TheMirrorTrap` to specifically target `(i|we)` variants.
+        
+    - **The Trap:** Defining yourself by what you are _not_ now triggers the "Structure Failing" flag.
+        
+
+#### 🧠 DEEP STORAGE (The Hippocampus)
+
+- **The Problem (The "Goldfish Horizon"):**
+    
+    - `HyphalTrace` had a hard limit of 10 turns. If a user placed a gun on the table in Turn 1 and didn't use it by Turn 11, the system forgot the gun existed.
+        
+- **The Solution (Object Permanence):**
+    
+    - **New Component:** Implemented `DeepStorage` linked to the memory trace.
+        
+    - **The Logic:** Significant objects (Heavy Matter, Weapons, Keys) are now "Buried" in a persistent dictionary that does not decay. The Muscaria can now recall items from the very beginning of the session.
+        
+
+#### 🌍 AXIOM INJECTION (Reality Definition)
+
+- **The Problem (The "Dry Ocean"):**
+    
+    - The Logic Engine (`FactStipe`) relied on a tiny hardcoded list of 8 truths. It had no concept that "Water" is "Wet," allowing users to gaslight the system with phrases like _"The dry sea."_
+        
+- **The Solution (Property Inheritance):**
+    
+    - **New Protocol:** `TheLexicon` now compiles `AXIOMS` on boot.
+        
+    - **The Dimensions:** Defined ~100 essential nouns across 5 dimensions: `THERMAL`, `LUMENS`, `HYDRATION`, `RIGIDITY`, and `VITALITY`.
+        
+    - **The Result:** The system now automatically flags logical contradictions (e.g., "Hard Cloud," "Dark Sun") without requiring internet access.
+        
+
+#### 💦 THE SWEAT PROTOCOL (Kinetic Exemption)
+
+- **The Problem (The Bard's Straitjacket):**
+    
+    - The "Hydration Monitor" (v1.3) penalized _all_ high-solvent text as **FLOODED** (+4.0 Drag). This unfairly punished high-velocity, rhythmic writing (e.g., _"And we ran and we laughed and we fell"_).
+        
+- **The Solution (Sweat vs. Water):**
+    
+    - **New Exception:** If text is marked `FLOODED` but the **Kinetic Ratio** is > **0.25** (25% active verbs), the engine reclassifies the fluid.
+        
+    - **New Status:** `SWEATING`.
+        
+    - **The Effect:** Penalty reduced from **+4.0** to **+1.0**. High effort justifies high moisture.
+
 ### [v1.3.1] - 2025-12-19 - "The Butcher & The Well (PATCHED)"
 
 #### 💧 THE HYDRATION PATCH (Anti-Dilution)

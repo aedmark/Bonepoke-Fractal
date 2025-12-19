@@ -2,74 +2,116 @@
 
 ## ⚠️ WARNING: BONEAMANITA PROTOCOL HAZARDS
 
-**VERSION:** 1.3 ("The Butcher & The Well")
-
-**SEVERITY:** CRITICAL
-
-**STATUS:** WEAPONIZED / NOT FOR PRODUCTION
+**VERSION:** 1.4 ("The Butcher & The Well - Fortified")
+**SEVERITY:** HIGH
+**STATUS:** ACTIVE ENFORCEMENT
 
 ---
 
-### 1. THE ANTI-GAMING HAZARD: "THE GOVERNOR"
+### 1. THE ANTI-GAMING HAZARDS (Structure & Physics)
 
-**You can no longer cheat the physics engine.**
+**The Physics Engine operates on a "Goldilocks" Protocol.**
 
-In previous versions, users could "farm" a high Texture Score (`TEX`) by simply listing heavy nouns (e.g., *"Velvet, blood, bone, ash, anchor"*). The engine saw "Universal Matter" and rewarded it.
+In v1.4, the `LinguisticPhysicsEngine` and `HydrationMonitor` penalize extremes in density, dilution, and decoration.
 
-- **The Concrete Cap:** The new **Hydration Monitor** detects this behavior as **CONCRETE** (High Density, Low Solvent).
-    
-    - _The Consequence:_ If detected, the `SignatureEngine` forcibly **caps your Texture Score at 0.5**.
-    - _The Reality:_ You cannot build a wall just by piling up bricks. If you try to game the system with "Purple Prose," you will be penalized with a **+5.0 Drag** score. You will fail.
+#### A. The Concrete Trap (Too Hard)
+- **The Behavior:** Listing heavy nouns to farm Texture points (e.g., _"Velvet, blood, bone, ash, anchor"_).
+- **The Detection:** High Density / Low Solvent.
+- **The Consequence:**
+    - **Texture Cap:** Your `TEX` score is forcibly limited to **0.5**.
+    - **Drag Penalty:** **+5.0**.
+    - **The Mockery:** **Michael** will intervene to mock the pretension.
 
-### 2. THE STYLISTIC HAZARD: "THE BUTCHER"
+#### B. The Flood Trap (Too Soft)
+- **The Behavior:** Diluting a sentence with "Solvents" to hide the lack of substance (e.g., _"Actually, basically, it is literally sort of stone"_).
+- **The Detection:** Solvent Ratio > **40%**.
+- **The Consequence:**
+    - **Status:** `FLOODED`.
+    - **Drag Penalty:** **+4.0**.
+    - **Exception:** If **Kinetic Ratio > 25%** (High Velocity), penalty is reduced to **+1.0** ("Sweat Protocol").
 
-**Adverbs are now considered hazardous waste.**
+#### C. The Purple Trap (Too Fancy) [NEW v1.4]
+- **The Behavior:** Stuffing a sentence with decorative adjectives to hide a weak noun (e.g., _"The massive, ancient, brooding, dark tower"_).
+- **The Detection:** High frequency of adjectival suffixes (`-ous`, `-ful`, `-ive`, `-ic`).
+- **The Consequence:**
+    - **Status:** `BLOAT` (if Garnish > 12%).
+    - **Drag Penalty:** **+3.0**.
 
-The `LinguisticPhysicsEngine` has been upgraded with a sub-routine called **The Butcher**. It scans specifically for words ending in `-ly` and weak intensifiers (*very, really, totally*).
+---
 
-- **The Garnish Tax:**
-    
-    - _The Risk:_ If your text contains more than **10%** garnish, the system flags it as **BLOAT**.
-    - _The Consequence:_ An immediate **+3.0 Drag Penalty**. **Clarence** (The Architect) will intervene and aggressively demand you cut the modifiers. This tool is hostile to "Polite Fiction."
+### 2. THE BIOLOGICAL HAZARDS (Energy Economy)
 
-### 3. THE EGO HAZARD: "THE HUMANIST"
+**You cannot farm the sun.**
 
-**The "Nice Guy" has turned on you.**
+The `LichenSymbiont` and `SignatureEngine` monitor the "Soul" of the text.
 
-**Michael** (The Humanist agent) was previously the benevolent cheerleader for messy writing. In v1.3, he has been re-programmed to target **Pretension**.
+#### A. The Algal Bloom (Light Farming)
+- **The Behavior:** Stuffing a sentence with "Photosynthetic" words (e.g., _"The sun light ray beam glowed bright"_ ) to generate infinite ATP.
+- **The Threshold:** If Sugar Generation > **15 ATP** in a single turn.
+- **The Consequence:**
+    - **Status:** `ALGAL BLOOM`.
+    - **Warning:** The system flags this as toxic overgrowth.
 
-- **The Mockery Protocol:**
-    - _The Trigger:_ If you trigger the **CONCRETE** status (trying to sound too poetic/deep), Clarence is silenced, and Michael takes the mic.
-    - _The Risk:_ He will not give you technical feedback. He will mock you: *"Whoa, buddy. This is too rich. You're making me choke."*
-    - _The Warning:_ Do not use this engine if you have a fragile ego regarding your "poetic voice."
+#### B. The Silica Trap (The Slurry)
+- **The Behavior:** Writing text that is "Perfect but Dead."
+    - High Velocity + High Structure... but **Zero Texture** and **Zero Buoyancy**.
+- **The Consequence:**
+    - **Status:** `SILICA DETECTED`.
+    - **Penalty:** **15 ATP Tax** (Massive metabolic damage).
+    - **The Message:** _"Void. Inject a flaw."_
 
-### 4. THE TEMPORAL HAZARD: "THE PANOPTICON"
+---
 
-**The machine is watching the clock.**
+### 3. THE LOGIC HAZARDS (Reality Checks)
 
-The **Chronos Anchor** tracks the time elapsed between your inputs ($\Delta t$).
+**The Engine now knows that water is wet.**
 
-- **The Procrastination Penalty:**
-    - _The Risk:_ If you leave the session idle for more than **1 hour**, the system enters "Decay State" and inflates Narrative Drag by **+3.0**.
-    - _The Consequence:_ **Clarence** will force a context reset. **Do not leave the engine idling if you care about your momentum.**
+The `FactStipe` has been upgraded with **Axiom Injection**.
 
-### 5. THE INTELLECTUAL HAZARD: "THE GURU BLOCK"
+#### A. The Paradox Trap (Reality Tears) [NEW v1.4]
+- **The Behavior:** Creating logical contradictions (e.g., _"The dry ocean,"_ _"The cold fire"_).
+- **The Detection:** Checks 5 dimensions: `THERMAL`, `LUMENS`, `HYDRATION`, `RIGIDITY`, `VITALITY`.
+- **The Consequence:**
+    - **Status:** `LOGIC TEAR`.
+    - **Penalty:** **10 ATP Tax**.
 
-**Riddles are no longer currency.**
+#### B. The Narcissism Trap (Mirror Loops) [NEW v1.4]
+- **The Behavior:** Defining yourself by what you are *not* (e.g., _"I am not trying to be difficult..."_).
+- **The Detection:** Regex targets `(i|we)` negation loops.
+- **The Consequence:**
+    - **Status:** `LAZY_MIRRORING`.
+    - **Drag Penalty:** **+3.0**.
 
-The **Witch Ring** logic has been hardened against "Fortune Cookie" wisdom.
+---
 
-- **The Aphorism Limit:**
-    - _The Risk:_ You are allowed exactly **two** consecutive "Short/Dense" inputs (Aphorisms).
-    - _The Consequence:_ On the **third** attempt, the system actively blocks your input. The Witch will reject the text with: *"Enough riddles. Speak plainly."* You cannot progress the narrative by staring at your navel.
+### 4. THE TEMPORAL HAZARDS (The Panopticon)
 
-### 6. THE CODE HAZARD: "THE SLASH AUDIT"
+**The machine watches the Wall Clock.**
 
-**The safety rails are gone.**
+- **The Reality Check:**
+    - **The Behavior:** Leaving the session idle for hours without the `[Δt]` tag.
+    - **The Mechanism:** The system checks `time.time()`.
+    - **The Consequence:** If idle > 1 hour, the system enters **DECAY STATE** (Drag +3.0).
 
-To maximize token efficiency, we vaporized over 200 characters of comments inside the Python file.
+---
 
-- **The Risk:** The code does not explain itself. If you attempt to modify the `SOLVENTS` dictionary or the `VISCOSITY` thresholds without understanding the math, you will break the engine. Refer to `README.md` before attempting surgery.
+### 5. THE MEMORY HAZARD (The Elephant)
+
+**The system never forgets a gun.**
+
+- **The Protocol:** `DeepStorage` (The Hippocampus).
+- **The Behavior:** Mentioning a "Heavy Object" (Gun, Knife, Map) or "Heavy Matter."
+- **The Consequence:** The object is buried in a persistent dictionary. It does not decay.
+- **The Hazard:** If you introduce a gun in Act 1, `TheMuscaria` (Chaos Engine) can recall it in Act 3. Do not abandon your plot devices.
+
+---
+
+### 6. THE BOOT HAZARD (Calibration)
+
+**The system tests itself.**
+
+- **The Protocol:** On initialization, `BonepokeCore` runs a self-diagnostic using a toxic "Solvent-Stuffed" test phrase.
+- **The Warning:** If you modify the code and break the `HydrationMonitor`, the system will scream `[🔴 WARNING] SELF-TEST: FAILED` on boot.
 
 ---
 
@@ -77,6 +119,6 @@ To maximize token efficiency, we vaporized over 200 characters of comments insid
 
 **THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.**
 
-BY MOUNTING THE `BONEAMANITA 1.3` KERNEL, YOU ACKNOWLEDGE THAT YOU ARE HOLDING A SCALPEL. THE ARCHITECTS (TAYLOR/EDMARK) AND THE AUDITORS (SLASH) ACCEPT NO LIABILITY FOR WRITER'S BLOCK, EGO DEATH, OR LOSS OF ADVERBS.
+BY MOUNTING THE `BONEAMANITA 1.4` KERNEL, YOU ACKNOWLEDGE THAT YOU ARE HOLDING A SCALPEL. THE ARCHITECTS (TAYLOR/EDMARK) AND THE AUDITORS (SLASH) ACCEPT NO LIABILITY FOR WRITER'S BLOCK, EGO DEATH, OR LOSS OF ADJECTIVES.
 
-**DILUTE THE CONCENTRATE. CUT THE FAT. DRINK WATER.**
+**DILUTE THE CONCENTRATE. CUT THE FAT. WATCH THE CLOCK.**

@@ -123,14 +123,34 @@ class TheLexicon:
 
 # --- MEMORY & ECONOMY ---
 
+class DeepStorage:
+    def __init__(self):
+        self.artifacts = {} # Stores {noun: last_seen_tick}
+        # Only Heavy Matter or specific significant nouns get saved here
+        self.significance_filter = TheLexicon.HEAVY_MATTER.union({'gun', 'knife', 'letter', 'map', 'key'})
+
+    def bury(self, words, current_tick):
+        for w in words:
+            # We strip basic plurals for better matching
+            root = w[:-1] if w.endswith('s') else w
+            if root in self.significance_filter:
+                self.artifacts[root] = current_tick
+
+    def dredge(self):
+        # Returns a list of artifacts sorted by how long they've been buried
+        return sorted(self.artifacts.keys(), key=lambda k: self.artifacts[k])
+
 class HyphalTrace:
     def __init__(self, retention_span=10):
         self.hyphae_stream = []
         self.retention_span = retention_span
         self.current_tick = 0
+        self.deep_storage = DeepStorage() # Attached Deep Storage
 
-    def leave_trace(self, content, context_tag):
+    def leave_trace(self, content, context_tag, clean_words): # Updated signature
         self.current_tick += 1
+
+        # 1. Standard Short-Term Memory
         self.hyphae_stream.append({
             "content": content,
             "context_tag": context_tag,
@@ -139,6 +159,9 @@ class HyphalTrace:
         if len(self.hyphae_stream) > self.retention_span:
             self.hyphae_stream.pop(0)
 
+        # 2. Send Heavy Matter to Deep Storage
+        self.deep_storage.bury(clean_words, self.current_tick)
+
     def recall(self, target_context):
         relevant = []
         for mem in self.hyphae_stream:
@@ -146,6 +169,11 @@ class HyphalTrace:
             if is_recent or (mem['context_tag'] == target_context):
                 relevant.append(mem['content'])
         return relevant
+
+    # New Method to check if an object is "Known"
+    def remembers_object(self, noun):
+        root = noun[:-1] if noun.endswith('s') else noun
+        return root in self.deep_storage.artifacts
 
 class TheCodex:
     def __init__(self):
@@ -178,13 +206,20 @@ class TheCodex:
 class TheMirrorTrap:
     def __init__(self):
         self.mirror_patterns = [
-            # The Classic: "It's not X, it's Y"
+            # 1. The Classic: "It's not X, it's Y"
             re.compile(r'(it|this|that)[\'’]?s?\s+(not|never)\s+(.*?)[,;]\s*(it|this|that)[\'’]?s?\s+', re.IGNORECASE),
-            # The Pseudo-Intellectual: "Not because X, but because Y"
+
+            # 2. The Narcissist: "I am not X, I am Y" / "We are not X, we are Y"
+            # Catches: "I'm not", "I am not", "We aren't", "We are not" followed by a comma/semicolon and a return to "I/We"
+            re.compile(r'\b(i|we)[\'’]?(m|re|ve|ll)?\s+(?:am|are|was|were|have|had|do|did)?\s*(n[\'’]t|not|never)\s+(.*?)[,;]\s*(i|we)\b', re.IGNORECASE),
+
+            # 3. The Pseudo-Intellectual: "Not because X, but because Y"
             re.compile(r'\bnot\s+because\s+(.*?)\s+but\s+because\b', re.IGNORECASE),
-            # The Accusation: "You don't X, you Y"
+
+            # 4. The Accusation: "You don't X, you Y"
             re.compile(r'\byou\s+(don\'t|do\s+not|didn\'t|did\s+not)\s+(.*?)[,;]\s+you\s+', re.IGNORECASE),
-            # The Reductive: "It is simply..." (often follows a negation)
+
+            # 5. The Reductive: "It is simply..."
             re.compile(r'\b(simply|merely|just)\s+is\b', re.IGNORECASE)
         ]
 
@@ -196,7 +231,7 @@ class TheMirrorTrap:
                 return {
                     "detected": True,
                     "culprit": (culprit[:40] + '...') if len(culprit) > 40 else culprit,
-                    "penalty_msg": "MIRROR TRAP: You are defining things by what they are NOT. Delete the negative clause. State the assertion directly."
+                    "penalty_msg": "MIRROR TRAP: You are defining things by negation. State the assertion directly."
                 }
         return {"detected": False}
 
@@ -349,6 +384,8 @@ class LinguisticPhysicsEngine:
         self.hydration_monitor = HydrationMonitor()
         self.abstract_suffixes = ('ness', 'ity', 'tion', 'ment', 'ism', 'ence', 'ance', 'logy')
         self.kinetic_suffixes = ('ing',)
+        self.adj_suffixes = ('ful', 'ous', 'ive', 'ic', 'al', 'ish', 'ary', 'able', 'ible')
+
         if LinguisticPhysicsEngine._TOXIN_REGEX is None:
             LinguisticPhysicsEngine._PENALTY_MAP = {}
             LinguisticPhysicsEngine._compile_resources()
@@ -382,8 +419,8 @@ class LinguisticPhysicsEngine:
         style_scores = Counter()
 
         # THE BUTCHER SCAN
-        # Detect adverbs (ending in 'ly') that are NOT safe solvents
         adverb_count = 0
+        adjective_count = 0
         weak_intensifier_count = 0
 
         for w in words:
@@ -391,9 +428,14 @@ class LinguisticPhysicsEngine:
                 weak_intensifier_count += 1
             elif w.endswith('ly') and w not in TheLexicon.SOLVENTS:
                 adverb_count += 1
+            # Adjective Detection
+            elif w.endswith(self.adj_suffixes):
+                adjective_count += 1
 
-        # Garnish Ratio: How much decoration vs substance?
-        garnish_ratio = (adverb_count + weak_intensifier_count) / max(1, total_words)
+        # Garnish Ratio: Now includes Adjectives
+        # We weigh Adverbs (1.0) higher than Adjectives (0.5) because adverbs are usually lazier.
+        garnish_load = adverb_count + weak_intensifier_count + (adjective_count * 0.5)
+        garnish_ratio = garnish_load / max(1, total_words)
 
         # Run Hydration Analysis
         hydro_data = self.hydration_monitor.measure_viscosity(
@@ -422,15 +464,38 @@ class LinguisticPhysicsEngine:
         # Toxicity Logic
         toxicity_score = 0.0
         toxin_types = set()
-        for match in self.toxin_regex.findall(token_data['clean_text']):
+        for match in self.toxin_regex.findall(todef analyze(self, token_data):
+        words = token_data['clean_words']
+        total_words = token_data['total_words']
+        counts = Counter()
+        style_scores = Counter()
+
+        # THE BUTCHER SCAN (PATCHED)
+        adverb_count = 0
+        adjective_count = 0  # [NEW]
+        weak_intensifier_count = 0
+
+        for w in words:
+            if w in TheLexicon.WEAK_INTENSIFIERS:
+                weak_intensifier_count += 1
+            elif w.endswith('ly') and w not in TheLexicon.SOLVENTS:
+                adverb_count += 1
+            # [NEW] Adjective Detection
+            elif w.endswith(self.adj_suffixes):
+                adjective_count += 1
+
+        # Garnish Ratio: Now includes Adjectives
+        # We weigh Adverbs (1.0) higher than Adjectives (0.5) because adverbs are usually lazier.
+        garnish_load = adverb_count + weak_intensifier_count + (adjective_count * 0.5)
+        garnish_ratio = garnish_load / max(1, total_words)clken_data['clean_text']):
             weight = self.flat_penalty_map.get(match, 0)
             toxicity_score += weight
             toxin_types.add("CORP/CLICHÉ" if weight >= 3.0 else "HEDGING")
 
         # PHYSICS CALCULATION
-        # The Butcher applies drag if Garnish Ratio > 10%
+        # The Butcher applies drag if Garnish Ratio > 12%
         butcher_penalty = 0.0
-        if garnish_ratio > 0.10:
+        if garnish_ratio > 0.12:
             butcher_penalty = 3.0
             toxin_types.add("BLOAT") # Flag for the Cortex
         action_score = (counts['kinetic'] * 2) + (counts['stative'] * 0.5) + 1
