@@ -1,5 +1,89 @@
 # CHANGELOG.md
 
+### [v1.3.1] - 2025-12-19 - "The Butcher & The Well (PATCHED)"
+
+#### 💧 THE HYDRATION PATCH (Anti-Dilution)
+
+- **The Problem (The "Solvent-Stuffed Turkey"):**
+    
+    - Users could exploit the Viscosity engine by stuffing a dense sentence with meaningless "Solvents" (e.g., _"Actually, basically, the stone and iron are literally sort of here."_). This tricked the engine into seeing a healthy "Balance Ratio" despite the text being garbage.
+        
+- **The Solution (The Saturation Cap):**
+    
+    - **New Logic:** Implemented a `solvent_cap` in `HydrationMonitor`.
+        
+    - **The Trap:** If Solvents constitute > **40%** of the total word count:
+        
+        - **Status:** Flips to `FLOODED`.
+            
+        - **Penalty:** Narrative Drag **+4.0**.
+            
+    - **The Result:** You cannot dilute a brick by drowning it in "actually."
+        
+
+#### 🔮 THE WITCH'S GRUDGE (Memory Extension)
+
+- **The Problem (The "Riddle Sandwich"):**
+    
+    - The `aphorism_streak` reset to `0` immediately upon detecting a single normal sentence. Users could alternate between Riddles and Plain Speech to bypass the limit indefinitely.
+        
+- **The Solution (Decay Logic):**
+    
+    - **The Fix:** Changed the reset logic in `TheWitchRing`. The streak no longer resets; it **decays**.
+        
+    - **The Math:** `self.aphorism_streak = max(0, self.aphorism_streak - 1)`.
+        
+    - **The Effect:** The Witch holds a grudge. You must speak plainly for several turns to clear your debt.
+        
+
+#### ⏳ CHRONOS REALITY (The Wall Clock)
+
+- **The Problem (The "Time Spoof"):**
+    
+    - Users could avoid the "Decay" state (Drag +3.0) simply by omitting the `[Δt: ...]` tag after a long absence.
+        
+- **The Solution (System Clock Fallback):**
+    
+    - **New Component:** Integrated `time.time()` into `ChronosAnchor`.
+        
+    - **The Logic:** If a user tag is provided, the system honors it (Roleplay Time). If NO tag is provided, the system calculates the actual elapsed wall-clock time (Reality Time).
+        
+    - **The Result:** If you leave the terminal for 2 hours and return without explanation, the system _will_ be decayed.
+        
+
+#### 🔭 HEURISTIC EXPANSION (The Horizon)
+
+- **The Problem (Finite Lexicon):**
+    
+    - The dictionary was hardcoded. Words like "Granite" (Heavy) or "Sprint" (Kinetic) were unrecognized, resulting in false negatives for valid writing.
+        
+- **The Solution (Suffix Scanning):**
+    
+    - **New Method:** Added `_heuristic_scan` to the `LinguisticPhysicsEngine`.
+        
+    - **The Logic:**
+        
+        - **Heavy Detection:** Words ending in `-ite`, `-ium`, `-ock`, `-alt`, `-ore` -> **UNIVERSAL**.
+            
+        - **Kinetic Detection:** Words ending in `-ash`, `-olt`, `-unk`, `-ip` -> **KINETIC**.
+            
+    - **The Result:** The engine now recognizes the weight of "Basalt" and the speed of "Flash" without needing a dictionary update.
+        
+
+#### 💀 THE BUTCHER PROTOCOL (Self-Calibration)
+
+- **The Problem (Silent Failure):**
+    
+    - There was no way to verify if the physics engine was actually catching toxic patterns without manual testing.
+        
+- **The Solution (Boot Sequence):**
+    
+    - **New Protocol:** Added `_run_calibration_sequence` to `BonepokeCore.__init__`.
+        
+    - **The Test:** On every boot, the system silently feeds itself the "Solvent-Stuffed Turkey" phrase.
+        
+    - **The Check:** If the engine does not flag it as `FLOODED`, a warning is logged. If it does, the system prints: `> [💀 BUTCHER PROTOCOL] SELF-TEST: PASSED.`
+
 ### [v1.3] - 2025-12-19 - "The Butcher & The Well"
 
 #### 💧 THE HYDRATION MONITOR (Viscosity Physics)
