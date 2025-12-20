@@ -1,5 +1,59 @@
 # CHANGELOG.md
 
+### [v1.4.7] - 2025-12-19 - "Time Sync + SLASH Refactor"
+
+#### 🧠 THE PINKER REFACTOR (Cognitive Ergonomics)
+
+- **The Swanson Cleaner (Punctuation Blindness):**
+    
+    - **The Problem:** The previous cleaner only removed periods. Inputs like "Stone, iron, and blood" resulted in "Stone," (retaining the comma), causing `TheLexicon` lookup failures (e.g., "Stone," is not equal to "Stone").
+        
+    - **The Solution:** Implemented `TheLexicon.swanson_clean`.
+        
+    - **The Fix:** A robust translator that strips _all_ punctuation and normalizes whitespace before processing. "Meat and potatoes" cleaning.
+        
+- **Centralized Tuning (Magic Numbers):**
+    
+    - **The Problem:** Critical thresholds for `NarrativeChronometer` and `TheMuscaria` were buried deep in the logic classes, making tuning difficult.
+        
+    - **The Solution:** Extracted variables (e.g., `CHRONO_MACRO_WEIGHT`, `BOREDOM_PRESSURE_THRESHOLD`) and moved them to the `PhysicsConstants` class.
+        
+
+#### 🛡️ THE FULLER REFACTOR (System Integrity)
+
+- **Deep Storage Cap (Memory Leak Fix):**
+    
+    - **The Problem:** `DeepStorage` had no upper limit. An infinite sequence of unique "Significant Objects" would cause `bone_memory.json` to grow indefinitely, eventually crashing the loader.
+        
+    - **The Solution:** Implemented a FIFO (First-In-First-Out) eviction policy. `DeepStorage` now holds a maximum of **50** artifacts.
+        
+- **Safe Persistence (Crash Proofing):**
+    
+    - **The Problem:** If the script was interrupted during a `json.dump` operation, the save file would be corrupted. Upon the next boot, the system would reset to zero, wiping the user's history.
+        
+    - **The Solution:** Implemented a `.bak` backup protocol in `PersistenceManager`. If the main file fails to load, the system automatically attempts to restore from the backup.
+        
+
+#### ❤️ THE SCHUR REFACTOR (Humanity)
+
+- **Poetic License (The Logic Tear Fix):**
+    
+    - **The Problem:** `FactStipe` penalized all paradoxes ("Cold Fire") equally, punishing valid poetic metaphors as structural failures.
+        
+    - **The Solution:** Context-aware logic via `kinetic_ratio`.
+        
+    - **The Fix:**
+        
+        - **High Kinetic (Action):** Paradoxes are **Errors** (Physics Violation).
+            
+        - **Low Kinetic (Poetry):** Paradoxes are **Voltage** (Metaphorical Energy). The user is no longer fined for being poetic.
+            
+- **The Onboarding Tooltip:**
+    
+    - **The Problem:** The Dashboard metrics (`VISC`, `ENT`) were opaque to new users, leading to confusion about "Concrete" status.
+        
+    - **The Solution:** Added a conditional tooltip to `MycelialDashboard`. For the first **5 ticks**, the system explains how to fix Viscosity issues.
+
 ### [v1.4.5] - 2025-12-19 - "SLASH AUDITED"
 
 #### 💾 THE PERSISTENCE MANAGER (Long-Term Memory)

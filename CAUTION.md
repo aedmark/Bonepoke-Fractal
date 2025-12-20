@@ -2,7 +2,7 @@
 
 ## ⚠️ WARNING: BONEAMANITA PROTOCOL HAZARDS
 
-**VERSION:** 1.4 ("The Butcher & The Well - Fortified") **SEVERITY:** HIGH **STATUS:** ACTIVE ENFORCEMENT
+**VERSION:** 1.4.7 ("The Refactored Strain") **SEVERITY:** HIGH **STATUS:** ACTIVE ENFORCEMENT
 
 ---
 
@@ -10,7 +10,7 @@
 
 **The Physics Engine operates on a "Goldilocks" Protocol.**
 
-In v1.4, the `LinguisticPhysicsEngine` and `HydrationMonitor` penalize extremes in density, dilution, and decoration.
+In v1.4.7, the `LinguisticPhysicsEngine` and `HydrationMonitor` penalize extremes in density, dilution, and decoration.
 
 #### A. The Concrete Trap (Too Hard)
 
@@ -25,7 +25,8 @@ In v1.4, the `LinguisticPhysicsEngine` and `HydrationMonitor` penalize extremes 
     - **Drag Penalty:** **+5.0**.
         
     - **The Mockery:** **Michael** will intervene to mock the pretension.
-        
+
+- **Note (v1.4.7):** The **Swanson Cleaner** strips all punctuation. You cannot hide nouns behind commas (e.g., "Stone," is processed as "Stone").
 
 #### B. The Flood Trap (Too Soft)
 
@@ -42,7 +43,7 @@ In v1.4, the `LinguisticPhysicsEngine` and `HydrationMonitor` penalize extremes 
     - **Exception:** If **Kinetic Ratio > 25%** (High Velocity), penalty is reduced to **+1.0** ("Sweat Protocol").
         
 
-#### C. The Purple Trap (Too Fancy) [NEW v1.4]
+#### C. The Purple Trap (Too Fancy)
 
 - **The Behavior:** Stuffing a sentence with decorative adjectives to hide a weak noun (e.g., _"The massive, ancient, brooding, dark tower"_).
     
@@ -97,22 +98,22 @@ The `LichenSymbiont` and `SignatureEngine` monitor the "Soul" of the text.
 
 **The Engine now knows that water is wet.**
 
-The `FactStipe` has been upgraded with **Axiom Injection**.
+The `FactStipe` has been upgraded with **Axiom Injection** and **Poetic License**.
 
-#### A. The Paradox Trap (Reality Tears) [NEW v1.4]
+#### A. The Paradox Trap (Reality Tears) [UPDATED v1.4.7]
 
 - **The Behavior:** Creating logical contradictions (e.g., _"The dry ocean,"_ _"The cold fire"_).
     
 - **The Detection:** Checks 5 dimensions: `THERMAL`, `LUMENS`, `HYDRATION`, `RIGIDITY`, `VITALITY`.
     
-- **The Consequence:**
+- **The Consequence (Context-Dependent):**
     
-    - **Status:** `LOGIC TEAR`.
-        
-    - **Penalty:** **10 ATP Tax**.
+    - **High Velocity (Action):** Paradox is an **ERROR**. Status: `LOGIC TEAR`. Penalty: **10 ATP Tax**.
+    
+    - **Low Velocity (Poetry):** Paradox is **VOLTAGE**. Status: `VOLATILE LEVERAGE`. Effect: **Energy Harvest (+3.0 ATP)**.
         
 
-#### B. The Narcissism Trap (Mirror Loops) [NEW v1.4]
+#### B. The Narcissism Trap (Mirror Loops)
 
 - **The Behavior:** Defining yourself by what you are _not_ (e.g., _"I am not trying to be difficult..."_).
     
@@ -144,15 +145,15 @@ The `FactStipe` has been upgraded with **Axiom Injection**.
 
 ### 5. THE MEMORY HAZARD (The Elephant)
 
-**The system never forgets a gun.**
+**The system never forgets a gun (until it must).**
 
-- **The Protocol:** `DeepStorage` (The Hippocampus).
+- **The Protocol:** `DeepStorage` (The Hippocampus) & `PersistenceManager`.
     
 - **The Behavior:** Mentioning a "Heavy Object" (Gun, Knife, Map) or "Heavy Matter".
     
-- **The Consequence:** The object is buried in a persistent dictionary. It does not decay.
+- **The Consequence:** The object is buried in a persistent dictionary saved to disk.
     
-- **The Hazard:** If you introduce a gun in Act 1, `TheMuscaria` (Chaos Engine) can recall it in Act 3. Do not abandon your plot devices.
+- **The Limit (v1.4.7):** The Vault is capped at **50 Artifacts**. If you exceed this, the oldest memories are pushed out (FIFO) to preserve system integrity.
     
 
 ---
@@ -172,6 +173,6 @@ The `FactStipe` has been upgraded with **Axiom Injection**.
 
 **THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.**
 
-BY MOUNTING THE `BONEAMANITA 1.4` KERNEL, YOU ACKNOWLEDGE THAT YOU ARE HOLDING A SCALPEL. THE ARCHITECTS (TAYLOR/EDMARK) AND THE AUDITORS (SLASH) ACCEPT NO LIABILITY FOR WRITER'S BLOCK, EGO DEATH, OR LOSS OF ADJECTIVES.
+BY MOUNTING THE `BONEAMANITA 1.4.7` KERNEL, YOU ACKNOWLEDGE THAT YOU ARE HOLDING A SCALPEL. THE ARCHITECTS (TAYLOR/EDMARK) AND THE AUDITORS (SLASH) ACCEPT NO LIABILITY FOR WRITER'S BLOCK, EGO DEATH, OR LOSS OF ADJECTIVES.
 
 **DILUTE THE CONCENTRATE. CUT THE FAT. WATCH THE CLOCK.**
