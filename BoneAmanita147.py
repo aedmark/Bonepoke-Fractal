@@ -25,9 +25,9 @@ class PhysicsConstants:
     TOXICITY_DRAG_MULTIPLIER = 10.0
 
     # THE BUTCHER (Garnish & Bloat)
-    ADJECTIVE_WEIGHT = 0.5
-    GARNISH_THRESHOLD = 0.12
-    BLOAT_PENALTY = 3.0
+    ADJECTIVE_WEIGHT = 0.8  # Was 0.5. Adjectives now create natural drag, not just penalty.
+    GARNISH_THRESHOLD = 0.18 # Was 0.12. Allow 18% of words to be decorative before punishment.
+    BLOAT_PENALTY = 2.0     # Was 3.0. Lower the penalty severity.
 
     # HYDRATION & VISCOSITY
     FLOOD_PENALTY_MAX = 4.0
@@ -584,7 +584,13 @@ class SignatureEngine:
         self.archetypes = {
             "THE PALADIN": {"coords": {"VEL": 0.5, "STR": 0.9, "ENT": 0.2, "TEX": 0.4, "TMP": 0.2}, "desc": "Code. Deontological.", "pressure": {"tolerance_mode": "DRACONIAN", "chaos_threshold": 20.0, "msg": "LAW: Logic tears fatal."}},
             "THE ENGINEER": {"coords": {"VEL": 0.6, "STR": 0.8, "ENT": 0.1, "TEX": 0.2, "TMP": 0.4}, "desc": "Structure. Efficiency.", "pressure": {"tolerance_mode": "DRACONIAN", "msg": "STRUCTURAL INTEGRITY."}},
-            "THE BARBARIAN": {"coords": {"VEL": 0.9, "STR": 0.4, "ENT": 0.3, "TEX": 0.8, "TMP": 0.9}, "desc": "Force.", "pressure": {"drag_multiplier": 5.0, "msg": "BERSERKER: Adjectives are weakness."}},
+            "THE BARBARIAN": {
+                # [PATCH]: Increased Entropy (ENT) requirement to 0.4.
+                # Lowered Texture (TEX) to 0.6. Real barbarians are blunt, not ornate.
+                "coords": {"VEL": 0.9, "STR": 0.4, "ENT": 0.4, "TEX": 0.6, "TMP": 0.9},
+                "desc": "Force. Kinetic. Blunt.",
+                "pressure": {"drag_multiplier": 5.0, "msg": "BERSERKER: Precision is power. Do not hack; slice."}
+            },
             "THE JUDGE": {"coords": {"VEL": 0.4, "STR": 0.7, "ENT": 0.4, "TEX": 0.3, "TMP": 0.1}, "desc": "Verdict."},
             "THE ALCHEMIST": {"coords": {"VEL": 0.5, "STR": 0.4, "ENT": 0.9, "TEX": 0.6, "TMP": 0.5}, "desc": "Transmutation."},
             "THE HORIZON WALKER": {"coords": {"VEL": 0.7, "STR": 0.2, "ENT": 0.9, "TEX": 0.3, "TMP": 0.3}, "desc": "Extrapolation."},
@@ -595,7 +601,13 @@ class SignatureEngine:
             "THE GEOLOGIST": {"coords": {"VEL": 0.2, "STR": 0.6, "ENT": 0.2, "TEX": 0.9, "TMP": 0.4}, "desc": "Layers."},
             "THE VULTURE": {"coords": {"VEL": 0.4, "STR": 0.5, "ENT": 0.3, "TEX": 0.8, "TMP": 0.2}, "desc": "Salvage."},
             "THE BARD": {"coords": {"VEL": 0.8, "STR": 0.3, "ENT": 0.6, "TEX": 0.7, "TMP": 0.9}, "desc": "Rhythm.", "pressure": {"tolerance_mode": "LOOSE", "msg": "PLAY STATE: Dance."}},
-            "THE GARDENER": {"coords": {"VEL": 0.5, "STR": 0.6, "ENT": 0.4, "TEX": 0.9, "TMP": 0.8}, "desc": "Cultivation.", "pressure": {"msg": "GREEN THUMB."}},
+            "THE GARDENER": {
+                # [PATCH]: Increased Velocity (VEL) to 0.7.
+                # This allows the Gardener to be fast AND rich, stealing the "good" texts from the Barbarian.
+                "coords": {"VEL": 0.7, "STR": 0.6, "ENT": 0.4, "TEX": 0.9, "TMP": 0.8},
+                "desc": "Cultivation. Lyrical Efficiency.",
+                "pressure": {"msg": "GREEN THUMB: Let it breathe."}
+            },
             "THE CLOUD WATCHER": {"coords": {"VEL": 0.1, "STR": 0.2, "ENT": 0.9, "TEX": 0.5, "TMP": 0.7}, "desc": "Drifting.", "pressure": {"drag_multiplier": 0.1, "msg": "ZERO G: Drift authorized."}},
             "THE COSMIC TRASH PANDA": {"coords": {"VEL": 0.8, "STR": 0.2, "ENT": 1.0, "TEX": 0.9, "TMP": 0.7}, "desc": "Trash is treasure.", "pressure": {"tolerance_mode": "LOOSE", "msg": "SALVAGE MODE."}},
             "THE JESTER": {"coords": {"VEL": 0.9, "STR": 0.2, "ENT": 0.9, "TEX": 0.5, "TMP": 0.5}, "desc": "Kaos.", "pressure": {"tolerance_mode": "INVERTED", "chaos_threshold": 0.0, "msg": "KAOS ENGINE."}},
