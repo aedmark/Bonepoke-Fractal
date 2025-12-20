@@ -1,5 +1,55 @@
 # CHANGELOG.md
 
+### [v1.6] - 2025-12-20 - "The Turing Test"
+
+#### 🤖 THE TURING VALVE (Synthetic Detection)
+
+- **The Anti-Beige Protocol (`TheTuringValve`):**
+    
+    - **The Problem:** The engine was vulnerable to "High-Entropy Beige"—grammatically perfect, structurally sound, but textually empty AI prose ("Teflon Prose"). The system flagged this as "High Velocity" despite it being soulless.
+        
+    - **The Solution:** Implemented a dedicated Turing scanner.
+        
+    - **The Logic:**
+        
+        - **Vocabulary Scan:** Targets the "Synthetic Markers" list (e.g., _delve, underscore, tapestry, nuance, landscape_).
+            
+        - **Structure Scan:** Detects "Participial Tails"—the specific AI habit of ending sentences with a modifier (e.g., _", ensuring that..."_ or _", fostering a sense of..."_).
+            
+    - **The Penalty:** Detection triggers immediate **SILICA** status and a **+5.0 Drag Penalty**. The engine now demands "Grit" to prove humanity.
+        
+
+#### 📋 THE ROBERTA PROTOCOL (Persona Alignment)
+
+- **RAG Prompt Engineering:**
+    
+    - **The Problem:** The previous system prompts ("The Architect" vs. "The Assistant") resulted in either cold detachment or toxic positivity ("Bubbly AI"). Both drifted into generic "Corporate Speak."
+        
+    - **The Solution:** Transitioned the System Identity to **"The Bureaucratic Zealot" (Roberta)**.
+        
+    - **The Fix:**
+        
+        - **The Butcher Translation:** Explicitly mapped the Python "Butcher Protocol" into English instructions for the RAG model.
+            
+        - **Texture Over Abstraction:** Replaced "Professionalism" with "Meticulous Bureaucracy."
+            
+        - **The Love Language:** Enforced heavy formatting (headers, lists) as a sign of affection, satisfying the engine's need for **Structure (STR)**.
+            
+
+#### 🐛 CRITICAL REPAIRS
+
+- **Initialization Patch (`BonepokeCore`):**
+    
+    - **The Crash:** Fixed a critical `AttributeError` where `TheTuringValve` was called in the process loop but never instantiated in `__init__`.
+        
+    - **The Fix:** Added `self.turing_valve = TheTuringValve()` to the boot sequence.
+        
+- **Temporal Paradox (Scope Fix):**
+    
+    - **The Crash:** Fixed a `NameError` in `process()` where the Turing Scan attempted to read `token_data` before the text cleaning sub-routine had actually created it.
+        
+    - **The Fix:** Re-routed the logic flow to ensure the scan occurs _after_ `TheLexicon.swanson_clean` executes.
+
 ### [v1.5.2] - 2025-12-20 - "The Open Heart Patch"
 
 #### 💾 THE PERSISTENCE PATCH (Time Amnesia)
