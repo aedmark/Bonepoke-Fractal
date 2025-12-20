@@ -1,5 +1,62 @@
 # CHANGELOG.md
 
+### [v1.4.5] - 2025-12-19 - "SLASH AUDITED"
+
+#### 💾 THE PERSISTENCE MANAGER (Long-Term Memory)
+
+- **The Problem (The Amnesiac Bot):**
+    
+    - Previously, `DeepStorage` existed only in RAM; restarting the script erased all memories, meaning the bot forgot significant objects (like guns or keys) between sessions.
+        
+- **The Solution (JSON Cryostasis):**
+    
+    - **New Component:** Implemented the `PersistenceManager` class to handle file I/O.
+        
+    - **The Logic:** The system now serializes `DeepStorage` artifacts and `TheCodex` registry into a local file (`bone_memory.json`) at the end of every turn.
+        
+    - **The Result:** The bot now retains object permanence across reboots, loading the previous state and tick count upon initialization.
+        
+
+#### 🧬 THE SMART STRIP (Dyslexia Cure)
+
+- **The Problem (The "Glass/Glas" Glitch):**
+    
+    - The previous pluralization logic blindly stripped the last letter if it was an 's', turning "Glass" into "Glas" and "Bus" into "Bu," corrupting memory retrieval.
+        
+- **The Solution (Centralized Lemmatization):**
+    
+    - **New Logic:** Implemented `TheLexicon.smart_strip` as a static method.
+        
+    - **The Fix:** This logic explicitly protects words ending in double-s (like "grass") and short words (like "yes"), ensuring `DeepStorage` and `HyphalTrace` speak the same language.
+        
+
+#### ⚡ THE ZEUS PATCH (Entity Recognition)
+
+- **The Problem (The First-Word Blindspot):**
+    
+    - `TheCodex` previously ignored any capitalized word at index 0 to avoid flagging sentence starters, meaning it missed entities like "Zeus" if they started the sentence.
+        
+- **The Solution (Look-Behind Logic):**
+    
+    - **The Fix:** Removed the index-0 restriction and expanded the `ignore_list` to include common sentence starters (e.g., "Actually," "Maybe," "Because").
+        
+    - **The Result:** Entities are now tracked regardless of their position in the sentence.
+        
+
+#### 🏗️ ARCHITECTURAL HYGIENE (The Decoupling)
+
+- **Variable Renaming:**
+    
+    - Refactored `BonepokeCore.process` to replace cryptic variables (e.g., `t_dat`, `m`) with human-readable names (`token_data`, `full_metrics`) to prevent `NameError` crashes.
+        
+- **Modular Output:**
+    
+    - Updated `MycelialDashboard` to use `generate_report`, which returns a string string instead of printing directly to the console, allowing for cleaner integration with other interfaces.
+        
+- **Execution Loop:**
+    
+    - Added a standard `if __name__ == "__main__":` block to handle the CLI loop and facilitate clean imports.
+
 ### [v1.4] - 2025-12-19 - "The Butcher & The Well - Fortified"
 
 #### 🟣 THE PURPLE PATCH (Adjectival Blindspot)
