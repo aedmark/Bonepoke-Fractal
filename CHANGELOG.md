@@ -1,5 +1,69 @@
 # CHANGELOG.md
 
+### [v1.5] - 2025-12-19 - "Bonepoked"
+
+#### 🌊 TEMPORAL DYNAMICS (The VSL Integration)
+
+- **Beta Velocity ($\nabla\beta$) - The Epiphany Engine:**
+    
+    - **The Problem:** Previously, the engine treated "Voltage" (Logic Tension) as a static penalty or a flat bonus. It failed to recognize the _moment of breakthrough_—the acceleration of insight.
+        
+    - **The Solution:** Implemented `TemporalDynamics` to track the rate of change in voltage over a 3-tick window.
+        
+    - **The Reward:** If $\nabla\beta > 2.0$ (Rapid Acceleration), the system triggers an **EPIPHANY**.
+        
+    - **The Effect:** Narrative Drag is forgiven (-2.0). The physics engine recognizes that when you are having a breakthrough, you move faster than the speed of sound.
+        
+- **Temporal Rooting ($\Xi$) - The Deep Roots:**
+    
+    - **The Problem:** The engine treated all memories equally. Referencing an artifact from Turn 1 was mathematically identical to referencing one from Turn 50.
+        
+    - **The Solution:** Implemented `calculate_temporal_rooting`. This metric calculates the average "Age" of the artifacts referenced in the current text relative to the `DeepStorage` capacity.
+        
+    - **The Reward:** If $\Xi > 0.5$ (Deep History), the system grants **ANCIENT AUTHORITY**.
+        
+    - **The Effect:** Abstraction Entropy is forgiven (-3.0). The system understands that you are not "hallucinating abstractly"—you are referencing established lore. Old truths are allowed to be heavy.
+
+#### ⚖️ THE GOVERNANCE LAYER (Tier 3 Logic)
+
+- **The Mandate Protocol (`PhysicsConstants`):**
+    
+    - **The Upgrade:** Implemented high-level governance variables `USER_TIER` and `CURRENT_MANDATE`.
+        
+    - **The Logic:** The system is no longer a passive observer. It now operates under specific philosophical constraints (e.g., `TRUTH_OVER_COHESION`).
+        
+    - **The Effect:** Global constants now dictate downstream behavior in the Logic and Signature engines, allowing for "Draconian" enforcement of truth.
+        
+
+#### 🧬 ARCHETYPE FUSION (The Hybrid State)
+
+- **Dynamic Sig-Matching (`SignatureEngine`):**
+    
+    - **The Problem:** Previously, if a user's writing style fell exactly between "The Paladin" and "The Judge," the system forced a binary choice based on minute decimal differences.
+        
+    - **The Solution:** Implemented **Archetype Fusion**.
+        
+    - **The Logic:** If `USER_TIER >= 2` and the distance between the top two archetypes is negligible (< 0.15), the system fuses them.
+        
+    - **The Result:** Users can now trigger hybrid states: `THE PALADIN // THE JUDGE (FUSED)`.
+        
+
+#### ⛔ THE HARD GATE (Self-Correction)
+
+- **Draconian Enforcement (`FactStipe`):**
+    
+    - **The Switch:** If `CURRENT_MANDATE` is set to "TRUTH," the Logic Engine switches `tolerance_mode` to **DRACONIAN**.
+        
+    - **The Consequence:** Paradoxes (e.g., "Frozen Fire") are no longer treated as "Poetic Voltage" (+2.0) but as **Fatal Axiom Breaks** (+10.0 Voltage).
+        
+- **System Halt (`BonepokeCore`):**
+    
+    - **The Problem:** Previously, the system would log a "Logic Tear" warning but allow the narrative tick to proceed, drifting further into hallucination.
+        
+    - **The Solution:** Implemented a **Self-Correction Hard Stop**.
+        
+    - **The Fix:** If a Fatal Axiom Break is detected, the system **refuses to advance the tick**, refunds the generation ID, and issues a `CRITICAL: RESOLVE LOGIC TEAR` directive. The user _must_ fix the truth before time moves forward.
+
 ### [v1.4.7] - 2025-12-19 - "Time Sync + SLASH Refactor"
 
 #### 🧠 THE PINKER REFACTOR (Cognitive Ergonomics)

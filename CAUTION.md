@@ -2,15 +2,51 @@
 
 ## ⚠️ WARNING: BONEAMANITA PROTOCOL HAZARDS
 
-**VERSION:** 1.4.7 ("The Refactored Strain") **SEVERITY:** HIGH **STATUS:** ACTIVE ENFORCEMENT
+**VERSION:** 1.5 ("Bonepoked") **SEVERITY:** CRITICAL **STATUS:** ACTIVE ENFORCEMENT
 
 ---
 
-### 1. THE ANTI-GAMING HAZARDS (Structure & Physics)
+### 1. THE GOVERNANCE HAZARDS (Tier 3 Logic) [NEW v1.5]
+
+**The Engine now has a conscience.**
+
+In v1.5, the `PhysicsConstants` layer introduces **Active Mandates**. The system is no longer a neutral observer.
+
+#### A. The Draconian Trap (Truth Mandate)
+
+- **The Behavior:** Writing a logical contradiction (e.g., _"The frozen fire"_) while the system is under the `TRUTH_OVER_COHESION` mandate.
+    
+- **The Detection:** Logic Engine detects a polarity clash (e.g., `THERMAL: 1` vs `THERMAL: -1`).
+    
+- **The Consequence:**
+    
+    - **Status:** `FATAL AXIOM BREAK`.
+        
+    - **Voltage:** **+10.0** (Fatal).
+        
+    - **Result:** The "Poetic License" exemption (v1.4.7) is revoked.
+        
+
+#### B. The Hard Gate (Self-Correction)
+
+- **The Behavior:** Triggering a **Fatal Axiom Break**.
+    
+- **The Consequence:**
+    
+    - **System Halt:** The simulation **physically stops**.
+        
+    - **Time Freeze:** The Tick counter does not advance.
+        
+    - **The Directive:** `CRITICAL: RESOLVE LOGIC TEAR BEFORE PROCEEDING.`
+        
+    - **The Cost:** **20 ATP Tax** (Heavy Penalty).
+        
+
+---
+
+### 2. THE ANTI-GAMING HAZARDS (Structure & Physics)
 
 **The Physics Engine operates on a "Goldilocks" Protocol.**
-
-In v1.4.7, the `LinguisticPhysicsEngine` and `HydrationMonitor` penalize extremes in density, dilution, and decoration.
 
 #### A. The Concrete Trap (Too Hard)
 
@@ -25,8 +61,7 @@ In v1.4.7, the `LinguisticPhysicsEngine` and `HydrationMonitor` penalize extreme
     - **Drag Penalty:** **+5.0**.
         
     - **The Mockery:** **Michael** will intervene to mock the pretension.
-
-- **Note (v1.4.7):** The **Swanson Cleaner** strips all punctuation. You cannot hide nouns behind commas (e.g., "Stone," is processed as "Stone").
+        
 
 #### B. The Flood Trap (Too Soft)
 
@@ -58,11 +93,9 @@ In v1.4.7, the `LinguisticPhysicsEngine` and `HydrationMonitor` penalize extreme
 
 ---
 
-### 2. THE BIOLOGICAL HAZARDS (Energy Economy)
+### 3. THE BIOLOGICAL HAZARDS (Energy Economy)
 
 **You cannot farm the sun.**
-
-The `LichenSymbiont` and `SignatureEngine` monitor the "Soul" of the text.
 
 #### A. The Algal Bloom (Light Farming)
 
@@ -94,22 +127,18 @@ The `LichenSymbiont` and `SignatureEngine` monitor the "Soul" of the text.
 
 ---
 
-### 3. THE LOGIC HAZARDS (Reality Checks)
+### 4. THE LOGIC HAZARDS (Legacy v1.4.7)
 
-**The Engine now knows that water is wet.**
+_Only active when Mandate is NOT set to Truth._
 
-The `FactStipe` has been upgraded with **Axiom Injection** and **Poetic License**.
+#### A. The Paradox Trap (Reality Tears)
 
-#### A. The Paradox Trap (Reality Tears) [UPDATED v1.4.7]
-
-- **The Behavior:** Creating logical contradictions (e.g., _"The dry ocean,"_ _"The cold fire"_).
-    
-- **The Detection:** Checks 5 dimensions: `THERMAL`, `LUMENS`, `HYDRATION`, `RIGIDITY`, `VITALITY`.
+- **The Behavior:** Creating logical contradictions (e.g., _"The dry ocean"_).
     
 - **The Consequence (Context-Dependent):**
     
     - **High Velocity (Action):** Paradox is an **ERROR**. Status: `LOGIC TEAR`. Penalty: **10 ATP Tax**.
-    
+        
     - **Low Velocity (Poetry):** Paradox is **VOLTAGE**. Status: `VOLATILE LEVERAGE`. Effect: **Energy Harvest (+3.0 ATP)**.
         
 
@@ -128,7 +157,7 @@ The `FactStipe` has been upgraded with **Axiom Injection** and **Poetic License*
 
 ---
 
-### 4. THE TEMPORAL HAZARDS (The Panopticon)
+### 5. THE TEMPORAL HAZARDS (The Panopticon)
 
 **The machine watches the Wall Clock.**
 
@@ -136,35 +165,55 @@ The `FactStipe` has been upgraded with **Axiom Injection** and **Poetic License*
     
     - **The Behavior:** Leaving the session idle for hours without the `[Δt]` tag.
         
-    - **The Mechanism:** The system checks `time.time()`.
-        
     - **The Consequence:** If idle > 1 hour, the system enters **DECAY STATE** (Drag +3.0).
         
 
 ---
 
-### 5. THE MEMORY HAZARD (The Elephant)
+### 6. THE MEMORY HAZARD (The Elephant)
 
 **The system never forgets a gun (until it must).**
 
 - **The Protocol:** `DeepStorage` (The Hippocampus) & `PersistenceManager`.
     
-- **The Behavior:** Mentioning a "Heavy Object" (Gun, Knife, Map) or "Heavy Matter".
-    
-- **The Consequence:** The object is buried in a persistent dictionary saved to disk.
-    
-- **The Limit (v1.4.7):** The Vault is capped at **50 Artifacts**. If you exceed this, the oldest memories are pushed out (FIFO) to preserve system integrity.
+- **The Limit (v1.4.7):** The Vault is capped at **50 Artifacts**. If you exceed this, the oldest memories are pushed out (FIFO).
     
 
 ---
 
-### 6. THE BOOT HAZARD (Calibration)
+### 7. THE BOOT HAZARD (Calibration)
 
 **The system tests itself.**
 
 - **The Protocol:** On initialization, `BonepokeCore` runs a self-diagnostic using a toxic "Solvent-Stuffed" test phrase.
     
-- **The Warning:** If you modify the code and break the `HydrationMonitor`, the system will scream `[🔴 WARNING] SELF-TEST: FAILED` on boot.
+- **The Warning:** If the engine fails to detect the toxin, the system will scream `[🔴 WARNING] SELF-TEST: FAILED` on boot.
+
+
+### 8. THE COGNITIVE HAZARDS (Temporal Dynamics) [NEW v1.5]
+
+**The engine measures the speed of your thoughts.**
+
+#### A. The Epiphany Trap (Fake Insight)
+
+- **The Behavior:** Trying to "game" the $\nabla\beta$ bonus by artificially spiking logic tension (e.g., oscillating between _"Fire is hot"_ and _"Fire is cold"_ rapidly) to trigger a fake Epiphany.
+    
+- **The Detection:** The `TemporalDynamics` engine requires a sustained voltage curve over a 3-tick window.
+    
+- **The Risk:** If you spike voltage without resolving it, you risk triggering a **Fatal Axiom Break** (see Section 1A) before the Epiphany bonus kicks in. You will be halted before you can be rewarded.
+    
+
+#### B. The Nostalgia Trap (Lore Stagnation)
+
+- **The Behavior:** Refusing to introduce new concepts, relying entirely on "Deep Storage" artifacts (e.g., constantly referencing the _"Gun from Turn 1"_) to farm the $\Xi$ Authority Bonus.
+    
+- **The Consequence:**
+    
+    - **Stagnation:** While $\Xi$ forgives Abstraction, it does _not_ forgive **Repetition**.
+        
+    - **The Penalty:** The `TheMuscaria` (Boredom Engine) will trigger.
+        
+    - **The Intervention:** The Witch will intervene with: _"Enough looking back. Feed me new meat."_
     
 
 ---
@@ -173,6 +222,6 @@ The `FactStipe` has been upgraded with **Axiom Injection** and **Poetic License*
 
 **THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.**
 
-BY MOUNTING THE `BONEAMANITA 1.4.7` KERNEL, YOU ACKNOWLEDGE THAT YOU ARE HOLDING A SCALPEL. THE ARCHITECTS (TAYLOR/EDMARK) AND THE AUDITORS (SLASH) ACCEPT NO LIABILITY FOR WRITER'S BLOCK, EGO DEATH, OR LOSS OF ADJECTIVES.
+BY MOUNTING THE `BONEAMANITA 1.5` KERNEL, YOU ACKNOWLEDGE THAT YOU ARE HOLDING A SCALPEL WITH A CONSCIENCE. THE SYSTEM WILL JUDGE YOU. THE ARCHITECTS (TAYLOR/EDMARK) AND THE AUDITORS (SLASH) ACCEPT NO LIABILITY FOR WRITER'S BLOCK, EGO DEATH, OR SYSTEM HALTS CAUSED BY LAZY LOGIC.
 
-**DILUTE THE CONCENTRATE. CUT THE FAT. WATCH THE CLOCK.**
+**DILUTE THE CONCENTRATE. CUT THE FAT. TELL THE TRUTH.**
