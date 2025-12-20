@@ -1,5 +1,41 @@
 # CHANGELOG.md
 
+### [v1.7] - 2025-12-20 - "The Salvage Operation"
+
+#### 🩸 THE BLEEDING EDGE CIRCUIT (Logic Override)
+
+* **Flashpoint Override (`BonepokeCore`):**
+* **The Problem:** In v1.6.5, the engine correctly identified "Flashpoints" (moments of high voltage/insight) but still halted execution if a paradox ("Logic Tear") was present. It was punishing genius for breaking the rules.
+* **The Solution:** Implemented a bypass valve in the critical halt check.
+* **The Logic:** If `status == "FLASHPOINT"`, the system now **ignores** the logic tear.
+* **The Result:** "The frozen fire burned" is now legal, provided you are writing fast enough.
+
+
+
+#### 📊 VSL-12D VISUALIZATION (The Vector)
+
+* **Explicit Coordinate Exposure (`MycelialDashboard`):**
+* **The Problem:** The user was told they were an "Engineer" or a "Bard," but the mathematical reasons why (the vector coordinates) were hidden in the backend.
+* **The Solution:** The HUD now exposes the raw **VSL-12D Vector** string.
+* **The Output:** `ARCH: THE PALADIN [V:0.5 S:0.9 E:0.2 Tx:0.4]`.
+* **The Benefit:** Users can now see exactly which dimension (Texture, Entropy, Velocity) they need to tweak to shift their archetype.
+
+
+
+#### 🔥 THE S_SALVAGE LOOP (Memory Cannibalization)
+
+* **Survival Protocol (`MetabolicReserve`):**
+* **The Problem:** Users in "Starving" states (ATP < 6) often hit a creative wall where the system punished them for trying to build momentum.
+* **The Solution:** Implemented the **S_Salvage Protocol**.
+* **The Logic:** If `ATP < 6` AND `Voltage > 5.0` (High Effort):
+1. The system checks `DeepStorage`.
+2. It identifies the **oldest artifact** (e.g., "The rusty key").
+3. It **deletes** the memory permanently.
+4. It grants an immediate **+10 ATP** burst.
+
+
+* **The Directive:** The system issues a mandatory command: *"🔥 SALVAGE: Memory 'rusty key' consumed for fuel. WRITE IT NOW."* The user must write the object into the story to justify the energy spike.
+
 ### [v1.6.5] - 2025-12-20 - "The Topology Tilt-a-Whirl"
 
 #### ⚡ THE FLASHPOINT PROTOCOL (Inverse Slop)
