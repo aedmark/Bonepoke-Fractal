@@ -10,8 +10,8 @@ from uuid import uuid4
 import re
 import json
 import os
-import shutil # [FIX: For Safe Persistence]
-import string # [FIX: For Swanson Cleaner]
+import shutil
+import string
 
 class PhysicsConstants:
     """
@@ -25,9 +25,9 @@ class PhysicsConstants:
     TOXICITY_DRAG_MULTIPLIER = 10.0
 
     # THE BUTCHER (Garnish & Bloat)
-    ADJECTIVE_WEIGHT = 0.8  # Was 0.5. Adjectives now create natural drag, not just penalty.
-    GARNISH_THRESHOLD = 0.18 # Was 0.12. Allow 18% of words to be decorative before punishment.
-    BLOAT_PENALTY = 2.0     # Was 3.0. Lower the penalty severity.
+    ADJECTIVE_WEIGHT = 0.8
+    GARNISH_THRESHOLD = 0.18
+    BLOAT_PENALTY = 2.0
 
     # HYDRATION & VISCOSITY
     FLOOD_PENALTY_MAX = 4.0
@@ -113,9 +113,6 @@ class TheLexicon:
                         cls.TRUTHS[word] = {}
                     cls.TRUTHS[word][dimension] = polarity
 
-    # [FIX: Initialization Call]
-    # We call this later, after class is fully defined, or in __init__ of the Engine
-
     PHOTOSYNTHETICS = {
         'light', 'sun', 'ray', 'beam', 'glow', 'shine', 'spark', 'fire',
         'flame', 'star', 'day', 'dawn', 'noon', 'gold', 'bright', 'glimmer'
@@ -182,8 +179,6 @@ class TheLexicon:
         if word.endswith('s') and len(word) <= 3: return word
         return word[:-1] if word.endswith('s') else word
 
-    # [FIX: SWANSON CLEANER]
-    # Robust text cleaning to fix Punctuation Blindness
     @staticmethod
     def swanson_clean(text):
         """
@@ -199,8 +194,6 @@ TheLexicon.compile_truths()
 # --- MEMORY & ECONOMY ---
 
 class DeepStorage:
-    # [FIX: DEEP STORAGE CAP]
-    # Prevent Memory Leaks
     def __init__(self, max_capacity=50):
         self.artifacts = {}
         self.significance_filter = TheLexicon.HEAVY_MATTER.union({'gun', 'knife', 'letter', 'map', 'key'})
@@ -325,13 +318,10 @@ class FactStipe:
         voltage = 0.0
         for dim, polarities in active_dimensions.items():
             if 1 in polarities and -1 in polarities:
-                # [FIX: POETIC LICENSE]
-                # If kinetic ratio is low (poetic), we treat paradox as "Voltage" (Energy), not Error.
-                # If kinetic ratio is high (action), we treat paradox as Error.
                 if tolerance_mode == "INVERTED":
                     voltage += 2.0
-                elif kinetic_ratio < 0.2: # Low Kinetic = High Poetic License
-                    voltage += 3.0 # Paradox generates energy!
+                elif kinetic_ratio < 0.2:
+                    voltage += 3.0
                 elif kinetic_ratio > 0.4:
                     voltage += 5.0
                     violations.append(f"PARADOX IGNITED [{dim}]: High velocity collision.")
@@ -358,7 +348,7 @@ class ChaosCooldown:
 class TheMuscaria:
     def __init__(self):
         self.boredom_pressure = 0.0
-        self.pressure_threshold = PhysicsConstants.BOREDOM_PRESSURE_THRESHOLD # [FIX: Centralized Constant]
+        self.pressure_threshold = PhysicsConstants.BOREDOM_PRESSURE_THRESHOLD
         self.prescriptions = {
             'KINETIC': ["ADRENALINE SHOT: Describe a sound immediately.", "VELOCITY CHECK: Someone is running at you.", "IMPACT EVENT: A door slams."],
             'SENSORY': ["GRAVITY CHECK: The air is thin.", "VIBE CHECK: What does the light smell like?", "TEMPERATURE DROP: Freezing."],
@@ -585,8 +575,6 @@ class SignatureEngine:
             "THE PALADIN": {"coords": {"VEL": 0.5, "STR": 0.9, "ENT": 0.2, "TEX": 0.4, "TMP": 0.2}, "desc": "Code. Deontological.", "pressure": {"tolerance_mode": "DRACONIAN", "chaos_threshold": 20.0, "msg": "LAW: Logic tears fatal."}},
             "THE ENGINEER": {"coords": {"VEL": 0.6, "STR": 0.8, "ENT": 0.1, "TEX": 0.2, "TMP": 0.4}, "desc": "Structure. Efficiency.", "pressure": {"tolerance_mode": "DRACONIAN", "msg": "STRUCTURAL INTEGRITY."}},
             "THE BARBARIAN": {
-                # [PATCH]: Increased Entropy (ENT) requirement to 0.4.
-                # Lowered Texture (TEX) to 0.6. Real barbarians are blunt, not ornate.
                 "coords": {"VEL": 0.9, "STR": 0.4, "ENT": 0.4, "TEX": 0.6, "TMP": 0.9},
                 "desc": "Force. Kinetic. Blunt.",
                 "pressure": {"drag_multiplier": 5.0, "msg": "BERSERKER: Precision is power. Do not hack; slice."}
@@ -602,8 +590,6 @@ class SignatureEngine:
             "THE VULTURE": {"coords": {"VEL": 0.4, "STR": 0.5, "ENT": 0.3, "TEX": 0.8, "TMP": 0.2}, "desc": "Salvage."},
             "THE BARD": {"coords": {"VEL": 0.8, "STR": 0.3, "ENT": 0.6, "TEX": 0.7, "TMP": 0.9}, "desc": "Rhythm.", "pressure": {"tolerance_mode": "LOOSE", "msg": "PLAY STATE: Dance."}},
             "THE GARDENER": {
-                # [PATCH]: Increased Velocity (VEL) to 0.7.
-                # This allows the Gardener to be fast AND rich, stealing the "good" texts from the Barbarian.
                 "coords": {"VEL": 0.7, "STR": 0.6, "ENT": 0.4, "TEX": 0.9, "TMP": 0.8},
                 "desc": "Cultivation. Lyrical Efficiency.",
                 "pressure": {"msg": "GREEN THUMB: Let it breathe."}
@@ -700,7 +686,6 @@ class NarrativeChronometer:
         strong_macro = sum(1 for w in clean_words if w in self.STRONG_MACRO)
         weak_macro = sum(1 for w in clean_words if w in self.WEAK_MACRO)
 
-        # [FIX: Centralized Magic Numbers]
         score = (strong_macro * PhysicsConstants.CHRONO_MACRO_STRONG_WEIGHT) + \
                 (weak_macro * PhysicsConstants.CHRONO_MACRO_WEAK_WEIGHT) - \
                 (micro * PhysicsConstants.CHRONO_MICRO_WEIGHT)
@@ -917,8 +902,7 @@ class PersistenceManager:
             "atp": metabolism.atp,
             "boredom": muscaria.boredom_pressure
         }
-        # [FIX: SAFE PERSISTENCE]
-        # Backup before writing
+
         if os.path.exists(self.filename):
             try:
                 shutil.copy(self.filename, self.filename + ".bak")
@@ -980,7 +964,6 @@ class BonepokeCore:
         self._run_calibration_sequence()
 
     def _run_calibration_sequence(self):
-        # [FIX] Using the Swanson Clean in Calibration too for consistency
         test_phrase = "Actually, basically, the stone and iron are literally sort of here, if you think about it, honestly."
         clean_words = TheLexicon.swanson_clean(test_phrase)
 
@@ -1013,7 +996,6 @@ class BonepokeCore:
 
         chronos_data = self.chronos.metabolize_delta(delta_val)
 
-        # [FIX: IMPLEMENT SWANSON CLEANER]
         clean_words = TheLexicon.swanson_clean(clean_prompt)
         token_data = {
             'raw_text': clean_prompt,
@@ -1113,6 +1095,7 @@ class BonepokeCore:
         }
 
 # --- EXECUTION LOOP ---
+
 if __name__ == "__main__":
     engine = BonepokeCore(render_mode="ANSI")
     print("\n> [SYSTEM ONLINE] BoneAmanita 1.4.7 (SLASH REFACTOR) is listening...")
