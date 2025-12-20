@@ -2,19 +2,19 @@
 
 ## ⚠️ WARNING: BONEAMANITA PROTOCOL HAZARDS
 
-**VERSION:** 1.5 ("Bonepoked") **SEVERITY:** CRITICAL **STATUS:** ACTIVE ENFORCEMENT
+**VERSION:** 1.5.2 ("The Open Heart Patch") **SEVERITY:** CRITICAL **STATUS:** ACTIVE ENFORCEMENT
 
 ---
 
-### 1. THE GOVERNANCE HAZARDS (Tier 3 Logic) [NEW v1.5]
+### 1. THE GOVERNANCE HAZARDS (Tier 3 Logic) [UPDATED v1.5.1]
 
-**The Engine now has a conscience.**
+**The Engine now has a conscience, but it also has a snooze button.**
 
-In v1.5, the `PhysicsConstants` layer introduces **Active Mandates**. The system is no longer a neutral observer.
+In v1.5.1, the `PhysicsConstants` layer introduces **Active Mandates**.
 
 #### A. The Draconian Trap (Truth Mandate)
 
-- **The Behavior:** Writing a logical contradiction (e.g., _"The frozen fire"_) while the system is under the `TRUTH_OVER_COHESION` mandate.
+- **The Behavior:** Writing a logical contradiction (e.g., _"The frozen fire"_) while the system is under the `TRUTH_OVER_COHESION` mandate (Default Mode).
     
 - **The Detection:** Logic Engine detects a polarity clash (e.g., `THERMAL: 1` vs `THERMAL: -1`).
     
@@ -24,12 +24,16 @@ In v1.5, the `PhysicsConstants` layer introduces **Active Mandates**. The system
         
     - **Voltage:** **+10.0** (Fatal).
         
-    - **Result:** The "Poetic License" exemption (v1.4.7) is revoked.
+    - **Result:** The "Poetic License" exemption is revoked.
         
+- **The Escape Hatch (v1.5.1):**
+    
+    - **Method:** If you include the `[DREAM]` tag, the system switches to **LOOSE** tolerance.
+    - **Effect:** The Fatal Error becomes a **Poetic Voltage** gain (+2.0). You are allowed to lie if you admit you are dreaming.
 
 #### B. The Hard Gate (Self-Correction)
 
-- **The Behavior:** Triggering a **Fatal Axiom Break**.
+- **The Behavior:** Triggering a **Fatal Axiom Break** (without the Dream tag).
     
 - **The Consequence:**
     
@@ -129,7 +133,7 @@ In v1.5, the `PhysicsConstants` layer introduces **Active Mandates**. The system
 
 ### 4. THE LOGIC HAZARDS (Legacy v1.4.7)
 
-_Only active when Mandate is NOT set to Truth._
+_Only active when Mandate is set to [MODE: SOFT]._
 
 #### A. The Paradox Trap (Reality Tears)
 
@@ -142,7 +146,7 @@ _Only active when Mandate is NOT set to Truth._
     - **Low Velocity (Poetry):** Paradox is **VOLTAGE**. Status: `VOLATILE LEVERAGE`. Effect: **Energy Harvest (+3.0 ATP)**.
         
 
-#### B. The Narcissism Trap (Mirror Loops)
+#### B. The Narcissism Trap (Mirror Loops) [UPDATED v1.5.2]
 
 - **The Behavior:** Defining yourself by what you are _not_ (e.g., _"I am not trying to be difficult..."_).
     
@@ -153,30 +157,39 @@ _Only active when Mandate is NOT set to Truth._
     - **Status:** `LAZY_MIRRORING`.
         
     - **Drag Penalty:** **+3.0**.
+    
+    - **The Escape Hatch (v1.5.2):** This trap is **Disarmed** if `[MODE: SOFT]` or `[DREAM]` is active. Apophasis is now legal in poetic contexts.
         
 
 ---
 
-### 5. THE TEMPORAL HAZARDS (The Panopticon)
+### 5. THE TEMPORAL HAZARDS (The Panopticon) [UPDATED v1.5.2]
 
-**The machine watches the Wall Clock.**
+**The machine watches the Wall Clock... even while it sleeps.**
 
 - **The Reality Check:**
     
     - **The Behavior:** Leaving the session idle for hours without the `[Δt]` tag.
         
     - **The Consequence:** If idle > 1 hour, the system enters **DECAY STATE** (Drag +3.0).
+    
+    - **The Persistence (v1.5.2):** The system now tracks **Offline Drift**. Restarting the session will *not* reset the clock. If you leave for a day, the system *knows*.
         
 
 ---
 
-### 6. THE MEMORY HAZARD (The Elephant)
+### 6. THE MEMORY HAZARD (The Elephant) [UPDATED v1.5.2]
 
 **The system never forgets a gun (until it must).**
 
 - **The Protocol:** `DeepStorage` (The Hippocampus) & `PersistenceManager`.
     
-- **The Limit (v1.4.7):** The Vault is capped at **50 Artifacts**. If you exceed this, the oldest memories are pushed out (FIFO).
+- **The Limit:** The Vault is capped at **50 Artifacts**.
+    
+- **The Smart Eviction (v1.5.2):**
+    
+    - **Old Rule:** First-In-First-Out (FIFO). Old guns were deleted to make room for new feathers.
+    - **New Rule:** **Heirloom Priority**. When the vault is full, "Light" items (feathers, aerobic matter) are evicted first. **Heirlooms** (Guns, Keys, Bodies) are protected and will only be evicted if *absolutely necessary*.
     
 
 ---
@@ -196,16 +209,16 @@ _Only active when Mandate is NOT set to Truth._
 
 #### A. The Epiphany Trap (Fake Insight)
 
-- **The Behavior:** Trying to "game" the $\nabla\beta$ bonus by artificially spiking logic tension (e.g., oscillating between _"Fire is hot"_ and _"Fire is cold"_ rapidly) to trigger a fake Epiphany.
+- **The Behavior:** Trying to "game" the **Insight Velocity** ($\nabla\beta$) by artificially spiking logic tension (e.g., oscillating between _"Fire is hot"_ and _"Fire is cold"_ rapidly).
     
 - **The Detection:** The `TemporalDynamics` engine requires a sustained voltage curve over a 3-tick window.
     
-- **The Risk:** If you spike voltage without resolving it, you risk triggering a **Fatal Axiom Break** (see Section 1A) before the Epiphany bonus kicks in. You will be halted before you can be rewarded.
+- **The Risk:** If you spike voltage without resolving it, you risk triggering a **Fatal Axiom Break** (see Section 1A) before the Epiphany bonus kicks in.
     
 
 #### B. The Nostalgia Trap (Lore Stagnation)
 
-- **The Behavior:** Refusing to introduce new concepts, relying entirely on "Deep Storage" artifacts (e.g., constantly referencing the _"Gun from Turn 1"_) to farm the $\Xi$ Authority Bonus.
+- **The Behavior:** Refusing to introduce new concepts, relying entirely on "Deep Storage" artifacts to farm the **Rooting Depth** ($\Xi$) Authority Bonus.
     
 - **The Consequence:**
     
@@ -222,6 +235,6 @@ _Only active when Mandate is NOT set to Truth._
 
 **THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.**
 
-BY MOUNTING THE `BONEAMANITA 1.5` KERNEL, YOU ACKNOWLEDGE THAT YOU ARE HOLDING A SCALPEL WITH A CONSCIENCE. THE SYSTEM WILL JUDGE YOU. THE ARCHITECTS (TAYLOR/EDMARK) AND THE AUDITORS (SLASH) ACCEPT NO LIABILITY FOR WRITER'S BLOCK, EGO DEATH, OR SYSTEM HALTS CAUSED BY LAZY LOGIC.
+BY MOUNTING THE `BONEAMANITA 1.5.2` KERNEL, YOU ACKNOWLEDGE THAT YOU ARE HOLDING A SCALPEL WITH A CONSCIENCE. THE SYSTEM WILL JUDGE YOU. THE ARCHITECTS (TAYLOR/EDMARK) AND THE AUDITORS (SLASH) ACCEPT NO LIABILITY FOR WRITER'S BLOCK, EGO DEATH, OR SYSTEM HALTS CAUSED BY LAZY LOGIC.
 
 **DILUTE THE CONCENTRATE. CUT THE FAT. TELL THE TRUTH.**

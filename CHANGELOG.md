@@ -1,5 +1,92 @@
 # CHANGELOG.md
 
+### [v1.5.2] - 2025-12-20 - "The Open Heart Patch"
+
+#### 💾 THE PERSISTENCE PATCH (Time Amnesia)
+
+- **Atomic Saves (`PersistenceManager`):**
+    - **The Problem:** Previously, `save_state` wrote directly to `bone_memory.json`. If the script crashed mid-write (or power failed), the file would become corrupted (0 bytes), wiping the user's history.
+    - **The Fix:** Implemented a "Write-Then-Rename" protocol. The system now writes to `.tmp` first and performs an atomic `os.replace` only upon success.
+    
+- **Time Tracking (`ChronosAnchor`):**
+    - **The Problem:** The engine had no concept of "Offline Time." If a user quit and returned 24 hours later, the clock reset to 0, resetting the "Decay" state.
+    - **The Fix:** `PersistenceManager` now captures `time.time()` on save. On boot, `ChronosAnchor` calculates the drift between the last save and the current moment, accurately applying Decay penalties for time away.
+
+#### 🧠 MEMORY LOGIC (Deep Storage)
+
+- **Smart Eviction (`DeepStorage`):**
+    - **The Problem:** The previous eviction policy was a strict FIFO (First-In-First-Out). When the cache filled (50 items), it deleted the *oldest* memories, causing the bot to forget key plot items (like a "Gun" introduced in Act 1) in favor of recent trivialities.
+    - **The Fix:** Implemented a priority system. The engine now identifies "Heirlooms" (Heavy Matter, Weapons, Keys). When full, it first evicts "Light" items. If only Heirlooms remain, it sadly evicts the oldest.
+
+#### 🗣️ HUMANITY PATCHES
+
+- **The Screaming Fix (`NilssonPatch`):**
+    - **The Problem:** The heuristic `sum(isupper) / len(raw)` flagged short acronyms like "OK" or "USA" as "Screaming," triggering the Nilsson state incorrectly.
+    - **The Fix:** Added a length guard. The text must be **> 10 characters** to qualify as a scream.
+
+- **The Bureaucracy Fix (`TheMirrorTrap`):**
+    - **The Problem:** The engine penalized *all* negative definitions ("It is not X"), which stifled legitimate literary devices like apophasis in "Soft Mode."
+    - **The Fix:** The Mirror Trap now checks `PhysicsConstants.CURRENT_MANDATE`. If the user is in `POETIC_LICENSE` mode, the trap is disarmed.
+
+### [v1.5.1] - 2025-12-20 - "Bonepoked Part Deux"
+
+#### 🔓 THE AGENCY RESTORATION (User Overrides)
+
+- **The Dream Logic Protocol (`BonepokeCore`):**
+    
+    - **The Problem:** The v1.5 "Truth Mandate" was too effective. It treated Surrealism (e.g., "The cold sun") as a Fatal System Error, locking the system and preventing poetic exploration.
+        
+    - **The Solution:** Implemented the `[DREAM]` tag override.
+        
+    - **The Fix:** If the user includes `[DREAM]` in their input, the system switches the Pressure Matrix to `LOOSE` tolerance, explicitly lifting Axiom constraints. Logic tears are permitted for the sake of art.
+        
+- **The Governance Toggle:**
+    
+    - **The Problem:** The `CURRENT_MANDATE` ("TRUTH_OVER_COHESION") was hardcoded in `PhysicsConstants`, requiring a code edit to change the difficulty.
+        
+    - **The Solution:** Implemented Runtime Mandate Switching.
+        
+    - **The Commands:**
+        
+        - `[MODE: HARD]`: Enforces `TRUTH_OVER_COHESION`. (System Halt on Paradox).
+            
+        - `[MODE: SOFT]`: Enforces `POETIC_LICENSE`. (Voltage accumulation on Paradox).
+            
+
+#### 🧬 FUSION REFINEMENT (The Synonym Filter)
+
+- **Semantic Distance Check (`SignatureEngine`):**
+    
+    - **The Problem:** The v1.5 Fusion logic only checked if two Archetypes had similar _scores_. This often fused synonymous identities (e.g., `THE PALADIN // THE JUDGE`), resulting in redundant feedback.
+        
+    - **The Solution:** Implemented a **Vector Distance Threshold**.
+        
+    - **The Logic:** The system now calculates the Euclidean distance between the _Archetypes themselves_.
+        
+    - **The Rule:** Fusion is only permitted if `inter_arch_dist > 0.25`. The identities must be mathematically distinct enough to create an interesting hybrid (e.g., `THE JESTER // THE ENGINEER`).
+        
+
+#### 🗣️ UX TRANSLATION (Cognitive Ergonomics)
+
+- **De-Mystification of VSL Metrics:**
+    
+    - **The Problem:** The output `∇β` and `Ξ` was mathematically precise but cognitively opaque to users unfamiliar with Topological Data Analysis.
+        
+    - **The Solution:** Aliased the variables in the `directives` output string.
+        
+        - `∇β` -> **INSIGHT VELOCITY**.
+            
+        - `Ξ` -> **ROOTING DEPTH**.
+            
+
+#### 🐛 CRITICAL FIXES
+
+- **Scope Repair (`BonepokeCore`):**
+    
+    - **The Crash:** Fixed a `NameError` in the v1.5 logic flow where the `directives` list was being appended to (by the Dream Logic block) _before_ it was initialized.
+        
+    - **The Fix:** Moved `directives = []` to the top of the processing chain, ensuring the container exists before any logic blocks attempt to fill it.
+
 ### [v1.5] - 2025-12-19 - "Bonepoked"
 
 #### 🌊 TEMPORAL DYNAMICS (The VSL Integration)
