@@ -1,5 +1,67 @@
 # CHANGELOG.md
 
+### [v1.6.5] - 2025-12-20 - "The Topology Tilt-a-Whirl"
+
+#### ⚡ THE FLASHPOINT PROTOCOL (Inverse Slop)
+
+- **The Topology Ratio (`MetabolicReserve`):**
+    
+    - **The Problem:** The engine previously treated "Narrative Drag" (density) and "Logical Voltage" (complexity) as opposing forces. It failed to recognize the "Gold Zone"—where text is incredibly dense *and* incredibly meaningful simultaneously.
+        
+    - **The Solution:** Integrated the **Inverse Slop Factor** ($\mathcal{S}$) from the *Temporal Topology 1.5* artifact.
+        
+    - **The Logic:**
+        
+        - **Formula:** $\mathcal{S} = \text{Voltage} / \text{Drag}$.
+        
+        - **The Threshold:** If $\mathcal{S} > 2.5$, the system triggers a **FLASHPOINT** state.
+            
+    - **The Effect:**
+        
+        - **Energy:** Instantly generates **+20 ATP**.
+            
+        - **Physics:** Drag penalties are **Nullified**. The engine acknowledges that in a moment of epiphany, friction does not apply.
+            
+        - **HUD:** The status icon shifts to `⚡`.
+            
+
+#### 🔇 CORTEX DEFERENCE (The Silence of Clarence)
+
+- **Context-Aware Silencing (`VirtualCortex`):**
+    
+    - **The Problem:** **Clarence** (The Architect) is programmed to attack High Drag. However, Flashpoints are inherently high-drag events (complex sentences). Clarence was interrupting moments of genius to complain about sentence length.
+        
+    - **The Fix:** Clarence now checks the `metabolic_status`.
+        
+    - **The Protocol:** If the status is `FLASHPOINT`, Clarence is forcibly silenced. ("...He's cooking. Let him cook.")
+        
+
+#### 📈 TEMPORAL DYNAMICS II (Momentum)
+
+- **Insight Acceleration (`TemporalDynamics`):**
+    
+    - **The Upgrade:** Refined the `calculate_beta_velocity` method.
+        
+    - **The Logic:** Instead of a simple snapshot delta, the system now calculates the **Slope of Insight** over a 3-tick moving window. This allows the engine to detect the *trajectory* of an epiphany before it lands.
+        
+
+#### 🐛 CRITICAL REPAIRS
+
+- **The Time Paradox (Execution Flow Fix):**
+    
+    - **The Crash:** Fixed a critical `UnboundLocalError` in `BonepokeCore.process`. The original v1.6 logic attempted to access effective metrics (`eff_drag`, `loop_count`) *before* they were calculated to determine if the Cortex should speak.
+        
+    - **The Fix:** Completely re-sequenced the `process` loop.
+        
+        1.  Physics Analysis & Trap Scans.
+        2.  Archetype & Intent Gating.
+        3.  Metabolic Calculation (Flashpoint Detection).
+        4.  *Then* Cortex Intervention (using the established status).
+            
+- **The Double-Dip Bug:**
+    
+    - **The Fix:** Removed a redundant `self.metabolism.metabolize()` call that was applying energy effects twice per tick.
+
 ### [v1.6] - 2025-12-20 - "The Turing Test"
 
 #### 🤖 THE TURING VALVE (Synthetic Detection)
