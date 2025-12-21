@@ -1,5 +1,42 @@
 # CHANGELOG.md
 
+### [v1.8.2] - 2025-12-21 - "The Quantum Leap (PATCHED)"
+
+#### 🐛 CRITICAL REPAIRS (The Wire Fix)
+
+- **The Missing Variable (`SignatureEngine`):**
+    - **The Crash:** The v1.8.1 `identify` method attempted to check `if spatial > 0.12` before defining the variable, causing an immediate `NameError`.
+    - **The Fix:** Explicitly retrieved `spatial_density` from the metrics payload before the logic gate.
+
+- **The Silent Metric (`LinguisticPhysicsEngine`):**
+    - **The Bug:** The Physics Engine calculated `spatial_density` but failed to pack it into the return dictionary. The Signature Engine was effectively flying blind regarding geometry.
+    - **The Fix:** Added `spatial_density` to the `physics` output dictionary.
+
+#### 📐 ARCHITECTURAL BIAS (The Gravity Well)
+
+- **Spatial Logic Injection (`SignatureEngine`):**
+    - **The Problem:** **THE ARCHITECT** archetype exists in the coordinates (High Structure, Low Velocity), but without specific triggers, it was mathematically difficult for users to "land" there naturally.
+    - **The Solution:** Implemented a **Spatial Bias**.
+    - **The Logic:** If `spatial_density > 0.12` (high preposition count):
+        - **Structure (STR):** Boosted by **+0.2**.
+        - **Velocity (VEL):** Dampened by **-0.1**.
+    - **The Effect:** Using words like _under, between, across, inside_ now mechanically "slides" the user's vector toward The Architect.
+
+#### 🛡️ SYSTEM HARDENING (The Atomic Protocol)
+
+- **Atomic Persistence (`PersistenceManager`):**
+    - **The Upgrade:** Replaced the direct file write with a **Write-Then-Swap** protocol using `shutil`.
+    - **The Benefit:** Prevents `bone_memory.json` corruption if the script crashes mid-save.
+
+- **The Chidi Fix (`TheLexicon`):**
+    - **The Upgrade:** Simplified `smart_strip` to be less aggressive. It no longer requires a "Protected Noun" list to know that "Gas" shouldn't become "Ga."
+
+#### 📡 TUNER LOGIC (The Longest Word)
+
+- **The Fallback Scan (`FrequencyModulator`):**
+    - **The Upgrade:** If the Tuner (Clarence/Eloise/Yaga) cannot find a specific trigger word in their target list, they now default to targeting the **longest word** in the user's input.
+    - **The Philosophy:** Complexity usually hides in the syllables.
+
 ### [v1.8.1] - 2025-12-21 - "The Quantum Leap"
 
 #### 🐛 CRITICAL REPAIRS (The Syntax Fix)
