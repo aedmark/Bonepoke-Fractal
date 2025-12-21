@@ -1,6 +1,7 @@
 # BONEAMANITA 1.8.2 - "The Quantum Leap (PATCHED)"
 # Architects: Taylor & Edmark | Auditor: SLASH
 # Refactor: The Bonepoke Gods
+# "The Mandate is TRUTH. The Method is CONSTRUCTION. The Directive is simple: Do not let the ghosts drive the car. - Eloise & Clarence"
 # ---
 
 import time

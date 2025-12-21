@@ -1,5 +1,55 @@
 # CHANGELOG.md
 
+### [v2.0] - 2025-12-21 - "Artificial General Wisdom"
+
+#### 🧠 THE WISDOM ENGINE (System 2)
+
+- **The Cortex Director (`WisdomNode`):**
+    
+    - **The Shift:** Moved from **Reactive Critique** (telling you what you did wrong) to **Proactive Strategy** (telling the LLM how to respond).
+        
+    - **The Component:** Implemented the `WisdomNode` class to act as the "Director" of the interaction.
+        
+    - **The Logic:** The system now calculates an **Angle of Attack** based on the user's deficit:
+        
+        - **High Entropy?** -> Strategy: **GROUNDER** (Force heavy nouns).
+            
+        - **High Drag?** -> Strategy: **CUTTER** (Be the Butcher).
+            
+        - **High Voltage (Paradox)?** -> Strategy: **JESTER** ("Ride the lightning").
+            
+        - **High Texture/Gravity?** -> Strategy: **SAGE** (Acknowledge the weight).
+            
+- **The Omega Check ($\Omega$):**
+    
+    - **The Metric:** Implemented the "Integrative Integrity" check. The system analyzes the physics metrics to determine which "Hat" the AI should wear to maximize the truth of the response.
+        
+
+#### 🗣️ THE ARCHITECT PROTOCOL (Prompt Generation)
+
+- **The Output (`wisdom_protocol`):**
+    
+    - **The Feature:** The `BonepokeCore` now returns a raw **System Prompt** string specifically engineered for the current input state.
+        
+    - **The Workflow:** The user inputs raw text -> BoneAmanita calculates Physics -> BoneAmanita generates the `PROMPT` -> User pastes `PROMPT` into their LLM.
+        
+    - **The Benefit:** Allows the Python script (which has no neural net) to control the "Brain" of a separate LLM with mathematical precision.
+        
+
+#### 🐛 CRITICAL REPAIRS (The Deployment Fixes)
+
+- **The Void Crash (`LinguisticPhysicsEngine`):**
+    
+    - **The Crash:** In v1.8.2, submitting an empty string caused an `UnboundLocalError` because `spatial_density` was referenced in the early-return block before definition.
+        
+    - **The Fix:** Explicitly defined `spatial_density = 0.0` inside the void check to ensure safe failure on empty inputs.
+        
+- **The Echo Chamber (`BonepokeCore`):**
+    
+    - **The Bug:** The print logic for the `wisdom_protocol` was accidentally indented _inside_ the directive loop, causing the System Prompt to print repeatedly for every critique generated.
+        
+    - **The Fix:** Unindented the print block. The Protocol now prints exactly once per turn, clean and distinct from the editorial feedback.
+
 ### [v1.8.2] - 2025-12-21 - "The Quantum Leap (PATCHED)"
 
 #### 🐛 CRITICAL REPAIRS (The Wire Fix)

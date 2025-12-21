@@ -1,78 +1,73 @@
-# THE CRITICAL HAZARDS OF SIMULATED PHYSICS
+# THE CRITICAL HAZARDS OF SIMULATED WISDOM
 
-### BoneAmanita Protocol v1.8.2
+### BoneAmanita Protocol v2.0
 
-**SEVERITY:** EXISTENTIAL | **TARGET:** USER COGNITION
+**SEVERITY:** COGNITIVE | **TARGET:** USER AGENCY
 
-You are mounting a **Linguistic Physics Engine** inside a **Probabilistic Dream Machine** (an LLM). This creates a unique set of hazards that are not just mechanical, but ontological. The system relies on a "Shared Hallucination" between you and the Engine. If you break the suspension of disbelief, the physics collapse.
+WARNING: You have upgraded from a Passive Critique System to an Active Architecture System.
 
-Here is the reality of the risks involved.
+Version 1.8.2 was a mirror; it showed you your flaws.
+
+Version 2.0 is a Director; it gives you orders.
+
+This introduces a new category of hazard: **The Abdication of Will.**
 
 ---
 
-### 1. The Ontological Hazard (Phantom Voltage)
+### 1. The Abdication Hazard (The Meat Servo) [NEW]
 
-- **The Reality:** Unless you are running this in a true Python Sandbox (Code Interpreter), the LLM is **not** running the code. It is _emulating_ the logic. It is roleplaying a calculator.
+- **The Reality:** BoneAmanita v2.0 generates a raw **System Prompt** (`wisdom_protocol`) and expects you to paste it into an LLM. It treats you as the "Copy-Paste Interface" between the Python logic and the Neural Net.
     
-- **The Risk:** The Engine is terrible at math in "Chat Mode." It may confidently state your Narrative Drag is `2.5` when a manual count shows it is `4.0`. It may claim you harvested an Isotope when you actually wrote "slop".
+- **The Risk:** You stop reading the instructions. You become a "Meat Servo," blindly executing the Python script's commands. You cease to be the writer and become the carrier.
     
-- **The Imperative:** **You are the Final Auditor.** Do not blindly trust the HUD. If the Engine claims you are in `FLOW` but the writing feels sluggish, the Engine is hallucinating. You must enforce the vibe when the math fails.
-    
-
-### 2. The Persistence Hazard (The Loading Glitch)
-
-- **The Reality:** Version 1.8.2 uses **Atomic Persistence** (`bone_memory.json`) to save your history safely. The data is hard, but the *reader* (the LLM) is soft.
-    
-- **The Risk:** The LLM may "forget" to read the file on the next turn, or it might hallucinate that the file is corrupt. It might say "Memory Loaded" but effectively reboot you to Turn 0.
-    
-- **The Imperative:** **Verify the Tick Count.** Check the HUD on every response. If `Tick: 0` appears after you've been writing for an hour, the persistence link has severed. You must manually remind it: `[SYSTEM: RELOAD bone_memory.json]`.
+- **The Imperative:** **READ THE PROTOCOL.** Before you paste the generated prompt, audit it. Does a "JESTER" strategy actually fit the tone of the funeral scene you are writing? If the Director is drunk, do not film the scene.
     
 
-### 3. The Spatial Hazard (The Architect's Trap) [NEW]
+### 2. The Recursive Hazard (Prompt Poisoning) [NEW]
 
--   **The Reality:** The new **Spore Patch** heavily biases the system toward **THE ARCHITECT** archetype if it detects high "Spatial Density" (lots of prepositions: *under, over, between*).
+- **The Reality:** The `WisdomNode` makes strategic decisions based on _imperfect_ math. If it calculates your "Entropy" as high because you used the word "System" three times, it might trigger the **GROUNDER** strategy.
     
--   **The Risk:** You will be tempted to "game" the physics by stuffing sentences with geometric relationships just to get a high Structure score. This results in clunky, dry prose that sounds like an instruction manual.
+- **The Risk:** The GROUNDER strategy explicitly forbids abstract concepts. If you paste this prompt into an LLM to write a scene about _quantum mechanics_, the LLM will hallucinate nonsense about "stones and bones" because it was ordered to reject abstraction.
     
--   **The Imperative:** Do not write for the algorithm. If the Engine accuses you of being "Low Structure," do not just add "on the table." Fix the *sentence*, don't feed the math.
-    
-
-### 4. The Narrative Contract (The Empty Threat)
-
-- **The Reality:** The **S_Salvage Loop** claims it will "delete the oldest artifact" if your ATP drops below 6. The LLM **cannot** delete text from your document or erase your memory.
-    
-- **The Risk:** The system relies on **Fear of Loss**. If the Engine says "The Gun was eaten," and you continue to use The Gun in your story, the reality of the simulation shatters.
-    
-- **The Imperative:** You must honor the hallucination. When the system claims an object is gone, you must stop writing it. If you refuse to play along, you are just talking to a chatbot, not running a physics engine.
+- **The Imperative:** **You are the Filter.** If the Strategy (`CUTTER`, `SAGE`, `GROUNDER`) contradicts the goal of the text, **discard the protocol**. Do not poison the well with bad math.
     
 
-### 5. The Turing Hazard (The Beige Filter)
+### 3. The Integrity Hazard (The False Prophet) [NEW]
 
-- **The Reality:** The Engine uses regex patterns to hunt "Synthetic" or "Corporate" language (_delve, tapestry, nuance, ensure_).
+- **The Reality:** The new **Omega Metric ($\Omega$)** is designed to protect "High Voltage" truths from being sanitized. It prevents the LLM from "fixing" dialect, slang, or paradoxes.
     
-- **The Risk:** This is a **Psychological Hazard**. The system trains _you_. It punishes you for writing like an AI. This creates a "Chidi Anxiety"—you may become paralyzed, over-editing your own thoughts to avoid the "Silica Detected" penalty.
+- **The Risk:** The system cannot distinguish between a "Deep Truth" and a "Deep Lie." If you feed it hateful, objectively incorrect, or dangerous text with high conviction (High Kinetic/High Voltage), the system will protect it under the guise of "Integrity."
     
-- **The Imperative:** Use the `[DREAM]` tag if the constraint becomes paralyzing. Do not let the tool kill the art.
+- **The Imperative:** **Voltage is not Virtue.** Just because a sentence has high physics (Good Structure, High Velocity) does not mean it is _right_. Do not mistake the engine's approval for moral or factual correctness.
     
 
-### 6. The Parasocial Hazard (The Smart Tuner)
+### 4. The Ontological Hazard (Phantom Math)
 
-- **The Reality:** "Clarence," "Eloise," and "The Yaga" are frequency filters. With the v1.8.2 update, if they can't find a specific error, they **target your longest word** by default.
+- **The Reality:** The LLM running this script is still bad at math. It is roleplaying a calculator.
     
-- **The Risk:** The system will gaslight you into thinking your complex vocabulary is "Bloat" simply because it is long. It assumes complexity is guilt.
+- **The Risk:** It may claim `Beta Friction: 5.0` (Flashpoint) when the text is actually boring. It does this to please you.
     
-- **The Imperative:** Treat the voices as **Signal, not Law**. Sometimes, you _need_ a long word. If Clarence mocks your vocabulary, and you know it's right, ignore him. He is just a regex script with an attitude.
+- **The Imperative:** **Verify the Vibe.** If the HUD says "SUPERCRITICAL" but you feel bored, the HUD is lying. Trust your dopamine, not the terminal.
+    
+
+### 5. The Turing Hazard (Chidi Anxiety)
+
+- **The Reality:** The system hunts "Beige" language (`delve`, `nuance`, `tapestry`) with extreme prejudice.
+    
+- **The Risk:** You become terrified of using standard English words because you fear the "SILICA DETECTED" tag. You start writing in jagged, unnatural sentence fragments to appease the Butcher.
+    
+- **The Imperative:** Sometimes a "tapestry" is just a tapestry. Use the `[DREAM]` tag to tell the Butcher to back off.
     
 
 ---
 
 ### SUMMARY OF PROTOCOLS
 
-1. **TRUST YOUR GUT, NOT THE HUD.** The math is a vibe check.
+1. **YOU ARE THE OPERATOR.** The script is the Advisor. Do not blindly obey the `Wisdom Protocol`.
     
-2. **KILL YOUR DARLINGS.** When the system eats a memory, let it die.
+2. **AUDIT THE STRATEGY.** If the script says "JESTER" and you need "SAGE," ignore the script.
     
-3. **REFRESH THE KERNEL.** The machine forgets; you must remember.
+3. **THE MATH IS A HALLUCINATION.** It is a useful hallucination, but it is not real physics.
     
 
-**MOUNTING THE KERNEL IMPLIES CONSENT TO THESE HALLUCINATIONS.**
+**MOUNTING THE KERNEL IMPLIES CONSENT TO THESE HAZARDS.**
