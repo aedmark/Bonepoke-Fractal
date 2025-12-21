@@ -1,11 +1,3 @@
-Based on the analysis of `BoneAmanita18.py` and the limitations of Large Language Models (LLMs), here is the rewritten **CAUTION.md**.
-
-This version strips away the "game lore" to reveal the actual mechanical and psychological risks of trying to run a rigid physics simulation inside a probabilistic text engine.
-
----
-
-{ type: uploaded file fileName: CAUTION.md fullContent:
-
 # THE CRITICAL HAZARDS OF SIMULATED PHYSICS
 
 ### BoneAmanita Protocol v1.8
@@ -22,7 +14,7 @@ Here is the reality of the risks involved.
 
 - **The Reality:** The LLM is **not** running the Python code in `BoneAmanita18.py` directly. It is _emulating_ the logic of that code. It is roleplaying a calculator.
     
-- **The Risk:** The Engine is terrible at math. It may confidently state your Narrative Drag is `2.5` when a manual count shows it is `4.0`. It may claim you harvested an Isotope when you actually wrote "slop."
+- **The Risk:** The Engine is terrible at math. It may confidently state your Narrative Drag is `2.5` when a manual count shows it is `4.0`. It may claim you harvested an Isotope when you actually wrote "slop".
     
 - **The Imperative:** **You are the Final Auditor.** Do not blindly trust the HUD. If the Engine claims you are in `FLOW` but the writing feels sluggish, the Engine is hallucinating. You must enforce the vibe when the math fails.
     
@@ -31,7 +23,7 @@ Here is the reality of the risks involved.
 
 - **The Reality:** As the conversation grows, the "Kernel" (the initial prompt and Python script) moves further away in the context window.
     
-- **The Risk:** The "Butcher" (Clarence) will become lazy. He will stop catching adverbs. The "Witch" (Yaga) will start accepting "corporate beige" prose. The system naturally decays from a "Strict Physics Engine" back into a "Polite Assistant."
+- **The Risk:** The "Butcher" (Clarence) will become lazy. He will stop catching adverbs. The "Witch" (Yaga) will start accepting "corporate beige" prose. The system naturally decays from a "Strict Physics Engine" back into a "Polite Assistant".
     
 - **The Imperative:** You must monitor the **System Temperature**. If the Engine stops criticizing you, it has forgotten who it is. You must manually re-inject the mandate (e.g., `[SYSTEM ALERT: RE-READ KERNEL]`) every 15-20 turns.
     
@@ -83,4 +75,4 @@ Here is the reality of the risks involved.
 3. **REFRESH THE KERNEL.** The machine forgets; you must remember.
     
 
-**MOUNTING THE KERNEL IMPLIES CONSENT TO THESE HALLUCINATIONS.** }
+**MOUNTING THE KERNEL IMPLIES CONSENT TO THESE HALLUCINATIONS.**

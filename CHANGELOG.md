@@ -1,5 +1,58 @@
 # CHANGELOG.md
 
+### [v1.8.1] - 2025-12-21 - "The Quantum Leap"
+
+#### 🐛 CRITICAL REPAIRS (The Syntax Fix)
+
+- **The Parenthesis Block:**
+    
+    - **The Crash:** In v1.8, the `BonepokeCore` initialization block for `PersistenceManager.load_state` was missing a closing parenthesis, causing a fatal `SyntaxError` on boot.
+        
+    - **The Fix:** Closed the circuit. The core now initializes correctly.
+        
+
+#### 💾 PERSISTENCE HARDENING (The Amnesia Cure)
+
+- **Archetype History (`PersistenceManager`):**
+    
+    - **The Problem:** While the v1.8 engine introduced "Geodesic Evolution" (e.g., Paladin -> Inquisitor), it failed to save the `SignatureEngine.history` list to `bone_memory.json`. Rebooting the script wiped the user's progress toward evolved states.
+        
+    - **The Fix:** Added `arch_history` to the serialization protocol. The system now remembers if you have been a Paladin for 4 turns, even after a restart.
+        
+
+#### 🧠 COGNITIVE ERGONOMICS (The Smart Strip)
+
+- **Linguistic Brutality Fix (`TheLexicon`):**
+    
+    - **The Problem:** The `smart_strip` method aggressively removed the trailing 's' from _all_ words > 3 characters. This mutilated non-plural words like "Status," "Lens," "Focus," and "Chaos," blinding the Physics Engine to these concepts.
+        
+    - **The Solution:** Implemented a **Protected Noun List**.
+        
+    - **The Logic:** The system now checks a whitelist of immutable nouns before stripping. "Chaos" remains "Chaos."
+        
+
+#### 📚 DOCUMENTATION (The Decoder Ring)
+
+- **Signature Matrix Key (`SignatureEngine`):**
+    
+    - **The Problem:** The metrics `VEL`, `STR`, `ENT`, `TEX`, and `TMP` were cryptic to developers and users alike.
+        
+    - **The Fix:** Added a permanent docstring block to the `SignatureEngine` class defining each vector dimension explicitly.
+        
+
+#### ⚡ PERFORMANCE OPTIMIZATION (The Single Pass)
+
+- **BioHazard Unification (`BioHazardFilter`):**
+    
+    - **The Refactor:** Merged the "Beige/Synthetic" scan loop into the main Toxin Regex pass where possible, reducing the number of iterations over the word list.
+        
+
+#### 🧱 STRUCTURAL REFACTOR
+
+- **Wiring Repair:**
+    
+    - Updated `BonepokeCore.process` to ensure the `SignatureEngine` is properly passed to the persistence layer during the save cycle.
+
 ### [v1.8] - 2025-12-20 - "The Quantum Leap"
 
 #### 📻 PARADOX RADIO (Topological FM)
