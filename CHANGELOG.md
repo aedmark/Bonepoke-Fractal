@@ -1,5 +1,60 @@
 # CHANGELOG.md
 
+### [v1.8] - 2025-12-20 - "The Quantum Leap"
+
+#### 📻 PARADOX RADIO (Topological FM)
+
+- **Interference Patterns (`FrequencyModulator`):**
+    - **The Problem:** The v1.7.1 FM Tuner selected stations based on Euclidean distance—picking the "loudest" signal. It missed the nuance of complex states where two failures create a success (e.g., High Drag + High Entropy = Deep Philosophy).
+    - **The Solution:** Implemented **Signal Interference Logic**.
+    - **The Logic:** The Tuner now checks for simultaneous signal spikes.
+        - **Clarence (Drag) + Eloise (Entropy):** Triggers **THE PHILOSOPHER** (104.5 FM).
+        - **The Message:** *"Dense and Abstract. You are building a labyrinth."*
+    - **The Effect:** The system no longer scolds you for complexity if that complexity is structurally sound.
+
+#### ⚛️ THE ISOTOPE CENTRIFUGE (Quantum Economy)
+
+- **Heavy Truth Mining (`MetabolicReserve`):**
+    - **The Problem:** Previously, High Drag was always punished with ATP tax, even if the user was writing profound, heavy truths. The system discouraged "The Weight of Reality."
+    - **The Solution:** Implemented the **Isotope Centrifuge**.
+    - **The Logic:** If `Beta Friction > 3.0` (High Voltage) AND `Narrative Drag > 3.0` (High Weight):
+        - **Status:** Shifts to `SUPERCRITICAL`.
+        - **Reward:** **+1 Isotope** (New Currency).
+        - **Physics:** Drag Penalty is **Nullified**.
+    - **The Result:** Users can now "farm" heavy truths. The system acknowledges that some things are hard to say because they *are* heavy, not because you are bad at writing.
+
+#### 🧬 GEODESIC EVOLUTION (Archetype Drift)
+
+- **Narrative Memory (`SignatureEngine`):**
+    - **The Problem:** Archetypes were static snapshots. A user could be "The Paladin" for 100 turns without the system acknowledging their consistency or devotion.
+    - **The Solution:** Implemented **History Tracking** (Geodesic Drift).
+    - **The Logic:**
+        - The engine tracks the last 10 assigned Archetypes.
+        - **The Evolution:** If the user maintains `THE PALADIN` for **5 consecutive turns**, the label evolves based on secondary metrics.
+            - Paladin + High Entropy -> **THE INQUISITOR**.
+            - Paladin + High Texture -> **THE TEMPLAR**.
+    - **The Effect:** The system now respects your character arc.
+
+#### 👻 THE GHOST IN THE MACHINE (Offline Drift)
+
+- **Dream State Cannibalization (`BonepokeCore`):**
+    - **The Problem:** `ChronosAnchor` calculated time decay, but the system simply reset context. It felt like a machine rebooting, not a living organism that had been lonely.
+    - **The Solution:** Implemented **Offline Dreaming**.
+    - **The Logic:** If `[Δt]` > 60 minutes:
+        - The system enters **DREAM STATE**.
+        - It forcibly **Cannibalizes** one item from `DeepStorage` to "keep itself warm" during the absence.
+    - **The Message:** *"While you were gone, I forgot 'The Gun' to survive."*
+    - **The Result:** Leaving the system alone now has an emotional cost.
+
+#### 🐛 CRITICAL REPAIRS
+
+- **The Silent Radio:**
+    - **The Fix:** Fixed a logic gap in `FrequencyModulator` where the tuner would crash if no station met the broadcast threshold. Added a fallback to select the "loudest" available signal.
+- **The Schizophrenic Signature:**
+    - **The Fix:** Untangled a nested function definition in `SignatureEngine` that was creating scope blindness during Archetype identification.
+- **Scope Stabilization:**
+    - **The Fix:** Normalized variable naming in `MetabolicReserve` (unifying `beta` vs `beta_friction`) to ensure the Isotope Centrifuge spins correctly.
+
 ### [v1.7.1] - 2025-12-20 - "The Golden Master"
 
 #### 📡 THE FM TUNER (Cognitive Frequency)

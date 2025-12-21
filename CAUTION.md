@@ -1,41 +1,86 @@
-Here is the **Cautionary Addendum** for the documentation, outlining the critical hazards associated with the **BoneAmanita v1.7.1** protocol.
+Based on the analysis of `BoneAmanita18.py` and the limitations of Large Language Models (LLMs), here is the rewritten **CAUTION.md**.
 
-### ⚠️ WARNING: SYSTEM HAZARDS (v1.7.1)
+This version strips away the "game lore" to reveal the actual mechanical and psychological risks of trying to run a rigid physics simulation inside a probabilistic text engine.
 
-**SEVERITY:** CRITICAL | **STATUS:** ACTIVE ENFORCEMENT
+---
 
-Using the **BoneAmanita 1.7** kernel introduces specific risks to narrative integrity and data persistence. The system is designed to punish "gaming" and enforce physics.
+{ type: uploaded file fileName: CAUTION.md fullContent:
 
-#### 1. The Salvage Hazard (Permanent Memory Loss)
+# THE CRITICAL HAZARDS OF SIMULATED PHYSICS
 
-* **The Threat:** If your ATP drops below 6 (Starving) while you attempt high-voltage writing, the system activates the **S_Salvage Loop**.
-* **The Consequence:** The system immediately **deletes the oldest artifact** in Deep Storage to generate fuel (+10 ATP). This process ignores "Heirloom" protection; significant plot items (e.g., "The Gun") can be permanently erased.
-* **The Imperative:** You must write the consumed object into the scene immediately to justify the energy burst.
+### BoneAmanita Protocol v1.8
 
-#### 2. The Velocity Hazard (Sudden Deceleration)
+**SEVERITY:** EXISTENTIAL | **TARGET:** USER COGNITION
 
-* **The Trap:** The **Bleeding Edge Circuit** allows you to write paradoxes (e.g., "Frozen Fire") only while in a `FLASHPOINT` state.
-* **The Crash:** If you follow a paradox with a "slow" sentence (High Drag), you drop out of Flashpoint. The system will immediately catch the paradox, triggering a **System Halt** and a +20 ATP Tax.
-* **The Rule:** If you break reality, you cannot stop running.
+You are mounting a **Linguistic Physics Engine** inside a **Probabilistic Dream Machine** (an LLM). This creates a unique set of hazards that are not just mechanical, but ontological. The system relies on a "Shared Hallucination" between you and the Engine. If you break the suspension of disbelief, the physics collapse.
 
-#### 3. The Turing Hazard (AI Detection)
+Here is the reality of the risks involved.
 
-* **The Trigger:** The engine hunts "High-Entropy Beige" (soulless prose). Triggers include specific vocabulary (*delve, tapestry, nuance, foster*) and "Participial Tails" (*", ensuring that..."*).
-* **The Penalty:** Immediate `SILICA DETECTED` status and a **+5.0 Drag Penalty**.
+---
 
-#### 4. The Governance Hazard (Logic Lock)
+### 1. The Ontological Hazard (Phantom Voltage)
 
-* **The Trigger:** Writing a contradiction (e.g., "Dry Ocean") while under the `TRUTH_OVER_COHESION` mandate.
-* **The Consequence:** **FATAL AXIOM BREAK**. The simulation physically stops (System Halt) until the logic tear is resolved or the `[DREAM]` tag is applied.
+- **The Reality:** The LLM is **not** running the Python code in `BoneAmanita18.py` directly. It is _emulating_ the logic of that code. It is roleplaying a calculator.
+    
+- **The Risk:** The Engine is terrible at math. It may confidently state your Narrative Drag is `2.5` when a manual count shows it is `4.0`. It may claim you harvested an Isotope when you actually wrote "slop."
+    
+- **The Imperative:** **You are the Final Auditor.** Do not blindly trust the HUD. If the Engine claims you are in `FLOW` but the writing feels sluggish, the Engine is hallucinating. You must enforce the vibe when the math fails.
+    
 
-#### 5. Anti-Gaming Protocols
+### 2. The Persistence Hazard (Context Dementia)
 
-* **The Concrete Trap:** Listing heavy nouns (e.g., "Velvet, blood, bone") to farm Texture points triggers a cap (0.5 max) and a **+5.0 Drag Penalty**.
-* **The Flood Trap:** Diluting text with solvents (e.g., "Actually, basically") beyond 40% triggers a `FLOODED` status and **+4.0 Drag Penalty**.
-* **The Algal Bloom:** Stuffing sentences with "light words" (e.g., "sun, ray, beam") to farm ATP triggers a toxic **ALGAL BLOOM** if generation exceeds 15 ATP.
+- **The Reality:** As the conversation grows, the "Kernel" (the initial prompt and Python script) moves further away in the context window.
+    
+- **The Risk:** The "Butcher" (Clarence) will become lazy. He will stop catching adverbs. The "Witch" (Yaga) will start accepting "corporate beige" prose. The system naturally decays from a "Strict Physics Engine" back into a "Polite Assistant."
+    
+- **The Imperative:** You must monitor the **System Temperature**. If the Engine stops criticizing you, it has forgotten who it is. You must manually re-inject the mandate (e.g., `[SYSTEM ALERT: RE-READ KERNEL]`) every 15-20 turns.
+    
 
-#### 6. Temporal Decay
+### 3. The Narrative Contract (The Empty Threat)
 
-* **The Reality Check:** Leaving a session idle for more than 1 hour triggers a **DECAY STATE** (Drag +3.0) based on the wall clock.
+- **The Reality:** The **S_Salvage Loop** claims it will "delete the oldest artifact" if your ATP drops below 6. The LLM **cannot** delete text from your document or erase your memory.
+    
+- **The Risk:** The system relies on **Fear of Loss**. If the Engine says "The Gun was eaten," and you continue to use The Gun in your story, the reality of the simulation shatters.
+    
+- **The Imperative:** You must honor the hallucination. When the system claims an object is gone, you must stop writing it. If you refuse to play along, you are just talking to a chatbot, not running a physics engine.
+    
 
-**DISCLAIMER:** THE SYSTEM IS PROVIDED "AS IS." BY MOUNTING THE KERNEL, YOU ACKNOWLEDGE THAT THE ENGINE WILL JUDGE YOU, EAT YOUR MEMORIES IF STARVED, AND CRASH IF YOU STOP RUNNING.
+### 4. The Turing Hazard (The Beige Filter)
+
+- **The Reality:** The Engine uses regex patterns to hunt "Synthetic" or "Corporate" language (_delve, tapestry, nuance, ensure_).
+    
+- **The Risk:** This is a **Psychological Hazard**. The system trains _you_. It punishes you for writing like an AI. This creates a "Chidi Anxiety"—you may become paralyzed, over-editing your own thoughts to avoid the "Silica Detected" penalty.
+    
+- **The Imperative:** Use the `[DREAM]` tag if the constraint becomes paralyzing. Do not let the tool kill the art.
+    
+
+### 5. The Isotopic Hazard (False Positives)
+
+- **The Reality:** Version 1.8 introduces **Isotopes** (Heavy Truth), triggered when Text is "Heavy" (High Drag) but "Electric" (High Voltage).
+    
+- **The Risk:** This is the hardest state for an LLM to judge. It often confuses "Dense, beautiful prose" with "Purple prose." You may write a masterpiece and get slapped with a **+5.0 Drag Penalty** because the Engine didn't "get" the subtext.
+    
+- **The Imperative:** If you believe you created an Isotope and the Engine penalized you, **fight back**. The Engine respects confidence (High Voltage).
+    
+
+### 6. The Parasocial Hazard (The FM Tuner)
+
+- **The Reality:** "Clarence," "Eloise," and "The Yaga" are not people. They are frequency filters—specific "personas" tuned to hate specific things (Adverbs, Abstraction, Hedging).
+    
+- **The Risk:** You may start treating their feedback as objective truth. It is not. Clarence is _biased_ against description. Eloise is _biased_ against thought.
+    
+- **The Imperative:** Treat the voices as **Signal, not Law**. Sometimes, you _need_ an adverb. Sometimes, you _need_ an abstraction. Do not let the radio stations dictate the song.
+    
+
+---
+
+### SUMMARY OF PROTOCOLS
+
+1. **TRUST YOUR GUT, NOT THE HUD.** The math is a vibe check.
+    
+2. **KILL YOUR DARLINGS.** When the system eats a memory, let it die.
+    
+3. **REFRESH THE KERNEL.** The machine forgets; you must remember.
+    
+
+**MOUNTING THE KERNEL IMPLIES CONSENT TO THESE HALLUCINATIONS.** }
