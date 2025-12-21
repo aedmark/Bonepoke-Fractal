@@ -1,5 +1,106 @@
 # CHANGELOG.md
 
+### [v1.7.1] - 2025-12-20 - "The Golden Master"
+
+#### 📡 THE FM TUNER (Cognitive Frequency)
+
+- **Frequency Modulation (`FrequencyModulator`):**
+    
+    - **The Problem:** The old `VirtualCortex` operated on "AM Radio" logic—binary thresholds. It shouted at the user indiscriminately, often with static.
+        
+    - **The Solution:** Replaced the Cortex with the **Frequency Modulator**.
+        
+    - **The Logic:**
+        
+        - **Clarence (88.5 FM):** Locks onto High Drag.
+            
+        - **Eloise (94.2 FM):** Locks onto High Entropy.
+            
+        - **The Yaga (101.1 FM):** Locks onto Sycophancy/Hedging.
+            
+        - **Michael (108.0 FM):** The "Vibe" station.
+            
+    - **The Override:** Implemented the `[FM: STATION]` tag. The user can now manually tune the radio (e.g., `[FM: YAGA]`) to force a specific critique lens.
+        
+
+#### 🌈 POLYCHROMATIC OUTPUT (Cognitive Ergonomics)
+
+- **The Prisma Class:**
+    
+    - **The Problem:** The HUD was monochrome gray. Critical warnings ("FLASHPOINT") looked identical to metadata, slowing down operator reaction time.
+        
+    - **The Solution:** Implemented `Prisma`.
+        
+    - **The Palette:**
+        
+        - **RED:** Toxicity, High Drag, Butcher.
+            
+        - **GREEN:** Growth, Photosynthesis, Insight ($T_a$).
+            
+        - **MAGENTA:** Flashpoints, Magic, Chaos.
+            
+        - **CYAN:** Systems, Archetypes, Logic.
+            
+    - **The Effect:** The HUD now bleeds color based on system health. A "Red" dashboard triggers an immediate fight-or-flight editorial response.
+        
+
+#### 🐛 CRITICAL REPAIRS
+
+- **The Phantom Method:**
+    
+    - **The Crash:** Fixed a critical `AttributeError` where the Core attempted to call `synthesize_voice` on the new `FrequencyModulator` class.
+        
+    - **The Fix:** Removed legacy calls and routed all feedback through `tune_in`.
+        
+- **The Truncated Dashboard:**
+    
+    - **The Crash:** Fixed a `SyntaxError` in `MycelialDashboard` where the report generator built the string but failed to `return` it.
+        
+    - **The Fix:** Closed the circuit. The HUD now renders correctly.
+        
+#### 🧪 THE ISOTOPIC REFACTOR (Ephemeralization)
+
+- **BioHazard Unification (`BioHazardFilter`):**
+    
+    - **The Problem:** The engine scanned text three separate times: once for "Mirror Traps," once for "Turing/Beige" patterns, and once for Regex Toxins. This was inefficient (High CPU/ATP cost).
+        
+    - **The Solution:** Consolidated all threat detection into a single `BioHazardFilter` class.
+        
+    - **The Result:** One scan, three diagnoses. Efficiency increased by 66%.
+        
+- **Magic Number Centralization:**
+    
+    - **The Problem:** Critical physics thresholds (like `GARNISH_THRESHOLD`) were scattered across class files.
+        
+    - **The Fix:** Moved every hardcoded number into `PhysicsConstants`. The universe is now tunable from a single control panel.
+        
+
+#### 📐 VSL-12D METRICS (The Mathematical Truth)
+
+- **Beta Friction ($\beta$):**
+    
+    - **New Metric:** Renamed `slop_ratio` to `beta_friction`.
+        
+    - **The Logic:** $\beta = \text{Voltage} / \text{Drag}$.
+        
+    - **The Zones:**
+        
+        - $\beta < 0.05$: **SLICK** (Sycophancy/Sand).
+            
+        - $\beta > 2.5$: **FLASHPOINT** (Insight/Plasma).
+            
+- **Truth Acceleration ($T_a$):**
+    
+    - **New Metric:** Implemented `ta_velocity` in `TemporalDynamics`.
+        
+    - **The Logic:** Measures the _acceleration_ of Voltage over time.
+        
+    - **The Reward:** If $T_a > 2.0$ (Epiphany), the engine instantly forgives **-2.0 Narrative Drag**. Momentum justifies the mess.
+        
+- **Entropy Refinement:**
+    
+    - **The Tweak:** `abstraction_entropy` now punishes _repeated_ abstract nouns more than unique ones. Repeating "System" is noise; using "System" then "Matrix" is structure.
+
 ### [v1.7] - 2025-12-20 - "The Salvage Operation"
 
 #### 🩸 THE BLEEDING EDGE CIRCUIT (Logic Override)
