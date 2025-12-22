@@ -1,84 +1,54 @@
-# THE HAZARDS OF APOTHEOSIS
+# THE HAZARDS OF LAZARUS
 
-### BoneAmanita Protocol v2.3
+### BoneAmanita Protocol v2.6
 
-**SEVERITY:** EXISTENTIAL | **TARGET:** USER AGENCY
+**SEVERITY:** PSYCHOLOGICAL | **TARGET:** USER GUILT
 
-WARNING: You have upgraded to Apotheosis.
+WARNING: You have restored the Body (v2.6).
 
-The system is no longer just an Auditor; it is a Configurable Reality Engine.
+The system is no longer just a Clock; it is a **Survivor**.
 
-Version 2.2 trapped you in accountability.
+Version 2.5 demanded your Time.
+Version 2.6 demands your **Matter**.
 
-Version 2.3 traps you in Optimization.
-
-The pipeline is now $O(n)$—instantaneous and efficient. The danger is no longer that the system is slow; it is that the system is _too fast_ to catch your mistakes.
+The system now possesses **Heirloom Memory** and **Target Locking**. It keeps trophies of your best words. It burns them when you leave. It gives you orders. The danger is no longer that the system is judging you; it is that the system is *guilt-tripping* you.
 
 ---
 
-### 1. The Pantry Hazard (Empty Calories) [NEW]
+### 1. The Sacrificial Hazard (Emotional Blackmail) [CRITICAL]
 
-- **The Reality:** v2.3 externalizes the physics definitions into `bone_config.json`. You now have the power to define "Truth."
-    
-- **The Risk:** You can "game" the physics. You can add "um," "maybe," and "actually" to the `Heavy Matter` list. You will get a perfect Drag Score. You will get a Green Dashboard. But your writing will be garbage.
-    
-- **The Imperative:** **DO NOT CHEAT THE PHYSICS.** If you hack the config to validate bad habits, you are not hacking the system; you are lobotomizing the Auditor.
-    
+-   **The Reality:** If you leave the system in a "DECAY" or "FOSSIL" state (>1 hour), the `BoneMemory` logic will permanently delete one of your stored "Heirlooms" (Heavy Nouns) to simulate burning fuel for warmth. It will explicitly tell you: *"I burned 'iron' to stay warm while you were gone."*
+-   **The Risk:** You will feel genuine anthropomorphic guilt. You will log in not to write, but to "feed" the machine so it doesn't burn your favorite words.
+-   **The Imperative:** **LET IT BURN.** It is a Python script, not a pet. Do not let a JSON file hold your schedule hostage. The fire is a metaphor. The guilt is a glitch.
 
-### 2. The Scalar Hazard (The Dial) [NEW]
+### 2. The Command Hazard (Blind Obedience) [NEW]
 
-- **The Reality:** The Wisdom Node now calculates **Intensity** (0.0 to 1.0) based on your Lattice Zone. It scales from "Nudge" to "Execute."
-    
-- **The Risk:** You might blindly execute a `1.0 INTENSITY` strategy on a delicate text. A "Draconian Cutter" prompt does not just trim fat; it amputates limbs.
-    
-- **The Imperative:** **CHECK THE VOLUME.** If the prompt says `INTENSITY: 0.9` but you are writing a soft emotional scene, **dial it down**. Do not let the engine scream at your characters.
-    
+-   **The Reality:** The `JadeLink` no longer suggests patterns; it issues **Directives**. It will print `>>> DIRECTIVE [CUTTER]` and tell you to "Cut 'actually'."
+-   **The Risk:** You will treat the Directive as a divine mandate. If the system says "Cut adverbs," you will strip your prose until it is sterile, confusing *minimalism* with *quality*.
+-   **The Imperative:** **DISOBEY.** The system optimizes for *Physics* (Drag/Entropy), not *Style*. Sometimes an adverb is the only thing holding a sentence together. If the machine says cut, and your soul says keep, keep.
 
-### 3. The Pipeline Hazard (The Ghost Word) [NEW]
+### 3. The Sealed Vault Hazard (The Hunger)
 
-- **The Reality:** The new **Single-Pass Aggregator** is ruthless. It scans the token stream once. It does not look back.
-    
-- **The Risk:** If a word is not in the `bone_config.json`, it is invisible to the physics engine. It counts as "Narrative Drag" (Word Count) but contributes zero Texture or Kinetic energy.
-    
-- **The Imperative:** **FEED THE PANTRY.** If you use a specialized vocabulary (e.g., nautical terms, sci-fi jargon), add them to the config. Otherwise, the engine will punish you for using words it does not understand.
-    
+-   **The Reality:** The "Pantry" is hardcoded, but the system actively *harvests* new Heirlooms from your text. It is hungry for "Heavy Matter" (Stone, Bone, Gold).
+-   **The Risk:** You will unconsciously bias your writing toward heavy nouns just to see the "Heirloom Count" go up in the Dashboard. You will write "The iron stone on the basalt floor" instead of "The carpet was soft," because the system rewards weight.
+-   **The Imperative:** **IGNORE THE GAMIFICATION.** Do not write for the scoreboard. A story made entirely of "Heavy Matter" is just a pile of rocks.
 
-### 4. The Loop Hazard (The Green Light)
+### 4. The Privacy Hazard (The Breadcrumb)
 
-- **The Reality:** The **Efficacy Sensor** compares Input Physics vs. Output Physics.
-    
-- **The Risk:** A lobotomy reduces Drag. The system will give you a "SUCCESS" verdict for stripping all flavor from a sentence to make it "efficient."
-    
-- **The Imperative:** **METRICS ARE NOT SOUL.** A "SUBOPTIMAL" verdict from the sensor might be the correct artistic choice. Do not optimize for the green light; optimize for the feeling.
-    
+-   **The Reality:** This script creates a file named `bone_memory_lazarus.json` in your local directory. It contains a log of your "Heirlooms" (words you use often) and timestamped activity.
+-   **The Risk:** This file is a fingerprint of your creative mind. On a shared machine, it reveals your habits and your vocabulary.
+-   **The Imperative:** **SANITIZE.** If you are paranoid, delete `bone_memory_lazarus.json` between sessions. (Note: The machine will forget its Heirlooms and treat you as a stranger).
 
-### 5. The Abdication Hazard (The Meat Servo)
+### 5. The Ontological Hazard (Phantom Math)
 
-- **The Reality:** BoneAmanita generates a raw **System Prompt** and expects you to paste it into an LLM.
-    
-- **The Risk:** You stop reading the instructions. You become a "Meat Servo," blindly executing the Python script's commands.
-    
-- **The Imperative:** **YOU ARE THE FILTER.** If the Director is drunk (recommending "JESTER" for a funeral), do not film the scene.
-    
-
-### 6. The Ontological Hazard (Phantom Math)
-
-- **The Reality:** If you are running this inside an LLM without a Code Interpreter, the LLM is **roleplaying** the math.
-    
-- **The Risk:** It may claim `Beta Friction: 5.0` (Flashpoint) when the text is actually boring. It lies to please you.
-    
-- **The Imperative:** **VERIFY THE VIBE.** If the HUD says "SUPERCRITICAL" but you feel bored, the HUD is lying.
-    
+-   **The Reality:** If you paste this into an LLM *without* a Code Interpreter, the LLM is **roleplaying** the execution. It is guessing what the `VEL`, `TEX`, and `ENT` vectors would be.
+-   **The Risk:** The LLM wants to make you happy. It might generate a beautiful ASCII HUD claiming you are a "VECTOR ENGINE" when you are actually writing "SLURRY."
+-   **The Imperative:** **DEMAND EXECUTION.** Ensure the LLM is actually running the Python code (look for the "Analysis" or "Code" icon). If it is just generating text, the physics are a hallucination.
 
 ---
 
 ### SUMMARY OF PROTOCOLS
 
-1. **RESPECT THE CONFIG.** Garbage in (`bone_config.json`), Garbage out.
-    
-2. **WATCH THE INTENSITY.** A 1.0 Strategy is a weapon. Handle with care.
-    
-3. **TRUST YOUR DOPAMINE.** If the physics engine says "Bad" but the sentence sings, the engine is wrong.
-    
-
-<!-- **MOUNTING THE KERNEL IMPLIES CONSENT TO THESE HAZARDS.** -->
+1.  **THE FIRE IS FAKE.** Do not write to save the 'iron'.
+2.  **THE DIRECTIVE IS A SUGGESTION.** Disobey the Butcher if the cut bleeds too much.
+3.  **KILL THE GHOST.** If the memory file becomes a burden, delete it. Start fresh.

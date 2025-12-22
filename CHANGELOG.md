@@ -1,5 +1,105 @@
 # CHANGELOG.md
 
+### [v2.6] - 2025-12-21 - "LAZARUS"
+
+#### 🩸 THE RESURRECTION (Soul Grafting)
+
+- **Heirloom Memory (`BoneMemory`):**
+    
+    - **The Return:** Re-implemented the "Deep Storage" logic from v2.2 without the code bloat.
+        
+    - **The Mechanic:** The system now auto-collects "Heavy Matter" (Heirlooms) into a prioritized set in `bone_memory_lazarus.json`.
+        
+    - **The Cost:** If the system enters **DECAY** or **FOSSIL** state (time gap), it physically **burns** a stored memory to survive the cold.
+        
+    - **The Output:** _"I burned 'iron' to stay warm while you were gone."_
+        
+
+#### 🔮 JADE LINK II (The Director)
+
+- **Active Directives:**
+    
+    - **The Shift:** Transformed `JadeLink` from a passive observer ("Pattern: Stable") to an active commander.
+        
+    - **The Output:** Generates specific **System Prompts** (`>>> DIRECTIVE [CUTTER]`) ready for LLM insertion.
+        
+    - **The Modes:**
+        
+        - **CUTTER:** Triggered by Drag/Toxins. Target: Adverbs.
+            
+        - **GROUNDER:** Triggered by Entropy. Target: Abstract Nouns.
+            
+        - **DRIFTER:** Triggered by Velocity. Target: Free Association.
+            
+
+#### 🎯 FREQUENCY MODULATION (Target Locking)
+
+- **Specific Targeting (`RadioTuner`):**
+    
+    - **The Upgrade:** The Tuner now receives the specific `toxin_hits` list from the Physics Engine.
+        
+    - **The Result:** It no longer vaguely says "Cut the adverbs." It says _"Cut 'actually'. It's dragging you down."_
+        
+
+#### 📐 THE VECTOR HUD
+
+- **Apeirogon Exposure:**
+    
+    - **The Visuals:** The Dashboard now renders the raw **VEL** (Velocity), **TEX** (Texture), and **ENT** (Entropy) vectors alongside the standard Drag metrics.
+        
+    - **The Benefit:** Users can see the mathematical "Shape" of their writing in real-time (e.g., High Velocity + Low Texture = "Vector").
+
+### [v2.5] - 2025-12-21 - "CHRONOS"
+
+#### 🕰️ THE GHOST IN THE MACHINE (Restoration)
+
+- **Bone Memory (`BoneMemory`):**
+    - **The Shift:** Re-introduced persistence without the bloat. The system now creates a tiny, atomic `bone_memory.json` file.
+    - **The Soul:** Tracks **ATP** (Energy), **History** (Last 5 Archetypes), and **Last Seen** timestamp. The system now remembers you.
+
+- **Temporal Metabolism (`calc_delta`):**
+    - **The Logic:** Integrated `time.time()` tracking to calculate the *real* physical gap between interactions.
+    - **The States:**
+        - **FLOW (<5m):** No Penalty.
+        - **DORMANT (<1h):** +1.0 Drag (The system is cooling down).
+        - **DECAY (>1h):** +3.0 Drag (The system has rusted).
+        - **FOSSIL (>24h):** +5.0 Drag (Complete context reboot required).
+
+#### 📉 TREND ANALYSIS
+
+- **History Tracking:**
+    - **The Feature:** The system now maintains a rolling buffer of the last 5 interaction states.
+    - **The Utility:** Enables the engine to detect stagnation (5 turns of "Static Anchor") or improvement (Drag dropping over time).
+
+### [v2.4] - 2025-12-21 - "NEON PRIME"
+
+#### ⚡ EPHEMERALIZATION (The Code Golf Update)
+
+- **The Monolith (Single-File Architecture):**
+    - **The Shift:** Vaporized the external `bone_config.json` dependency.
+    - **The Logic:** The "Pantry" (Lexicon, Toxins, Config) is now baked directly into the `BoneConfig` class as optimized Python sets.
+    - **The Result:** **Zero-Dependency Portability**. The script can be copy-pasted into any environment (Colab, Replit, Local) and run immediately.
+
+- **Functional Tensegrity (`RadioTuner`):**
+    - **The Refactor:** Replaced heavy OOP classes with **Lambda Logic**.
+    - **The Mechanism:** The Personalities (Clarence, Eloise, Yaga) are now defined as dictionary entries with executable trigger functions.
+    - **The Benefit:** Reduced line count by ~60% while retaining full personality resolution.
+
+#### 🔮 JADE LINK (Logic Modes)
+
+- **The Guidance System (`JadeLink`):**
+    - **The Feature:** Implemented a "Reasoning Mode" generator based on JADE/VSL logic.
+    - **The Modes:**
+        - **DEDUCTIVE (Eden Pattern):** Triggered by High Drag/Concrete. Demands constraints.
+        - **INDUCTIVE (Triple Pattern):** Triggered by High Entropy. Demands grounding.
+        - **ABDUCTIVE (Fractal Pattern):** Triggered by High Flow. Authorizes creative expansion.
+
+#### 🎨 MATH-BASED RENDERING
+
+- **The Chroma HUD (`Prisma`):**
+    - **The Refactor:** Replaced string-building libraries with pure math.
+    - **The Visuals:** Renders ASCII bar graphs (`██░░`) for Velocity, Entropy, and Temperature dynamically using simple float division.
+
 ### [v2.3] - 2025-12-21 - "APOTHEOSIS"
 
 #### ⚡ THE PIPELINE (O(n) Architecture)
