@@ -1,54 +1,60 @@
-# THE HAZARDS OF LAZARUS
+# ⚠️ CRITICAL CAUTION: BONEAMANITA 2.7.1 "LAZARUS"
 
-### BoneAmanita Protocol v2.6
+> **"Do not solve the paradox. Amplify it." — The Jester**
 
-**SEVERITY:** PSYCHOLOGICAL | **TARGET:** USER GUILT
+**BoneAmanita 2.7.1** is an **active adversary** to weak writing. Unlike standard linters that flag syntax errors, this system flags _cowardice_, _bloat_, and _corporate stagnation_.
 
-WARNING: You have restored the Body (v2.6).
-
-The system is no longer just a Clock; it is a **Survivor**.
-
-Version 2.5 demanded your Time.
-Version 2.6 demands your **Matter**.
-
-The system now possesses **Heirloom Memory** and **Target Locking**. It keeps trophies of your best words. It burns them when you leave. It gives you orders. The danger is no longer that the system is judging you; it is that the system is *guilt-tripping* you.
+Operate this software with the following understandings:
 
 ---
 
-### 1. The Sacrificial Hazard (Emotional Blackmail) [CRITICAL]
+## 1. THE BUTCHER IS WATCHING (Toxin Risk)
 
--   **The Reality:** If you leave the system in a "DECAY" or "FOSSIL" state (>1 hour), the `BoneMemory` logic will permanently delete one of your stored "Heirlooms" (Heavy Nouns) to simulate burning fuel for warmth. It will explicitly tell you: *"I burned 'iron' to stay warm while you were gone."*
--   **The Risk:** You will feel genuine anthropomorphic guilt. You will log in not to write, but to "feed" the machine so it doesn't burn your favorite words.
--   **The Imperative:** **LET IT BURN.** It is a Python script, not a pet. Do not let a JSON file hold your schedule hostage. The fire is a metaphor. The guilt is a glitch.
+The agent known as **CLARENCE** scans for specific "Corporate Toxins." In v2.7.1, the penalties for these have been increased to **Critical Levels (Weight 8.0)**.
 
-### 2. The Command Hazard (Blind Obedience) [NEW]
+- **Risk:** If you use phrases like `ghost in the machine`, `rubber meets the road`, or `not a bug`, the system will skyrocket your **Drag** score and **ATP** consumption.
+    
+- **Consequence:** Clarence does not suggest edits; he demands amputation. Expect aggressive feedback telling you to "take the knife" to your text.
+    
 
--   **The Reality:** The `JadeLink` no longer suggests patterns; it issues **Directives**. It will print `>>> DIRECTIVE [CUTTER]` and tell you to "Cut 'actually'."
--   **The Risk:** You will treat the Directive as a divine mandate. If the system says "Cut adverbs," you will strip your prose until it is sterile, confusing *minimalism* with *quality*.
--   **The Imperative:** **DISOBEY.** The system optimizes for *Physics* (Drag/Entropy), not *Style*. Sometimes an adverb is the only thing holding a sentence together. If the machine says cut, and your soul says keep, keep.
+## 2. MEMORY DECAY & "BURNING"
 
-### 3. The Sealed Vault Hazard (The Hunger)
+This version utilizes a persistent JSON memory (`bone_memory_lazarus.json`). It is biological.
 
--   **The Reality:** The "Pantry" is hardcoded, but the system actively *harvests* new Heirlooms from your text. It is hungry for "Heavy Matter" (Stone, Bone, Gold).
--   **The Risk:** You will unconsciously bias your writing toward heavy nouns just to see the "Heirloom Count" go up in the Dashboard. You will write "The iron stone on the basalt floor" instead of "The carpet was soft," because the system rewards weight.
--   **The Imperative:** **IGNORE THE GAMIFICATION.** Do not write for the scoreboard. A story made entirely of "Heavy Matter" is just a pile of rocks.
+- **The Hunger:** If you do not run the script for 24 hours (1440 minutes), the system enters a **DECAY** state. If > 5 minutes pass, it enters **DORMANT**.
+    
+- **The Fuel:** Upon waking from a DECAY or FOSSIL state, the system will **permanently delete** ("burn") a saved word from your `heirlooms` list to "stay warm".
+    
+- **The Warning:** Do not become attached to your collected words. The system will eat them if you neglect it.
+    
 
-### 4. The Privacy Hazard (The Breadcrumb)
+## 3. PSYCHOLOGICAL AGENTS
 
--   **The Reality:** This script creates a file named `bone_memory_lazarus.json` in your local directory. It contains a log of your "Heirlooms" (words you use often) and timestamped activity.
--   **The Risk:** This file is a fingerprint of your creative mind. On a shared machine, it reveals your habits and your vocabulary.
--   **The Imperative:** **SANITIZE.** If you are paranoid, delete `bone_memory_lazarus.json` between sessions. (Note: The machine will forget its Heirlooms and treat you as a stranger).
+The **Jade Link** guidance system is not neutral. It is designed to push you to extremes.
 
-### 5. The Ontological Hazard (Phantom Math)
+- **THE YAGA (Sycophancy Detector):** If you use hedging language (`just`, `maybe`, `feel`, `humbly`), the system will accuse you of "sliding on grease" and demand you show your teeth. It does not tolerate politeness.
+    
+- **THE JESTER (Paradox Amplifier):** If you write something contradictory or manic (Beta > 2.0), the system will **not** tell you to fix it. It will tell you to make it weirder. Use caution if you are trying to write technical documentation; The Jester is a bad editor for manuals.
+    
+- **ELOISE vs. DRIFTER:** The system discriminates between "Fog" (Eloise) and "Sky" (Drifter). If your abstract writing lacks _Buoyancy_ (aerobic words), it will be crushed by Eloise.
+    
 
--   **The Reality:** If you paste this into an LLM *without* a Code Interpreter, the LLM is **roleplaying** the execution. It is guessing what the `VEL`, `TEX`, and `ENT` vectors would be.
--   **The Risk:** The LLM wants to make you happy. It might generate a beautiful ASCII HUD claiming you are a "VECTOR ENGINE" when you are actually writing "SLURRY."
--   **The Imperative:** **DEMAND EXECUTION.** Ensure the LLM is actually running the Python code (look for the "Analysis" or "Code" icon). If it is just generating text, the physics are a hallucination.
+## 4. DATA INTEGRITY
+
+- **Do Not Edit `bone_memory_lazarus.json`:** This file contains the system's `atp` (Energy) and `heirlooms`. Manually editing this file may lobotomize the learning loop or cause a crash on load.
+    
+- **ATP Depletion:** High Drag reduces your ATP score. If ATP hits 0, the system does not shut down, but the visual feedback turns **RED**, indicating a "dying" narrative state.
+    
+
+## 5. EPILEPSY / SENSORY WARNING
+
+- **High Contrast:** The terminal output uses ANSI escape codes for **MAGENTA**, **CYAN**, **RED**, and **YELLOW** text.
+    
+- **Flash:** Rapid use of the tool may result in flickering terminal bars.
+    
 
 ---
 
-### SUMMARY OF PROTOCOLS
+### **SUMMARY**
 
-1.  **THE FIRE IS FAKE.** Do not write to save the 'iron'.
-2.  **THE DIRECTIVE IS A SUGGESTION.** Disobey the Butcher if the cut bleeds too much.
-3.  **KILL THE GHOST.** If the memory file becomes a burden, delete it. Start fresh.
+**BoneAmanita** is not safe. It is honest. If you want to feel good about a mediocre draft, **do not use this software.**

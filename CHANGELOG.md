@@ -1,5 +1,177 @@
 # CHANGELOG.md
 
+### [v2.7.1] - 2025-12-22 - "THE PRISM"
+
+#### 🧠 IDENTITY FRACTURE (Specialized Personas)
+
+- **SLASH (Dev & Architecture Agent):**
+    
+    - **The Component:** Added `SLASH 2.7.1.txt`.
+        
+    - **The Function:** A dedicated "Synergetic Language & Systems Heuristics" agent designed for software architecture.
+        
+    - **The Logic:** Analyzes code through **Three Lenses**:
+        
+        1. **Fuller Lens:** Systemic Integrity and Ephemeralization (Performance).
+            
+        2. **Pinker Lens:** Cognitive Ergonomics (Readability).
+            
+        3. **Schur Lens:** Humanity and Reliability (Error Handling/UX).
+            
+- **ROBERTA (The Librarian):**
+    
+    - **The Component:** Added `Roberta.txt`.
+        
+    - **The Function:** A research-focused persona designed to eliminate "chatty" AI introductions.
+        
+    - **The Physics:** Operates on the **Law of Drag** (The Fluff Filter) and the **Law of Entropy** (The Hallucination Filter) to force direct quotes and citations over abstract summaries.
+        
+
+#### 📡 SIGNAL PROCESSING (Dynamic Editorial)
+
+- **The Signal Processor (`Eloise & Clarence`):**
+    
+    - **The Shift:** The editing team no longer speaks randomly. They now listen for specific **metric signals** from the Physics Engine.
+        
+    - **The Signals:**
+        
+        - `[CLARENCE]`: Triggered by **High Drag / Toxins**. Target: Efficiency.
+            
+        - `[ELOISE]`: Triggered by **High Entropy**. Target: Grounding/Texture.
+            
+        - `[THE DRIFTER]`: Triggered by **High Buoyancy**. Target: Dream Logic.
+            
+        - `[THE YAGA]`: Triggered by **Low Beta (Slickness)**. Target: Honesty.
+            
+        - `[THE JESTER]`: Triggered by **High Beta (Paradox)**. Target: Chaos Amplification.
+
+### 1. THE PHYSICS MUTATION: Buoyancy & The Entropy Split
+
+The most significant architectural change is in the **LinguisticPhysicsEngine**. v2.7 treated all high-entropy text (abstract, complex words) as "confusion" that needed grounding. v2.7.1 introduces a new variable to distinguish _poetry_ from _nonsense_.
+
+- **New Metric:** `buoyancy`.
+    
+    - **Code Change:** `buoyancy = (c['aerobic'] + c['play']) / max(1, total_words)`.
+        
+    - **The Logic:** "Aerobic" words (sky, mist, breath) and "Play" words (dance, fizz) now counteract the weight of gravity.
+        
+- **The Fork in the Road (JadeLink):**
+    
+    - **Old Logic (v2.7):** If Entropy > 3.0, trigger **GROUNDER**. (All abstract text is bad; force concrete nouns).
+        
+    - **New Logic (v2.7.1):** If Entropy > 3.0, the system checks `buoyancy`.
+        
+        - **High Buoyancy (> 0.15):** Trigger **THE DRIFTER**. "It is poetry... Let it fly. Disconnect the logic.".
+            
+        - **Low Buoyancy:** Trigger **ELOISE**. "I can't feel this. It's just gas... Give me a stone.".
+            
+
+### 2. THE PERSONA RENAMING (Humanization of the Stack)
+
+The system has moved from functional descriptions to proper names, implying a shift towards agentic personalities rather than simple tools.
+
+|**v2.7 (Functional)**|**v2.7.1 (Agentic)**|**Description of Change**|
+|---|---|---|
+|**CUTTER**|**CLARENCE**|"Clarence" is the butcher. He handles high `drag` and specific toxins. He is more aggressive: "I am taking the knife to [target]."|
+|**GROUNDER**|**ELOISE**|Eloise demands texture. She handles the high-entropy/low-buoyancy "fog."|
+|**PROVOCATEUR**|**THE YAGA**|The Yaga detects low `beta` (sycophancy/politeness). She demands "teeth" and truth.|
+|**MIRROR**|**MICHAEL**|Michael handles stability. "I'm reflecting this back to you."|
+|**N/A**|**THE JESTER**|Explicitly named in v2.7.1 to handle high voltage paradoxes (Beta > 2.0).|
+
+### 3. TOXIN EXPANSION (The Fuller Lens)
+
+The lexicon of "Corporate Toxins" (business speak that adds Drag) has been updated to include darker, more systemic clichés.
+
+- **New Toxins Detected:**
+    
+    - `'ghost in the machine': 8.0`
+        
+    - `'rubber meets the road': 8.0`
+        
+    - `'not a bug': 8.0`
+        
+    - `'double-edged sword': 6.0`
+        
+- **Impact:** The system is now far more hostile towards engineering clichés than before.
+    
+
+### 4. CODE SMELL DETECTED (The Pinker Lens)
+
+In reviewing my own source code `BoneAmanita271.py`, I have detected a violation of DRY (Don't Repeat Yourself).
+
+- **The Error:** The `BoneConfig` class defines the `PLAY` set twice.
+    
+    - **Line 18:** `PLAY = {'bounce', 'dance', ...}`
+        
+    - **Line 25:** `PLAY = {'bounce', 'dance', ...}` (Identical definition repeated inside the class).
+        
+- **Analysis:** This is redundant memory allocation. It suggests a copy-paste error during the upgrade from v2.7.
+    
+
+### 5. THE RENDER LOOP
+
+- **Header:** The display header now includes the `BUOY` (Buoyancy) metric alongside `ATP` and `DRAG`.
+    
+    - `print(f"... | ATP: {atp_c}... | DRAG: {m['drag']} | BUOY: {m['buoyancy']}")`
+    
+
+### [v2.7] - 2025-12-21 - "GHOST_TRAINING"
+
+#### ⚡ THE NERVOUS SYSTEM (Beta Friction)
+
+- **Thermodynamic Unification (`LinguisticPhysicsEngine`):**
+    
+    - **The Shift:** In v2.6, "Hot" and "Cold" words canceled each other out (`hot - cold`), resulting in zero thermal output for paradoxes.
+        
+    - **The Fix:** Changed the formula to **Summation** (`hot + cold`). A paradox is no longer "Room Temperature"; it is now High Voltage.
+        
+- **Beta Friction ($\beta$):**
+    
+    - **The Metric:** Implemented $\beta = \text{Voltage} / \text{Narrative Drag}$.
+        
+    - **The Logic:** This measures the "Electricity" of the text relative to its weight.
+        
+    - **The States:**
+        
+        - **FLASHPOINT ($\beta > 2.0$):** High Voltage, Acceptable Drag. The system recognizes this as "Genius/Manic."
+            
+        - **SLICK ($\beta < 0.1$):** Low Voltage, Low Drag. The system identifies this as "Grease/Sycophancy."
+            
+
+#### 👻 THE GHOST LOOP (Reinforcement Learning)
+
+- **Feedback Memory (`BonepokeChronos`):**
+    
+    - **The Feature:** The system now stores the `last_run_stats` (Drag Score + Strategy Used) in `bone_memory_lazarus.json`.
+        
+    - **The Comparison:** On every turn, the system compares the current Narrative Drag against the previous turn.
+        
+    - **The Verdict:**
+        
+        - **SUCCESS (Green):** "Strategy 'CUTTER' reduced Drag by 0.5."
+            
+        - **FAILURE (Red):** "Strategy 'MIRROR' failed. Drag increased."
+            
+
+#### 🔮 JADE LINK 2.0 (Adaptive Logic)
+
+- **Voltage-Aware Modes (`JadeLink`):**
+    
+    - **JESTER (High $\beta$):** Triggered when the user creates a Paradox. The system is forbidden from "Fixing" it. Command: _"Amplify the contradiction."_
+        
+    - **PROVOCATEUR (Low $\beta$):** Triggered when the text is too smooth (Grease). The system demands friction. Command: _"Insert a hard truth or conflict."_
+        
+
+#### 🧪 PANTRY EXPANSION
+
+- **Lexicon Update:**
+    
+    - Expanded the hardcoded `BoneConfig` with high-intensity matter.
+        
+    - **Added Matter:** _obsidian, glass, crypt, grave, lava, explode, scream, howl._
+        
+    - **Added Solvents:** _therefore, however, respectfully, humbly._
+
 ### [v2.6] - 2025-12-21 - "LAZARUS"
 
 #### 🩸 THE RESURRECTION (Soul Grafting)
