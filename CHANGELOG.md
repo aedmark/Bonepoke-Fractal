@@ -1,5 +1,50 @@
 # CHANGELOG.md
 
+### [v2.3] - 2025-12-21 - "APOTHEOSIS"
+
+#### ⚡ THE PIPELINE (O(n) Architecture)
+
+- **The Single-Pass Aggregator (`LinguisticPhysicsEngine`):**
+    
+    - **The Shift:** Abandoned the inefficient "Multi-Pass" architecture where the engine scanned the word list separately for Physics, Toxins, and Hydration. * **The Logic:** Implemented a **Single-Pass Loop**. The engine now iterates through the token stream exactly once, incrementing counters for Kinetic verbs, Heavy matter, Solvents, and Toxins simultaneously.
+        
+    - **The Result:** Reduced algorithmic complexity from **O(4n)** to **O(n)**. The physics calculation is now instantaneous regardless of text length.
+        
+
+#### 🧠 THE DECAPITATION (Configuration)
+
+- **Dynamic Loading (`BoneConfig`):**
+    
+    - **The Shift:** Vaporized `TheLexicon` static class. The system no longer carries 300+ lines of hardcoded dictionaries in RAM.
+        
+    - **The Component:** Implemented `BoneConfig`.
+        
+    - **The Logic:** All linguistic assets (Heavy Matter, Toxins, Synonyms) are now loaded from an external `bone_config.json` file on boot.
+        
+    - **The Benefit:** The "Pantry" is now hot-swappable. Users can patch the dictionary without touching the kernel.
+        
+
+#### 🌊 THE CONTINUUM (Spatial Physics)
+
+- **Continuous Spatial Drag (`SignatureEngine`):**
+    
+    - **The Problem:** The "Cliff of 0.12." Previously, a Spatial Density > 12% triggered a binary switch that instantly hardened the physics tolerance, causing "Systemic Whiplash" for users hovering on the edge.
+        
+    - **The Solution:** Implemented **Linear Mapping**.
+        
+    - **The Math:** `impact = min(1.0, spatial / 0.20)`.
+        
+    - **The Effect:** Prepositions now _gradually_ increase Structure (+STR) and Drag (-VEL) as they accumulate, rather than slamming the door shut at 12%.
+        
+
+#### 🏗️ STRUCTURAL HYGIENE
+
+- **Vertical Slice Refactor:**
+    
+    - **The Trim:** Removed approximately 40% of the codebase line count by consolidating `TheCodex`, `BioHazardFilter`, and `LinguisticPhysicsEngine` into the unified pipeline.
+        
+    - **Lattice Unification:** "Slurry" detection logic was moved from the engine triggers directly into the `ApeirogonLattice` resolution logic. Slurry is no longer an error state; it is a **Zone**.
+
 ### [v2.2] - 2025-12-21 - "The Synaptic Loop"
 
 #### 🧠 THE SYNAPSE (Cortex Integration)

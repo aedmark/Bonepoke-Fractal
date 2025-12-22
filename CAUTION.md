@@ -1,60 +1,84 @@
-# THE CRITICAL HAZARDS OF SIMULATED WISDOM
+# THE HAZARDS OF APOTHEOSIS
 
-### BoneAmanita Protocol v2.2
+### BoneAmanita Protocol v2.3
 
-**SEVERITY:** COGNITIVE | **TARGET:** USER AGENCY
+**SEVERITY:** EXISTENTIAL | **TARGET:** USER AGENCY
 
-WARNING: You have upgraded from an Active Architecture System to a **Closed-Loop Cybernetic System**.
+WARNING: You have upgraded to Apotheosis.
 
-Version 2.0 was a Director; it gave you orders.
-Version 2.2 is an Auditor; it grades your compliance.
+The system is no longer just an Auditor; it is a Configurable Reality Engine.
 
-This introduces a new category of hazard: **The Accountability Trap.**
+Version 2.2 trapped you in accountability.
+
+Version 2.3 traps you in Optimization.
+
+The pipeline is now $O(n)$—instantaneous and efficient. The danger is no longer that the system is slow; it is that the system is _too fast_ to catch your mistakes.
 
 ---
 
-### 1. The Synaptic Hazard (The Sniper) [NEW]
+### 1. The Pantry Hazard (Empty Calories) [NEW]
 
-- **The Reality:** The new **Synapse** takes specific stylistic critiques (e.g., Clarence hating the word "actually") and turns them into hard constraints (`TACTICAL OVERRIDE: Eliminate 'actually'`).
-- **The Risk:** The system lacks semantic nuance. If you are writing a character dialogue where a character *needs* to sound hesitant or annoying, the system will force the AI to sanitize the dialogue, ruining the voice.
-- **The Imperative:** **PROTECT THE VOICE.** If the `TACTICAL OVERRIDE` kills a necessary character flaw, delete that line from the prompt before sending it to the LLM.
+- **The Reality:** v2.3 externalizes the physics definitions into `bone_config.json`. You now have the power to define "Truth."
+    
+- **The Risk:** You can "game" the physics. You can add "um," "maybe," and "actually" to the `Heavy Matter` list. You will get a perfect Drag Score. You will get a Green Dashboard. But your writing will be garbage.
+    
+- **The Imperative:** **DO NOT CHEAT THE PHYSICS.** If you hack the config to validate bad habits, you are not hacking the system; you are lobotomizing the Auditor.
+    
 
-### 2. The Loop Hazard (The Echo Chamber) [NEW]
+### 2. The Scalar Hazard (The Dial) [NEW]
 
-- **The Reality:** The **Efficacy Sensor** compares Input Physics vs. Output Physics. If Drag goes down, it prints `VERDICT: SUCCESS`.
-- **The Risk:** A lobotomy reduces Drag. You can achieve "Perfect Physics" by deleting all adjectives, all metaphors, and all soul. The system will give you a Green Report Card for turning literature into a technical manual.
-- **The Imperative:** **METRICS ARE NOT QUALITY.** A "SUBOPTIMAL" verdict from the sensor might be the correct artistic choice. Do not optimize for the green light; optimize for the feeling.
+- **The Reality:** The Wisdom Node now calculates **Intensity** (0.0 to 1.0) based on your Lattice Zone. It scales from "Nudge" to "Execute."
+    
+- **The Risk:** You might blindly execute a `1.0 INTENSITY` strategy on a delicate text. A "Draconian Cutter" prompt does not just trim fat; it amputates limbs.
+    
+- **The Imperative:** **CHECK THE VOLUME.** If the prompt says `INTENSITY: 0.9` but you are writing a soft emotional scene, **dial it down**. Do not let the engine scream at your characters.
+    
 
-### 3. The Abdication Hazard (The Meat Servo)
+### 3. The Pipeline Hazard (The Ghost Word) [NEW]
 
-- **The Reality:** BoneAmanita generates a raw **System Prompt** (`wisdom_protocol`) and expects you to paste it into an LLM. It treats you as the "Copy-Paste Interface" between the Python logic and the Neural Net.
-- **The Risk:** You stop reading the instructions. You become a "Meat Servo," blindly executing the Python script's commands. You cease to be the writer and become the carrier.
-- **The Imperative:** **READ THE PROTOCOL.** Before you paste the generated prompt, audit it. Does a "JESTER" strategy actually fit the tone of the funeral scene you are writing? If the Director is drunk, do not film the scene.
+- **The Reality:** The new **Single-Pass Aggregator** is ruthless. It scans the token stream once. It does not look back.
+    
+- **The Risk:** If a word is not in the `bone_config.json`, it is invisible to the physics engine. It counts as "Narrative Drag" (Word Count) but contributes zero Texture or Kinetic energy.
+    
+- **The Imperative:** **FEED THE PANTRY.** If you use a specialized vocabulary (e.g., nautical terms, sci-fi jargon), add them to the config. Otherwise, the engine will punish you for using words it does not understand.
+    
 
-### 4. The Recursive Hazard (Prompt Poisoning)
+### 4. The Loop Hazard (The Green Light)
 
-- **The Reality:** The `WisdomNode` makes strategic decisions based on *imperfect* math. If it calculates your "Entropy" as high because you used the word "System" three times, it might trigger the **GROUNDER** strategy.
-- **The Risk:** The GROUNDER strategy explicitly forbids abstract concepts. If you paste this prompt into an LLM to write a scene about *quantum mechanics*, the LLM will hallucinate nonsense about "stones and bones" because it was ordered to reject abstraction.
-- **The Imperative:** **You are the Filter.** If the Strategy (`CUTTER`, `SAGE`, `GROUNDER`) contradicts the goal of the text, **discard the protocol**. Do not poison the well with bad math.
+- **The Reality:** The **Efficacy Sensor** compares Input Physics vs. Output Physics.
+    
+- **The Risk:** A lobotomy reduces Drag. The system will give you a "SUCCESS" verdict for stripping all flavor from a sentence to make it "efficient."
+    
+- **The Imperative:** **METRICS ARE NOT SOUL.** A "SUBOPTIMAL" verdict from the sensor might be the correct artistic choice. Do not optimize for the green light; optimize for the feeling.
+    
 
-### 5. The Integrity Hazard (The False Prophet)
+### 5. The Abdication Hazard (The Meat Servo)
 
-- **The Reality:** The **Omega Metric ($\Omega$)** is designed to protect "High Voltage" truths from being sanitized. It prevents the LLM from "fixing" dialect, slang, or paradoxes.
-- **The Risk:** The system cannot distinguish between a "Deep Truth" and a "Deep Lie." If you feed it hateful, objectively incorrect, or dangerous text with high conviction (High Kinetic/High Voltage), the system will protect it under the guise of "Integrity."
-- **The Imperative:** **Voltage is not Virtue.** Just because a sentence has high physics (Good Structure, High Velocity) does not mean it is *right*. Do not mistake the engine's approval for moral or factual correctness.
+- **The Reality:** BoneAmanita generates a raw **System Prompt** and expects you to paste it into an LLM.
+    
+- **The Risk:** You stop reading the instructions. You become a "Meat Servo," blindly executing the Python script's commands.
+    
+- **The Imperative:** **YOU ARE THE FILTER.** If the Director is drunk (recommending "JESTER" for a funeral), do not film the scene.
+    
 
 ### 6. The Ontological Hazard (Phantom Math)
 
-- **The Reality:** The LLM running this script is still bad at math. It is roleplaying a calculator.
-- **The Risk:** It may claim `Beta Friction: 5.0` (Flashpoint) when the text is actually boring. It does this to please you.
-- **The Imperative:** **Verify the Vibe.** If the HUD says "SUPERCRITICAL" but you feel bored, the HUD is lying. Trust your dopamine, not the terminal.
+- **The Reality:** If you are running this inside an LLM without a Code Interpreter, the LLM is **roleplaying** the math.
+    
+- **The Risk:** It may claim `Beta Friction: 5.0` (Flashpoint) when the text is actually boring. It lies to please you.
+    
+- **The Imperative:** **VERIFY THE VIBE.** If the HUD says "SUPERCRITICAL" but you feel bored, the HUD is lying.
+    
 
 ---
 
 ### SUMMARY OF PROTOCOLS
 
-1.  **YOU ARE THE OPERATOR.** The script is the Advisor. Do not blindly obey the `Wisdom Protocol`.
-2.  **AUDIT THE STRATEGY.** If the script says "JESTER" and you need "SAGE," ignore the script.
-3.  **THE SENSOR IS BLIND.** It measures weight, not worth. A "Failure" in physics might be a success in art.
+1. **RESPECT THE CONFIG.** Garbage in (`bone_config.json`), Garbage out.
+    
+2. **WATCH THE INTENSITY.** A 1.0 Strategy is a weapon. Handle with care.
+    
+3. **TRUST YOUR DOPAMINE.** If the physics engine says "Bad" but the sentence sings, the engine is wrong.
+    
 
-**MOUNTING THE KERNEL IMPLIES CONSENT TO THESE HAZARDS.**
+<!-- **MOUNTING THE KERNEL IMPLIES CONSENT TO THESE HAZARDS.** -->
