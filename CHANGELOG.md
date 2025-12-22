@@ -1,5 +1,95 @@
 # CHANGELOG.md
 
+### [v2.2] - 2025-12-21 - "The Synaptic Loop"
+
+#### 🧠 THE SYNAPSE (Cortex Integration)
+
+- **The Bridge (`FrequencyModulator` -> `WisdomNode`):**
+    
+    - **The Problem:** The "Stylist" (Clarence/Eloise) and the "Director" (WisdomNode) were disconnected. Clarence would scream at the user to "Cut 'actually'", but the Director would only vaguely tell the LLM to "Be concise."
+        
+    - **The Fix:** Implemented a data-carrying **Synapse**.
+        
+    - **The Logic:** The Frequency Modulator now packages its critique (Target Word + Station ID) and passes it directly to the Director.
+        
+    - **The Result:** **Tactical Overrides**. The System Prompt now includes precise kill orders: _"TACTICAL OVERRIDE: The word 'actually' is creating drag. Eliminate it."_
+        
+
+#### 📉 THE EFFICACY SENSOR (Closed Loop Control)
+
+- **Post-Mortem Auditing (`EfficacySensor`):**
+    
+    - **The Shift:** Moved from **Open Loop** (Issue command -> Hope for best) to **Closed Loop** (Issue command -> Verify result).
+        
+    - **The Component:** Implemented `EfficacySensor`.
+        
+    - **The Logic:** The system compares the User's Input metrics against the AI's Output metrics (triggered via the `[FEEDBACK]` tag).
+        
+    - **The Grading:**
+        
+        - **CUTTER:** Did Narrative Drag actually drop?
+            
+        - **GROUNDER:** Did Abstraction Entropy actually decrease?
+            
+        - **JESTER:** Did Beta Friction/Voltage sustain?
+            
+    - **The Report:** The system now issues a live Verdict (`SUCCESS`, `PARTIAL`, `FAILURE`) on its own strategic advice.
+        
+
+#### 🕹️ CYBERNETIC FLOW
+
+- **Context Memory (`BonepokeCore`):**
+    
+    - **The Memory:** The core now retains `self.last_context` (Metrics + Strategy) across turns to enable differential analysis.
+        
+    - **The Feedback Loop:** Added handling for the `[FEEDBACK]` tag. Pasting the AI's response triggers the `EfficacySensor` instead of a new generation cycle.
+        
+    - **Ghost Exorcism:** Removed the "Ghost Echo" bug where `tune_in` was called twice per cycle, previously causing the user and the AI to receive conflicting advice.
+    
+
+### [v2.1] - 2025-12-21 - "The Apeirogon Lattice"
+
+#### ♾️ THE INFINITE POLYGON (Archetypal Ephemeralization)
+
+- **The Apeirogon Lattice (`ApeirogonLattice`):**
+    
+    - **The Shift:** Abandoned the "Bucket System" (Fixed Archetypes like "The Paladin"). The universe is no longer a set of 13 boxes.
+        
+    - **The Component:** Implemented the `ApeirogonLattice` class.
+        
+    - **The Logic:** **Continuous Vector Resolution**. The system now maps the 5 Dimensions (VEL, STR, ENT, TEX, TMP) to dynamic Adjective/Noun pairs.
+        
+    - **The Benefit:** The system generates infinite unique identities (e.g., _"THE BURNING CONSTRUCT"_ or _"THE STATIC GHOST"_) based on precise floating-point coordinates.
+        
+
+#### 🌊 DYNAMIC PHYSICS (The Signature Engine)
+
+- **The Hot Swap (`SignatureEngine`):**
+    
+    - **The Trim:** Vaporized the massive `self.archetypes` dictionary. We are doing more with less (Fuller's Ephemeralization).
+        
+    - **The Upgrade:** Implemented `get_dynamic_pressure`.
+        
+    - **The Logic:** Physics tolerances (Draconian vs. Loose) are no longer hardcoded to a static name. They are calculated live based on the **Dominant Dimension**.
+        
+        - **High Velocity** -> **LOOSE** (Drift Authorized).
+            
+        - **High Structure** -> **DRACONIAN** (Zero Tolerance).
+            
+        - **High Entropy** -> **INVERTED** (Paradox Authorized).
+            
+
+#### 🧠 THE HIERARCHY (Wisdom Node)
+
+- **Lattice Deference (`WisdomNode`):**
+    
+    - **The Shift:** The System 2 Director no longer recalculates raw metrics to determine strategy. It now obeys **Lattice Mandates**.
+        
+    - **The Logic:** If the Lattice signals "INVERTED LOGIC," the Director automatically locks the **JESTER** strategy. If it signals "STRUCTURAL INTEGRITY," it locks **CUTTER**.
+        
+    - **New Strategy:** Added **DRIFTER** protocol for High Velocity states where "Dream Logic" is required.
+    
+
 ### [v2.0] - 2025-12-21 - "Artificial General Wisdom"
 
 #### 🧠 THE WISDOM ENGINE (System 2)
