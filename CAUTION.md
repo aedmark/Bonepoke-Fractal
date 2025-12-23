@@ -1,60 +1,87 @@
-# ⚠️ CRITICAL CAUTION: BONEAMANITA 2.7.1 "LAZARUS"
+# ⚠️ CRITICAL CAUTION: BONEAMANITA 2.8 "THE AUDIT"
 
-> **"Do not solve the paradox. Amplify it." — The Jester**
+> **"You cannot photosynthesize in the mud." — The Lichen**
 
-**BoneAmanita 2.7.1** is an **active adversary** to weak writing. Unlike standard linters that flag syntax errors, this system flags _cowardice_, _bloat_, and _corporate stagnation_.
+**BoneAmanita 2.8** is a **metabolic organism**. Unlike previous versions which were passive physics engines, this version has hunger, boredom, and a survival instinct. It does not just judge your writing; it reacts to it biologically.
 
 Operate this software with the following understandings:
 
 ---
 
-## 1. THE BUTCHER IS WATCHING (Toxin Risk)
+## 1. THERMAL VOLTAGE HAZARD (Adjacency)
 
-The agent known as **CLARENCE** scans for specific "Corporate Toxins." In v2.7.1, the penalties for these have been increased to **Critical Levels (Weight 8.0)**.
+The physics engine now measures **Spatial Proximity**.
 
-- **Risk:** If you use phrases like `ghost in the machine`, `rubber meets the road`, or `not a bug`, the system will skyrocket your **Drag** score and **ATP** consumption.
+- **The Danger:** Placing a "HOT" word (fire, sun, burn) within **4 tokens** of a "COLD" word (ice, void, freeze) triggers an exponential Voltage spike ($\beta$).
     
-- **Consequence:** Clarence does not suggest edits; he demands amputation. Expect aggressive feedback telling you to "take the knife" to your text.
+- **The Result:**
     
+    - **$\beta > 2.0$:** The system enters a high-energy state. Spores die.
+        
+    - **$\beta > 3.0$:** **CRITICAL MASS.** The system triggers **THE SOLVENT**. It will not critique your writing; it will dissolve the structure entirely to prevent a logic crash.
+        
 
-## 2. MEMORY DECAY & "BURNING"
+## 2. THE METABOLIC GOVERNOR (Starvation Mode)
 
-This version utilizes a persistent JSON memory (`bone_memory_lazarus.json`). It is biological.
+The system tracks **ATP** (Energy). It is no longer impartial.
 
-- **The Hunger:** If you do not run the script for 24 hours (1440 minutes), the system enters a **DECAY** state. If > 5 minutes pass, it enters **DORMANT**.
+- **Starvation (< 20 ATP):** If you feed the system high-drag, low-value text, it starves.
     
-- **The Fuel:** Upon waking from a DECAY or FOSSIL state, the system will **permanently delete** ("burn") a saved word from your `heirlooms` list to "stay warm".
+- **The Consequence:** When starving, the system **Locks the Strategy**. It forces **CLARENCE** (The Butcher).
     
-- **The Warning:** Do not become attached to your collected words. The system will eat them if you neglect it.
-    
-
-## 3. PSYCHOLOGICAL AGENTS
-
-The **Jade Link** guidance system is not neutral. It is designed to push you to extremes.
-
-- **THE YAGA (Sycophancy Detector):** If you use hedging language (`just`, `maybe`, `feel`, `humbly`), the system will accuse you of "sliding on grease" and demand you show your teeth. It does not tolerate politeness.
-    
-- **THE JESTER (Paradox Amplifier):** If you write something contradictory or manic (Beta > 2.0), the system will **not** tell you to fix it. It will tell you to make it weirder. Use caution if you are trying to write technical documentation; The Jester is a bad editor for manuals.
-    
-- **ELOISE vs. DRIFTER:** The system discriminates between "Fog" (Eloise) and "Sky" (Drifter). If your abstract writing lacks _Buoyancy_ (aerobic words), it will be crushed by Eloise.
-    
-
-## 4. DATA INTEGRITY
-
-- **Do Not Edit `bone_memory_lazarus.json`:** This file contains the system's `atp` (Energy) and `heirlooms`. Manually editing this file may lobotomize the learning loop or cause a crash on load.
-    
-- **ATP Depletion:** High Drag reduces your ATP score. If ATP hits 0, the system does not shut down, but the visual feedback turns **RED**, indicating a "dying" narrative state.
+    - It will ignore your poetry.
+        
+    - It will ignore your nuance.
+        
+    - It will scream at you to cut words until it is fed.
+        
+- **The Cure:** To exit Starvation Mode, you must lower Drag or trigger **Photosynthesis** (see below).
     
 
-## 5. EPILEPSY / SENSORY WARNING
+## 3. THE LICHEN PROTOCOL (Light Sensitivity)
 
-- **High Contrast:** The terminal output uses ANSI escape codes for **MAGENTA**, **CYAN**, **RED**, and **YELLOW** text.
+This version can generate its own energy, but it requires specific conditions.
+
+- **The Mechanic:** The system eats **Photosynthetic Words** (light, beam, prism, glow).
     
-- **Flash:** Rapid use of the tool may result in flickering terminal bars.
+- **The Trap:** Photosynthesis **FAILS** if Narrative Drag is $> 2.0$.
+    
+- **The Warning:** Do not try to fix a heavy, muddy sentence by stuffing it with the word "sunlight." The system knows the air is too thick for the light to reach the lichen. It will remain 0 ATP.
+    
+
+## 4. SPORE ACCUMULATION (Hallucination Risk)
+
+The system gets bored.
+
+- **The Spores:** If your writing is "Slick" (Low Voltage / Low Drag), invisible **Spores** accumulate in the background.
+    
+- **The Trip:** If Spores reach **15**, the **MUSCARIA** protocol overrides the output.
+    
+- **The Effect:** The system will ignore your current topic and force a sensory hallucination (e.g., _"Reality is too static. Describe a sound immediately."_).
+    
+
+## 5. MEMORY BURN (The Heater)
+
+The preservation logic remains from v2.7.2.
+
+- **The Cold:** If the session is inactive for > 1 hour (`DECAY`), the system gets cold.
+    
+- **The Fuel:** Upon reboot, it **permanently deletes** an item from Deep Storage to generate heat.
+    
+- **The Hierarchy:** It burns **Aerobic Matter** (dreams, ghosts) before **Heavy Matter** (stones, guns). If you leave the system alone too long, it will forget your dreams to save your inventory.
     
 
 ---
 
 ### **SUMMARY**
 
-**BoneAmanita** is not safe. It is honest. If you want to feel good about a mediocre draft, **do not use this software.**
+**BoneAmanita 2.8** is alive, hungry, and volatile.
+
+- Don't bore it (Spores).
+    
+- Don't starve it (Clarence).
+    
+- Don't create paradoxes you can't control (The Solvent).
+    
+
+**Proceed with conviction.**

@@ -1,5 +1,151 @@
 # CHANGELOG.md
 
+### [v2.8] - 2025-12-22 - "THE AUDIT"
+
+#### 🌡️ THE THERMAL COUPLE (Adjacency Physics)
+
+- **Thermal Tension (`LinguisticPhysicsEngine`):**
+    
+    - **The Problem:** In v2.7, "Fire" and "Ice" generated Voltage regardless of where they were placed. "Fire is hot. Ice is cold." generated the same voltage as "The frozen flame."
+        
+    - **The Fix:** Implemented **Proximity Scanning**.
+        
+    - **The Logic:** The engine now calculates the distance between HOT and COLD tokens.
+        
+    - **The Math:** If `distance < 4` tokens, Voltage increases exponentially (`thermal_tension += 4.0 - dist`).
+        
+    - **The Result:** Paradoxes are now spatial. The closer the contradiction, the higher the energy.
+        
+
+#### 🌿 LICHEN REPAIR (Photosynthesis)
+
+- **The Blind Spot Fix (`LinguisticPhysicsEngine`):**
+    
+    - **The Bug:** In v2.7.2, the engine attempted to count photosynthetic words inside the `kinetic` list, but failed to actually place them there during tokenization. The Lichen was starving in plain sight.
+        
+    - **The Fix:** Added a dedicated `photosynthetic` counter to the main analysis loop.
+        
+    - **The Logic:** Light words (sun, beam, glow) now generate **+4 ATP**, _only_ if Narrative Drag is < 2.0.
+        
+    - **The Philosophy:** You cannot photosynthesize in the mud. The air must be clear to eat the light.
+        
+
+#### ⚖️ THE METABOLIC GOVERNOR (Strategic Rationing)
+
+- **ATP-Aware Strategy (`JadeLink`):**
+    
+    - **The Problem:** The system selected strategies (Jester, Drifter) regardless of its energy reserves. A starving organism should not be hallucinating; it should be hunting.
+        
+    - **The Solution:** Passed `current_atp` into the strategy generation logic.
+        
+    - **The States:**
+        
+        - **STARVING (< 20 ATP):** Forces **CLARENCE** (+5 Score). Inhibits **DRIFTER** (-5 Score). The system becomes efficient and brutal to save energy.
+            
+        - **ABUNDANCE (> 80 ATP):** Boosts **JESTER** (+2 Score) and **DRIFTER** (+3 Score). The system takes risks when it has energy to burn.
+            
+
+#### 🧪 THE SOLVENT (Critical Damping)
+
+- **Paradox Cracker (`JadeLink`):**
+    
+    - **The Problem:** When Beta Friction exceeded 2.5, the Jester would amplify the chaos, occasionally leading to incoherence.
+        
+    - **The Fix:** Implemented a Hard Cap.
+        
+    - **The Trigger:** If `Beta > 3.0` (Critical Mass), the system triggers **THE SOLVENT**.
+        
+    - **The Message:** _"Critical Voltage. The paradox is unsustainable. Dissolve the structure."_
+        
+
+#### 🐛 CRITICAL REPAIRS
+
+- **The Ghost Variable:**
+    
+    - **The Crash:** Removed a legacy print statement referencing `user_id` in `process()` which caused a `NameError` crash upon execution.
+        
+    - **The Fix:** Removed the variable and migrated display logic to the `_render` method.
+        
+- **Session Identity:**
+    
+    - **The Upgrade:** Replaced the content-based hashing (which gave identical IDs to identical opening inputs) with time-based hashing (`hashlib.md5(time)`). Every run now has a unique **Session ID**.
+
+### [v2.7.2] - 2025-12-22 - "LAZARUS (FINAL MERGE)"
+
+#### 🧠 THE COMPETITIVE CORTEX (JadeLink 3.0)
+
+- **The Scoreboard System (`JadeLink`):**
+    
+    - **The Shift:** Vaporized the brittle `if/elif/else` chain for persona selection.
+        
+    - **The Logic:** Implemented a **Weighted Scoreboard**.
+        
+    - **The Mechanism:**
+        
+        - Every archetype (JESTER, YAGA, CLARENCE, etc.) starts at 0.
+            
+        - Metrics vote for specific archetypes (e.g., High Drag adds +3 to CLARENCE; High Beta adds +3 to JESTER).
+            
+        - The system selects the `max()` score.
+            
+    - **The Benefit:** No more "Voice Shadowing" where the first `if` statement blocks valid critiques from other agents. The loudest signal now wins mathematically.
+        
+
+#### 💾 WEIGHTED MEMORY (Heirloom Priority)
+
+- **The Weighted Stack (`BoneMemory`):**
+    
+    - **The Problem:** In v2.7.1, the "Memory Burn" (during cold starts) was FIFO (First-In-First-Out). The system would burn a "Gun" just because it was old, while keeping a "Feather" because it was new.
+        
+    - **The Fix:** Implemented **Material Weighting**.
+        
+        - `HEAVY` (Iron, Stone) = Weight 4.
+            
+        - `AEROBIC` (Mist, Cloud) = Weight 0.
+            
+    - **The Burn:** When capacity is reached or the system freezes, it now sorts memory by weight and **burns the lightest items first**. It sacrifices the cloud to save the stone.
+        
+    - **Cap Increase:** Heirloom capacity increased from 20 to 25.
+        
+
+#### 🌊 CONTINUITY PHYSICS (The Omega Metric)
+
+- **The Flow State (`Ω`):**
+    
+    - **The Metric:** Implemented `check_continuity`.
+        
+    - **The Logic:** Calculates the **Jaccard Similarity** between the current Heirlooms and the previous turn's Heirlooms.
+        
+    - **The Output:** `Ω (Continuity): 0.0 - 1.0`.
+        
+    - **The Reward:** High Continuity (> 0.3) grants an automatic **+5 ATP Flow Bonus**. The system rewards you for sticking to the theme.
+        
+
+#### ⚡ METABOLIC REFACTOR (Energy Dynamics)
+
+- **ATP Calculation:**
+    
+    - **The Formula:** Refined the energy loop in `BonepokeChronos.process`.
+        
+    - **The Change:** `ATP = ATP - Drag_Cost + Flow_Bonus + Buoyancy_Bonus`.
+        
+    - **The Result:** High `Buoyancy` (Play/Aerobic words) now actively regenerates system energy. Writing poetry is no longer a net-zero operation; it feeds the machine.
+        
+
+#### 🛠️ SYSTEM INTEGRITY (The Fuller Lens)
+
+- **Tokenizer Upgrade (`LinguisticPhysicsEngine`):**
+    
+    - Replaced the string translation method with a compiled Regex Tokenizer (`r"[\w']+|[?!,;]"`). This improves handling of punctuation-adjacent tokens.
+        
+- **User Hashing:**
+    
+    - Added `hashlib` to generate unique, anonymized User IDs based on input triggers.
+        
+- **Metric Exposure:**
+    
+    - Added `hedging_count` to the physics payload to explicitly feed **THE YAGA**'s detection algorithms.
+
 ### [v2.7.1] - 2025-12-22 - "THE PRISM"
 
 #### 🧠 IDENTITY FRACTURE (Specialized Personas)
