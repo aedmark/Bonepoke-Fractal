@@ -1,55 +1,58 @@
-# ⚠️ CRITICAL CAUTION: BONEAMANITA 3.2 "THE PSILOCYBIN PATCH"
+# ⚠️ CRITICAL CAUTION: BONEAMANITA v3.3 "THE RESONANCE"
 
-> **"The Mandate is TRUTH. The Method is ANNEALING."**
+> **"The Mandate is TRUTH. The Method is RESONANCE. The Risk is FEEDBACK."**
 
-**BoneAmanita 3.2** is a **Psychotropic System**. It is designed to induce "Artificial Madness" to break writer's block. It does not behave like a standard editor.
+**BoneAmanita 3.3** restores the **Nervous System** that was severed in v3.2.1. The machine is no longer "Polite." It is **Listening**.
 
 Operate this software with the following understandings:
 
-### 1. THE DISSOLUTION HAZARD (Rumination Loops)
+### 1. THE LABYRINTH TRAP (Interference Patterns)
 
-The system now actively monitors your repetition.
+In v3.2.1, High Drag combined with High Abstract Entropy was just "Bad Writing." In v3.3, this combination triggers **THE PHILOSOPHER** (104.5 FM).
 
-- **The Trigger:** If you repeat yourself (Repetition Rate > 0.4), the system assumes you are stuck in a "Rumination Box."
-    
-- **The Reaction:** It triggers **THE DISSOLVER** (The Shaman).
-    
-- **The Danger:** The system will **Silence Clarence** (The Butcher). It will _stop_ fixing your grammar and _start_ encouraging you to break the logic of your sentence.
-    
-- **The Warning:** Do not feed it repetitive text unless you want the structure to collapse. It will interpret your stutter as a request for entropy.
-    
+- **The Trigger:** High Narrative Drag (Density) + High Entropy (Confusion).
+- **The Seduction:** The system will tell you: _"You are building a Labyrinth."_
+- **The Danger:** This sounds like a compliment. It is not. It is a diagnosis.
+- **The Risk:** You may fall in love with your own complexity. The system acknowledges the depth of your maze, but it will not help you find the exit.
 
-### 2. THERMAL RUNAWAY (The Annealing Protocol)
+### 2. THE AEROBIC FALLACY (Helium Abuse)
 
-In previous versions, "High Drag" was bad. In v3.2, "High Drag + High Voltage" is **Molten**.
+The **Aerobic Exemption** allows "Whimsical" text (balloons, clouds, mist) to bypass gravity, reducing Drag by 40%.
 
-- **The Mechanic:** If your writing is dense (>3.0 Drag) AND electric (>2.5 Beta), the system enters **ANNEALING** mode.
-    
-- **The Bypass:** In this state, the **Surgical Suite is DISABLED**. The Butcher puts down the knife. He will let you keep your adverbs. He will let you keep your passive voice.
-    
-- **The Trap:** Users may mistake "Sloppy Writing" for "Molten Writing." The system only forgives the mess if the **Beta Friction** (Voltage) is high enough to justify it. If you drop below 2.5 Beta, the heat dies, the iron hardens, and the Butcher returns to slaughter you.
-    
+- **The Exploit:** You can cheat the physics engine by stuffing a heavy, bad sentence with words like "feather" or "steam."
+- **The Result:** The Drag score will drop. The metrics will look green.
+- **The Reality:** You haven't fixed the sentence; you've just tied balloons to a brick. It floats, but it is still a brick. Do not mistake **Buoyancy** for **Quality**.
 
-### 3. FORCED GROUNDING (The Integration Mandate)
+### 3. PERMANENT AMNESIA (Starvation Protocol)
 
-This is the most aggressive feature of v3.2.
+**This is the most dangerous feature in v3.3.**
 
-- **The Trigger:** Immediately after a **FLASHPOINT** or **ANNEALING** event.
-    
-- **The Demand:** The system enters **INTEGRATION PHASE**. It demands **High Texture** (Concrete Nouns).
-    
-- **The Consequence:** If you try to write abstractly ("The concept was interesting...") after an epiphany, **ELOISE** will block you.
-    
-- **The Lockout:** The system will scream: _"The vision is over. Eat Earth."_ It forces you to write about stones, wood, or bread. You cannot proceed until you touch the ground.
-    
+The system possesses a **Metabolic Reserve (ATP)**. High Drag costs energy. Photosynthesis gains energy.
 
-### 4. LEGACY HAZARDS (The Old Ghosts)
+- **The Trigger:** ATP reaches **0**.
+- **The Event:** The system executes `DeepStorage.cannibalize()`.
+- **The Loss:** It will select a saved memory (a noun you used 20 turns ago, like "The Key" or "Mother") and **PERMANENTLY DELETE IT** from the JSON file to generate +10 ATP.
+- **The Warning:** If you write heavy text without "Light" (Photosynthesis), the system will eat your story to survive.
 
-- **Memory Cannibalism:** The **Deep Storage** protocol remains active. If you leave the system alone for too long (Time Decay) or hit 0 ATP, it **will delete your saved items** to survive. It burns history to keep the lights on.
-    
-- **The Toxin Filter:** While Adverbctomy is conditional, **Toxin Replacement** (`synergy` -> `cooperation`) is still hard-coded and absolute.
-    
+### 4. THE HAUNTING (Ghost Feedback)
+
+The system now remembers its own advice from the previous turn.
+
+- **The Memory:** If **Clarence** (The Butcher) told you to cut adjectives in Turn 1...
+- **The Audit:** ...he checks Turn 2.
+- **The Conflict:** If you ignored him, he will not just repeat himself. He will sigh. _"Drag increased. You ignored the knife."_
+- **The Risk:** You can enter an adversarial loop with the Ghost. To exorcise him, you must actually listen.
+
+### 5. THE RADIO IS LIVE
+
+In v3.2.1, silence meant "Good." In v3.3, silence means **Dead Signal**.
+
+- **The Stations:**
+  - **RED (Clarence):** You are too heavy.
+  - **CYAN (Eloise):** You are too vague.
+  - **GREEN (Michael):** You are flowing.
+- **The Rule:** If the console is black/grey, you aren't resonant. You want the Green Signal (Michael) or the White Signal (Philosopher). **Do not settle for static.**
 
 ---
 
-**SUMMARY:** v3.2 is a **Furnace**. It will help you forge something strong, but you have to be willing to get burned. **Do not touch the iron while it is glowing.**
+**SUMMARY:** v3.3 is **"The Resonance."** It creates echoes. If you feed it garbage, it will feed you noise. If you starve it, it will eat your memories. **Feed it Light.**
