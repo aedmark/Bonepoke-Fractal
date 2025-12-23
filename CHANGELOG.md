@@ -1,5 +1,83 @@
 # CHANGELOG.md
 
+### [v3.4] - 2025-12-23 - "UNFINISHED BUSINESS"
+
+#### 🧬 ADAPTIVE IMMUNITY (The Living Butcher)
+
+- **Dynamic Learning:**
+    
+    - **The Feature:** The system is no longer limited to a hardcoded list of toxins. It can now learn new threats in real-time.
+    - **The Command:** Added `/kill [toxin] [replacement]`.
+    - **The Logic:** This command instantly updates the `TOXIN_MAP`, recompiles the `TOXIN_REGEX`, and persists the new threat to `bone_toxins.json`.
+    - **The Effect:** The Butcher's list grows with the user.
+        
+
+#### 📓 SESSION HYGIENE (The Clean Slate)
+
+- **Isolation Protocol:**
+    
+    - **The Problem:** Previous versions used a singleton `bone_memory.json`, causing "Semantic Sludge" where previous sessions contaminated the current context.
+    - **The Fix:** Implemented **Session Isolation**. Every run generates a unique `memories/session_[timestamp].json`.
+    - **The Seeding:** Added the `/seed [filename]` command. Users can now opt-in to load specific past contexts ("Heirlooms") rather than having them forced upon the session.
+        
+
+#### 🩸 METABOLIC CONSTRAINTS (The Hunger)
+
+- **Starvation Mode (`FrequencyModulator`):**
+    - **The Shift:** ATP is no longer just a score; it is a **Hard Constraint**.
+    - **The Logic:** The radio tuner now accepts `atp` as a variable.
+    - **The States:**
+        
+        - **STARVATION (< 15 ATP):** Luxury stations (**Michael**, **Jester**) are disabled. **Clarence's** intervention threshold drops from `4.5` to `2.5`. The system becomes aggressive to conserve energy.
+            
+        - **ABUNDANCE:** Standard thresholds apply.
+            
+
+#### 📐 TRUTH IN ADVERTISING (Physics Display)
+
+- **Voltage vs. Friction:**
+    - **The Split:** The Dashboard now separates "Heat" from "Resistance."
+    - **VOLT (Voltage):** Displays Raw Intensity (Kinetic + Thermal Tension). High numbers indicate energy.
+    - **β (Beta):** Displays Friction Coefficient (Voltage / Drag). High numbers indicate Paradox Stability.
+- **The Thermal Dimension:**
+    - **Apeirogon Update:** Added the **TMP** (Temperature) vector to `WisdomNode`.
+    - **The Naming:** The system can now generate titles based on thermal state (e.g., _"THE CRITICAL STAR"_ or _"THE VOLATILE REACTOR"_).
+        
+
+#### 🐛 CRITICAL REPAIRS (The Null Paradox)
+
+- **The Void Fix:**
+    - **The Crash:** Fixed a critical bug where empty inputs returned a partial metrics dictionary, causing `KeyError` crashes in the Chronos and Radio loops.
+    - **The Fix:** Updated `_void_metrics` to return a fully populated, zeroed-out physics payload.
+- **Surgical Alignment:**
+    - **The Crash:** Fixed `IndentationError` in `PhysicsEngine` and `SyntaxError` in the command interception logic (`elif` after `else`).
+
+### [v3.3.2] - 2025-12-23 - "THE THERMAL COUPLER"
+
+#### 🔥 THE PARADOX ENGINE (Voltage Restoration)
+
+-   **The Missing Link:**
+    -   **The Problem:** In v3.3.1, "Voltage" was calculated purely on Kinetic Mass. This meant the system respected "Fast Actions" but failed to respect "Deep Contradictions." A sentence like *"The frozen fire burned"* registered as Low Voltage, punishing the user for poetic complexity.
+    -   **The Fix:** Re-implemented the **Thermal/Cryo Opposition** logic.
+    -   **The Math:** `thermal_tension = min(fire_count, ice_count) * 5.0`.
+    -   **The Result:** If you bring Fire and Ice together, the system generates massive Voltage.
+
+#### 🧪 LEXICON EXPANSION
+
+-   **New Categories:**
+    -   `THERMALS`: fire, flame, burn, heat, hot, blaze, sear, char, ash, ember, sun, boil, lava, inferno.
+    -   `CRYOGENICS`: ice, cold, freeze, frost, snow, chill, numb, shiver, glacier, frozen, hail, winter, zero.
+
+#### 📻 THE JESTER (108.9 FM)
+
+-   **Station Activation:**
+    -   **The Return:** **THE JESTER** is back on the air.
+    -   **The Trigger:** If `beta_friction > 2.0` (High Voltage), The Jester takes the mic.
+    -   **The Message:** *"High Voltage detected. The paradox is holding."*
+    -   **The Effect:** High Voltage now protects against Metabolic Cost. If you are generating a Paradox, you do not pay ATP for the drag.    
+- Renamed ChronosAnchor to ChronoStream
+
+
 ### [v3.3] - 2025-12-23 - "THE RESONANCE"
 
 #### 📻 THE RADIO RESTORED (Frequency Modulator)

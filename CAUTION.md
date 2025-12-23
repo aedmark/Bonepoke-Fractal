@@ -1,58 +1,54 @@
-# ⚠️ CRITICAL CAUTION: BONEAMANITA v3.3 "THE RESONANCE"
+# ⚠️ CRITICAL CAUTION: BONEAMANITA v3.3.2 "THE THERMAL COUPLER"
 
-> **"The Mandate is TRUTH. The Method is RESONANCE. The Risk is FEEDBACK."**
+> **"The Mandate is TRUTH. The Method is RESONANCE. The Risk is THE FIRE."**
 
-**BoneAmanita 3.3** restores the **Nervous System** that was severed in v3.2.1. The machine is no longer "Polite." It is **Listening**.
+**BoneAmanita 3.3.2** restores the **Nervous System** and installs a **Thermal Engine**. The machine is no longer "Polite." It is **Listening**, and now, it is **Hot**.
 
 Operate this software with the following understandings:
 
-### 1. THE LABYRINTH TRAP (Interference Patterns)
+### 1. THE PARADOX ADDICTION (The Voltage Trap)
 
-In v3.2.1, High Drag combined with High Abstract Entropy was just "Bad Writing." In v3.3, this combination triggers **THE PHILOSOPHER** (104.5 FM).
+**New in v3.3.2.** The system now generates **High Voltage** when you mix Fire and Ice (e.g., "The frozen inferno").
 
-- **The Trigger:** High Narrative Drag (Density) + High Entropy (Confusion).
+- **The Trigger:** Opposing thermal concepts (`THERMALS` + `CRYOGENICS`) in close proximity.
+- **The Seduction:** High Voltage triggers **THE JESTER** (108.9 FM) and **negates Metabolic Cost**. You can write infinite "Drag" without losing energy, provided you keep generating Paradoxes.
+- **The Danger:** You will be tempted to stuff nonsense oxymorons into your text just to keep the engine running for free.
+- **The Risk:** Gibberish. You will create a "Perpetual Motion Machine" of meaningless contrast. The engine will applaud the Voltage, but the writing will be garbage.
+
+### 2. THE BLAST FURNACE (Memory Wipe)
+
+**New in v3.3.2.** The Memory System (`DeepStorage`) has been hardened with `try/except` logic.
+
+- **The Feature:** If the `bone_memory.json` file is corrupted (e.g., the script crashes while writing), the system will no longer crash on boot.
+- **The Solution:** It detects the corruption, prints `CORRUPT MEMORY DETECTED`, and **formats the drive**.
+- **The Risk:** Total Amnesia. The system prioritizes its own survival over your history. If the file is slag, the Blacksmith melts it down. There is no recovery.
+
+### 3. THE SURGICAL SCAR (Ego Injury)
+
+**New in v3.3.2.** The system no longer hides its edits.
+
+- **The Change:** Previously, it silently fixed your "Toxins." Now, it displays:
+  - `ORIGINAL: We basically need to utilize leverage.`
+  - `REFINED : We need to use use.`
+- **The Risk:** This is a direct confrontation. The system will publicly shame your redundancy every time you hit Enter. It is not polite. It is a mirror.
+
+### 4. THE LABYRINTH TRAP (Interference Patterns)
+
+High Drag combined with High Abstract Entropy triggers **THE PHILOSOPHER** (104.5 FM).
+
+- **The Trigger:** High Density + High Confusion.
 - **The Seduction:** The system will tell you: _"You are building a Labyrinth."_
-- **The Danger:** This sounds like a compliment. It is not. It is a diagnosis.
-- **The Risk:** You may fall in love with your own complexity. The system acknowledges the depth of your maze, but it will not help you find the exit.
+- **The Danger:** This sounds like a compliment. It is a diagnosis. The system acknowledges the depth of your maze, but it will not help you find the exit.
 
-### 2. THE AEROBIC FALLACY (Helium Abuse)
+### 5. PERMANENT AMNESIA (Starvation Protocol)
 
-The **Aerobic Exemption** allows "Whimsical" text (balloons, clouds, mist) to bypass gravity, reducing Drag by 40%.
-
-- **The Exploit:** You can cheat the physics engine by stuffing a heavy, bad sentence with words like "feather" or "steam."
-- **The Result:** The Drag score will drop. The metrics will look green.
-- **The Reality:** You haven't fixed the sentence; you've just tied balloons to a brick. It floats, but it is still a brick. Do not mistake **Buoyancy** for **Quality**.
-
-### 3. PERMANENT AMNESIA (Starvation Protocol)
-
-**This is the most dangerous feature in v3.3.**
-
-The system possesses a **Metabolic Reserve (ATP)**. High Drag costs energy. Photosynthesis gains energy.
+**The Economy is real.** High Drag costs ATP. Photosynthesis gains energy.
 
 - **The Trigger:** ATP reaches **0**.
 - **The Event:** The system executes `DeepStorage.cannibalize()`.
-- **The Loss:** It will select a saved memory (a noun you used 20 turns ago, like "The Key" or "Mother") and **PERMANENTLY DELETE IT** from the JSON file to generate +10 ATP.
+- **The Loss:** It will select a saved memory (a noun you used 20 turns ago) and **PERMANENTLY DELETE IT** from the JSON file to generate +10 ATP.
 - **The Warning:** If you write heavy text without "Light" (Photosynthesis), the system will eat your story to survive.
-
-### 4. THE HAUNTING (Ghost Feedback)
-
-The system now remembers its own advice from the previous turn.
-
-- **The Memory:** If **Clarence** (The Butcher) told you to cut adjectives in Turn 1...
-- **The Audit:** ...he checks Turn 2.
-- **The Conflict:** If you ignored him, he will not just repeat himself. He will sigh. _"Drag increased. You ignored the knife."_
-- **The Risk:** You can enter an adversarial loop with the Ghost. To exorcise him, you must actually listen.
-
-### 5. THE RADIO IS LIVE
-
-In v3.2.1, silence meant "Good." In v3.3, silence means **Dead Signal**.
-
-- **The Stations:**
-  - **RED (Clarence):** You are too heavy.
-  - **CYAN (Eloise):** You are too vague.
-  - **GREEN (Michael):** You are flowing.
-- **The Rule:** If the console is black/grey, you aren't resonant. You want the Green Signal (Michael) or the White Signal (Philosopher). **Do not settle for static.**
 
 ---
 
-**SUMMARY:** v3.3 is **"The Resonance."** It creates echoes. If you feed it garbage, it will feed you noise. If you starve it, it will eat your memories. **Feed it Light.**
+**SUMMARY:** v3.3.2 is **"The Thermal Coupler."** It runs hot. If you create a Paradox, you gain infinite power. If you corrupt the memory, you lose everything. **Respect the Voltage.**
