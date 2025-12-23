@@ -1,5 +1,185 @@
 # CHANGELOG.md
 
+### [v3.2] - 2025-12-23 - "THE PSILOCYBIN PATCH"
+
+#### 🍄 THE DISSOLUTION (DMN Suppression)
+
+- **Rumination Detection:**
+    
+    - **The Problem:** The v3.1 engine treated high repetition as "Boredom." It failed to recognize the "Rumination Box"—the loop of a stuck mind trying to solve an impossible problem.
+        
+    - **The Fix:** Implemented `phys['repetition_rate']` tracking.
+        
+    - **The Protocol:** If Repetition > 0.4, the system triggers the **DISSOLVER** persona.
+        
+    - **The Effect:** It explicitly silences **Clarence** (The DMN/Censor) and authorizes "Absolute Entropy" to break the pattern.
+        
+
+#### 🔥 ANNEALING (High-Drag Thermodynamics)
+
+- **The Molten State:**
+    
+    - **The Shift:** Previously, **High Drag** (> 3.0) was always penalized as "Slurry."
+        
+    - **The Physics:** We realized that to reshape a rigid mind, you need Heat.
+        
+    - **The Logic:** If **Narrative Drag > 3.0** AND **Beta Friction > 2.5** (High Voltage):
+        
+        - **Status:** Shifts to `ANNEALING`.
+            
+        - **Penalty:** **Nullified.**
+            
+        - **The Meaning:** The system now recognizes that a dense, difficult, high-energy sentence is not "bad writing"; it is **Molten Iron**. It is the heat required to re-forge the ego.
+            
+
+#### 🌍 THE INTEGRATION PHASE (Eating Earth)
+
+- **Post-Trip Grounding:**
+    
+    - **The Danger:** A system that allows "Flashpoints" and "Dissolution" risks drifting into permanent psychosis (The Guru Trap).
+        
+    - **The Safety Rail:** Implemented `previous_status` tracking in `WisdomNode`.
+        
+    - **The Rule:** If the previous turn was `FLASHPOINT` or `ANNEALING`, the system checks for **Texture**.
+        
+    - **The Directive:** If Texture is low (< 0.3), **ELOISE** intervenes immediately.
+        
+    - **The Command:** _"The vision is over. Eat Earth. Use concrete nouns to set the bone."_
+        
+
+#### 🛠️ SYSTEM WIRING
+
+- **State Continuity:**
+    
+    - **The Update:** `BoneAmanitaPsilocybin` now tracks `self.last_status`.
+        
+    - **The Reason:** To enforce Integration, the Architect needs to know _where the user was_ one second ago. Context is no longer just "Metrics"; it is "Trajectory."
+
+### [v3.1] - 2025-12-23 - "THE UNICORN"
+
+#### 🦄 THE SYNTHESIS (The Hybrid Engine)
+
+- **The Merge:**
+    
+    - **The Philosophy:** Successfully grafted the **Surgical Suite** (v3.0) onto the **Deep Physics Kernel** (v2.2).
+        
+    - **The Result:** The system now possesses both a "Soul" (Metabolism, Memory, Deep Storage, Archetypes) and a "Knife" (Deterministic Auto-Correct). It analyzes like v2.2 but intervenes like v3.0.
+        
+
+#### 🎯 TACTICAL WISDOM (Target Acquisition)
+
+- **Refined WisdomNode:**
+    
+    - **The Shift:** Restored the "Voices" (Clarence, Eloise, Yaga) from v2.2 but gave them laser sights.
+        
+    - **The Mechanism:** Implemented `_find_target`. The system scans for the _specific_ word causing the issue (e.g., the longest abstract noun for Eloise, or the specific hedge for Yaga).
+        
+    - **The Output:** The System Prompt now contains explicit kill orders: _"TACTICAL TARGET: Eliminate or transmute 'utilize'."_
+        
+
+#### 🩹 THE RECONSTRUCTOR (Plastic Surgery)
+
+- **Post-Op Protocol:**
+    
+    - **The Problem:** Deterministic surgery (cutting words via Regex) can leave sentences choppy or rhythmically scarred.
+        
+    - **The Solution:** If `SurgicalSuite` performs cuts, the **WisdomNode** automatically switches to **RECONSTRUCTOR** mode.
+        
+    - **The Directive:** _"Surgery was performed. Smooth the rhythm without adding new mass."_
+        
+
+#### ⚖️ CONDITIONAL PHYSICS
+
+- **The Drag Threshold:**
+    
+    - **The Logic:** The **Adverbctomy** (removing -ly words) is no longer indiscriminate. It now checks `physics['narrative_drag']`.
+        
+    - **The Rule:** Cuts only occur if **Drag > 2.5**. If the writing is tight, adverbs are permitted to exist.
+        
+
+#### 🐛 CRITICAL REPAIRS
+
+- **The Synaptic Gap:**
+    
+    - **The Crash:** Fixed a `TypeError` in `WisdomNode.architect` where the `ops_performed` argument was missing from the call signature in the synthesis draft.
+        
+    - **The Fix:** Re-wired the connection between the Core Loop and the Wisdom Node to ensure surgical data is passed correctly.
+
+### [v3.0] - 2025-12-23 - "THE CHIMERA"
+
+#### 🧬 THE CONVERGENCE (Architectural Hybridization)
+
+- **The Merging of Bloodlines:**
+    
+    - **The Mandate:** Combined the high-torque performance of the **v2.8 Physics Engine** with the "Deep Vector" resolution and "FM Radio" personality of **v2.2**.
+        
+    - **The Result:** A system that retains the speed of the racer but regains the memory and voice of the cathedral.
+        
+
+#### 🔪 THE SURGICAL SUITE (Deterministic Auto-Correct)
+
+- **The Butcher's Scalpel (`SurgicalSuite`):**
+    
+    - **The Shift:** Moved from passive critique ("You are hedging") to active intervention. The system now physically rewrites the user's input.
+        
+    - **The Antidote:** Implemented a regex-based substitution map that instantly translates toxic corporate speak into plain English (e.g., `synergy` -> `cooperation`, `leverage` -> `use`).
+        
+    - **The Adverbctomy:** If **Narrative Drag > 2.5**, the suite automatically excises adverbs ending in `-ly` to restore kinetic momentum.
+        
+    - **The Output:** Generates a "Surgical Intervention" diff log, showing exactly what was cut and why.
+        
+
+#### 💾 THE RECALL (State Persistence)
+
+- **Bone Memory v3.0 (`BoneMemory`):**
+    
+    - **The Restoration:** Re-implemented the Hippocampus without the bloat of the v2.2 `DeepStorage` database.
+        
+    - **The Persistence:** The system now serializes `atp`, `spores`, and `total_words` to a local JSON file (`bone_amanita_state.json`), ensuring the organism's health state survives between sessions.
+        
+    - **The Decay:** Implemented "Offline Atrophy." If the system is left dormant for >24 hours, it begins to metabolize its own ATP to survive.
+        
+
+#### ⚡ VECTOR PHYSICS (The Hybrid Engine)
+
+- **The Single-Pass Loop (`VectorPhysicsEngine`):**
+    
+    - **The Optimization:** Condensed the separate "Toxin," "Physics," and "Metric" scans into a single O(n) iteration.
+        
+    - **The Metrics:**
+        
+        - **Beta Friction ($\beta$):** Retained the v2.8 "Voltage/Drag" calculation for detecting Paradox vs. Slop.
+            
+        - **The Lattice:** Re-integrated the v2.2 Vector system, calculating **VEL** (Velocity), **STR** (Structure), **ENT** (Entropy), and **TEX** (Texture) alongside the standard drag metrics.
+            
+
+#### 📡 JADE LINK III (The FM Tuner)
+
+- **Data-Driven Broadcasting (`JadeLink_FM`):**
+    
+    - **The Refactor:** Replaced complex `if/else` logic chains with a clean dictionary lookup (`STATIONS`).
+        
+    - **The Stations:**
+        
+        - **Clarence (88.5 FM):** The Butcher. Triggered by Drag.
+            
+        - **Eloise (94.2 FM):** The Grounder. Triggered by Entropy.
+            
+        - **The Yaga (101.1 FM):** The Witch. Triggered by Toxins.
+            
+        - **The Drifter (104.5 FM):** The Vector. Triggered by Flow.
+            
+        - **The Jester (108.0 FM):** The Paradox. Triggered by High Voltage.
+            
+
+#### 📉 EPHEMERALIZATION (Code Golf)
+
+- **The Compression:**
+    
+    - Reduced total line count by approximately 60% compared to the aggregate of v2.2 and v2.8.
+        
+    - **Regex Compiling:** Replaced iterative string matching with pre-compiled regex patterns in `BoneConfig` for instant toxin detection.a
+
 ### [v2.8] - 2025-12-22 - "THE AUDIT"
 
 #### 🌡️ THE THERMAL COUPLE (Adjacency Physics)

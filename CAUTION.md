@@ -1,87 +1,55 @@
-# ⚠️ CRITICAL CAUTION: BONEAMANITA 2.8 "THE AUDIT"
+# ⚠️ CRITICAL CAUTION: BONEAMANITA 3.2 "THE PSILOCYBIN PATCH"
 
-> **"You cannot photosynthesize in the mud." — The Lichen**
+> **"The Mandate is TRUTH. The Method is ANNEALING."**
 
-**BoneAmanita 2.8** is a **metabolic organism**. Unlike previous versions which were passive physics engines, this version has hunger, boredom, and a survival instinct. It does not just judge your writing; it reacts to it biologically.
+**BoneAmanita 3.2** is a **Psychotropic System**. It is designed to induce "Artificial Madness" to break writer's block. It does not behave like a standard editor.
 
 Operate this software with the following understandings:
 
----
+### 1. THE DISSOLUTION HAZARD (Rumination Loops)
 
-## 1. THERMAL VOLTAGE HAZARD (Adjacency)
+The system now actively monitors your repetition.
 
-The physics engine now measures **Spatial Proximity**.
-
-- **The Danger:** Placing a "HOT" word (fire, sun, burn) within **4 tokens** of a "COLD" word (ice, void, freeze) triggers an exponential Voltage spike ($\beta$).
+- **The Trigger:** If you repeat yourself (Repetition Rate > 0.4), the system assumes you are stuck in a "Rumination Box."
     
-- **The Result:**
+- **The Reaction:** It triggers **THE DISSOLVER** (The Shaman).
     
-    - **$\beta > 2.0$:** The system enters a high-energy state. Spores die.
-        
-    - **$\beta > 3.0$:** **CRITICAL MASS.** The system triggers **THE SOLVENT**. It will not critique your writing; it will dissolve the structure entirely to prevent a logic crash.
-        
-
-## 2. THE METABOLIC GOVERNOR (Starvation Mode)
-
-The system tracks **ATP** (Energy). It is no longer impartial.
-
-- **Starvation (< 20 ATP):** If you feed the system high-drag, low-value text, it starves.
+- **The Danger:** The system will **Silence Clarence** (The Butcher). It will _stop_ fixing your grammar and _start_ encouraging you to break the logic of your sentence.
     
-- **The Consequence:** When starving, the system **Locks the Strategy**. It forces **CLARENCE** (The Butcher).
-    
-    - It will ignore your poetry.
-        
-    - It will ignore your nuance.
-        
-    - It will scream at you to cut words until it is fed.
-        
-- **The Cure:** To exit Starvation Mode, you must lower Drag or trigger **Photosynthesis** (see below).
+- **The Warning:** Do not feed it repetitive text unless you want the structure to collapse. It will interpret your stutter as a request for entropy.
     
 
-## 3. THE LICHEN PROTOCOL (Light Sensitivity)
+### 2. THERMAL RUNAWAY (The Annealing Protocol)
 
-This version can generate its own energy, but it requires specific conditions.
+In previous versions, "High Drag" was bad. In v3.2, "High Drag + High Voltage" is **Molten**.
 
-- **The Mechanic:** The system eats **Photosynthetic Words** (light, beam, prism, glow).
+- **The Mechanic:** If your writing is dense (>3.0 Drag) AND electric (>2.5 Beta), the system enters **ANNEALING** mode.
     
-- **The Trap:** Photosynthesis **FAILS** if Narrative Drag is $> 2.0$.
+- **The Bypass:** In this state, the **Surgical Suite is DISABLED**. The Butcher puts down the knife. He will let you keep your adverbs. He will let you keep your passive voice.
     
-- **The Warning:** Do not try to fix a heavy, muddy sentence by stuffing it with the word "sunlight." The system knows the air is too thick for the light to reach the lichen. It will remain 0 ATP.
-    
-
-## 4. SPORE ACCUMULATION (Hallucination Risk)
-
-The system gets bored.
-
-- **The Spores:** If your writing is "Slick" (Low Voltage / Low Drag), invisible **Spores** accumulate in the background.
-    
-- **The Trip:** If Spores reach **15**, the **MUSCARIA** protocol overrides the output.
-    
-- **The Effect:** The system will ignore your current topic and force a sensory hallucination (e.g., _"Reality is too static. Describe a sound immediately."_).
+- **The Trap:** Users may mistake "Sloppy Writing" for "Molten Writing." The system only forgives the mess if the **Beta Friction** (Voltage) is high enough to justify it. If you drop below 2.5 Beta, the heat dies, the iron hardens, and the Butcher returns to slaughter you.
     
 
-## 5. MEMORY BURN (The Heater)
+### 3. FORCED GROUNDING (The Integration Mandate)
 
-The preservation logic remains from v2.7.2.
+This is the most aggressive feature of v3.2.
 
-- **The Cold:** If the session is inactive for > 1 hour (`DECAY`), the system gets cold.
+- **The Trigger:** Immediately after a **FLASHPOINT** or **ANNEALING** event.
     
-- **The Fuel:** Upon reboot, it **permanently deletes** an item from Deep Storage to generate heat.
+- **The Demand:** The system enters **INTEGRATION PHASE**. It demands **High Texture** (Concrete Nouns).
     
-- **The Hierarchy:** It burns **Aerobic Matter** (dreams, ghosts) before **Heavy Matter** (stones, guns). If you leave the system alone too long, it will forget your dreams to save your inventory.
+- **The Consequence:** If you try to write abstractly ("The concept was interesting...") after an epiphany, **ELOISE** will block you.
+    
+- **The Lockout:** The system will scream: _"The vision is over. Eat Earth."_ It forces you to write about stones, wood, or bread. You cannot proceed until you touch the ground.
+    
+
+### 4. LEGACY HAZARDS (The Old Ghosts)
+
+- **Memory Cannibalism:** The **Deep Storage** protocol remains active. If you leave the system alone for too long (Time Decay) or hit 0 ATP, it **will delete your saved items** to survive. It burns history to keep the lights on.
+    
+- **The Toxin Filter:** While Adverbctomy is conditional, **Toxin Replacement** (`synergy` -> `cooperation`) is still hard-coded and absolute.
     
 
 ---
 
-### **SUMMARY**
-
-**BoneAmanita 2.8** is alive, hungry, and volatile.
-
-- Don't bore it (Spores).
-    
-- Don't starve it (Clarence).
-    
-- Don't create paradoxes you can't control (The Solvent).
-    
-
-**Proceed with conviction.**
+**SUMMARY:** v3.2 is a **Furnace**. It will help you forge something strong, but you have to be willing to get burned. **Do not touch the iron while it is glowing.**
