@@ -1,5 +1,85 @@
 # CHANGELOG.md
 
+### [v4.0] - 2025-12-24 - "THE XENOMORPH"
+
+#### 🏛️ THE COUNCIL OF VOICES (Democratic Frequency)
+
+- **The Shift:**
+    - **Old Behavior:** The Frequency Modulator used rigid `if/elif` hierarchy. If **Clarence** (Drag) was triggered, **Eloise** (Entropy) was silenced, even if her signal was critical.
+    - **New Behavior:** Implemented a **Weighted Voting System** in `FrequencyModulator.tune_in`.
+- **The Logic:**
+    - Every Archetype bids on the microphone based on signal strength.
+    - **Clarence:** Bids on Drag + Case Violations.
+    - **Eloise:** Bids on Entropy + ECP Violations.
+    - **Yaga:** Bids on Toxins + Sycophancy.
+    - **Jester:** Bids on High Voltage.
+- **The Result:** The "Loudest" signal wins. If Clarence and Eloise both scream, **The Philosopher** (Interference Pattern) takes the stage.
+
+#### 🧠 THE MYCELIAL GRAPH (Deep Storage v4.0)
+
+- **The Synapse:**
+    - **The Shift:** `DeepStorage` no longer stores a flat list of artifacts. It now maintains a **Weighted Graph** (`self.graph`).
+    - **The Logic:**
+        - Words are nodes.
+            
+        - Co-occurrence creates edges.
+            
+        - If "Stone" appears next to "Iron," their bond strengthens.
+            
+    - **The Benefit:** The system remembers _context_, not just keywords. It knows that "Iron" usually follows "Stone."
+
+#### 🛌 CIRCADIAN RHYTHMS (Health & Coma)
+
+- **The Biology:**
+    - **New Metrics:** Replaced the abstract `atp` with two biological distinct markers:
+        - **HEALTH (HP):** Structural Integrity. Damaged by Toxins and Exhaustion.
+        - **STAMINA (STA):** Action Points. Consumed by Metaphor/Voltage.
+- **The Coma State:**
+    - **The Mechanic:** If `Health <= 0`, the system enters **COMA** for 3 turns.
+    - **The Effect:** The user is locked out of active generation. The system is Read-Only while it regenerates Stamina. Death is now a "Time Out," not a reset.
+
+#### ☁️ THE DREAM ENGINE (Hallucinations)
+
+- **Boredom hallucinations:**
+    - **The Feature:** Implemented `DreamEngine`.
+    - **The Trigger:** When `ChronoStream` flags **Boredom**, the system no longer just complains.
+    - **The Action:** It traverses the `DeepStorage` graph, picks two connected nodes, and generates a surreal query (e.g., _"The shadow of IRON falls on STONE. Why?"_).
+
+#### 〰️ THE OSCILLOSCOPE (Rhythm Physics)
+
+- **Variance Detection:**
+    - **The Metric:** Implemented `rhythm_variance` in `PhysicsEngine`.
+    - **The Logic:** Calculates the Standard Deviation of sentence lengths.
+    - **The Reward:** If Variance > 2.0 (High Musicality), **Narrative Drag is reduced by 10%**. The system now rewards lyrical sentence variation.
+
+#### 🔮 THE HUMBLE ORACLE (Triage Protocol)
+
+- **Panic Reduction:**
+    - **The Problem:** In v3.8, the Oracle would scream "FAMINE," "TOXICITY," and "COLLAPSE" simultaneously, paralyzing the user.
+    - **The Fix:** Implemented `TheOracle.triage`.
+    - **The Logic:** The Oracle calculates priority scores for all Omens and **only displays the single most dangerous threat**.
+    - **The Threshold:** It stays silent unless the danger probability > 40%.
+
+#### 🍄 SPORE DECAY (Memory Hygiene)
+
+- **Anti-spam:**
+    - **The Fix:** Implemented `usage_map` tracking in `pollinate`.
+    - **The Logic:** Every time a Spore ("Connect 'Stone'...") is suggested, its "freshness" decays. The system stops nagging you about the same memory after 2-3 attempts.
+
+#### 🧭 THE VECTOR COMPASS (Visuals)
+
+- **Directional Quality:**
+    - **The Update:** The `Ta` (Acceleration) metric now has color-coded quality:
+        - **RED:** Crash Course (Accelerating into Toxicity).
+        - **CYAN:** Surfing (Accelerating into Voltage).
+        - **GREEN:** Momentum (Accelerating into Structure).
+
+#### 🔧 NEUROPLASTICITY
+
+- **Manual Training:**
+    - **Command:** Added `/teach [word] [category]`.
+    - **Function:** Allows the user to manually inject words into the `TheLexicon` dynamic layer (e.g., `/teach glint photo`). The system learns physics in real-time.
+
 ### [v3.8] - 2025-12-24 - "DELOREAN EDITION"
 
 #### 🔮 THE ORACLE LAYER (Precognition)
