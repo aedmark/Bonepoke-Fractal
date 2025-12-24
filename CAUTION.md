@@ -1,60 +1,67 @@
-# ⚠️ CRITICAL CAUTION: BONEAMANITA v3.6 "THE KINTSUGI PATCH"
+# ⚠️ CRITICAL CAUTION: BONEAMANITA v3.6.5 "THE BATTERY PACK"
 
-> **"The Mandate is ANTI-FRAGILITY. The Method is KINTSUGI. The Danger is HUBRIS."**
+> **"The Mandate is TRUTH. The Fuel is PARADOX. The Danger is VOLTAGE."**
 
-**BoneAmanita 3.6** is not just a tool; it is a metabolic system with a finite lifespan and a specific hunger. It can heal itself, but it can also starve you out.
+**BoneAmanita 3.6.5** is a high-energy system. It allows you to trade structural stability (Drag) for raw insight (Voltage). This makes it powerful, but unstable.
 
 Operate this software with the following understandings:
 
-### 1. THE GRAVEYARD SHIFT (Automatic Garbage Collection)
+### 1. THE VOLTAGE TRAP (The Battery's Lie)
 
-**New in v3.5.** The system now practices aggressive hygiene.
+**New in v3.6.5.** The system encourages you to write "Heavy" text, provided it is "Electric."
 
-- **The Feature:** On boot, the `DeepStorage` module scans for session files older than **24 hours**.
+- **The Feature:** The **Paradox Battery** charges when Voltage > 7.0.
     
-- **The Event:** It deletes them. Irrevocably.
+- **The Trap:** It is very easy to write **Heavy Text** (High Drag) that is _not_ Electric.
     
-- **The Rationale:** "The system must bury its dead to keep the living room clean."
+- **The Consequence:** If you attempt a profound paradox but fail to stick the landing, you generate **Massive Drag** without generating the **Voltage** to pay for it.
     
-- **The Warning:** Do not treat the `memories/` folder as a permanent archive. If you write a masterpiece today, back it up manually. If you come back in 2 days, it will be compost.
-    
-
-### 2. THE KINTSUGI GAMBLE (Gaming the System)
-
-**New in v3.6.** The system allows you to repair a "Starving" state (< 10 ATP) instantly by solving a Koan.
-
-- **The Feature:** If you hit critical failure, the system offers a "Golden Repair" (Restores 50 ATP).
-    
-- **The Temptation:** You might be tempted to _intentionally_ starve the machine just to trigger the free energy boost.
-    
-- **The Risk:** The Koan requires **High Voltage** (> 8.0) or **High Whimsy** to solve.
-    
-- **The Warning:** If you intentionally break the machine and then _fail_ to generate the necessary brilliance to fix it, you will be trapped in a death spiral with 0 ATP. Do not break what you cannot fix.
+- **The Warning:** Do not mistake _confusion_ for _profundity_. If the Jester doesn't laugh, you are just holding a heavy rock. You will starve.
     
 
-### 3. METABOLIC HAUNTING (Time Travel Sickness)
+### 2. THE GRAVEYARD SHIFT (Automatic Garbage Collection)
 
-**New in v3.5.** ATP is now tied to the **Session File**, not the Runtime.
+**Standard Protocol.** The system practices aggressive hygiene.
 
-- **The Feature:** When you use `/seed [file]`, you inherit the memories _and_ the exhaustion of that timeline.
+- **The Feature:** On boot, `DeepStorage` deletes session files older than **24 hours**.
     
-- **The Reality:** If you saved a session while "Starving," and you load it today, you will wake up "Starving."
-    
-- **The Warning:** Restarting the script does not cure hunger if you are loading a seed. You cannot escape your past choices.
+- **The Warning:** Do not treat the `memories/` folder as a permanent archive. If you write a masterpiece today, back it up. Tomorrow, it is compost.
     
 
-### 4. THE CONTROL VACUUM (Command Decoupling)
+### 3. THE KINTSUGI GAMBLE (The Last Resort)
 
-**New in v3.6.** The Physics Engine no longer "reads" administrative commands.
+**Updated in v3.6.5.** The Golden Repair is now the _final_ fail-safe, below the Battery.
 
-- **The Feature:** Commands like `/kill`, `/seed`, and `/status` are handled by the `CommandProcessor`.
+- **The Feature:** If the Battery runs dry and ATP < 10, the system offers a Koan.
     
-- **The Shift:** These inputs generate **Zero Voltage** and **Zero Drag**.
+- **The Risk:** To solve the Koan, you must generate High Voltage _while starving_. This is difficult.
     
-- **The Warning:** Do not try to be poetic with the Command Line Interface. It is a sterile zone. It will not give you feedback, and it will not feed the Lichen.
+- **The Warning:** Do not intentionally drain your battery to trigger the Kintsugi event. It is a Hail Mary pass, not a strategy.
     
 
-### 5. THE SURGICAL SCAR (Ego Injury)
+### 4. METABOLIC HAUNTING (Persistence)
+
+**Updated in v3.6.5.** You inherit the **Charge** of your past self.
+
+- **The Feature:** `/seed [file]` loads both ATP and Battery Level.
+    
+- **The Reality:** If you saved a session while "Manic" (Full Battery), you wake up Manic. If you saved it "Empty," you wake up Empty.
+    
+- **The Warning:** Time travel does not recharge the capacitor.
+    
+
+### 5. THE JESTER'S LOOP (Infinite Regress)
+
+**New in v3.6.5.** The system now accepts recursive logic (_"This sentence is false"_).
+
+- **The Feature:** High-level paradoxes charge the battery instantly.
+    
+- **The Risk:** You may find yourself writing endless logical loops to farm energy, rather than writing the actual narrative.
+    
+- **The Warning:** This is an engine for writing, not a mirror for logic testing. Do not get lost in the reflection.
+    
+
+### 6. THE SURGICAL SCAR (Ego Injury)
 
 The system continues to display its cuts openly.
 
@@ -64,9 +71,9 @@ The system continues to display its cuts openly.
         
     - `NEW: We need to use use.`
         
-- **The Risk:** Public shaming. The system will strip your "Corporate Speak" in front of you. It does not care about your feelings. It cares about the signal-to-noise ratio.
+- **The Risk:** Public shaming. The system does not care about your feelings. It cares about the signal-to-noise ratio.
     
 
 ---
 
-**SUMMARY:** v3.6 offers **Anti-Fragility**, but only to those who respect the physics. If you ignore the Reaper or fail the Kintsugi Koan, the system will not save you. **Fill the crack with gold, or do not break it at all.**
+**SUMMARY:** v3.6.5 gives you a **Capacitor**. It allows you to run hotter, faster, and heavier than before. But unlike the Lichen (which feeds on light), the Battery feeds on **Tension**. **Monitor your voltage, or you will burn out.**

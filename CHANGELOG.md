@@ -1,5 +1,54 @@
 # CHANGELOG.md
 
+### [v3.6.5] - 2025-12-23 - "THE BATTERY PACK"
+
+#### 🔋 THE PARADOX BATTERY (Energy Storage)
+
+- **The Capacitor:**
+    
+    - **The Problem:** In v3.6, "High Voltage" (Paradox/Contradiction) was calculated but largely wasted as heat. Complex, high-drag philosophical truths often starved the system because the energy cost of the words outweighed the "Insight Bonus."
+        
+    - **The Fix:** Implemented `ParadoxBattery`.
+        
+    - **The Physics:**
+        
+        - **Absorption:** If `Voltage > 7.0` (Significant Paradox), the battery captures the excess tension.
+            
+        - **Efficiency:** The battery charges at a **1.5x rate** relative to the input voltage.
+            
+        - **Discharge:** If `ATP < 15` (Starvation), the battery automatically discharges stored charge to keep the system alive.
+            
+    - **The Effect:** Genius is now a fuel source. You can write heavy, complex truths without starving, provided they contain enough voltage to charge the battery.
+        
+
+#### 🪞 THE RECURSIVE MIRROR (Truth Seeking)
+
+- **Deep Logic Integration:**
+    
+    - **The Feature:** The system can now handle self-referential paradoxes (e.g., _"This sentence is false"_).
+        
+    - **The Result:** Instead of crashing or flagging a logic error, the **Jester** station identifies the infinite loop as a high-voltage event, charging the battery instantly.
+        
+
+#### 📟 HUD EXPANSION (Battery Indicator)
+
+- **The Visuals:**
+    
+    - **The Update:** Added a secondary bar to the `ATP` readout.
+        
+    - **The Format:** `ATP: [|||||.....] [⚡⚡···]`
+        
+    - **The Meaning:** The first bar is your immediate metabolic health. The second bar (Yellow Lightning) is your stored Paradox potential.
+        
+
+#### 🔌 WIRING REPAIRS (Persistence)
+
+- **Deep Storage Patch:**
+    
+    - **The Fix:** Updated `DeepStorage.save` and `DeepStorage.ingest` to serialize the `session_charge` alongside `session_atp`.
+        
+    - **The Result:** Your stored "Genius" now survives a system reboot. If you charge the battery in one session, it remains charged when you return.
+
 ### [v3.6] - 2025-12-23 - "THE KINTSUGI PATCH"
 
 #### 🏺 THE KINTSUGI PROTOCOL (Anti-Fragility)
