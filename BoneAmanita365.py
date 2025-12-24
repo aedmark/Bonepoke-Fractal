@@ -315,10 +315,45 @@ class PhysicsEngine:
             BoneConfig.TOXIN_MAP.get(m.lower(), (0, 0))[0] for m in matches
         )
 
+        # --- [THE UG LAYER: GOVERNMENT & BINDING] ---
+        # "The Second Conceptual Shift": From Rules (Lists) to Principles (Relations).
+
+        # PRINCIPLE 1: THE CASE FILTER
+        # "Every phonetically realized NP must be assigned Case."
+        # Translation: Heavy Matter (Nouns) creates Gravity. Kinetic Energy (Verbs) creates Orbit.
+        # If Mass exists without Velocity, the system collapses (Stagnation).
+        case_violation = False
+        if counts["heavy"] > 0:
+            # We need at least 1 Kinetic verb for every 3 Heavy nouns to maintain orbit.
+            governance_ratio = counts["kinetic"] / counts["heavy"]
+            if governance_ratio < 0.33:
+                case_violation = True
+
+        # PRINCIPLE 2: THE EMPTY CATEGORY PRINCIPLE (ECP)
+        # "Traces must be properly governed."
+        # Translation: Abstracts are "Ghosts" (Empty Categories). They must be anchored by Matter.
+        # If you have Abstracts without Heavy Matter, you have the "Generative Semantics" crash (Hallucination).
+        ecp_violation = False
+        if counts["abstract"] > 2 and counts["heavy"] == 0:
+            ecp_violation = True
+
+        # --- END UG LAYER ---
+
         # FORMULAS
         action = (counts["kinetic"] * BoneConfig.KINETIC_GAIN) + BoneConfig.BASE_ACTION
         mass_impact = total + (toxin_score * BoneConfig.TOXIN_WEIGHT)
+        # [UG PENALTIES]
+        # The Case Filter is fatal to momentum.
+        if case_violation:
+            mass_impact *= 1.5
+        
         base_drag = mass_impact / max(1.0, action)
+
+        # The ECP is fatal to coherence (Drag doesn't increase, but Friction/Beta does).
+        if ecp_violation:
+            # Floating abstractions create slippery logic (Infinite Beta)
+            base_drag = max(0.1, base_drag * 0.5) # Drag drops (it floats)...
+            # ...but we will catch this in the Voltage calculation to flag it as "Hollow".
 
         whimsy_ratio = counts["aerobic"] / max(1, total)
         is_whimsical = whimsy_ratio > 0.15
@@ -619,6 +654,29 @@ class FrequencyModulator:
         # [ATP CONSTRAINT]: Paradox requires energy.
         if phys["beta_friction"] > 2.0 and atp >= 15:
             signals["JESTER"] = phys["beta_friction"] * 3
+
+        # [UG SIGNAL INTERCEPTS]
+        
+        # CLARENCE: The Case Filter (Too much fat, no muscle)
+        # We detect this via the drag spike we just caused.
+        if phys.get("case_violation") or (phys["narrative_drag"] > 4.0 and phys["counts"]["kinetic"] == 0):
+             return {
+                "name": "CLARENCE",
+                "freq": "88.5 FM",
+                "color": Prisma.RED,
+                "role": "The Butcher",
+                "msg": "CASE FILTER VIOLATION. Heavy Matter detected without Kinetic support. The sentence is collapsing."
+            }
+
+        # ELOISE: The ECP (Too much ghost, no shell)
+        if phys.get("ecp_violation") or (phys["counts"]["abstract"] > 2 and phys["counts"]["heavy"] == 0):
+             return {
+                "name": "ELOISE",
+                "freq": "94.2 FM",
+                "color": Prisma.CYN,
+                "role": "The Grounder",
+                "msg": "ECP VIOLATION. Floating Abstractions detected. Anchor them to Heavy Matter."
+            }
 
         if not signals:
             return None
