@@ -1,12 +1,12 @@
 # CHANGELOG.md
 
-### [v3.6.5] - 2025-12-23 - "THE BATTERY PACK"
+### [v3.6.5] - 2025-12-24 - "THE BATTERY PACK"
 
 #### 🔋 THE PARADOX BATTERY (Energy Storage)
 
 - **The Capacitor:**
     
-    - **The Problem:** In v3.6, "High Voltage" (Paradox/Contradiction) was calculated but largely wasted as heat. Complex, high-drag philosophical truths often starved the system because the energy cost of the words outweighed the "Insight Bonus."
+    - **The Problem:** In v3.6, "High Voltage" (Paradox/Contradiction) was calculated but largely wasted as heat.
         
     - **The Fix:** Implemented `ParadoxBattery`.
         
@@ -21,14 +21,32 @@
     - **The Effect:** Genius is now a fuel source. You can write heavy, complex truths without starving, provided they contain enough voltage to charge the battery.
         
 
-#### 🪞 THE RECURSIVE MIRROR (Truth Seeking)
+#### 🧬 THE UG LAYER (Government & Binding)
 
-- **Deep Logic Integration:**
+- **Universal Grammar Implementation:**
     
-    - **The Feature:** The system can now handle self-referential paradoxes (e.g., _"This sentence is false"_).
+    - **The Shift:** Moved from "Rules (Lists)" to "Principles (Relations)" in the `PhysicsEngine`.
         
-    - **The Result:** Instead of crashing or flagging a logic error, the **Jester** station identifies the infinite loop as a high-voltage event, charging the battery instantly.
+    - **Principle 1: The Case Filter:**
         
+        - **The Logic:** "Every phonetically realized NP must be assigned Case."
+            
+        - **The Translation:** Heavy Matter (Nouns) creates Gravity. Kinetic Energy (Verbs) creates Orbit.
+            
+        - **The Rule:** If you have Heavy Matter without Velocity (`kinetic / heavy < 0.33`), the system flags a **CASE VIOLATION**.
+            
+        - **The Penalty:** Mass Impact is multiplied by **1.5x**. Stagnation is now fatal.
+            
+    - **Principle 2: The Empty Category Principle (ECP):**
+        
+        - **The Logic:** "Traces must be properly governed."
+            
+        - **The Translation:** Abstracts are "Ghosts." They must be anchored by Matter.
+            
+        - **The Rule:** If `Abstracts > 2` and `Heavy Matter == 0`, the system flags an **ECP VIOLATION**.
+            
+        - **The Effect:** Narrative Drag drops (the text floats), but the **Voltage** calculation penalizes it as "Hollow."
+            
 
 #### 📟 HUD EXPANSION (Battery Indicator)
 
@@ -47,7 +65,11 @@
     
     - **The Fix:** Updated `DeepStorage.save` and `DeepStorage.ingest` to serialize the `session_charge` alongside `session_atp`.
         
-    - **The Result:** Your stored "Genius" now survives a system reboot. If you charge the battery in one session, it remains charged when you return.
+    - **The Result:** Your stored "Genius" now survives a system reboot.
+        
+- **Command Processor:**
+    
+    - **The Update:** Explicitly defined `/exit` and `/quit` in the command handler to ensure clean shutdown and state saving.
 
 ### [v3.6] - 2025-12-23 - "THE KINTSUGI PATCH"
 
