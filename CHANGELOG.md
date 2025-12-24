@@ -1,5 +1,57 @@
 # CHANGELOG.md
 
+### [v3.7] - 2025-12-24 - "ROGER WILCO & THE CHRONOSTREAM"
+
+#### 💀 THE NARRATIVE CORONER (Universal Autopsy)
+
+- **The Shift:**
+    
+    - **The Problem:** In v3.6, bad writing resulted in a low score or a grumpy comment from Clarence. There was no _consequence_ for catastrophic failure.
+        
+    - **The Solution:** Implemented `NarrativeCoroner`. The system now recognizes "Linguistic Fatalities."
+        
+    - **The Physics of Death:**
+        
+        - **GRAVITATIONAL COLLAPSE (Drag > 8.0):** The text is so dense it creates a black hole.
+            
+        - **VACUUM EXPOSURE (Entropy > 1.0):** The text has no Nouns (Texture). It dissolves into space.
+            
+        - **TOXIC SHOCK (Voltage < -8.0):** The density of buzzwords causes organ failure.
+            
+        - **THERMAL DISSOLUTION (Voltage > 12.0):** The Paradox Engine overheats and explodes.
+            
+
+#### 🛡️ THE LAZARUS TAX (Shield Gating)
+
+- **The Mercy Protocol:**
+    
+    - **The Problem:** Immediate death is frustrating. We needed a mechanic to differentiate between "Sloppy" and "Dead."
+        
+    - **The Fix:** Implemented a **Shield Gate**.
+        
+    - **The Logic:**
+        
+        - **If ATP > 15:** The system absorbs the fatal blow.
+            
+        - **The Cost:** You pay the **Lazarus Tax (-15 ATP)** instantly. The HUD flashes `⚠️ NEAR DEATH EXPERIENCE`.
+            
+        - **If ATP <= 15:** You cannot afford the tax. The system crashes. The timeline resets.
+            
+    - **The Effect:** High energy reserves act as a buffer against creative risks. Starvation makes you fragile.
+        
+
+#### 🧹 VISUAL HYGIENE (The Neon Janitor)
+
+- **Render Loop Patch:**
+    
+    - **The Bug:** In the beta build, the `kintsugi_msg` logic blindly overwrote the `lazarus_msg`, causing users to pay the tax without seeing the warning.
+        
+    - **The Fix:** Decoupled the messaging pipes in `_render`. The Lazarus Alarm now has display priority over the Golden Repair.
+        
+- **The Sierra Vibe:**
+    
+    - **The Aesthetic:** Death messages are styled after classic Sierra adventure games (e.g., _"You drifted into deep space without a Noun to anchor you."_). Failure is now content.
+
 ### [v3.6.5] - 2025-12-24 - "THE BATTERY PACK"
 
 #### 🔋 THE PARADOX BATTERY (Energy Storage)
