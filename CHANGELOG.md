@@ -1,5 +1,73 @@
 # CHANGELOG.md
 
+### [v3.6] - 2025-12-23 - "THE KINTSUGI PATCH"
+
+#### 🏺 THE KINTSUGI PROTOCOL (Anti-Fragility)
+
+- **The Death Spiral Fix:**    
+    - **The Problem:** In v3.5, "Starvation Mode" (ATP < 15) disabled the creative engines (Michael/Jester), forcing the user into a grind to recover energy. This created a negative feedback loop where a dying system became harder to save.
+    - **The Fix:** Implemented the **Kintsugi Protocol**.
+    - **The Logic:**
+        - **Critical State:** If `ATP < 10`, the system generates a **Koan** (e.g., _"Ignite the ice"_).
+        - **The Gold:** If the user responds with **High Voltage** (> 8.0) or **High Whimsy**, the system recognizes the breakthrough.
+        - **The Reward:** ATP is instantly restored to **50**. The crack is filled with gold.
+
+#### 🎛️ CONTROL PLANE DECOUPLING (CommandProcessor)
+
+- **The Separation of Concerns:**
+    - **The Refactor:** Extracted command logic (`/kill`, `/seed`) out of the main `BoneAmanita.process` loop into a dedicated `CommandProcessor` class.
+    - **The Benefit:** The Physics Engine no longer needs to parse administrative tasks. The "Control Plane" is now distinct from the "Data Plane."
+    - **New Commands:**
+        - `/status`: Displays deep system diagnostics (Session ID, Artifact Count, Antigen Count).
+        - `/help`: Displays the available command list (The User Manual).
+
+#### 📟 THE SURGICAL HUD (Visual Hygiene)
+
+- **Log Separation:**
+    - **The Shift:** The Dashboard now cleanly delineates between "Flight Instruments" (ATP/Drag/Voltage) and "Sub-System Logs."
+    - **The Stack:** Ghost, Lichen, and Starvation messages are now indented as sub-processes under the main Directive, improving scanability.
+    - **Kintsugi Alert:** Added a specific yellow alert state for when the Golden Repair is active.
+
+### [v3.5] - 2025-12-23 - "McFLY'S LAW"
+
+#### 🕰️ THE TIME MENDER (Temporal Integrity)
+
+- **The Metabolic Seal (Session-Scoped ATP):**
+    - **The Leak:** In v3.4, ATP was tied to the _runtime instance_, not the _session file_. If you restarted the script or switched sessions, the new consciousness inherited the exhaustion (Low ATP) of the previous user.
+    - ** The Fix:** ATP is now serialized into the `meta` block of the `json` save file.
+    - **The Effect:** Time travel is now safe. A fresh session always starts at **33 ATP**. Resuming an old session restores its exact metabolic state.
+
+#### 💀 THE GRIM REAPER (Disk Hygiene)
+
+- **Automatic Garbage Collection:**
+    - **The Problem:** `DeepStorage` created infinite `memories/session_[ts].json` files, eventually leading to "Entropy Death" (Disk Bloat).
+    - **The Fix:** Implemented `cleanup_old_sessions` on boot.
+    - **The Rules:**
+        - **Time Limit:** Files older than 24 hours are composted.
+        - **Capacity Limit:** Only the 20 most recent timelines are preserved.
+    - **The Philosophy:** The system must bury its dead to keep the living room clean.
+
+#### 👻 THE EXORCISM (Cross-Session Hauntings)
+
+- **Ghost ID Verification:**
+    - **The Hallucination:** Previously, **The Ghost** (Feedback Loop) compared the current text against `last_context` regardless of the Session ID. It would scold a new user for "Ignoring the Knife" offered to a previous user 5 minutes ago.
+    - **The Fix:** The Ghost now checks `self.mem.session_id`.
+    - **The Result:** The haunting is now strictly local. The Ghost stays in its own house.
+
+#### ⏳ TABULA RASA (ChronoStream)
+
+- **Session-Scoped Boredom:**
+    - **The Problem:** The `ChronoStream` boredom counter persisted across sessions. The system would be "bored" with a fresh user immediately because the previous user was repetitive.
+    - **The Fix:** Implemented `self.boredom_map` to track patience levels individually per Session ID.
+    - **The Effect:** Every new timeline gets a fresh supply of patience.
+
+#### 🐛 CRITICAL REPAIRS (The Fracture)
+
+- **The Crash:**
+    - Fixed a fatal `TypeError` in the `process` loop where `chronos.tick` was called without the required `session_id` argument.
+- **The Migration:**
+    - Updated `DeepStorage.ingest` to handle the new **Nested JSON Structure** (Artifacts + Meta) introduced in v3.5, while retaining backward compatibility for v3.4 "Flat" files. The system can now read both ancient history and modern time.
+
 ### [v3.4] - 2025-12-23 - "UNFINISHED BUSINESS"
 
 #### 🧬 ADAPTIVE IMMUNITY (The Living Butcher)
