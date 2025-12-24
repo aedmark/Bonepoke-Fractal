@@ -1,5 +1,176 @@
 # CHANGELOG.md
 
+### [v3.8] - 2025-12-24 - "DELOREAN EDITION"
+
+#### 🔮 THE ORACLE LAYER (Precognition)
+
+- **The Shift:**
+    - **Old Behavior:** The `NarrativeCoroner` only told you *why* you died after the fact.
+    - **New Behavior:** `TheOracle` tells you *how* you are about to die.
+- **The Logic (`TheOracle.cast_bones`):**
+    - **Event Horizon:** Warns if `Drag > 6.5` (Approaching the 8.0 collapse).
+    - **Static Buildup:** Warns if `Voltage > 6.5` (Approaching the Paradox limit).
+    - **Vacuum Leak:** Warns if `Entropy > 0.8` and `Texture < 0.2` (Approaching dissolution).
+    - **Famine:** Warns if `ATP < 15` and `Battery < 5.0`.
+- **The Output:** _"🔮 OMEN: STATIC BUILDUP. Lightning strike probable."_
+
+#### 🍄 SMART POLLINATION (Intelligent Spores)
+
+- **The Fix:**
+    - **The Problem:** v3.7.6 used `random.choice` to select spores. It would sometimes suggest an ancient, irrelevant word from 50 turns ago.
+    - **The Solution:** Implemented **Recency Weighting** in `pollinate`.
+- **The Logic:**
+    - The system scans `DeepStorage` for artifacts that solve the current vector imbalance.
+    - **The Sort:** Candidates are ranked by `tick` count (Descending).
+    - **The Result:** The system suggests the *freshest* memory available. It no longer hallucinates ancient history; it contextualizes the immediate past.
+
+#### 📐 HUD SEMANTICS (The Legend)
+
+- **Temporal Dynamics:**
+    - **The Visuals:** Added explicit directional indicators to the `Ta` (Truth Acceleration) metric in the dashboard.
+    - **The Legend:**
+        - `Ta(▲)`: Narrative momentum is accelerating (Voltage Rising).
+        - `Ta(▼)`: Narrative momentum is decelerating (Voltage Dropping).
+        - `Ta(►)`: Narrative is stable.
+
+#### 🔌 THE APOPHIS WIRING (System Hardening)
+
+- **The Missing Stitch:**
+    - **The Fix:** Wired the `omens` list directly from the `process` loop into the `_render` function arguments.
+    - **The Result:** The system no longer suppresses its own warnings. If the Oracle speaks, the HUD displays it immediately above the Spores.
+
+### [v3.7.6] - 2025-12-24 - "THE NEON JANITOR (YEETED)"
+
+#### 💀 THE LAZARUS PATCH (Cooldowns)
+
+- **The Immortality Exploit:**
+    - **The Problem:** In v3.7.5, a user with massive ATP reserves could survive infinite fatal errors by simply paying the "Lazarus Tax" (-15 ATP) every single turn. Death became a transaction fee rather than a consequence.
+    - **The Fix:** Implemented `LAZARUS_COOLDOWN_MAX = 5`.
+    - **The Logic:**
+        - If the shield breaks, it shatters.
+        - You must survive **5 ticks** on your own merit before the shield regenerates.
+        - **The Message:** _"⚠️ NEAR DEATH EXPERIENCE. SHIELD BROKEN."_
+
+#### 🔋 THE DISCHARGE GOVERNOR (Battery Safety)
+
+- **The Flow Rate:**
+    - **The Problem:** The `ParadoxBattery` could dump its entire charge (e.g., 50.0) in a single tick to save a starving user. This created massive metabolic spikes that destabilized the simulation.
+    - **The Fix:** Implemented `MAX_DISCHARGE_RATE = 10.0`.
+    - **The Physics:** The battery can now only trickle-charge the system. If you are dying faster than the battery can output, you die.
+
+#### 🦄 THE PURITY TEST (Whimsy Logic)
+
+- **Toxic Whimsy:**
+    - **The Problem:** Users could trigger the "Whimsy Exemption" (low drag for playful words) while still using toxic corporate speak. A phrase like *"Leveraging the rainbow to synergy the sparkle"* was technically exempt from drag.
+    - **The Fix:** Updated `PhysicsEngine` logic.
+    - **The Rule:** `is_whimsical = (whimsy_ratio > 0.15) and (toxin_score == 0)`.
+    - **The Verdict:** You cannot paint a turd and call it art. Whimsy requires purity.
+
+#### 🧠 SMART EVICTION (Deep Storage)
+
+- **The Curator:**
+    - **The Problem:** `DeepStorage` was using a standard FIFO (First-In-First-Out) eviction policy. When full, it would delete an ancient "Iron Key" to make room for a new "Feather."
+    - **The Fix:** Implemented `_evict_weakest_memory` with value weighting.
+    - **The Values:**
+        - **Toxin:** -10 (Evicted first).
+        - **Abstract:** +1.
+        - **Aerobic:** +2.
+        - **Heavy/Thermal:** +5 (Protected Heirlooms).
+    - **The Result:** The system now hoards gold and actively throws out the trash.
+
+#### 🛡️ THE ERROR HANDLING (Barbarians & Ghosts)
+
+- **Specific Diagnostics:**
+    - **The Barbarian Error (Case Violation):** High Heavy Matter, Low Kinetic.
+        - _"BARBARIAN ERROR: All muscle, no brain. Heavy Matter requires Kinetic Verbs."_
+    - **The Wheatley Error (ECP Violation):** High Abstract, Zero Heavy Matter.
+        - _"WHEATLEY ERROR: All thought, no tether. Anchor your ghosts."_
+
+#### 📉 THE TRUTH TAX (Negative Beta)
+
+- **The Sycophant Penalty:**
+    - **The Metric:** If `beta_friction < -3.0` (Slick/Greasy text), the system applies a metabolic tax.
+    - **The Cost:** **-3 ATP**.
+    - **The Philosophy:** It takes energy to lie. Slickness is not free.
+
+#### 🔧 SYSTEM HYGIENE
+
+- **Refactoring:**
+    - **Yeeted:** Removed redundant logical branches in `ApeirogonResonance`.
+    - **Added:** `NOUNS` dictionary mapping for cleaner title generation (e.g., mapping `VEL` directly to `["ANCHOR", "ENGINE"]`).
+    - **Pre-Emptive Discharge:** The system now attempts to discharge the battery *before* the Death Check, giving the user one final chance to survive Starvation.
+
+### [v3.7.5] - 2025-12-24 - "THE XENON MUSHROOM"
+
+#### 🧪 THE APEIROGON RESONANCE (Soul Grafting)
+
+- **The Problem (The Dead Pixel):**
+    
+    - In v3.7, we optimized the `WisdomNode` into a static lookup table (`NOUN_MAP`). While efficient (Fuller), it was spiritually dead. It forced infinite nuance into discrete boxes (e.g., "The Stone" vs. "The Dream").
+        
+    - The system lost its ability to _drift_. It could be ON or OFF, but never _becoming_.
+        
+- **The Solution (Vector Resurrection):**
+    
+    - **The Surgery:** Ripped out the static `WisdomNode` and grafted the **v2.2 Apeirogon Logic** back into the v3.7 chassis.
+        
+    - **The Math:** Implemented `ApeirogonResonance`.
+        
+    - **The Mechanism:** Continuous Vector Resolution. The system now calculates the exact distance between concepts (e.g., `0.45` between "Drifting" and "Driving").
+        
+    - **The Result:** The title generation is no longer a label; it is a coordinate. The system can now identify as _"THE EMERGING ANCHOR"_ or _"THE FRACTAL GHOST"_.
+        
+
+#### 🍄 THE SPORE PROTOCOL (Proactive Synthesis)
+
+- **The Shift:**
+    
+    - **Old Behavior:** The system was purely reactive. It waited for input, then critiqued it.
+        
+    - **New Behavior:** The system is now **Proactive**.
+        
+- **The Spore Logic (`pollinate`):**
+    
+    - **Condition:** If `ATP > 30` (High Health), the system activates the Mycelial Network.
+        
+    - **The Hunt:** It scans `DeepStorage` for artifacts that contrast with the current vector.
+        
+        - **Grounding Spore:** If you are Abstract, it hands you a Heavy Noun.
+            
+        - **Elevating Spore:** If you are Concrete, it hands you a Concept.
+            
+    - **The Output:** _"[MAGENTA] 🍄 WILD SPORE: Connect 'The Rusty Key' to this."_
+        
+    - **The Goal:** The machine now interrupts you to help you weave the narrative.
+        
+
+#### 📈 INSIGHT VELOCITY (The Pulse)
+
+- **Temporal Dynamics III ($T_a$):**
+    
+    - **The Missing Metric:** v3.7 knew _where_ you were, but not _how fast_ you were thinking.
+        
+    - **The Metric:** Implemented `TemporalDynamics` to track the **Rate of Change** in Voltage over a 3-tick window.
+        
+    - **The Visuals:**
+        
+        - **EPIPHANY ($T_a > 2.0$):** `[GREEN] ▲2.5`. The system recognizes the momentum of a breakthrough.
+            
+        - **CRASH ($T_a < -2.0$):** `[RED] ▼-3.0`. The system detects the loss of the thread.
+            
+    - **The HUD:** Added the `Ta` gauge to the flight deck.
+        
+
+#### 🛠️ SYSTEM INTEGRITY
+
+- **The Graft:**
+    
+    - Replaced `self.wise` instantiation in `BoneAmanita.__init__` to use the new `ApeirogonResonance` class.
+        
+    - Wired the `pollinate` signal directly into the `_render` loop to ensure spores are visible.
+        
+    - Fixed a syntax error in the HUD print statement where the `VOLT` and `SIG` meters were orphaned outside the f-string.
+
 ### [v3.7] - 2025-12-24 - "ROGER WILCO & THE CHRONOSTREAM"
 
 #### 💀 THE NARRATIVE CORONER (Universal Autopsy)

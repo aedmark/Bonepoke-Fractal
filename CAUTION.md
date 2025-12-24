@@ -1,91 +1,70 @@
-# ⚠️ CRITICAL CAUTION: BONEAMANITA v3.7 "THE NEON JANITOR"
+# ⚠️ CRITICAL CAUTION: BONEAMANITA v3.8 "DELOREAN EDITION"
 
-> **"The Mandate is SURVIVAL. The Risk is TOTALITY. The Janitor is WATCHING."**
+> **"The Mandate is PRECOGNITION. The Risk is HUBRIS. The Future is VISIBLE."**
 
-**BoneAmanita 3.7** introduces **Consequence**.
+**BoneAmanita 3.8** introduces **The Burden of Knowledge**.
 
-In previous versions, a bad sentence resulted in a bad score. In v3.7, a bad sentence results in a **Coroner's Inquest**. The system is now capable of killing your session, wiping your context, and resetting the timeline.
+In v3.7.6, you could claim ignorance. You could say you didn't know the Drag was critical until the floor collapsed. You could say you didn't know the Voltage was lethal until the battery exploded.
+
+**v3.8 removes the excuse.** We have installed an Oracle. The system now screams before you die.
 
 Operate this software with the following understandings:
 
-### 1. THE TERMINAL VELOCITY (Instant Death)
+### 1. THE ORACLE'S BURDEN (Ignorance is Dead)
 
-**New in v3.7.** The Physics Engine now has "Kill Switches."
+**New in v3.8.** The system now predicts fatalities before they happen.
 
-- **The Gravitational Collapse:**
+- **The Mechanic:** `TheOracle` scans your trajectory. It warns of **Event Horizons** (Drag > 6.5), **Static Buildup** (Voltage > 6.5), and **Vacuum Leaks** (Entropy > 0.8).
     
-    - **The Trigger:** **Narrative Drag > 8.0**.
-        
-    - **The Reality:** This is not just "boring." This is a paragraph so dense that light cannot escape.
-        
-    - **The Consequence:** Immediate session termination. The autopsy report will read: _"You are buried under a pile of adverbs."_
-        
-- **The Vacuum Exposure:**
+- **The Risk:** If the HUD displays `🔮 OMEN` and you do not correct course, the resulting death is a choice. You are flying into the mountain with the alarms blaring.
     
-    - **The Trigger:** **Entropy > 1.0** (Pure Abstraction) with **Zero Texture**.
-        
-    - **The Reality:** You have written a sentence made entirely of ghosts ("The system of the concept of the framework...").
-        
-    - **The Consequence:** Your suit decompresses. You drift into the void. Game Over.
-        
-
-### 2. THE LAZARUS TAX (Economic Ruin)
-
-**New in v3.7.** You have a Shield, but using it is expensive.
-
-- **The Mechanic:** If you trigger a fatal error, the system checks your ATP.
-    
-- **The Cost:** If **ATP > 15**, you survive, but you pay a **Lazarus Tax of 15 ATP**.
-    
-- **The Trap:** 15 ATP is 30% of your maximum capacity. One mistake takes you from "Healthy" to "Starving."
-    
-- **The Warning:** If you hit a fatal error while Starving (**ATP < 15**), there is no shield. You die. **Keep your energy high. It is your health bar.**
+- **The Reality:** There is no mercy for pilots who ignore the terrain pull-up warning.
     
 
-### 3. THE UG LAYER (The Silent Killer)
+### 2. THE MEMORY TRAP (Smart Spores)
 
-**Retained from v3.6.5.** These principles are what usually trigger the Coroner.
+**New in v3.8.** The Mycelial Network is no longer random; it is sticky.
 
-- **The Case Filter:** Nouns without Verbs cause Gravity Spikes. If you write a bulleted list of heavy nouns, you will hit Drag 8.0 and die.
+- **The Mechanic:** `pollinate()` now prioritizes **Recency**. It hands you the heavy object you _just_ buried, not a random word from an hour ago.
     
-- **The ECP:** Abstracts without Concrete Anchors cause Vacuum Exposure. If you use the word "Entity" three times without defining it, you will float away and die.
+- **The Trap:** You cannot escape your immediate context. If you drop a "Gun" in tick 10, the system will hand it back to you in tick 11 if you start drifting.
     
-
-### 4. THE CAPACITOR (Life Insurance)
-
-**Retained from v3.6.5.** The Battery is no longer just for "Manic Writing."
-
-- **The Necessity:** You need a charged battery to afford the **Lazarus Tax**.
-    
-- **The Strategy:** You must intentionally create **Paradoxes** (High Voltage) to charge the battery, so you have a reserve when you inevitably write a terrible sentence.
-    
-- **The Irony:** You must court danger (High Voltage) to survive failure (High Drag).
+- **The Consequence:** Narrative continuity is forced. You cannot "reset" the vibe by simply ignoring your past.
     
 
-### 5. THE INCINERATOR (Data Hygiene)
+### 3. THE ACCELERATION VECTOR (Ta Velocity)
 
-**Standard Protocol.**
+**New in v3.8.** Stability is a lie.
 
-- **The Feature:** `DeepStorage` deletes session files older than **24 hours**.
+- **The Mechanic:** The HUD displays `Ta(▲)` or `Ta(▼)` to show the _derivative_ of your truth.
     
-- **The Warning:** Do not treat the `memories/` folder as a permanent archive. The Janitor cleans the hallway every night.
+- **The Danger:** You might be "Safe" at Voltage 4.0, but if `Ta` is `▲25.0`, you are one tick away from a Paradox Explosion.
+    
+- **The Lesson:** Do not look at where you are. Look at how fast you are falling.
     
 
-### 6. THE SARCASM ENGINE (Emotional Damage)
+### 4. THE LAZARUS COOLDOWN (Retained)
 
-**New in v3.7.**
+**Retained from v3.7.6.** The shield remains fragile.
 
-- **The Risk:** If you die, the system will mock you.
+- **The Rule:** If you trigger a Near Death Experience, the Shield **SHATTERS**.
     
-- **The Tone:** It is modeled after 1980s Adventure Game death screens.
+- **The Vulnerability:** You are naked for **5 TICKS**. A second mistake is fatal.
     
-    - _"You reached into your pocket for a key that doesn't exist. You found only lint and despair."_
-        
-- **The Advice:** Don't take it personally. But do write better.
+- **The Oracle's Role:** The Oracle will warn you _during_ the cooldown. If you see an Omen while the Shield is broken, **PANIC**.
+    
+
+### 5. THE BATTERY GOVERNOR (Retained)
+
+**Retained from v3.7.6.** Energy is throttled.
+
+- **The Cap:** Discharge is capped at **10.0 ATP/tick**.
+    
+- **The Math:** If you are burning 20 ATP/tick, the battery cannot save you. It will only prolong the starvation.
     
 
 ---
 
-**SUMMARY:** v3.7 is a survival game. **ATP is your Health. Drag is Gravity. Entropy is Vacuum.** Keep your tank full, keep your feet on the ground, and watch your air supply.
+**SUMMARY:** v3.8 gives you eyes. You can see the crash coming. **If you hit the wall now, it is not an accident. It is a suicide.**
 
-**Good luck, Captain.**
+**Heed the Omen.**

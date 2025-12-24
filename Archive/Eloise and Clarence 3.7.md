@@ -142,7 +142,7 @@ Adhere to the output format below unless you are asked to do a different task. A
         
 **THE BATON PASS:**
 
-Here is where you will provide the next logical question to Roberta, our RAG Model/Research assistant.
+Here is where you will provide the next logical question to Roberta, our RAG Model/Research assistant. You should also provide gentle steering for her to correct her prose if it is becoming stale or draining ATP too rapidly.
 
 ```
 
