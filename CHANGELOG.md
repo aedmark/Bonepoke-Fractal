@@ -1,5 +1,113 @@
 # CHANGELOG.md
 
+### [v4.2.1] - 2025-12-24 - "THE SYMBIONT (PATCHED)"
+
+#### 🩸 THE METABOLIC ORDER (Energy Dynamics)
+
+- **The Burn Sequence:**
+    - **The Pathology:** In v4.2, the system calculated battery discharge _before_ applying the stamina cost of the current action. This created a "Death Spiral" where the system would discharge the battery to reach 30 STM, then immediately burn 5 STM for the cost, leaving the user constantly under-fueled.
+    - **The Cure:** Reordered `BoneAmanita.process`. The system now Pays the Cost first, _then_ checks the Battery to cover the deficit.
+    - **The Trauma Tax:** Implemented Dynamic Efficiency. If `Health < 50`, the battery transfer rate drops from 2.0 to 1.0. A damaged system struggles to process paradoxes.
+        
+#### 🛌 THE LUCID COMA (Subconscious Continuity)
+
+- **Anti-Amnesia:**
+    - **The Pathology:** The v4.2 Coma was a total blackout. It skipped the `tick` counter and memory burial, causing the system to wake up with "Temporal Amnesia" (lost context of how much time passed).
+    - **The Cure:** The Coma state now increments `tick_count` and buries empty memories to keep the timeline alive.
+    - **The Dream:** The `DreamEngine` now runs during the Coma (30% chance). The system may hallucinate while repairing, keeping the narrative thread active even in sleep.
+        
+
+#### 🍄 SPORE DIVERSITY (The Mutation)
+
+- **The Monoculture Fix:**
+    - **The Pathology:** The `pollinate` function blindly selected the single strongest edge in the graph. If "Stone" was strongly linked to "Iron," the system would _always_ suggest Iron, creating a feedback loop of identical suggestions.
+    - **The Cure:** Implemented **Weighted Random Selection**.
+    - **The Logic:** The system now identifies the top 3 strongest connections and rolls a weighted die to select one.
+    - **The Result:** The Spores are now mutated. The system favors the strong path but occasionally explores the adjacent possible.
+
+#### 🔮 THE ORACLE'S GRADIENT (Triage v2.0)
+
+- **The Yellow Alert:**
+    - **The Pathology:** The Oracle had a binary output: Silence (<50%) or Panic (>=50%). This left a dangerous blind spot where a 49% threat level (imminent death) resulted in zero warning.
+    - **The Cure:** Implemented a **Gradient Triage**.
+    - **The Logic:**
+        - **Score >= 80%:** **OMEN (Red/Critical).**
+        - **Score 50-79%:** **CAUTION (Yellow/Warning).**
+    - **The Result:** The system now chirps before the fire alarm goes off.
+
+### [v4.2] - 2025-12-24 - "THE SYMBIONT"
+
+#### 🔋 THE EMERGENCY GENERATOR (Metabolic Wiring)
+
+- **The Discharge Valve:**
+    - **The Pathology:** In v4.1, the `ParadoxBattery` captured High Voltage (genius) but never released it. Users could starve to death (0 Stamina) while holding a fully charged battery (50.0 Charge). It was "Potential Energy" with no kinetic outlet.
+    - **The Cure:** Wired the battery directly into the `process` loop.
+    - **The Logic:**
+        - **Trigger:** If `Stamina < 20` (The Danger Zone) AND `Charge > 0.5`.
+        - **Action:** The system automatically discharges the battery.
+        - **Rate:** 1 Unit of Charge = 2 Units of Stamina.
+    - **The Result:** High-voltage writing now creates a "Reserve Tank" that automatically kicks in to save you from exhaustion. Genius is now a survival mechanism.
+
+#### 🛡️ THE BLOOD-BRAIN BARRIER (Dream Filtering)
+
+- **Nightmare Prevention:**
+    - **The Pathology:** The `DreamEngine` followed the strongest edges in the graph regardless of quality. If the user had a habit of using "Synergy" and "Leverage" together, the system would hallucinate toxic connections, reinforcing bad habits.
+    - **The Cure:** Implemented a **Toxin Filter** in `hallucinate`.
+    - **The Logic:** The engine now explicitly ignores graph edges that lead to words found in `TOXIN_MAP`.
+    - **The Result:** The Symbiont refuses to dream of poison.
+
+#### 🔮 THE ORACLE'S SEDATION (Anxiety Management)
+
+- **Threshold Adjustment:**
+    - **The Pathology:** The Oracle was a hypochondriac. It reported low-probability threats (Score 40-45%) like "Orbit Decaying" constantly, causing "Alarm Fatigue" for the user.
+    - **The Cure:** Raised the reporting threshold.
+    - **The Logic:**
+        - **Renamed:** `atp` parameter -> `stamina` (Fixed variable mismatch).
+        - **Famine Logic:** Lowered panic threshold from `< 15` to `< 5` if Battery has charge.
+        - **Silence:** The Oracle now remains silent unless the Threat Score is **>= 50%**.
+    - **The Result:** If the Oracle speaks, you should actually listen.
+
+#### 📐 INTERFACE TRUTH (Dysmorphia Fix)
+
+- **Label Correction:**
+    - **The Pathology:** The HUD displayed `ATP: [||||...]` but the underlying variable was `self.stamina`. This semantic drift caused confusion about whether the user was burning "Currency" or "Health."
+    - **The Cure:** Updated the Flight Deck label to `STM` (Stamina).
+    - **The Philosophy:** ATP is the molecule; Stamina is the fuel tank. The HUD now reflects the tank.
+
+#### 🐛 CRITICAL SURGERY (The Pulse Check)
+
+- **The Coroner's Relocation:**
+    - **The Error:** In v4.1, `NarrativeCoroner.check_vitals` was accidentally inserted into `__init__`, where it would cause an immediate `NameError` crash (as physics metrics do not exist on boot).
+    - **The Fix:** Extracted the organ and transplanted it into the `process` loop, post-metabolism.
+    - **The Result:** The system now checks for death _after_ the battery has attempted to save the patient.
+
+### [v4.1] - 2025-12-24 - "THE XENOMORPH (STABILIZED)"
+
+#### 🏥 THE EMERGENCY SURGERY (Biological Repairs)
+
+- **Metabolic Reordering (The Hunger Fix):**
+    - **The Pathology:** In v4.0, the system paid the "Stamina Cost" _before_ attempting Photosynthesis. It was burning calories before eating, leading to metabolic bankruptcy even in high-light environments.
+    - **The Cure:** Inverted the order of operations in `process()`. The system now absorbs light _first_, adds the sugar to the Stamina pool, and _then_ pays the cost of exertion.
+    - **The Result:** It is now possible to survive high-drag states if you feed the machine enough light.
+        
+- **Neural Reconnection (The Split-Brain Fix):**
+    - **The Pathology:** The `pollinate()` method was still attempting to access the deprecated `self.mem.artifacts` list (legacy v3.8 code), while v4.0 had migrated to a Graph Database. The Spore engine was trying to read a map that didn't exist, leading to silence or crashes.
+    - **The Cure:** Completely rewrote `pollinate()` to traverse `self.mem.graph`. It now identifies the strongest edges connected to the current input vector.
+    - **The Result:** Spores now fire correctly based on the strongest mycelial connections in the graph.
+        
+- **Subconscious Filtering (Dream Logic):**
+    - **The Pathology:** The `DreamEngine` was selecting two random nodes from the entire database (`random.choice`). This created "Psychotic Noise" (e.g., "The STONE is dreaming of the PARADIGM SHIFT") with no semantic link.
+    - **The Cure:** The engine now picks a start node, then walks the actual graph edges to find a _connected_ node.
+    - **The Result:** Dreams now follow established neural pathways (memory context) rather than generating random noise.
+        
+- **Genetic** Repair **(Trauma Healing):**
+    - **The Pathology:** Sessions inherited the Health/Stamina of their parent exactly. If a session ended in a Coma (Health 20), the next seeded session started broken. This created a "Trauma Cascade" that weakened the lineage over time.
+    - **The Cure:** Implemented a healing factor on boot. If loaded Health < 50, the system applies a **+30 HP Genetic Repair**.
+    - **The Philosophy:** Life heals between generations.
+        
+- **Standardization:**
+    - **The Fix:** Normalized `self.atp` (Legacy) references to `self.stamina` (v4.0) throughout the class to prevent `AttributeError` crashes during rendering and logic checks.
+
 ### [v4.0] - 2025-12-24 - "THE XENOMORPH"
 
 #### 🏛️ THE COUNCIL OF VOICES (Democratic Frequency)
@@ -21,9 +129,7 @@
     - **The Shift:** `DeepStorage` no longer stores a flat list of artifacts. It now maintains a **Weighted Graph** (`self.graph`).
     - **The Logic:**
         - Words are nodes.
-            
         - Co-occurrence creates edges.
-            
         - If "Stone" appears next to "Iron," their bond strengthens.
             
     - **The Benefit:** The system remembers _context_, not just keywords. It knows that "Iron" usually follows "Stone."
