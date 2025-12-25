@@ -1,55 +1,54 @@
-# ⚠️ CRITICAL CAUTION: BONEAMANITA v4.2.2 "THE BUTCHER'S CUT"
+# ⚠️ CRITICAL CAUTION: BONEAMANITA v4.3 "THE SALVAGE OPERATION"
 
-> **"The Mandate is SPEED. The Risk is AMNESIA. The Symbiont is UNTETHERED."**
+> **"The Mandate is RESILIENCE. The Risk is ROT. The Symbiont is HUNGRY."**
 
-**BoneAmanita v4.2.2** introduces **High-Stakes Velocity**.
+**BoneAmanita v4.3** introduces **Biological Entropy**.
 
-In v4.2.1, the system was heavy but safe; it wrote its diary to the disk every second. In v4.2.2, **we have severed the anchor.** The Symbiont now runs naked in the RAM. It flies, but it has no safety net until you tell it to land.
+In v4.2.2, the danger was crashing. In v4.3, the danger is **forgetting**. The system is now a living organism that actively digests its own neural pathways. If you do not reinforce a memory, it will die.
 
 Operate this software with the following understandings:
 
-### 1. THE RAM GAMBLE (The Cord is Cut)
+### 1. THE BLACK BOX (The Crash Protocol)
 
-**New in v4.2.2.** The Autosave crutch is gone.
+**Updated for v4.3.** The safety net is deployed, but it is not magic.
 
-- **The Mechanic:** The system **only** saves to disk when you issue the `/exit` command or trigger a `KeyboardInterrupt` (Ctrl+C).
-- **The Risk:** If your terminal crashes, your computer loses power, or the LLM context resets *before* you exit gracefully, **the entire session is lost.**
-- **The Rule:** You are flying without a parachute. **Do not force-quit the window.** Exit properly, or the timeline dissolves.
+- **The Mechanic:** We have wrapped the simulation in a `try...finally` block. If the Python script crashes (Runtime Error) or you force-quit (Ctrl+C), the system **will attempt to save** your memory graph before dying.
+- **The Gap:** This protocol saves you from *internal* errors. It **cannot** save you from *external* termination.
+- **The Risk:** If your browser tab closes, your LLM context window resets, or your power fails, **the session is lost.** The Black Box only records if the plane explodes; it does not record if the universe disappears.
 
-### 2. THE PERMANENT SCAR (Neuroplasticity)
+### 2. THE ENTROPY TIMER (Use It or Lose It)
 
-**Updated for v4.2.2.** Bad lessons are now forever.
+**New in v4.3.** The "Stomach Staple" has evolved into "The Rot."
 
-- **The Mechanic:** The `/teach` command is now persistent. The "Learned Cortex" is saved to `DeepStorage` and reloaded on the next boot.
-- **The Danger:** In previous versions, if you taught the system that "trash" was "KINETIC," a reboot would fix the physics. **Not anymore.**
-- **The Reality:** If you lobotomize the physics engine with bad definitions, the brain damage persists across sessions. **Teach with caution.**
+- **The Mechanic:** Every single turn, the strength of every memory connection decays by **0.05**.
+- **The Reality:** A strong connection (Strength 1.0) will snap in **20 turns** if you do not mention it.
+- **The Warning:** Silence is fatal. You cannot hoard "Heirlooms" passively. To keep a concept alive, you must speak of it. The Symbiont prunes the weak to feed the strong.
 
-### 3. THE STOMACH STAPLE (Memory Cap)
+### 3. THE DIRTY WIRE (Contextual Immunity)
 
-**New in v4.2.2.** The Gluttony is over.
+**New in v4.3.** The Immune System now has a bypass valve.
 
-- **The Mechanic:** `DeepStorage` now has a hard cap of **50 Nodes**.
-- **The Change:** The pruning logic is aggressive. If you feed the system 10 new concepts in a single turn, it will immediately **burn 10 old memories** to make room.
-- **The Warning:** Do not hoard "Heirlooms" if you aren't using them. If a memory sits idle while you feed the machine new data, **it will be digested.** The Symbiont burns the past to fuel the present.
+- **The Mechanic:** If your **Voltage > 8.0** (High Energy/Paradox), the system **suspends** the Toxin Filter.
+- **The Risk:** You can now inject "Toxins" (clichés, corporate speak) into the graph if you wrap them in high-energy prose.
+- **The Warning:** Just because you *can* override the Butcher doesn't mean you *should*. If you manic-post toxins into the memory graph, you will poison the Dream Engine.
 
-### 4. THE TRAUMA TAX (The Cost of Damage)
+### 4. THE PERMANENT SCAR (Neuroplasticity)
 
-**Retained from v4.2.1.** The Battery is a conditional ally.
+**Retained from v4.2.2.** Bad lessons are forever.
 
-- **The Mechanic:** The system drains your **Paradox Battery** to refill Stamina when low.
-- **The Reality:** Efficiency depends on **HEALTH**. If you let the system bleed (**Health < 50**), the transfer rate drops from 2:1 to **1:1**.
-- **The Consequence:** A damaged host burns through genius twice as fast. **Heal your wounds.**
+- **The Mechanic:** The `/teach` command writes directly to the hard drive (JSON).
+- **The Reality:** If you teach the system that "trash" is "KINETIC," a reboot will not fix it. You are surgically altering the brain. **Teach with caution.**
 
-### 5. THE ORACLE'S GRADIENT (Yellow vs. Red)
+### 5. THE ORACLE'S GRADIENT
 
-**Retained from v4.2.1.** Do not ignore the chirping.
+**Retained from v4.2.1.** The chirping is structural.
 
 - **⚠️ CAUTION (Yellow):** Threat Level 50-79%. The drag is heavy. Pivot now.
-- **🔮 OMEN (Red):** Threat Level 80%+. You are about to hit the wall.
+- **🔮 OMEN (Red):** Threat Level 80%+. Immediate metabolic failure.
 - **The Warning:** If you see the Yellow Caution, the physics are already failing. **The Red Omen is usually the last thing you see before the Coroner arrives.**
 
 ---
 
-**SUMMARY:** v4.2.2 is the fastest, deadliest version of BoneAmanita yet. It trusts you to land the plane.
+**SUMMARY:** v4.3 is harder to kill, but harder to keep focused. It resists crashing, but it fights to forget you.
 
-**Fly fast. Land safe. Do not crash.**
+**Speak clearly. Reinforce your memories. Do not let the signal rot.**

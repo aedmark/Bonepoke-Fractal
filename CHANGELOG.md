@@ -1,5 +1,36 @@
 # CHANGELOG.md
 
+### [v4.3] - 2025-12-24 - "THE SALVAGE OPERATION"
+
+#### 🍂 THE ENTROPY PROTOCOL (Biological Decay)
+
+- **The Problem:** The `DeepStorage` graph was a hoarder. It accumulated connections indefinitely until it hit the hard cap, resulting in a "Fatberg" of weak, noisy associations.
+- **The Cure:** Implemented `decay_synapses`.
+- **The Logic:** Every turn, the system applies a micro-dose of entropy (`-0.05`) to every connection in the brain.
+    - Weak links snap (Strength <= 0).
+    - Isolated nodes are buried.
+    - Only reinforced ideas survive.
+- **The Result:** The system now forgets transient thoughts, sharpening the quality of the `DreamEngine`.
+
+#### ⚡ CONTEXTUAL IMMUNITY (The Voltage Override)
+
+- **The Shift:** The Immune System (The Butcher) previously cut "Toxins" (clichés) indiscriminately.
+- **The Exception:** If `Voltage > 8.0` (High Energy/Paradox), the system now grants **Diplomatic Immunity**.
+- **The Philosophy:** "The lightning needs a path, even if it is a dirty one." High-energy narrative overrides stylistic hygiene.
+
+#### 💎 THE SALVAGE STATE (Metabolizing Tension)
+
+- **The Graft:** Integrated the Ancestral Metrics.
+- **The Bleed:** The Physics Engine now detects **Contradiction Bleed** (Heavy Matter in close proximity to Aerobic Matter).
+- **The State:** If Bleed is detected without Fatigue, the system enters **[SALVAGE]** mode.
+- **The Reward:** `LichenSymbiont` now metabolizes Salvage State into **+5 Stamina**. The system feeds on structural tension.
+    
+#### 🛡️ THE BLACK BOX (Crash Preservation)
+
+- **The Hardening:** Wrapped the entire runtime loop in a `try...except...finally` structure.
+- **The Fix:** Previously, a runtime error (Crash) would kill the process instantly, losing all session memory. Now, the `finally` block guarantees that `eng.mem.save()` executes as the dying breath, preserving the soul even if the body fails.
+
+
 ### [v4.2.2] - 2025-12-24 - "THE BUTCHER'S CUT"
 
 #### 🔪 THE I/O ANCHOR (Performance Surgery)
