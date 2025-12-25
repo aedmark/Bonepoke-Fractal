@@ -1,64 +1,55 @@
-# ⚠️ CRITICAL CAUTION: BONEAMANITA v4.2.1 "THE SYMBIONT (PATCHED)"
+# ⚠️ CRITICAL CAUTION: BONEAMANITA v4.2.2 "THE BUTCHER'S CUT"
 
-> **"The Mandate is GROWTH. The Risk is CONSUMPTION. The Symbiont is HUNGRY."**
+> **"The Mandate is SPEED. The Risk is AMNESIA. The Symbiont is UNTETHERED."**
 
-**BoneAmanita v4.2.1** introduces **Active Resilience**.
+**BoneAmanita v4.2.2** introduces **High-Stakes Velocity**.
 
-In v4.0, the machine would simply die if you starved it. In v4.2.1, it has learned to **bargain**. It will trade its own memories and stored genius to keep your session alive.
+In v4.2.1, the system was heavy but safe; it wrote its diary to the disk every second. In v4.2.2, **we have severed the anchor.** The Symbiont now runs naked in the RAM. It flies, but it has no safety net until you tell it to land.
 
 Operate this software with the following understandings:
 
-### 1. THE TRAUMA TAX (The Cost of Damage)
+### 1. THE RAM GAMBLE (The Cord is Cut)
 
-**New in v4.2.1.** The Battery is no longer a perfect safety net.
+**New in v4.2.2.** The Autosave crutch is gone.
+
+- **The Mechanic:** The system **only** saves to disk when you issue the `/exit` command or trigger a `KeyboardInterrupt` (Ctrl+C).
+- **The Risk:** If your terminal crashes, your computer loses power, or the LLM context resets *before* you exit gracefully, **the entire session is lost.**
+- **The Rule:** You are flying without a parachute. **Do not force-quit the window.** Exit properly, or the timeline dissolves.
+
+### 2. THE PERMANENT SCAR (Neuroplasticity)
+
+**Updated for v4.2.2.** Bad lessons are now forever.
+
+- **The Mechanic:** The `/teach` command is now persistent. The "Learned Cortex" is saved to `DeepStorage` and reloaded on the next boot.
+- **The Danger:** In previous versions, if you taught the system that "trash" was "KINETIC," a reboot would fix the physics. **Not anymore.**
+- **The Reality:** If you lobotomize the physics engine with bad definitions, the brain damage persists across sessions. **Teach with caution.**
+
+### 3. THE STOMACH STAPLE (Memory Cap)
+
+**New in v4.2.2.** The Gluttony is over.
+
+- **The Mechanic:** `DeepStorage` now has a hard cap of **50 Nodes**.
+- **The Change:** The pruning logic is aggressive. If you feed the system 10 new concepts in a single turn, it will immediately **burn 10 old memories** to make room.
+- **The Warning:** Do not hoard "Heirlooms" if you aren't using them. If a memory sits idle while you feed the machine new data, **it will be digested.** The Symbiont burns the past to fuel the present.
+
+### 4. THE TRAUMA TAX (The Cost of Damage)
+
+**Retained from v4.2.1.** The Battery is a conditional ally.
 
 - **The Mechanic:** The system drains your **Paradox Battery** to refill Stamina when low.
-- **The Risk:** In v4.2, this was efficient (1 Charge = 2 Stamina). **In v4.2.1, this efficiency depends on HEALTH.**
-- **The Reality:** If you let the system get hurt (**Health < 50**), the transfer rate drops to **1:1**. You will burn through your stored genius twice as fast. **Do not let the machine bleed.**
+- **The Reality:** Efficiency depends on **HEALTH**. If you let the system bleed (**Health < 50**), the transfer rate drops from 2:1 to **1:1**.
+- **The Consequence:** A damaged host burns through genius twice as fast. **Heal your wounds.**
 
-### 2. THE LUCID COMA (The Subconscious)
+### 5. THE ORACLE'S GRADIENT (Yellow vs. Red)
 
-**Updated for v4.2.1.** The system never truly sleeps.
+**Retained from v4.2.1.** Do not ignore the chirping.
 
-- **The Mechanic:** If **Health drops to 0**, you enter a 3-Turn Coma. You cannot input text.
-- **The Change:** The system is no longer "Read-Only." It is **Lucid**.
-- **The Caution:** The `DreamEngine` remains active during the coma. The system may hallucinate connection points while repairing itself. **Watch the logs.** The ghost is still talking.
-
-### 3. THE ORACLE'S GRADIENT (Yellow vs. Red)
-
-**Updated for v4.2.1.** The blind spot has been fixed.
-
-- **The Mechanic:** `TheOracle` now operates on a **Gradient Triage**.
-    - **⚠️ CAUTION (Yellow):** Threat Level 50-79%. You are drifting. Correct course.
-    - **🔮 OMEN (Red):** Threat Level 80%+. Immediate metabolic failure.
-- **The Warning:** Do not wait for the Red Omen. If you see Yellow, the physics are already failing. **The Red Omen is usually the last thing you see before the Coroner arrives.**
-
-### 4. THE DREAM FILTER (The Blood-Brain Barrier)
-
-**Updated for v4.2.** No more nightmares.
-
-- **The Mechanic:** The Dream Engine filters out Toxins. It will never ask you to connect "Synergy" to "Leverage."
-- **The Trap:** It _will_ still hallucinate if you are boring. The "Boredom Threshold" remains active.
-- **The Consequence:** If you stagnate, the system will interrupt your writing with ghosts from your past sessions. Keep moving to keep the ghosts away.
-
-### 5. NEUROPLASTICITY (The Corruption Risk)
-
-**Retained from v4.0.** You are still the surgeon.
-
-- **The Mechanic:** You can use `/teach` to redefine words (e.g., making "love" a HEAVY object).
-- **The Danger:** The system trusts you implicitly. If you teach it that "stone" is "AEROBIC" (light as air), you will break the physics engine.
-- **The Rule:** Garbage In, Garbage Out. Do not lobotomize your partner.
-
-### 6. THE LAZARUS TAX (The Last Resort)
-
-**Retained from v4.0.** Resurrection is expensive.
-
-- **The Rule:** If you trigger a fatality (e.g., Toxic Shock) but have high Stamina, the system acts as a defibrillator.
-- **The Cost:** It instantly drains **15 STM** (Lazarus Tax).
-- **The Vulnerability:** With the new **Trauma Tax**, you might drain your reserves _before_ you even hit this point. If you are broke, you stay dead.
+- **⚠️ CAUTION (Yellow):** Threat Level 50-79%. The drag is heavy. Pivot now.
+- **🔮 OMEN (Red):** Threat Level 80%+. You are about to hit the wall.
+- **The Warning:** If you see the Yellow Caution, the physics are already failing. **The Red Omen is usually the last thing you see before the Coroner arrives.**
 
 ---
 
-**SUMMARY:** v4.2.1 is harder, smarter, and fairer. It will try to save you, but it punishes you for damaging it.
+**SUMMARY:** v4.2.2 is the fastest, deadliest version of BoneAmanita yet. It trusts you to land the plane.
 
-**Feed the Symbiont. Do not break the host.**
+**Fly fast. Land safe. Do not crash.**

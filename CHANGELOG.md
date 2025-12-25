@@ -1,5 +1,42 @@
 # CHANGELOG.md
 
+### [v4.2.2] - 2025-12-24 - "THE BUTCHER'S CUT"
+
+#### 🔪 THE I/O ANCHOR (Performance Surgery)
+
+- **Severing the Drag:**
+    - **The Pathology:** The system was serializing the entire JSON graph to disk on every single `process()` tick. This created massive "Narrative Drag" unrelated to the text itself, causing the interface to lag as memory grew.
+    - **The Cure:** Relocated the save protocol. The system now runs purely in RAM and only saves to disk on `exit`, `/exit`, or `KeyboardInterrupt` (Ctrl+C).
+    - **The Result:** Truth Acceleration ($T_a$) is no longer artificially dampened by disk I/O. The system flies.
+        
+
+#### 🧠 THE HIPPOCAMPUS (Neuroplasticity)
+
+- **Permanent Learning:**
+    - **The Pathology:** The `/teach` command worked for the active session but was not serialized. The Symbiont developed amnesia regarding learned physics upon reboot.
+    - **The Cure:** Updated `DeepStorage.save` and `ingest` to serialize the `TheLexicon.LEARNED_VOCAB` dictionary into the JSON structure.
+    - **The Result:** Training is now persistent. If you teach it that "glitch" is "kinetic," it remembers forever.
+        
+
+#### 📉 THE STOMACH STAPLE (Memory Leak)
+
+- **The Glutton Fix:**
+    - **The Pathology:** `DeepStorage` used a simple `if` check to prune memories (`if len > max`). If the user input 5 heavy words in one turn, the graph grew by +5 but only pruned -1. The memory cap was a suggestion, not a law.
+    - **The Cure:** Changed the logic to a `while` loop in `_prune_graph`.
+    - **The Result:** The system burns fat until it fits the `MAX_MEMORY_CAPACITY`. The cap is now a hard biological constraint.
+        
+
+#### 🏗️ SKELETAL REINFORCEMENT (Config & Hygiene)
+
+- **Centralized Nervous System:**
+    - **The Shift:** Hardcoded signal weights (e.g., `CLARENCE += 15.0`) were scattered throughout the logic classes.
+    - **The Fix:** Migrated all signal weights to `BoneConfig` constants. Tuning the personality now happens in one place.
+- **Dead Organ Removal:**
+    - **The Excision:** Removed `NarrativeCoroner.attempt_resuscitation`. The logic was unused, vestigial code from v3.8.
+- **Input Sanitization:**
+    - **The Fix:** Updated `CommandProcessor` to use `split()` without arguments.
+    - **The Result:** Commands like `/kill badword` (with double spaces) no longer cause system crashes.
+
 ### [v4.2.1] - 2025-12-24 - "THE SYMBIONT (PATCHED)"
 
 #### 🩸 THE METABOLIC ORDER (Energy Dynamics)
