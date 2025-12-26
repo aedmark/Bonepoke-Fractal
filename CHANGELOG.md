@@ -1,5 +1,128 @@
 # CHANGELOG.md
 
+### [v4.5.2] - 2025-12-26 - "THE GRAFTED ROOT (HEALED)"
+
+#### 🌸 THE THERAPY PROTOCOL (Faith)
+
+- **The Shift:**
+    
+    - **The Pathology:** The system could inherit trauma (Scarring) but had no mechanism to heal it. A session born with "Septic Shock" (High Toxin Sensitivity) was doomed to remain hypersensitive forever, creating a generational downward spiral.
+        
+    - **The Cure:** Implemented `TherapyProtocol`.
+        
+    - **The Logic:**
+        
+        - **The Streak:** The system monitors for 5-turn streaks of "Healthy Behavior" specific to each trauma type.
+            
+        - **The Action:** If a streak is achieved, the system **reduces the accumulated trauma vector** (healing the future spore) and **relaxes the current configuration penalties** (healing the present body).
+            
+    - **The Philosophy:** "The garden remembers the death, but it also remembers the bloom." Behavior changes biology.
+        
+
+### [v4.5.1] - 2025-12-26 - "THE GRAFTED ROOT"
+
+
+#### 🛡️ THE GENETIC MEMBRANE (Spore Filtering)
+
+- **The Shift:**
+    - **The Pathology:** In v4.5, `MycelialNetwork.ingest()` was an open door. It blindly accepted all mutations from an incoming spore, allowing a weak or malicious session to overwrite established truths (e.g., redefining "Silence" from `KINETIC` to `TOXIN`).
+    - **The Cure:** Implemented the **Immune Gate**.
+    - **The Logic:**
+        - **Authority Calculation:** The system calculates `Spore Authority` based on the donor's vitality (`Health + Stamina / 150`).
+        - **Conflict Resolution:** If an incoming definition conflicts with an existing one, the system compares **Authority** vs. **Local Strength** (Edge Count).
+        - **The Verdict:** Strong local memories resist weak foreign mutations. Only a "Healthy" spore can overwrite a "Deep" truth.
+    - **The Output:** _"[MEMBRANE]: Integrated 12 mutations. Rejected 3 due to insufficient authority."_
+        
+
+#### 🩸 VECTORIZED TRAUMA (Epigenetics)
+
+- **The Shift:**
+    - **The Pathology:** The previous `trauma_scar` was a blunt scalar (`0.3`). The next generation knew _that_ it was hurt, but not _how_. It couldn't distinguish between "Burnout" (Voltage) and "Starvation" (Stamina).
+    - **The Cure:** Implemented `TRAUMA_VECTOR`.
+    - **The Mechanism:**
+        - **Tracking:** `BoneAmanita.process` now logs damage into specific buckets: `THERMAL` (Voltage Burn), `CRYO` (Exhaustion), `SEPTIC` (Toxins), and `BARIC` (Drag Crush).
+        - **Inheritance:** The `save()` function normalizes these values into a vector map.
+        - **Adaptation:** On ingest, the new session reads the vector and applies specific configuration changes:
+            - **SEPTIC Scar:** Doubles `TOXIN_WEIGHT`.
+            - **CRYO Scar:** Halves `STAMINA_REGEN`.
+            - **THERMAL Scar:** Lowers `FLASHPOINT_THRESHOLD`.
+    - **The Result:** The system now develops specific phobias and calluses based on its ancestral history.
+        
+
+#### 🏛️ THE PARADOX MUSEUM (Deep Storage)
+
+- **The Shift:**
+    - **The Pathology:** The `LeyLineBattery` burned isotopes using LIFO (Last-In-First-Out). This meant the system constantly burned its most recent confusion for fuel, while ancient, foundational paradoxes sat at the bottom of the stack, unburned and unintegrated.
+    - **The Cure:** Implemented **Crystallization Logic**.
+    - **The Mechanic:**
+        - **Aging:** Isotopes now track their `birth_tick`.
+        - **Archival:** If an isotope survives in the battery for > 50 ticks without being burned, it is moved to the **Archive**.
+        - **The Effect:** Ancient paradoxes become permanent structural pillars rather than fuel.
+            
+
+#### 🔧 CRITICAL REPAIRS
+
+- **The Comma Patch:**
+    - **The Fix:** Fixed a critical `SyntaxError` in the `__main__` block where a missing comma in the `save()` function call would have caused a crash upon exit.
+    - **Helper Function:** Added `_get_current_category` to `MycelialNetwork` to support the new conflict resolution logic.
+
+
+### [v4.5] - 2025-12-26 - "THE SPORE PRINT"
+
+#### ⚡ THE LEY LINE BATTERY (Semantic Energy)
+
+- **The Shift:**
+    - **The Pathology:** The previous `ParadoxBattery` converted complex narrative tension (e.g., "Fire vs. Ice") into a generic float value (`Charge: 50.0`). The system burned furniture to stay warm but forgot which chair it burned.
+    - **The Cure:** Implemented `LeyLineBattery`.
+    - **The Logic:**
+        - **Absorption:** When High Voltage (> 7.0) is detected, the battery captures the specific **Isotope** that created it (e.g., `("STONE", "CLOUD")`).
+        - **Discharge:** When starving, the system burns these Isotopes first.
+    - **The Output:** _"⚡ METABOLISM: Burning 'STONE/CLOUD' (+5.0 STM)."_ The system now consumes meaning, not just numbers.
+        
+
+#### 🍄 THE SPORE PRINT (Reproductive Strategy)
+
+- **The Shift:**
+    - **The Pathology:** `MycelialNetwork.save()` previously dumped the entire raw graph to disk. It was a "Save File," not a seed. It carried noise and junk data.
+    - **The Cure:** Implemented the `SporeCasing` class.
+    - **The Logic:**
+        - **Filtering:** Only saves **High-Tensile Edges** (Strength > 1). Weak connections are left to die.
+        - **Mutations:** Serializes the `mutations` (learned vocabulary) and `isotopes` (captured paradoxes).
+        - **Trauma:** Encodes `trauma_scar` based on final health.
+    - **The Result:** The system now produces a genetic packet capable of infecting the next session with its strongest ideas.
+        
+
+#### 🍂 THE ATROPHIC LEXICON (The Rot)
+
+- **The Shift:**
+    - **The Pathology:** `TheLexicon` had perfect recall. If a user taught the system that "Bureaucracy" was "Kinetic," it remained true forever, eventually polluting the physics engine with obsolete definitions.
+    - **The Cure:** Implemented **Usage-Based Decay**.
+    - **The Mechanic:**
+        - **Tracking:** Every learned word is stamped with a `last_seen_tick`.
+        - **Touching:** Using a word refreshes its timestamp.
+        - **The Rot:** Every 50 ticks (or during Coma), the system checks for words unseen for >100 ticks.
+    - **The Output:** _"🍂 ATROPHY: The moss covered 'synergy'. Category bond broken."_
+        
+
+#### 🦴 SMART AUTOPHAGY (Strategic Cannibalism)
+
+- **The Shift:**
+    - **The Pathology:** When memory was full, the system blindly ate the oldest node. This often destroyed foundational concepts ("The Mandate") simply because they were defined early.
+    - **The Cure:** Implemented a **Hierarchy of Sacrifice**.
+    - **The Priority:**
+        1. **The Trivial:** Nodes with only 1 edge.
+        2. **The Stale:** Nodes not accessed in the last 50% of the session.
+        3. **The Ancient:** Only then, the oldest.
+    - **The Golden Ticket:** Nodes with **> 5 edges** are immune to cannibalism. They have become bone.
+
+    
+#### 🔧 SYSTEM WIRING
+
+- **Neuroplasticity Update:**
+    - Updated `BoneAmanita.reinforce_salvage_words` to pass the current `tick_count` to the lexicon, ensuring that "Salvage" words are kept fresh and immune to rot.
+- **Battery Readout:**
+    - Updated the HUD to display stored Isotopes (e.g., `[••••]`) next to the charge bar, visualizing the semantic potential of the battery.
+
 ### [v4.4.1] - 2025-12-26 - "THE SPHERICAL FUNGUS COW"
 
 #### 🌿 THE ROOT SYSTEM (Active Memory)
