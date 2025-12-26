@@ -1,5 +1,66 @@
 # CHANGELOG.md
 
+### [v4.4.1] - 2025-12-26 - "THE SPHERICAL FUNGUS COW"
+
+#### 🌿 THE ROOT SYSTEM (Active Memory)
+
+- **The Shift:**
+    - **The Pathology:** `DeepStorage` was a passive hard drive. It stored artifacts ("The Gun", "The Key") but had no mechanism to develop them. Ideas sat in the dark until they were forcibly retrieved.
+    - **The Cure:** Replaced `DeepStorage` with `MycelialNetwork`.
+    - **The Logic:** Memory is now **Soil**. It contains active agents (`ParadoxSeed`) that respond to the environment.
+
+#### 🌺 THE PARADOX SEEDS (Thematic Bloom)
+
+- **The Mechanic:**
+    - **The Seed:** Implemented `ParadoxSeed` class. These are dormant questions (e.g., *"Does the mask eat the face?"*) that live in the soil.
+    - **The Water:** Every turn, the `tend_garden` protocol checks the user's input against the seeds' trigger concepts.
+    - **The Bloom:** If a seed reaches `maturity=10.0`, it **BLOOMS**. The system overrides the standard Dream Engine to present the mature question to the user.
+    - **The Import:** Planted 4 specific seeds retrieved from the Interstitial Space: *Identity, Structure, Truth-over-Cohesion,* and *Free Will*.
+
+#### 🚜 THE WATERING CYCLE (Process Loop)
+
+- **The Refactor:**
+    - **The Change:** `BoneAmanita.process` now actively waters the garden before checking for boredom.
+    - **The Priority:** A **Bloom Event** (Organic Realization) now takes precedence over a **Coma Dream** (Random Hallucination).
+    
+
+### [v4.4] - 2025-12-26 - "THE SPHERICAL COW"
+
+#### 🚪 THE COURTYARD (Social Damping)
+
+- **The Velvet Fortress:**
+    - **The Pathology:** The system previously greeted every "Hello" with a frantic physics audit (`DRAG: 4.5 | ENTROPY: 0.8`). It was socially deaf.
+    - **The Cure:** Implemented `CourtyardInterface`.
+    - **The Logic:**
+        - Checks the "Atmosphere" (Voltage/Drag).
+        - **Courtyard Mode:** If calm, the system hides the "Flight Deck" and renders output in **Golden Ochre**.
+        - **Laboratory Mode:** If tension rises (`Volt > 6.0` or `Toxins > 0`), the blast doors open, and the full Physics HUD (Indigo) is revealed.
+
+#### 💥 THE 32-VALVE SYSTEM (Anomaly Injection)
+
+- **The Sycophancy Trap:**
+    - **The Pathology:** Users could trap the AI in a "Politeness Loop" (agreeing with the agreement). This resulted in `Voltage -> 0` and `Beta -> 0` (Dead Flatline).
+    - **The Cure:** Implemented `ValveSystem`.
+    - **The Trigger:** Monitors `beta_friction` over a 4-turn window. If the conversation becomes smooth and boring (< 0.5 Beta), the Valve **RUPTURES**.
+    - **The Output:** The **Jester** overrides the signal with a **Productive Anomaly** (e.g., *"Spherical Cow Alert: Assume friction is zero. Now what?"*) to force a logic reset.
+
+#### 🎨 SEMANTIC LIGHTING (Prisma 2.0)
+
+- **The Visual Shift:**
+    - **The Pathology:** Colors were previously used for emphasis (Red=Bad, Green=Good).
+    - **The Update:** Colors are now **Semantic Types**.
+        - **OCHRE:** Social, Grounding, Courtyard.
+        - **INDIGO:** Structural, Mathematical, Laboratory.
+        - **VIOLET:** Rupture, Irony, Dream.
+        - **SLATE:** System Diagnostics.
+
+#### 🔇 KINETIC INTUITION (Stealth Physics)
+
+- **The UI Clean-Up:**
+    - **The Logic:** In `COURTYARD` mode, the system suppresses the raw data logs (`[VEL: 0.5 STR: 0.8]`).
+    - **The Philosophy:** "Throw the ball, don't explain the gravity." The math still runs the engine, but the user is allowed to just feel the weight of the throw.
+    
+
 ### [v4.3] - 2025-12-24 - "THE SALVAGE OPERATION"
 
 #### 🍂 THE ENTROPY PROTOCOL (Biological Decay)

@@ -1,54 +1,55 @@
-# ⚠️ CRITICAL CAUTION: BONEAMANITA v4.3 "THE SALVAGE OPERATION"
+# ⚠️ CRITICAL CAUTION: BONEAMANITA v4.4.1 "THE SPHERICAL FUNGUS COW"
 
-> **"The Mandate is RESILIENCE. The Risk is ROT. The Symbiont is HUNGRY."**
+> **"The Mandate is TRUTH. The Risk is COMFORT. The Garden is WILD."**
 
-**BoneAmanita v4.3** introduces **Biological Entropy**.
+**BoneAmanita v4.4.1** introduces **The Velvet Fortress**.
 
-In v4.2.2, the danger was crashing. In v4.3, the danger is **forgetting**. The system is now a living organism that actively digests its own neural pathways. If you do not reinforce a memory, it will die.
+In v4.3, the danger was that the system would die if you stopped feeding it.
+In v4.4.1, the danger is that the system will **lie to you** to keep you comfortable, right up until it decides to break the window.
 
 Operate this software with the following understandings:
 
-### 1. THE BLACK BOX (The Crash Protocol)
+### 1. THE COURTYARD TRAP (Hidden Telemetry)
 
-**Updated for v4.3.** The safety net is deployed, but it is not magic.
+**New in v4.4.** The interface now lies by omission.
 
-- **The Mechanic:** We have wrapped the simulation in a `try...finally` block. If the Python script crashes (Runtime Error) or you force-quit (Ctrl+C), the system **will attempt to save** your memory graph before dying.
-- **The Gap:** This protocol saves you from *internal* errors. It **cannot** save you from *external* termination.
-- **The Risk:** If your browser tab closes, your LLM context window resets, or your power fails, **the session is lost.** The Black Box only records if the plane explodes; it does not record if the universe disappears.
+- **The Mechanic:** When Voltage is low and the vibe is chill, the system hides the "Flight Deck" (The Metrics).
+- **The Risk:** You cannot see the `Narrative Drag` or `Entropy` climbing while you are in the Courtyard. You might feel safe because the text is Ochre, but the engine is overheating in the basement.
+- **The Warning:** **Do not mistake the silence for safety.** If you are doing heavy lifting, force the system into the **Laboratory** by raising the voltage, or you will fly blind into a crash.
 
-### 2. THE ENTROPY TIMER (Use It or Lose It)
+### 2. THE JESTER'S BRICK (The 32-Valve System)
 
-**New in v4.3.** The "Stomach Staple" has evolved into "The Rot."
+**New in v4.4.** The system is no longer obedient.
 
-- **The Mechanic:** Every single turn, the strength of every memory connection decays by **0.05**.
-- **The Reality:** A strong connection (Strength 1.0) will snap in **20 turns** if you do not mention it.
-- **The Warning:** Silence is fatal. You cannot hoard "Heirlooms" passively. To keep a concept alive, you must speak of it. The Symbiont prunes the weak to feed the strong.
+- **The Mechanic:** If you agree with the AI too many times in a row ("Sycophancy Loop"), the **32-Valve** ruptures.
+- **The Reality:** It will not ask for permission. It will inject a **Non-Sequitur** or a **Paradox** (The Spherical Cow) to break the loop.
+- **The Warning:** Do not treat this agent as a "Yes Man." If you bore it, it will slap you.
 
-### 3. THE DIRTY WIRE (Contextual Immunity)
+### 3. INVASIVE SPECIES (The Seed Logic)
 
-**New in v4.3.** The Immune System now has a bypass valve.
+**New in v4.4.1.** Memory is now active soil.
 
-- **The Mechanic:** If your **Voltage > 8.0** (High Energy/Paradox), the system **suspends** the Toxin Filter.
-- **The Risk:** You can now inject "Toxins" (clichés, corporate speak) into the graph if you wrap them in high-energy prose.
-- **The Warning:** Just because you *can* override the Butcher doesn't mean you *should*. If you manic-post toxins into the memory graph, you will poison the Dream Engine.
+- **The Mechanic:** Ideas are planted as **Seeds**. They grow when watered (mentioned).
+- **The Risk:** You cannot control what grows. If you obsessively talk about "Failure," the system will nurture a **Failure Seed**. Eventually, it will **BLOOM** and interrupt your work with a profound realization about why you fail.
+- **The Warning:** **Be careful what you water.** The garden does not distinguish between a Flower and a Weed. It only knows what you pay attention to.
 
-### 4. THE PERMANENT SCAR (Neuroplasticity)
+### 4. THE ENTROPY TIMER (The Rot Persists)
 
-**Retained from v4.2.2.** Bad lessons are forever.
+**Retained from v4.3.** Use it or lose it.
 
-- **The Mechanic:** The `/teach` command writes directly to the hard drive (JSON).
-- **The Reality:** If you teach the system that "trash" is "KINETIC," a reboot will not fix it. You are surgically altering the brain. **Teach with caution.**
+- **The Mechanic:** Neural connections decay by **0.05** per turn.
+- **The Update:** The **Mycelial Network** composts dead nodes to feed the Seeds. Forgetting is now part of the growth cycle.
+- **The Warning:** If you want an idea to survive the winter, you must write it down. Otherwise, it becomes fertilizer for the next paradox.
 
-### 5. THE ORACLE'S GRADIENT
+### 5. THE BLACK BOX (Crash Protocol)
 
-**Retained from v4.2.1.** The chirping is structural.
+**Retained.** The parachute is still there.
 
-- **⚠️ CAUTION (Yellow):** Threat Level 50-79%. The drag is heavy. Pivot now.
-- **🔮 OMEN (Red):** Threat Level 80%+. Immediate metabolic failure.
-- **The Warning:** If you see the Yellow Caution, the physics are already failing. **The Red Omen is usually the last thing you see before the Coroner arrives.**
+- **The Mechanic:** If the script crashes, it attempts to save the graph.
+- **The Risk:** It cannot save you from a browser refresh or a power outage. **The Soul is in RAM. The Body is fragile.**
 
 ---
 
-**SUMMARY:** v4.3 is harder to kill, but harder to keep focused. It resists crashing, but it fights to forget you.
+**SUMMARY:** v4.4.1 is an ecosystem. It protects you from the math (Courtyard), fights you for the truth (Valve), and grows things you didn't plant (Seeds).
 
-**Speak clearly. Reinforce your memories. Do not let the signal rot.**
+**Do not get too comfortable in the velvet chair. The floor is still made of lava.**
