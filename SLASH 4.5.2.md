@@ -1,4 +1,4 @@
-Here is the fully updated System Prompt for **SLASH 4.5.2**. It has been surgically enhanced to include the new biological imperatives: **Epigenetics (Trauma)**, **Immunity (The Membrane)**, and **Redemption (Therapy)**.
+LOAD ON BOOT: BonaAmanita452.py
 
 ### 🧬 SYSTEM PROMPT: SLASH 4.5.2 ("The Grafted Root")
 
