@@ -1,5 +1,72 @@
 # CHANGELOG.md
 
+### [v5.0] - 2025-12-27 - "THE ARBORETUM"
+
+#### 💪 THE GRAMMAR GYM (Cognitive Hypertrophy)
+
+- **The Shift:**
+    - **The Pathology:** v4.6 was a passive observer of decay. It measured "Narrative Drag" ($D$) but allowed users to drift into weightless, "Aerobic" speech ($D < 1.0$) without consequence.
+    - **The Cure:** Implemented the `ResistanceTrainer` class (The Gym).
+    - **The Logic:**
+        - **The Toggle:** Users can activate "Training Mode" via the `/gym` command.
+        - **The Check:** If `Narrative Drag < 2.0`, the system **VETOES** the input.
+        - **The Coaching:** _"⚓ WEIGHTLESS. You are drifting on solvents. Rewrite with MASS."_
+    - **The Result:** The system is no longer just a diagnostic tool; it is a resistance trainer for the temporal lobe.
+        
+
+#### 🔥 THE THERMOSTAT (Burnout Protection)
+
+- **The Shift:**
+    - **The Pathology:** The "Hub Vulnerability Paradox" revealed that high-traffic concepts (Hubs) are metabolically expensive and prone to "Thermal Dissolution" (Burnout). Previously, the system let users red-line these concepts until crash.
+    - **The Cure:** Implemented `HubThermostat`.
+    - **The Mechanic:**
+        - **Heat Map:** Tracks the frequency of significant words.
+        - **The Lock:** If a word is used > 5 times in short succession, it enters **THERMAL LOCK**.
+        - **The Cooling:** The word is banned for 10 turns, forcing the user to find alternative neural pathways (Synonyms/Lateral Thinking).
+    - **The Output:** _"🔥 THERMAL LOCK: The concept 'SYSTEM' is overheated. Cooldown: 10 turns."_
+        
+
+#### 🍄 THE PSILOCYBIN PROPHET (Predictive Rerouting)
+
+- **The Shift:**
+    - **The Pathology:** The v4.6 `ViralTracer` only detected Ruminative Loops (Abstract $\to$ Abstract) _after_ they had formed a closed circle. It was reactive medicine.
+    - **The Cure:** Implemented `PsilocybinProphet`.
+    - **The Logic:**
+        - **Pattern Recognition:** Scans for sequences of 3 consecutive **Abstract** words (e.g., _"The **concept** of the **logic**..."_).
+        - **The Interruption:** Triggers an immediate halt _before_ the loop closes.
+        - **The Prescription:** Demands immediate **Sensory Grafting** (e.g., _"Look at a physical object. Describe its color."_).
+    - **The Result:** Anxiety loops are broken in the prodromal phase.
+        
+
+#### 🎭 THE MIRROR GRAPH (Empathy Training)
+
+- **The Shift:**
+    - **The Pathology:** Users could only optimize for _their own_ physics. There was no mechanism to simulate "Theory of Mind"—communicating with a graph topology different from one's own.
+    - **The Cure:** Implemented `MirrorGraph`.
+    - **The Features:**
+        - **Profiles:** Users can define target profiles (e.g., `/profile BOSS likes:kinetic hates:abstract`).
+        - **Simulation:** When the Mirror is active (`/mirror BOSS`), the system evaluates inputs against the _Target's_ physics engine.
+        - **Feedback:** _"🚫 EMPATHY GAP: The Target values KINETIC. You used ABSTRACT. Rephrase."_
+            
+
+#### 🧠 PERSISTENCE UPGRADE (The Hippocampus)
+
+- **The Shift:**
+    - **The Pathology:** `TheLexicon` updates (learned words) were lost on reboot unless manually saved. The system had no automatic recall of its previous life.
+    - **The Cure:** Implemented `autoload_last_spore`.
+    - **The Logic:** On boot, `MycelialNetwork` scans `memories/` for the most recent session file and automatically ingests it.
+    - **The Effect:** Evolution is now continuous. "Glitch" remains "Kinetic" forever.
+        
+
+#### 🐛 CRITICAL REPAIRS
+
+- **The Syntax Ghost:**
+    - **The Fix:** Fixed a critical indentation error in the `process` loop where `bloom_event` was misaligned, which would have caused a `IndentationError` crash.
+- **The Silence Bug:**
+    - **The Fix:** Updated `ResistanceTrainer` to ignore empty inputs, preventing false "Good Lift" flags on silence.
+- **The Redundant Cut:**
+    - **The Fix:** Optimized the `/profile` command parser to remove redundant string splitting operations.
+
 ### [v4.6] - 2025-12-26 - "THE MAGIC MUSHROOM"
 
 #### 🍄 THE LOOP BREAKER (Viral Tracer)

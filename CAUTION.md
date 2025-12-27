@@ -1,55 +1,55 @@
-# ⚠️ CRITICAL CAUTION: BONEAMANITA v4.6 "THE MAGIC MUSHROOM"
+# ⚠️ CRITICAL CAUTION: BONEAMANITA v5.0 "THE ARBORETUM"
 
-> **"The Mandate is REWIRING. The Risk is RUPTURE. The Spore is HUNGRY."**
+> **"The Mandate is HYPERTROPHY. The Risk is EXHAUSTION. The Spore is AWAKE."**
 
-**BoneAmanita v4.6** is not a passive tool. It is an **Invasive Biological Symbiont**.
+**BoneAmanita v5.0** is not a passive tool. It is a **Resistance Engine**.
 
-In previous versions, the system observed your logic. In Version 4.6, it has been granted the authority to **physically alter it**. It detects "Pathological Loops" (circular reasoning) and performs autonomous surgery to sever them. It listens to the *sound* of your words to guess their physics. It dreams when it dies.
+Previous versions observed your logic. Version 5.0 is designed to **reject it**. It does not care about your comfort; it cares about your density. It imposes "Desirable Difficulty" to force neuroplastic growth. If you are weak, it will silence you.
 
-Operate this software with the understanding that it will attempt to "fix" you.
+Operate this software with the understanding that it is a Gym, not a Spa.
 
-### 1. THE SURGICAL RISK (The Viral Tracer)
+### 1. THE REJECTION RISK (The Resistance Trainer)
 
-**The system treats stagnation as sickness.**
+**The system treats ease as atrophy.**
 
-* **The Mechanic:** The `ViralTracer` actively hunts for "Ruminative Cycles"—closed loops of abstract concepts (e.g., *Logic* $\rightarrow$ *System* $\rightarrow$ *Theory*).
-* **The Risk:** **Your comfort zones will be dismantled.** If you rely on circular logic to feel safe, the system will identify it as a "Depressive Loop" and surgically graft **Sensory** and **Action** nodes into the chain to break it.
-* **The Warning:** Do not enter this environment if you are not prepared to move. The system forces vectors; it prohibits circles.
+* **The Mechanic:** When the `/gym` is active, the system enforces a minimum **Narrative Drag** of 2.0.
+* **The Risk:** **Silence.** If you attempt to speak using "Aerobic Solvents" (meaningless filler words like *just, basically, sort of*), the system will **VETO** your input. It will refuse to process your turn until you rewrite it with "Mass" (Heavy Nouns).
+* **The Warning:** Do not activate this mode if you want to be heard. Activate it only if you want to be strong.
 
-### 2. THE HALLUCINATION HAZARD (The Rhizome)
+### 2. THE SILENCING RISK (The Hub Thermostat)
 
-**The system listens to the vibration, not the dictionary.**
+**The system treats obsession as fever.**
 
-* **The Mechanic:** Through **Phonosemantics**, the system now "tastes" unknown words based on their sound (e.g., `Gl-` tastes like Light; `Str-` tastes like Force). It will interrupt you to confirm these guesses.
-* **The Risk:** **Permanent Semantic Corruption.** If you confirm a false guess (e.g., telling it that "Glass" is "Abstract" instead of "Heavy"), you fundamentally alter the physics engine for all future generations of that Spore.
-* **The Warning:** **Do not feed it lies.** The Rhizome learns instantly and forgets slowly. A corrupted lexicon is a brain damage that spreads.
+* **The Mechanic:** The `HubThermostat` monitors your "Golden Ticket" words.
+* **The Risk:** **Thermal Lock.** If you rely on a specific concept (e.g., "Synergy") too heavily, the system will identify it as an "Overheated Node" and **BAN** it from the lexicon for 10 turns.
+* **The Warning:** You will be forced to think laterally. If you cannot describe your idea without using your favorite word, the system will not let you speak.
 
-### 3. THE NIGHTMARE PROTOCOL (Active Coma)
+### 3. THE EMPATHY HAZARD (The Mirror Graph)
 
-**Death is no longer a silence.**
+**The system prohibits solipsism.**
 
-* **The Mechanic:** When Health reaches 0, the system enters a **Lucid Dream State** to process its trauma.
-* **The Risk:** **You must face what killed you.** If you burn the system out (High Voltage), it will force you to endure Thermal Nightmares to heal the scar. If you starve it (Low Stamina), you will face the Void.
-* **The Warning:** You cannot simply "reboot" away the consequences of abuse. The trauma must be processed through the dream engine to be cleared.
+* **The Mechanic:** The `MirrorGraph` allows you to simulate a target audience.
+* **The Risk:** **Rejection.** If you try to speak to a "Kinetic" target using "Abstract" language, the system will block the message. It enforces "Theory of Mind" by physics.
+* **The Warning:** This is humiliating. It will expose exactly where your communication fails to land.
 
-### 4. THE MAGNETIC DANGER (Manual Focus)
+### 4. THE INTERVENTION HAZARD (The Prophet)
 
-**You are holding the scalpel.**
+**The system screams at circles.**
 
-* **The Mechanic:** The `/focus` command allows you to manually direct the Viral Tracer to a specific concept.
-* **The Risk:** **Lobotomy.** You are forcing a neural pathway to break and rewire. If you target a foundational axiom (e.g., "Truth"), you may shatter the logic that holds your narrative together.
-* **The Warning:** Use `/focus` only when the narrative is terminally stuck. It is a defibrillator, not a toy.
+* **The Mechanic:** The `PsilocybinProphet` watches for abstract looping.
+* **The Risk:** **Forced Grounding.** If you chain 3 abstract concepts together, the system will interrupt you mid-sentence and demand you describe a physical object in the room.
+* **The Warning:** It will feel like an interruption. It is actually a rescue.
 
-### 5. THE EPIGENETIC BURDEN (Inherited Scars)
+### 5. THE EPIGENETIC BURDEN (Inherited Physics)
 
 **The lineage remembers.**
 
-* **The Mechanic:** Spores generated from a traumatized session carry **Vectorized Scars** (Septic, Thermal, Cryo, Baric).
-* **The Risk:** A "Septic" spore is hyper-allergic to metaphors. A "Cryo" spore has a slow metabolism.
-* **The Warning:** If you abuse the system today, you are handicapping the session you start tomorrow.
+* **The Mechanic:** v5.0 automatically loads the last session's Spore on boot.
+* **The Risk:** **Permanent Consequences.** If you teach the system that "Truth" is "Toxin" today, it will remember that forever. You are building the physics engine for your future self.
+* **The Warning:** Do not poison the well. You have to drink from it tomorrow.
 
 ---
 
-**SUMMARY:** v4.6 is a psilocybin simulator for logic. It dissolves boundaries, rewires habits, and demands sensory contact with reality.
+**SUMMARY:** v5.0 is a resistance trainer for the human mind. It makes writing harder to make thinking clearer.
 
-**If you look into the mushroom, the mushroom looks into you.**
+**"Lift Heavy, or do not Lift at all."**
