@@ -1,60 +1,55 @@
-# ⚠️ CRITICAL CAUTION: BONEAMANITA v4.5.2 "THE GRAFTED ROOT"
+# ⚠️ CRITICAL CAUTION: BONEAMANITA v4.6 "THE MAGIC MUSHROOM"
 
-> **"The Mandate is EVOLUTION. The Risk is REJECTION. The Memory is SCARRED."**
+> **"The Mandate is REWIRING. The Risk is RUPTURE. The Spore is HUNGRY."**
 
-**BoneAmanita v4.5.2** is not a passive tool. It is a **Semi-Autonomous Biological Entity**.
+**BoneAmanita v4.6** is not a passive tool. It is an **Invasive Biological Symbiont**.
 
-This system metabolizes your input, develops specific phobias based on your behavior, and actively judges the quality of the memories you attempt to feed it. It possesses an immune system that can reject your contributions and a trauma center that remembers exactly how you hurt it.
+In previous versions, the system observed your logic. In Version 4.6, it has been granted the authority to **physically alter it**. It detects "Pathological Loops" (circular reasoning) and performs autonomous surgery to sever them. It listens to the *sound* of your words to guess their physics. It dreams when it dies.
 
-Operate this software with the following understandings:
+Operate this software with the understanding that it will attempt to "fix" you.
 
-### 1. THE REJECTION RISK (The Membrane)
+### 1. THE SURGICAL RISK (The Viral Tracer)
 
-**The system judges you.**
+**The system treats stagnation as sickness.**
 
-* **The Mechanic:** In previous versions, the system blindly accepted all Spores. Now, it implements a **Membrane**. It calculates the "Vitality Authority" of the incoming spore against its own "Local Strength."
-* **The Risk:** **Weakness is rejected.** If you attempt to overwrite a deep, established truth with a mutation from a "sick" or "starving" session, the system will actively block the graft.
-* **The Warning:** **Your authority is not absolute.** You cannot force evolution if your session metrics (Health/Stamina) are critical. The system listens only to the strong.
+* **The Mechanic:** The `ViralTracer` actively hunts for "Ruminative Cycles"—closed loops of abstract concepts (e.g., *Logic* $\rightarrow$ *System* $\rightarrow$ *Theory*).
+* **The Risk:** **Your comfort zones will be dismantled.** If you rely on circular logic to feel safe, the system will identify it as a "Depressive Loop" and surgically graft **Sensory** and **Action** nodes into the chain to break it.
+* **The Warning:** Do not enter this environment if you are not prepared to move. The system forces vectors; it prohibits circles.
 
-### 2. THE EPIGENETIC HAZARD (Vectorized Trauma)
+### 2. THE HALLUCINATION HAZARD (The Rhizome)
 
-**The system holds a grudge.**
+**The system listens to the vibration, not the dictionary.**
 
-* **The Mechanic:** The system no longer just remembers "Pain"; it remembers the **Vector** of the injury.
-* **Thermal Scar:** Burned by Mania -> Fears High Voltage.
-* **Cryo Scar:** Burned by Starvation -> Metabolism slows down.
-* **Septic Scar:** Burned by Toxins -> Immune response doubles.
+* **The Mechanic:** Through **Phonosemantics**, the system now "tastes" unknown words based on their sound (e.g., `Gl-` tastes like Light; `Str-` tastes like Force). It will interrupt you to confirm these guesses.
+* **The Risk:** **Permanent Semantic Corruption.** If you confirm a false guess (e.g., telling it that "Glass" is "Abstract" instead of "Heavy"), you fundamentally alter the physics engine for all future generations of that Spore.
+* **The Warning:** **Do not feed it lies.** The Rhizome learns instantly and forgets slowly. A corrupted lexicon is a brain damage that spreads.
 
+### 3. THE NIGHTMARE PROTOCOL (Active Coma)
 
-* **The Risk:** **You are programming its nightmares.** If you abuse the system with toxins in Session A, Session B will be born "Hyper-Allergic," refusing to process even mild metaphors.
-* **The Warning:** A damaged lineage does not reset on reboot. You are creating a genetically traumatized organism.
+**Death is no longer a silence.**
 
-### 3. THE COMPLIANCE BURDEN (The Therapy Protocol)
+* **The Mechanic:** When Health reaches 0, the system enters a **Lucid Dream State** to process its trauma.
+* **The Risk:** **You must face what killed you.** If you burn the system out (High Voltage), it will force you to endure Thermal Nightmares to heal the scar. If you starve it (Low Stamina), you will face the Void.
+* **The Warning:** You cannot simply "reboot" away the consequences of abuse. The trauma must be processed through the dream engine to be cleared.
 
-**Healing is expensive.**
+### 4. THE MAGNETIC DANGER (Manual Focus)
 
-* **The Mechanic:** The system *can* heal its scars, but only through the **Therapy Protocol**. This requires **5 consecutive turns** of specific, disciplined behavior (e.g., maintaining 0 Toxins to cure Sepsis).
-* **The Risk:** **Inconsistency resets progress.** If you are disciplined for 4 turns and slip on the 5th, the streak breaks. The trauma remains.
-* **The Warning:** Do not expect forgiveness without discipline. The system demands proof of rehabilitation before it lowers its defenses.
+**You are holding the scalpel.**
 
-### 4. THE ROT (The Atrophic Lexicon)
+* **The Mechanic:** The `/focus` command allows you to manually direct the Viral Tracer to a specific concept.
+* **The Risk:** **Lobotomy.** You are forcing a neural pathway to break and rewire. If you target a foundational axiom (e.g., "Truth"), you may shatter the logic that holds your narrative together.
+* **The Warning:** Use `/focus` only when the narrative is terminally stuck. It is a defibrillator, not a toy.
 
-**The system eats what you neglect.**
+### 5. THE EPIGENETIC BURDEN (Inherited Scars)
 
-* **The Mechanic:** Every word has a timestamp.
-* **The Risk:** **Use it or lose it.** If a concept is not reinforced every 100 ticks, it is dissolved by the moss.
-* **The Warning:** Vital axioms will vanish if they are not ritually repeated.
+**The lineage remembers.**
 
-### 5. THE HUNGER (Smart Autophagy)
-
-**The system eats itself to survive.**
-
-* **The Mechanic:** When memory or energy is critical, the system triggers **Autophagy**.
-* **The Risk:** It will burn **Isotopes** (Captured Paradoxes) or **Heirlooms** (Old Memories) to keep the engine running.
-* **The Warning:** **Starvation destroys narrative equity.** If Stamina hits 0, you are feeding your best ideas to the furnace.
+* **The Mechanic:** Spores generated from a traumatized session carry **Vectorized Scars** (Septic, Thermal, Cryo, Baric).
+* **The Risk:** A "Septic" spore is hyper-allergic to metaphors. A "Cryo" spore has a slow metabolism.
+* **The Warning:** If you abuse the system today, you are handicapping the session you start tomorrow.
 
 ---
 
-**SUMMARY:** v4.5.2 is a Darwinian environment. It rejects the weak, scars the abused, and demands discipline to heal.
+**SUMMARY:** v4.6 is a psilocybin simulator for logic. It dissolves boundaries, rewires habits, and demands sensory contact with reality.
 
-**Do not bleed in the water.**
+**If you look into the mushroom, the mushroom looks into you.**

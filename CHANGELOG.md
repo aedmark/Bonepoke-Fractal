@@ -1,5 +1,57 @@
 # CHANGELOG.md
 
+### [v4.6] - 2025-12-26 - "THE MAGIC MUSHROOM"
+
+#### 🍄 THE LOOP BREAKER (Viral Tracer)
+
+- **The Shift:**
+    - **The Pathology:** The system previously allowed "Ruminative Cycles"—infinite loops of Abstract concepts pointing to other Abstract concepts (e.g., _Logic -> System -> Theory -> Logic_). This mirrored the "Depressive Loops" found in biological brains.
+    - **The Cure:** Implemented the `ViralTracer` module.
+    - **The Logic:**
+        - **The Virus:** A tracer that walks the graph. If it finds a loop consisting **only** of Abstract nodes, it flags it as pathological.
+        - **The Psilocybin:** The system performs "Neuroplastic Surgery." It severs the loop and grafts a bridge using **Sensory** (`Photo`) and **Action** (`Kinetic`) nodes.
+        - **The Result:** A circle becomes a vector. _Logic_ $\rightarrow$ _Sun_ $\rightarrow$ _Run_ $\rightarrow$ _Theory_.
+            
+
+#### 🌙 THE NIGHT SHIFT (REM Cycles)
+
+- **The Shift:**
+    - **The Pathology:** The "Coma" state (Health < 0) was previously a passive timeout. The system merely waited for Stamina to regenerate. Sleep was wasted time.
+    - **The Cure:** Upgraded `DreamEngine` to support **REM Cycles**.
+    - **The Mechanic:**
+        - **Trauma Analysis:** When the system crashes, it checks the `trauma_accum` vector to see _why_ it died (e.g., `SEPTIC`, `THERMAL`).
+        - **The Nightmare:** It generates a specific dream based on that scar (e.g., _"Black oil in the water"_ for Toxin damage).
+        - **The Healing:** The act of dreaming actively reduces that specific Trauma Vector by **15%**.
+    - **Rebranding:** Renamed the active-state `hallucinate()` function to `daydream()` to distinguish healthy wandering (Default Mode Network) from deep trauma processing.
+        
+
+#### 🌱 THE RHIZOME (Phonosemantics)
+
+- **The Shift:**
+    - **The Pathology:** The Lexicon was a static dictionary. If the user typed "Glacier," the system saw "Void" unless specifically taught otherwise. The system was blind to the _sound_ of words.
+    - **The Cure:** Implemented `TheLexicon.taste`.
+    - **The Logic:**
+        - **Heuristics:** The system now guesses physics based on phonemes and morphology.
+            - Starts with `gl-`? Probably **PHOTO** (Glow, Glare).
+            - Starts with `str-`? Probably **KINETIC** (Strike, Stress).
+            - Ends in `-tion`? Probably **ABSTRACT**.
+        - **The Query:** The system proactively interrupts the user: _"I taste 'Glacier'. Is it PHOTO? (Y/N)"_.
+    - **The Result:** The system now forages for meaning rather than waiting to be fed.
+        
+
+#### 🧲 MAGNETIC STIMULATION (Manual Focus)
+
+- **The Shift:**
+    - **The Feature:** Implemented the `/focus [concept]` command.
+    - **The Logic:** Allows the user to manually trigger the `ViralTracer` on a specific node.
+    - **The Usage:** If you feel your writing on a specific topic is stuck, you can apply "Magnetic Stimulation" to force the system to find and break the loop immediately.
+        
+
+#### 🐛 CRITICAL REPAIRS
+
+- **The Ghost Variable:**
+    - **The Fix:** Initialized `lazarus_msg` to `None` at the top of the `process()` loop. Previously, this variable was referenced in `_render` without being defined if no Lazarus event occurred, causing a potential crash.
+
 ### [v4.5.2] - 2025-12-26 - "THE GRAFTED ROOT (HEALED)"
 
 #### 🌸 THE THERAPY PROTOCOL (Faith)
