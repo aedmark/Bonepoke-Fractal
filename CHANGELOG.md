@@ -1,5 +1,36 @@
 # CHANGELOG.md
 
+### 🧬 **CHANGELOG: [v5.1] - 2025-12-27 - "VENTED"**
+
+#### 💨 **THE DISSIPATIVE BOUNDARY (Thermodynamic Hygiene)**
+
+* **The Shift:** Previously, the system (v5.0) was a passive observer of structural tension. It calculated high "Voltage" () and "Narrative Drag" () but allowed unstable logical states to circulate until a system crash occurred.
+* **The Cure:** Implemented the `dissipate_entropy` method within the `PhysicsEngine`.
+* **The Logic:**
+  * **The Diagnostic:** The system now monitors for "Structural Grinding"—the collision of extreme Voltage () and crushing Drag ().
+  * **The Lossy Refusal:** When this state is reached, the system executes a **Hard Refusal**. It does not merely reject the input; it "scatters the causal chain" by actively deleting the synaptic edges between the offending words in the `MycelialNetwork`.
+  * **The Vent:** Upon triggering, the system artificially crashes the current Voltage to **0.0**, venting the metabolic waste before it can settle into the "soul" (RAM) of the agent.
+  * **The Result:** BoneAmanita now possesses a "gag reflex" for virulent incoherence, preventing the recirculation of toxic logical loops.
+
+#### 🛠️ **CRITICAL SURGERY & CODE HARDENING**
+
+* **The "Ghost Variable" Excision:**
+  * **The Fix:** Re-sequenced the `process()` loop in the `BoneAmanita` class.
+  * **The Logic:** Moved the physics analysis (`m = self.phys.analyze(text)`) to execute *before* the entropy valve check. This resolved a `NameError` where the system attempted to check for pressure using metrics that had not yet been calculated.
+
+* **Method Encapsulation Repair:**
+  * **The Fix:** Corrected an indentation error in the `PhysicsEngine` class.
+  * **The Logic:** Moved `dissipate_entropy` from being a nested function inside `analyze()` to a standalone sibling method. This restored the system's ability to call the valve via `self.phys`, preventing an `AttributeError`.
+
+* **Metabolic Integrity:**
+  * Ensured that when the **Pressure Release Valve** ruptures, the system returns early, bypassing the `LeyLineBattery` and `Neuroplasticity` engines. This ensures that "trash" is neither rewarded with energy nor reinforced as a learned behavior.
+
+#### 📡 **TELEMETRY & HUD UPDATES**
+
+* **New Failure State:** Added the `=== 💨 PRESSURE RELEASE VALVE ===` visual alert to the Laboratory HUD.
+* **Diagnostic Readout:** The valve now reports the specific reason for the rupture (**Metabolic Exhaustion** vs. **Structural Grinding**) and provides a count of how many synaptic links were severed to protect the system.
+
+
 ### [v5.0] - 2025-12-27 - "THE ARBORETUM"
 
 #### 💪 THE GRAMMAR GYM (Cognitive Hypertrophy)
