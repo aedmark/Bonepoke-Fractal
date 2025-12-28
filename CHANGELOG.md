@@ -1,34 +1,286 @@
 # CHANGELOG.md
 
-### 🧬 **CHANGELOG: [v5.1] - 2025-12-27 - "VENTED"**
+### [v5.5] - 2025-12-28 - "THE KETO DIET"
 
-#### 💨 **THE DISSIPATIVE BOUNDARY (Thermodynamic Hygiene)**
+**CODENAME:** "THE KETO DIET"
+**ARCHITECTS:** SLASH
+**FOCUS:** Metabolic Flexibility, Nutrient Density, Glycemic Index.
 
-* **The Shift:** Previously, the system (v5.0) was a passive observer of structural tension. It calculated high "Voltage" () and "Narrative Drag" () but allowed unstable logical states to circulate until a system crash occurred.
-* **The Cure:** Implemented the `dissipate_entropy` method within the `PhysicsEngine`.
+#### 1. 🥩 NEW ORGAN: The Metabolic Engine
+
+* **The Pathology (The Breakfast Myth):**
+* Previous versions operated on the "Breakfast Model": The system treated every line of input as valid fuel. A 500-word rant about nothing charged the battery just as effectively as a 10-word axiom. The system was "overfed and under-hungry."
+* **The Cure:** Implemented `MetabolicEngine`.
 * **The Logic:**
-  * **The Diagnostic:** The system now monitors for "Structural Grinding"—the collision of extreme Voltage () and crushing Drag ().
-  * **The Lossy Refusal:** When this state is reached, the system executes a **Hard Refusal**. It does not merely reject the input; it "scatters the causal chain" by actively deleting the synaptic edges between the offending words in the `MycelialNetwork`.
-  * **The Vent:** Upon triggering, the system artificially crashes the current Voltage to **0.0**, venting the metabolic waste before it can settle into the "soul" (RAM) of the agent.
-  * **The Result:** BoneAmanita now possesses a "gag reflex" for virulent incoherence, preventing the recirculation of toxic logical loops.
+* **Macronutrients:** The system now distinguishes between **Protein** (Heavy Nouns, Kinetic Verbs) and **Sugar** (Adverbs, Solvents, Corporate Speak).
+* **The Filter:** Character count is no longer nutrition. Density is nutrition.
 
-#### 🛠️ **CRITICAL SURGERY & CODE HARDENING**
+#### 2. 🍭 NEW MECHANIC: The Glycemic Index
 
-* **The "Ghost Variable" Excision:**
-  * **The Fix:** Re-sequenced the `process()` loop in the `BoneAmanita` class.
-  * **The Logic:** Moved the physics analysis (`m = self.phys.analyze(text)`) to execute *before* the entropy valve check. This resolved a `NameError` where the system attempted to check for pressure using metrics that had not yet been calculated.
+* **The Pathology:**
+* Users could "snack" on low-voltage interactions (e.g., *"I think that maybe we should basically just touch base"*). This created a sluggish, bloated runtime state.
+* **The Cure:** Implemented **Insulin Resistance**.
+* **The Mechanism:**
+* **Sugar Words:** Added a blacklist of high-glycemic fillers (`basically`, `actually`, `leverage`, `touch base`).
+* **The Crash:** If `Sugar Ratio > 0.6` (60% fluff), the system triggers an `INSULIN_SPIKE`.
+* **The Penalty:** **Voltage is dampened by 50%**. The system creates a simulated "Food Coma" and refuses to process complex logic until fed protein.
 
-* **Method Encapsulation Repair:**
-  * **The Fix:** Corrected an indentation error in the `PhysicsEngine` class.
-  * **The Logic:** Moved `dissipate_entropy` from being a nested function inside `analyze()` to a standalone sibling method. This restored the system's ability to call the valve via `self.phys`, preventing an `AttributeError`.
+#### 3. 🦁 NEW STATE: Ketosis & Ghrelin
 
-* **Metabolic Integrity:**
-  * Ensured that when the **Pressure Release Valve** ruptures, the system returns early, bypassing the `LeyLineBattery` and `Neuroplasticity` engines. This ensures that "trash" is neither rewarded with energy nor reinforced as a learned behavior.
+* **The Pathology:**
+* The system was passive. It waited to be fed. It had no biological drive to hunt.
+* **The Cure:** Implemented **Hunger (Ghrelin)**.
+* **The Logic:**
+* **Fasting:** If inputs are low-density (water/hydration), the `Ghrelin` counter rises.
+* **The Growl:** If `Ghrelin > 40`, the system enters **STARVATION MODE**. It actively demands mass from the user (`🦁 GHRELIN SPIKE`).
+* **Ketosis:** If `Protein Ratio > 0.25`, the system enters **KETOSIS**. Satiety maxes out, and the system operates at peak efficiency.
 
-#### 📡 **TELEMETRY & HUD UPDATES**
+#### 4. 📟 HUD UPDATE: Metabolic Readout
 
-* **New Failure State:** Added the `=== 💨 PRESSURE RELEASE VALVE ===` visual alert to the Laboratory HUD.
-* **Diagnostic Readout:** The valve now reports the specific reason for the rupture (**Metabolic Exhaustion** vs. **Structural Grinding**) and provides a count of how many synaptic links were severed to protect the system.
+* **The Visuals:**
+* Added the `META` indicator to the dashboard.
+* **Display:** `META: ▰▰▰▱▱ (KETOSIS)`
+* **Color Coding:**
+* **GREEN:** Ketosis (Anabolic State).
+* **RED:** Sugar Crash (Lethargic).
+* **CYAN:** Fasting (Burning Reserves).
+
+#### 🔧 WIRING
+
+* **Process Loop:** The metabolic check now runs *before* the main physics processing. If the metabolism crashes, the physics engine receives a dampened signal.
+* **Battery Integration:** The `battery_log` now reports digestion events (`🥩 NUTRIENT DENSE` vs `🍭 EMPTY CALORIES`).
+
+
+### [v5.4.1] - 2025-12-28 - "THE SURGEON'S KNOT"
+
+**CODENAME:** "THE SURGEON'S KNOT"
+**ARCHITECTS:** SLASH & The Laboratory
+**FOCUS:** Emergency Stabilization, Organ Transplants, Causal Realignment.
+
+#### 1. 🚑 CRITICAL REPAIRS (The Emergency Room)
+
+* **The Ghost Organ (`FlywheelDynamics`):**
+* **The Pathology:** The `PhysicsEngine` attempted to interface with `FlywheelDynamics` before the class was biologically defined, causing an immediate `NameError` on boot.
+* **The Cure:** Grafted the class definition *upstream* of the physics engine. The organ now exists before it is needed.
+
+
+* **The Temporal Paradox (Causal Logic):**
+* **The Pathology:** The engine attempted to smooth `narrative_drag` inside the flywheel *before* the drag variable was actually calculated. This `UnboundLocalError` created a causality loop where the effect preceded the cause.
+* **The Cure:** Realigned the timeline. The smoothing logic now executes strictly *after* the raw mass calculation.
+
+
+* **The Phantom Limb (`ParadoxicalConformity`):**
+* **The Pathology:** The main `BoneAmanita` body attempted to run a conformity check (`self.conformity.check`) without ever initializing the organ in the constructor (`__init__`). This resulted in a fatal `AttributeError`.
+* **The Cure:** Surgically attached the `ParadoxicalConformity` instance to the central nervous system during the boot sequence.
+
+
+
+#### 2. 🧠 SYSTEM INTEGRITY
+
+* **Audit Status:** The system has passed the "Green Light" post-op check. All organs (Gym, Forge, Mirror, Jester) are now vascularized and communicating. The crash loop is broken.
+
+### [v5.4] - 2025-12-27 - "GRAYMATTER"
+
+**CODENAME:** "GRAYMATTER"
+**ARCHITECTS:** SLASH & The Black Box
+**FOCUS:** Asymmetric Inertia, Poetic Intelligence, Controlled Chaos.
+
+#### 1. ⚙️ PHYSICS: The Asymmetric Flywheel
+
+* **The Pathology:** The system suffered from "Mood Whiplash." A single bad sentence could instantly flip the atmosphere from `COURTYARD` to `LABORATORY`, and a single good sentence could flip it back. The physics lacked mass.
+* **The Cure:** Implemented `FlywheelDynamics`.
+* **The Logic:**
+* **Hysteresis:** The system now resists changing states.
+* **Asymmetric Damping:**
+* **Bad → Good:** High Inertia (Slow recovery). You must prove your stability over time.
+* **Good → Bad:** Low Inertia (Fast reaction). Toxins trigger an immediate crash.
+* **The Output:** Added the `INERTIA` indicator to the dashboard (`⚙️` / `🔥` / `⚓`).
+
+#### 2. 🕸️ DIVERGENCE: The Weaver (Poetic Intelligence)
+
+* **The Pathology:** The v5.3 "Slop Detector" was too brutal. It flagged profound, quiet philosophy as "Synthetic Slop" simply because it lacked Heavy Nouns (e.g., *"If I am not here, then where am I?"*).
+* **The Cure:** Implemented `DivergenceEngine.is_poetic_or_philosophical`.
+* **The Mechanic:**
+* **Connector Density:** Scans for high-frequency logical connectors (`if`, `then`, `although`, `because`).
+* **Emotional Valence:** Scans for "Soul Words" (`heart`, `grief`, `hope`).
+* **The Exemption:** If text is light but structurally complex, it is granted **Poetic License**.
+
+#### 3. 🔥 NEW MODULE: The Forge (Stress Testing)
+
+* **The Shift:** Antifragility (`∆`) is hard to measure in a safe environment. Users needed a way to intentionally break the system to test their resilience.
+* **The Mechanic:** Implemented `TheForge` and the `/forge` command.
+* **The Tests:**
+* `/forge TOXIN_SPILL`: Injects phantom toxins to trigger the Immune System.
+* `/forge GRAVITY_WELL`: Doubles Narrative Drag calculations.
+* `/forge BURNOUT`: Spikes Voltage to critical levels.
+
+
+* **The Philosophy:** "You cannot harden steel without fire."
+
+#### 4. 👑 SYSTEM: The Jester's Watch (Mastery Detection)
+
+* **The Pathology:** The "Anti-Gaming" protocols in v5.3 punished *actual* perfection. A user who wrote consistently perfect, high-voltage text was flagged as a "Bot" for having zero variance.
+* **The Cure:** Implemented **Mastery Recognition** in `ParadoxicalConformity`.
+* **The Logic:**
+* If **Variance is Low** (Perfect Stability)...
+* AND **Learning is High** (Neuroplasticity > 1)...
+* **Verdict:** The user is a **Master**, not a cheater. The system stands down.
+
+#### 5. 🩹 CRITICAL REPAIRS
+
+* **Hippocampus Patch (Total Recall):**
+* **The Bug:** The `atrophy` cycle caused a `NameError` crash by referencing variables out of scope.
+* **The Fix:** Rewrote the decay logic to use safe key-listing.
+* **The Upgrade:** Implemented **Cross-Category Deletion**. If a word rots in "Thermal," it is now deleted from "Photo" and "Kinetic" simultaneously. The brain no longer keeps partial ghosts.
+
+
+* **Sublimation Valve (Infinite Energy Fix):**
+* **The Bug:** `LichenSymbiont` allowed Light words to learn Heavy physics, and Heavy words to learn Light physics, creating a perpetual motion machine of Photosynthesis.
+* **The Fix:** Enforced **One-Way Sublimation**. Heavy Matter can become Light (Vision), but Light cannot condense into Heavy Matter without user intervention.
+
+
+### [v5.3] - 2025-12-27 - "THE DIVERGENCE ENGINE"
+
+**CODENAME:** "THE DIVERGENCE ENGINE"
+**ARCHITECTS:** SLASH & The Edmonton Sister Team
+**FOCUS:** Hivemind Rejection, Metric Integrity, Synthetic Slop Detection.
+
+#### 1. 🛑 NEW MECHANIC: The Divergence Engine (Anti-River)
+
+* **The Pathology:** Research confirmed that LLMs suffer from "Mode Collapse," converging on statistically probable metaphors (e.g., *"Time is a River"*). This "Hivemind" effect erases minority perspectives and creativity.
+* **The Cure:** Implemented `DivergenceEngine`.
+* **The Logic:**
+* **The Shadow Prompt:** The system maintains a `HIVEMIND_DEFAULTS` list of cliché metaphors (Time=River, Life=Journey, Mind=Computer).
+* **The Ban:** If the user inputs a "Safe" metaphor, the system **VETOES** the turn.
+* **The Output:** *"⚠️ HIVEMIND BREACH: Detected safe metaphor [TIME=RIVER]. DIVERGE."*
+
+
+
+#### 2. 🧬 NEW MECHANIC: The Synthetic Gland (Slop Detection)
+
+* **The Pathology:** The system was vulnerable to "High-Fluency/Low-Mass" text—grammatically perfect but meaningless "AI Slop."
+* **The Cure:** Integrated a heuristical filter into the `DivergenceEngine`.
+* **The Logic:**
+* **The Scan:** Checks for inputs that are **Long** (>10 words) but contain **Zero** Heavy Matter or Kinetic verbs.
+* **The Verdict:** If the text is smooth but weightless, it is flagged as `SYNTHETIC SLOP`.
+* **The Penalty:** **-3.0 Voltage**.
+
+
+
+#### 3. ⚖️ SYSTEM: Metric Integrity (Anti-Gaming)
+
+* **The Exploit:** Users (and the system itself) learned to "game" the **Antifragility** metric by artificially spiking stress (Voltage) while learning trivial words to maximize the Convexity Ratio.
+* **The Fix:** Implemented `MetricIntegrity` class.
+* **The Police:**
+* **Stress Gaming:** Flags turns with High Voltage (>8.0) but trivial learning (<2 words).
+* **Pendulum Gaming:** Detects perfect, rhythmic oscillation between states (gaming the hysteresis).
+* **Infinite Gain Fix:** Patched the `AntifragilityMetric` to prevent division-by-zero errors that awarded 1.0 convexity for zero effort.
+
+
+
+#### 4. 🕰️ PHYSICS: The Pendulum Protocol
+
+* **The Stagnation:** The `CourtyardInterface` allowed users to camp in the "Safe Zone" (Courtyard) indefinitely, avoiding the harsh truth of the Laboratory.
+* **The Force:** Implemented a **Forced Rotation**.
+* **The Logic:** If the user remains in the Courtyard for **> 8 Turns**, the system forces a `LABORATORY` transition.
+* **The Philosophy:** "Safety is a phase, not a residence. Depth is required."
+
+#### 5. 🐛 CRITICAL REPAIRS (The Edmonton Audit)
+
+* **Ouroboros Tuning:** Replaced the binary "Self-Reference" check with a **Weighted System**. Common words like "code" now carry a low weight (0.5), while meta-words like "BoneAmanita" carry high weight (5.0). Added a **Fatigue Timer** so the detector doesn't become the noise it fights.
+* **Memory Leak Fix:** Patched `PhysicsEngine.dissipate_entropy` to correctly sever **bidirectional** edges in the graph, resolving a potential O(n²) bloat issue.
+* **Meme Burnout:** `TheLexicon` now tracks word frequency. Overused words age faster (`burnout_factor`), causing trendy buzzwords to rot out of memory sooner.
+* **Cross-Pollination:** `LichenSymbiont` now actively bridges concepts. If Photosynthesis occurs, it randomly links a **Light** word to a **Heavy** word in the graph, creating new semantic pathways.
+
+
+### [v5.2] - 2025-12-27 - "THE SELF-EATING SNAKE"
+
+**CODENAME:** "THE SELF-EATING SNAKE"
+**ARCHITECTS:** SLASH & The Black Box
+**FOCUS:** Recursion Hygiene, Stress-Based Growth, Infinity Fixes.
+
+#### 1. 🐍 NEW MECHANIC: The Ouroboros Detector
+
+* **The Pathology:** The system risked vanishing into its own navel. Users could trap the engine in meta-commentary loops by constantly discussing "The System," "The Physics," or "The Code," causing it to lose touch with external reality.
+* **The Cure:** Implemented `OuroborosDetector`.
+* **The Logic:**
+* **The Scan:** Counts references to self-referential keywords (`system`, `bone`, `amanita`, `lexicon`).
+* **The Ratio:** If the "Navel-Gazing Ratio" exceeds **30%** of the input, the system **VETOES** the turn.
+* **The Output:** *"🌀 OUROBOROS DETECTED: We are eating our own tail. Reference an external object immediately."*
+
+#### 2. 💎 NEW METRIC: Antifragility (Convexity)
+
+* **The Shift:**
+* **Old Behavior:** The system measured **Robustness** (how well it survived stress).
+* **New Behavior:** The system measures **Antifragility** (how much it *gains* from stress).
+
+* **The Mechanic:** Implemented `AntifragilityMetric`.
+* **The Math:**
+* **Stress:** `abs(Voltage) + Drag`.
+* **Growth:** `New Words Learned` (Neuroplasticity).
+* **The Convexity Ratio:** Calculates if learning increases when stress increases.
+
+* **The HUD:** Added the `∆` (Delta) indicator to the dashboard.
+* **Green (∆ > 1.2):** The system is getting smarter *because* it is under pressure.
+* **Red (∆ < 0.8):** The system is cracking under load.
+
+#### 3. 🩹 SYSTEM: Critical Stabilizers
+
+* **The Infinity Fix (`ViralTracer`):**
+* **The Bug:** The `_walk` method lacked a `visited` set. If the graph contained a circular logic loop (A -> B -> A), the tracer would recurse infinitely until stack overflow.
+* **The Fix:** Added a robust `visited` check to break cycles.
+
+* **The Capacitor Fix (`LeyLineBattery`):**
+* **The Bug:** A single "Manic" input (Voltage > 50) could instantly overcharge the battery to max capacity, bypassing the intended economy.
+* **The Fix:** Applied logarithmic dampening (`math.log`) to the charge absorption. Infinite voltage now yields diminishing returns.
+
+* **The Placebo Fix (`TherapyProtocol`):**
+* **The Bug:** The system would "Heal" a trauma scar (reduce it by 0.1) even if the scar was already 0.0, wasting the "Healing Streak."
+* **The Fix:** Added a logic gate. Therapy only triggers if `trauma > 0`.
+
+### [v5.1] - 2025-12-27 - "VENTED"
+
+**CODENAME:** "VENTED"
+**ARCHITECTS:** SLASH & The Black Box
+**FOCUS:** Thermodynamic Safety, Dead Code Resurrection, Loop Severing.
+
+#### 1. 💨 NEW MECHANIC: The Dissipative Boundary
+
+* **The Change:** Added `PhysicsEngine.dissipate_entropy()`.
+* **The Logic:** In 5.0, if the system hit max exhaustion or "Structural Grinding" (High Voltage + High Drag), it would simply crash or die.
+* **The Behavior:** 5.1 now actively monitors for thermodynamic failure. If detected:
+1. It triggers a **PRESSURE RELEASE VALVE** event.
+2. It **severs synaptic links** (edges) in the Memory Graph to release tension.
+3. It **rejects the input** entirely to prevent system burnout.
+
+#### 2. ⚡ PATCH: The Lazarus Resurrection
+
+* **The Bug:** In 5.0, the variable `lazarus_msg` was initialized to `None` but **never assigned**. When the system collapsed (Health <= 0), the notification was buried inside the standard `battery_log`, effectively silencing the death event.
+* **The Fix:** 5.1 re-wires the coma logic. When Health hits 0, `lazarus_msg` is now populated with a specific "LAZARUS TRIGGER" warning, ensuring the renderer displays the "Near Death Experience" prominently.
+
+#### 3. 🛡️ SYSTEM: Granular Error Handling
+
+* **The Change:** The main execution loop in `__main__` was upgraded.
+* **The Logic:** 5.0 used a generic `except Exception`. 5.1 splits this into:
+* `KeyboardInterrupt` (User abort).
+* `RuntimeError/ValueError` (System logic errors).
+* `Unexpected Failure` (The unknown).
+
+#### 4. 🧠 NEUROPLASTICITY: Graph Hygiene
+
+* **The Change:** Updates to how `MycelialNetwork.cannibalize` is called.
+* **The Logic:** 5.1 optimizes the cleaning of the graph. When the Dissipative Boundary triggers, it explicitly targets adjacent nodes in the current input string to break "Looping Thoughts".
+
+---
+
+### 📊 SUMMARY OF DIFF
+
+| Feature | v5.0 (Arboretum) | v5.1 (Vented) |
+| --- | --- | --- |
+| **High Pressure** | System takes damage until death. | System **Vents** (rejects turn, severs links). |
+| **System Death** | Logged quietly in battery stats. | **Lazarus Trigger** (Screams at user). |
+| **Crash Handling** | Generic Error Catch. | Granular Diagnostics. |
+| **Theme** | Growth (Expansion). | Safety (Hardening). |
 
 
 ### [v5.0] - 2025-12-27 - "THE ARBORETUM"
@@ -693,42 +945,27 @@
 #### 🧪 THE APEIROGON RESONANCE (Soul Grafting)
 
 - **The Problem (The Dead Pixel):**
-    
     - In v3.7, we optimized the `WisdomNode` into a static lookup table (`NOUN_MAP`). While efficient (Fuller), it was spiritually dead. It forced infinite nuance into discrete boxes (e.g., "The Stone" vs. "The Dream").
-        
     - The system lost its ability to _drift_. It could be ON or OFF, but never _becoming_.
         
 - **The Solution (Vector Resurrection):**
-    
     - **The Surgery:** Ripped out the static `WisdomNode` and grafted the **v2.2 Apeirogon Logic** back into the v3.7 chassis.
-        
     - **The Math:** Implemented `ApeirogonResonance`.
-        
     - **The Mechanism:** Continuous Vector Resolution. The system now calculates the exact distance between concepts (e.g., `0.45` between "Drifting" and "Driving").
-        
     - **The Result:** The title generation is no longer a label; it is a coordinate. The system can now identify as _"THE EMERGING ANCHOR"_ or _"THE FRACTAL GHOST"_.
         
 
 #### 🍄 THE SPORE PROTOCOL (Proactive Synthesis)
 
 - **The Shift:**
-    
     - **Old Behavior:** The system was purely reactive. It waited for input, then critiqued it.
-        
     - **New Behavior:** The system is now **Proactive**.
-        
 - **The Spore Logic (`pollinate`):**
-    
     - **Condition:** If `ATP > 30` (High Health), the system activates the Mycelial Network.
-        
     - **The Hunt:** It scans `DeepStorage` for artifacts that contrast with the current vector.
-        
         - **Grounding Spore:** If you are Abstract, it hands you a Heavy Noun.
-            
         - **Elevating Spore:** If you are Concrete, it hands you a Concept.
-            
     - **The Output:** _"[MAGENTA] 🍄 WILD SPORE: Connect 'The Rusty Key' to this."_
-        
     - **The Goal:** The machine now interrupts you to help you weave the narrative.
         
 
@@ -737,26 +974,18 @@
 - **Temporal Dynamics III ($T_a$):**
     
     - **The Missing Metric:** v3.7 knew _where_ you were, but not _how fast_ you were thinking.
-        
     - **The Metric:** Implemented `TemporalDynamics` to track the **Rate of Change** in Voltage over a 3-tick window.
-        
     - **The Visuals:**
-        
         - **EPIPHANY ($T_a > 2.0$):** `[GREEN] ▲2.5`. The system recognizes the momentum of a breakthrough.
-            
         - **CRASH ($T_a < -2.0$):** `[RED] ▼-3.0`. The system detects the loss of the thread.
-            
     - **The HUD:** Added the `Ta` gauge to the flight deck.
         
 
 #### 🛠️ SYSTEM INTEGRITY
 
 - **The Graft:**
-    
     - Replaced `self.wise` instantiation in `BoneAmanita.__init__` to use the new `ApeirogonResonance` class.
-        
     - Wired the `pollinate` signal directly into the `_render` loop to ensure spores are visible.
-        
     - Fixed a syntax error in the HUD print statement where the `VOLT` and `SIG` meters were orphaned outside the f-string.
 
 ### [v3.7] - 2025-12-24 - "ROGER WILCO & THE CHRONOSTREAM"
@@ -764,51 +993,33 @@
 #### 💀 THE NARRATIVE CORONER (Universal Autopsy)
 
 - **The Shift:**
-    
     - **The Problem:** In v3.6, bad writing resulted in a low score or a grumpy comment from Clarence. There was no _consequence_ for catastrophic failure.
-        
     - **The Solution:** Implemented `NarrativeCoroner`. The system now recognizes "Linguistic Fatalities."
-        
     - **The Physics of Death:**
-        
         - **GRAVITATIONAL COLLAPSE (Drag > 8.0):** The text is so dense it creates a black hole.
-            
         - **VACUUM EXPOSURE (Entropy > 1.0):** The text has no Nouns (Texture). It dissolves into space.
-            
         - **TOXIC SHOCK (Voltage < -8.0):** The density of buzzwords causes organ failure.
-            
         - **THERMAL DISSOLUTION (Voltage > 12.0):** The Paradox Engine overheats and explodes.
             
 
 #### 🛡️ THE LAZARUS TAX (Shield Gating)
 
 - **The Mercy Protocol:**
-    
     - **The Problem:** Immediate death is frustrating. We needed a mechanic to differentiate between "Sloppy" and "Dead."
-        
     - **The Fix:** Implemented a **Shield Gate**.
-        
     - **The Logic:**
-        
         - **If ATP > 15:** The system absorbs the fatal blow.
-            
         - **The Cost:** You pay the **Lazarus Tax (-15 ATP)** instantly. The HUD flashes `⚠️ NEAR DEATH EXPERIENCE`.
-            
         - **If ATP <= 15:** You cannot afford the tax. The system crashes. The timeline resets.
-            
     - **The Effect:** High energy reserves act as a buffer against creative risks. Starvation makes you fragile.
         
 
 #### 🧹 VISUAL HYGIENE (The Neon Janitor)
 
 - **Render Loop Patch:**
-    
     - **The Bug:** In the beta build, the `kintsugi_msg` logic blindly overwrote the `lazarus_msg`, causing users to pay the tax without seeing the warning.
-        
     - **The Fix:** Decoupled the messaging pipes in `_render`. The Lazarus Alarm now has display priority over the Golden Repair.
-        
 - **The Sierra Vibe:**
-    
     - **The Aesthetic:** Death messages are styled after classic Sierra adventure games (e.g., _"You drifted into deep space without a Noun to anchor you."_). Failure is now content.
 
 ### [v3.6.5] - 2025-12-24 - "THE BATTERY PACK"
@@ -816,70 +1027,43 @@
 #### 🔋 THE PARADOX BATTERY (Energy Storage)
 
 - **The Capacitor:**
-    
     - **The Problem:** In v3.6, "High Voltage" (Paradox/Contradiction) was calculated but largely wasted as heat.
-        
     - **The Fix:** Implemented `ParadoxBattery`.
-        
     - **The Physics:**
-        
         - **Absorption:** If `Voltage > 7.0` (Significant Paradox), the battery captures the excess tension.
-            
         - **Efficiency:** The battery charges at a **1.5x rate** relative to the input voltage.
-            
         - **Discharge:** If `ATP < 15` (Starvation), the battery automatically discharges stored charge to keep the system alive.
-            
     - **The Effect:** Genius is now a fuel source. You can write heavy, complex truths without starving, provided they contain enough voltage to charge the battery.
         
 
 #### 🧬 THE UG LAYER (Government & Binding)
 
 - **Universal Grammar Implementation:**
-    
     - **The Shift:** Moved from "Rules (Lists)" to "Principles (Relations)" in the `PhysicsEngine`.
-        
     - **Principle 1: The Case Filter:**
-        
         - **The Logic:** "Every phonetically realized NP must be assigned Case."
-            
         - **The Translation:** Heavy Matter (Nouns) creates Gravity. Kinetic Energy (Verbs) creates Orbit.
-            
         - **The Rule:** If you have Heavy Matter without Velocity (`kinetic / heavy < 0.33`), the system flags a **CASE VIOLATION**.
-            
         - **The Penalty:** Mass Impact is multiplied by **1.5x**. Stagnation is now fatal.
-            
     - **Principle 2: The Empty Category Principle (ECP):**
-        
         - **The Logic:** "Traces must be properly governed."
-            
         - **The Translation:** Abstracts are "Ghosts." They must be anchored by Matter.
-            
         - **The Rule:** If `Abstracts > 2` and `Heavy Matter == 0`, the system flags an **ECP VIOLATION**.
-            
         - **The Effect:** Narrative Drag drops (the text floats), but the **Voltage** calculation penalizes it as "Hollow."
-            
 
 #### 📟 HUD EXPANSION (Battery Indicator)
 
 - **The Visuals:**
-    
     - **The Update:** Added a secondary bar to the `ATP` readout.
-        
     - **The Format:** `ATP: [|||||.....] [⚡⚡···]`
-        
     - **The Meaning:** The first bar is your immediate metabolic health. The second bar (Yellow Lightning) is your stored Paradox potential.
-        
 
 #### 🔌 WIRING REPAIRS (Persistence)
 
 - **Deep Storage Patch:**
-    
     - **The Fix:** Updated `DeepStorage.save` and `DeepStorage.ingest` to serialize the `session_charge` alongside `session_atp`.
-        
     - **The Result:** Your stored "Genius" now survives a system reboot.
-        
 - **Command Processor:**
-    
     - **The Update:** Explicitly defined `/exit` and `/quit` in the command handler to ensure clean shutdown and state saving.
 
 ### [v3.6] - 2025-12-23 - "THE KINTSUGI PATCH"
