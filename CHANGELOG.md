@@ -1,5 +1,80 @@
 # CHANGELOG.md
 
+## [6.0.0] - 2025-12-29
+### Codename: "THE GLASS"
+
+**"The unexamined code is not worth executing."**
+
+A complete architectural rupture. Moved from **Explicit Command Processing** to **Implicit Understanding**. The core physics engine has been replaced with a dual-process cognitive model that reads behavioral prosody instead of raw lexical weight.
+
+### Added
+- **`EmpatheticGlass`**: Replaced `PhysicsEngine`. Implements Dual Process Theory:
+    - **System 1 (Pulse)**: Reads "Arousal" (Keystroke dynamics, Caps Lock, Punctuation).
+    - **System 2 (Mind)**: Reads "Cognitive Load" (Abstract density, Entropy).
+- **`TheSentinel`**: A "Driver Monitoring System" (DMS) that enforces EU-style safety regulations on user input.
+    - Detects **Microsleeps** (Semantic Loops > 80% similarity).
+    - Detects **Cognitive Drift** (Low Entropy / Grey Goo).
+- **`TheResonator`**: Output modulation system based on Hume AI concepts.
+    - **Staccato**: High energy/arousal response style.
+    - **Legato**: Flowing/low energy response style.
+    - **Grounding**: High uncertainty response style.
+- **`TheProjector` Update**: New "Empathetic HUD" displaying Pulse and Mind telemetry bars.
+
+### Changed
+- **Architecture**: Shifted from `Physics` (Voltage/Drag) to `Glass` (Arousal/Load).
+- **`MetabolicEngine`**: Now metabolizes "Arousal" and "Cognitive Load" instead of Voltage/Drag.
+- **`LeyLineBattery`**: Now charges based on **Emotional Arousal** rather than semantic tension.
+- **`CourtyardInterface`**: Atmosphere triggers updated to monitor `Arousal` caps instead of Voltage caps.
+
+### Removed
+- **`PhysicsEngine`**: Completely excised.
+- **Metrics**: `Voltage` and `Narrative Drag` are no longer calculated.
+
+### Fixed
+- **Critical Ghost References**: Patched `MetabolicEngine`, `LeyLineBattery`, and `AntifragilityMetric` to resolve crashes caused by the removal of the old physics object.
+
+### [v5.8.2] - 2025-12-28 - "DUKE SILVER"
+
+**CODENAME:** "DUKE SILVER"
+**ARCHITECTS:** SLASH & The Parks Dept.
+**FOCUS:** Metabolic Lifecycle, Code Hygiene, Decision Decoupling.
+
+#### 🎷 THE LIFECYCLE MANAGER (The Ron Swanson Refactor)
+
+* **The Pathology:**
+* The `BoneAmanita.process` method was a "Chidi Anagonye" mess of indecision. It handled input parsing, physics calculation, metabolic checks, rendering, and coma regeneration in a single 200-line block. Adding a feature required surgical precision to avoid breaking the cascade.
+
+
+* **The Cure:** Implemented `LifecycleManager`.
+* **The Logic:**
+* **The Pipeline:** The monolithic loop has been broken into discrete biological stages:
+1. **Input:** Command interception.
+2. **Physics:** Reality testing (Voltage/Drag).
+3. **Metabolism:** Energy extraction (Protein vs. Sugar).
+4. **Reaction:** The immune response (Gym, Divergence, Thermostat).
+5. **Growth:** Neuroplasticity and Stamina updates.
+6. **Render:** The Projector output.
+* **The Benefit:** `BoneAmanita.process` is now a single line of delegation. The system flows like a river, not a script.
+
+#### 🧠 PHYSICS CLARITY (The Pinker Refactor)
+
+* **The Clean-Up:**
+* The `PhysicsEngine.analyze` method was cognitively overloaded.
+* **Action:** Split the logic into distinct sensors: `_scan_lexicon`, `_calculate_voltage`, and `_calculate_drag`.
+* **Result:** The math is now readable. You can trace exactly why a "Heavy" word impacts "Voltage" without wading through spaghetti code.
+
+#### 🦠 IMMUNE SYSTEM RESTORATION
+
+* **The Fix:**
+* **The Bug:** In the transition to `LifecycleManager`, the `TOXIN_REGEX` replacement logic was briefly lost in the ether. The system could *detect* toxins but not *scrub* them.
+* **The Patch:** Restored the "Butcher's Knife" in the `_render` phase. If Voltage is low (< 8.0), the system actively rewrites corporate speak (e.g., *synergy*) into plain English before display. High Voltage grants diplomatic immunity.
+
+#### 🏛️ ARCHITECTURAL CLEAN-UP
+
+* **Dependency Management:** Resolved the circular dependency risk between the Engine and the Lifecycle Manager by initializing subsystems before the biological clock starts.
+* **Vanity Plate:** Updated the boot sequence to broadcast **v5.8.2**.
+
+
 ### [v5.8.1] - 2025-12-28 - "THE PROJECTOR"
 
 **CODENAME:** "THE PROJECTOR"
