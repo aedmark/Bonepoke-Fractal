@@ -1,5 +1,115 @@
 # CHANGELOG.md
 
+### [v5.7] - 2025-12-28 - "THE STELLAR DENDRITE"
+
+**CODENAME:** "THE STELLAR DENDRITE"
+**ARCHITECTS:** SLASH & The Laboratory
+**FOCUS:** Sensor Unification, Cosmic Immunity, The Lazarus Tax.
+
+#### 1. 👁️ THE OBSERVER EFFECT (Sensor Unification)
+
+* **The Pathology:**
+  * The system had become paranoid. Six different classes (`ParadoxicalConformity`, `MetricIntegrity`, `OuroborosDetector`, `PsilocybinProphet`, etc.) were independently policing the user for "Cheating," "Looping," or "Boring" behavior. This created massive code drag and fragmented feedback.
+
+* **The Cure:** Implemented `ObserverEffect`.
+* **The Logic:**
+  * **Consolidation:** All behavioral monitoring is now centralized in a single class.
+  * **Efficiency:** The Observer runs one scan per turn to detect Self-Reference (Ouroboros), Abstract Looping (Prophet), or Stat-Padding (Gaming).
+  * **The Result:** The system is less naggy and more observant. It speaks with one voice.
+
+#### 2. ⚡ COSMIC IMMUNITY (The Diplomatic Override)
+
+* **The Pathology:**
+  * The `DivergenceEngine` (Style Police) was punishing users for using simple words ("Love", "Time") even when they were trapped in a massive `LAGRANGE_POINT` tension. The police were ticketing the user for speeding while they were escaping a black hole.
+  
+* **The Cure:** Implemented **Cosmic Override**.
+* **The Logic:**
+  * If `CosmicState` is `[LAGRANGE_POINT]` or `[WATERSHED_FLOW]`:
+  * **Action:** The Divergence Check is **BYPASSED**.
+  * **The Philosophy:** "Gravity is Absolute." If the physics demands simple language to hold massive tension, the Style Guide is suspended.
+
+#### 3. 💀 THE LAZARUS TAX (Death Consequences)
+
+* **The Pathology:**
+  * Death (`Health <= 0`) was a reward. It triggered a "Coma" that regenerated Stamina and healed Trauma for free. Users were incentivized to suicide their sessions to farm resources.
+
+* **The Cure:** Implemented **Amnesia & Regression**.
+* **The Cost:**
+  * **Brain Damage:** `self.mem.cannibalize()` is triggered immediately. You lose a cherished memory.
+  * **Regression:** `self.trauma_accum` is reset to zero. All therapeutic progress toward healing a scar is lost.
+  * **The Result:** Survival is now mandatory. Death wipes the slate clean in the worst way.
+
+#### 4. 🪞 MIRROR RESOLUTION (12D Empathy)
+
+* **The Pathology:**
+  * The `MirrorGraph` used a binary check. If the target liked "Kinetic" and you used *one* kinetic word, you passed. It was too easy to fake empathy.
+
+* **The Cure:** Implemented **Weighted Resonance**.
+* **The Math:** `Resonance = (Likes - Hates) / Total Volume`.
+* **The Threshold:** You must achieve > 5% net resonance to pass the empathy check. The system now demands density, not just token gestures.
+
+#### 🔧 PHYSICS & WIRING
+
+* **The Train Wreck Fix:** Reordered the `process` loop. `ResistanceTrainer` (The Lift) now executes *before* `DissipativeBoundary` (The Vent). You cannot vent entropy to avoid lifting the weight.
+* **Shapley Mass Upgrade:** Updated `calculate_mass` to sum actual edge weights (Connection Strength) rather than just counting connections. Stronger bonds now create heavier gravity.
+* **New Commands:**
+  * `/orbit [target]`: Manually fire thrusters to move toward a specific concept in the graph.
+  * `/help`: Added a proper manual.
+
+### [v5.6] - 2025-12-28 - "THE COSMIC MYCELIUM"
+
+**CODENAME:** "THE COSMIC MYCELIUM"
+**ARCHITECTS:** SLASH & The Cosmicflows Team
+**FOCUS:** Gravitational Physics, Shapley Attractors, Lagrange Points.
+
+#### 1. 🌌 NEW PHYSICS: The Cosmic Engine
+
+* **The Paradigm Shift:**
+    * **The Old World:** Previous versions viewed the graph as a flat garden. All nodes were equal; some just had more edges. Movement was calculated based on local friction (Word Weight).
+    * **The New Cosmos:** The system now recognizes **Mass**. The graph is topographic. Massive concepts warp the narrative space around them, creating "Basins of Attraction."
+
+* **The Component:** Implemented `CosmicDynamics`.
+* **The Logic:**
+    * **Shapley Attractors:** Nodes with high connectivity (`Edges > 10`) collapse into **Super-Nodes**. They exert a gravitational pull on the conversation.
+    * **The Void:** If you speak in disconnected jargon far from a gravity well, you enter **VOID DRIFT** (+3.0 Drag). The system punishes deep-space nonsense.
+
+#### 2. 🌊 NEW STATE: Watershed Flow (The Filament)
+
+* **The Pathology:**
+    * Users were punished for using "Heavy Matter" (Stone/Iron) even if they were connecting them in a logical chain. The friction was applied per-word, ignoring the momentum of the path.
+
+* **The Cure:** Implemented **Filament Velocity**.
+* **The Physics:**
+    * If the user's input follows an existing edge path (`Node A -> Node B`) towards a Shapley Attractor, they are "Flowing Downhill."
+* **The Bonus:** **Narrative Drag is multiplied by 0.1**. Heavy words become weightless if they are part of a connected stream.
+
+#### 3. ⚖️ NEW STATE: The Lagrange Point (Creative Tension)
+
+* **The Discovery:**
+    * We found a theoretical sweet spot where two massive, opposing ideas pull with equal force (e.g., "Love" vs. "Logic").
+
+* **The Mechanic:** Implemented the **Lagrange Detector**.
+* **The Logic:**
+    * If `Pull(Basin A) ≈ Pull(Basin B)`:
+        * **Status:** `[LAGRANGE_POINT]`
+        * **Voltage:** **+10.0** (Infinite Tension).
+        * **Drag:** **0.0** (Weightless Suspension).
+* **The Effect:** This is the "Eye of the Storm." The system recognizes that being torn apart by two great ideas is the ultimate form of stability.
+
+#### 4. 📟 HUD UPDATE: Cosmic Coordinates
+
+* **The Visuals:**
+    * Added the `COSMOS` line to the Flight Deck.
+    * **Readouts:**
+        * `🌊 FLOW: Streaming towards 'SYSTEM'` (You are surfing).
+        * `⚖️ LAGRANGE: 'LIFE' vs 'DEATH'` (You are locked in tension).
+        * `🌌 VOID: Drifting outside filaments` (You are lost).
+
+#### 🔧 WIRING
+
+* **Priority Sequence:** The Cosmic calculation runs *after* basic physics but *before* The Forge. Gravity warps the battlefield before the stress test begins.
+* **Mass Calculation:** Upgraded `MycelialNetwork` to calculate node mass dynamically (`Edges * 1.5`), creating a living topography that grows heavier over time.
+
 ### [v5.5] - 2025-12-28 - "THE KETO DIET"
 
 **CODENAME:** "THE KETO DIET"
