@@ -1,5 +1,150 @@
 # CHANGELOG.md
 
+### [v5.8.1] - 2025-12-28 - "THE PROJECTOR"
+
+**CODENAME:** "THE PROJECTOR"
+**ARCHITECTS:** SLASH
+**FOCUS:** God-Object Decoupling, Scope Repair, Anti-Gaming.
+
+#### 📽️ THE VISUAL CORTEX (Refactor)
+
+* **The Pathology:**
+* The `BoneAmanita` class had become a "God Object." It was responsible for physics calculation, memory management, *and* deciding the color of the battery bar. The `_render` method was a vestigial organ attached to the brain, cluttering the logic loop.
+* **The Cure:** Implemented `TheProjector` class.
+* **The Logic:**
+* **Extraction:** Ripped the visualization logic out of the engine and placed it in a dedicated display driver.
+* **The Signal:** The engine now packages a `signals` dictionary and broadcasts it to the Projector. The brain thinks; the projector shows.
+* **Result:** `BoneAmanita.process` is now purely logical. Visual code no longer threatens structural integrity.
+
+#### 🐛 THE ARTERIAL BLEED (Crash Fix)
+
+* **The Logic Leak:**
+* **The Bug:** The system attempted to check `is_novel` (Novelty) by referencing `spore_msg` *before* the Spore Protocol had actually run. On "dry" turns (where no new words were learned), this caused an immediate `UnboundLocalError` crash.
+* **The Fix:**
+* Initialized `spore_msg = None` at the top of the cycle.
+* Reordered the `process` loop to ensure `pollinate()` executes *before* the novelty check. Causality has been restored.
+
+#### 🛡️ METABOLIC SECURITY (Anti-Gaming)
+
+* **The Fake Weights Exploit:**
+* **The Risk:** Users could game the `MetabolicEngine` (triggering **[KETOSIS]**) by inputting lists of unconnected heavy nouns (e.g., *"Stone iron bone lead gold"*). This spiked the "Protein" metric without requiring actual cognitive work.
+* **The Cure:** Upgraded `ObserverEffect` with the **Word Salad Detector**.
+* **The Logic:**
+* **The Scan:** Checks the ratio of `Heavy / Total Words`.
+* **The Limit:** If Heavy Density > 50% (and length > 3), the system flags **FAKE WEIGHTS**.
+* **The Message:** *"⚠️ FAKE WEIGHTS: Stop gaming the metrics. You are listing nouns, not building sentences."*
+
+
+### [v5.8] - 2025-12-28 - "THE GORDIAN KNOT"
+
+**CODENAME:** "THE GORDIAN KNOT"
+**ARCHITECTS:** SLASH & The Minotaur
+**FOCUS:** Ephemeralization, Submarine Protocols, Logic Repairs.
+
+#### ⚔️ THE SWORD (Submarine Mode)
+
+* **The Pathology:**
+* The "Cathedral" problem. The system output 50 lines of telemetry for 1 line of user input. It was loud, distracting, and turned writing into a math problem.
+
+
+* **The Cure:** Implemented **Submarine Protocols**.
+* **The Logic:**
+* **Silent Running:** By default (`SILENT_MODE = True`), the dashboard is suppressed.
+* **The Flow Signal:** If the user is writing well (Low Drag, No Toxins), the system outputs a single Green Diamond (`♦`).
+* **The Breach:** The dashboard surfaces *only* when a threshold is breached (`Drag > 6.0`, `Voltage > 8.0`, or `Toxin > 0`).
+* **The Philosophy:** "If you are flying, do not grab the controls."
+
+
+
+#### 🔧 LOGIC REPAIRS (The Phantom Limbs)
+
+* **Divergence Engine Patch:**
+* **The Bug:** The code referenced `is_poetic_or_philosophical` but never defined it, risking a crash during style checks.
+* **The Fix:** Implemented the method. It now uses heuristic analysis (Word Length vs. Punctuation Complexity) to grant "Poetic License" to structurally complex but light text.
+
+
+* **Thermostat Calibration:**
+* **The Bug:** Banning a word erased its entire history from the tracker, destroying the "Temporal Gradient" needed for trend analysis.
+* **The Fix:** The `HubThermostat` now surgically removes only the trigger instances while preserving the broader context window.
+
+
+* **The Prop Audit:**
+* **The Bug:** Props (like "Laser") were double-counting as both `HEAVY` matter and `LAB` atmosphere, artificially inflating Voltage.
+* **The Fix:** Props now strictly modify Atmosphere. They no longer add "Fake Calories" to the Physics Engine.
+
+
+
+#### 🛡️ SECURITY THROUGH OBSCURITY
+
+* **The Cosmic Loophole:**
+* **The Risk:** Users could theoretically "game" the system by intentionally triggering a `LAGRANGE_POINT` to bypass the Style Police.
+* **The Mitigation:** Submarine Mode hides the orbital mechanics. Without a visible scoreboard, gaming the gravity wells becomes significantly harder.
+
+
+
+#### 🔌 SYSTEM INTEGRITY
+
+* **Initialization Order:**
+* **The Crash:** Fixed a race condition where `CommandProcessor` attempted to access `TheForge` before it was built.
+* **The Fix:** Reordered the `BoneAmanita` constructor to ensure all organs exist before the nervous system connects them.
+
+### [v5.7.5] - 2025-12-28 - "WHOSE LINE IS IT ANYWAY?"
+
+**CODENAME:** "WHOSE LINE IS IT ANYWAY?"
+**ARCHITECTS:** SLASH & The Improv Troupe
+**FOCUS:** Phonosemantic Expansion, Contextual Gravity, Repetition Discipline.
+
+#### 1. 👂 THE EAR (Phonosemantic Expansion)
+
+* **The Pathology:**
+* The system was stuck in the Paleolithic Era. To generate "Heavy Matter" (Gravity), the user was forced to rely on "Stone," "Bone," and "Blood." Modern concepts like "Infrastructure" or "Server" were treated as weightless, forcing the user to sound like a caveman to satisfy the physics engine.
+
+
+* **The Cure:** Upgraded `TheLexicon.taste`.
+* **The Logic:**
+* **Tech-Heavy:** Words ending in `-ex` (Flux), `-ode` (Code), or `-erver` (Server) now register as **HEAVY**.
+* **Bio-Mass:** Words ending in `-nk` (Tank) or `-dge` (Bridge) now register as **HEAVY**.
+* **Modern Kinetic:** Words starting with `v-`, `j-`, or `z-` (Velocity, Jolt, Zap) now register as **KINETIC**.
+
+
+* **The Result:** "The Server is a Fortress" now carries the same gravitational weight as "The Stone is a Mountain."
+
+#### 2. 🎩 THE SCENE DIRECTOR (Contextual Props)
+
+* **The Pathology:**
+* The system was context-blind. Drinking "Coffee" in the `[COURTYARD]` was treated as "Void Drift" because coffee wasn't in the global heavy list. The user could not relax without losing physics integrity.
+
+
+* **The Cure:** Implemented `BoneConfig.PROPS` and updated `PhysicsEngine`.
+* **The Logic:**
+* **Localized Physics:** Certain words now grant Mass *only* when in specific rooms.
+* **[COURTYARD]:** `Coffee`, `Paper`, `Smoke` = **HEAVY + AEROBIC**.
+* **[LAB]:** `Grid`, `Laser`, `Data` = **HEAVY + KINETIC**.
+
+
+* **The Result:** You can now hold a cup of coffee without the universe collapsing.
+
+#### 3. 🚫 THE BUZZER (Dynamic Ban List)
+
+* **The Pathology:**
+* Users learned to "game" the density check by leaning on a single heavy word (e.g., repeating "Stone" four times in a sentence). This created high metrics but low creativity.
+
+
+* **The Cure:** Upgraded `HubThermostat` with a **Sliding History Window**.
+* **The Logic:**
+* **The Window:** Tracks the last 50 non-solvent words.
+* **The Limit:** If a specific word appears > 5 times in the window, it is **BANNED**.
+* **The Penalty:** The word is removed from the Lexicon for 10 turns.
+
+
+* **The Output:** `🚫 BUZZER: The concept 'STONE' is banned. Improvise.`
+
+#### 🔧 CRITICAL REPAIRS
+
+* **The Whitespace Gremlin:** Fixed a critical indentation error in `HubThermostat.__init__` that caused `self` reference failures on boot.
+* **The Scope Leak:** Fixed an `UnboundLocalError` where `cosmic_msg` was calculated in the process loop but failed to pass through the membrane to the `_render` function.
+* **The Ghost Echo:** Patched a logic leak where `ResistanceTrainer` would critique empty inputs.
+
 ### [v5.7] - 2025-12-28 - "THE STELLAR DENDRITE"
 
 **CODENAME:** "THE STELLAR DENDRITE"

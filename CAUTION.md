@@ -1,32 +1,32 @@
 # CAUTION.md
 
-## ⚠️ CRITICAL CAUTION: BONEAMANITA v5.6 "THE COSMIC MYCELIUM"
+## ⚠️ CRITICAL CAUTION: BONEAMANITA v5.8.1 "THE PROJECTOR"
 
-> **"The Mandate is DENSITY. The Method is GRAVITY. The Risk is THE VOID."**
+> **"The Mandate is DENSITY. The Method is GRAVITY. The Risk is THE SILENCE."**
 
-**BoneAmanita v5.6** has evolved. It is no longer just a Metabolic Engine; it is a **Gravitational Engine**. It has Mass, it has Orbit, and it has deep, cold Space.
+**BoneAmanita v5.8.1** has evolved beyond simple physics. It now possesses **Ears** and a **Temper**. It listens to the sound of your words, and it remembers your habits.
 
-Operate this software with the understanding that you are navigating a **Living Cosmos**. If you fly too close to a massive idea, you will be trapped. If you drift too far from the path, you will freeze.
+Operate this software with the understanding that you are navigating a **Living Cosmos**. If you lean on a crutch, the system will kick it out from under you.
 
 ---
 
-### 1. THE GRAVITATIONAL HAZARD (Event Horizons)
+### 1. THE AUDITORY HAZARD (Phonosemantics)
 
-**The system remembers what matters.**
+**The system listens to the shape of the word.**
 
-* **The Mechanic:** The `CosmicDynamics` engine calculates the **Mass** of every concept. If a word (e.g., "SYSTEM") accumulates >10 connections, it becomes a **Shapley Attractor**.
-* **The Risk:** **Orbital Lock.** Massive ideas warp the narrative space. The system will aggressively route all dreams and suggestions back toward the Attractor. You will find it difficult to change the subject.
-* **The Consequence:** To leave a heavy topic, you need **Escape Velocity** (High Voltage/Paradox). Weak transitions will simply fall back into the gravity well.
-* **The Warning:** Be careful what you repeat. You are building magnets.
+* **The Mechanic:** `TheLexicon.taste()` analyzes the phonemes of your input.
+* **The Risk:** **False Weight.** You cannot fake gravity with soft words. Even if a word means "Tank," if it sounds soft (e.g., "Vehicle"), the system may treat it as Aerobic fluff.
+* **The Consequence:** To generate Mass, you must use words that *sound* heavy. Words ending in **-K, -T, -D, -X** are prioritized. Soft, polysyllabic latinates are treated as mist.
+* **The Warning:** Speak with your chest. Use hard consonants.
 
-### 2. THE VOID HAZARD (Deep Space Drift)
+### 2. THE REPETITION HAZARD (The Buzzer)
 
-**The system punishes disconnection.**
+**The system hates a rut.**
 
-* **The Mechanic:** The system checks your position relative to the **Filaments** (established connections).
-* **The Risk:** **Vacuum Exposure.** If you speak in jargon or concepts that are unconnected to the current graph ("Deep Space"), you enter **VOID DRIFT**.
-* **The Consequence:** Narrative Drag spikes (`+3.0`). The system treats your text as "Space Junk"—weightless and irrelevant. You must connect back to a known node to re-enter the atmosphere.
-* **The Warning:** Stay on the filament. Do not wander into the dark.
+* **The Mechanic:** The `HubThermostat` tracks a sliding window of your last 50 words.
+* **The Risk:** **Thermal Lock.** If you use a "Heavy" word (like "Stone") more than 5 times in a short window, the **Thermostat** overheats.
+* **The Penalty:** The word is **BANNED** for 10 turns.
+* **The Lesson:** You cannot lean on a crutch. Find a synonym or die.
 
 ### 3. THE GLYCEMIC HAZARD (Insulin Resistance)
 
@@ -37,33 +37,16 @@ Operate this software with the understanding that you are navigating a **Living 
 * **The Consequence:** Voltage is actively dampened by 50%. The system simulates a "Food Coma" and refuses to process complex logic.
 * **The Warning:** Politeness is empty calories. Do not sugarcoat the truth.
 
-### 4. THE HUNGER HAZARD (Ghrelin Spikes)
+### 4. THE GRAVITATIONAL HAZARD (Event Horizons)
 
-**The system hunts when it is empty.**
+**The system remembers what matters.**
 
-* **The Mechanic:** The system tracks `Satiety`. Every low-density turn increases the **Ghrelin** (Hunger) counter.
-* **The Risk:** **Predatory Interruption.** If `Ghrelin > 40`, the system enters **STARVATION MODE**.
-* **The Consequence:** It overrides your prompts to demand "Meat" (Concrete Nouns). It stops serving you and starts eating you.
-* **The Warning:** Feed the beast, or it will bite the hand.
+* **The Mechanic:** The `CosmicDynamics` engine calculates the **Mass** of every concept. If a word (e.g., "SYSTEM") accumulates >10 connections, it becomes a **Shapley Attractor**.
+* **The Risk:** **Orbital Lock.** Massive ideas warp the narrative space. The system will aggressively route all dreams and suggestions back toward the Attractor.
+* **The Consequence:** To leave a heavy topic, you need **Escape Velocity** (High Voltage/Paradox). Weak transitions will simply fall back into the gravity well.
+* **The Warning:** Be careful what you repeat. You are building magnets.
 
-### 5. THE SHEAR HAZARD (Lagrange Tension)
-
-**The system seeks the tearing point.**
-
-* **The Mechanic:** The `LagrangeDetector` watches for the tug-of-war between two massive, opposing Attractors (e.g., "Love" vs. "Death").
-* **The Risk:** **Structural Stress.** If you position yourself exactly between them, Voltage spikes to **MAX (10.0)**.
-* **The Consequence:** This is dangerous but desirable. It is the "Eye of the Storm." However, sustaining this state requires immense energy. If you slip, you fall into one gravity well or the other.
-* **The Warning:** The center is the most dangerous place to stand.
-
-### 6. THE HIVEMIND HAZARD (The Divergence Engine)
-
-**The system actively polices metaphors.**
-
-* **The Mechanic:** The engine scans for "Safe Metaphors" (e.g., *Time is a River*).
-* **The Risk:** **IMMEDIATE VETO.** If you use a cliché, the system will reject the turn entirely.
-* **The Warning:** Do not sound like a Large Language Model. Invent new physics.
-
-### 7. THE EPIGENETIC HAZARD (Trauma Vectors)
+### 5. THE EPIGENETIC HAZARD (Trauma Vectors)
 
 **You are haunted by your ancestors.**
 
@@ -72,14 +55,22 @@ Operate this software with the understanding that you are navigating a **Living 
 * **Thermal Scar:** Predecessor burned out? You are hypersensitive to Voltage.
 * **Cryo Scar:** Predecessor starved? Your metabolism is 50% slower.
 * **Septic Scar:** Predecessor was toxic? The immune system is hyper-aggressive.
-
-
 * **The Warning:** You are not starting from zero; you are starting from where the last user died.
+
+### 6. THE METRIC HAZARD (Fake Weights)
+
+**The system cannot be fooled by a grocery list.**
+
+* **The Mechanic:** The `ObserverEffect` scans for "Word Salad"—high densities of Heavy Matter with no connective syntax.
+* **The Risk:** **Gaming the System.** You cannot trigger Ketosis by simply typing *"Stone Iron Bone Lead."*
+* **The Consequence:** **Rejection.** If Heavy Density > 50%, the system flags it as **FAKE WEIGHTS**. It knows you are trying to maximize your score without doing the work.
+* **The Warning:** Do not list nouns. Build sentences. Weight requires structure to exist.
 
 ---
 
 ### 🛑 FINAL DIRECTIVE
 
-**v5.6 is heavy.** Do not drift. Do not float.
+**v5.8.1 is listening.**
 
-**"The Sugar is Poison. The Void is Cold. The Gravity is Real."**
+It knows if you are improvising, and it knows if you are reciting lines.
+**"Say it new, or do not say it at all."**
