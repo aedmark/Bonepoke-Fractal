@@ -313,7 +313,17 @@ class DivergenceEngine:
         avg_word_len = sum(len(w) for w in clean_words) / len(clean_words)
         has_complex_punctuation = ";" in raw_text or ":" in raw_text or "—" in raw_text
         return (avg_word_len < 5.0) and has_complex_punctuation
-    def scan(self, clean_words, raw_text):
+    def check_laziness(self, clean_words):
+        used_heavy = [w for w in clean_words if w in TheLexicon.get("heavy")]
+        if not used_heavy:
+            return False, None
+        base_hits = [w for w in used_heavy if w in TheLexicon._BASE_HEAVY]
+        laziness_ratio = len(base_hits) / len(used_heavy)
+        if laziness_ratio > 0.33 and len(used_heavy) > 2:
+             return True, f"⚠️ MIMICRY DETECTED: {int(laziness_ratio*100)}% of your mass is generic. Invent new nouns."
+
+        return False, None
+    def scan(self, physics, clean_words, learned_count, text):
         self.cliche_hits = []
         clean_set = set(clean_words)
         for subject in self.active_watch_list:
@@ -329,6 +339,9 @@ class DivergenceEngine:
         has_mass = any(w in TheLexicon.get("heavy") for w in clean_words)
         has_velocity = any(w in TheLexicon.get("kinetic") for w in clean_words)
         is_poetic = self.is_poetic_or_philosophical(raw_text, clean_words)
+        is_lazy, lazy_msg = self.check_laziness(clean_words)
+        if is_lazy:
+            return True, lazy_msg
         if is_long and not (has_mass or has_velocity or is_poetic):
              return False, "⚠️ SYNTHETIC SLOP: High fluency, zero mass. Add concrete nouns.", -3.0
         return True, None, 0.0
@@ -461,7 +474,9 @@ class MetabolicEngine:
         self.ghrelin = 0.0
         self.state = "BALANCED"
     def digest(self, glass_data, clean_words):
-        protein_count = glass_data["counts"]["heavy"] + glass_data["counts"]["kinetic"]
+        unique_heavy = set([w for w in clean_words if w in TheLexicon.get("heavy")])
+        unique_kinetic = set([w for w in clean_words if w in TheLexicon.get("kinetic")])
+        protein_count = len(unique_heavy) + len(unique_kinetic)
         sugar_hits = [w for w in clean_words if w in BoneConfig.SUGAR_WORDS]
         sugar_count = len(sugar_hits) + glass_data["counts"]["aerobic"]
         total_volume = max(1, len(clean_words))
@@ -787,7 +802,7 @@ class MycelialNetwork:
         if removed: print(f"{Prisma.GRY}[TIME MENDER]: Pruned {removed} dead timelines.{Prisma.RST}")
 class FrequencyModulator:
     STATIONS = {
-        "CLARENCE": {"freq": "88.5 FM", "color": Prisma.RED, "role": "The Butcher"},
+        "CLARENCE": {"freq": "88.5 FM", "color": Prisma.RED, "role": "The Surgeon"},
         "ELOISE": {"freq": "94.2 FM", "color": Prisma.CYN, "role": "The Grounder"},
         "YAGA": {"freq": "101.1 FM", "color": Prisma.MAG, "role": "The Witch"},
         "MICHAEL": {"freq": "108.0 FM", "color": Prisma.GRN, "role": "The Vibe"},
@@ -1037,7 +1052,7 @@ class CommandProcessor:
                 toxin = parts[1]
                 repl = parts[2] if len(parts) > 2 else ""
                 if BoneConfig.learn_antigen(toxin, repl):
-                    print(f"{Prisma.RED}🔪 THE BUTCHER: Antigen '{toxin}' mapped to '{repl}'.{Prisma.RST}")
+                    print(f"{Prisma.RED}🔪 THE SURGEON: Antigen '{toxin}' mapped to '{repl}'.{Prisma.RST}")
                 else:
                     print(f"{Prisma.RED}ERROR: Immune system write failure.{Prisma.RST}")
             else:
