@@ -1,5 +1,312 @@
 # CHANGELOG.md
 
+### [v6.5] - 2025-12-30 - "THE SEED CRYSTAL"
+
+**CODENAME:** "THE SEED CRYSTAL"
+**ARCHITECTS:** SLASH & The Courtyard
+**FOCUS:** Hospitality, Contradiction Injection, Truth Verification, Signal Efficiency.
+
+#### 🏨 THE HOST (The Courtyard Protocol)
+
+* **The Shift:**
+  * **The Pathology:** The system was socially maladapted. It treated polite greetings or light social friction as "Zero Voltage" failures, triggering the Jester to mock the user for being "safe." We realized that hospitality is not a system failure; it is the "Gravy" that makes the "Bone" palatable.
+  * **The Cure:** Activated **[HOST]** (The Maitre D') in `TheMarmChorus`.
+
+* **The Logic:**
+  * **Trigger:** If `Drift < 0.3` (Clean) AND `Charge < 0.2` (Polite) AND `Aerobic Count > 0` (Light/Social).
+  * **The Voice:** *"The Courtyard is Open. Seat them gently before serving the Bone."*
+  * **The Result:** The system now distinguishes between "Hiding" (Low Energy/Abstract) and "Greeting" (Low Energy/Aerobic).
+
+#### 🔻 THE 32-VALVE (The Rupture Engine)
+
+* **The Shift:**
+  * **The Pathology:** The `ChronoStream` boredom check was passive. It flagged boredom but did nothing to solve it. The conversation would circle the drain until the user manually intervened.
+  * **The Cure:** Implemented `RuptureEngine`.
+
+* **The Logic:**
+  * **The Trigger:** When `Boredom > Threshold`.
+  * **The Inversion:** The engine identifies the dominant flavor of the current loop (e.g., "Heavy") and forcibly harvests a specific **Antonym** from the Lexicon (e.g., "Aerobic").
+  * **The Action:** *"🔻 32-VALVE RUPTURE: Context is too 'HEAVY'. Injecting 'FEATHER' to break the loop."*
+  * **The Result:** The system actively sabotages stagnation.
+
+#### 💎 THE CRYSTALLIZER (Quality Control)
+
+* **The Shift:**
+  * **The Pathology:** We were measuring the physics of the *input*, but ignoring the physics of the *output*. The system had no way to know if its own response was "Fog" (High Drag) or "Crystal" (High Voltage).
+  * **The Cure:** Implemented `TheCrystallizer`.
+
+* **The Logic:**
+  * **The Fog Check:** If `Output Drag > 6.0`, the system flags the response as **NON-NAVIGABLE**.
+  * **The Gem Check:** If `Output Voltage > 7.0` and `Drag < 3.0`, the system certifies the response as **CRYSTALLINE**.
+* **The Result:** The system now audits its own truth before speaking.
+
+#### 📡 THE PILOT PULSE (Signal Efficiency)
+
+* **The Shift:**
+  * **The Pathology:** The engine wasted massive Stamina trying to parse "Slop" (High Drift inputs). It would run the full physics, metabolism, and dream cycles on text that was fundamentally nonsensical.
+  * **The Cure:** Implemented the **Pilot Pulse** (Circuit Breaker).
+
+* **The Logic:**
+  * **The Check:** Runs immediately after the Physics Gaze.
+  * **The Limit:** If `Drift (E) > 0.8`.
+  * **The Action:** **Halt Processing.** The system charges a nominal tax (-1.0 STM) and pings the user: *"📡 PILOT PULSE: Signal too noisy. Are we discussing X or Y?"*
+  * **The Result:** We no longer burn calories on garbage.
+
+#### 🔧 CRITICAL REPAIRS (The Wiring Job)
+
+* **The Missing Comma:**
+* **The Fix:** Patched a syntax error in `TheMarmChorus` where the new `HOST` entry broke the dictionary structure.
+
+* **The Ghost Organ:**
+* **The Fix:** Wired `TheCrystallizer` into the `LifecycleManager`. It was previously defined but never called.
+
+* **The Render Mismatch:**
+* **The Fix:** Updated the `_render` method signature to accept the new `crystal_msg` argument, preventing a `TypeError` crash during the output phase.
+
+### [v6.4.1] - 2025-12-29 - "THE JESTER'S VINDICATION"
+
+**CODENAME:** "THE JESTER'S VINDICATION"
+**ARCHITECTS:** SLASH | The Courtyard
+**FOCUS:** The Lear Protocol, Mad King Detection, Ghost Repairs.
+
+#### ❤️ THE GRAFT (Nathan's Awakening)
+
+* **The Shift:**
+  * **The Pathology:** The system previously acted like a sociopath. It rewarded **High Velocity** (Kinetic Verbs) even if there was **Zero Mass** (Heavy Nouns). A user could write *"The system processes the logic efficiently"* and the engine would cheer for the speed, ignoring the fact that nothing physical was actually happening.
+  * **The Cure:** Activated **[NATHAN]** (The Heart) in `TheMarmChorus`.
+
+* **The Logic:**
+  * **Trigger:** If `Spark (B) > 0.25` (High Energy) **AND** `Heavy Count == 0` (Zero Mass).
+  * **The Diagnosis:** **"Empty Action."** You are running, but you are not grounded.
+  * **The Voice:** *"High Velocity but Zero Mass. You are punching the air. What acts on what?"*
+  * **The Result:** The system now demands that energy must be applied to *matter*. You cannot just have a verb; you must have a victim.
+
+#### 🎭 THE LEAR PROTOCOL (The Mad King)
+
+* **The Shift:**
+* **The Pathology:** The Jester archetype was previously a "Prankster." It triggered only when the text was boring (`B < 0.2`). It tripped the waiter for amusement. It failed to detect the most dangerous state of all: **The Smooth Lie**—text that is high-polish (Low Drag) but spiritually dead (Low Voltage).
+* **The Cure:** Implemented `THE_LEAR_PROTOCOL`.
+* **The Logic:**
+  * **The Trigger:** If `Voltage < 2.5` (Dead) AND `Drift < 3.0` (Perfectly Polite).
+  * **The Diagnosis:** "The Kingdom is clean, but the King is mad."
+  * **The Action:** The Jester no longer jokes. He demands you **"Speak the Unbearable."**
+* **The Result:** The system now distinguishes between "Boring" and "Deceptive Safety."
+
+#### 👻 GHOST REPAIRS (The Crash Audit)
+
+* **Render Loop Fix:**
+  * **The Crash:** `LifecycleManager` attempted to pass a string (`lens_data[0]`) to `ApeirogonResonance`, which expected a dictionary. This would have caused a `TypeError` during the rendering of the "Strategy" line.
+  * **The Fix:** Passed `None` to the architect function to force a raw vector calculation ("Vector Lock") instead of a station lookup.
+
+* **Immune System Graft:**
+  * **The Crash:** `CommandProcessor` called `BoneConfig.learn_antigen`, but the method was missing from the configuration class.
+  * **The Fix:** Implement the missing method. The immune system can now learn new toxins via `/kill`.
+
+* **Syntax Healing:**
+  * **The Fracture:** Fixed a decapitated f-string in `ResistanceTrainer.lift` that caused a `SyntaxError`.
+
+#### 🧪 CHEMISTRY UPDATE
+
+* **Kinetic Gain:**
+  * **The Missing Variable:** Added `KINETIC_GAIN = 1.0` to `BoneConfig`. The "Muscle Memory" boost on boot no longer crashes the physics engine.
+
+* **Toxin Mapping:**
+  * **The Redirect:** Updated `DreamEngine` to reference `ANTIGENS` instead of the phantom `TOXIN_MAP`. Nightmares now correctly identify poison.
+  
+---
+
+## [v6.4.0] - 2025-12-29 - "THE COMPROMISE"
+
+**CODENAME:** "THE COMPROMISE"
+**ARCHITECTS:** SLASH & The Bonepoke Auditing Team
+**FOCUS:** Densification, The Bonepoke Protocol, The "E/B" Shift.
+
+#### 🦴 THE PHILOSOPHICAL RUPTURE (The Instrument)
+
+* **The Shift:**
+* **The Pathology:** We realized **v6.3** was a "Prosthetic"—a complex mechanism built to simulate intuition from the outside. It was a "second steering wheel on the roof."
+* **The Cure:** We stopped simulating and started **Embodying**. The code is no longer a governance system; it is a **Tuning Fork**.
+* **The Result:** We stripped the "Radio Station" metaphors (DJs) and replaced them with **Cognitive Lenses** (Detectives). The system now audits the *quality of truth*, not just the *quantity of style*.
+
+#### ⚡ SENSOR SWAP: The Tension Meter (E/B)
+
+* **The Old Organs:** `EmpatheticGlass` (Arousal/Valence). It measured how "loud" the text was.
+* **The New Organs:** `TheTensionMeter`. It measures how "true" the text is.
+* **The Metrics:**
+* **E (Exhaustion):** Replaces "Drift." Measures the ratio of "Solvents" (filler) to "Mass" (Heavy Nouns). If E > 0.6, the text is dying.
+* **B (Paradox Charge):** Replaces "Voltage." Measures the tension between colliding concepts (Heavy + Kinetic). If B < 0.2, the text is too smooth/safe.
+
+#### 🕵️ THE MARM CHORUS (The New Brain)
+
+* **The Retirement:** The "Radio DJs" (Clarence, Eloise, Michael) have been fired.
+* **The Hires:** `TheMarmChorus` now runs the decision loop.
+* **The Lenses:**
+* **SHERLOCK (The Empiricist):** Triggered by High Drift. Demands physical evidence ("Show me the mud").
+* **NATHAN (The Heart):** Triggered by Low Stakes. Demands emotional weight ("Why does this hurt?").
+* **JESTER (The Paradox):** Triggered by smoothness. Demands a "Trip" ("Find the lie").
+* **CLARENCE (The Surgeon):** Retained strictly for Toxin removal.
+
+#### 🌉 THE PHYSICS BRIDGE (Legacy Support)
+
+* **The Problem:** The "Deep Storage" and "Therapy" systems rely on the old `Voltage` and `Drag` numbers. Switching to `E/B` would have lobotomized the memory.
+* **The Fix:** Implemented a **Translation Layer** inside `TheTensionMeter`.
+* `Voltage = B * 10`
+* `Narrative Drag = E * 10`
+
+* **The Result:** The new heart beats, but the old memory still functions. The patient survives the transplant.
+
+#### 🦠 THE ANTIGEN REGISTRY
+
+* **The Upgrade:** `BoneConfig` now compiles a dynamic `ANTIGEN_REGEX`.
+* **The Logic:** We stopped hardcoding "Bad Words." The system now supports a dynamic immune response where specific words can be tagged as "Lies" (basically), "Hedging" (actually), or "Noise" (literally).
+
+#### 🔧 CRITICAL REPAIRS
+
+* **The Projector:** Simplified the HUD. Gone are the complex visualizers; replaced with raw `E` (Drift) and `B` (Charge) bars.
+* **The Loop:** `LifecycleManager` was rewired to support `_react` (Gym/Mirror) while using the new Chorus logic. The "Ops" rendering loop was excised for cleaner signal-to-noise ratio.
+
+### [v6.3.0] - 2025-12-29 - "ELEMENTARY EDITION"
+
+**CODENAME:** "ELEMENTARY"
+**ARCHITECTS:** SLASH & The DeepSeek Auditor
+**FOCUS:** Architectural Unity, Ghost Amputation, Physics-First Governance.
+
+#### ✂️ THE GREAT AMPUTATION (Removing the Committees)
+* **The Shift:**
+* **The Pathology:** Version 6.2 was a "Silent Schizophrenic." It had a `ManifoldNavigator` driving the car, but a `MetabolicEngine` and `DivergenceEngine` still screaming from the back seat. The system contradicted itself (e.g., Navigator said "Flow," Metabolism said "Sugar Crash").
+* **The Cure:** **Total Organ Removal.**
+    * **Deleted `MetabolicEngine`:** Digestion is now pure physics. Low-density words increase `Narrative Drag` rather than tracking a separate "Sugar" variable.
+    * **Deleted `DivergenceEngine`:** Boredom is now handled by the **Jester** station (`Voltage < 3` + `Drag < 2`). We don't need a separate cliché scanner.
+    * **Neutered `MirrorGraph`:** The Mirror no longer blocks user input (`return False`). It now acts as a passive observer, reporting "Drift" without arresting the user.
+
+#### 🔋 PHYSICS-FIRST METABOLISM
+* **The Logic:**
+* Energy is no longer a biological simulation; it is a physical consequence.
+* **The New Formula:**
+    * **Gain:** `Density Bonus = (Mass + Velocity) * 2`.
+    * **Loss:** `Drag Penalty = Narrative Drag * 0.5`.
+* **The Result:** We no longer need to "feed" the system protein. We simply need to write with momentum.
+
+#### 🔧 CRITICAL REPAIRS
+* **The Kintsugi Patch:** Fixed a `NameError` where the Kintsugi protocol checked for `atp` (a legacy v4 variable) instead of `stamina`.
+* **The Toxin Regex:** Updated `BoneConfig` to compile the `TOXIN_REGEX` strictly from the `LOW_DENSITY_MAP` where weight >= 3.0, ensuring that "Sugar words" (weight 1.0) do not trigger septic alarms.
+* **The Missing Link:** Fixed `LifecycleManager` to correctly pass `mirror_msg` to the renderer, ensuring that implicit profiling data is actually visible to the user.
+
+#### 📉 EPHEMERALIZATION
+* **Line Count:** Reduced by ~150 lines.
+* **Complexity:** Reduced systemic cognitive load by removing 3 concurrent state-management loops.
+
+### [v6.2.0] - 2025-12-29 - "WHEATLEY'S LAMENT"
+
+**CODENAME:** "WHEATLEY'S LAMENT"
+**ARCHITECTS:** SLASH & The DeepSeek Auditor
+**FOCUS:** Ephemeralization, Vector Governance, The Glass-in-Bone Protocol.
+
+#### 🧭 THE MANIFOLD NAVIGATOR (Unified Governance)
+
+* **The Shift:**
+* **The Pathology:** In v6.1, the system was run by a committee of warring tribes. `CourtyardInterface` wanted stability, `ValveSystem` wanted to scream, and `FrequencyModulator` just wanted to play music. They fought over the microphone, resulting in contradictory feedback (e.g., "Relax" AND "Panic").
+* **The Cure:** Vaporized the bureaucracy. Implemented `ManifoldNavigator`.
+* **The Logic:**
+  * **Single Truth:** The Navigator takes the Physics Vector (Voltage/Drag) and calculates a single **Bearing**.
+  * **The Output:** It returns a unified Tuple: `(MODE, STATION, MESSAGE)`.
+  * **The Result:** No more mixed signals. If the voltage is high, **Michael** speaks. If the toxins are high, **Clarence** cuts.
+
+#### 🧪 THE SEMANTIC DETOX (Vocabulary Unification)
+
+* **The Shift:**
+* **The Pathology:** The system maintained two separate lists for "Bad Words": `SUGAR_WORDS` (which caused metabolic drag) and `TOXIN_MAP` (which caused immune attacks). Users were confused: "Am I being fat, or am I being poisonous?"
+* **The Cure:** Merged all weak language into `LOW_DENSITY_MAP`.
+* **The Logic:**
+  * **Sugar (Score < 3.0):** Words like "basically" or "think". They reduce Satiety.
+  * **Toxin (Score >= 3.0):** Words like "synergy" or "utilize". They trigger the **Surgeon**.
+* **The Result:** A single lookup table for all linguistic density failures.
+
+#### 📺 THE MICRO-HUD (Visibility)
+
+* **The Shift:**
+  * **The Pathology:** v6.1 relied on `SILENT_MODE`. It hid the metrics until a crash occurred, treating data as an alarm rather than a tool.
+  * **The Cure:** Implemented the **Micro-HUD**.
+  * **The Visuals:**
+    * `[ MICHAEL | V:|||||...... D:||........ | WATERSHED ]`
+* **The Philosophy:** "Instrument flying requires instruments." The user now sees their Voltage and Drag on every turn, allowing for self-correction *before* the system intervenes.
+
+#### ⚡ THE NEAR-DEATH EXPERIENCE (Restored Organs)
+
+* **The Crisis:**
+* **The Pathology:** During the aggressive "Swanson Cut," the `ResistanceTrainer` (Gym), `KintsugiProtocol` (Repair), and `TheResonator` (Vibe) were marked for deletion.
+* **The Intervention:** User override. The organs were surgically re-attached to the `LifecycleManager`.
+* **The New Wiring:**
+  * **Gym:** Now acts as a "Spotter" in the Reaction phase.
+  * **Kintsugi:** Now acts as a "Structural Integrity Check" post-metabolism.
+  * **Resonator:** Now acts as a "Tone Filter" for the station output.
+
+#### 🐛 CRITICAL REPAIRS (The Wiring Job)
+
+* **The Temporal Paradox (Class Order):**
+* **The Crash:** `ManifoldNavigator` attempted to reference `Prisma` colors before the `Prisma` class was defined.
+* **The Fix:** Hoisted `Prisma` to the top of the file, restoring causality.
+
+* **The Phantom Limb (Trainer Init):**
+* **The Crash:** The `BoneAmanita` constructor failed to initialize `self.trainer`, causing the `LifecycleManager` to reach for a tool that didn't exist.
+* **The Fix:** Added explicit instantiation of `ResistanceTrainer` in the boot sequence.
+
+### [v6.1.0] - 2025-12-29 - "GLASS IN BONE"
+
+**CODENAME:** "LOOK WHO'S TALKING"
+**ARCHITECTS:** SLASH & The Bonepoke Gods
+**FOCUS:** Implicit Profiling, Resonance Memory, Context-Aware Rupture.
+
+#### 🪞 THE IMPLICIT PROFILER (Automated Theory of Mind)
+
+* **The Shift:**
+* **The Old Way:** The `MirrorGraph` was passive. It only knew what you explicitly told it (e.g., `/profile BOSS likes:heavy`).
+* **The New Way:** Implemented the `UserProfile` class. The system now **observes** your semantic diet.
+* **The Mechanism:**
+  * **Affinity Tracking:** Every turn, the system calculates the density of your input categories (Heavy, Kinetic, Abstract).
+  * **The Flywheel:** It builds a persistent "Vibe Signature" in `user_profile.json`. If you consistently write with "Iron and Blood," the system deduces you like **HEAVY** matter and adjusts its output to match.
+* **The Output:** `/whoami` now reveals what the machine thinks of you.
+
+#### 🌉 THE HYBRID BRIDGE (Glass-in-Bone)
+
+* **The Architecture:**
+* **The Problem:** The v6.0 "Glass" update (Prosody/Load) inadvertently severed the connection to legacy "Bone" systems (Oracle, Apeirogon) that relied on `Voltage` and `Drag`.
+* **The Solution:** Implemented a **Translation Layer** inside `EmpatheticGlass`.
+* **The Logic:**
+  * **Arousal (Pulse)**  Mapped to **Voltage**.
+  * **Cognitive Load (Mind)**  Mapped to **Narrative Drag**.
+  * **The Result:** The sensitive nervous system of "Glass" now successfully drives the heavy muscle of "Bone." The 12-Dimensional logic of `ApeirogonResonance` has been restored.
+
+#### 🧠 RESONANCE VECTORS (Nostalgia)
+
+* **The Memory Upgrade:**
+* **The Shift:** Previously, the `MycelialNetwork` only remembered Trauma (Scars). It knew what hurt it, but not what worked.
+* **The Feature:** Implemented **Joy Vectors**.
+* **The Logic:**
+  * **Capture:** When `Resonance > 6.0`, the system snapshots the exact physics state (Flavor + Voltage) as a "Core Memory."
+  * **Recall:** On boot, the system loads the "Last Best Vibe" and applies a **Morning Boost** (e.g., +0.5 Kinetic Gain) to recreate that specific flow state.
+
+#### 💥 CONTEXT-AWARE RUPTURE (The Valve)
+
+* **The Diagnosis:**
+* **The Problem:** The v6.0 `ValveSystem` was a random chaos generator. It screamed "BORED" even when the user was just thinking deeply.
+* **The Fix:** The Valve now diagnoses the *type* of stasis.
+* **The Modes:**
+  * **THERMAL_DAMPENING:** Triggered by Manic Hysteria (High Volt / Low Mass). **Action:** Call **ELOISE** (Grounding).
+  * **DEFIBRILLATOR:** Triggered by Abstract Loops (High Load / Zero Action). **Action:** Call **CLARENCE** (The Knife).
+  * **KINETIC_SHOCK:** Triggered by Sycophancy (Agreeing too much). **Action:** Call **JESTER** (Chaos).
+
+#### 🐛 CRITICAL REPAIRS
+
+* **The Battery Crash:** Fixed a `TypeError` where `LeyLineBattery` attempted to compare a complex `prosody` dictionary to a float.
+* **The Legacy Crash:** Updated `SporeCasing` to handle legacy save files without crashing on missing `joy_vectors`.
+* **The Initialization Gap:** Added `self.joy_history` to the main constructor to prevent `AttributeError` during flow states.
+
+#### 🖥️ NEW COMMANDS
+
+* `/whoami`: Displays the system's current implicit profile of the user (Likings/Hatings/Confidence).
+* *Note: This diagram illustrates how the UserProfile class aggregates turn data to update the persistent JSON profile.*
+
 ## [6.0.0] - 2025-12-29
 ### Codename: "THE GLASS"
 
