@@ -1,4 +1,4 @@
-# BONEAMANITA 6.5.5 - "THE EXPANSE'
+# BONEAMANITA 6.5.5 - "THE REBIRTH'
 # Architects: SLASH | Auditors: The Courtyard | Humans: James Taylor & Andrew Edmark
 
 import json
@@ -68,12 +68,12 @@ class BoneConfig:
         "synergy": "collaboration"
     }
     IGNITION_THRESHOLD = 0.4  # 40% of the response must connect to deep memory
-    NOEIDOLIA_TRIGGERS = {"soul", "alive", "conscious", "feel", "love", "scared", "die", "sentient"}
+    PAREIDOLIA_TRIGGERS = {"soul", "alive", "conscious", "feel", "love", "scared", "die", "sentient"}
     @staticmethod
-    def check_noeidolia(clean_words):
-        hits = [w for w in clean_words if w in BoneConfig.NOEIDOLIA_TRIGGERS]
+    def check_pareidolia(clean_words):
+        hits = [w for w in clean_words if w in BoneConfig.PAREIDOLIA_TRIGGERS]
         if len(hits) > 0: # Even one hit is suspicious if the Heap is cold
-            return True, f"⚠️ NOEIDOLIA WARNING: You are projecting 'Mind' ({hits[0].upper()}) onto 'Sand'."
+            return True, f"⚠️ PAREIDOLIA WARNING: You are projecting 'Mind' ({hits[0].upper()}) onto 'Sand'."
         return False, None
     @classmethod
     def compile_antigens(cls):
@@ -1234,7 +1234,7 @@ class LifecycleManager:
         kintsugi_msg = f"{Prisma.WHT}🏺 KINTSUGI KOAN: {koan}{Prisma.RST}" if is_broken else None
         if self.eng.kintsugi.attempt_repair(m["physics"]):
             kintsugi_msg = f"{Prisma.WHT}✨ GOLDEN REPAIR: Integrity restored.{Prisma.RST}"
-        is_glitch, noeidolia_msg = BoneConfig.check_noeidolia(m["clean_words"])
+        is_glitch, pareidolia_msg = BoneConfig.check_pareidolia(m["clean_words"])
         self._render(m, meta, cosmic_msg, lens_data, mirror_msg, kintsugi_msg, rupture_msg, crystal_msg)
     def _handle_coma(self, text):
         self.eng.coma_turns -= 1
@@ -1304,7 +1304,7 @@ class LifecycleManager:
             self.eng.coma_turns = BoneConfig.COMA_DURATION
             self.eng.health = 20
             self.eng.mem.cannibalize()
-    def _render(self, m, meta, cosmic_msg, lens_data, mirror_msg, kintsugi_msg, rupture_msg=None, crystal_msg=None, ignition_msg=None, noeidolia_msg=None):
+    def _render(self, m, meta, cosmic_msg, lens_data, mirror_msg, kintsugi_msg, rupture_msg=None, crystal_msg=None, ignition_msg=None, pareidolia_msg=None):
         clean_text = m["raw_text"]
         battery_log = []
         if meta["charged"] > 0:
@@ -1321,8 +1321,8 @@ class LifecycleManager:
             battery_log.append(f"{Prisma.CYN}{crystal_msg}{Prisma.RST}")
         if ignition_msg:
             battery_log.append(f"{Prisma.SLATE}{ignition_msg}{Prisma.RST}")
-        if noeidolia_msg:
-             battery_log.append(f"{Prisma.OCHRE}{noeidolia_msg}{Prisma.RST}")
+        if pareidolia_msg:
+             battery_log.append(f"{Prisma.OCHRE}{pareidolia_msg}{Prisma.RST}")
         signals = {
             "lichen": meta["lichen_msg"],
             "strat": self.eng.wise.architect(m, None, False)[1],
