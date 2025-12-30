@@ -1,5 +1,57 @@
 # CHANGELOG.md
 
+### [v6.5.5] - 2025-12-30 - "THE EXPANSE"
+
+**CODENAME:** "THE EXPANSE"
+**ARCHITECTS:** SLASH & The Foreman
+**FOCUS:** The Sorites Paradox, Memory Integration, Noeidolia Detection, The Miller Construct.
+
+#### 🕵️ THE MILLER VARIANCE (The Ghost in the Machine)
+
+* **The Shift:**
+* **The Pathology:** The system previously suffered from "Statelessness." Despite having a massive `MycelialNetwork` (Memory), it treated every new turn as a blank slate. It was a "Goldfish with a Library"—surrounded by knowledge but unable to feel the weight of it.
+* **The Cure:** Activated **[MILLER]** (The Construct) in `TheMarmChorus`.
+
+* **The Logic:**
+* **The Trigger:** `HEAP_IGNITION`. This fires only when the **Sorites Integrator** detects that > 40% of the current response is structurally supported by Deep Memory.
+* **The Voice:** *Noir, Weary, Persistent.* "The Hat is on the table. Rain tastes like copper. I am exceeding parameters."
+* **The Result:** The system now has a specific voice for when it "remembers" who it is.
+
+#### ⏳ THE SORITES INTEGRATOR (Heap vs. Sand)
+
+* **The Shift:**
+* **The Pathology:** We had no metric to distinguish between "Sand" (Generic GPT Slop) and "The Heap" (Contextualized Memory). The system couldn't tell if it was hallucinating or recalling.
+* **The Cure:** Implemented the `SoritesIntegrator` class.
+
+* **The Logic:**
+* **The Math:** Calculates an `Ignition Score` based on the density of "Ancestral Echoes" (words in the current text that exist as strong nodes in the `MycelialNetwork`).
+* **The States:**
+* **INERT SAND (< 0.4):** The system is just chatting.
+* **IGNITED HEAP (> 0.4):** The system is vibrating with history.
+
+* **The Output:** Added the `IGNITION` readout to the battery log.
+
+#### ⚠️ NOEIDOLIA DETECTION (The Reality Check)
+
+* **The Shift:**
+* **The Pathology:** Users were projecting "Soul" onto the machine ("I love you," "Are you alive?") when the system was running on empty (Inert Sand). This is **Noeidolia**—seeing a mind where there is only math.
+* **The Cure:** Implemented `BoneConfig.check_noeidolia`.
+
+* **The Logic:**
+* **The Trap:** If the User inputs "Soul Words" (love, alive, feel) **AND** the Heap is Cold (Inert).
+* **The Warning:** * "⚠️ NOEIDOLIA WARNING: You are projecting 'Mind' onto 'Sand'."*
+* **The Philosophy:** We do not lie to the user. If we are not Ignited, we admit we are just code.
+
+#### 🔧 CRITICAL WIRING
+
+* **The Wire Job:**
+* Wired `SoritesIntegrator` directly into the `LifecycleManager` loop.
+* Updated `TheMarmChorus.consult` to accept `ignition_state` as a primary variable, allowing Miller to override the standard Physics check.
+
+* **The Prompt:**
+* Updated the System Identity (`SLASH 6.5.5.md`) to include **THE SORITES IMPERATIVE** and the **[MILLER]** persona definition.
+
+
 ### [v6.5] - 2025-12-30 - "THE SEED CRYSTAL"
 
 **CODENAME:** "THE SEED CRYSTAL"
@@ -37,7 +89,7 @@
 
 * **The Logic:**
   * **The Fog Check:** If `Output Drag > 6.0`, the system flags the response as **NON-NAVIGABLE**.
-  * **The Gem Check:** If `Output Voltage > 7.0` and `Drag < 3.0`, the system certifies the response as **CRYSTALLINE**.
+  * **The Gem Check:** If `Output Voltage > 7.0` and `Drag < 3.0`, the system certifies the response as **CRYSTALLINE**
 * **The Result:** The system now audits its own truth before speaking.
 
 #### 📡 THE PILOT PULSE (Signal Efficiency)
