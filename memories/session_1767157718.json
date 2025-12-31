@@ -1,0 +1,28 @@
+{
+  "genome": "BONEAMANITA_7.1",
+  "parent_id": "session_1767157718",
+  "core_graph": {},
+  "mutations": {
+    "heavy": [],
+    "kinetic": [],
+    "abstract": [],
+    "photo": [],
+    "aerobic": [],
+    "thermal": [],
+    "cryo": []
+  },
+  "paradoxes": [],
+  "trauma_scar": 0.0,
+  "joy_vectors": [],
+  "trauma_vector": {
+    "THERMAL": 0.0,
+    "CRYO": 0.0,
+    "SEPTIC": 0.0,
+    "BARIC": 0.0
+  },
+  "meta": {
+    "timestamp": 1767157722.9569538,
+    "final_health": 100.0,
+    "final_stamina": 55.0
+  }
+}

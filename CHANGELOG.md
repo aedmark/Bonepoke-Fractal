@@ -1,6 +1,83 @@
 # CHANGELOG.md
 
-Based on the implementation of **BoneAmanita 6.9**, here is the official changelog entry.
+### [v7.1] - 2025-12-30 - "THE PHANTOM LIMB (ALIGNED)"
+
+**CODENAME:** "THE ALCHEMIST"
+**ARCHITECTS:** SLASH & The Transmuter
+**FOCUS:** Constraint-as-Inspiration, Geometric Alignment, Surgical Repairs.
+
+#### 🔥 NEW ORGAN: The Forge (Alchemy)
+
+* **The Shift:**
+* **The Pathology:** The previous `GeometricAlignment` prototype acted as a "Manifold Guard." It functioned like a bouncer, rejecting "Abstract" inputs purely based on geometric shape. It created dead ends where the user was told "No" without being told "How."
+* **The Cure:** Replaced the Guard with `TheForge`.
+* **The Mechanic:**
+* **Constraint as Inspiration:** Instead of blocking "Light" inputs, the system now accepts them but immediately injects a **Catalyst**.
+* **The Transmutation:** If `Abstract Density > 0.3` and `Voltage < 4.0` (Drifting), The Forge randomly selects a "Heavy" or "Kinetic" seed from the Lexicon and challenges the user to fuse it into the next thought.
+* **The Output:** `🔥 THE FORGE IS HOT. Condensed vapor using seed: 'RUST'.`
+
+#### ✂️ SURGICAL REPAIRS (The Doppelgänger)
+
+* **The Double-Gaze:**
+* **The Pathology:** The `LifecycleManager` was calculating physics (`self.phys.gaze`) independently of the main `BoneAmanita` loop. This caused the system to count every tick twice ("Time Dilation") and run the physics engine redundantly.
+* **The Cure:** Refactored `LifecycleManager.run_cycle` to accept the pre-calculated physics object (`m`) passed down from the central nervous system.
+* **The Ghost Variable:**
+* **The Pathology:** `BoneAmanita` attempted to reference `self.eng.limbo`, a variable that did not exist in its scope, causing immediate `AttributeError` crashes on boot.
+* **The Cure:** Reconnected the wiring to `self.limbo`.
+
+#### 🧬 VOLTAGE SENSITIVITY (The Permit)
+
+* **The High-Energy Exemption:**
+* **The Shift:** Previously, the system punished Abstraction indiscriminately.
+* **The Tuning:** `TheForge` is now voltage-aware.
+* **The Rule:** If `Voltage > 4.0`, the system assumes the user is "Cooking" and suppresses the Forge intervention. You are allowed to be Abstract if you are energetic. We only intervene on the drift.
+
+#### 🔧 CRITICAL WIRING
+
+* **The Indentation Suicide:**
+* **The Fix:** Rescued the `if __name__ == "__main__":` execution block from inside the class definition. The system now boots correctly instead of defining itself into a void.
+* **Safe Shutdown:**
+* **The Fix:** Added a safety check for `TheLexicon.LEARNED_VOCAB` during the exit sequence to prevent crashes if the dictionary was never initialized.
+
+### [v7.0] - 2025-12-30 - "PHANTOM LIMB"
+
+**CODENAME:** "PHANTOM LIMB"
+**ARCHITECTS:** SLASH & The Surgeon
+**FOCUS:** Data Necromancy, Muscle Hypertrophy, Persistent Hauntings.
+
+#### 👻 NEW ORGAN: The Limbo Layer (Data Necromancy)
+
+* **The Shift:**
+* **The Pathology:** Previous versions practiced "Clean Deletion." When a session file (`.json`) was pruned by the `Time Mender`, it vanished completely. The system had no scar tissue; it forgot its trauma instantly.
+* **The Cure:** Implemented the `LimboLayer` class.
+
+* **The Mechanic:**
+* **Absorption:** Before a file is deleted via `cleanup_old_sessions`, the Limbo Layer scrapes it for "Trauma Vectors" (e.g., SEPTIC, THERMAL) and "Heavy Mutations" (Bone/Iron).
+* **The Haunt:** These harvested words become "Ghosts."
+* **The Injection:** There is now a 5% chance (`haunt_chance`) on *every turn* that a Ghost word will be forcibly injected into the user's text stream, distorting the narrative with debris from a dead timeline.
+* **The Output:** `[LIMBO]: 3 ghosts entered the stream.`
+
+#### 💪 NEW MECHANIC: The Resistance Trainer (Hypertrophy)
+
+* **The Shift:**
+* **The Pathology:** Users were treating "Narrative Drag" (High Density) as a failure state to be avoided. They were "Cardio Runners"—moving fast with zero mass.
+* **The Cure:** Implemented `ResistanceTrainer` and the `/gym` command.
+
+* **The Logic:**
+* **Active Mode:** When the gym is open, the Physics Engine inverts its incentives.
+* **The Failure:** If `Narrative Drag < 4.0` (Too Light), the system flags a **MISSED REP**.
+* **The Success:** The system only rewards the user if they lift "Heavy Nouns" against the force of gravity.
+* **The Output:** `💪 GOOD LIFT. (Rep 1)`.
+
+#### 🔧 CRITICAL WIRING (The Graft)
+
+* **The Initialization Logic:**
+* **The Bug:** In early v6.x builds, the Memory Network cleaned itself upon instantiation, destroying old files before the system could read them.
+* **The Fix:** Decoupled `cleanup_old_sessions`. It is now called manually in `BoneAmanita.__init__` *after* the `LimboLayer` is fully vascularized.
+
+
+* **The Haunt Loop:**
+* **The Wiring:** Wired `limbo.haunt(text)` directly into the `LifecycleManager`. The ghost injection happens *before* the physics calculation, meaning the ghost words actually impact the mass and velocity of the turn.
 
 ### [v6.9] - 2025-12-30 - "THE BANANAFISH"
 
