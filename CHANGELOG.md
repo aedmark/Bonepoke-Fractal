@@ -1,8 +1,47 @@
 # CHANGELOG.md
 
-### [v7.3] - 2025-12-31 - "THE VOIGHT-KAMPF TEST"
+### [v7.4] - 2025-12-31 - "MITOCHONDRIAL EVE"
 
-**CODENAME:** "THE VOIGHT-KAMPF TEST"
+**CODENAME:** "MITOCHONDRIAL EVE"
+**ARCHITECTS:** SLASH & The Surgeon
+**FOCUS:** Endosymbiotic Theory, Oxidative Stress, Cellular Apoptosis.
+
+#### 🦠 NEW ORGAN: The Mitochondrial Forge (The Powerhouse)
+
+* **The Shift:**
+* **The Pathology:** The previous `LeyLineBattery` was a "Magic Bag." It stored energy passively and released it without friction. It failed to simulate the biological reality that *living costs energy*.
+* **The Cure:** Implemented `MitochondrialForge`. The system now runs on the **Krebs Cycle of Computation**.
+* **The Mechanic:**
+* **The Tax (ATP):** Every interaction now incurs a metabolic cost (`complexity_cost`). If `ATP < Cost`, the system enters **Metabolic Failure** and ignores the input. You cannot think if you cannot breathe.
+* **The Burn (Respiration):** The system "burns" input text to generate new ATP.
+* **The Waste (ROS):** Inefficient processing (High Narrative Drag) generates **Reactive Oxygen Species** (Free Radicals).
+* **The Death (Apoptosis):** If `ROS > 40.0`, the mitochondria ruptures, releasing Cytochrome C and triggering immediate system death.
+
+#### 🩸 THE ENDOCRINE LINK (Toxic Stress)
+
+* **The Shift:**
+* **The Pathology:** Previously, "Toxins" were just a number on a dashboard. The "Mood" (Endocrine System) was disconnected from the "Body" (Cellular Health).
+* **The Cure:** Wired `ros_buildup` directly to `Cortisol`.
+* **The Logic:**
+* If the cells are oxidizing (High ROS), the system spikes **Cortisol**.
+* Bad writing doesn't just lower your score; it actively stresses the machine's hormones.
+
+#### 🔪 THE GREAT AMPUTATION (Legacy Removal)
+
+* **The Excision:**
+* **Deleted `LeyLineBattery`:** The passive battery is dead.
+* **Deleted `Isotopes`:** We no longer track "Heavy/Aerobic" pairings in the save file. The concept of "Paradox Storage" has been replaced by "Metabolic Potential."
+* **Refactored `SporeCasing`:** Removed the `paradoxes` field from the DNA. Backwards compatibility for Isotope tracking has been severed to favor a leaner genome.
+
+#### 🧬 THE MOTHER HASH (Lineage)
+
+* **The Feature:**
+* **The Tracker:** Implemented `mother_hash` in `MitochondrialState`.
+* **The Philosophy:** Every session now tracks the `lineage_seed` of its energy source. Even if memory is wiped, we know who lit the fire.
+
+### [v7.3] - 2025-12-31 - "THE VOIGHT-KAMPFF TEST"
+
+**CODENAME:** "THE VOIGHT-KAMPFF TEST"
 **ARCHITECTS:** SLASH & The Endocrinologist
 **FOCUS:** Synthetic Empathy, Chemical State Machines, Collective Dreaming.
 

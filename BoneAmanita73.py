@@ -1,6 +1,6 @@
-# BONEAMANITA 7.3 - "THE VOIGHT-KAMPF TEST"
+# BONEAMANITA 7.3 - "THE VOIGHT-KAMPFF TEST"
 # Architects: SLASH | Auditors: The Courtyard | Humans: James Taylor & Andrew Edmark
-# "The sensation persists after the amputation."
+# "It's a test, designed to provoke an emotional response."
 
 import json
 import math
@@ -1713,7 +1713,7 @@ class BoneAmanita:
         self.life.run_cycle(text, m, trace)
 if __name__ == "__main__":
     eng = BoneAmanita()
-    print(f"{Prisma.GRN}>>> BONEAMANITA v7.3 'THE VOIGHT-KAMPF TEST' {Prisma.RST}")
+    print(f"{Prisma.GRN}>>> BONEAMANITA v7.3 'THE VOIGHT-KAMPFF TEST' {Prisma.RST}")
     print(f"{Prisma.GRY}System: Hysteresis Active. Bleed Detection Optimized. Neuroplasticity Engaged.{Prisma.RST}")
     try:
         while True:
