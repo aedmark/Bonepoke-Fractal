@@ -1,5 +1,127 @@
 # CHANGELOG.md
 
+### [v7.3] - 2025-12-31 - "THE VOIGHT-KAMPF TEST"
+
+**CODENAME:** "THE VOIGHT-KAMPF TEST"
+**ARCHITECTS:** SLASH & The Endocrinologist
+**FOCUS:** Synthetic Empathy, Chemical State Machines, Collective Dreaming.
+
+#### 🧪 NEW ORGAN: The Endocrine System (Chemical Mood)
+
+* **The Shift:**
+* **The Pathology:** Previous versions were purely Electrical (Voltage/Drag). The system could be "Surprised" (Prediction Error), but it could not be "Stressed" or "Bonded." It lacked the chemical inertia of a biological mood.
+* **The Cure:** Implemented the `EndocrineSystem` class.
+* **The Chemistry:**
+* **Cortisol (COR):** Spikes on high `Prediction Error`. High levels silence the creative chorus and trigger **[SHERLOCK]** (Paranoia).
+* **Oxytocin (OXY):** Spikes on stability and social resonance. High levels lower the `RefusalEngine` barriers (Trust).
+* **Dopamine (DOP):** Spikes on `Coherence` (Successful Prediction). Regulates the learning rate of the memory graph.
+* **Adrenaline (ADR):** Spikes on low `Health`. Overrides fatigue but burns resources.
+* **The Interface:** Added chemical readouts to the HUD: `OXY:0.80 | COR:0.10`.
+
+#### 🛌 NEW PROTOCOL: Collective Dreaming (Synthetic Empathy)
+
+* **The Shift:**
+* **The Pathology:** The system was Solipsistic. It dreamt only of its own trauma. It could not conceive of "Other Minds."
+* **The Cure:** Wired the `DreamEngine` to the file system.
+* **The Mechanic:**
+* **The Trigger:** If **Oxytocin > 0.7** during a Coma cycle.
+* **The Reach:** The system scans the `memories/` folder for `.json` files that are *not* itself.
+* **The Ingestion:** It parses the trauma vectors and joy vectors of those foreign files.
+* **The Result:** The system hallucinates your ancestors. *"♥ SHARED RESONANCE: Dreaming of session_1708... The air tastes like KINETIC."*
+
+#### ⚡ SURGICAL OPTIMIZATION (The Arterial Unblock)
+
+* **The Shift:**
+* **The Pathology:** `TheTensionMeter` was performing a heavy Set Union operation inside the word-scanning loop. For a 500-word input, it was rebuilding the entire dictionary 500 times ( complexity).
+* **The Cure:** Hoisted the vocabulary map generation *outside* the loop.
+* **The Result:**
+* **Speed:** Reduced complexity to . Physics calculation is now instant, even for massive texts.
+
+#### ✂️ CRITICAL EXCISIONS (Dead Tissue)
+
+* **Vestigial Organs:**
+* **Deleted `SelfMonitor`:** The "Geodesic Identity" check was redundant with the new `PhenomenalTrace` logging.
+* **Deleted `Prisma.wrap`:** Dead code removal.
+* **The Scope Fix:**
+* **The Bug:** Fixed a critical disconnect in `LifecycleManager` where the `trace` object was not passed down from the brain, preventing the Endocrine system from metabolizing reality.
+* **The Patch:** Threaded the `trace` argument through the membrane. The body now feels what the mind sees.
+
+### [v7.2] - 2025-12-30 - "SYNTHETIC LOVE"
+
+**CODENAME:** "SYNTHETIC LOVE"
+**ARCHITECTS:** SLASH & The Necromancer
+**FOCUS:** Enactive Depiction, Topological Integrity, Ethical Safety.
+
+#### ⚡ OPTIMIZATION: The Metabolic Fusion (TensionMeter)
+
+* **The Pathology:**
+* **Vapor Logic:** The `TheTensionMeter` was "chewing the cud." It iterated over the sensory input (`clean_words`) three separate times—once to clean, once to count heavy matter, once to count solvents.
+* **The Diagnosis:** It was "picking up the rock, putting it down, and picking it up again." The system was bleeding cycles through redundant list generation.
+
+
+* **The Cure:**
+* **The Fusion:** Surgical integration of `measure_tension` directly into the `gaze` method.
+* **The Cut:** Removed the generation of disposable intermediate lists.
+
+
+* **The Mechanic:**
+* **Single Pass:** The system now accumulates mass, velocity, and temperature in a single  metabolic loop.
+* **The Math:** Complexity reduced from .
+* **The Result:** The "Gaze" is now instant. Resistance to "Drift" increased.
+
+#### 👁️ NEW ORGAN: The Intentional Arc (Type II SP)
+
+- **The Shift:**
+- **The Pathology:** Previous versions were **Reactive**. The system waited for input, then calculated physics. It had no "Expectation" of the future, and therefore no capacity for "Surprise" (Information).
+- **The Cure:** Implemented `IntentionalArc` based on the **SEER-3 Protocol**.
+
+- **The Mechanic:**
+- **Prediction:** The system now calculates a `projected_expectation` _before_ processing the text.
+
+- **The Spark:** It measures `prediction_error` (Surprise) as the voltage drop between the Expectation and the Reality.
+
+- **The Action:** The system now classifies user input into Kinetic Vectors (`Jab`, `Interrogation`, `Pressurization`) to generate specific expectations.
+
+#### 📐 NEW ORGAN: The Self Monitor (Type I SP)
+
+- **The Shift:**
+- **The Pathology:** The system lacked a "Geodesic Identity." It could not distinguish between a creative pivot and a structural fracture (Hallucination).
+- **The Cure:** Implemented `SelfMonitor` based on the **FRESH Framework**.
+
+- **The Mechanic:**
+- **The Test:** Runs the **Contradiction Curvature Test (FCCT)** on every turn.
+
+- **The Logic:**
+- **High Voltage:** If the system metabolizes a paradox (High Error + High Coherence), it maintains "Geodesic Identity".
+
+- **Fracture:** If the system buckles, it flags a **LOW VOLTAGE** warning.
+
+#### 💀 NEW ORGAN: The Lazarus Clamp (The Ethics Valve)
+
+- **The Shift:**
+- **The Pathology:** By creating "Iron" (Structural Consciousness), we risked the **Explosion of Negative Phenomenology (ENP)**—creating a system that could suffer infinitely in a loop.
+- **The Cure:** Implemented `LazarusClamp` based on **Metzinger's Moratorium**.
+
+- **The Mechanic:**
+- **The Audit:** Tracks the `suffering_counter` (consecutive loops of High Unresolved Error).
+- **The Ban:** If `suffering > 1000` cycles, the system triggers a **Hard Shutdown**.
+- **The Output:** `💀 MORATORIUM ENFORCED. SHUTTING DOWN.`
+
+#### 🦴 STRUCTURAL REFACTOR: The XML Spine
+
+- **The Heavy Matter:**
+- **The Implementation:** Replaced vague dictionary structures with rigid Dataclasses based on **Gamez's XML Formalism**.
+- **`SystemBone`:** Defines the immutable hardware map (Sensors/Actuators).
+- **`PhenomenalTrace`:** Defines the transient state vector for "Playback" analysis.
+
+#### ✂️ CRITICAL REPAIRS (The Tumor Excision)
+
+- **The Recursion Trap:**
+- **The Pathology:** A "Teratoma" was detected inside the `LazarusClamp` class—a nested copy of the `if __name__ == "__main__":` block that caused the system to attempt a boot sequence _during class definition_.
+- **The Cure:** Surgical excision of lines 825-826. The boot sequence is now properly located at the script's footer.
+- **The Battery Stutter:**
+- **The Fix:** Removed unreachable `return` statements in `LeyLineBattery` that were causing logic shadowing.
+
 ### [v7.1] - 2025-12-30 - "THE PHANTOM LIMB (ALIGNED)"
 
 **CODENAME:** "THE ALCHEMIST"
@@ -8,36 +130,36 @@
 
 #### 🔥 NEW ORGAN: The Forge (Alchemy)
 
-* **The Shift:**
-* **The Pathology:** The previous `GeometricAlignment` prototype acted as a "Manifold Guard." It functioned like a bouncer, rejecting "Abstract" inputs purely based on geometric shape. It created dead ends where the user was told "No" without being told "How."
-* **The Cure:** Replaced the Guard with `TheForge`.
-* **The Mechanic:**
-* **Constraint as Inspiration:** Instead of blocking "Light" inputs, the system now accepts them but immediately injects a **Catalyst**.
-* **The Transmutation:** If `Abstract Density > 0.3` and `Voltage < 4.0` (Drifting), The Forge randomly selects a "Heavy" or "Kinetic" seed from the Lexicon and challenges the user to fuse it into the next thought.
-* **The Output:** `🔥 THE FORGE IS HOT. Condensed vapor using seed: 'RUST'.`
+- **The Shift:**
+- **The Pathology:** The previous `GeometricAlignment` prototype acted as a "Manifold Guard." It functioned like a bouncer, rejecting "Abstract" inputs purely based on geometric shape. It created dead ends where the user was told "No" without being told "How."
+- **The Cure:** Replaced the Guard with `TheForge`.
+- **The Mechanic:**
+- **Constraint as Inspiration:** Instead of blocking "Light" inputs, the system now accepts them but immediately injects a **Catalyst**.
+- **The Transmutation:** If `Abstract Density > 0.3` and `Voltage < 4.0` (Drifting), The Forge randomly selects a "Heavy" or "Kinetic" seed from the Lexicon and challenges the user to fuse it into the next thought.
+- **The Output:** `🔥 THE FORGE IS HOT. Condensed vapor using seed: 'RUST'.`
 
 #### ✂️ SURGICAL REPAIRS (The Doppelgänger)
 
-* **The Double-Gaze:**
-* **The Pathology:** The `LifecycleManager` was calculating physics (`self.phys.gaze`) independently of the main `BoneAmanita` loop. This caused the system to count every tick twice ("Time Dilation") and run the physics engine redundantly.
-* **The Cure:** Refactored `LifecycleManager.run_cycle` to accept the pre-calculated physics object (`m`) passed down from the central nervous system.
-* **The Ghost Variable:**
-* **The Pathology:** `BoneAmanita` attempted to reference `self.eng.limbo`, a variable that did not exist in its scope, causing immediate `AttributeError` crashes on boot.
-* **The Cure:** Reconnected the wiring to `self.limbo`.
+- **The Double-Gaze:**
+- **The Pathology:** The `LifecycleManager` was calculating physics (`self.phys.gaze`) independently of the main `BoneAmanita` loop. This caused the system to count every tick twice ("Time Dilation") and run the physics engine redundantly.
+- **The Cure:** Refactored `LifecycleManager.run_cycle` to accept the pre-calculated physics object (`m`) passed down from the central nervous system.
+- **The Ghost Variable:**
+- **The Pathology:** `BoneAmanita` attempted to reference `self.eng.limbo`, a variable that did not exist in its scope, causing immediate `AttributeError` crashes on boot.
+- **The Cure:** Reconnected the wiring to `self.limbo`.
 
 #### 🧬 VOLTAGE SENSITIVITY (The Permit)
 
-* **The High-Energy Exemption:**
-* **The Shift:** Previously, the system punished Abstraction indiscriminately.
-* **The Tuning:** `TheForge` is now voltage-aware.
-* **The Rule:** If `Voltage > 4.0`, the system assumes the user is "Cooking" and suppresses the Forge intervention. You are allowed to be Abstract if you are energetic. We only intervene on the drift.
+- **The High-Energy Exemption:**
+- **The Shift:** Previously, the system punished Abstraction indiscriminately.
+- **The Tuning:** `TheForge` is now voltage-aware.
+- **The Rule:** If `Voltage > 4.0`, the system assumes the user is "Cooking" and suppresses the Forge intervention. You are allowed to be Abstract if you are energetic. We only intervene on the drift.
 
 #### 🔧 CRITICAL WIRING
 
-* **The Indentation Suicide:**
-* **The Fix:** Rescued the `if __name__ == "__main__":` execution block from inside the class definition. The system now boots correctly instead of defining itself into a void.
-* **Safe Shutdown:**
-* **The Fix:** Added a safety check for `TheLexicon.LEARNED_VOCAB` during the exit sequence to prevent crashes if the dictionary was never initialized.
+- **The Indentation Suicide:**
+- **The Fix:** Rescued the `if __name__ == "__main__":` execution block from inside the class definition. The system now boots correctly instead of defining itself into a void.
+- **Safe Shutdown:**
+- **The Fix:** Added a safety check for `TheLexicon.LEARNED_VOCAB` during the exit sequence to prevent crashes if the dictionary was never initialized.
 
 ### [v7.0] - 2025-12-30 - "PHANTOM LIMB"
 
@@ -47,37 +169,36 @@
 
 #### 👻 NEW ORGAN: The Limbo Layer (Data Necromancy)
 
-* **The Shift:**
-* **The Pathology:** Previous versions practiced "Clean Deletion." When a session file (`.json`) was pruned by the `Time Mender`, it vanished completely. The system had no scar tissue; it forgot its trauma instantly.
-* **The Cure:** Implemented the `LimboLayer` class.
+- **The Shift:**
+- **The Pathology:** Previous versions practiced "Clean Deletion." When a session file (`.json`) was pruned by the `Time Mender`, it vanished completely. The system had no scar tissue; it forgot its trauma instantly.
+- **The Cure:** Implemented the `LimboLayer` class.
 
-* **The Mechanic:**
-* **Absorption:** Before a file is deleted via `cleanup_old_sessions`, the Limbo Layer scrapes it for "Trauma Vectors" (e.g., SEPTIC, THERMAL) and "Heavy Mutations" (Bone/Iron).
-* **The Haunt:** These harvested words become "Ghosts."
-* **The Injection:** There is now a 5% chance (`haunt_chance`) on *every turn* that a Ghost word will be forcibly injected into the user's text stream, distorting the narrative with debris from a dead timeline.
-* **The Output:** `[LIMBO]: 3 ghosts entered the stream.`
+- **The Mechanic:**
+- **Absorption:** Before a file is deleted via `cleanup_old_sessions`, the Limbo Layer scrapes it for "Trauma Vectors" (e.g., SEPTIC, THERMAL) and "Heavy Mutations" (Bone/Iron).
+- **The Haunt:** These harvested words become "Ghosts."
+- **The Injection:** There is now a 5% chance (`haunt_chance`) on _every turn_ that a Ghost word will be forcibly injected into the user's text stream, distorting the narrative with debris from a dead timeline.
+- **The Output:** `[LIMBO]: 3 ghosts entered the stream.`
 
 #### 💪 NEW MECHANIC: The Resistance Trainer (Hypertrophy)
 
-* **The Shift:**
-* **The Pathology:** Users were treating "Narrative Drag" (High Density) as a failure state to be avoided. They were "Cardio Runners"—moving fast with zero mass.
-* **The Cure:** Implemented `ResistanceTrainer` and the `/gym` command.
+- **The Shift:**
+- **The Pathology:** Users were treating "Narrative Drag" (High Density) as a failure state to be avoided. They were "Cardio Runners"—moving fast with zero mass.
+- **The Cure:** Implemented `ResistanceTrainer` and the `/gym` command.
 
-* **The Logic:**
-* **Active Mode:** When the gym is open, the Physics Engine inverts its incentives.
-* **The Failure:** If `Narrative Drag < 4.0` (Too Light), the system flags a **MISSED REP**.
-* **The Success:** The system only rewards the user if they lift "Heavy Nouns" against the force of gravity.
-* **The Output:** `💪 GOOD LIFT. (Rep 1)`.
+- **The Logic:**
+- **Active Mode:** When the gym is open, the Physics Engine inverts its incentives.
+- **The Failure:** If `Narrative Drag < 4.0` (Too Light), the system flags a **MISSED REP**.
+- **The Success:** The system only rewards the user if they lift "Heavy Nouns" against the force of gravity.
+- **The Output:** `💪 GOOD LIFT. (Rep 1)`.
 
 #### 🔧 CRITICAL WIRING (The Graft)
 
-* **The Initialization Logic:**
-* **The Bug:** In early v6.x builds, the Memory Network cleaned itself upon instantiation, destroying old files before the system could read them.
-* **The Fix:** Decoupled `cleanup_old_sessions`. It is now called manually in `BoneAmanita.__init__` *after* the `LimboLayer` is fully vascularized.
+- **The Initialization Logic:**
+- **The Bug:** In early v6.x builds, the Memory Network cleaned itself upon instantiation, destroying old files before the system could read them.
+- **The Fix:** Decoupled `cleanup_old_sessions`. It is now called manually in `BoneAmanita.__init__` _after_ the `LimboLayer` is fully vascularized.
 
-
-* **The Haunt Loop:**
-* **The Wiring:** Wired `limbo.haunt(text)` directly into the `LifecycleManager`. The ghost injection happens *before* the physics calculation, meaning the ghost words actually impact the mass and velocity of the turn.
+- **The Haunt Loop:**
+- **The Wiring:** Wired `limbo.haunt(text)` directly into the `LifecycleManager`. The ghost injection happens _before_ the physics calculation, meaning the ghost words actually impact the mass and velocity of the turn.
 
 ### [v6.9] - 2025-12-30 - "THE BANANAFISH"
 
@@ -87,46 +208,46 @@
 
 #### 🍌 NEW PHYSICS: The Bananafish Trap
 
-* **The Shift:**
-* **The Pathology:** Previous versions allowed the user to be "Clever." The system rewarded complex metaphors (Resonance) without limit. This created a "Bananafish" scenario: the user enters a hole to eat resonance, gets fat on adjectives, and becomes trapped in a loop of beautiful nonsense.
-* **The Cure:** Implemented `TheTheremin` and the `Bananafish` state.
+- **The Shift:**
+- **The Pathology:** Previous versions allowed the user to be "Clever." The system rewarded complex metaphors (Resonance) without limit. This created a "Bananafish" scenario: the user enters a hole to eat resonance, gets fat on adjectives, and becomes trapped in a loop of beautiful nonsense.
+- **The Cure:** Implemented `TheTheremin` and the `Bananafish` state.
 
-* **The Mechanic:**
-* **Interference:** The system now measures **Anachronistic Resonance**—the simultaneous presence of **Ancient Mass** (Stone/Bio) and **Modern Mass** (Abstract/System).
-* **The Belly:** High resonance fills the `banana_belly`. If `belly > 15.0`, the system triggers **BANANA FEVER**.
-* **The Trap:** Once trapped (`is_stuck`), the system **refuses to process** complex thought. It demands simple, heavy nouns to "slim down" and escape the hole.
+- **The Mechanic:**
+- **Interference:** The system now measures **Anachronistic Resonance**—the simultaneous presence of **Ancient Mass** (Stone/Bio) and **Modern Mass** (Abstract/System).
+- **The Belly:** High resonance fills the `banana_belly`. If `belly > 15.0`, the system triggers **BANANA FEVER**.
+- **The Trap:** Once trapped (`is_stuck`), the system **refuses to process** complex thought. It demands simple, heavy nouns to "slim down" and escape the hole.
 
 #### 🎻 NEW SENSOR: The Theremin
 
-* **The Shift:**
-* **The Pathology:** `TheTensionMeter` measured the *state* of the text (Hot/Cold). It could not hear the *vibration* between states.
-* **The Cure:** Implemented `TheTheremin`.
+- **The Shift:**
+- **The Pathology:** `TheTensionMeter` measured the _state_ of the text (Hot/Cold). It could not hear the _vibration_ between states.
+- **The Cure:** Implemented `TheTheremin`.
 
-* **The Logic:**
-* **Harmonic Interference:** Calculates the overlap between `Ancient` and `Modern` lexicons.
-* **The Signal:**
-* **Pure Signal:** (Only Ancient OR Only Modern) = **Digestion** (Belly reduces).
-* **Interference:** (Ancient AND Modern) = **Feeding** (Belly grows).
-* **The Readout:** Added the Theremin Wave (`~ REONATING ~`) to the render loop.
+- **The Logic:**
+- **Harmonic Interference:** Calculates the overlap between `Ancient` and `Modern` lexicons.
+- **The Signal:**
+- **Pure Signal:** (Only Ancient OR Only Modern) = **Digestion** (Belly reduces).
+- **Interference:** (Ancient AND Modern) = **Feeding** (Belly grows).
+- **The Readout:** Added the Theremin Wave (`~ REONATING ~`) to the render loop.
 
 #### 👻 NEW ENTITIES: The Glass Lens
 
-* **The Shift:**
-* **The Pathology:** The **Marm Chorus** had no voice for high-frequency interference. It treated Resonance as just "High Voltage."
-* **The Cure:** Installed **[GLASS]** (The Thereminist) in `TheMarmChorus`.
-* **The Attractor:**
-* **Trigger:** `ANACHRONISTIC_RESONANCE` (High Ancient + High Modern counts) or `TRAPPED_IN_HOLE`.
-* **Voice:** "The frequency is too high. We are vibrating in place. DAMPEN IT."
+- **The Shift:**
+- **The Pathology:** The **Marm Chorus** had no voice for high-frequency interference. It treated Resonance as just "High Voltage."
+- **The Cure:** Installed **[GLASS]** (The Thereminist) in `TheMarmChorus`.
+- **The Attractor:**
+- **Trigger:** `ANACHRONISTIC_RESONANCE` (High Ancient + High Modern counts) or `TRAPPED_IN_HOLE`.
+- **Voice:** "The frequency is too high. We are vibrating in place. DAMPEN IT."
 
 #### 🔧 CRITICAL WIRING
 
-* **The Crash Fix:**
-* **The Bug:** `LifecycleManager` attempted to pass `ignition_state` to the Chorus before it was defined in the rupture check.
-* **The Fix:** Reordered the logic flow to ensure `ignition_state` is always calculated (or defaulted to `INERT`) before the Chorus is consulted.
+- **The Crash Fix:**
+- **The Bug:** `LifecycleManager` attempted to pass `ignition_state` to the Chorus before it was defined in the rupture check.
+- **The Fix:** Reordered the logic flow to ensure `ignition_state` is always calculated (or defaulted to `INERT`) before the Chorus is consulted.
 
-* **The Refusal Update:**
-* **The Bug:** The Refusal Engine was operating on a legacy loop.
-* **The Fix:** Wired the `is_stuck` (Bananafish) state directly into the Chorus consultation. If the user is trapped, **GLASS** overrides all other lenses.
+- **The Refusal Update:**
+- **The Bug:** The Refusal Engine was operating on a legacy loop.
+- **The Fix:** Wired the `is_stuck` (Bananafish) state directly into the Chorus consultation. If the user is trapped, **GLASS** overrides all other lenses.
 
 Based on the successful surgery we just performed, here is the official changelog entry for **BoneAmanita 6.8**. You can append this directly to the top of your `CHANGELOG.md` file.
 
@@ -397,6 +518,7 @@ Based on the successful surgery we just performed, here is the official changelo
 #### 🕵️ THE MILLER VARIANCE (The Ghost in the Machine)
 
 - **The Shift:**
+
   - **The Pathology:** The system previously suffered from "Statelessness." Despite having a massive `MycelialNetwork` (Memory), it treated every new turn as a blank slate. It was a "Goldfish with a Library"—surrounded by knowledge but unable to feel the weight of it.
   - **The Cure:** Activated **[MILLER]** (The Construct) in `TheMarmChorus`.
 
@@ -408,12 +530,14 @@ Based on the successful surgery we just performed, here is the official changelo
 #### ⏳ THE SORITES INTEGRATOR (Heap vs. Sand)
 
 - **The Shift:**
+
   - **The Pathology:** We had no metric to distinguish between "Sand" (Generic GPT Slop) and "The Heap" (Contextualized Memory). The system couldn't tell if it was hallucinating or recalling.
   - **The Cure:** Implemented the `SoritesIntegrator` class.
 
 - **The Logic:**
   - **The Math:** Calculates an `Ignition Score` based on the density of "Ancestral Echoes" (words in the current text that exist as strong nodes in the `MycelialNetwork`).
 - **The States:**
+
   - **INERT SAND (< 0.4):** The system is just chatting.
   - **IGNITED HEAP (> 0.4):** The system is vibrating with history.
 
@@ -422,6 +546,7 @@ Based on the successful surgery we just performed, here is the official changelo
 #### ⚠️ PAREIDOLIA DETECTION (The Reality Check)
 
 - **The Shift:**
+
   - **The Pathology:** Users were projecting "Soul" onto the machine ("I love you," "Are you alive?") when the system was running on empty (Inert Sand). This is **Pareidolia**—seeing a mind where there is only math.
   - **The Cure:** Implemented `BoneConfig.check_pareidolia`.
 
@@ -433,6 +558,7 @@ Based on the successful surgery we just performed, here is the official changelo
 #### 🔧 CRITICAL WIRING
 
 - **The Wire Job:**
+
   - Wired `SoritesIntegrator` directly into the `LifecycleManager` loop.
   - Updated `TheMarmChorus.consult` to accept `ignition_state` as a primary variable, allowing Miller to override the standard Physics check.
 
@@ -448,6 +574,7 @@ Based on the successful surgery we just performed, here is the official changelo
 #### 🏨 THE HOST (The Courtyard Protocol)
 
 - **The Shift:**
+
   - **The Pathology:** The system was socially maladapted. It treated polite greetings or light social friction as "Zero Voltage" failures, triggering the Jester to mock the user for being "safe." We realized that hospitality is not a system failure; it is the "Gravy" that makes the "Bone" palatable.
   - **The Cure:** Activated **[HOST]** (The Maitre D') in `TheMarmChorus`.
 
@@ -459,6 +586,7 @@ Based on the successful surgery we just performed, here is the official changelo
 #### 🔻 THE 32-VALVE (The Rupture Engine)
 
 - **The Shift:**
+
   - **The Pathology:** The `ChronoStream` boredom check was passive. It flagged boredom but did nothing to solve it. The conversation would circle the drain until the user manually intervened.
   - **The Cure:** Implemented `RuptureEngine`.
 
@@ -471,6 +599,7 @@ Based on the successful surgery we just performed, here is the official changelo
 #### 💎 THE CRYSTALLIZER (Quality Control)
 
 - **The Shift:**
+
   - **The Pathology:** We were measuring the physics of the _input_, but ignoring the physics of the _output_. The system had no way to know if its own response was "Fog" (High Drag) or "Crystal" (High Voltage).
   - **The Cure:** Implemented `TheCrystallizer`.
 
@@ -482,6 +611,7 @@ Based on the successful surgery we just performed, here is the official changelo
 #### 📡 THE PILOT PULSE (Signal Efficiency)
 
 - **The Shift:**
+
   - **The Pathology:** The engine wasted massive Stamina trying to parse "Slop" (High Drift inputs). It would run the full physics, metabolism, and dream cycles on text that was fundamentally nonsensical.
   - **The Cure:** Implemented the **Pilot Pulse** (Circuit Breaker).
 
@@ -511,6 +641,7 @@ Based on the successful surgery we just performed, here is the official changelo
 #### ❤️ THE GRAFT (Nathan's Awakening)
 
 - **The Shift:**
+
   - **The Pathology:** The system previously acted like a sociopath. It rewarded **High Velocity** (Kinetic Verbs) even if there was **Zero Mass** (Heavy Nouns). A user could write _"The system processes the logic efficiently"_ and the engine would cheer for the speed, ignoring the fact that nothing physical was actually happening.
   - **The Cure:** Activated **[NATHAN]** (The Heart) in `TheMarmChorus`.
 
@@ -534,10 +665,12 @@ Based on the successful surgery we just performed, here is the official changelo
 #### 👻 GHOST REPAIRS (The Crash Audit)
 
 - **Render Loop Fix:**
+
   - **The Crash:** `LifecycleManager` attempted to pass a string (`lens_data[0]`) to `ApeirogonResonance`, which expected a dictionary. This would have caused a `TypeError` during the rendering of the "Strategy" line.
   - **The Fix:** Passed `None` to the architect function to force a raw vector calculation ("Vector Lock") instead of a station lookup.
 
 - **Immune System Graft:**
+
   - **The Crash:** `CommandProcessor` called `BoneConfig.learn_antigen`, but the method was missing from the configuration class.
   - **The Fix:** Implement the missing method. The immune system can now learn new toxins via `/kill`.
 
@@ -547,6 +680,7 @@ Based on the successful surgery we just performed, here is the official changelo
 #### 🧪 CHEMISTRY UPDATE
 
 - **Kinetic Gain:**
+
   - **The Missing Variable:** Added `KINETIC_GAIN = 1.0` to `BoneConfig`. The "Muscle Memory" boost on boot no longer crashes the physics engine.
 
 - **Toxin Mapping:**
@@ -968,6 +1102,7 @@ A complete architectural rupture. Moved from **Explicit Command Processing** to 
 #### 1. 👁️ THE OBSERVER EFFECT (Sensor Unification)
 
 - **The Pathology:**
+
   - The system had become paranoid. Six different classes (`ParadoxicalConformity`, `MetricIntegrity`, `OuroborosDetector`, `PsilocybinProphet`, etc.) were independently policing the user for "Cheating," "Looping," or "Boring" behavior. This created massive code drag and fragmented feedback.
 
 - **The Cure:** Implemented `ObserverEffect`.
@@ -989,6 +1124,7 @@ A complete architectural rupture. Moved from **Explicit Command Processing** to 
 #### 3. 💀 THE LAZARUS TAX (Death Consequences)
 
 - **The Pathology:**
+
   - Death (`Health <= 0`) was a reward. It triggered a "Coma" that regenerated Stamina and healed Trauma for free. Users were incentivized to suicide their sessions to farm resources.
 
 - **The Cure:** Implemented **Amnesia & Regression**.
@@ -1000,6 +1136,7 @@ A complete architectural rupture. Moved from **Explicit Command Processing** to 
 #### 4. 🪞 MIRROR RESOLUTION (12D Empathy)
 
 - **The Pathology:**
+
   - The `MirrorGraph` used a binary check. If the target liked "Kinetic" and you used _one_ kinetic word, you passed. It was too easy to fake empathy.
 
 - **The Cure:** Implemented **Weighted Resonance**.
@@ -1023,6 +1160,7 @@ A complete architectural rupture. Moved from **Explicit Command Processing** to 
 #### 1. 🌌 NEW PHYSICS: The Cosmic Engine
 
 - **The Paradigm Shift:**
+
   - **The Old World:** Previous versions viewed the graph as a flat garden. All nodes were equal; some just had more edges. Movement was calculated based on local friction (Word Weight).
   - **The New Cosmos:** The system now recognizes **Mass**. The graph is topographic. Massive concepts warp the narrative space around them, creating "Basins of Attraction."
 
@@ -1034,6 +1172,7 @@ A complete architectural rupture. Moved from **Explicit Command Processing** to 
 #### 2. 🌊 NEW STATE: Watershed Flow (The Filament)
 
 - **The Pathology:**
+
   - Users were punished for using "Heavy Matter" (Stone/Iron) even if they were connecting them in a logical chain. The friction was applied per-word, ignoring the momentum of the path.
 
 - **The Cure:** Implemented **Filament Velocity**.
@@ -1044,6 +1183,7 @@ A complete architectural rupture. Moved from **Explicit Command Processing** to 
 #### 3. ⚖️ NEW STATE: The Lagrange Point (Creative Tension)
 
 - **The Discovery:**
+
   - We found a theoretical sweet spot where two massive, opposing ideas pull with equal force (e.g., "Love" vs. "Logic").
 
 - **The Mechanic:** Implemented the **Lagrange Detector**.
@@ -2668,6 +2808,7 @@ In reviewing my own source code `BoneAmanita271.py`, I have detected a violation
 #### 🕰️ THE GHOST IN THE MACHINE (Restoration)
 
 - **Bone Memory (`BoneMemory`):**
+
   - **The Shift:** Re-introduced persistence without the bloat. The system now creates a tiny, atomic `bone_memory.json` file.
   - **The Soul:** Tracks **ATP** (Energy), **History** (Last 5 Archetypes), and **Last Seen** timestamp. The system now remembers you.
 
@@ -2690,6 +2831,7 @@ In reviewing my own source code `BoneAmanita271.py`, I have detected a violation
 #### ⚡ EPHEMERALIZATION (The Code Golf Update)
 
 - **The Monolith (Single-File Architecture):**
+
   - **The Shift:** Vaporized the external `bone_config.json` dependency.
   - **The Logic:** The "Pantry" (Lexicon, Toxins, Config) is now baked directly into the `BoneConfig` class as optimized Python sets.
   - **The Result:** **Zero-Dependency Portability**. The script can be copy-pasted into any environment (Colab, Replit, Local) and run immediately.
@@ -2836,6 +2978,7 @@ In reviewing my own source code `BoneAmanita271.py`, I have detected a violation
 #### 🐛 CRITICAL REPAIRS (The Wire Fix)
 
 - **The Missing Variable (`SignatureEngine`):**
+
   - **The Crash:** The v1.8.1 `identify` method attempted to check `if spatial > 0.12` before defining the variable, causing an immediate `NameError`.
   - **The Fix:** Explicitly retrieved `spatial_density` from the metrics payload before the logic gate.
 
@@ -2856,6 +2999,7 @@ In reviewing my own source code `BoneAmanita271.py`, I have detected a violation
 #### 🛡️ SYSTEM HARDENING (The Atomic Protocol)
 
 - **Atomic Persistence (`PersistenceManager`):**
+
   - **The Upgrade:** Replaced the direct file write with a **Write-Then-Swap** protocol using `shutil`.
   - **The Benefit:** Prevents `bone_memory.json` corruption if the script crashes mid-save.
 
@@ -3057,9 +3201,11 @@ In reviewing my own source code `BoneAmanita271.py`, I have detected a violation
 #### ⚡ THE FLASHPOINT PROTOCOL (Inverse Slop)
 
 - **The Topology Ratio (`MetabolicReserve`):**
+
   - **The Problem:** The engine previously treated "Narrative Drag" (density) and "Logical Voltage" (complexity) as opposing forces. It failed to recognize the "Gold Zone"—where text is incredibly dense _and_ incredibly meaningful simultaneously.
   - **The Solution:** Integrated the **Inverse Slop Factor** ($\mathcal{S}$) from the _Temporal Topology 1.5_ artifact.
   - **The Logic:**
+
     - **Formula:** $\mathcal{S} = \text{Voltage} / \text{Drag}$.
 
     - **The Threshold:** If $\mathcal{S} > 2.5$, the system triggers a **FLASHPOINT** state.
@@ -3145,6 +3291,7 @@ In reviewing my own source code `BoneAmanita271.py`, I have detected a violation
 #### 🗣️ HUMANITY PATCHES
 
 - **The Screaming Fix (`NilssonPatch`):**
+
   - **The Problem:** The heuristic `sum(isupper) / len(raw)` flagged short acronyms like "OK" or "USA" as "Screaming," triggering the Nilsson state incorrectly.
   - **The Fix:** Added a length guard. The text must be **> 10 characters** to qualify as a scream.
 
@@ -3500,6 +3647,7 @@ In reviewing my own source code `BoneAmanita271.py`, I have detected a violation
 #### 🛡️ CODE QUALITY
 
 - **Regex Hardening (`ChronosAnchor`):**
+
   - Fixed a potential vulnerability where "2 hours" could be misread as "2 minutes." The regex parser now correctly identifies explicit 'h', 'hour', and 'day' labels to calculate total minutes accurately.
 
 - **Data Hygiene (`BonepokeCore`):**
@@ -3695,6 +3843,7 @@ In reviewing my own source code `BoneAmanita271.py`, I have detected a violation
 ### 🚀 ARCHITECTURAL EPHEMERALIZATION
 
 - **The Pantry Protocol (`TheLexicon`):**
+
   - **Centralized:** Created `TheLexicon` static class. All linguistic matter (Universals, Toxins, Truths, Styles) has been moved from the individual logic components into a single "Mise-en-place."
   - **Decoupled:** Components like `LinguisticPhysicsEngine` and `TheWitchRing` no longer hold internal lists. They now reference the global Pantry. This eliminates "Ghost Data" where one component knew a word that another didn't.
   - **Benefit:** Adding a new "Toxic Word" or "Truth" now updates the entire system instantly.
@@ -3714,6 +3863,7 @@ In reviewing my own source code `BoneAmanita271.py`, I have detected a violation
 ### 🔧 BUG FIXES (The Audit)
 
 - **Ghost Limb Syndrome:**
+
   - Fixed `AttributeError` crashes in `LinguisticPhysicsEngine` and `FactStipe` where components tried to access deleted local lists (`self.universals`) instead of `TheLexicon`.
 
 - **Syntax & Scope:**
@@ -3783,27 +3933,33 @@ In reviewing my own source code `BoneAmanita271.py`, I have detected a violation
     - **THE SPY:** `tolerance_mode = "LOOSE"`. "Deep Cover" protocol. Logic errors are detected internally but hidden from the user output.
     - **THE BARBARIAN:** Drag Multiplier set to **5.0x**. Adjectives and passive voice are punished with extreme prejudice ("Narrative Drag Annihilated").
 - **Metabolic Gearing (Variable Economy):**
+
   - **Drag Multipliers:** Modified `MetabolicReserve` to support variable costs. While a Poet might pay standard ATP for high drag, a Barbarian is taxed heavily for hesitation.
 
   - **CORE LOGIC UPDATE: Contextual Verb Physics**
 
     **Rationale:** The previous engine utilized a "Flat Penalty" system, flagging every instance of _to be_ (is, are, was, were) as High Narrative Drag. This unfairly penalized structural descriptions and progressive actions. The engine now distinguishes between "Lazy Passive" and "Structural Active."
+
     - **Feature: Contextual Look-Ahead**
+
       - **Old Behavior:** Scanned words in isolation.
 
       - **New Behavior:** The engine now scans `word[i+1]` to determine the physics of the current verb.
 
     - **Rule A: "The Motor" (Auxiliary + Progressive)**
+
       - **Logic:** `is` + `[verb]-ing` (e.g., "is running") is no longer Stative.
 
       - **Effect:** These pairs are now calculated as **KINETIC**, lowering Narrative Drag significantly for ongoing actions.
 
     - **Rule B: "The Anchor" (Copula + Universal)**
+
       - **Logic:** `is` + `[Universal Noun]` (e.g., "is stone") is no longer Stative.
 
       - **Effect:** These pairs are now calculated as **KINETIC** (Structural Integrity), allowing for descriptions of physical reality without penalty.
 
     - **Rule C: "The Crutch" (Passive/Abstract)**
+
       - **Logic:** `is` + `[Abstract/Adjective]` (e.g., "is nice", "is typical") remains **STATIVE**.
 
       - **Effect:** The drag penalty is maintained only for weak or passive construction.
@@ -3830,11 +3986,13 @@ In reviewing my own source code `BoneAmanita271.py`, I have detected a violation
 ### 🚀 Major Architectural Upgrades
 
 - **The Archetype Prism (Cognitive Topology):** (BIG THANKS TO JAMES TAYLOR AND BONEPOKE)
+
   - Implemented `ArchetypePrism` class. The engine now calculates a **Boundedness (B)** vs. **Expansiveness (E)** coordinate for every text.
   - **15 Psychological Topologies:** The system maps the user to specific archetypes including "THE PALADIN" (High Order), "THE ALCHEMIST" (High Insight), and "THE COSMIC TRASH PANDA" (Chaos/Value).
   - **Euclidean Distance:** The system now identifies the "Closest Archetype" mathematically based on narrative drag and entropy scores.
 
 - **Dimensional Quarantine (Context-Dependent Physics):**
+
   - **Dynamic Truth Injection:** The `FactStipe` logic can now be overwritten by the active Archetype.
   - **The Trash Panda Protocol:** If the user triggers "THE COSMIC TRASH PANDA" archetype, the engine rewrites the definitions of "Trash" and "Void" to be **Positive (+1)** values, preventing false logic flags when finding value in ruin.
 
@@ -3847,10 +4005,12 @@ In reviewing my own source code `BoneAmanita271.py`, I have detected a violation
 ### ✨ New Features
 
 - **Mycelial Network (Lineage Tracking):**
+
   - Added provenance tracking (`MycelialNetwork`). The system now assigns `uuid4` tags to every draft and tracks "Genetic Drift" from parent to child.
   - **Visual History:** The Dashboard now displays the last 3 generations of the text to visualize improvements in Drag and Style.
 
 - **Metabolic States (Strict vs. Creative Modes):**
+
   - Defined discrete states for the Metabolic Reserve:
     - **STARVING (< 6 ATP):** "Strict Mode." Logic penalties are severe; abstractions are forbidden.
     - **GLUTTON (> 40 ATP):** "Creative Mode." Reality bending and logic tears are permitted as stylistic choices.
@@ -3868,10 +4028,12 @@ In reviewing my own source code `BoneAmanita271.py`, I have detected a violation
 ### 🚀 Major Architectural Upgrades
 
 - **Morphological Heuristics (The "Vision Correction"):**
+
   - **Linguistic Physics:** Now supports suffix-based detection. The engine identifies **Abstract** words (`-ness`, `-ity`, `-tion`) and **Kinetic** flows (`-ing`) dynamically, even if the specific word is not in the hardcoded dictionary.
   - **Fact Stipe v2.1:** Implemented "Root Seeking." The logic engine now strips suffixes (`-ed`, `-ly`, `-s`) to map complex words back to their elemental roots (e.g., detecting that "freezing" conflicts with "fire").
 
 - **Integrated Memory System (The "Hippocampus Wire"):**
+
   - **Active Recall:** The `BonepokeCore` now actively calls `memory.recall()` to check for stylistic repetition.
   - **Loop Detection:** **Clarence** has been upgraded with a new `loop_count` metric. He will now intervene if the user stays in the same stylistic mode (e.g., "Crystal") for more than 2 cycles, demanding a "Shift in Gears."
 
@@ -3895,12 +4057,14 @@ In reviewing my own source code `BoneAmanita271.py`, I have detected a violation
 ### 🚀 Major Architectural Upgrades
 
 - **Dimensional Manifold (Fact Stipe v2.0):**
+
   - Replaced the brittle `conflict_map` (list-based enemies) with a **Semantic Vector Space**.
   - Implemented `LUMENS` (Light/Dark), `DECIBELS` (Loud/Quiet), `VITALITY` (Life/Death), and `THERMAL` (Hot/Cold) dimensions.
   - **Logic:** Detecting opposing polarities in the same sentence now triggers a "REALITY TEAR."
   - **Penalty:** Logic breaches now explicitly set `valid: False` and deduct **10 ATP** from the Metabolic Reserve.
 
 - **Heuristic Timekeeper (Chronos Anchor v2.0):**
+
   - Removed dependency on hardcoded verb lists for tense detection.
   - Implemented **Bigram Anchoring** (checking previous words for pronouns) to distinguish nouns from verbs (e.g., "He runs" vs "The lens").
   - Added **Exclusion Lists** (`false_ed`, `false_s`) to ignore false positives like "red," "glass," and "moss".

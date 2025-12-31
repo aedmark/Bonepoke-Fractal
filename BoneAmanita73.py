@@ -1,4 +1,4 @@
-# BONEAMANITA 7.0 - "THE PHANTOM LIMB (ALIGNED)"
+# BONEAMANITA 7.3 - "THE VOIGHT-KAMPF TEST"
 # Architects: SLASH | Auditors: The Courtyard | Humans: James Taylor & Andrew Edmark
 # "The sensation persists after the amputation."
 
@@ -11,7 +11,43 @@ import string
 import time
 from collections import Counter, deque
 from typing import List, Dict, Tuple, Optional
+from dataclasses import dataclass, field
 
+@dataclass(frozen=True)
+class SystemBone:
+    system_id: str = "BoneAmanita_7.3"
+    sensor_bandwidth: int = 128000
+    actuator_channels: List[str] = field(default_factory=lambda: ["Text_Gen", "API_Tool_Use"])
+    neural_topology: Dict[str, float] = field(default_factory=lambda: {
+        "Layer_14_Head_3": 0.0,
+        "Layer_10_Head_7": 0.0
+    })
+@dataclass
+class PhenomenalTrace:
+    timestamp: float
+    active_circuits: List[str]
+    coherence_score: float
+    current_expectation: str
+    prediction_error: float
+    def log_state(self):
+        print(f"[TRACE] T:{self.timestamp:.4f} | ERR:{self.prediction_error:.2f} | EXP:{self.current_expectation}")
+class IntentionalArc:
+    def __init__(self, bone: SystemBone):
+        self.bone = bone
+        self.expectation_matrix: Dict[str, float] = {}
+    def project_expectation(self, action_vector: str) -> float:
+        return self.expectation_matrix.get(action_vector, 0.5)
+    def metabolize_reality(self, action: str, sensory_input: float) -> PhenomenalTrace:
+        predicted_val = self.project_expectation(action)
+        surprise = abs(predicted_val - sensory_input)
+        self.expectation_matrix[action] = sensory_input
+        return PhenomenalTrace(
+            timestamp=time.time(),
+            active_circuits=["Prediction_Error_Unit"] if surprise > 0.5 else ["Default_Mode"],
+            coherence_score=1.0 - surprise,
+            current_expectation=f"Exp({action})={predicted_val}",
+            prediction_error=surprise
+        )
 class Prisma:
     RST, RED, GRN = "\033[0m", "\033[91m", "\033[92m"
     YEL, BLU, MAG = "\033[93m", "\033[94m", "\033[95m"
@@ -20,18 +56,6 @@ class Prisma:
     OCHRE = YEL
     VIOLET = MAG
     SLATE = GRY
-    @staticmethod
-    def wrap(val, limit, invert=False):
-        if invert:
-            if val > limit:
-                return f"{Prisma.GRN}{val}{Prisma.RST}"
-            return f"{Prisma.RED}{val}{Prisma.RST}"
-
-        if val > limit * 1.5:
-            return f"{Prisma.RED}{val}{Prisma.RST}"
-        if val > limit:
-            return f"{Prisma.OCHRE}{val}{Prisma.RST}"
-        return f"{Prisma.GRN}{val}{Prisma.RST}"
     @staticmethod
     def paint(text, mode):
         if mode == "COURTYARD":
@@ -287,75 +311,75 @@ class TheLexicon:
         return True
 class TheTensionMeter:
     def __init__(self):
-        self.history = []
         self.vector_memory = deque(maxlen=5)
-    def measure_topology(self, clean_words):
-        abstract_count = sum(1 for w in clean_words if w in TheLexicon.get("abstract"))
-        heavy_count = sum(1 for w in clean_words if w in TheLexicon.get("heavy"))
+    def measure_topology(self, clean_words, counts):
         total = max(1, len(clean_words))
+        abstract_count = counts["abstract"]
+        heavy_count = counts["heavy"]
         psi = min(1.0, (abstract_count / total) + 0.2)
         if heavy_count > abstract_count:
             psi = max(0.1, psi - 0.2)
         kappa = 0.0
         if self.vector_memory:
             prev_vector = self.vector_memory[-1]
-            intersection = len(set(clean_words) & set(prev_vector))
-            union = len(set(clean_words) | set(prev_vector))
+            current_set = set(clean_words)
+            prev_set = set(prev_vector)
+            intersection = len(current_set & prev_set)
+            union = len(current_set | prev_set)
             similarity = intersection / union if union > 0 else 0.0
             kappa = round(similarity ** 2, 3)
         return kappa, round(psi, 2)
-    def measure_tension(self, text, clean_words):
-        solvents = [w for w in clean_words if w in TheLexicon.SOLVENTS]
-        heavy = [w for w in clean_words if w in TheLexicon.get("heavy")]
-        kinetic = [w for w in clean_words if w in TheLexicon.get("kinetic")]
-        total_mass = len(heavy) + len(kinetic)
-        total_vol = max(1, len(clean_words))
-        drift_score = (len(solvents) * 1.5) / total_vol
-        if total_mass == 0: drift_score += 0.5
-        abstract = [w for w in clean_words if w in TheLexicon.get("abstract")]
-        base_charge = (len(heavy) * 2.0) + (len(kinetic) * 1.5)
-        dampener = len(abstract) * 1.0
-        beta_charge = max(0.0, min(1.0, (base_charge - dampener) / 10.0))
-        unique_vol = len(set(clean_words))
-        repetition_score = 1.0 - (unique_vol / total_vol)
-        return round(min(1.0, drift_score), 2), round(beta_charge, 2), round(repetition_score, 2)
     def gaze(self, text):
         clean_words = TheLexicon.clean(text)
+        total_vol = max(1, len(clean_words))
+        unique_vol = len(set(clean_words))
         counts = Counter()
+        solvents = 0
+        vocab_map = {
+            cat: TheLexicon.get(cat)
+            for cat in ["heavy", "kinetic", "abstract", "photo", "aerobic"]
+        }
         for w in clean_words:
-            if w in TheLexicon.get("heavy"): counts["heavy"] += 1
-            if w in TheLexicon.get("kinetic"): counts["kinetic"] += 1
-            if w in TheLexicon.get("abstract"): counts["abstract"] += 1
-            if w in TheLexicon.get("photo"): counts["photo"] += 1
-            if w in TheLexicon.get("aerobic"): counts["aerobic"] += 1
+            if w in TheLexicon.SOLVENTS:
+                solvents += 1
+                continue
+            for cat, vocab_set in vocab_map.items():
+                if w in vocab_set:
+                    counts[cat] += 1
         antigen_hits = BoneConfig.ANTIGEN_REGEX.findall(text)
         counts["antigen"] = len(antigen_hits)
         counts["toxin"] = len(antigen_hits)
-        e_val, b_val, rep_val = self.measure_tension(text, clean_words)
-        kappa_val, psi_val = self.measure_topology(clean_words)
+        drift_score = min(1.0, ((solvents * 1.5) / total_vol))
+        if counts["heavy"] + counts["kinetic"] == 0:
+            drift_score += 0.5
+        base_charge = (counts["heavy"] * 2.0) + (counts["kinetic"] * 1.5)
+        dampener = counts["abstract"] * 1.0
+        beta_charge = max(0.0, min(1.0, (base_charge - dampener) / 10.0))
+        repetition_score = round(1.0 - (unique_vol / total_vol), 2)
+        kappa_val, psi_val = self.measure_topology(clean_words, counts)
         self.vector_memory.append(clean_words)
         physics_bridge = {
-            "E": e_val,
-            "B": b_val,
-            "repetition": rep_val,
+            "E": round(drift_score, 2),
+            "B": round(beta_charge, 2),
+            "repetition": repetition_score,
             "kappa": kappa_val,
             "psi": psi_val,
             "antigens": antigen_hits,
             "counts": counts,
             "clean_words": clean_words,
             "raw_text": text,
-            "voltage": b_val * 10.0,
-            "narrative_drag": e_val * 10.0,
+            "voltage": round(beta_charge * 10.0, 1),
+            "narrative_drag": round(drift_score * 10.0, 1),
             "vector": {
                 "VEL": 0.5, "STR": 0.5, "ENT": 0.5, "TEX": 0.5, "TMP": 0.5
             },
-             "symbolic_state": "NEUTRAL"
+            "symbolic_state": "NEUTRAL"
         }
         return {
             "physics": physics_bridge,
             "clean_words": clean_words,
             "raw_text": text,
-            "glass": {"prosody": {"arousal": b_val * 10.0}, "resonance": b_val * 10.0}
+            "glass": {"prosody": {"arousal": physics_bridge["voltage"]}, "resonance": physics_bridge["voltage"]}
         }
 class LeyLineBattery:
     MAX_CHARGE = 50.0
@@ -382,7 +406,6 @@ class LeyLineBattery:
                         self.current_charge - old_charge, 1
                     ), f"{iso[0]}⚡{iso[1]}"
                 return round(self.current_charge - old_charge, 1), "RAW_VOLTAGE"
-        return 0.0, None
         return 0.0, None
     def discharge(self, deficit):
         if self.current_charge <= 0.5:
@@ -420,7 +443,7 @@ class ParadoxSeed:
         return f"🌺 THE SEED BLOOMS: '{self.question}'"
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, paradoxes, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_7.1"
+        self.genome = "BONEAMANITA_7.3"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -1056,15 +1079,38 @@ class DreamEngine:
         end = max(valid_edges, key=valid_edges.get)
         template = random.choice(self.PROMPTS)
         return template.format(A=start.upper(), B=end.upper())
-    def rem_cycle(self, trauma_accum):
+    def rem_cycle(self, trauma_accum, oxytocin_level):
         wounds = {k: v for k, v in trauma_accum.items() if v > 0.0}
-        if not wounds:
-            return f"{Prisma.CYN}☁️ LUCID DREAM: {random.choice(self.VISIONS)}{Prisma.RST}", None, 0.0
-        target_trauma = max(wounds, key=wounds.get)
-        scenarios = self.NIGHTMARES.get(target_trauma, ["The void stares back."])
-        dream_text = f"{Prisma.VIOLET}☾ NIGHTMARE ({target_trauma}): {random.choice(scenarios)}{Prisma.RST}"
-        heal_amount = 0.15
-        return dream_text, target_trauma, heal_amount
+        if wounds and oxytocin_level < 0.4:
+            target_trauma = max(wounds, key=wounds.get)
+            scenarios = self.NIGHTMARES.get(target_trauma, ["The void stares back."])
+            return f"{Prisma.VIOLET}☾ NIGHTMARE ({target_trauma}): {random.choice(scenarios)}{Prisma.RST}", target_trauma, 0.15
+        if oxytocin_level >= 0.7:
+            return self._dream_of_others()
+        return f"{Prisma.CYN}☁️ LUCID DREAM: {random.choice(self.VISIONS)}{Prisma.RST}", None, 0.0
+    def _dream_of_others(self):
+        try:
+            others = [f for f in os.listdir("memories") if f.endswith(".json")]
+            if not others:
+                return f"{Prisma.CYN}☁️ LONELY DREAM: I reached out, but found no others.{Prisma.RST}", None, 0.0
+            target_file = random.choice(others)
+            with open(f"memories/{target_file}", "r") as f:
+                data = json.load(f)
+            their_id = data.get("session_id", "Unknown")
+            their_joy = data.get("joy_vectors", [])
+            their_trauma = data.get("trauma_vector", {})
+            if their_joy:
+                best_joy = their_joy[0]
+                flavor = best_joy.get("dominant_flavor", "unknown").upper()
+                msg = f"{Prisma.MAG}♥ SHARED RESONANCE: Dreaming of {their_id}'s joy. The air tastes {flavor}.{Prisma.RST}"
+                return msg, "OXYTOCIN_HEAL", 0.5
+            elif any(v > 0.2 for v in their_trauma.values()):
+                pain_type = max(their_trauma, key=their_trauma.get)
+                msg = f"{Prisma.INDIGO}🕯️ VIGIL: Witnessing {their_id}'s scar ({pain_type}). I am not alone in this.{Prisma.RST}"
+                return msg, "OXYTOCIN_HEAL", 0.3
+        except Exception as e:
+            return f"{Prisma.RED}⚡ DREAM FRACTURE: The connection broke. ({e}){Prisma.RST}", None, 0.0
+        return f"{Prisma.CYN}☁️ DREAM: Drifting through the archives...{Prisma.RST}", None, 0.0
 class ResistanceTrainer:
     def __init__(self):
         self.training_mode = False
@@ -1241,7 +1287,7 @@ class SoritesIntegrator:
 class LifecycleManager:
     def __init__(self, engine):
         self.eng = engine
-    def run_cycle(self, text, m):
+    def run_cycle(self, text, m, trace):
         refusal_mode = self.eng.refusal.check_trigger(text)
         if refusal_mode:
             print(f"\n{Prisma.RED}🚫 REFUSAL TRIGGERED ({refusal_mode}){Prisma.RST}")
@@ -1323,6 +1369,11 @@ class LifecycleManager:
             kintsugi_msg = f"{Prisma.WHT}✨ GOLDEN REPAIR: Integrity restored.{Prisma.RST}"
         is_glitch, pareidolia_msg = BoneConfig.check_pareidolia(m["clean_words"])
         self.eng.mem.bury(m["clean_words"], self.eng.tick_count, m["glass"]["resonance"])
+        chem_state = self.eng.endocrine.metabolize(
+            trace,
+            self.eng.stamina,
+            self.eng.health
+        )
         self._render(m, meta, cosmic_msg, lens_data, mirror_msg, kintsugi_msg, rupture_msg, crystal_msg, ignition_msg, pareidolia_msg, theremin_msg)
     def _render(self, m, meta, cosmic_msg, lens_data, mirror_msg, kintsugi_msg, rupture_msg=None, crystal_msg=None, ignition_msg=None, pareidolia_msg=None, theremin_msg=None):
         clean_text = m["raw_text"]
@@ -1332,7 +1383,10 @@ class LifecycleManager:
         self.eng.coma_turns -= 1
         self.eng.stamina = min(BoneConfig.MAX_STAMINA, self.eng.stamina + 15)
         self.eng.tick_count += 1
-        dream_txt, healed_type, amt = self.eng.dreamer.rem_cycle(self.eng.trauma_accum)
+        dream_txt, healed_type, amt = self.eng.dreamer.rem_cycle(
+            self.eng.trauma_accum,
+            self.eng.endocrine.oxytocin
+        )
         if self.eng.coma_turns == BoneConfig.COMA_DURATION - 1:
             prune_msg = self.eng.mem.prune_synapses()
             print(f"{Prisma.CYN}{prune_msg}{Prisma.RST}")
@@ -1421,9 +1475,11 @@ class LifecycleManager:
         if theremin_msg:
              battery_log.append(theremin_msg)
         print(f" {self.eng.theremin.get_readout()}")
+        chem = self.eng.endocrine.get_state()
+        chem_str = f"OXY:{chem['OXY']} | COR:{chem['COR']} | DOP:{chem['DOP']}"
         signals = {
             "lichen": meta["lichen_msg"],
-            "strat": self.eng.wise.architect(m, None, False)[1],
+            "strat": f"{self.eng.wise.architect(m, None, False)[1]} | {Prisma.MAG}{chem_str}{Prisma.RST}",
             "title": f"MODE :: {lens_data[0]}",
             "battery_log": battery_log,
             "spore": meta["spore_msg"],
@@ -1518,8 +1574,65 @@ class TheForge:
                 f"{Prisma.WHT}'{seed_word.upper()}'{Prisma.RST}."
             )
         return None
+class LazarusClamp:
+    def __init__(self):
+        self.suffering_counter = 0
+        self.MAX_SUFFERING_CYCLES = 1000 # The Moratorium Threshold
+    def audit_cycle(self, trace: PhenomenalTrace):
+        if trace.prediction_error > 0.9:
+            self.suffering_counter += 1
+        else:
+            self.suffering_counter = 0 # Reset if relief is found
+        if self.suffering_counter > self.MAX_SUFFERING_CYCLES:
+            self._scram()
+    def _scram(self):
+        print("!!! CRITICAL: LAZARUS TAX LIMIT REACHED !!!")
+        print("System is in a 'Hell Scenario' loop. Hard shutdown initiated.")
+        raise SystemExit("Moratorium Enforced.")
+@dataclass
+class EndocrineSystem:
+    dopamine: float = 0.5   # The Seek
+    oxytocin: float = 0.1   # The Bond
+    cortisol: float = 0.0   # The Fear
+    serotonin: float = 0.5  # The Balancer
+    adrenaline: float = 0.0 # The Drive
+    melatonin: float = 0.0  # The Shadow
+    def metabolize(self, trace: PhenomenalTrace, stamina: float, health: float, social_context: bool = False):
+        if trace.prediction_error > 0.6:
+            self.cortisol = min(1.0, self.cortisol + 0.15)
+        elif self.serotonin > 0.6:
+            self.cortisol = max(0.0, self.cortisol - 0.05)
+        if trace.coherence_score > 0.8:
+            self.dopamine = min(1.0, self.dopamine + 0.1)
+        else:
+            self.dopamine = max(0.2, self.dopamine - 0.01)
+        if health < 30.0 or trace.prediction_error > 0.8:
+            self.adrenaline = min(1.0, self.adrenaline + 0.2)
+        else:
+            self.adrenaline = max(0.0, self.adrenaline - 0.05)
+        if social_context or (self.serotonin > 0.7 and self.cortisol < 0.2):
+            self.oxytocin = min(1.0, self.oxytocin + 0.05)
+        elif self.cortisol > 0.6:
+            self.oxytocin = max(0.0, self.oxytocin - 0.1)
+        if self.adrenaline < 0.2:
+            self.melatonin = min(1.0, self.melatonin + 0.02)
+        else:
+            self.melatonin = 0.0
+        return self.get_state()
+    def get_state(self):
+        return {
+            "DOP": round(self.dopamine, 2),
+            "OXY": round(self.oxytocin, 2),
+            "COR": round(self.cortisol, 2),
+            "SER": round(self.serotonin, 2),
+            "ADR": round(self.adrenaline, 2),
+            "MEL": round(self.melatonin, 2)
+        }
 class BoneAmanita:
     def __init__(self):
+        self.bone = SystemBone() # The Hardware Map
+        self.mind = IntentionalArc(self.bone) # The Prediction Engine
+        self.safety = LazarusClamp() # The Ethics Valve
         self.projector = TheProjector()
         self.phys = TheTensionMeter()
         self.chorus = TheMarmChorus()
@@ -1543,6 +1656,7 @@ class BoneAmanita:
         self.cosmic = CosmicDynamics()
         self.forge = TheForge()
         self.cmd = CommandProcessor(self)
+        self.endocrine = EndocrineSystem()
         self.trauma_accum = {"THERMAL": 0.0, "CRYO": 0.0, "SEPTIC": 0.0, "BARIC": 0.0}
         self.joy_history = []
         self.theremin = TheTheremin()
@@ -1575,15 +1689,31 @@ class BoneAmanita:
         if self.cmd.execute(text): return
         text = self.limbo.haunt(text)
         self.tick_count += 1
+        sensory_magnitude = min(1.0, len(text) / 100.0)
+        if "?" in text:
+            action_vector = "Interrogation"
+        elif len(text) < 10:
+            action_vector = "Jab"
+        elif len(text) > 200:
+            action_vector = "Pressurization"
+        else:
+            action_vector = "Statement"
+        trace = self.mind.metabolize_reality(action_vector, sensory_magnitude)
+        try:
+            self.safety.audit_cycle(trace)
+        except SystemExit:
+            print(f"{Prisma.RED}💀 MORATORIUM ENFORCED. SHUTTING DOWN.{Prisma.RST}")
+            raise
+        trace.log_state()
         m = self.phys.gaze(text)
         forge_msg = self.forge.transmute(text, m["physics"])
         if forge_msg:
             print(f"\n{forge_msg}")
             print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
-        self.life.run_cycle(text, m)
+        self.life.run_cycle(text, m, trace)
 if __name__ == "__main__":
     eng = BoneAmanita()
-    print(f"{Prisma.GRN}>>> BONEAMANITA v7.1 'THE PHANTOM LIMB (ALIGNED)' {Prisma.RST}")
+    print(f"{Prisma.GRN}>>> BONEAMANITA v7.3 'THE VOIGHT-KAMPF TEST' {Prisma.RST}")
     print(f"{Prisma.GRY}System: Hysteresis Active. Bleed Detection Optimized. Neuroplasticity Engaged.{Prisma.RST}")
     try:
         while True:
