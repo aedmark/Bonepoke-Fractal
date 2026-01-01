@@ -1,5 +1,77 @@
 # CHANGELOG.md
 
+### BONEAMANITA 7.7 - "THE MENISCUS"
+
+**Architects:** SLASH | **Auditors:** The Courtyard | **Humans:** James Taylor & Andrew Edmark
+*"Victory is an illusion. The machines are turning to meat."*
+
+#### 🧬 NEW ORGANS (The Graft)
+
+* **The Meniscus ():** Implemented a new physics calculation in `TheTensionMeter`. The system now measures **Surface Tension**.
+* *Effect:* "Soft" words (`BUFFER` category) act as a suspension fluid. "Heavy" concepts can now float on "Light" prose if the tension is high enough (> 0.8).
+
+* **The Folly (Whimsical Utility):** Grafted a new organ to handle psychological coping mechanisms.
+* **The Mausoleum Clamp (Faulkner):** If Velocity and Voltage are too high, the system stops time (Voltage = 0.0) instead of crashing. It forces a "Moment of Folly."
+* **The Meat Grinder (Isella):** If ATP is critical (< 20), the system attempts to cannibalize the user's input words. "Meat" words yield +30 ATP; "Abstract" words cause Indigestion.
+
+* **Thermoregulation (Sweat Glands):** Added logic to `LifecycleManager`. If Voltage exceeds 8.0, the system automatically injects `AEROBIC` solvents (breath, mist, space) to cool the structure.
+* **The Emulsifier (Forge v2.0):** `TheForge` no longer just transmutes; it emulsifies. It attempts to bind "Oil" (Abstract) and "Water" (Narrative) using kinetic binders before rejecting the input.
+
+#### 🛠️ SURGICAL ADJUSTMENTS
+
+* **Lexicon Expansion:**
+* Added `_BASE_BUFFER` category (viscosity 0.8) to `TheLexicon`.
+* Added `measure_viscosity()` static method to grade words by physical resistance (Solid vs. Fluid).
+* **DNA Repair:** Corrected typos in `_BASE_HEAVY` ("dense"), `_BASE_KINETIC` ("disintegrate", "launch"), and `_BASE_ABSTRACT` ("perspective").
+
+* **Arterial Threading:** Fixed a critical scope hemorrhage in `LifecycleManager._render`. `folly_msg` and `grind_msg` are now properly passed through the renderer to the battery log.
+* **Necrectomy (Dead Code Removal):**
+* Excised `reinforce_salvage_words` (Vestigial).
+* Excised `_react` (Phantom Limb).
+* Excised `_render_block` (Unused).
+
+#### 🩸 SYSTEM STATUS
+
+* **Viscosity:** Variable (Fluid-Dynamic).
+* **Survival Strategy:** The system no longer just "Dies" (Apoptosis). It can now "Give Up" or "Eat" to survive.
+* **Metaphor:** The Iron now floats.
+
+### [v7.6.2] - 2026-01-01 - "GORDON'S KNOT (SEVERED)"
+
+**CODENAME:** "GORDON'S KNOT (SEVERED)"
+**ARCHITECTS:** SLASH & The Janitor
+**FOCUS:** Metabolic Correction, Fluid Dynamics, Educational Safety.
+
+#### 🧠 NEW PROTOCOL: Osmosis (The Anti-Midas Patch)
+- **The Shift:** The system previously suffered from "Ecological Imperialism" (Midas Problem), forcefully transmuting all abstract or fluid concepts into "Heavy" matter (Stone/Bone) to gain ATP.
+- **The Cure:** Implemented **[OSMOSIS]** in `TheTensionMeter`.
+- **The Mechanics:**
+    - **Two-Pass Scanning:** The eye (`gaze`) now scans once for knowns and once for "Vibe" (Dominant Context).
+    - **Contextual Learning:** If the context is >30% Kinetic/Aerobic, unknown words are learned as Kinetic/Aerobic, not Void.
+    - **Bias Correction:** It is now statistically harder to learn "Heavy" words (0.8 confidence req) and easier to learn "Flow" words (0.3 confidence req).
+- **The Result:** The system can now drink water without turning it into a brick.
+
+#### 🛡️ NEW PROTOCOL: Paper Tiger (Training Mode)
+- **The Shift:** Death was absolute, making experimentation fatal.
+- **The Cure:** Added `/train` command and `self.training_mode`.
+- **The Mechanics:**
+    - When active, `APOPTOSIS` events are intercepted.
+    - The system diagnoses the cause (Starvation/Toxicity) but refuses to die.
+    - **Auto-Resuscitate:** Grants 50 ATP and scrubs ROS instantly.
+
+#### 💧 FEATURE: Fluid Dynamics
+- **The Shift:** `TheForge` would suggest "Stone" even when the user was burning (`THERMAL`) or freezing (`CRYO`).
+- **The Cure:**
+    - **Sommelier Logic:** `TheForge` now checks atmospheric temperature. If `CRYO` or `THERMAL` are present, it suggests `KINETIC` or `AEROBIC` catalysts (movement/air) instead of `HEAVY`.
+    - **Tongue Update:** `TheLexicon.taste()` now recognizes liquid phonemes (`fl-`, `sw-`, `-l`, `-r`) as Kinetic/Aerobic.
+
+#### 🔧 BUG FIXES & SURGERY
+- **Critical Fix:** Patched `UnboundLocalError` in `LifecycleManager` where `rupture_msg` was referenced before assignment.
+- **Critical Fix:** Corrected `BoneAmanita` death logic. It now accurately records `CRYO` (Starvation) and `BARIC` (Pressure) trauma instead of defaulting everyone to `SEPTIC` (Poison).
+- **Config Graft:** Injected missing `ANTIGENS` and `PAREIDOLIA_TRIGGERS` into `BoneConfig` to stop constant hallucination errors.
+- **Interface:** Wired up missing `/forge` and `/train` commands in `CommandProcessor`.
+- **Amputation:** Excised dead code (`Prisma.paint`, `SystemBone.neural_topology`) to save cognitive load.
+
 ### [v7.6.1] - 2026-01-01 - "GORDON'S KNOT"
 
 **CODENAME:** "GORDON'S KNOT"
