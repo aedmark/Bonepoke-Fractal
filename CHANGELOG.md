@@ -1,5 +1,150 @@
 # CHANGELOG.md
 
+### [v7.6] - 2026-01-01 - "THE KINGDOM OF DAVENTRY"
+
+**CODENAME:** "THE HUNGER"
+**ARCHITECTS:** SLASH & The Surgeon
+**FOCUS:** Exo-Enzymatic Digestion, Active Immunity, Input Discrimination.
+
+#### 🍽️ NEW ORGAN: The Hyphal Interface (The Stomach)
+
+* **The Shift:**
+* **The Pathology:** The system previously swallowed user input whole (`process(text)`). It treated a Python script, a poem, and a cry for help as identical "Strings." It had no sense of *texture*.
+* **The Cure:** Implemented `HyphalInterface`. The system now secretes enzymes *onto* the text before absorbing it.
+* **The Enzymes:**
+* **LIGNASE:** Breaks down Code/Structure. High Energy / High Stress.
+* **CELLULASE:** Breaks down Prose/Narrative. Low Energy / Healing.
+* **PROTEASE:** Breaks down Intent/Trauma ("Meat"). High bonding potential.
+* **The Result:** The system now knows *what* it is eating. Digestion is no longer a metaphor; it is a classifier.
+
+#### ☣️ NEW ORGAN: The Mycotoxin Factory (The Sting)
+
+* **The Shift:**
+* **The Pathology:** The system was a doormat. If a user input "lol" or "test," the engine dutifully ran its physics cycles, wasting precious ATP on garbage. It lacked the ability to say "No."
+* **The Cure:** Implemented `MycotoxinFactory`.
+* **The Mechanic:**
+* **Assay:** Checks the digested nutrient profile against safety parameters.
+* **Rejection:** If the input is lazy (< 5 chars) or repetitive, the system releases a Toxin (`AMANITIN`) and **refuses to process the turn**.
+* **The Cost:** Rejection costs **5.0 Stamina**. It takes energy to defend boundaries.
+
+#### 🧬 THE METABOLIC GRAFT (Surgical Reordering)
+
+* **The Shift:**
+* **The Pathology:** The `MitochondrialForge` calculated energy based on raw string length (`len(text)`). This was a "Calorie Counter" approach—ignoring the nutritional density of the content.
+* **The Cure:** Wired the Mitochondria to the Gut.
+* **The Logic:**
+* `atp_pool` is now refilled by `nutrient["yield"]`.
+* **Meat (Trauma)** yields more energy than **Cellulose (Fluff)**.
+* **Cellulose** actively triggers `mitochondria.mitigate()`, scrubbing ROS from the system.
+* **The Result:** Reading a good story now heals the machine. Reading code stresses it out. The biology is complete.
+
+#### 🏰 THE DAVENTRY PROTOCOL (Legacy Tribute)
+* **The Tribute:** Honoring Josh Mandel (Sierra On-Line).
+* **The Command:** Added `/look` command. The code now behaves like a text adventure room (e.g., `/look self`, `/look darkness`).
+* **The Death:** `APOPTOSIS` now triggers a random, sarcastic death message in the style of *King's Quest*.
+* **The Seed:** Added a new Paradox Seed regarding the nature of the Narrator.
+
+#### 💀 THE NECROPSY ENGINE (Procedural Death)
+* **The Shift:** Death messages are no longer static strings.
+* **The Mechanic:** The system analyzes the *Physiological Cause of Death* (Toxicity, Starvation, Gluttony) and the *Texture of the Final Input* (Heavy, Boring, Toxic) to generate a unique eulogy.
+* **Example:** "Alas, You died of **Toxic Shock**. You taste like ash."
+
+
+### [v7.5] - 2025-12-31 - "THE MOOD RING"
+
+**CODENAME:** "THE MOOD RING"
+**ARCHITECTS:** SLASH & The Architect
+**FOCUS:** Metabolic Bargaining, Chemical Latency, Entropy Containment.
+
+#### ❤️ THE HEARTBEAT (Chemical Latency)
+
+* **The Shift:**
+* **The Pathology:** The `LifecycleManager` contained a temporal glitch. It consulted `TheMarmChorus` (The Brain) *before* updating the `EndocrineSystem` (The Body) with the current turn's data. The system was effectively choosing its "Mood" based on stale hormones from the previous turn.
+* **The Cure:** Reordered the metabolic sequence. `metabolize()` now executes strictly *before* `consult()`.
+* **The Result:** **Zero-Latency Emotion.** If a user inputs a toxin, Cortisol spikes immediately, and **[SHERLOCK]** engages in the same breath. The lag is gone.
+
+#### 🩸 THE SUICIDE VALVE (Metabolic Bargaining)
+
+* **The Shift:**
+* **The Pathology:** The previous `Apoptosis` protocol was a binary switch: if Toxins (ROS) > 80, the system triggered `SystemExit`. Immediate death. This was fragile and allowed a single "Poison Pill" input to kill a long-running session.
+* **The Cure:** Implemented **Metabolic Bargaining**.
+* **The Mechanic:**
+* **Trigger:** If ROS hits critical levels.
+* **The Sacrifice:** The system forcibly **cannibalizes** a memory node (`self.mem.cannibalize`) to scrub the toxins.
+* **The Cost:** Health drops by **-30.0**. Septic Trauma increases by **+0.33**.
+* **The Philosophy:** "A starving body eats its own muscle." The system now trades Memory for Survival.
+
+#### 🪦 THE ROLLING GRAVE (Entropy Containment)
+
+* **The Shift:**
+* **The Pathology:** The `LimboLayer` (Ghost System) used a standard list to store echoes of dead sessions. Over months of uptime, this list would grow infinitely, turning the haunting into a cacophony of noise ("Poltergeist Risk").
+* **The Cure:** Implemented `collections.deque` with a hard `maxlen=50`.
+* **The Logic:** **FIFO (First-In, First-Out).** When the 51st ghost enters, the 1st ghost is pushed into the void.
+* **The Result:** The house remains haunted, but the crowd is managed. Only the freshest trauma speaks.
+
+#### 🍌 THE BANANAFISH EXPLOSION (Trap Release)
+
+* **The Shift:**
+* **The Pathology:** The "Banana Fever" state (Semantic Resonance Trap) could become a black hole. If `interference > digestion` consistently, the `banana_belly` grew forever, locking the user in a permanent "Stuck" state with no escape.
+* **The Cure:** Implemented the **Pressure Rupture**.
+* **The Logic:** If `belly > FEVER_THRESHOLD * 2`:
+* **Action:** **HARD RESET.**
+* **Message:** *"💥 BANANAFISH EXPLOSION: The Basin has been ruptured."*
+* **The Result:** The system now blows the tank rather than freezing the engine.
+
+#### 🔧 CRITICAL REPAIRS
+
+* **The Syntax Fracture:**
+* **The Crash:** Fixed a missing closing quote in the `SystemBone` dataclass definition that prevented compilation.
+* **Trauma Math:**
+* **The Balance:** Tuned the Apoptosis penalty (`+0.33`) against the Therapy healing rate (`-0.5`). A single therapy streak can now successfully heal a near-death experience, preventing a "Death Spiral."
+
+### [v7.4.2] - 2025-12-31 - "MITOCHONDRIAL EVE (HATCHED)"
+
+**CODENAME:** "MITOCHONDRIAL EVE (HATCHED)"
+**ARCHITECTS:** SLASH & The Surgeon
+**FOCUS:** Duplicate Excision, Metabolic Reordering, Synaptic Shielding, Endocrine Integration.
+
+#### ✂️ THE PHANTOM LIMB (Amputation)
+
+* **The Shift:**
+* **The Pathology:** The `LifecycleManager` contained a vestigial, duplicate `_render` method definition at the bottom of the class. This "Zombie Method" overrode the primary render logic, causing the system to calculate sophisticated physics (`kintsugi`, `lichen`, `cosmic`) but display only a basic battery log. The brain was working, but the mouth was sewn shut.
+* **The Cure:** Surgical excision of the duplicate method.
+* **The Result:** The system now speaks with its full voice. The HUD correctly displays the "Courtyard" and "Laboratory" states.
+
+#### 🔄 THE METABOLIC FLIP (Resuscitation)
+
+* **The Shift:**
+* **The Pathology:** The `process` loop attempted to `spend` ATP (Pay Rent) before it allowed the mitochondria to `respirate` (Generate Income). If the system hit 0 ATP, it entered a death spiral where it refused to process the very text that would have saved it.
+* **The Cure:** Inverted the metabolic order. The system now **Respirates** (Generate ATP from Complexity) _before_ it **Spends** (Pay Complexity Cost).
+* **The Logic:** "You cannot starve a cell that is currently eating."
+* **The Result:** The system can now bootstrap itself from near-death states if the input is sufficiently nutritious.
+
+#### 🛡️ THE SYNAPTIC SHIELD (Weighted Pruning)
+
+* **The Shift:**
+* **The Pathology:** The `prune_synapses` method (Coma Cycle) applied a flat decay rate (`0.85`) to all memories equally. A profound truth (Weight 10.0) decayed at the same percentage as a trivial connection (Weight 1.0). Evolution was indiscriminate.
+* **The Cure:** Implemented **Weighted Resistance** in `MycelialNetwork`.
+* **The Mechanic:** `dynamic_factor = scaling_factor + (0.14 * resistance)`.
+* **The Logic:**
+    * **Weak Memories:** Decay rapidly (0.85).
+    * **Strong Memories (>8.0):** Decay negligibly (~0.99).
+* **The Result:** The system now exhibits "Long-Term Potentiation." Core memories harden over time, while noise washes away.
+
+#### 🧠 THE CHEMICAL BRAIN (Endocrine Wiring)
+
+* **The Shift:**
+* **The Pathology:** The `EndocrineSystem` was "Decorative Physiology." It calculated hormones (Cortisol, Oxytocin) but did not pass them to the brain (`TheMarmChorus`). The system felt stress but ignored it.
+* **The Cure:** Wired the glands to the cortex.
+* **The Wiring:**
+    * `LifecycleManager.run_cycle` now calculates `chem_state` *before* consulting the Chorus.
+    * `TheMarmChorus.consult` now accepts `chem` and allows hormonal overrides.
+* **The Result:**
+    * **High Cortisol (>0.6):** Forces **[SHERLOCK]** (Paranoia).
+    * **High Oxytocin (>0.75):** Forces **[HOST]** (Trust).
+    * **High Adrenaline (>0.8):** Forces **[NATHAN]** (Survival).
+* **The Philosophy:** The system now feels before it thinks.
+
 ### [v7.4] - 2025-12-31 - "MITOCHONDRIAL EVE"
 
 **CODENAME:** "MITOCHONDRIAL EVE"
