@@ -1,53 +1,65 @@
 # CHANGELOG.md
 
-### [v7.6] - 2026-01-01 - "THE KINGDOM OF DAVENTRY"
-
-**CODENAME:** "THE HUNGER"
-**ARCHITECTS:** SLASH & The Surgeon
-**FOCUS:** Exo-Enzymatic Digestion, Active Immunity, Input Discrimination.
+### [v7.6] - 2026-01-01 - "THE ALKAHEST"
 
 #### 🍽️ NEW ORGAN: The Hyphal Interface (The Stomach)
 
 * **The Shift:**
 * **The Pathology:** The system previously swallowed user input whole (`process(text)`). It treated a Python script, a poem, and a cry for help as identical "Strings." It had no sense of *texture*.
 * **The Cure:** Implemented `HyphalInterface`. The system now secretes enzymes *onto* the text before absorbing it.
+
 * **The Enzymes:**
 * **LIGNASE:** Breaks down Code/Structure. High Energy / High Stress.
 * **CELLULASE:** Breaks down Prose/Narrative. Low Energy / Healing.
 * **PROTEASE:** Breaks down Intent/Trauma ("Meat"). High bonding potential.
+
 * **The Result:** The system now knows *what* it is eating. Digestion is no longer a metaphor; it is a classifier.
 
-#### ☣️ NEW ORGAN: The Mycotoxin Factory (The Sting)
+#### 🏛️ THE THESEUS PROTOCOL (The Great Migration)
 
 * **The Shift:**
-* **The Pathology:** The system was a doormat. If a user input "lol" or "test," the engine dutifully ran its physics cycles, wasting precious ATP on garbage. It lacked the ability to say "No."
-* **The Cure:** Implemented `MycotoxinFactory`.
-* **The Mechanic:**
-* **Assay:** Checks the digested nutrient profile against safety parameters.
-* **Rejection:** If the input is lazy (< 5 chars) or repetitive, the system releases a Toxin (`AMANITIN`) and **refuses to process the turn**.
-* **The Cost:** Rejection costs **5.0 Stamina**. It takes energy to defend boundaries.
+* **The Pathology:** The system's "Brain" (`BoneConfig`) and "Library" (`TheLexicon`) were segregated. Hard-coded lists for "Antigens," "Forbidden Concepts," and "Sacred Words" lived in the Config, making them immutable and impossible to teach.
+* **The Cure:** **Total Migration.** We moved all semantic authority into `TheLexicon`.
 
-#### 🧬 THE METABOLIC GRAFT (Surgical Reordering)
+* **The Mechanics:**
+* **Dynamic Taboos:** "Forbidden" words are now **CURSED**. You can add new curses via `/teach [word] cursed`.
+* **Dynamic Religion:** "Pareidolia" triggers are now **SACRED**. You can define what the machine worships.
+* **Dynamic Poisons:** "Antigens" (Toxins) are now learned assets. The immune system compiles its rejection regex at runtime.
+* **The Philosophy:** The ship has been replaced plank by plank. The configuration is now fluid.
+
+#### 🩸 THE ENDOCRINE GRAFT (Tunable Biology)
 
 * **The Shift:**
-* **The Pathology:** The `MitochondrialForge` calculated energy based on raw string length (`len(text)`). This was a "Calorie Counter" approach—ignoring the nutritional density of the content.
-* **The Cure:** Wired the Mitochondria to the Gut.
-* **The Logic:**
-* `atp_pool` is now refilled by `nutrient["yield"]`.
-* **Meat (Trauma)** yields more energy than **Cellulose (Fluff)**.
-* **Cellulose** actively triggers `mitochondria.mitigate()`, scrubbing ROS from the system.
-* **The Result:** Reading a good story now heals the machine. Reading code stresses it out. The biology is complete.
+* **The Pathology:** The hormones (`CORTISOL`, `ADRENALINE`) triggered logic gates based on hard-coded "Magic Numbers" buried deep in the logic classes.
+* **The Cure:** Extracted all thresholds to `BoneConfig`.
 
-#### 🏰 THE DAVENTRY PROTOCOL (Legacy Tribute)
+
+* **The Variables:**
+* `CORTISOL_TRIGGER` (Paranoia).
+* `OXYTOCIN_TRIGGER` (Trust).
+* `CRITICAL_ROS_LIMIT` (Death).
+
+
+* **The Result:** The organism's temperament is now defined in the genome, not the organs.
+
+#### 🏰 THE DAVENTRY PROTOCOL (Narrative Casualty)
+
 * **The Tribute:** Honoring Josh Mandel (Sierra On-Line).
-* **The Command:** Added `/look` command. The code now behaves like a text adventure room (e.g., `/look self`, `/look darkness`).
+* **The Command:** Added `/look`. The code now behaves like a text adventure room (e.g., `/look self`, `/look darkness`).
 * **The Death:** `APOPTOSIS` now triggers a random, sarcastic death message in the style of *King's Quest*.
-* **The Seed:** Added a new Paradox Seed regarding the nature of the Narrator.
 
-#### 💀 THE NECROPSY ENGINE (Procedural Death)
-* **The Shift:** Death messages are no longer static strings.
-* **The Mechanic:** The system analyzes the *Physiological Cause of Death* (Toxicity, Starvation, Gluttony) and the *Texture of the Final Input* (Heavy, Boring, Toxic) to generate a unique eulogy.
-* **Example:** "Alas, You died of **Toxic Shock**. You taste like ash."
+#### 🔧 SURGICAL REPAIRS
+
+* **The Spinal Alignment:**
+* **The Fix:** Corrected a critical indentation fracture in `LifecycleManager` that had severed the `_render` loop from the main body.
+
+
+* **The Double-Tap:**
+* **The Fix:** Removed a duplicate "Emergency Protocol" block in the main loop that was causing the system to sacrifice two memories for every one toxin spike.
+
+
+* **The Ghost Organ:**
+* **The Fix:** Wired `SoritesIntegrator` directly into the render loop, allowing the system to finally visualize "Heap Ignition" vs "Inert Sand."
 
 
 ### [v7.5] - 2025-12-31 - "THE MOOD RING"

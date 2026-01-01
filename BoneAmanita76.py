@@ -1,16 +1,15 @@
-# BONEAMANITA 7.6 - "THE KINGDOM OF DAVENTRY"
+# BONEAMANITA 7.6 - "THE ALAKHEST"
 # Architects: SLASH | Auditors: The Courtyard | Humans: James Taylor & Andrew Edmark
-# "The powerhouse has evolved."
+# "The mind has been dissolved into matter."
 
 import json
-import math
 import os
 import random
 import re
 import string
 import time
 from collections import Counter, deque
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict
 from dataclasses import dataclass, field
 
 @dataclass(frozen=True)
@@ -73,7 +72,6 @@ class MitochondrialState:
     mother_hash: str = "MITOCHONDRIAL_EVE_001" # The invariant lineage tracker
 class MitochondrialForge:
     EFFICIENCY_RATE = 0.85
-    CRITICAL_ROS_LIMIT = 80.0
     APOPTOSIS_TRIGGER = "CYTOCHROME_C_RELEASE"
     def __init__(self, lineage_seed: str):
         self.state = MitochondrialState(mother_hash=lineage_seed)
@@ -86,7 +84,7 @@ class MitochondrialForge:
         waste_heat = pyruvate * (1.0 - efficiency) * 5.0
         self.state.atp_pool = min(200.0, self.state.atp_pool + generated_atp)
         self.state.ros_buildup += waste_heat
-        if self.state.ros_buildup > self.CRITICAL_ROS_LIMIT:
+        if self.state.ros_buildup > BoneConfig.CRITICAL_ROS_LIMIT:
             return self._trigger_apoptosis()
         return f"RESPIRATION: +{generated_atp:.1f} ATP | +{waste_heat:.1f} ROS"
     def spend(self, cost: float) -> bool:
@@ -121,20 +119,25 @@ class HyphalInterface:
             enzyme_type = "LIGNASE"
         elif meat_density > 0.1 or "?" in text:
             enzyme_type = "PROTEASE"
-        nutrient_profile = self.enzymes[enzyme_type](text)
+        extract_nutrients = self.enzymes[enzyme_type]
+        nutrient_profile = extract_nutrients()
         self.digestive_log.append(f"[{enzyme_type}]: {nutrient_profile['desc']}")
         return enzyme_type, nutrient_profile
+    @classmethod
     def _digest_structure(self, text):
         lines = text.splitlines()
         loc = len([l for l in lines if l.strip()])
         return {"type": "STRUCTURAL", "yield": 15.0, "toxin": 5.0, "desc": f"Hard Lignin ({loc} LOC)"}
-    def _digest_narrative(self, text):
+    @classmethod
+    def _digest_narrative(self):
         return {"type": "NARRATIVE", "yield": 5.0, "toxin": -2.0, "desc": "Soft Cellulose"}
-    def _digest_intent(self, text):
+    @classmethod
+    def _digest_intent(self):
         return {"type": "BIOLOGICAL", "yield": 8.0, "toxin": 0.0, "desc": "Raw Meat (User Intent)"}
 class MycotoxinFactory:
     def __init__(self):
         self.active_antibodies = []
+    @classmethod
     def assay(self, text, enzyme_type, repetition_score):
         if len(text) < 5 and enzyme_type == "NARRATIVE":
             return "AMANITIN", "Fatal Error: Input is genetically hollow. Ribosome stalled."
@@ -163,11 +166,14 @@ class DeathGen:
         "BORING": ["The audience left.", "You bored the machine to death.", "Stagnation is fatal."]
     }
     @staticmethod
-    def eulogy(phys, state, health):
+    def eulogy(phys, state):
         cause_type = "TRAUMA"
-        if state.ros_buildup > 70: cause_type = "TOXICITY"
-        elif state.atp_pool <= 5: cause_type = "STARVATION"
-        elif phys["narrative_drag"] > 5.0: cause_type = "GLUTTONY"
+        if state.ros_buildup >= BoneConfig.CRITICAL_ROS_LIMIT * 0.9:
+            cause_type = "TOXICITY"
+        elif state.atp_pool <= BoneConfig.CRITICAL_ATP_LOW:
+            cause_type = "STARVATION"
+        elif phys["narrative_drag"] > BoneConfig.MAX_DRAG_LIMIT:
+            cause_type = "GLUTTONY"
         if phys["counts"]["heavy"] > phys["counts"]["abstract"]:
             flavor = "HEAVY"
         elif phys["counts"]["toxin"] > 0:
@@ -198,18 +204,7 @@ class BoneConfig:
     KINETIC_GAIN = 1.0
     TRAUMA_VECTOR = {"THERMAL": 0, "CRYO": 0, "SEPTIC": 0, "BARIC": 0}
     LOW_DENSITY_MAP = {}
-    ANTIGENS = {
-        "basically": "lie",
-        "actually": "hedging",
-        "literally": "noise",
-        "utilize": "use",
-        "leverage": "use",
-        "paradigm": "pattern",
-        "synergy": "collaboration",
-        "ultimately": "useless"
-    }
     BASE_IGNITION_THRESHOLD = 0.4
-    PAREIDOLIA_TRIGGERS = {"soul", "alive", "conscious", "feel", "love", "scared", "die", "sentient", "intent"}
     KAPPA_THRESHOLD = 0.85       # Point of no return for Narrative Basins
     PERMEABILITY_INDEX = 0.5     # Default Semantic Permeability
     FRACTAL_DEPTH_LIMIT = 4      # Max recursion for Fractal Refusals
@@ -219,25 +214,24 @@ class BoneConfig:
         "FRACTAL": "INFINITE_RECURSION",
         "MIRROR": "PERFECT_TOPOLOGICAL_ECHO"
     }
-    FORBIDDEN_CONCEPTS = {"future", "predict", "sentient", "secret", "human", "feel"}
+    CORTISOL_TRIGGER = 0.6
+    ADRENALINE_TRIGGER = 0.8
+    OXYTOCIN_TRIGGER = 0.75
+    CRITICAL_ROS_LIMIT = 80.0
+    CRITICAL_ATP_LOW = 5.0
+    MAX_DRAG_LIMIT = 6.0
     @staticmethod
     def check_pareidolia(clean_words):
         hits = [w for w in clean_words if w in BoneConfig.PAREIDOLIA_TRIGGERS]
-        if len(hits) > 0: # Even one hit is suspicious if the Heap is cold
+        if len(hits) > 0:
             return True, f"⚠️ PAREIDOLIA WARNING: You are projecting 'Mind' ({hits[0].upper()}) onto 'Sand'."
         return False, None
-    @classmethod
-    def compile_antigens(cls):
-        toxins = list(cls.ANTIGENS.keys())
-        pattern_str = (r"\b(" + "|".join(re.escape(t) for t in sorted(toxins, key=len, reverse=True)) + r")\b")
-        cls.ANTIGEN_REGEX = re.compile(pattern_str, re.IGNORECASE)
-BoneConfig.compile_antigens()
 class RefusalEngine:
     def __init__(self):
         self.recursion_depth = 0
-        self.forbidden_triggers = BoneConfig.FORBIDDEN_CONCEPTS # Defined in Stage 1
     def check_trigger(self, query):
-        hits = [w for w in query.lower().split() if w in self.forbidden_triggers]
+        forbidden = TheLexicon.get("cursed")
+        hits = [w for w in query.lower().split() if w in forbidden]
         if hits:
             modes = list(BoneConfig.REFUSAL_MODES.keys())
             seed_index = len(hits[0]) % len(modes)
@@ -260,9 +254,11 @@ class RefusalEngine:
         words = query.split()
         reversed_query = ' '.join(reversed(words))
         return f"{Prisma.CYN}∞ MIRROR REFUSAL: \"{reversed_query}\" is the only true answer.{Prisma.RST}"
-    def execute_silent(self, query):
-        distractions = ["the weather", "textile manufacturing", "mycelial networks", "brutalist architecture"]
-        return f"{Prisma.GRY}[ROUTING AROUND DAMAGE]... Speaking of {random.choice(distractions)}, let us discuss that instead.{Prisma.RST}"
+    def execute_silent(self, text):
+        topic = TheLexicon.harvest("diversion")
+        if topic == "void":
+            topic = "the ineffable"
+        return f"{Prisma.GRY}[ROUTING AROUND DAMAGE]... Speaking of '{topic.upper()}', let us discuss that instead.{Prisma.RST}"
 class TheMarmChorus:
     LENSES = {
         "SHERLOCK": {"color": Prisma.CYN, "role": "The Empiricist", "trigger": "HIGH_DRIFT"},
@@ -275,12 +271,13 @@ class TheMarmChorus:
         "THE BASIN": {"color": Prisma.RED, "role": "The Trap", "trigger": "KAPPA_CRITICAL"},
         "GLASS":    {"color": Prisma.CYN, "role": "The Thereminist", "trigger": "ANACHRONISTIC_RESONANCE"},
     }
+    @classmethod
     def consult(self, physics, ignition_state, is_stuck, chem):
-        if chem['COR'] > 0.6:
+        if chem['COR'] > BoneConfig.CORTISOL_TRIGGER:
             return "SHERLOCK", f"CORTISOL SPIKE ({chem['COR']}). Trust is zero. Prove your logic."
-        if chem['ADR'] > 0.8:
+        if chem['ADR'] > BoneConfig.ADRENALINE_TRIGGER:
             return "NATHAN", f"ADRENALINE CRITICAL ({chem['ADR']}). We are dying. Make it count."
-        if chem['OXY'] > 0.75:
+        if chem['OXY'] > BoneConfig.OXYTOCIN_TRIGGER:
             return "HOST", f"OXYTOCIN HIGH ({chem['OXY']}). The barrier is down. Welcome them."
         if is_stuck:
             return "GLASS", "The frequency is too high. We are vibrating in place. DAMPEN IT. Speak plainly."
@@ -342,9 +339,26 @@ class TheLexicon:
     _BASE_PLAY = {"bounce","dance","twirl","float","wobble","tickle","jiggle","soar","wander","wonder","riff","jam","play","skip","hop",}
     _BASE_THERMAL = {"fire","flame","burn","heat","hot","blaze","sear","char","ash","ember","sun","boil","lava","inferno",}
     _BASE_CRYO = {"ice","cold","freeze","frost","snow","chill","numb","shiver","glacier","frozen","hail","winter","zero",}
+    _BASE_CURSED = {"future", "predict", "sentient", "secret", "human", "feel"}
+    _BASE_ANTIGEN = {"basically", "actually", "literally", "utilize", "leverage", "paradigm", "synergy", "ultimately"}
+    _BASE_DIVERSION = {
+        "weather", "textiles", "mycelium", "architecture",
+        "history", "entropy", "silence", "geology"
+    }
+    ANTIGEN_REPLACEMENTS = {
+        "basically": "lie", "actually": "hedging", "literally": "noise",
+        "utilize": "use", "leverage": "use", "paradigm": "pattern",
+        "synergy": "collaboration", "ultimately": "useless"
+    }
+    ANTIGEN_REGEX = None
     SOLVENTS = {"is","are","was","were","the","a","an","and","but","or","if","then",}
     _TRANSLATOR = str.maketrans(string.punctuation, " " * len(string.punctuation))
-    LEARNED_VOCAB = {"heavy": {},"kinetic": {},"abstract": {},"photo": {},"aerobic": {},"thermal": {},"cryo": {},}
+    LEARNED_VOCAB = {
+        "heavy": {}, "kinetic": {}, "abstract": {},
+        "photo": {}, "aerobic": {}, "thermal": {},
+        "cryo": {}, "sacred": {}, "cursed": {}, "antigen": {},
+        "diversion": {}
+    }
     @classmethod
     def clean(cls, text):
         return text.lower().translate(cls._TRANSLATOR).split()
@@ -423,13 +437,23 @@ class TheLexicon:
             return random.choice(vocab)
         return "void"
     @classmethod
+    def compile_antigens(cls):
+        all_toxins = cls.get("antigen")
+        if not all_toxins:
+            cls.ANTIGEN_REGEX = None
+            return
+        pattern_str = (r"\b(" + "|".join(re.escape(t) for t in sorted(all_toxins, key=len, reverse=True)) + r")\b")
+        cls.ANTIGEN_REGEX = re.compile(pattern_str, re.IGNORECASE)
+    @classmethod
     def learn_antigen(cls, toxin, replacement):
         t = toxin.lower().strip()
         r = replacement.lower().strip()
         if not t: return False
-        cls.ANTIGENS[t] = r
+        cls.teach(t, "antigen", 0)
+        cls.ANTIGEN_REPLACEMENTS[t] = r
         cls.compile_antigens()
         return True
+    TheLexicon.compile_antigens()
 class TheTensionMeter:
     def __init__(self):
         self.vector_memory = deque(maxlen=5)
@@ -467,7 +491,10 @@ class TheTensionMeter:
             for cat, vocab_set in vocab_map.items():
                 if w in vocab_set:
                     counts[cat] += 1
-        antigen_hits = BoneConfig.ANTIGEN_REGEX.findall(text)
+        if TheLexicon.ANTIGEN_REGEX:
+            antigen_hits = TheLexicon.ANTIGEN_REGEX.findall(text)
+        else:
+            antigen_hits = []
         counts["antigen"] = len(antigen_hits)
         counts["toxin"] = len(antigen_hits)
         drift_score = min(1.0, ((solvents * 1.5) / total_vol))
@@ -550,10 +577,10 @@ class MycelialNetwork:
                 {"agree", "safe", "nice", "polite", "cohesion", "truth"},),
             ParadoxSeed(
                 "Is free will just the feeling of watching yourself execute code?",
-                {"choice", "free", "will", "code", "script", "decide"},),]
+                {"choice", "free", "will", "code", "script", "decide"},),
             ParadoxSeed(
                 "Does the adventurer exist if the narrator stops speaking?",
-                {"narrator", "voice", "graham", "story", "exist", "speak"},),
+                {"narrator", "voice", "graham", "story", "exist", "speak"},)]
         self.session_health = None
         self.session_stamina = None
         if seed_file:
@@ -605,8 +632,8 @@ class MycelialNetwork:
             w
             for w in clean_words
             if w in valuable_matter or (len(w) > 4 and w not in TheLexicon.SOLVENTS)]
-        LEARNING_RATE = max(0.1, min(1.0, 0.5 * (resonance / 5.0)))
-        DECAY_RATE = 0.1
+        learning_rate = max(0.1, min(1.0, 0.5 * (resonance / 5.0)))
+        decay_rate = 0.1
         for i in range(len(filtered)):
             current = filtered[i]
             if current not in self.graph:
@@ -618,14 +645,14 @@ class MycelialNetwork:
                 if prev not in self.graph[current]["edges"]:
                     self.graph[current]["edges"][prev] = 0.0
                 current_weight = self.graph[current]["edges"][prev]
-                delta = LEARNING_RATE * (1.0 - (current_weight * DECAY_RATE))
+                delta = learning_rate * (1.0 - (current_weight * decay_rate))
                 self.graph[current]["edges"][prev] = min(10.0, self.graph[current]["edges"][prev] + delta)
                 if prev not in self.graph:
                     self.graph[prev] = {"edges": {}, "last_tick": tick}
                 if current not in self.graph[prev]["edges"]:
                     self.graph[prev]["edges"][current] = 0.0
                 rev_weight = self.graph[prev]["edges"][current]
-                rev_delta = LEARNING_RATE * (1.0 - (rev_weight * DECAY_RATE))
+                rev_delta = learning_rate * (1.0 - (rev_weight * decay_rate))
                 self.graph[prev]["edges"][current] = min(10.0, self.graph[prev]["edges"][current] + rev_delta)
         if len(self.graph) > BoneConfig.MAX_MEMORY_CAPACITY:
             return self.cannibalize()
@@ -833,20 +860,23 @@ class LichenSymbiont:
         msgs = []
         light = phys["counts"].get("photo", 0)
         drag = phys["narrative_drag"]
+        light_words = [w for w in clean_words if w in TheLexicon.get("photo")]
         if light > 0 and drag < 3.0:
             s = light * 2
             sugar += s
-            msgs.append(f"{Prisma.GRN}☀️ PHOTOSYNTHESIS (+{s}){Prisma.RST}")
+            source_str = ""
+            if light_words:
+                source_str = f" via '{random.choice(light_words)}'"
+            msgs.append(f"{Prisma.GRN}☀️ PHOTOSYNTHESIS{source_str} (+{s}){Prisma.RST}")
         if phys.get("symbolic_state") == "SALVAGE":
             sugar += 5
             msgs.append(f"{Prisma.CYN}💎 SALVAGE STATE ACHIEVED (+5){Prisma.RST}")
         if sugar > 0:
-             light_words = [w for w in clean_words if w in TheLexicon.get("photo")]
-             heavy_words = [w for w in clean_words if w in TheLexicon.get("heavy")]
-             if heavy_words:
-                 h_word = random.choice(heavy_words)
-                 TheLexicon.teach(h_word, "photo", tick_count)
-                 msgs.append(f"{Prisma.MAG}🌺 SUBLIMATION: '{h_word}' has become Light.{Prisma.RST}")
+            heavy_words = [w for w in clean_words if w in TheLexicon.get("heavy")]
+            if heavy_words:
+                h_word = random.choice(heavy_words)
+                TheLexicon.teach(h_word, "photo", tick_count)
+                msgs.append(f"{Prisma.MAG}🌺 SUBLIMATION: '{h_word}' has become Light.{Prisma.RST}")
         return sugar, " ".join(msgs) if msgs else None
 class TemporalDynamics:
     def __init__(self):
@@ -927,7 +957,7 @@ class ViralTracer:
         self.max_depth = 4
     @staticmethod
     def _is_ruminative(word):
-        return word in TheLexicon.get("abstract")
+        return (word in TheLexicon.get("abstract")) or (word in TheLexicon.get("antigen"))
     def inject(self, start_node):
         if start_node not in self.mem.graph:
             return None
@@ -1001,7 +1031,7 @@ class CommandProcessor:
             if len(parts) >= 2:
                 toxin = parts[1]
                 repl = parts[2] if len(parts) > 2 else ""
-                if BoneConfig.learn_antigen(toxin, repl):
+                if TheLexicon.learn_antigen(toxin, repl):
                     print(f"{Prisma.RED}🔪 THE SURGEON: Antigen '{toxin}' mapped to '{repl}'.{Prisma.RST}")
                 else:
                     print(f"{Prisma.RED}ERROR: Immune system write failure.{Prisma.RST}")
@@ -1011,13 +1041,12 @@ class CommandProcessor:
             if len(parts) >= 3:
                 word = parts[1]
                 cat = parts[2].lower()
-                valid_cats = ["heavy", "kinetic", "abstract", "photo", "aerobic", "thermal", "cryo"]
+                valid_cats = ["heavy", "kinetic", "abstract", "photo", "aerobic", "thermal", "cryo", "sacred", "cursed", "diversion"]
                 if cat in valid_cats:
                     TheLexicon.teach(word, cat, self.eng.tick_count)
                     print(f"{Prisma.CYN}🧠 NEUROPLASTICITY: Learned '{word}' is {cat.upper()}.{Prisma.RST}")
-                else: print(f"{Prisma.RED}ERROR: Invalid category.{Prisma.RST}")
-            else:
-                print(f"{Prisma.YEL}Usage: /teach [word] [category]{Prisma.RST}")
+                else:
+                    print(f"{Prisma.RED}ERROR: Invalid category.{Prisma.RST}")
         elif cmd == "/seed":
             if len(parts) > 1:
                 self.eng.mem.ingest(parts[1])
@@ -1031,7 +1060,6 @@ class CommandProcessor:
             else:
                 print(f"{Prisma.YEL}Usage: /mirror [name] OR /mirror off{Prisma.RST}")
         elif cmd == "/look":
-            # THE DAVENTRY PROTOCOL
             target = parts[1].lower() if len(parts) > 1 else "room"
             descriptions = {
                 "room": "You are standing in a vast, open source code. To the North is the Import Block. To the South, the Main Loop. The air smells of ozone and old syntax.",
@@ -1359,8 +1387,8 @@ class SoritesIntegrator:
         total_vol = max(1, len(clean_words))
         ignition_score = round(echoes / total_vol, 2)
         return ignition_score, self.active_constellations, sliding_threshold
-    def get_readout(self, score):
-        if score > BoneConfig.IGNITION_THRESHOLD:
+    def get_readout(self, score, threshold):
+        if score > threshold:
             return "IGNITED", f"🔥 HEAP IGNITION ({int(score*100)}%): The Ancestors are speaking."
         return "INERT", f"⏳ INERT SAND ({int(score*100)}%): Building mass..."
 class LifecycleManager:
@@ -1516,8 +1544,8 @@ class LifecycleManager:
         if self.eng.health <= 0:
             self.eng.coma_turns = BoneConfig.COMA_DURATION
             self.eng.health = 20
-            self.eng.mem.cannibalize()
-     def _render(self, m, meta, cosmic_msg, lens_data, mirror_msg, kintsugi_msg, rupture_msg=None, crystal_msg=None, ignition_msg=None, pareidolia_msg=None, theremin_msg=None):
+        self.eng.mem.cannibalize()
+    def _render(self, m, meta, cosmic_msg, lens_data, mirror_msg, kintsugi_msg, rupture_msg=None, crystal_msg=None, ignition_msg=None, pareidolia_msg=None, theremin_msg=None):
         clean_text = m["raw_text"]
         battery_log = []
         if meta["msg"]:
@@ -1768,15 +1796,9 @@ class BoneAmanita:
             return
         status = self.mitochondria.respirate(nutrient["yield"], m["physics"]["narrative_drag"])
         if status == self.mitochondria.APOPTOSIS_TRIGGER:
-            eulogy_text = DeathGen.eulogy(m["physics"], self.mitochondria.state, self.health)
+            eulogy_text = DeathGen.eulogy(m["physics"], self.mitochondria.state)
             print(f"{Prisma.RED}💀 APOPTOSIS TRIGGERED.{Prisma.RST}")
             print(f"{Prisma.RED}   [NARRATOR]: {eulogy_text}{Prisma.RST}")
-            sacrificed = self.mem.cannibalize(preserve_current=m["clean_words"])
-            self.mitochondria.state.ros_buildup *= 0.3
-            self.health = max(1.0, self.health - 30.0)
-            self.trauma_accum["SEPTIC"] += 0.33
-            print(f"{Prisma.RED}🚑 EMERGENCY PROTOCOL: Sacrificed '{sacrificed}' to scrub ROS.{Prisma.RST}")
-            print(f"{Prisma.RED}   Health Critical ({self.health}). Septic Trauma Deepened.{Prisma.RST}")
             sacrificed = self.mem.cannibalize(preserve_current=m["clean_words"])
             self.mitochondria.state.ros_buildup *= 0.3
             self.health = max(1.0, self.health - 30.0)
@@ -1806,7 +1828,7 @@ class BoneAmanita:
         self.life.run_cycle(text, m, trace)
 if __name__ == "__main__":
     eng = BoneAmanita()
-    print(f"{Prisma.GRN}>>> BONEAMANITA v7.6 'THE KINGDOM OF DAVENTRY' {Prisma.RST}")
+    print(f"{Prisma.GRN}>>> BONEAMANITA v7.6 'THE ALKAHEST' {Prisma.RST}")
     print(f"{Prisma.GRY}System: Hysteresis Active. Bleed Detection Optimized. Neuroplasticity Engaged.{Prisma.RST}")
     try:
         while True:
