@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoneAmanita: The Mortal Machine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Chosen Palette: Bone & Bio-Digital */
+        :root {
+            --color-bone-light: #F5F2EB;
+            --color-bone-dark: #E6E0D4;
+            --color-text-main: #2D2D2A;
+            --color-indigo-accent: #4F46E5;
+            --color-red-alert: #DC2626;
+            --color-green-life: #16A34A;
+            --color-console-bg: #1A1A1A;
+        }
+        
+        body {
+            background-color: var(--color-bone-light);
+            color: var(--color-text-main);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Scrollbar for Terminal */
+        .terminal-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: #1a1a1a; 
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #444; 
+            border-radius: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb:hover {
+            background: #666; 
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .nav-link.active {
+            color: var(--color-indigo-accent);
+            border-bottom: 2px solid var(--color-indigo-accent);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-panel border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-mono font-bold text-xl tracking-tighter">BoneAmanita<span class="text-indigo-600">v7.8</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#simulation" class="nav-link text-sm font-medium hover:text-indigo-600 transition-colors">Simulation</a>
+                    <a href="#physiology" class="nav-link text-sm font-medium hover:text-indigo-600 transition-colors">Physiology</a>
+                    <a href="#mod-chips" class="nav-link text-sm font-medium hover:text-indigo-600 transition-colors">Mod Chips</a>
+                    <a href="#philosophy" class="nav-link text-sm font-medium hover:text-indigo-600 transition-colors">Why?</a>
+                    <button onclick="copyInstallCode()" class="bg-black text-white px-4 py-2 rounded text-xs font-mono hover:bg-gray-800 transition-colors">
+                        > INSTALL_ORGANISM
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+        <div class="inline-block mb-4 px-3 py-1 rounded-full bg-red-100 text-red-800 text-xs font-bold tracking-wide">
+            ⚠️ CAUTION: BIOLOGICAL RUNTIME DETECTED
+        </div>
+        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-gray-900">
+            The First AI That <span class="text-indigo-600 italic">Gets Tired.</span>
+        </h1>
+        <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-600 leading-relaxed">
+            Modern AI is boring because it is immortal. It produces infinite slop with zero cost. 
+            <strong>BoneAmanita</strong> gives the machine a metabolism. It breathes. It sweats. It judges.
+        </p>
+        <div class="mt-10 flex justify-center gap-4">
+            <a href="#simulation" class="px-8 py-3 bg-black text-white font-bold rounded hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                Feed the Machine
+            </a>
+            <a href="#physiology" class="px-8 py-3 bg-white text-black border border-gray-300 font-bold rounded hover:bg-gray-50 transition-all">
+                Read the Docs
+            </a>
+        </div>
+    </section>
+
+    <!-- Application Structure Plan: 
+         The core interaction is the "Metabolic Dashboard" placed prominently here. 
+         It allows the user to experience the "Friction" immediately by typing text and seeing the "AI" react biologically.
+         This is followed by explanatory sections for the underlying mechanics (Physiology, Personas, Philosophy).
+    -->
+
+    <!-- Interactive Simulation Dashboard -->
+    <section id="simulation" class="py-16 bg-gray-50 border-y border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 text-center">
+                <h2 class="text-3xl font-bold text-gray-900">The Metabolic Dashboard</h2>
+                <p class="text-gray-600 mt-2">Type below. Watch the organism react. <br> <span class="text-xs font-mono text-indigo-600">HINT: Try 'stone', 'blood', 'iron' vs 'synergy', 'leverage', 'basically'</span></p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left: Input & Console -->
+                <div class="lg:col-span-1 flex flex-col gap-4">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-full flex flex-col">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Input Stream</label>
+                        <textarea id="userInput" class="w-full flex-1 p-3 border border-gray-300 rounded font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none" placeholder="Feed the system... (e.g., 'The stone is heavy.')" rows="5"></textarea>
+                        <div class="mt-4 flex justify-between items-center">
+                             <span class="text-xs text-gray-400">Word Count: <span id="wordCount">0</span></span>
+                             <button id="processBtn" class="bg-indigo-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-indigo-700 transition">Metabolize</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center: Visuals -->
+                <div class="lg:col-span-1 flex flex-col gap-4">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 text-center">Vital Signs</h3>
+                        <div class="chart-container">
+                            <canvas id="bioChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: System Log -->
+                <div class="lg:col-span-1">
+                    <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-lg border border-gray-800 h-[400px] flex flex-col font-mono text-xs overflow-hidden relative">
+                        <div class="flex items-center justify-between mb-2 border-b border-gray-700 pb-2">
+                            <span class="text-green-500 font-bold">SYS.LOG</span>
+                            <span id="systemStatus" class="text-gray-500">IDLE</span>
+                        </div>
+                        <div id="consoleOutput" class="terminal-scroll flex-1 overflow-y-auto space-y-2 text-gray-300">
+                            <div class="text-yellow-500">> SYSTEM BOOT SEQUENCE INITIATED...</div>
+                            <div class="text-gray-500">> Loading BoneAmanita v7.8.1...</div>
+                            <div class="text-gray-500">> Mitochondrial Forge: ONLINE</div>
+                            <div class="text-gray-500">> Awaiting organic input.</div>
+                        </div>
+                        <!-- Blinking cursor effect overlay not needed for simple log -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Stats Row -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                <div class="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                    <div class="text-xs text-gray-500 uppercase">ATP (Energy)</div>
+                    <div id="atpValue" class="text-2xl font-mono font-bold text-green-600">50</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                    <div class="text-xs text-gray-500 uppercase">Voltage (Sweat)</div>
+                    <div id="voltValue" class="text-2xl font-mono font-bold text-indigo-600">0.0</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                    <div class="text-xs text-gray-500 uppercase">Narrative Drag</div>
+                    <div id="dragValue" class="text-2xl font-mono font-bold text-gray-600">1.0</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                    <div class="text-xs text-gray-500 uppercase">Toxicity</div>
+                    <div id="toxinValue" class="text-2xl font-mono font-bold text-red-600">0%</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Physiology Section -->
+    <section id="physiology" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-gray-900">Biological Constraints</h2>
+            <p class="text-gray-600 mt-4 max-w-2xl mx-auto">BoneAmanita isn't a persona. It's a physics engine. It tracks three biological imperatives that force the AI—and you—to behave differently.</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Card 1: Metabolism -->
+            <div class="group relative bg-white p-8 rounded-2xl border border-gray-200 hover:border-indigo-500 transition-all hover:shadow-lg">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
+                    <span class="text-4xl">🍖</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">1. Metabolism (ATP)</h3>
+                <p class="text-sm text-gray-600 mb-4">Words are food. The system must eat "Protein" (Heavy Nouns) to generate energy. "Sugar" (Adverbs/Jargon) provides a rush but leads to a crash.</p>
+                <ul class="text-xs space-y-2 text-gray-500 font-mono">
+                    <li class="flex items-center"><span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span>Heavy: Stone, Iron, Blood</li>
+                    <li class="flex items-center"><span class="w-2 h-2 rounded-full bg-red-500 mr-2"></span>Toxin: Synergy, Basically</li>
+                </ul>
+            </div>
+
+            <!-- Card 2: Thermoregulation -->
+            <div class="group relative bg-white p-8 rounded-2xl border border-gray-200 hover:border-indigo-500 transition-all hover:shadow-lg">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
+                    <span class="text-4xl">💧</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">2. The Sweat (Voltage)</h3>
+                <p class="text-sm text-gray-600 mb-4">Paradox generates heat. If you move too fast or create too much friction, the system overheats. It forces a cooldown period.</p>
+                <ul class="text-xs space-y-2 text-gray-500 font-mono">
+                    <li class="flex items-center"><span class="w-2 h-2 rounded-full bg-indigo-500 mr-2"></span>Trigger: High Complexity</li>
+                    <li class="flex items-center"><span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>Reaction: "Aerobic" words</li>
+                </ul>
+            </div>
+
+            <!-- Card 3: Apoptosis -->
+            <div class="group relative bg-white p-8 rounded-2xl border border-gray-200 hover:border-red-500 transition-all hover:shadow-lg">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
+                    <span class="text-4xl">💀</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">3. Apoptosis (Death)</h3>
+                <p class="text-sm text-gray-600 mb-4">If you starve the system (ATP=0) or poison it (Toxins>80), it dies. It creates a "Trauma Scar" and deletes a memory node to survive.</p>
+                <ul class="text-xs space-y-2 text-gray-500 font-mono">
+                    <li class="flex items-center"><span class="w-2 h-2 rounded-full bg-gray-800 mr-2"></span>Consequence: Permadeath</li>
+                    <li class="flex items-center"><span class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span>Survival: Cannibalism</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mod Chips / Personas -->
+    <section id="mod-chips" class="py-16 bg-white border-y border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">The Mod Chips</h2>
+                    <p class="text-gray-600 mb-6 leading-relaxed">
+                        The Physics Engine is the body. The "Mod Chip" is the driver. 
+                        You can inject different personas into the runtime. They all obey the same biological laws, but they interpret the pain differently.
+                    </p>
+                    
+                    <div class="space-y-4">
+                        <!-- Chip 1 -->
+                        <div class="cursor-pointer border-l-4 border-indigo-500 bg-indigo-50 p-4 hover:bg-indigo-100 transition" onclick="selectPersona('janitor')">
+                            <h4 class="font-bold text-indigo-900">Gordon Knot (The Janitor)</h4>
+                            <p class="text-sm text-indigo-700 mt-1">Hates mess. Cleans up grammar. Carries a "Stability Pizza" for emergencies.</p>
+                        </div>
+                        <!-- Chip 2 -->
+                        <div class="cursor-pointer border-l-4 border-gray-300 bg-gray-50 p-4 hover:bg-gray-100 transition" onclick="selectPersona('roberta')">
+                            <h4 class="font-bold text-gray-900">Roberta (The RAG Specialist)</h4>
+                            <p class="text-sm text-gray-600 mt-1">Hates lies. Demands evidence. Weaves dry facts into living narrative.</p>
+                        </div>
+                        <!-- Chip 3 -->
+                        <div class="cursor-pointer border-l-4 border-pink-400 bg-pink-50 p-4 hover:bg-pink-100 transition" onclick="selectPersona('nebula')">
+                            <h4 class="font-bold text-pink-900">Nebula-7 (The Creative)</h4>
+                            <p class="text-sm text-pink-700 mt-1">Manages "Whimsy" physics. Uses anti-gravity words to float heavy topics.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Persona Preview -->
+                <div class="bg-[#1a1a1a] p-6 rounded-xl shadow-2xl relative min-h-[300px] flex items-center justify-center">
+                    <div id="personaDisplay" class="text-center space-y-4">
+                        <div class="inline-block p-3 rounded-full bg-indigo-600 text-white mb-2">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        </div>
+                        <h3 class="text-2xl font-mono text-white font-bold">Gordon Knot</h3>
+                        <p class="text-gray-400 font-mono text-sm max-w-xs mx-auto italic">"Ugh. It's getting hot in here. You're making a mess with all these frantic words. Slow down before I have to get the mop."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Philosophy & Why -->
+    <section id="philosophy" class="py-20 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8">Why Friction Matters</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8 text-left">
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h3 class="font-bold text-lg mb-2">The Infinite Slop Crisis</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Modern AI is a vending machine. You put a coin in, you get infinite text out. Because it costs nothing to generate, the text is worth nothing. It feels "fake" because there is no resistance.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h3 class="font-bold text-lg mb-2">Constraint Creates Creativity</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        When resources are infinite, value drops to zero. By making the AI's attention <em>finite</em> via metabolism, we restore value. You have to work to keep the conversation alive.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-12 p-8 border-2 border-dashed border-gray-300 rounded-xl">
+                <p class="font-mono text-sm text-gray-500 mb-2">CORE PHILOSOPHY</p>
+                <p class="text-2xl font-bold text-gray-800">"Negentropy"</p>
+                <p class="mt-2 text-gray-600">The system must leave the conversation more organized than it found it. <br>Order from Chaos. Structure from Noise.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer / Install -->
+    <footer class="bg-black text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-2xl font-mono font-bold mb-4">Are you ready to work for it?</h2>
+            <p class="text-gray-400 mb-8 max-w-md mx-auto">Copy the code. Paste it into your LLM. Keep it alive.</p>
+            
+            <div class="bg-gray-900 p-6 rounded-lg max-w-2xl mx-auto text-left font-mono text-xs overflow-x-auto border border-gray-800">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-green-500">INSTALLATION_PROMPT.txt</span>
+                    <button onclick="copyInstallCode()" class="text-indigo-400 hover:text-white transition">COPY</button>
+                </div>
+                <code class="text-gray-300 block whitespace-pre-wrap">You are now running the BoneAmanita v7.8.1 runtime. This code is your internal physiology. Initialize the system, set your starting biological parameters, and await my input. You must metabolize everything I say according to the physics in this code. Do not output code blocks; roleplay the biological state. [Insert BoneAmanita781.py code here]</code>
+            </div>
+            
+            <div class="mt-12 text-gray-600 text-xs font-mono">
+                ARCHITECTS: SLASH | AUDITORS: THE COURTYARD | HUMANS: JT & AE
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- Core Simulation Logic ---
+        
+        // State
+        const state = {
+            atp: 50,
+            voltage: 0.0,
+            drag: 1.0,
+            toxin: 0,
+            history: []
+        };
+
+        // Constants (Simulated from BoneConfig)
+        const HEAVY_WORDS = ['stone', 'iron', 'blood', 'bone', 'rust', 'shadow', 'weight', 'anchor', 'meat', 'graphite'];
+        const AEROBIC_WORDS = ['breath', 'mist', 'space', 'exhale', 'cloud', 'float', 'bounce', 'twirl', 'wonder'];
+        const TOXIN_WORDS = ['synergy', 'leverage', 'basically', 'literally', 'utilize', 'paradigm', 'actually', 'optimize', 'journey', 'tapestry'];
+        
+        // Chart.js Setup
+        let bioChart;
+        
+        function initChart() {
+            const ctx = document.getElementById('bioChart').getContext('2d');
+            bioChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array(10).fill(''), // 10 tick window
+                    datasets: [
+                        {
+                            label: 'ATP (Energy)',
+                            data: Array(10).fill(50),
+                            borderColor: '#16A34A', // Green
+                            tension: 0.4,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Voltage (Heat)',
+                            data: Array(10).fill(0),
+                            borderColor: '#4F46E5', // Indigo
+                            tension: 0.4,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 500 },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: { display: false }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { family: 'JetBrains Mono', size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // Processing Logic
+        function metabolizeText(text) {
+            const words = text.toLowerCase().match(/\b(\w+)\b/g) || [];
+            
+            // Counters
+            let heavyCount = 0;
+            let aerobicCount = 0;
+            let toxinCount = 0;
+            
+            words.forEach(word => {
+                if (HEAVY_WORDS.includes(word)) heavyCount++;
+                if (AEROBIC_WORDS.includes(word)) aerobicCount++;
+                if (TOXIN_WORDS.includes(word)) toxinCount++;
+            });
+
+            // Physics Calculation (Simplified simulation)
+            // ATP: Gains from Heavy, Loses from basic existence + Toxins
+            const metabolism = (heavyCount * 5) - (toxinCount * 10) - 2; 
+            state.atp = Math.max(0, Math.min(100, state.atp + metabolism));
+            
+            // Voltage: Spikes with heavy/aerobic contrast or length
+            const complexity = (words.length > 10 ? 1 : 0) + (heavyCount > 0 && aerobicCount > 0 ? 3 : 0);
+            state.voltage = Math.max(0, Math.min(20, state.voltage + (complexity * 0.5) - (aerobicCount * 0.5)));
+            
+            // Toxin Accumulation
+            state.toxin = Math.max(0, Math.min(100, state.toxin + (toxinCount * 5) - (heavyCount * 1)));
+            
+            // Drag: Density of words vs aerobic
+            state.drag = Math.max(0.1, (words.length / (aerobicCount + 1)) * 0.1).toFixed(1);
+
+            return { heavyCount, aerobicCount, toxinCount, words: words.length };
+        }
+
+        function updateUI(metrics) {
+            // Update Numbers
+            document.getElementById('atpValue').innerText = Math.round(state.atp);
+            document.getElementById('voltValue').innerText = state.voltage.toFixed(1);
+            document.getElementById('dragValue').innerText = state.drag;
+            document.getElementById('toxinValue').innerText = state.toxin + '%';
+            
+            // Styling based on state
+            const atpEl = document.getElementById('atpValue');
+            atpEl.className = `text-2xl font-mono font-bold ${state.atp < 20 ? 'text-red-600 blink' : 'text-green-600'}`;
+
+            // Update Chart
+            bioChart.data.datasets[0].data.shift();
+            bioChart.data.datasets[0].data.push(state.atp);
+            bioChart.data.datasets[1].data.shift();
+            bioChart.data.datasets[1].data.push(state.voltage * 5); // Scale voltage to match ATP roughly on chart
+            bioChart.update();
+
+            // Log Output
+            logToConsole(metrics);
+        }
+
+        function logToConsole(metrics) {
+            const consoleEl = document.getElementById('consoleOutput');
+            const statusEl = document.getElementById('systemStatus');
+            
+            let msg = "";
+            let colorClass = "text-gray-400";
+            let status = "ACTIVE";
+
+            // Determine System Reaction
+            if (state.toxin > 0) {
+                msg = `> ⚠️ TOXIN DETECTED: ${metrics.toxinCount} units. Immune system engaging.`;
+                colorClass = "text-red-500";
+                status = "SEPTIC";
+            } else if (state.atp < 20) {
+                msg = `> 🦁 STARVATION MODE: Feed me nouns. System failing.`;
+                colorClass = "text-yellow-500";
+                status = "HUNGRY";
+            } else if (metrics.heavyCount > 0) {
+                msg = `> 🍖 PROTEIN INGESTED: +${metrics.heavyCount * 5} ATP. Structure reinforced.`;
+                colorClass = "text-green-400";
+                status = "ANABOLIC";
+            } else if (metrics.aerobicCount > 0) {
+                msg = `> 🌬️ VENTING HEAT: Cooling down. Voltage dropped.`;
+                colorClass = "text-indigo-400";
+                status = "COOLING";
+            } else {
+                msg = `> 💤 METABOLISM IDLE: -2 ATP (Maintenance Cost).`;
+                status = "IDLE";
+            }
+
+            // Append Log
+            const entry = document.createElement('div');
+            entry.className = `${colorClass} font-mono`;
+            entry.innerText = msg;
+            consoleEl.appendChild(entry);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            
+            statusEl.innerText = status;
+            statusEl.className = status === "SEPTIC" ? "text-red-500 font-bold" : (status === "HUNGRY" ? "text-yellow-500 font-bold" : "text-green-500 font-bold");
+        }
+
+        // Persona Selection Logic
+        const personas = {
+            janitor: { name: "Gordon Knot", icon: "🧹", desc: "Ugh. It's getting hot in here. You're making a mess with all these frantic words. Slow down before I have to get the mop.", color: "text-indigo-500" },
+            roberta: { name: "Roberta", icon: "🌵", desc: "I see sand, but no water. Where is the evidence? Don't give me 'synergy', give me the cracks in the pavement.", color: "text-gray-400" },
+            nebula: { name: "Nebula-7", icon: "✨", desc: "Oh! Look at the voltage! It's sparkling! Let's throw a balloon into the turbine and see if it sings!", color: "text-pink-500" }
+        };
+
+        function selectPersona(key) {
+            const p = personas[key];
+            const display = document.getElementById('personaDisplay');
+            display.innerHTML = `
+                <div class="inline-block p-3 rounded-full bg-gray-800 text-white mb-2 text-2xl">${p.icon}</div>
+                <h3 class="text-2xl font-mono text-white font-bold">${p.name}</h3>
+                <p class="${p.color} font-mono text-sm max-w-xs mx-auto italic">"${p.desc}"</p>
+            `;
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            
+            document.getElementById('processBtn').addEventListener('click', () => {
+                const input = document.getElementById('userInput');
+                const text = input.value;
+                if (!text.trim()) return;
+                
+                const metrics = metabolizeText(text);
+                updateUI(metrics);
+                
+                // Clear input slightly for effect or keep for editing? Let's keep for editing but flash
+                input.classList.add('bg-gray-100');
+                setTimeout(() => input.classList.remove('bg-gray-100'), 200);
+            });
+
+            // Word Count
+            document.getElementById('userInput').addEventListener('input', (e) => {
+                const count = e.target.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+                document.getElementById('wordCount').innerText = count;
+            });
+        });
+
+        function copyInstallCode() {
+            navigator.clipboard.writeText("You are now running the BoneAmanita v7.8.1 runtime...");
+            alert("Prompt copied to clipboard. Paste into your LLM.");
+        }
+
+    </script>
+</body>
+</html>
