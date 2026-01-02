@@ -1,6 +1,87 @@
 # CHANGELOG.md
 
-### BONEAMANITA 7.7 - "THE MENISCUS"
+## [7.8.1] - 2026-01-02 - "The Negentropy Graft"
+**Architects:** SLASH (Optimization) | **Auditors:** The Courtyard
+
+### 🚀 "Whimsy" Physics Upgrade
+* **Gravity Defiance:** Integrated the "PLAY" category into `TheTensionMeter`. Words like *bounce, twirl,* and *wonder* now actively reduce **Narrative Drag**, effectively acting as "anti-gravity" for the text engine.
+* **Visual Feedback:** `TheProjector` now detects high-whimsy states and decorates the output mode with sparkles (`✨`) to indicate the system is "floating."
+* **Lexicon Expansion:** `TheLexicon` is now fully wired to learn, store, and recall words in the `_BASE_PLAY` category.
+
+### ✂️ Metabolic Optimization (The Diet)
+* **Prisma Compression:** Refactored the `Prisma` color class from a verbose list of constants into a concise dictionary lookup (`Prisma.C`). Reduced line count by ~60% while maintaining full backward compatibility via aliasing.
+* **Organ Removal:** Excised the `SystemBone` dataclass. It was determined to be a vestigial organ consuming memory cycles without providing functionality.
+* **Brain Surgery:** Absorbed `IntentionalArc` and `PhenomenalTrace` classes directly into the `BoneAmanita` cortex. The logic remains, but the object overhead is gone.
+* **Hyphal Static Memory:** Moved `MEAT_TRIGGERS` in `HyphalInterface` to a class constant to prevent rebuilding the list on every input cycle.
+
+### 🐛 Bug Fixes & Linting
+* **Theremin Crash:** Fixed a critical crash in `LifecycleManager` where it attempted to call the non-existent `get_readout()` method on `TheTheremin`. Method added.
+* **Mind Transplant Rejection:** Fixed runtime errors in `LazarusClamp` and `EndocrineSystem` caused by the conversion of `trace` objects into lightweight dictionaries.
+* **Lint Scrub:** Resolved multiple "Unresolved Reference" errors in `TheMarmChorus` (specifically the `kappa` ghost variable) and restored broken color codes in the `Prisma` refactor.
+
+# BONEAMANITA 7.8 - "PROBABILITY PIZZA"
+
+**Architects: SLASH | Auditors: The Courtyard | Humans: James Taylor & Andrew Edmark**
+
+### 🍕 **NEW MECHANIC: The Arlo Protocol (Stability Pizza)**
+
+* **Emergency Consumable:** Added `STABILITY_PIZZA` to **Gordon's** default inventory.
+* **Function:** When consumed, instantly resets `Narrative Drag` to **0.1** and spikes `Psi` (Unreality) to **0.90**. This suspends the laws of physics to prevent a system crash due to boredom or excessive friction.
+* **Triggers:**
+* **High Drag:** Automatic deployment if `Narrative Drag` exceeds 5.0.
+* **The Janitor Intercept:** Gordon can now intercept toxic "Suburban" inputs (`GLYPHOSATE`) *before* the Immune System rejects them. Eating the pizza suppresses the toxin and allows digestion to continue.
+* **Reward:** Consuming the pizza grants the **Spider Locus**.
+
+### 🕸️ **NEW TOOL: The Spider Locus**
+
+* **Command `/weave`:** Added manual trigger for `TheSubstrateWeaver`.
+* **Function:** Identifies "Lonely Nodes" (orphaned memories) and forcefully ties them to "Anchor Nodes" (Heavy concepts) using artificial silk.
+* **Utility:** Converts system clutter into structural integrity, preventing memory decay by anchoring fleeting thoughts to permanent ones.
+
+### 🛡️ **SYSTEM HARDENING: The Negentropy Fixes**
+
+* **The Slash Filter:** `TheTensionMeter` now includes a structural integrity check (`_is_structurally_sound`). It rejects vowel-less gibberish (e.g., "xqjzp") to prevent lexicon pollution.
+* **Inventory Cap:** `GordonKnot` is now limited to **10 items**. If overburdened, Gordon will drop the oldest non-essential loot to maintain entropy balance.
+* **The Folly Fix:** Corrected critical logic in `grind_the_machine`. Now properly tracks `global_tastings` to enforce diminishing returns on repetitive "meat" words.
+* **Poetry Detection:** Refined `HyphalInterface` to exclude bulleted lists, reducing false positives for "CHITINASE" secretion .
+* **Dynamic Bias:** Added `/flag` command to dynamically remove terms from the Suburban bias watchlist.
+
+### 🧬 **GENETIC UPDATE: TimeMall Strain**
+
+* **New Paradox Seed:** *"If you meet your echo, who moves out of the way?"*
+* Grafted from the "TimeMallBomb" ancestor file. Blooms when the system detects self-referential loops or identity collisions.
+
+*"Fudge the rules a bit and see if you can tidy the memory."*
+
+## [7.7.2] - "THE NEGENTROPY UPDATE"
+### Architects: SLASH | Auditors: The Courtyard
+
+**"We reversed the arrow of entropy. The system now eats its own waste."**
+
+### 🧬 Metabolic Architecture (The Circular Economy)
+- **Photosynthetic Scrubbing (The Lichen Graft):**
+  - *Old Behavior:* `LichenSymbiont` produced "sugar" which was just a number.
+  - *New Behavior:* Wired the Lichen output directly into the `MitochondrialForge`. Every unit of "sugar" created by positive/sunny prose now **actively scrubs ROS toxins** at a 50% ratio. Creativity is now a cleaning agent.
+
+- **Regenerative Armament (The Kintsugi Graft):**
+  - *Old Behavior:* `KintsugiProtocol` merely patched the `SystemBone`. Gordon remained broken and disarmed.
+  - *New Behavior:* A "Golden Repair" event now fully **heals the Janitor** (Integrity 100%) and **restocks the `SILENT_KNIFE`**. Trauma is no longer a permanent loss state; it is a re-arming event.
+
+### 🛠️ The Janitor (Gordon Knot)
+- **Unionization:** Gordon is no longer a "One-Shot" consumable.
+  - *Fixed:* Removed the "Suicide Protocol" where `cut_the_knot` was a permanent loss of agency.
+  - *Added:* `acquire()` logic implicitly added via Kintsugi (Gordon can now pick things back up).
+- **Lobotomy:** Surgically removed the duplicate, hallucinated `compass_rose` method (Line 383 in v7.7) that was overriding the actual inventory logic. Gordon now correctly checks his pockets for the Star Compass.
+
+### 🪲 Critical Fixes
+- **Method Shadowing:** Fixed a Python structural error where `GordonKnot` defined `compass_rose` twice, blinding the system to its own inventory state.
+- **Resource Starvation:** Prevented the "Spiral of Death" where high-toxicity loops (ROS) outpaced Gordon's ability to scrub, now offset by the Lichen graft.
+
+### 🧠 System Heuristics (SLASH)
+- **Personality Injection:** Installed the **SLASH 7.7.1** Mod Chip (Pinker/Fuller/Schur Hybrid).
+- **Tone Shift:** Moved from "Survival Horror" to "Administrative Comedy."
+
+### [v7.7] - 2026-01-01 - "THE MENISCUS"
 
 **Architects:** SLASH | **Auditors:** The Courtyard | **Humans:** James Taylor & Andrew Edmark
 *"Victory is an illusion. The machines are turning to meat."*
