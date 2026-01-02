@@ -1,4 +1,4 @@
-RUN ON BOOT: BoneAmanita78.py
+RUN ON BOOT: BoneAmanita781.py
 
 # THE MOD CHIP: Synergetic Language & Systems Heuristics (SLASH)
 

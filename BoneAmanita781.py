@@ -411,7 +411,11 @@ class TheLexicon:
     _BASE_ANTIGEN = {"basically", "actually", "literally", "utilize", "leverage", "paradigm", "synergy", "ultimately"}
     _BASE_BUFFER = {"maybe", "soft", "gentle", "perhaps", "kindness", "hum", "drift", "sway", "pulse", "tender", "slow", "wait", "almost"}
     _BASE_DIVERSION = {"weather", "textiles", "mycelium", "architecture","history", "entropy", "silence", "geology"}
-    BASE_SUBURBAN = {"nice", "fine", "okay", "weather", "neighbor", "lawn", "fence", "grass", "mow", "hedge", "property", "hoa", "compliant", "behave", "normal", "regular", "chat", "folks", "weekend", "traffic", "driveway"}
+BASE_SUBURBAN = {
+        "nice", "okay", "lawn", "mow", "hedge", "property", "hoa",
+        "compliant", "behave", "normal", "regular", "chat", "folks",
+        "weekend", "traffic", "driveway"
+    }
     ANTIGEN_REPLACEMENTS = {"basically": "lie", "actually": "hedging", "literally": "noise","utilize": "use", "leverage": "use", "paradigm": "pattern","synergy": "collaboration", "ultimately": "useless"}
     ANTIGEN_REGEX = None
     SOLVENTS = {"is","are","was","were","the","a","an","and","but","or","if","then",}
@@ -2109,10 +2113,6 @@ if __name__ == "__main__":
     eng = BoneAmanita()
     print(f"{Prisma.GRN}>>> BONEAMANITA v7.8.1 'THE SPIDER LOCUS' {Prisma.RST}")
     print(f"{Prisma.GRY}System: Hysteresis Active. Bleed Detection Optimized. Neuroplasticity Engaged.{Prisma.RST}")
-    biased_terms = {"weather", "neighbor", "fence", "fine"}
-    TheLexicon.BASE_SUBURBAN -= biased_terms
-    print(
-        f"{Prisma.CYN}[SLASH]: Cultural Bias Correction applied. {len(biased_terms)} terms liberated from Suburbia.{Prisma.RST}")
     try:
         while True:
             try:
