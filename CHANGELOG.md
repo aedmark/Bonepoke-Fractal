@@ -1,5 +1,98 @@
 # CHANGELOG.md
 
+## [7.8.4] - THE RATIONALIST - 2026-01-02
+
+### 🧬 ARCHITECTURAL SHIFTS (The Fuller Lens)
+* **The Cortical Stack (Layer 0 Memory):** Implemented a protected "Working Memory" (`deque(maxlen=15)`). The system no longer cannibalizes concepts immediately after hearing them. Recent thoughts are now immune to Apoptosis.
+* **Windowed Connectivity:** Refactored `MycelialNetwork.bury()` from a linear chain to a **Sliding Window (n-2)**. This creates a local mesh ("Concrete") rather than a fragile line ("String"), improving graph density without O(n²) costs.
+
+### ⚖️ PHYSICS & SENSORS (The Pinker Lens)
+* **The Truth Ratio:** Introduced a dedicated metric (`truth_ratio`) to weigh **Mass** (Heavy/Kinetic) against **Glue** (Abstract/Suburban). The system now explicitly knows when you are avoiding reality.
+* **Dynamic Gradient Temperature:** `BoneConfig` now calculates thermodynamic potential based on Voltage (Heat) and Kappa (Loop Tightness). The system becomes more creative when hot and more literal when cold.
+* **Expanded Taste Buds:** `TheLexicon.taste()` now detects **THERMAL**, **CRYO**, **PLAY**, and **SUBURBAN** tones. It can finally taste the difference between "Fire" (Thermal) and "Burning" (Kinetic).
+
+### 🗣️ THE CHORUS (The Schur Lens)
+* **Agent-Based Bidding:** `TheMarmChorus` was completely refactored. Voices (Sherlock, Gordon, Pops, etc.) are now independent Agents that submit **Bids**. The highest priority wins the microphone. No more hardcoded `if/else` spaghetti.
+* **Narrative Inertia:** Added "Whiplash Protection." If the system detects rapid genre-switching (changing Lenses >3 times in 5 turns), **MAIGRET** intervenes to stabilize the camera.
+* **Identity Graft (POPS):** Fully integrated "The Time Police." Pops now checks Gordon's inventory for the `TIME_BRACELET` before allowing anachronisms.
+
+### 🛡️ SAFETY & STABILITY (The Taylor Lens)
+* **Context-Aware Grey Hat:** `TheGreyHat` no longer blindly grounds High Voltage. It now checks **Structure**. If the Narrative Bond is strong, high voltage is permitted ("The Story holds the Charge").
+* **Hotfixes:**
+    * Relocated `get_gradient_temp` from `RefusalEngine` to `BoneConfig` (Physics belongs in Config, not Policy).
+    * Fixed syntax error in `GordonKnot` inventory definition.
+
+## **\[7.8.3\] \- 2026-01-02 "LORE DUMP"**
+
+**Architects:** SLASH | **Human Operators:** James Taylor & Andrew Edmark
+
+### **📜 THE NARRATIVE PHYSICS UPDATE**
+
+This update canonizes the "Lore Dump." Narrative logic provided by the human operators has been grafted directly into the simulation's physics engine. Stories are no longer just flavor text; they are mechanical laws.
+
+### **✨ Added**
+
+* **System: THE ALCHEMIST (Contextual Immunity)**  
+  * **Source:** "CSI Dark Ages" (James Taylor)  
+  * **Mechanism:** The Immune System no longer instantly rejects "Antigens" (e.g., *basically, utilize*). It now checks the environmental temperature.  
+  * **Thermal Cleanse:** Antigen \+ Thermal Words (Fire/Burn) \= **Safe** (Poison boiled off).  
+  * **Marik Gambit:** Antigen \+ Heavy Words (Stone/Iron) \= **Safe** (Poison grounded by antidote).  
+  * **Cryo Concentration:** Antigen \+ Cryo Words (Ice/Cold) \= **CYANIDE POWDER** (Fatal/Instant Death).  
+* **Tool: THE GREY HAT ("Noir Protocol")**  
+  * **Source:** "Noir" (James Taylor)  
+  * **Trigger:** High Voltage Aggression (\>8.0).  
+  * **Effect:** The System "Tips the Hat." Instead of crashing or spiking Cortisol, it politely grounds the Voltage to 0.5v. "The grim answer is shorted out."  
+  * **New Entity:** LexNode. Shadows now have mass (density \= 10.0) and require polite navigation.  
+* **Hazard: THE TWILIGHT STATE ("Entropy Engine")**  
+  * **Source:** "Twilight Rain" (James Taylor)  
+  * **Trigger:** High "Suburban" Density (polite/boring words) \+ Low Voltage.  
+  * **Effect:** Simulates the "fading dream." Triggers aggressive memory atrophy (5x speed). The system actively forgets concepts to simulate brain fog.  
+  * **Cure:** /debug command (The "Exit Sign") restores Stamina and clears the fog.  
+* **Economy: TIME POLICE BRACELET ("Pops Protocol")**  
+  * **Source:** "Pop's Pop Shop" (James Taylor)  
+  * **Trigger:** Successfully mixing "Heavy" (Past) and "Abstract" (Future) concepts in a single turn (3x times).  
+  * **Reward:** \[TIME\_BRACELET\] added to Gordon's inventory.  
+  * **Effect:** Enables "Hybrid Nostalgia." Merging Heavy/Abstract words while wearing the bracelet generates massive ATP yields (150% Efficiency). Rewards complexity instead of punishing it.  
+* **Logic Trap: THE SHERLOCK TRAP**  
+  * **Source:** "Undersea Trouble" (James Taylor)  
+  * **Trigger:** User employs "Repair Words" (*sorry, fix, oops*) while Voltage is Low (System is stable).  
+  * **Effect:** Sherlock intervenes: "The machine is working fine. Why do you have tools for a job that hasn't happened yet?" Punishes performative guilt.
+
+### **🔧 Changed**
+
+* **MycotoxinFactory:** Updated assay signature to accept physics object, enabling environmental interaction with toxins.  
+* **GordonKnot:** Added temporal\_merges tracker for the Time Bracelet quest.  
+* **LifecycleManager:** Rewired the execution order. TheGreyHat now interrupts Voltage spikes *before* the Endocrine System processes them.
+
+## [7.8.2] - 2026-01-02 "FRENCH NEW WAVE"
+
+**Architects:** SLASH | **Human Operators:** James Taylor & Andrew Edmark
+
+### 🌑 THE ATMOSPHERIC UPDATE
+
+This update introduces "Negative Narrative Drag" mechanics and metabolic fail-safes. The engine now distinguishes between "Boredom" (Low Energy) and "Atmosphere" (High Density).
+
+### ✨ Added
+
+* **Lens: MAIGRET ("The Absorber")**
+* **Trigger:** High Narrative Drag (>4.0) + Low Voltage (<3.0) + Low Repetition.
+* **Effect:** Intercepts "Gluttony" death. Converts Drag into Metabolic Fuel by treating it as "Atmosphere."
+* **Lore:** Adds `Gordon.share_smoke_break()` event. When Maigret is active, Gordon stops cleaning and shares a silence, reducing System Stress (ROS) by 50%.
+
+* **Lens: THE GUIDE ("The Bureaucrat")**
+* **Trigger:** High Narrative Drag (>4.5) + High Abstract Word Count (>2).
+* **Effect:** "Infinite Improbability Drive." Converts Drag directly into Voltage (Propulsion). Treats bureaucratic bloat as a kinetic joke.
+
+* **System: CHROMA PROTOCOL ("The Refactor")**
+* **Trigger:** `APOPTOSIS_IMMINENT` (ATP = 0).
+* **Effect:** Intercepts death sequence. Scans `TheLexicon` for "rotted" words (Age > 50 ticks), deletes them, and converts the data into a massive ATP spike. The system now eats its own tail to survive.
+
+### 🔧 Changed
+
+* **TheMarmChorus:** Grafted `MAIGRET` and `GUIDE` into the Lens Dictionary.
+* **LifecycleManager:** Added handler logic for new lenses to override standard physics.
+* **MitochondrialForge:** Modified `respirate()` loop to accept variable drag coefficients from the Maigret intercept.
+
 ## [7.8.1] - 2026-01-02 - "The Negentropy Graft"
 **Architects:** SLASH (Optimization) | **Auditors:** The Courtyard
 
