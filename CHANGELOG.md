@@ -1,5 +1,56 @@
 # CHANGELOG.md
 
+## [8.1.1] - 2026-01-03 - "THE AMBER VALVE"
+**Architects:** SLASH | **Humans:** James Taylor & Andrew Edmark
+**"Movement generates heat. Heat melts the amber. Stop moving, and you become a fossil."**
+
+### 🏺 PHYSICS UPDATE: The Amber Protocol (Viscosity)
+
+* **The Shift:**
+* **The Pathology:** The previous `Bananafish` metaphor treated **Hybridity** (mixing Ancient + Modern words) as "Gluttony." It punished the user for being complex, even if they were writing well.
+* **The Cure:** Refactored `TheTheremin` to model **Viscosity** instead of Hunger.
+* **The Logic:**
+* **Resin Generation:** Mixing "Iron" (Heavy) and "Code" (Abstract) now creates **Resin**. Resin is sticky, high-potential fuel.
+* **The Velocity Check:**
+* **High Voltage (> 5.0):** The engine is hot. The Resin stays liquid and burns as fuel. You flow.
+* **Low Voltage (< 5.0):** The engine is cold. The Resin cools and hardens into **Amber**. You stick.
+* **Calcification:** **Repetition** acts as a hardening agent. High repetition rapidly solidifies the Resin into `CALCIFICATION`.
+* **The Terminology Shift:**
+* `Banana Fever` -> **AMBER TRAP** (You are stuck).
+* `Perek Event` -> **SHATTER EVENT** (The system explodes the hardened resin).
+* `Bile` -> **RESIN**.
+
+### 🧠 SYSTEM EVOLUTION: Neuroplasticity
+
+* **New Organ:** `NeuroPlasticity`.
+* **The Function:** The system now tracks a rolling history of the last 10 turns (`trace` + `bio_state`) to adapt its own configuration constants in real-time.
+* **The Adaptations:**
+* **Synaptic Reinforcement:** If Coherence is high (> 0.6) and Error is low, the system raises `MAX_VOLTAGE`. It allows you to run hotter.
+* **Trauma Response:** If Cortisol is high (> 0.5), the system raises `TOXIN_WEIGHT`. It becomes hypersensitive to threats.
+* **Metabolic Conservation:** If ATP is low (< 20.0), the system increases `SIGNAL_DRAG_MULTIPLIER`. It becomes harder to move heavy concepts when starving.
+
+### 🧪 ENZYME UPDATE: Decryptase
+
+* **New Enzyme:** `DECRYPTASE`.
+* **Trigger:** Detection of "Weather" or "Barometric" cipher words (`pressure`, `humidity`, `allocation`).
+* **Effect:** Digestion yields high nutrients but moderate toxins ("Barometric Data"). This allows the system to process "Corporate/Scientific" speak as a specific resource type rather than generic "Abstract."
+
+### 📐 NEW TOOL: The Logic Probe
+
+* **Command:** `/_prove [statement]`.
+* **Function:** Calculates the `truth_ratio` (Mass vs. Glue) of a specific statement without advancing the game turn.
+* **Verdicts:**
+* **AXIOMATIC:** High Density (> 0.6).
+* **CONJECTURE:** Medium Density (> 0.3).
+* **NOISE:** Low Density.
+
+### 🔧 SURGICAL REPAIRS
+
+* **The Sticky Fix:** Resolved a logic conflict where `TheTheremin` punished users for Hybridity regardless of their speed. The new `listen()` method now subtracts `voltage * 0.6` from the resin buildup, allowing high-energy hybrid states.
+* **Output Cleanup:** Removed all references to "Banana," "Bile," and "Fish" from the `TheTheremin` readout.
+* **Mitochondrial Inheritance:** `MitochondrialForge` now correctly applies efficiency modifiers inherited from the `mother_hash` of previous save files.
+
+
 ## [8.1] - 2026-01-03 - "THE HIVEMIND (EXPANDED)"
 
 **Architects:** SLASH | **Humans:** James Taylor & Andrew Edmark
