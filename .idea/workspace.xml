@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="54d71af3-2c96-427d-a74f-8b03f4313654" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BoneAmanita784.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/CHANGELOG.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MODS/SLASH.md" beforeDir="false" afterPath="$PROJECT_DIR$/MODS/SLASH.md" afterDir="false" />
-    </list>
+    <list default="true" id="54d71af3-2c96-427d-a74f-8b03f4313654" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -22,6 +17,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "aedmark"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/aedmark/BoneAmanita.git",
+    "accountId": "66794125-48e1-40f7-af20-bd4299810193"
+  }
+}]]></component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/BoneAmanita771.py" root0="SKIP_INSPECTION" />
   </component>
@@ -106,6 +113,7 @@
       <workItem from="1767315900623" duration="13113000" />
       <workItem from="1767366539696" duration="1000" />
       <workItem from="1767405859283" duration="316000" />
+      <workItem from="1767450696940" duration="62000" />
     </task>
     <servers />
   </component>

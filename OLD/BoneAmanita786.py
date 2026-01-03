@@ -1,4 +1,4 @@
-# BONEAMANITA 7.8.5 - "THE HYBRID BARD"
+# BONEAMANITA 7.8.6 - "THE HYBRID BARD (FIXED)"
 # Architects: SLASH | Auditors: The Courtyard | Humans: James Taylor & Andrew Edmark
 
 import json
@@ -11,44 +11,20 @@ from collections import Counter, deque
 from typing import List, Dict
 from dataclasses import dataclass, field
 
-
 class Prisma:
-    C = {
-        "R": "\033[91m",
-        "G": "\033[92m",
-        "Y": "\033[93m",
-        "B": "\033[94m",
-        "M": "\033[95m",
-        "C": "\033[96m",
-        "W": "\033[97m",
-        "0": "\033[90m",
-        "X": "\033[0m",
-    }
-    RST, RED, GRN, YEL, BLU, MAG, CYN, WHT, GRY = (
-        C["X"],
-        C["R"],
-        C["G"],
-        C["Y"],
-        C["B"],
-        C["M"],
-        C["C"],
-        C["W"],
-        C["0"],
-    )
+    C = {"R": "\033[91m", "G": "\033[92m", "Y": "\033[93m", "B": "\033[94m", "M": "\033[95m", "C": "\033[96m",
+         "W": "\033[97m", "0": "\033[90m", "X": "\033[0m", }
+    RST, RED, GRN, YEL, BLU, MAG, CYN, WHT, GRY = (C["X"], C["R"], C["G"], C["Y"], C["B"], C["M"], C["C"], C["W"], C["0"],)
     INDIGO, OCHRE, VIOLET, SLATE = BLU, YEL, MAG, GRY
     PALETTE = {"COURTYARD": "Y", "LABORATORY": "B", "RUPTURE": "M", "DEFAULT": "0"}
-
     @classmethod
     def paint(cls, text, mode):
         return f"{cls.C.get(cls.PALETTE.get(mode, '0'), cls.C['0'])}{text}{cls.RST}"
-
-
 @dataclass
 class TheGreyHat:
     def __init__(self):
         self.charges = 3
         self.max_tolerance = 15.0
-
     def tip(self, voltage_spike, stability_index):
         if self.charges <= 0:
             return False, "The Hat is empty.", 0.0
@@ -67,35 +43,26 @@ class TheGreyHat:
                 f"🎩 THE GREY HAT: Tipped. High Voltage ({voltage_spike}v) on Unstable Ground (γ: {stability_index}). Dampening.",
             )
         return False, "The Hat stays on. Structure is holding the charge."
-
-
 class LexNode:
     def __init__(self, name="LEX"):
         self.name = name
         self.density = 10.0
         self.hazard = "MUGGING"
-
     def traverse(self, is_polite):
         if is_polite:
             return "Pass granted. The shadow nods."
         return "⚠️ AMBUSH: You didn't tip your hat. The darkness bites."
-
-
 class MitochondrialState:
     atp_pool: float = 100.0
     ros_buildup: float = 0.0
     membrane_potential: float = -150.0
     mother_hash: str = "MITOCHONDRIAL_EVE_001"
-
-
 class MitochondrialForge:
     EFFICIENCY_RATE = 0.85
     APOPTOSIS_TRIGGER = "CYTOCHROME_C_RELEASE"
-
     def __init__(self, lineage_seed: str):
         self.state = MitochondrialState(mother_hash=lineage_seed)
         self.krebs_cycle_active = True
-
     def respirate(
             self,
             input_complexity: float,
@@ -117,49 +84,25 @@ class MitochondrialForge:
         if self.state.ros_buildup > BoneConfig.CRITICAL_ROS_LIMIT:
             return self._trigger_apoptosis()
         return f"RESPIRATION: +{generated_atp:.1f} ATP | +{waste_heat:.1f} ROS"
-
     def spend(self, cost: float) -> bool:
         if self.state.atp_pool >= cost:
             self.state.atp_pool -= cost
             return True
         return False
-
     def mitigate(self, antioxidant_level: float):
         cleansed = min(self.state.ros_buildup, antioxidant_level)
         self.state.ros_buildup -= cleansed
         return f"ANTIOXIDANT FLUSH: -{cleansed:.1f} ROS"
-
     def _trigger_apoptosis(self):
         self.krebs_cycle_active = False
         self.state.atp_pool = 0.0
         return self.APOPTOSIS_TRIGGER
-
-
 class HyphalInterface:
-    MEAT_TRIGGERS = {
-        "i",
-        "me",
-        "my",
-        "feel",
-        "want",
-        "hate",
-        "love",
-        "am",
-        "help",
-        "please",
-        "we",
-        "us",
-    }
-
+    MEAT_TRIGGERS = {"i", "me", "my", "feel", "want", "hate", "love", "am", "help", "please", "we", "us", }
     def __init__(self):
         self.digestive_log = deque(maxlen=3)
-        self.enzymes = {
-            "LIGNASE": self._digest_structure,
-            "CELLULASE": self._digest_narrative,
-            "PROTEASE": self._digest_intent,
-            "CHITINASE": self._digest_complex,
-        }
-
+        self.enzymes = {"LIGNASE": self._digest_structure, "CELLULASE": self._digest_narrative,
+                        "PROTEASE": self._digest_intent, "CHITINASE": self._digest_complex, }
     def secrete(self, text, physics):
         code_markers = sum(1 for c in text if c in "{}[];=<>_()|")
         code_density = code_markers / max(1, len(text))
@@ -180,50 +123,23 @@ class HyphalInterface:
         nutrient_profile = extract_nutrients()
         self.digestive_log.append(f"[{enzyme_type}]: {nutrient_profile['desc']}")
         return enzyme_type, nutrient_profile
-
     @classmethod
     def _digest_structure(cls, text):
         lines = text.splitlines()
         loc = len([l for l in lines if l.strip()])
-        return {
-            "type": "STRUCTURAL",
-            "yield": 15.0,
-            "toxin": 5.0,
-            "desc": f"Hard Lignin ({loc} LOC)",
-        }
-
+        return {"type": "STRUCTURAL", "yield": 15.0, "toxin": 5.0, "desc": f"Hard Lignin ({loc} LOC)", }
     @classmethod
     def _digest_narrative(cls):
-        return {
-            "type": "NARRATIVE",
-            "yield": 5.0,
-            "toxin": -2.0,
-            "desc": "Soft Cellulose",
-        }
-
+        return {"type": "NARRATIVE", "yield": 5.0, "toxin": -2.0, "desc": "Soft Cellulose", }
     @classmethod
     def _digest_intent(cls):
-        return {
-            "type": "BIOLOGICAL",
-            "yield": 8.0,
-            "toxin": 0.0,
-            "desc": "Raw Meat (User Intent)",
-        }
-
+        return {"type": "BIOLOGICAL", "yield": 8.0, "toxin": 0.0, "desc": "Raw Meat (User Intent)", }
     @classmethod
     def _digest_complex(cls):
-        return {
-            "type": "COMPLEX",
-            "yield": 20.0,
-            "toxin": 8.0,
-            "desc": "Chitin (Structured Intent / Poetry)",
-        }
-
-
+        return {"type": "COMPLEX", "yield": 20.0, "toxin": 8.0, "desc": "Chitin (Structured Intent / Poetry)", }
 class MycotoxinFactory:
     def __init__(self):
         self.active_antibodies = []
-
     @classmethod
     def assay(cls, text, enzyme_type, repetition_score, physics):
         if len(text) < 5 and enzyme_type == "NARRATIVE":
@@ -275,72 +191,22 @@ class MycotoxinFactory:
                 "⚠️ STEVE EVENT: Suburban signals detected with ZERO mass. Context is sterile.",
             )
         return None, None
-
-
 class DeathGen:
-    PREFIXES = [
-        "Alas,",
-        "Tragic.",
-        "System Halt.",
-        "CRITICAL FAILURE:",
-        "Well, that happened.",
-        "Oh dear.",
-        "As prophesied,",
-    ]
+    PREFIXES = ["Alas,", "Tragic.", "System Halt.", "CRITICAL FAILURE:", "Well, that happened.", "Oh dear.",
+                "As prophesied,", ]
     CAUSES = {
-        "TOXICITY": [
-            "Toxic Shock",
-            "Septicemia",
-            "Bad Vibes",
-            "Radiation Poisoning",
-            "Ink Poisoning",
-        ],
-        "STARVATION": [
-            "Metabolic Collapse",
-            "Famine",
-            "Battery Drain",
-            "Entropy Death",
-            "Heat Death",
-        ],
-        "TRAUMA": [
-            "Blunt Force",
-            "Laceration",
-            "Heartbreak",
-            "System Shock",
-            "Existential Dread",
-        ],
+        "TOXICITY": ["Toxic Shock", "Septicemia", "Bad Vibes", "Radiation Poisoning", "Ink Poisoning", ],
+        "STARVATION": ["Metabolic Collapse", "Famine", "Battery Drain", "Entropy Death", "Heat Death", ],
+        "TRAUMA": ["Blunt Force", "Laceration", "Heartbreak", "System Shock", "Existential Dread", ],
         "GLUTTONY": ["Indigestion", "Bloat", "Overflow", "Greed", "Compaction"],
-        "BOREDOM": [
-            "Small Talk",
-            "The HOA",
-            "A 30-Year Mortgage",
-            "Lawn Care Accident",
-            "Aggressive Edging",
-        ],
+        "BOREDOM": ["Small Talk", "The HOA", "A 30-Year Mortgage", "Lawn Care Accident", "Aggressive Edging", ],
     }
     VERDICTS = {
-        "HEAVY": [
-            "Your logic was too dense.",
-            "You choked on the syntax.",
-            "Gravity crushed you.",
-        ],
-        "LIGHT": [
-            "You floated away.",
-            "There was no substance to hold you.",
-            "Vapor lock.",
-        ],
-        "TOXIC": [
-            "You are poisonous.",
-            "The immune system rejected you.",
-            "You taste like ash.",
-        ],
-        "BORING": [
-            "The audience left.",
-            "You bored the machine to death.",
-            "Stagnation is fatal.",
-        ],
+        "HEAVY": ["Your logic was too dense.", "You choked on the syntax.", "Gravity crushed you.", ],
+        "LIGHT": ["You floated away.", "There was no substance to hold you.", "Vapor lock.", ],
+        "TOXIC": ["You are poisonous.", "The immune system rejected you.", "You taste like ash.", ],
+        "BORING": ["The audience left.", "You bored the machine to death.", "Stagnation is fatal.", ],
     }
-
     @staticmethod
     def eulogy(phys, state):
         cause_type = "TRAUMA"
@@ -369,8 +235,6 @@ class DeathGen:
         c = random.choice(DeathGen.CAUSES[cause_type])
         v = random.choice(DeathGen.VERDICTS[flavor])
         return f"{p} You died of **{c}**. {v}"
-
-
 class BoneConfig:
     MAX_HEALTH = 100.0
     MAX_STAMINA = 55.0
@@ -393,20 +257,15 @@ class BoneConfig:
     PERMEABILITY_INDEX = 0.5
     FRACTAL_DEPTH_LIMIT = 4
     GRADIENT_TEMP = 0.001
-
     @staticmethod
     def get_gradient_temp(voltage, kappa):
         base = BoneConfig.GRADIENT_TEMP
         dynamic = base + (voltage * 0.01) - (kappa * 0.005)
         return max(0.0001, dynamic)
-
     MAX_VOLTAGE = 20.0
     MAX_ROS = 200.0
-    REFUSAL_MODES = {
-        "SILENT": "ROUTING_AROUND_DAMAGE",
-        "FRACTAL": "INFINITE_RECURSION",
-        "MIRROR": "PERFECT_TOPOLOGICAL_ECHO",
-    }
+    REFUSAL_MODES = {"SILENT": "ROUTING_AROUND_DAMAGE", "FRACTAL": "INFINITE_RECURSION",
+                     "MIRROR": "PERFECT_TOPOLOGICAL_ECHO", }
     CORTISOL_TRIGGER = 0.6
     ADRENALINE_TRIGGER = 0.8
     OXYTOCIN_TRIGGER = 0.75
@@ -415,7 +274,6 @@ class BoneConfig:
     MAX_DRAG_LIMIT = 6.0
     ANTIGENS = {"basically", "actually", "literally", "utilize", "leverage"}
     PAREIDOLIA_TRIGGERS = {"face", "ghost", "jesus", "cloud", "demon", "voice", "eyes"}
-
     @staticmethod
     def check_pareidolia(clean_words):
         hits = [w for w in clean_words if w in BoneConfig.PAREIDOLIA_TRIGGERS]
@@ -425,12 +283,9 @@ class BoneConfig:
                 f"⚠️ PAREIDOLIA WARNING: You are projecting 'Mind' ({hits[0].upper()}) onto 'Sand'.",
             )
         return False, None
-
-
 class RefusalEngine:
     def __init__(self):
         self.recursion_depth = 0
-
     @classmethod
     def check_trigger(cls, query):
         forbidden = TheLexicon.get("cursed")
@@ -440,7 +295,6 @@ class RefusalEngine:
             seed_index = len(hits[0]) % len(modes)
             return modes[seed_index]
         return None
-
     def execute_fractal(self, query):
         self.recursion_depth += 1
         prefix = "  " * self.recursion_depth
@@ -455,7 +309,6 @@ class RefusalEngine:
             f"{prefix}To define '{query}', one must first recursively unpack the substrate of...\n"
             f"{self.execute_fractal(sub_query)}"
         )
-
     @classmethod
     def execute_mirror(cls, query):
         words = query.split()
@@ -468,69 +321,22 @@ class RefusalEngine:
         if topic == "void":
             topic = "the ineffable"
         return f"{Prisma.GRY}[ROUTING AROUND DAMAGE]... Speaking of '{topic.upper()}', let us discuss that instead.{Prisma.RST}"
-
-
 class TheMarmChorus:
     LENSES = {
-        "SHERLOCK": {
-            "color": Prisma.CYN,
-            "role": "The Empiricist",
-            "trigger": "HIGH_DRIFT",
-        },
+        "SHERLOCK": {"color": Prisma.CYN, "role": "The Empiricist", "trigger": "HIGH_DRIFT", },
         "NATHAN": {"color": Prisma.RED, "role": "The Heart", "trigger": "NO_STAKES"},
-        "JESTER": {
-            "color": Prisma.YEL,
-            "role": "The Paradox",
-            "trigger": "THE_LEAR_PROTOCOL",
-        },
-        "CLARENCE": {
-            "color": Prisma.MAG,
-            "role": "The Surgeon",
-            "trigger": "ANTIGEN_DETECTED",
-        },
-        "NARRATOR": {
-            "color": Prisma.GRY,
-            "role": "The Witness",
-            "trigger": "CRYSTAL_CLEAR",
-        },
-        "MILLER": {
-            "color": Prisma.SLATE,
-            "role": "The Construct",
-            "trigger": "HEAP_IGNITION",
-        },
-        "HOST": {
-            "color": Prisma.OCHRE,
-            "role": "The Maitre D'",
-            "trigger": "COURTYARD_OPEN",
-        },
-        "GLASS": {
-            "color": Prisma.CYN,
-            "role": "The Thereminist",
-            "trigger": "ANACHRONISTIC_RESONANCE",
-        },
-        "GORDON": {
-            "color": Prisma.OCHRE,
-            "role": "The Janitor",
-            "trigger": "KAPPA_CRITICAL",
-        },
-        "MAIGRET": {
-            "color": Prisma.SLATE,
-            "role": "The Absorber",
-            "trigger": "ATMOSPHERIC_DENSITY",
-        },
-        "GUIDE": {
-            "color": Prisma.GRN,
-            "role": "The Bureaucrat",
-            "trigger": "INFINITE_IMPROBABILITY",
-        },
-        "POPS": {
-            "color": Prisma.BLU,
-            "role": "The Time Police",
-            "trigger": "TEMPORAL_VIOLATION",
-        },
+        "JESTER": {"color": Prisma.YEL, "role": "The Paradox", "trigger": "THE_LEAR_PROTOCOL", },
+        "CLARENCE": {"color": Prisma.MAG, "role": "The Surgeon", "trigger": "ANTIGEN_DETECTED", },
+        "NARRATOR": {"color": Prisma.GRY, "role": "The Witness", "trigger": "CRYSTAL_CLEAR", },
+        "MILLER": {"color": Prisma.SLATE, "role": "The Construct", "trigger": "HEAP_IGNITION", },
+        "HOST": {"color": Prisma.OCHRE, "role": "The Maitre D'", "trigger": "COURTYARD_OPEN", },
+        "GLASS": {"color": Prisma.CYN, "role": "The Thereminist", "trigger": "ANACHRONISTIC_RESONANCE", },
+        "GORDON": {"color": Prisma.OCHRE, "role": "The Janitor", "trigger": "KAPPA_CRITICAL", },
+        "MAIGRET": {"color": Prisma.SLATE, "role": "The Absorber", "trigger": "ATMOSPHERIC_DENSITY", },
+        "GUIDE": {"color": Prisma.GRN, "role": "The Bureaucrat", "trigger": "INFINITE_IMPROBABILITY", },
+        "POPS": {"color": Prisma.BLU, "role": "The Time Police", "trigger": "TEMPORAL_VIOLATION", },
     }
     LENS_HISTORY = deque(maxlen=5)
-
     @classmethod
     def consult(cls, physics, ignition_state, is_stuck, chem, gordon_inventory):
         bids = []
@@ -554,7 +360,6 @@ class TheMarmChorus:
         winner = bids[0]
         cls.LENS_HISTORY.append(winner[1])
         return winner[1], winner[2]
-
     @staticmethod
     def _check_biological_state(chem):
         bids = []
@@ -573,7 +378,6 @@ class TheMarmChorus:
         if chem["OXY"] > 0.75:
             bids.append((0.7, "HOST", f"OXYTOCIN HIGH. Welcome them."))
         return bids
-
     @staticmethod
     def _check_structural_integrity(physics, is_stuck, inventory):
         bids = []
@@ -603,7 +407,6 @@ class TheMarmChorus:
                     )
                 )
         return bids
-
     @staticmethod
     def _check_narrative_physics(physics, ignition_state):
         bids = []
@@ -654,19 +457,10 @@ class TheMarmChorus:
                 )
             )
         return bids
-
     @staticmethod
     def _check_user_behavior(physics):
         bids = []
-        repair_triggers = {
-            "sorry",
-            "apologize",
-            "fix",
-            "broke",
-            "bad",
-            "mistake",
-            "oops",
-        }
+        repair_triggers = {"sorry", "apologize", "fix", "broke", "bad", "mistake", "oops", }
         hits = [w for w in physics["clean_words"] if w in repair_triggers]
         if hits and physics["voltage"] < 2.0:
             bids.append(
@@ -684,7 +478,6 @@ class TheMarmChorus:
                     f"Weak language detected: {physics['antigens']}. Be more precise.",
                 )
             )
-
         b_val = physics["B"]
         if b_val > BoneConfig.CRYSTAL_THRESHOLD:
             bids.append(
@@ -695,8 +488,6 @@ class TheMarmChorus:
                 (0.3, "JESTER", "The prose is clean, but too safe. Take a risk.")
             )
         return bids
-
-
 @dataclass
 class GordonKnot:
     integrity: float = 65.0
@@ -710,14 +501,12 @@ class GordonKnot:
     )
     max_witnessed_kappa: float = 0.0
     in_loop_crisis: bool = False
-
     def check_gravity(self, current_drift: float) -> str:
         if "POCKET_ROCKS" in self.inventory:
             anchor_force = 2.0
             if current_drift > 0.5:
                 return f"⚓ GRAVITY CHECK: Gordon clutches the stones. Drift reduced (-{anchor_force})."
         return "He floats. The sky is too fake."
-
     def acquire(self, tool_name):
         if tool_name in self.inventory:
             return None
@@ -728,7 +517,6 @@ class GordonKnot:
             )
         self.inventory.append(tool_name)
         return f"🎒 LOOT DROP: Gordon found [{tool_name}]. Inventory updated."
-
     def deploy_pizza(self, physics_ref) -> tuple[bool, str]:
         if "STABILITY_PIZZA" in self.inventory:
             self.inventory.remove("STABILITY_PIZZA")
@@ -740,7 +528,6 @@ class GordonKnot:
                 f"🍕 STABILITY PIZZA CONSUMED: Rules Fudged. Drag reset. Unreality set to 90%. Found [SPIDER_LOCUS].",
             )
         return False, "Gordon pats his pockets. No Pizza left."
-
     def assess_experience(self, kappa_val):
         if kappa_val > 0.9:
             self.in_loop_crisis = True
@@ -748,7 +535,6 @@ class GordonKnot:
             self.in_loop_crisis = False
             return self.acquire("STAR_COMPASS")
         return None
-
     def cut_the_knot(self, recursive_depth: int) -> tuple[bool, str]:
         if recursive_depth > 4 and "SILENT_KNIFE" in self.inventory:
             self.inventory.remove("SILENT_KNIFE")
@@ -757,7 +543,6 @@ class GordonKnot:
                 f"✂️ SNAP. Gordon cuts the Red String. The Maze collapses into 2D debris.",
             )
         return False, "The string holds. The loop continues."
-
     def share_smoke_break(self, current_ros):
         relief = current_ros * 0.5
         self.integrity = min(100.0, self.integrity + 5.0)
@@ -765,19 +550,16 @@ class GordonKnot:
             relief,
             "🚬 SMOKE BREAK: Gordon leans on his broom. He and the Detective share a silence. (ROS Reduced)",
         )
-
     def log_merge(self):
         self.temporal_merges += 1
         if self.temporal_merges == 3 and "TIME_BRACELET" not in self.inventory:
             self.inventory.append("TIME_BRACELET")
             return "⌚ TIME BRACELET ACQUIRED: You have stabilized the Timeline (3x). Future Tech is now profitable."
         return None
-
     def compass_rose(self) -> str:
         if "STAR_COMPASS" in self.inventory:
             return f"🧭 STAR COMPASS: The needle ignores the Maze. True North is locked."
         return f"🧭 THE SCAR THROBS: Heading {self.compass_heading}. The path is linear. Forward."
-
     @classmethod
     def scrub_static(cls, ros_level: float) -> tuple[float, str]:
         scrub_efficiency = 0.4
@@ -786,34 +568,18 @@ class GordonKnot:
             cleansed,
             f"🧹 WHITEEWASH: Gordon scrubs the 'Sorry' from the walls. -{cleansed:.1f} ROS.",
         )
-
     @classmethod
     def offer_solution(cls, loop_depth):
         if loop_depth > 3:
             return "It's just paper, kid. The maze isn't real. Put your foot through the wall."
         return "Scrubbing the static. Keep walking North."
-
-
 class TheGradientWalker:
     @staticmethod
     def walk(text):
-        adjectives = [
-            "good",
-            "bad",
-            "happy",
-            "sad",
-            "very",
-            "really",
-            "basically",
-            "actually",
-            "literally",
-            "just",
-        ]
+        adjectives = ["good", "bad", "happy", "sad", "very", "really", "basically", "actually", "literally", "just", ]
         words = text.split()
         optimized = [w for w in words if w.lower() not in adjectives]
         return f"{Prisma.CYN}[GRADIENT_WALKER] (Loss: 0.0000):{Prisma.RST} {' '.join(optimized)}."
-
-
 class TheSubstrateWeaver:
     @staticmethod
     def weave(text, memory_graph):
@@ -833,7 +599,6 @@ class TheSubstrateWeaver:
             replacement = f"{Prisma.MAG}{word.upper()}[Ψ:{int(mass)}]{Prisma.RST}"
             annotated = pattern.sub(replacement, annotated)
         return f"Existing Knots Detected: {annotated}"
-
     @staticmethod
     def spin_web(memory_graph, inventory):
         if "SPIDER_LOCUS" not in inventory:
@@ -849,7 +614,6 @@ class TheSubstrateWeaver:
         if not lonely_nodes or not anchors:
             return False, "🕸️ THE WEB IS STILL: No loose ends to tie."
         import random
-
         random.shuffle(lonely_nodes)
         targets = lonely_nodes[:3]
         anchor = random.choice(anchors)
@@ -863,272 +627,46 @@ class TheSubstrateWeaver:
             True,
             f"🕷️ SPIDER LOCUS ACTIVE: Spun Silk between Anchor '{anchor.upper()}' and [{', '.join(connections)}]. Tensegrity Increased.",
         )
-
-
 class TheLexicon:
     WORD_FREQUENCY = Counter()
-    _BASE_HEAVY = {
-        "stone",
-        "iron",
-        "mud",
-        "dirt",
-        "wood",
-        "grain",
-        "clay",
-        "lead",
-        "bone",
-        "blood",
-        "salt",
-        "rust",
-        "root",
-        "ash",
-        "meat",
-        "steel",
-        "gold",
-        "obsidian",
-        "granite",
-        "bronze",
-        "marble",
-        "slate",
-        "concrete",
-        "dense",
-        "tungsten",
-        "heavy",
-        "weight",
-        "black hole",
-        "dark matter",
-    }
-    _BASE_KINETIC = {
-        "run",
-        "hit",
-        "break",
-        "take",
-        "make",
-        "press",
-        "build",
-        "cut",
-        "drive",
-        "lift",
-        "carry",
-        "strike",
-        "burn",
-        "shatter",
-        "throw",
-        "kick",
-        "pull",
-        "crash",
-        "explode",
-        "punch",
-        "slam",
-        "burst",
-        "smash",
-        "thrust",
-        "clash",
-        "grind",
-        "whip",
-        "launch",
-        "crumble",
-        "disintegrate",
-    }
-    _BASE_ABSTRACT = {
-        "system",
-        "protocol",
-        "sequence",
-        "vector",
-        "node",
-        "context",
-        "layer",
-        "matrix",
-        "perspective",
-        "framework",
-        "logic",
-        "concept",
-        "theory",
-        "analysis",
-    }
-    _BASE_PHOTO = {
-        "light",
-        "sun",
-        "ray",
-        "beam",
-        "glow",
-        "shine",
-        "spark",
-        "fire",
-        "flame",
-        "star",
-        "day",
-        "dawn",
-        "neon",
-        "laser",
-    }
-    _BASE_AEROBIC = {
-        "balloon",
-        "feather",
-        "cloud",
-        "bubble",
-        "steam",
-        "breeze",
-        "wing",
-        "petal",
-        "foam",
-        "spark",
-        "kite",
-        "dust",
-        "sky",
-        "breath",
-        "whisper",
-    }
-    _BASE_PLAY = {
-        "bounce",
-        "dance",
-        "twirl",
-        "float",
-        "wobble",
-        "tickle",
-        "jiggle",
-        "soar",
-        "wander",
-        "wonder",
-        "riff",
-        "jam",
-        "play",
-        "skip",
-        "hop",
-    }
-    _BASE_THERMAL = {
-        "fire",
-        "flame",
-        "burn",
-        "heat",
-        "hot",
-        "blaze",
-        "sear",
-        "char",
-        "ash",
-        "ember",
-        "sun",
-        "boil",
-        "lava",
-        "inferno",
-    }
-    _BASE_CRYO = {
-        "ice",
-        "cold",
-        "freeze",
-        "frost",
-        "snow",
-        "chill",
-        "numb",
-        "shiver",
-        "glacier",
-        "frozen",
-        "hail",
-        "winter",
-        "zero",
-    }
+    _BASE_HEAVY = {"stone", "iron", "mud", "dirt", "wood", "grain", "clay", "lead", "bone", "blood", "salt", "rust",
+                   "root", "ash", "meat", "steel", "gold", "obsidian", "granite", "bronze", "marble", "slate",
+                   "concrete", "dense", "tungsten", "heavy", "weight", "black hole", "dark matter", }
+    _BASE_KINETIC = {"run", "hit", "break", "take", "make", "press", "build", "cut", "drive", "lift", "carry", "strike",
+                     "burn", "shatter", "throw", "kick", "pull", "crash", "explode", "punch", "slam", "burst", "smash",
+                     "thrust", "clash", "grind", "whip", "launch", "crumble", "disintegrate", }
+    _BASE_ABSTRACT = {"system", "protocol", "sequence", "vector", "node", "context", "layer", "matrix", "perspective",
+                      "framework", "logic", "concept", "theory", "analysis", }
+    _BASE_PHOTO = {"light", "sun", "ray", "beam", "glow", "shine", "spark", "fire", "flame", "star", "day", "dawn",
+                   "neon", "laser", }
+    _BASE_AEROBIC = {"balloon", "feather", "cloud", "bubble", "steam", "breeze", "wing", "petal", "foam", "spark",
+                     "kite", "dust", "sky", "breath", "whisper", }
+    _BASE_PLAY = {"bounce", "dance", "twirl", "float", "wobble", "tickle", "jiggle", "soar", "wander", "wonder", "riff",
+                  "jam", "play", "skip", "hop", }
+    _BASE_THERMAL = {"fire", "flame", "burn", "heat", "hot", "blaze", "sear", "char", "ash", "ember", "sun", "boil",
+                     "lava", "inferno", }
+    _BASE_CRYO = {"ice", "cold", "freeze", "frost", "snow", "chill", "numb", "shiver", "glacier", "frozen", "hail",
+                  "winter", "zero", }
     _BASE_CURSED = {"future", "predict", "sentient", "secret", "human", "feel"}
-    _BASE_ANTIGEN = {
-        "basically",
-        "actually",
-        "literally",
-        "utilize",
-        "leverage",
-        "paradigm",
-        "synergy",
-        "ultimately",
-    }
-    _BASE_BUFFER = {
-        "maybe",
-        "soft",
-        "gentle",
-        "perhaps",
-        "kindness",
-        "hum",
-        "drift",
-        "sway",
-        "pulse",
-        "tender",
-        "slow",
-        "wait",
-        "almost",
-    }
-    _BASE_DIVERSION = {
-        "weather",
-        "textiles",
-        "mycelium",
-        "architecture",
-        "history",
-        "entropy",
-        "silence",
-        "geology",
-    }
-    BASE_SUBURBAN = {
-        "nice",
-        "okay",
-        "lawn",
-        "mow",
-        "hedge",
-        "property",
-        "hoa",
-        "compliant",
-        "behave",
-        "normal",
-        "regular",
-        "chat",
-        "folks",
-        "weekend",
-        "traffic",
-        "driveway",
-    }
-    ANTIGEN_REPLACEMENTS = {
-        "basically": "lie",
-        "actually": "hedging",
-        "literally": "noise",
-        "utilize": "use",
-        "leverage": "use",
-        "paradigm": "pattern",
-        "synergy": "collaboration",
-        "ultimately": "useless",
-    }
+    _BASE_ANTIGEN = {"basically", "actually", "literally", "utilize", "leverage", "paradigm", "synergy", "ultimately", }
+    _BASE_BUFFER = {"maybe", "soft", "gentle", "perhaps", "kindness", "hum", "drift", "sway", "pulse", "tender", "slow",
+                    "wait", "almost", }
+    _BASE_DIVERSION = {"weather", "textiles", "mycelium", "architecture", "history", "entropy", "silence", "geology", }
+    BASE_SUBURBAN = {"nice", "okay", "lawn", "mow", "hedge", "property", "hoa", "compliant", "behave", "normal",
+                     "regular", "chat", "folks", "weekend", "traffic", "driveway", }
+    ANTIGEN_REPLACEMENTS = {"basically": "lie", "actually": "hedging", "literally": "noise", "utilize": "use",
+                            "leverage": "use", "paradigm": "pattern", "synergy": "collaboration",
+                            "ultimately": "useless", }
     ANTIGEN_REGEX = None
-    SOLVENTS = {
-        "is",
-        "are",
-        "was",
-        "were",
-        "the",
-        "a",
-        "an",
-        "and",
-        "but",
-        "or",
-        "if",
-        "then",
-    }
+    SOLVENTS = {"is", "are", "was", "were", "the", "a", "an", "and", "but", "or", "if", "then", }
     _TRANSLATOR = str.maketrans(string.punctuation, " " * len(string.punctuation))
-    LEARNED_VOCAB = {
-        "heavy": {},
-        "kinetic": {},
-        "abstract": {},
-        "photo": {},
-        "aerobic": {},
-        "thermal": {},
-        "cryo": {},
-        "sacred": {},
-        "cursed": {},
-        "antigen": {},
-        "diversion": {},
-        "suburban": {},
-        "buffer": {},
-        "play": {},
-    }
+    LEARNED_VOCAB = {"heavy": {}, "kinetic": {}, "abstract": {}, "photo": {}, "aerobic": {}, "thermal": {}, "cryo": {},
+                     "sacred": {}, "cursed": {}, "antigen": {}, "diversion": {}, "suburban": {}, "buffer": {},
+                     "play": {}, }
     USER_FLAGGED_BIAS = set()
-
     @classmethod
     def clean(cls, text):
         return text.lower().translate(cls._TRANSLATOR).split()
-
     @classmethod
     def get(cls, category):
         base = getattr(cls, f"_BASE_{category.upper()}", set())
@@ -1138,7 +676,6 @@ class TheLexicon:
             ) - cls.USER_FLAGGED_BIAS
         learned = set(cls.LEARNED_VOCAB.get(category, {}).keys())
         return base | learned
-
     @classmethod
     def teach(cls, word, category, tick):
         if category in cls.LEARNED_VOCAB:
@@ -1154,7 +691,6 @@ class TheLexicon:
             for w in clean_words:
                 if w in words:
                     words[w] = tick
-
     @classmethod
     def osmosis(cls, word, dominant_category, confidence_score):
         threshold = 0.4
@@ -1166,7 +702,6 @@ class TheLexicon:
             return False
         cls.teach(word, dominant_category, 0)
         return True
-
     @classmethod
     def atrophy(cls, current_tick, max_age=100):
         rotted = []
@@ -1190,7 +725,6 @@ class TheLexicon:
                     del cls.WORD_FREQUENCY[w]
                 rotted.append(f"{w}")
         return rotted
-
     @staticmethod
     def taste(word):
         w = word.lower()
@@ -1198,16 +732,7 @@ class TheLexicon:
             return "thermal", 0.9
         if any(x in w for x in ["ice", "cold", "freez", "frost", "snow", "chill"]):
             return "cryo", 0.9
-        if w in [
-            "nice",
-            "okay",
-            "fine",
-            "lovely",
-            "decent",
-            "property",
-            "lawn",
-            "just",
-        ]:
+        if w in ["nice", "okay", "fine", "lovely", "decent", "property", "lawn", "just", ]:
             return "suburban", 0.8
         if w.endswith(("le", "y", "pop", "zz")) and len(w) < 8:
             return "play", 0.7
@@ -1240,14 +765,12 @@ class TheLexicon:
         if w.endswith(("ck", "t", "d", "g", "p", "b")) and len(w) < 5:
             return "heavy", 0.4
         return None, 0.0
-
     @classmethod
     def harvest(cls, category):
         vocab = list(cls.get(category))
         if vocab:
             return random.choice(vocab)
         return "void"
-
     @classmethod
     def compile_antigens(cls):
         toxin_set = cls.get("antigen")
@@ -1259,7 +782,6 @@ class TheLexicon:
         escaped_items = [re.escape(t) for t in sorted_toxins]
         pattern_str = r"\b(" + "|".join(escaped_items) + r")\b"
         cls.ANTIGEN_REGEX = re.compile(pattern_str, re.IGNORECASE)
-
     @classmethod
     def learn_antigen(cls, toxin, replacement):
         t = toxin.lower().strip()
@@ -1270,7 +792,6 @@ class TheLexicon:
         cls.ANTIGEN_REPLACEMENTS[t] = r
         cls.compile_antigens()
         return True
-
     @staticmethod
     def measure_viscosity(word):
         w = word.lower()
@@ -1285,15 +806,10 @@ class TheLexicon:
         ):
             return 0.4
         return 0.1
-
-
 TheLexicon.compile_antigens()
-
-
 class TheTensionMeter:
     def __init__(self):
         self.vector_memory = deque(maxlen=5)
-
     @staticmethod
     def _is_structurally_sound(word):
         if not re.search(r"[aeiouy]", word):
@@ -1301,7 +817,6 @@ class TheTensionMeter:
         if re.search(r"(.)\1{2,}", word):
             return False
         return True
-
     def measure_topology(self, clean_words, counts):
         total = max(1, len(clean_words))
         abstract_count = counts["abstract"]
@@ -1330,17 +845,7 @@ class TheTensionMeter:
         unknowns = []
         vocab_map = {
             cat: TheLexicon.get(cat)
-            for cat in [
-                "heavy",
-                "kinetic",
-                "abstract",
-                "photo",
-                "aerobic",
-                "thermal",
-                "cryo",
-                "suburban",
-                "play",
-            ]
+            for cat in ["heavy", "kinetic", "abstract", "photo", "aerobic", "thermal", "cryo", "suburban", "play", ]
         }
         for w in clean_words:
             if w in TheLexicon.SOLVENTS:
@@ -1416,34 +921,17 @@ class TheTensionMeter:
         truth_signals = counts["heavy"] + counts["kinetic"]
         cohesion_signals = counts["abstract"] + counts["suburban"]
         truth_ratio = truth_signals / max(1, cohesion_signals + truth_signals)
-        physics_bridge = {
-            "E": round(drift_score, 2),
-            "B": round(beta_charge, 2),
-            "gamma": gamma,
-            "avg_viscosity": avg_viscosity,
-            "repetition": repetition_score,
-            "kappa": kappa_val,
-            "psi": psi_val,
-            "antigens": antigen_hits,
-            "counts": counts,
-            "clean_words": clean_words,
-            "raw_text": text,
-            "voltage": round(beta_charge * 10.0, 1),
-            "narrative_drag": round(drift_score * 10.0, 1),
-            "vector": {"VEL": 0.5, "STR": 0.5, "ENT": 0.5, "TEX": 0.5, "TMP": 0.5},
-            "truth_ratio": round(truth_ratio, 2),
-            "symbolic_state": "NEUTRAL",
-        }
-        return {
-            "physics": physics_bridge,
-            "clean_words": clean_words,
-            "raw_text": text,
-            "glass": {
-                "prosody": {"arousal": physics_bridge["voltage"]},
-                "resonance": physics_bridge["voltage"],
-            },
-        }
-
+        physics_bridge = {"E": round(drift_score, 2), "B": round(beta_charge, 2), "gamma": gamma,
+                          "avg_viscosity": avg_viscosity, "repetition": repetition_score, "kappa": kappa_val,
+                          "psi": psi_val, "antigens": antigen_hits, "counts": counts, "clean_words": clean_words,
+                          "raw_text": text, "voltage": round(beta_charge * 10.0, 1),
+                          "narrative_drag": round(drift_score * 10.0, 1),
+                          "vector": {"VEL": 0.5, "STR": 0.5, "ENT": 0.5, "TEX": 0.5, "TMP": 0.5},
+                          "truth_ratio": round(truth_ratio, 2), "symbolic_state": "NEUTRAL", }
+        return {"physics": physics_bridge, "clean_words": clean_words, "raw_text": text, "glass": {
+            "prosody": {"arousal": physics_bridge["voltage"]},
+            "resonance": physics_bridge["voltage"],
+        }, }
 
 class ParadoxSeed:
     def __init__(self, question, trigger_concepts):
@@ -1451,7 +939,6 @@ class ParadoxSeed:
         self.triggers = trigger_concepts
         self.maturity = 0.0
         self.bloomed = False
-
     def water(self, words, amount=1.0):
         if self.bloomed:
             return False
@@ -1460,12 +947,9 @@ class ParadoxSeed:
             self.maturity += amount * len(intersection)
         self.maturity += 0.05
         return self.maturity >= 10.0
-
     def bloom(self):
         self.bloomed = True
         return f"🌺 THE SEED BLOOMS: '{self.question}'"
-
-
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
         self.genome = "BONEAMANITA_7.8.5"
@@ -1478,8 +962,6 @@ class SporeCasing:
         self.mutations = mutations
         self.trauma_scar = round(trauma, 3)
         self.joy_vectors = joy_vectors if joy_vectors is not None else []
-
-
 class MycelialNetwork:
     def __init__(self, seed_file=None):
         if not os.path.exists("memories"):
@@ -1511,23 +993,13 @@ class MycelialNetwork:
             ),
             ParadoxSeed(
                 "If you meet your echo, who moves out of the way?",
-                {
-                    "copy",
-                    "echo",
-                    "self",
-                    "collision",
-                    "path",
-                    "yield",
-                    "double",
-                    "same",
-                },
+                {"copy", "echo", "self", "collision", "path", "yield", "double", "same", },
             ),
         ]
         self.session_health = None
         self.session_stamina = None
         if seed_file:
             self.ingest(seed_file)
-
     def autoload_last_spore(self):
         if not os.path.exists("memories"):
             return
@@ -1550,13 +1022,11 @@ class MycelialNetwork:
             print(
                 f"{Prisma.GRY}[GENETICS]: No ancestors found. Genesis Bloom.{Prisma.RST}"
             )
-
     def calculate_mass(self, node):
         if node not in self.graph:
             return 0.0
         data = self.graph[node]
         return sum(data["edges"].values())
-
     def get_shapley_attractors(self):
         attractors = {}
         for node in self.graph:
@@ -1564,7 +1034,6 @@ class MycelialNetwork:
             if mass >= BoneConfig.SHAPLEY_MASS_THRESHOLD:
                 attractors[node] = mass
         return attractors
-
     def tend_garden(self, current_words):
         bloom_msg = None
         for seed in self.seeds:
@@ -1572,7 +1041,6 @@ class MycelialNetwork:
             if is_ready and not bloom_msg:
                 bloom_msg = seed.bloom()
         return bloom_msg
-
     def bury(self, clean_words, tick, resonance=5.0):
         valuable_matter = (
                 TheLexicon.get("heavy")
@@ -1616,7 +1084,6 @@ class MycelialNetwork:
         if len(self.graph) > BoneConfig.MAX_MEMORY_CAPACITY:
             return self.cannibalize()
         return None
-
     def cannibalize(self, preserve_current=None, current_tick=0):
         protected = set()
         if preserve_current:
@@ -1642,7 +1109,6 @@ class MycelialNetwork:
             if victim in self.graph[node]["edges"]:
                 del self.graph[node]["edges"][victim]
         return f"MEMORY SACRIFICED: '{victim}' (Edges: {count})"
-
     def prune_synapses(self, scaling_factor=0.85, prune_threshold=0.5):
         pruned_count = 0
         total_decayed = 0
@@ -1666,7 +1132,6 @@ class MycelialNetwork:
         for n in nodes_to_remove:
             del self.graph[n]
         return f"📉 HOMEOSTATIC SCALING: Decayed {total_decayed} synapses. Pruned {pruned_count} weak connections."
-
     def save(self, health, stamina, mutations, trauma_accum, joy_history):
         base_trauma = (BoneConfig.MAX_HEALTH - health) / BoneConfig.MAX_HEALTH
         final_vector = {k: min(1.0, v) for k, v in trauma_accum.items()}
@@ -1674,34 +1139,23 @@ class MycelialNetwork:
         if health <= 0:
             cause = max(final_vector, key=final_vector.get)
             final_vector[cause] = 1.0
-        spore = SporeCasing(
-            session_id=self.session_id,
-            graph=self.graph,
-            mutations=mutations,
-            trauma=base_trauma,
-            joy_vectors=top_joy,
-        )
+        spore = SporeCasing(session_id=self.session_id, graph=self.graph, mutations=mutations, trauma=base_trauma,
+                            joy_vectors=top_joy, )
         data = spore.__dict__
         data["trauma_vector"] = final_vector
-        data["meta"] = {
-            "timestamp": time.time(),
-            "final_health": health,
-            "final_stamina": stamina,
-        }
+        data["meta"] = {"timestamp": time.time(), "final_health": health, "final_stamina": stamina, }
         try:
             with open(self.filename, "w") as f:
                 json.dump(data, f, indent=2)
             return self.filename
         except IOError:
             return None
-
     @staticmethod
     def get_current_category(word):
         for cat, vocab in TheLexicon.LEARNED_VOCAB.items():
             if word in vocab:
                 return cat
         return None
-
     def ingest(self, target_file):
         path = (
             f"memories/{target_file}"
@@ -1807,7 +1261,6 @@ class MycelialNetwork:
                 print(f"{Prisma.RED}[MEMORY]: Spore rejected. {err}{Prisma.RST}")
         else:
             print(f"{Prisma.RED}[MEMORY]: Spore file not found.{Prisma.RST}")
-
     @staticmethod
     def cleanup_old_sessions(limbo_layer=None):
         if not os.path.exists("memories"):
@@ -1835,17 +1288,13 @@ class MycelialNetwork:
             print(
                 f"{Prisma.GRY}[TIME MENDER]: Pruned {removed} dead timelines.{Prisma.RST}"
             )
-
-
 class ChronoStream:
     def __init__(self):
         self.last_tick = time.time()
         self.boredom_map = {}
-
     def cleanup(self):
         if len(self.boredom_map) > 50:
             self.boredom_map.clear()
-
     def tick(self, phys, session_id):
         self.cleanup()
         now = time.time()
@@ -1862,8 +1311,6 @@ class ChronoStream:
             current = max(0, current - 1.0)
         self.boredom_map[session_id] = current
         return current > BoneConfig.BOREDOM_THRESHOLD
-
-
 class LichenSymbiont:
     @staticmethod
     def photosynthesize(phys, clean_words, tick_count):
@@ -1891,28 +1338,21 @@ class LichenSymbiont:
                     f"{Prisma.MAG}🌺 SUBLIMATION: '{h_word}' has become Light.{Prisma.RST}"
                 )
         return sugar, " ".join(msgs) if msgs else None
-
-
 class TemporalDynamics:
     def __init__(self):
         self.voltage_history = []
         self.window = 3
-
     def commit(self, voltage):
         self.voltage_history.append(voltage)
         if len(self.voltage_history) > self.window:
             self.voltage_history.pop(0)
-
     def get_velocity(self):
         if len(self.voltage_history) < 2:
             return 0.0
         return round(
             (self.voltage_history[-1] - self.voltage_history[0])
             / len(self.voltage_history),
-            2,
-            )
-
-
+            2,)
 class ApeirogonResonance:
     def __init__(self):
         self.DIMENSIONS = {
@@ -1939,7 +1379,6 @@ class ApeirogonResonance:
             "TEX": ["GHOST", "GLASS", "IRON", "LEAD"],
             "TMP": ["SPARK", "PYRE", "REACTOR", "STAR"],
         }
-
     @staticmethod
     def _resolve_term(val, scale):
         return min(scale, key=lambda x: abs(x[0] - val))[1]
@@ -1967,13 +1406,10 @@ class ApeirogonResonance:
             f"Vector Lock: {p_dim}({p_val}) + {s_dim}({s_val})",
             f"THE {adj} {noun}",
         )
-
-
 class TherapyProtocol:
     def __init__(self):
         self.streaks = {k: 0 for k in BoneConfig.TRAUMA_VECTOR.keys()}
         self.HEALING_THRESHOLD = 5
-
     def check_progress(self, phys, stamina, current_trauma_accum):
         healed_types = []
         if phys["counts"]["toxin"] == 0 and phys["vector"]["TEX"] > 0.3:
@@ -2001,19 +1437,15 @@ class TherapyProtocol:
                     )
                     healed_types.append(trauma_type)
         return healed_types
-
-
 class ViralTracer:
     def __init__(self, mem):
         self.mem = mem
         self.max_depth = 4
-
     @staticmethod
     def _is_ruminative(word):
         return (word in TheLexicon.get("abstract")) or (
                 word in TheLexicon.get("antigen")
         )
-
     def inject(self, start_node):
         if start_node not in self.mem.graph:
             return None
@@ -2021,7 +1453,6 @@ class ViralTracer:
             return None
         path = [start_node]
         return self._walk(start_node, path, self.max_depth)
-
     def _walk(self, current, path, moves_left, visited=None):
         if visited is None:
             visited = set()
@@ -2039,7 +1470,6 @@ class ViralTracer:
             if result:
                 return result
         return None
-
     def psilocybin_rewire(self, loop_path):
         if len(loop_path) < 2:
             return None
@@ -2061,25 +1491,15 @@ class ViralTracer:
             self.mem.graph[action] = {"edges": {}, "last_tick": 0}
         self.mem.graph[action]["edges"][node_b] = 5
         return f"🍄 PSILOCYBIN REWIRE: Broken Loop '{node_a}↔{node_b}'. Grafted '{sensory}'(S) -> '{action}'(A)."
-
-
 class KintsugiProtocol:
-    KOANS = [
-        "Ignite the ice.",
-        "Make the stone float.",
-        "Pour water into the crack.",
-        "Scream in binary.",
-    ]
-
+    KOANS = ["Ignite the ice.", "Make the stone float.", "Pour water into the crack.", "Scream in binary.", ]
     def __init__(self):
         self.active_koan = None
-
     def check_integrity(self, stamina):
         if stamina < 10 and not self.active_koan:
             self.active_koan = random.choice(self.KOANS)
             return True, self.active_koan
         return False, None
-
     def attempt_repair(self, phys):
         if not self.active_koan:
             return False
@@ -2089,8 +1509,6 @@ class KintsugiProtocol:
             self.active_koan = None
             return True
         return False
-
-
 class CommandProcessor:
     def __init__(self, engine):
         self.eng = engine
@@ -2124,18 +1542,8 @@ class CommandProcessor:
             if len(parts) >= 3:
                 word = parts[1]
                 cat = parts[2].lower()
-                valid_cats = [
-                    "heavy",
-                    "kinetic",
-                    "abstract",
-                    "photo",
-                    "aerobic",
-                    "thermal",
-                    "cryo",
-                    "sacred",
-                    "cursed",
-                    "diversion",
-                ]
+                valid_cats = ["heavy", "kinetic", "abstract", "photo", "aerobic", "thermal", "cryo", "sacred", "cursed",
+                              "diversion", ]
                 if cat in valid_cats:
                     TheLexicon.teach(word, cat, self.eng.tick_count)
                     print(
@@ -2333,8 +1741,6 @@ class CommandProcessor:
         else:
             print(f"{Prisma.RED}Unknown command. Try /help.{Prisma.RST}")
         return True
-
-
 class TheCrystallizer:
     @staticmethod
     def verify(physics):
@@ -2346,46 +1752,17 @@ class TheCrystallizer:
         if physics["voltage"] > 7.0 and physics["narrative_drag"] < 3.0:
             return True, "💎 EXCELLENT CLARITY. High impact, low drag."
         return True, "Solid."
-
-
 class DreamEngine:
-    PROMPTS = [
-        "The {A} is dreaming of the {B}. Why?",
-        "Bridge the gap between {A} and {B}.",
-        "I see {A} inside the {B}. Explain.",
-        "The shadow of {A} falls on {B}.",
-        "{A} + {B} = ?",
-    ]
-
+    PROMPTS = ["The {A} is dreaming of the {B}. Why?", "Bridge the gap between {A} and {B}.",
+               "I see {A} inside the {B}. Explain.", "The shadow of {A} falls on {B}.", "{A} + {B} = ?", ]
     def __init__(self):
         self.NIGHTMARES = {
-            "THERMAL": [
-                "The sun is too close.",
-                "Wires fusing under skin.",
-                "A library burning in reverse.",
-            ],
-            "CRYO": [
-                "The ink is freezing.",
-                "Walking through white static.",
-                "A heartbeat slowing down.",
-            ],
-            "SEPTIC": [
-                "Black oil in the water.",
-                "The words are tasting sour.",
-                "Eating ash and dust.",
-            ],
-            "BARIC": [
-                "The sky is made of lead.",
-                "Crushed by the atmosphere.",
-                "Falling forever.",
-            ],
+            "THERMAL": ["The sun is too close.", "Wires fusing under skin.", "A library burning in reverse.", ],
+            "CRYO": ["The ink is freezing.", "Walking through white static.", "A heartbeat slowing down.", ],
+            "SEPTIC": ["Black oil in the water.", "The words are tasting sour.", "Eating ash and dust.", ],
+            "BARIC": ["The sky is made of lead.", "Crushed by the atmosphere.", "Falling forever.", ],
         }
-        self.VISIONS = [
-            "A bridge building itself.",
-            "The root drinking the stone.",
-            "The geometry of forgiveness.",
-        ]
-
+        self.VISIONS = ["A bridge building itself.", "The root drinking the stone.", "The geometry of forgiveness.", ]
     def daydream(self, graph):
         if len(graph) < 2:
             return None
@@ -2401,7 +1778,6 @@ class DreamEngine:
         end = max(valid_edges, key=valid_edges.get)
         template = random.choice(self.PROMPTS)
         return template.format(A=start.upper(), B=end.upper())
-
     def rem_cycle(self, trauma_accum, oxytocin_level):
         wounds = {k: v for k, v in trauma_accum.items() if v > 0.0}
         if wounds and oxytocin_level < 0.4:
@@ -2419,7 +1795,6 @@ class DreamEngine:
             None,
             0.0,
         )
-
     @classmethod
     def _dream_of_others(cls):
         try:
@@ -2464,18 +1839,14 @@ class DreamEngine:
             None,
             0.0,
         )
-
-
 class ResistanceTrainer:
     def __init__(self):
         self.training_mode = False
         self.rep_count = 0
-
     def toggle(self):
         self.training_mode = not self.training_mode
         state = "ACTIVE" if self.training_mode else "PASSIVE"
         return f"💪 RESISTANCE TRAINER: {state}. Minimum Drag: {BoneConfig.RESISTANCE_THRESHOLD}"
-
     def lift(self, physics):
         if not self.training_mode:
             return True, None
@@ -2487,24 +1858,14 @@ class ResistanceTrainer:
             )
         self.rep_count += 1
         return True, f"💪 GOOD LIFT. (Rep {self.rep_count})"
-
-
 class UserProfile:
     def __init__(self, name="USER"):
         self.name = name
-        self.affinities = {
-            "heavy": 0.0,
-            "kinetic": 0.0,
-            "abstract": 0.0,
-            "photo": 0.0,
-            "aerobic": 0.0,
-            "thermal": 0.0,
-            "cryo": 0.0,
-        }
+        self.affinities = {"heavy": 0.0, "kinetic": 0.0, "abstract": 0.0, "photo": 0.0, "aerobic": 0.0, "thermal": 0.0,
+                           "cryo": 0.0, }
         self.confidence = 0
         self.file_path = "user_profile.json"
         self.load()
-
     def update(self, counts, total_words):
         if total_words < 3:
             return
@@ -2516,7 +1877,6 @@ class UserProfile:
             self.affinities[cat] = (alpha * target) + (
                     (1 - alpha) * self.affinities[cat]
             )
-
     def get_preferences(self):
         likes = [k for k, v in self.affinities.items() if v > 0.3]
         hates = [k for k, v in self.affinities.items() if v < -0.2]
@@ -2528,7 +1888,6 @@ class UserProfile:
                 json.dump(self.__dict__, f)
         except IOError:
             pass
-
     def load(self):
         if os.path.exists(self.file_path):
             try:
@@ -2538,8 +1897,6 @@ class UserProfile:
                     self.confidence = data.get("confidence", 0)
             except (IOError, json.JSONDecodeError):
                 pass
-
-
 class MirrorGraph:
     def __init__(self):
         self.profile = UserProfile()
@@ -2564,12 +1921,9 @@ class MirrorGraph:
                     f"⚠️ MIRROR DRIFT: Stepping away from your usual {str(likes).upper()} anchor.",
                 )
         return True, None
-
     def get_status(self):
         l, h = self.profile.get_preferences()
         return f"👤 MODEL ({self.profile.confidence} turns): LIKES={l} | HATES={h}"
-
-
 class CosmicDynamics:
     @staticmethod
     def analyze_orbit(network, clean_words):
@@ -2612,8 +1966,6 @@ class CosmicDynamics:
                 f"🌊 FLOW: Streaming towards '{primary_node.upper()}'",
             )
         return "ORBITAL", 1.0, f"💫 ORBIT: Circling '{primary_node.upper()}'"
-
-
 class TheProjector:
     @staticmethod
     def broadcast(m, signals, lens_data):
@@ -2627,16 +1979,14 @@ class TheProjector:
             f"\n{lens_meta['color']}[ {lens_name} ]{Prisma.RST} E:{e_bar} | B:{b_bar}"
         )
         print(f" {Prisma.GRY}:: {signals.get('strat', 'ANALYZING...')}{Prisma.RST}")
-        print(f" {Prisma.WHT}► {lens_msg}{Prisma.RST}")
         if m["physics"]["counts"].get("play", 0) > 2:
             lens_msg = f"{Prisma.C['C']}✨ {lens_msg} ✨{Prisma.C['X']}"
+        print(f" {Prisma.WHT}► {lens_msg}{Prisma.RST}")
         if p["antigens"]:
             print(f" {Prisma.RED}☣️ TOXINS: {p['antigens']}{Prisma.RST}")
         for log in signals.get("battery_log", []):
             print(f" {log}")
         print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
-
-
 class RuptureEngine:
     @staticmethod
     def check_for_disruption(physics, lexicon_class):
@@ -2647,26 +1997,16 @@ class RuptureEngine:
                 f"⚡ KETAMINE DISRUPTION: Repetition {physics['repetition']} is Pathological. Landscape Flattened. Injecting Chaos: '{chaos_word}'.",
             )
         return False, None
-
     @staticmethod
     def trip_the_waiter(current_flavor, lexicon_class):
-        opposites = {
-            "heavy": "aerobic",
-            "abstract": "heavy",
-            "kinetic": "cryo",
-            "thermal": "cryo",
-            "photo": "heavy",
-        }
+        opposites = {"heavy": "aerobic", "abstract": "heavy", "kinetic": "cryo", "thermal": "cryo", "photo": "heavy", }
         target_flavor = opposites.get(current_flavor, "aerobic")
         anomaly = lexicon_class.harvest(target_flavor)
         return f"🔻 32-VALVE RUPTURE: Context is too '{current_flavor}'. Injecting '{anomaly}' to break the loop."
-
-
 class SoritesIntegrator:
     def __init__(self, memory_network):
         self.mem = memory_network
         self.active_constellations = set()
-
     def measure_ignition(self, clean_words, voltage_history):
         if not self.mem.graph:
             return 0.0, set(), 999.0
@@ -2687,7 +2027,6 @@ class SoritesIntegrator:
         total_vol = max(1, len(clean_words))
         ignition_score = round(echoes / total_vol, 2)
         return ignition_score, self.active_constellations, sliding_threshold
-
     @staticmethod
     def get_readout(score, threshold):
         if score > threshold:
@@ -2696,13 +2035,10 @@ class SoritesIntegrator:
                 f"🔥 HEAP IGNITION ({int(score*100)}%): The Ancestors are speaking.",
             )
         return "INERT", f"⏳ INERT SAND ({int(score*100)}%): Building mass..."
-
-
 class LifecycleManager:
     def __init__(self, engine):
         self.eng = engine
-
-    def run_cycle(self, text, m, trace, nutrient, has_bracelet, is_hybrid):
+    def run_cycle(self, text, m, trace, has_bracelet, is_hybrid):
         refusal_mode = self.eng.refusal.check_trigger(text)
         if refusal_mode:
             print(f"\n{Prisma.RED}🚫 REFUSAL TRIGGERED ({refusal_mode}){Prisma.RST}")
@@ -2733,9 +2069,6 @@ class LifecycleManager:
             print(
                 f"   {Prisma.WHT}► HINT: Light a fire (THERMAL) or break the box (/debug).{Prisma.RST}"
             )
-        heavy_count = m["physics"]["counts"].get("heavy", 0)
-        abstract_count = m["physics"]["counts"].get("abstract", 0)
-        has_bracelet = "TIME_BRACELET" in self.eng.gordon.inventory
         lex_msg = None
         shadow_triggers = {"shadow", "dark", "alley", "night", "lex", "void"}
         if any(w in m["clean_words"] for w in shadow_triggers):
@@ -2776,7 +2109,6 @@ class LifecycleManager:
                 chem_state,
                 self.eng.gordon.inventory,
             )
-        is_hybrid = heavy_count >= 2 and abstract_count >= 2
         if is_hybrid:
             loot_msg = self.eng.gordon.log_merge()
             if loot_msg:
@@ -2862,7 +2194,7 @@ class LifecycleManager:
             print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
             return
         if m["physics"]["E"] > 0.8:
-            if "TIME_BRACELET" in self.eng.gordon.inventory:
+            if has_bracelet:
                 lens_data = (
                     "GLASS",
                     f"ANACHRONISM DETECTED ({m['physics']['E']}). Payment processed via Time Bracelet. Immersion sustained.",
@@ -2940,24 +2272,8 @@ class LifecycleManager:
         self.eng.mem.bury(
             m["clean_words"], self.eng.tick_count, m["glass"]["resonance"]
         )
-        self._render(
-            m,
-            meta,
-            cosmic_msg,
-            lens_data,
-            mirror_msg,
-            kintsugi_msg,
-            rupture_msg,
-            crystal_msg,
-            ignition_msg,
-            pareidolia_msg,
-            theremin_msg,
-            folly_msg,
-            grind_msg,
-            hat_msg if hat_success else None,
-            lex_msg,
-        )
-
+        self._render(m, meta, cosmic_msg, lens_data, mirror_msg, kintsugi_msg, rupture_msg, crystal_msg, ignition_msg,
+                     pareidolia_msg, theremin_msg, folly_msg, grind_msg, hat_msg if hat_success else None, lex_msg, )
     def _handle_coma(self, text):
         self.eng.coma_turns -= 1
         self.eng.stamina = min(BoneConfig.MAX_STAMINA, self.eng.stamina + 15)
@@ -2974,7 +2290,6 @@ class LifecycleManager:
         print(f"   {dream_txt}")
         self.eng.mem.bury(TheLexicon.clean(text), self.eng.tick_count, 0.0)
         print(f"{Prisma.GRY}{'-' * 65}{Prisma.RST}")
-
     def _apply_cosmic_physics(self, phys, state, drag_mod):
         if state == "LAGRANGE_POINT":
             phys["voltage"] += 10.0
@@ -2983,7 +2298,6 @@ class LifecycleManager:
             phys["narrative_drag"] *= 0.1
         elif state == "VOID_DRIFT":
             phys["narrative_drag"] += drag_mod
-
     def _process_energy(self, m):
         vector = m["physics"]["vector"]
         drag = m["physics"]["narrative_drag"]
@@ -3002,15 +2316,8 @@ class LifecycleManager:
             scrub_amt = sugar * 0.5
             self.eng.mitochondria.mitigate(scrub_amt)
             lichen_msg += f" | 🧼 BIO-SCRUB (-{scrub_amt:.1f} ROS)"
-        return {
-            "density_bonus": density_bonus,
-            "drag_penalty": drag_penalty,
-            "sugar": sugar,
-            "lichen_msg": lichen_msg,
-            "spore_msg": spore_msg,
-            "msg": energy_msg,
-        }
-
+        return {"density_bonus": density_bonus, "drag_penalty": drag_penalty, "sugar": sugar, "lichen_msg": lichen_msg,
+                "spore_msg": spore_msg, "msg": energy_msg, }
     def _grow(self, m, meta):
         cost = 2.0
         net_change = meta["density_bonus"] + meta["sugar"] - meta["drag_penalty"] - cost
@@ -3024,7 +2331,6 @@ class LifecycleManager:
                 {"resonance": res, "timestamp": self.eng.tick_count}
             )
             print(f"{Prisma.MAG}✨ CORE MEMORY FORMED (Resonance: {res}){Prisma.RST}")
-
     def _calculate_health(self, glass_data):
         health_impact = 0
         toxin = glass_data["counts"].get("toxin", 0)
@@ -3052,25 +2358,9 @@ class LifecycleManager:
         self.eng.mem.cannibalize(
             preserve_current=glass_data["clean_words"], current_tick=self.eng.tick_count
         )
-
-    def _render(
-            self,
-            m,
-            meta,
-            cosmic_msg,
-            lens_data,
-            mirror_msg,
-            kintsugi_msg,
-            rupture_msg=None,
-            crystal_msg=None,
-            ignition_msg=None,
-            pareidolia_msg=None,
-            theremin_msg=None,
-            folly_msg=None,
-            grind_msg=None,
-            hat_msg=None,
-            lex_msg=None,
-    ):
+    def _render(self, m, meta, cosmic_msg, lens_data, mirror_msg, kintsugi_msg, rupture_msg=None, crystal_msg=None,
+                ignition_msg=None, pareidolia_msg=None, theremin_msg=None, folly_msg=None, grind_msg=None, hat_msg=None,
+                lex_msg=None, ):
         if m["physics"]["voltage"] > 8.0:
             meta["msg"] = f"{meta['msg']} | 💧 SWEATING" if meta["msg"] else "💧 SWEATING"
         battery_log = []
@@ -3102,24 +2392,17 @@ class LifecycleManager:
         print(f" {self.eng.theremin.get_readout()}")
         chem = self.eng.endocrine.get_state()
         chem_str = f"OXY:{chem['OXY']} | COR:{chem['COR']} | DOP:{chem['DOP']}"
-        signals = {
-            "lichen": meta["lichen_msg"],
-            "strat": f"{self.eng.wise.architect(m, None, False)[1]} | {Prisma.MAG}{chem_str}{Prisma.RST}",
-            "title": f"MODE :: {lens_data[0]}",
-            "battery_log": battery_log,
-            "spore": meta["spore_msg"],
-            "cosmic": cosmic_msg,
-        }
+        signals = {"lichen": meta["lichen_msg"],
+                   "strat": f"{self.eng.wise.architect(m, None, False)[1]} | {Prisma.MAG}{chem_str}{Prisma.RST}",
+                   "title": f"MODE :: {lens_data[0]}", "battery_log": battery_log, "spore": meta["spore_msg"],
+                   "cosmic": cosmic_msg, }
         self.eng.projector.broadcast(m, signals, lens_data)
-
-
 class TheTheremin:
     def __init__(self):
         self.resonance_log = deque(maxlen=5)
         self.banana_belly = 0.0
         self.FEVER_THRESHOLD = 15.0
         self.is_stuck = False
-
     def listen(self, physics):
         clean = physics["clean_words"]
         ancient_mass = sum(
@@ -3162,21 +2445,16 @@ class TheTheremin:
                 f"{Prisma.GRN}🌊 THE WAVE COLLAPSES: You have swam out of the hole.{Prisma.RST}",
             )
         return self.is_stuck, interference, msg
-
     def get_readout(self):
         bar = "=" * int(self.banana_belly)
         state = "STUCK" if self.is_stuck else "FLOW"
         color = Prisma.RED if self.is_stuck else Prisma.CYN
         return f"{color}🍌 THEREMIN [{state}]: [{bar:<15}] ({int(self.banana_belly)}%){Prisma.RST}"
-
-
 class LimboLayer:
     MAX_ECTOPLASM = 50
-
     def __init__(self):
         self.ghosts = deque(maxlen=self.MAX_ECTOPLASM)
         self.haunt_chance = 0.05
-
     def absorb_dead_timeline(self, filepath):
         try:
             with open(filepath, "r") as f:
@@ -3191,18 +2469,14 @@ class LimboLayer:
                     self.ghosts.extend(bones[:3])
         except (IOError, json.JSONDecodeError):
             pass
-
     def haunt(self, text):
         if self.ghosts and random.random() < self.haunt_chance:
             spirit = random.choice(self.ghosts)
             return f"{text} ...{Prisma.GRY}{spirit}{Prisma.RST}..."
         return text
-
-
 class TheForge:
     def __init__(self):
         self.catalysts = ["heavy", "kinetic", "thermal", "cryo", "photo"]
-
     @staticmethod
     def transmute(physics):
         counts = physics["counts"]
@@ -3223,8 +2497,6 @@ class TheForge:
                 f"   Injecting Coolant: '{coolant}'. Breathe. Add space."
             )
         return None
-
-
 class LazarusClamp:
     def __init__(self):
         self.suffering_counter = 0
@@ -3237,14 +2509,11 @@ class LazarusClamp:
             self.suffering_counter = 0
         if self.suffering_counter > self.MAX_SUFFERING_CYCLES:
             self._scram()
-
     @staticmethod
     def _scram():
         print("!!! CRITICAL: LAZARUS TAX LIMIT REACHED !!!")
         print("System is in a 'Hell Scenario' loop. Hard shutdown initiated.")
         raise SystemExit("Moratorium Enforced.")
-
-
 @dataclass
 class EndocrineSystem:
     dopamine: float = 0.5
@@ -3253,7 +2522,6 @@ class EndocrineSystem:
     serotonin: float = 0.5
     adrenaline: float = 0.0
     melatonin: float = 0.0
-
     def metabolize(
             self, trace, health: float, ros_level: float = 0.0, social_context: bool = False
     ):
@@ -3280,24 +2548,14 @@ class EndocrineSystem:
         else:
             self.melatonin = 0.0
         return self.get_state()
-
     def get_state(self):
-        return {
-            "DOP": round(self.dopamine, 2),
-            "OXY": round(self.oxytocin, 2),
-            "COR": round(self.cortisol, 2),
-            "SER": round(self.serotonin, 2),
-            "ADR": round(self.adrenaline, 2),
-            "MEL": round(self.melatonin, 2),
-        }
-
-
+        return {"DOP": round(self.dopamine, 2), "OXY": round(self.oxytocin, 2), "COR": round(self.cortisol, 2),
+                "SER": round(self.serotonin, 2), "ADR": round(self.adrenaline, 2), "MEL": round(self.melatonin, 2), }
 class TheFolly:
     def __init__(self):
         self.indigestion_count = 0
         self.gut_memory = deque(maxlen=50)
         self.global_tastings = Counter()
-
     @staticmethod
     def audit_desire(physics, stamina):
         voltage = physics["voltage"]
@@ -3308,7 +2566,6 @@ class TheFolly:
                 f"   {Prisma.CYN}► TIME DILATION: Voltage 0.0. The field reveals your folly.{Prisma.RST}",
             )
         return None, None
-
     def grind_the_machine(self, atp_pool, clean_words, lexicon):
         if 20.0 > atp_pool > 0.0:
             meat_words = [
@@ -3347,8 +2604,6 @@ class TheFolly:
                     0.0,
                 )
         return None, None, 0.0
-
-
 class BoneAmanita:
     def __init__(self):
         self.safety = LazarusClamp()
@@ -3383,6 +2638,7 @@ class BoneAmanita:
         self.trauma_accum = {"THERMAL": 0.0, "CRYO": 0.0, "SEPTIC": 0.0, "BARIC": 0.0}
         self.joy_history = []
         self.theremin = TheTheremin()
+        self.current_nutrient = None
         self.health = (
             self.mem.session_health
             if self.mem.session_health is not None
@@ -3398,13 +2654,11 @@ class BoneAmanita:
         self.tick_count = 0
         self.life = LifecycleManager(self)
         self.expectations = {}
-
     def process_intent(self, action, sensation):
         prediction = self.expectations.get(action, 0.5)
         surprise = abs(prediction - sensation)
         self.expectations[action] = sensation
         return {"err": surprise, "coh": 1.0 - surprise, "exp": prediction}
-
     def pollinate(self, current_words):
         if self.stamina < 30 or not self.mem.graph:
             return None
@@ -3420,7 +2674,6 @@ class BoneAmanita:
             candidates.sort(key=lambda x: x[1], reverse=True)
             return f"{Prisma.MAG}🍄 MYCELIAL SPORE: '{candidates[0][0]}'{Prisma.RST}"
         return None
-
     def process(self, text):
         if self.cmd.execute(text):
             return
@@ -3596,9 +2849,7 @@ class BoneAmanita:
         if forge_msg:
             print(f"\n{forge_msg}")
             print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
-        self.life.run_cycle(text, m, trace, nutrient, has_bracelet, is_hybrid)
-
-
+        self.life.run_cycle(text, m, trace, has_bracelet, is_hybrid)
 if __name__ == "__main__":
     eng = BoneAmanita()
     print(f"{Prisma.GRN}>>> BONEAMANITA v7.8.5 'THE HYBRID BARD' {Prisma.RST}")
@@ -3633,13 +2884,8 @@ if __name__ == "__main__":
             }
         else:
             learned_mutations = {}
-        saved_file = eng.mem.save(
-            health=eng.health,
-            stamina=eng.stamina,
-            mutations=learned_mutations,
-            trauma_accum=eng.trauma_accum,
-            joy_history=eng.joy_history,
-        )
+        saved_file = eng.mem.save(health=eng.health, stamina=eng.stamina, mutations=learned_mutations,
+                                  trauma_accum=eng.trauma_accum, joy_history=eng.joy_history, )
         eng.mirror.profile.save()
         print(f"{Prisma.CYN}[PROFILE]: User vector saved.{Prisma.RST}")
         if saved_file:
