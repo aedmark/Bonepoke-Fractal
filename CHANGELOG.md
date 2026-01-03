@@ -1,5 +1,31 @@
 # CHANGELOG.md
 
+### [7.8.5] - THE HYBRID BARD - 2026-01-02
+
+#### Added
+
+* **Rationalist Logic Probe (`/_prove`):** A new command that calculates the "truth density" of a statement based on the ratio of heavy/kinetic words to abstract/suburban glue. It returns a verdict of AXIOMATIC, CONJECTURE, or NOISE.
+* **Guard Rails (Security Layer):**
+* `validate_spore()` method added to `MycelialNetwork` to check for corrupted keys or impossible trauma values before ingesting memory files.
+* Permission checks added to `CommandProcessor`. Dangerous commands (`/teach`, `/kill`, `/flag`) now require a user confidence score > 50.
+
+
+* **Factory Reset:** Added `/reset --soft` (clears current session graph) and `/reset --hard` (deletes all memory files and reinitializes the directory).
+* **Metabolic Integration:** `MitochondrialForge.respirate()` now accepts `has_bracelet` and `is_hybrid` flags, allowing inventory items to directly influence metabolic efficiency.
+
+#### Fixed
+
+* **Critical Syntax Errors:**
+* Fixed indentation in `TheGreyHat.tip` which previously made the logic unreachable.
+* Corrected variable definition order in `BoneAmanita.process` to prevent `NameError` on `vol` and `rep`.
+* Resolved the "double open" error in `DreamEngine._dream_of_others` by removing the redundant `with open()` block while preserving the new validation logic.
+
+
+* **Formatting & Logic:**
+* Fixed indentation for `_BASE_SUBURBAN` and `ANTIGEN_REPLACEMENTS` in `TheLexicon`.
+* Corrected string formatting in `GradientWalker` output.
+* Updated `LifecycleManager.run_cycle` to correctly accept and pass the new metabolic parameters.
+
 ## [7.8.4] - THE RATIONALIST - 2026-01-02
 
 ### 🧬 ARCHITECTURAL SHIFTS (The Fuller Lens)
