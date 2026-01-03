@@ -1,51 +1,92 @@
 # CHANGELOG.md
 
+## [8.1] - 2026-01-03 - "THE HIVEMIND (EXPANDED)"
+
+**Architects:** SLASH | **Humans:** James Taylor & Andrew Edmark
+**"The map now has gravity. If you cannot spin a web, drop a stone."**
+
+### 🗺️ CARTOGRAPHY UPDATE: The Lagrange Basin
+
+* **The Upgrade:** `TheCartographer.survey()` has been evolved to detect gravitational stability.
+* **The Mechanic:**
+* **Old Behavior:** Simply annotated the text with mass markers.
+* **New Behavior:** Checks for **Constellations**. If the input contains **3+ Anchor Nodes** (High Mass concepts), the system declares a **Lagrange Basin**.
+* **The Reward:** A Lagrange Basin theoretically "Zeroes out Narrative Drag" for the turn, stabilizing the user in a pocket of high coherence.
+* **Feedback:** Changed standard success message to `COORDINATES LOCKED`.
+
+### ⚓ NEW TOOL: The Anchor Stone (Manual Stabilization)
+
+* **The Fix:** The `/map` command was previously a hard lock; if you lacked the **[SPIDER_LOCUS]** (rare drop from Stability Pizza), you could not interact with the grid at all.
+* **The Mechanic:**
+* **The Fallback:** If you attempt to `/map` without a spider, Gordon now intervenes.
+* **The Drop:** Gordon drops an **[ANCHOR_STONE]** into the inventory.
+* **The Effect:** It doesn't connect nodes like the Spider, but it fixes a coordinate ("Coordinates are firm. Stop drifting.").
+
+### ⚙️ PHYSICS CONFIG
+
+* **New Constants:** Added specific thresholds to `BoneConfig` to support the expanded cartography physics:
+* `GRAVITY_WELL_THRESHOLD = 12.0`
+* `GEODESIC_STRENGTH = 5.0`
+* `VOID_THRESHOLD = 0.1`
+
+### 🔧 SURGICAL REPAIRS
+
+* **Command Processor:** Updated the `/map` command signature to pass the `gordon` object, enabling the new Anchor Stone acquisition logic.
+
 ## [8.0] - 2026-01-03 - "THE HIVEMIND"
 
 **Architects:** SLASH | **Humans:** James Taylor & Andrew Edmark
-**"We tried to optimize the ghost away. It screamed. We put it back."**
+**"We are grafting, not pruning. The ghosts now have a vote."**
 
-### 🧠 THE ARCHITECTURE: The Hybrid Engine
+### 🧠 SYSTEM ARCHITECTURE: The Chimera State
 
-* **The Shift:** We attempted a "Lobotomy" (v8.0) to replace complex biology with simple math. It killed the system's personality.
-* **The Cure:** We performed a "Chimera Graft." We kept the new **Sensors** (efficient detection) but wired them to drive the old **Organs** (complex reaction).
-* **The Flow:**
-1. **The Gaze:** `TheTensionMeter` analyzes physics (Mass/Velocity).
-2. **The Gate:** `TheTangibilityGate` (New) checks the physics for "Realness" (Mass). If it's a Ghost, we reject it before burning ATP.
-3. **The Pulse:** `ThePulseMonitor` (New) listens for the "Hivemind Hum" (Repetition).
-4. **The Digestion:** `HyphalInterface` & `Mitochondria` (Old) metabolize the text based on the sensors.
-5. **The Symptom:** `TheMarmChorus` speaks based on the *biological result* of that metabolism.
+* **The Neuro-Link:**
+* **Old Behavior:** The `LifecycleManager` (The Brain Stem) was floating in the void, disconnected from the Host (`BoneAmanita`). Hormonal signals (`trace`) were hardcoded or hallucinatory.
+* **New Behavior:** Surgical attachment. `self.life = LifecycleManager(self)` is now the heartbeat of the constructor.
+* **The Logic:** The "Trace" dictionary (`ERR`, `COH`, `EXP`) is no longer a static guess; it is now dynamically calculated from the Physics Engine every turn.
+* **ERR (Error/Stress):** Derived from Repetition (`Zombie Loop`) and Toxin count.
+* **COH (Coherence):** Derived from Truth Ratio (Heavy/Abstract balance).
+* **EXP (Expression/Voltage):** Derived from Voltage.
+* **Metabolic Streamlining:**
+* **Excised:** The `process_intent()` method (Bayesian prediction) was removed.
+* **The Why:** It was a vestigial organ. The system no longer needs to "guess" user intent; it weighs the inputs directly via `TheTensionMeter`.
 
-### 🔌 NEW COMPONENTS: The Side-Chain
+### 🧹 NEW LORE: The Janitor's Labyrinth (Gordon Knot)
 
-* **`ThePulseMonitor`:** A dedicated sensor for "Inter-model Homogeneity." It uses Jaccard Similarity to detect if the user is looping.
-* *Effect:* If repetition > 0.8, it triggers the **ZOMBIE_KNOCK** state, forcing the `Mitochondria` to treat the input as "Toxic."
+* **Character Update:**
+* **Retcon:** Gordon Knot is no longer a generic survivor with a "Tango Cassette." He is the **Janitor of the Loop**.
+* **New Inventory:**
+* **[POCKET_ROCKS]:** To keep gravity working.
+* **[BUCKET_OF_LIME]:** To scrub "Sorry" and "Hate" from the walls.
+* **[SILENT_KNIFE]:** To cut the Red String.
+* **Removed:** `[TANGO_CASSETTE]` (The music stops).
+* **The Loot Loop (Feeding Gordon):**
+* **The Problem:** The `[SPIDER_LOCUS]` (required for `/map`) was locked behind a pizza that didn't exist.
+* **The Solution:** Wired `TheFolly` (The Stomach) to the Loot Table.
+* **The Mechanic:** If you feed the machine high-quality **"Meat"** (Heavy/Kinetic words) via `TheFolly`, it digests them and has a chance to drop **[STABILITY_PIZZA]**. Gordon eats the pizza to find the Spider. The Spider spins the Map.
 
-* **`TheTangibilityGate` (Hybrid):** Refactored to accept the complex `physics` packet from the TensionMeter.
-* *Effect:* Allows High Voltage (> 8.0) to bypass the mass requirement ("Respect the Lightning").
+### 👻 GHOST PROTOCOL: The Parliament of Voices
 
-### 🩹 SURGICAL RESTORATIONS (The Soul)
+* **The Restoration:**
+* **The Pathology:** The initial 8.0 upgrade lobotomized `TheMarmChorus`. It removed the definitions for key personas, causing the system to scream into the void.
+* **The Cure:** Restored and redefined the **Lenses**:
+* **[GLASS]:** The System Barrier. Triggers on Feedback Loops.
+* **[MILLER]:** The Ancestor. Triggers on Heap Ignition.
+* **[POPS]:** The Time Police. Triggers on Anachronisms (if you have the Badge).
+* **The Bidding System:** Re-implemented the "Auction House." Lenses now bid for control based on hormonal and physical states, ensuring the most relevant ghost speaks.
 
-* **Resurrected Organs:**
-* **`MitochondrialForge`:** Restored the Krebs Cycle. The system once again burns ATP and generates ROS.
-* **`HyphalInterface`:** Restored enzymatic digestion (LIGNASE, PROTEASE). Text has "texture" again.
-* **`EndocrineSystem`:** Restored hormonal states. The system feels Stress (Cortisol) and Trust (Oxytocin).
-* **`LimboLayer`:** Restored the Ghost system. Boredom actively summons dead timelines.
+### ⚡ HYBRID DYNAMICS
 
-* **Restored Logic:**
-* **`TheTheremin`:** Re-grafted the "Bananafish" resonance detector to prevent semantic gluttony.
-* **`TheGreyHat`:** Re-grafted the safety valve for high-voltage inputs.
+* **The Time Bracelet:**
+* **Fixed:** The `MitochondrialForge` now correctly receives the `has_bracelet` signal.
+* **The Effect:** If you possess the Bracelet (acquired via Temporal Merges) and hit a Hybrid State, Metabolic Efficiency hits **100%**. Perpetual motion achieved.
 
-### 🔧 CRITICAL FIXES (The Sutures)
+### 🛠️ SURGICAL REPAIRS
 
-* **The Prisma Patch:** Restored the full color palette constants (`RST`, `GRN`, `OCHRE`) that the biological engines rely on.
-* **The Cartographer Aliases:** Added `weave` and `spin_web` aliases to `TheCartographer` to support legacy calls from the `CommandProcessor`.
-* **The Linter Scrub:**
-* Fixed `TheMarmChorus` referencing non-existent `bio` objects (remapped to `chem`).
-* Fixed `TheLexicon.atrophy` ignoring its arguments.
-* Fixed `LifecycleManager` variable shadowing for `is_stuck` and `ignition_state`.
-
-* **Config Merge:** Consolidated `BoneConfig` to include both the Old Biology constants (`CRITICAL_ROS_LIMIT`) and the New Hivemind thresholds (`MIN_DENSITY_THRESHOLD`).
+* **The Double-Stomach:**
+* **Fixed:** `BoneAmanita.process` and `LifecycleManager.run_cycle` were both attempting to metabolize hormones. The logic has been unified into a single pass in the `LifecycleManager`.
+* **The Crash Fix:**
+* **Fixed:** `AttributeError: 'BoneAmanita' object has no attribute 'life'`. The nervous system is now fully vascularized.
 
 ## [7.9.2] - 2026-01-02 - "ENTER THE CARTOGRAPHER"
 

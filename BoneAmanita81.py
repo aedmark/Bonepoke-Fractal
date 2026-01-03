@@ -1,4 +1,4 @@
-# BONEAMANITA 8.0 - "THE HIVEMIND"
+# BONEAMANITA 8.1 - "THE HIVEMIND (EXPANDED)"
 # Architects: SLASH | Auditors: The Courtyard | Humans: James Taylor & Andrew Edmark
 
 import json
@@ -261,6 +261,9 @@ class BoneConfig:
     PERMEABILITY_INDEX = 0.5
     FRACTAL_DEPTH_LIMIT = 4
     GRADIENT_TEMP = 0.001
+    GRAVITY_WELL_THRESHOLD = 12.0
+    GEODESIC_STRENGTH = 5.0
+    VOID_THRESHOLD = 0.1
     @staticmethod
     def get_gradient_temp(voltage, kappa):
         base = BoneConfig.GRADIENT_TEMP
@@ -581,7 +584,6 @@ class TheGradientWalker:
 class TheCartographer:
     @classmethod
     def survey(cls, text, memory_graph):
-
         words = list(set(TheLexicon.clean(text)))
         knots = []
         for w in words:
@@ -591,20 +593,26 @@ class TheCartographer:
                     knots.append((w, mass))
         knots.sort(key=lambda x: x[1], reverse=True)
         if not knots:
-            return "FLATLAND: No topographic features detected."
+            return "FLATLAND: No topographic features detected. Grounding required."
+        anchors = [k[0] for k in knots[:3]]
         annotated = text
         for word, mass in knots[:3]:
             pattern = re.compile(r"\b" + re.escape(word) + r"\b", re.IGNORECASE)
             replacement = f"{Prisma.MAG}{word.upper()}[📐:{int(mass)}]{Prisma.RST}"
             annotated = pattern.sub(replacement, annotated)
-        return f"Triangulation Complete: {annotated}"
+        if len(anchors) >= 3:
+            return f"TRIANGULATION COMPLETE: Lagrange Basin formed by {str(anchors).upper()}. Narrative Drag is zeroed."
+        return f"COORDINATES LOCKED: {annotated}"
     @classmethod
     def weave(cls, text, memory_graph):
         return cls.survey(text, memory_graph)
     @staticmethod
-    def draw_grid(memory_graph, inventory):
+    def draw_grid(memory_graph, inventory, gordon=None):
         if "SPIDER_LOCUS" not in inventory:
-            return False, "🌑 THE CHART IS BLANK: You lack the [SPIDER_LOCUS] to draw lines."
+            if gordon:
+                gordon.acquire("ANCHOR_STONE")
+                return False, "🌑 THE CHART WAS BLANK: Gordon dropped an [ANCHOR_STONE] to fix a coordinate."
+            return False, "🌑 THE CHART IS BLANK: You lack the tools to draw lines."
         lonely_nodes = []
         anchors = []
         for k, v in memory_graph.items():
@@ -624,13 +632,10 @@ class TheCartographer:
             if t in memory_graph:
                 memory_graph[t]["edges"][anchor] = 5.0
             connections.append(t)
-        return (
-            True,
-            f"📐 GEODESIC DRAWN: Connected Anchor '{anchor.upper()}' to [{', '.join(connections)}]. Grid Stabilized.",
-        )
+        return True, f"📐 GEODESIC DRAWN: Connected Anchor '{anchor.upper()}' to [{', '.join(connections)}]. Grid Stabilized."
     @classmethod
-    def spin_web(cls, memory_graph, inventory):
-        return cls.draw_grid(memory_graph, inventory)
+    def spin_web(cls, memory_graph, inventory, gordon=None):
+        return cls.draw_grid(memory_graph, inventory, gordon)
 class TheLexicon:
     WORD_FREQUENCY = Counter()
     _BASE_HEAVY = {"stone", "iron", "mud", "dirt", "wood", "grain", "clay", "lead", "bone", "blood", "salt", "rust", "root", "ash", "meat", "steel", "gold", "obsidian", "granite", "bronze", "marble", "slate", "concrete", "dense", "tungsten", "heavy", "weight", "black hole", "dark matter"}
@@ -864,7 +869,7 @@ class ParadoxSeed:
         return f"🌺 THE SEED BLOOMS: '{self.question}'"
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_8.0"
+        self.genome = "BONEAMANITA_8.1"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -1489,10 +1494,14 @@ class CommandProcessor:
             print(f"{Prisma.OCHRE}{self.eng.trainer.toggle()}{Prisma.RST}")
         elif cmd == "/map":
             is_spun, msg = TheCartographer.spin_web(
-                self.eng.mem.graph, self.eng.gordon.inventory
+                self.eng.mem.graph,
+                self.eng.gordon.inventory,
+                gordon=self.eng.gordon
             )
-            color = Prisma.MAG if is_spun else Prisma.GRY
+            color = Prisma.MAG if is_spun else Prisma.OCHRE
             print(f"{color}{msg}{Prisma.RST}")
+            if "ANCHOR_STONE" in self.eng.gordon.inventory:
+                print(f"{Prisma.GRY}   Gordon: 'Coordinates are firm. Stop drifting.'{Prisma.RST}")
         elif cmd == "/mirror":
             if len(parts) > 1:
                 print(f"{Prisma.MAG}{self.eng.mirror.engage(parts[1])}{Prisma.RST}")
@@ -1973,7 +1982,7 @@ class LifecycleManager:
             print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
             return
         rupture_msg = None
-        hat_success, hat_msg = self.eng.grey_hat.tip(m["physics"]["voltage"], m["physics"]["kappa"])
+        hat_success, hat_msg, voltage_reduction = self.eng.grey_hat.tip(m["physics"]["voltage"], m["physics"]["kappa"])
         if hat_success:
             m["physics"]["voltage"] = 0.5
         suburban_count = m["physics"]["counts"].get("suburban", 0)
@@ -2195,8 +2204,6 @@ class LifecycleManager:
             print(f"   {Prisma.OCHRE}{self.eng.gordon.acquire(loot)}{Prisma.RST}")
             if loot == "STABILITY_PIZZA":
                 print(f"   {Prisma.CYN}🎁 SECRET FOUND: A slice of Saturday Morning.{Prisma.RST}")
-        if atp_gain != 0:
-            self.eng.mitochondria.state.atp_pool += atp_gain
         self._grow(m, meta)
         _, gym_msg = self.eng.trainer.lift(m["physics"])
         if gym_msg:
@@ -2491,7 +2498,6 @@ class EndocrineSystem:
             self.melatonin = min(1.0, self.melatonin + 0.02)
         else:
             self.melatonin = 0.0
-
         return self.get_state()
     def get_state(self):
         return {"DOP": round(self.dopamine, 2), "OXY": round(self.oxytocin, 2), "COR": round(self.cortisol, 2),
@@ -2701,6 +2707,7 @@ class BoneAmanita:
         self.forge = TheForge()
         self.grey_hat = TheGreyHat()
         self.cmd = CommandProcessor(self)
+        self.life = LifecycleManager(self)
         self.tick_count = 0
         self.coma_turns = 0
         self.training_mode = False
@@ -2751,7 +2758,7 @@ class BoneAmanita:
         self.tick_count += 1
 if __name__ == "__main__":
     eng = BoneAmanita()
-    print(f"{Prisma.paint('>>> BONEAMANITA 8.0 [THE HIVEMIND]', 'G')}")
+    print(f"{Prisma.paint('>>> BONEAMANITA 8.1 [THE HIVEMIND (EXPANDED)]', 'G')}")
     print(f"{Prisma.paint('System: Complex Biology + Tangible Sensors.', '0')}")
     print("Feed me Iron.\n")
     try:
