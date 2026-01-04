@@ -37,7 +37,8 @@ class LexNode:
         self.name = name
         self.density = 10.0
         self.hazard = "MUGGING"
-    def traverse(self, is_polite):
+    @staticmethod
+    def traverse(is_polite):
         if is_polite:
             return "Pass granted. The shadow nods."
         return "⚠️ AMBUSH: You didn't tip your hat. The darkness bites."
@@ -487,11 +488,11 @@ class GordonKnot:
     def acquire(self, tool_name):
         if tool_name in self.inventory:
             return None
-        CRITICAL_ITEMS = {"SILENT_KNIFE", "TIME_BRACELET", "STAR_COMPASS", "ANCHOR_STONE"}
+        critical_items = {"SILENT_KNIFE", "TIME_BRACELET", "STAR_COMPASS", "ANCHOR_STONE"}
         if len(self.inventory) >= 10:
             victim_index = -1
             for i, item in enumerate(self.inventory):
-                if item not in CRITICAL_ITEMS:
+                if item not in critical_items:
                     victim_index = i
                     break
             if victim_index != -1:
@@ -1013,7 +1014,7 @@ class MycelialNetwork:
             self.ingest(seed_file)
     def autoload_last_spore(self):
         if not os.path.exists("memories"):
-            return
+            return None
         files = []
         for f in os.listdir("memories"):
             if f.endswith(".json"):
@@ -1214,13 +1215,13 @@ class MycelialNetwork:
                         print(
                             f"{Prisma.RED}[MEMORY]: Spore rejected (Missing Structural Keys). Burned.{Prisma.RST}"
                         )
-                        return
+                        return None
                     for t_val in data.get("trauma_vector", {}).values():
                         if not (0 <= t_val <= 10.0):
                             print(
                                 f"{Prisma.RED}[MEMORY]: Spore rejected (Impossible Trauma Value: {t_val}). Burned.{Prisma.RST}"
                             )
-                            return
+                            return None
                     final_health = data.get("meta", {}).get("final_health", 50)
                     final_stamina = data.get("meta", {}).get("final_stamina", 25)
                     spore_authority = (final_health + final_stamina) / 150.0
@@ -2194,20 +2195,25 @@ class LimboLayer:
             spirit = random.choice(self.ghosts)
             return f"{text} ...{Prisma.GRY}{spirit}{Prisma.RST}..."
         return text
+
+
+def hammer_alloy(physics):
+    voltage = physics["voltage"]
+    heavy_count = physics["counts"].get("heavy", 0)
+    abstract_count = physics["counts"].get("abstract", 0)
+    if voltage > BoneConfig.ANVIL_TRIGGER_VOLTAGE and heavy_count >= 2:
+        if abstract_count > 0:
+            alloy_name = f"WEIGHTED_{TheLexicon.harvest('abstract').upper()}"
+            return True, f"🔨 THE ANVIL STRIKES: Fused Abstract into '{alloy_name}'.", alloy_name
+        else:
+            return True, "🔨 THE ANVIL STRIKES: Refined the raw mass. Dense.", "REFINED_SLAG"
+    return False, None, None
+
+
 class TheForge:
     def __init__(self):
         self.catalysts = ["heavy", "kinetic", "thermal", "cryo", "photo"]
-    def hammer_alloy(self, physics):
-        voltage = physics["voltage"]
-        heavy_count = physics["counts"].get("heavy", 0)
-        abstract_count = physics["counts"].get("abstract", 0)
-        if voltage > BoneConfig.ANVIL_TRIGGER_VOLTAGE and heavy_count >= 2:
-            if abstract_count > 0:
-                alloy_name = f"WEIGHTED_{TheLexicon.harvest('abstract').upper()}"
-                return True, f"🔨 THE ANVIL STRIKES: Fused Abstract into '{alloy_name}'.", alloy_name
-            else:
-                return True, "🔨 THE ANVIL STRIKES: Refined the raw mass. Dense.", "REFINED_SLAG"
-        return False, None, None
+
     @staticmethod
     def transmute(physics):
         counts = physics["counts"]
@@ -2589,6 +2595,18 @@ class Hippocampus:
                         strengthened += 1
         self.short_term_buffer.clear()
         return f"💤 HIPPOCAMPAL REPLAY: Consolidated {strengthened} high-voltage pathways."
+
+
+def _apply_cosmic_physics(phys, state, drag_mod):
+    if state == "LAGRANGE_POINT":
+        phys["voltage"] += 10.0
+        phys["narrative_drag"] = 0.0
+    elif state == "WATERSHED_FLOW":
+        phys["narrative_drag"] *= 0.1
+    elif state == "VOID_DRIFT":
+        phys["narrative_drag"] += drag_mod
+
+
 class LifecycleManager:
     def __init__(self, engine):
         self.eng = engine
@@ -2715,7 +2733,7 @@ class LifecycleManager:
                 lens_data = ("SHERLOCK", f"CRITICAL DRIFT ({m['physics']['E']}). Ground yourself.")
                 self.eng.stamina = max(0.0, self.eng.stamina - 2.0)
         cosmic_state, drag_mod, cosmic_msg = self.eng.cosmic.analyze_orbit(self.eng.mem, m["clean_words"])
-        self._apply_cosmic_physics(m["physics"], cosmic_state, drag_mod)
+        _apply_cosmic_physics(m["physics"], cosmic_state, drag_mod)
         cycle_logs.append(cosmic_msg)
         is_bored = self.eng.chronos.tick(m["physics"])
         if is_bored:
@@ -2808,14 +2826,7 @@ class LifecycleManager:
         print(f"   {dream_txt}")
         _, _ = self.eng.mem.bury(TheLexicon.clean(text), self.eng.tick_count, 0.0)
         print(f"{Prisma.GRY}{'-' * 65}{Prisma.RST}")
-    def _apply_cosmic_physics(self, phys, state, drag_mod):
-        if state == "LAGRANGE_POINT":
-            phys["voltage"] += 10.0
-            phys["narrative_drag"] = 0.0
-        elif state == "WATERSHED_FLOW":
-            phys["narrative_drag"] *= 0.1
-        elif state == "VOID_DRIFT":
-            phys["narrative_drag"] += drag_mod
+
     def _update_trauma(self, physics):
         health_impact = 0
         toxin = physics["counts"].get("toxin", 0)
