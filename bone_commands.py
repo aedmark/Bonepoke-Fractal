@@ -6,7 +6,7 @@ import os
 import shutil
 import random
 from typing import List
-from BoneAmanita85 import Prisma, BoneConfig, TheLexicon, TheCartographer
+from BoneAmanita852 import Prisma, BoneConfig, TheLexicon, TheCartographer
 
 class CommandProcessor:
     def __init__(self, engine, prisma_ref, lexicon_ref, config_ref, cartographer_ref):

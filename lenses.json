@@ -14,6 +14,7 @@
 		"POPS": { "color": "BLU", "role": "The Time Police", "trigger": "TEMPORAL_VIOLATION" },
 		"DEREK": { "color": "MAG", "role": "The Director", "trigger": "OVERACTING" },
 		"CARTOGRAPHER": { "color": "VIOLET", "role": "The Map-Maker", "trigger": "HIGH_PERMEABILITY" },
-		"JOEL": { "color": "RED", "role": "The Breaker", "trigger": "PASSIVE_WITNESS_CRITICAL" }
+		"JOEL": { "color": "RED", "role": "The Breaker", "trigger": "PASSIVE_WITNESS_CRITICAL" },
+		"JADE": {"color": "GRN", "role": "The Architect", "trigger": "BONEPOKE_CRITICAL"}
 	}
 }

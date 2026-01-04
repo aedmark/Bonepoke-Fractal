@@ -2,7 +2,7 @@
   "STARTING_INVENTORY": ["POCKET_ROCKS", "SILENT_KNIFE", "BUCKET_OF_LIME"],
   "CRITICAL_ITEMS": ["SILENT_KNIFE", "TIME_BRACELET", "STAR_COMPASS", "ANCHOR_STONE"],
   "SCAR_TISSUE": {
-    "SORRY": 0.8, "HATE": 0.6, "FATE": 0.9, "REGRET": 0.6, "THE_DEVIL_FORGOT": 0.1
+    "SORRY": 0.8, "HATE": 0.6, "FATE": 0.9, "REGRET": 0.6, "THE_DEVIL_FORGOT": 0.1, "BETRAYAL": 0.314
   },
   "ITEM_REGISTRY": {
     "POCKET_ROCKS": {
@@ -53,6 +53,11 @@
       "description": "Points to True North, ignoring the maze.",
       "function": "NAVIGATION",
       "usage_msg": "The needle locks onto a fixed point."
+    },
+    "THE_LEDGER": {
+      "description": "A book that records growth, not just debt. It glows.",
+      "function": "MASTERY_TRACKER",
+      "usage_msg": "Gordon opens the Ledger. A new column appears: 'Competence'."
     },
     "ANTISEPTIC_SPRAY": { "description": "For cleaning septic wounds.", "function": "TROPHY" },
     "DIVING_BELL": { "description": "For surviving high pressure.", "function": "TROPHY" },
