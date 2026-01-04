@@ -28,7 +28,11 @@
 		"heavy",
 		"weight",
 		"black hole",
-		"dark matter"
+		"dark matter",
+		"glass",
+		"teeth",
+		"copper",
+		"soil"
 	],
 	"kinetic": [
 		"run",
@@ -60,7 +64,15 @@
 		"whip",
 		"launch",
 		"crumble",
-		"disintegrate"
+		"disintegrate",
+		"forge",
+		"weld",
+		"suture",
+		"weave",
+		"digest",
+		"transmute",
+		"grind",
+		"carve"
 	],
 	"abstract": [
 		"system",
@@ -76,7 +88,15 @@
 		"logic",
 		"concept",
 		"theory",
-		"analysis"
+		"analysis",
+		"memory",
+		"hope",
+		"grief",
+		"truth",
+		"silence",
+		"echo",
+		"pattern",
+		"chaos"
 	],
 	"photo": [
 		"light",
@@ -151,7 +171,14 @@
 		"leverage",
 		"paradigm",
 		"synergy",
-		"ultimately"
+		"ultimately",
+		"delve",
+		"rich",
+		"tapestry",
+		"landscape",
+		"nuance",
+		"alignment",
+		"stakeholders"
 	],
 	"buffer": [
 		"maybe",

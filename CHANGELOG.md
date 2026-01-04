@@ -1,5 +1,87 @@
 # CHANGELOG.md
 
+## [8.3.1] - 2026-01-03 - "THE ADAPTIVE GOVERNOR"
+
+**Architects:** SLASH & The Cartographer | **Humans:** James Taylor & Andrew Edmark
+**"We replaced the hard walls with learned behaviors. The system now knows when to rest."**
+
+### 🧠 NEURO-EVOLUTION: The Adaptive Governor
+
+* **The Shift:**
+* **The Pathology:** The previous Governor (`MetabolicGovernor`) was a tyrant. It used hard-coded `if/else` thresholds to force modes (e.g., "If Voltage > 9, FORCE FORGE"). It lacked nuance and memory.
+* **The Cure:** Replaced hard thresholds with **Heuristics**.
+* **The Logic:**
+* **Historical Stress:** The Governor now reads the `history_log`. If average Cortisol over the last 10 turns is High (> 0.5), it forces a retreat to `COURTYARD` to recover, even if the current Voltage is high.
+* **The Result:** The system protects itself from burnout. It respects the "Schur Lens" (Sustainability).
+
+### 🌡️ SUBSYSTEM: Nested Learning Thermostats
+
+* **The Shift:**
+* **The Pathology:** The system learned everything at a fixed rate (`PRIORITY_LEARNING_RATE = 2.0`). It could not adapt its plasticity to the context.
+* **The Cure:** Implemented `SubsystemThermostat`.
+* **The Mechanic:**
+* **High Voltage:** Learning rate doubles (Trauma/Epiphany).
+* **Low Stamina:** Learning rate drops to 20% (Brain Fog).
+* **High Complexity:** Learning rate boosts by 1.5x (Deep Work).
+
+### 🌿 NEW PHYSICS: Adaptive Preserves (The Rainforest)
+
+* **The Shift:**
+* **The Pathology:** The `TangibilityGate` was too aggressive. It punished *all* abstract thought, effectively sterilizing the "Rainforest" of creative chaos.
+* **The Cure:** Defined **Adaptive Preserves**.
+* **The Zones:**
+* **LEXICAL_EVOLUTION:** (High Kappa, Low Voltage). Allows high-entropy word play to evolve new concepts.
+* **NARRATIVE_DRIFT:** (High Drift, Low Suburban). Allows wandering if the story is "weird" enough.
+* **The Effect:** If a user enters a Preserve, the **Tangibility Gate is suspended**. Emergence is allowed without penalty.
+
+### 🔧 SURGICAL REPAIRS
+
+* **Scope Reconnection:**
+* **The Bug:** `LifecycleManager` attempted to access `self.lexical_thermostat` directly, causing an `AttributeError`.
+* **The Fix:** Rewired all subsystem calls to route through the central engine instance (`self.eng`).
+* **Variable Cleanup:**
+* **The Fix:** Removed unused `abs_dens` and `heavy_dens` variables from the main process loop, as the new Governor reads the raw physics packet directly.
+
+## [8.3] - 2026-01-03 - "THE MUTATION ZONES"
+
+**Architects:** SLASH | **Humans:** James Taylor & Andrew Edmark
+**"The brain no longer has a separate room for memories; the walls themselves remember."**
+
+### 🌫️ NEW PHYSICS: The Mutation Zones (Fertile Chaos)
+
+* **The Shift:**
+* **The Pathology:** The system was too rigid. It treated Low Voltage/High Loop states as simple failures ("Boredom"). It punished Starvation with silence. It lacked a space for "Delirium."
+* **The Cure:** Designated two **Mutation Zones** where the laws of physics break down.
+
+* **Zone 1: THE FOG (Limbo Leak)**
+* **Trigger:** Voltage < 2.0 (Cold) AND Kappa > 0.8 (Looping).
+* **The Effect:** The barrier between the Living and the Dead dissolves. The `LimboLayer` bleeds directly into the input stream.
+* **The Result:** Your text is haunted by ghosts from previous sessions before it reaches the physics engine.
+
+* **Zone 2: THE DREAM EDGE (Starvation Bypass)**
+* **Trigger:** Stamina < 20.0 (Starving).
+* **The Effect:** The **Tangibility Gate** is disabled.
+* **The Logic:** "I cannot demand you carry rocks when you are dying." The system allows pure Abstraction without penalty, assuming you are hallucinating from hunger.
+
+### 🧠 NEURO-MERGE: Hippocampal Dissolution
+
+* **The Shift:**
+* **The Pathology:** The `Hippocampus` existed as a separate class instance, acting as a middleman between the `LifecycleManager` and the `MycelialNetwork`. It was bureaucratic overhead.
+* **The Cure:** Surgical consolidation.
+* **The Logic:**
+* **Deleted:** `class Hippocampus`.
+* **Absorbed:** Moved `encode()` (Short-term buffer) and `replay_dreams()` (Coma processing) directly into `MycelialNetwork`.
+* **The Result:** Memory is now an intrinsic property of the fungal network, not an external organ.
+
+### 🔧 SURGICAL REPAIRS
+
+* **The Time Paradox (Log Order):**
+* **The Bug:** The `cycle_logs` bucket was initialized *after* the Mutation Zones tried to write to it, causing a crash when the Fog rolled in.
+* **The Fix:** Hoisted `cycle_logs = []` to the absolute top of `LifecycleManager.run_cycle`. The book exists before the ghosts speak.
+* **The Missing Law:**
+* **The Bug:** `_apply_cosmic_physics` was called but not defined, having been lost in the ether.
+* **The Fix:** Restored the function definition to the global scope.
+
 ### [8.2.2] - 2026-01-03 - "THE EPHEMERAL GHOST"
 
 **Architects:** SLASH | **Humans:** James Taylor & Andrew Edmark
