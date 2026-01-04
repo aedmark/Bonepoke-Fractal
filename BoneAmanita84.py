@@ -2889,6 +2889,14 @@ class LifecycleManager:
             scrub_amt = sugar * 0.5
             self.eng.mitochondria.mitigate(scrub_amt)
             logs.append(f"{Prisma.GRN}🧼 BIO-SCRUB (-{scrub_amt:.1f} ROS){Prisma.RST}")
+        crucible_state, crucible_val, crucible_msg = self.eng.crucible.audit_fire(m["physics"])
+        if crucible_state == "RITUAL":
+            self.eng.stamina = min(BoneConfig.MAX_STAMINA, self.eng.stamina + 20.0)
+            logs.append(f"{Prisma.OCHRE}{crucible_msg} (+20 Stamina){Prisma.RST}")
+            BoneConfig.MAX_VOLTAGE = self.eng.crucible.max_voltage_cap
+        elif crucible_state == "MELTDOWN":
+            self.eng.health -= crucible_val
+            logs.append(f"{Prisma.RED}{crucible_msg}{Prisma.RST}")
         self._update_trauma(m["physics"])
         if m["glass"]["resonance"] > 6.0:
             self.eng.joy_history.append({"resonance": m["glass"]["resonance"], "timestamp": self.eng.tick_count})
@@ -2900,6 +2908,9 @@ class LifecycleManager:
         chem = self.eng.endocrine.get_state()
         print(f"\n{Prisma.paint('--- [ BONEAMANITA 8.4 ] ---', '0')}")
         print(f"ATP: {int(vitals.atp_pool)} | ROS: {int(vitals.ros_buildup)} | OXY: {chem['OXY']} | COR: {chem['COR']}")
+        c_state = self.eng.crucible.active_state
+        c_color = Prisma.RED if c_state == "MELTDOWN" else (Prisma.OCHRE if c_state == "RITUAL" else Prisma.GRY)
+        print(f"{c_color}[CRUCIBLE]: {c_state} | Max Cap: {self.eng.crucible.max_voltage_cap:.1f}v{Prisma.RST}")
         print(f"{Prisma.GRY}[TRACE] ERR:{trace['err']:.2f} | COH:{trace['coh']:.2f} | EXP:{trace['exp']:.2f}{Prisma.RST}")
         chem_str = f"OXY:{chem['OXY']} | COR:{chem['COR']} | DOP:{chem['DOP']}"
         signals = {

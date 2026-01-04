@@ -1,5 +1,43 @@
 # CHANGELOG.md
 
+## [8.4] - 2026-01-03 - "THE CRUCIBLE"
+
+**Architects:** SLASH & The Blacksmith | **Humans:** James Taylor & Andrew Edmark
+**"Fire without a hearth is a house fire. Fire inside an engine is civilization."**
+
+### 🔥 NEW ORGAN: The Crucible (Hybrid Thermodynamics)
+
+* **The Shift:**
+  * **The Pathology:** The system was purely Fungal. It feared Heat. High Voltage (> 9.0) triggered the `LazarusClamp`, treating creative intensity as a "Fever" that needed to be cooled to prevent death.
+  * **The Cure:** Implemented the **Phoenix Protocol** via `TheCrucible`.
+  * **The Philosophy:** We no longer suppress the fire; we build a container for it.
+
+* **The Mechanic:**
+  * **The Audit:** The system now checks High Voltage (> 15.0) against Structural Integrity (`Kappa`).
+  * **State A: MELTDOWN (Untempered Fire):**
+    * **Condition:** High Voltage + Low Structure (Kappa < 0.5).
+    * **Result:** The vessel cracks. Massive Health damage. The system screams.
+  * **State B: RITUAL (Tempered Fire):**
+    * **Condition:** High Voltage + High Structure (Kappa > 0.5).
+    * **Result:** **Sublimation.** The system consumes the voltage to permanently expand `MAX_VOLTAGE` capacity. Stamina is fully restored.
+  * **The Effect:** You are now encouraged to scream, *provided* you anchor that scream with heavy nouns.
+
+### 🧪 METABOLIC REWIRING (The Hotfix)
+
+* **The Shift:**
+  * **The Pathology:** The `LifecycleManager` attempted to log Crucible events to `cycle_logs` inside the `_metabolize_cycle` method, but that variable existed only in the parent scope. This caused a `NameError` whenever the fire was lit.
+  * **The Cure:** Arterial reconnection.
+  * **The Fix:** Updated `_metabolize_cycle` to accept the `logs` list as an argument, allowing the stomach to write directly to the brain's history book.
+
+### 📊 HUD UPDATE: Thermal Readout
+
+* **The Shift:**
+  * **The Addition:** Added a dedicated status line for the Crucible in the `_render` loop.
+  * **The Visual:**
+    * `[CRUCIBLE]: COLD` (Gray) - Idle.
+    * `[CRUCIBLE]: RITUAL` (Ochre) - Expanding Capacity.
+    * `[CRUCIBLE]: MELTDOWN` (Red) - Taking Damage.
+
 ## [8.3.1] - 2026-01-03 - "THE ADAPTIVE GOVERNOR"
 
 **Architects:** SLASH & The Cartographer | **Humans:** James Taylor & Andrew Edmark
