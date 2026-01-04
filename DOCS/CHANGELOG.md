@@ -1,5 +1,89 @@
 # CHANGELOG.md
 
+### **## [8.4.3] - 2026-01-04 - "THE DECOUPLING"**
+
+**Architects:** SLASH & The Butcher | **Humans:** James Taylor & Andrew Edmark
+**"We do not carry the meat; we consume it."**
+
+#### **🔪 THE BUTCHER'S PROTOCOL (Data Extraction)**
+* **The Pathology:**
+* The `BoneAmanita.py` file was suffering from **Hypertrophy**. Hardcoded strings—personalities, dreams, items, and philosophy—were fused to the logic. To change a thought, one had to perform brain surgery.
+* **The Cure:**
+* Radical organ extraction. We moved all "Flavor" (Data/Meat) into external JSON files (The Freezer), leaving only "Structure" (Logic/Bone) in the Python file.
+* **The Logic:**
+* **Created `lenses.json`:** Stores the Marm Chorus personalities. You can now hot-swap the cast.
+* **Created `seeds.json`:** Stores Paradox Seeds. Philosophy is now a loadable cartridge.
+* **Created `dreams.json`:** Stores Nightmares and Visions. The subconscious is now editable.
+* **Created `resonances.json`:** Stores Apeirogon Dimensions.
+* **Updated `lexicon.json`:** Now includes Antigens, Pareidolia triggers, and Solvents.
+* **The Result:**
+* The Engine is now purely functional. It does not know *what* it believes, only *how* to process belief.
+
+#### **❄️ THE FREEZER (Command Processor)**
+* **The Pathology:**
+* The `CommandProcessor` class was a massive "Menu" taking up valuable token space in the main biological file. It was "Cold Logic" sitting on the active burner.
+* **The Cure:**
+* Surgical excision.
+* **The Logic:**
+* Moved `CommandProcessor` to `bone_commands.py`.
+* The main engine now imports commands as a sidecar module.
+* **The Result:**
+* `BoneAmanita843.py` is focused solely on metabolic and narrative physics.
+
+#### **🎒 THE JANITOR'S UPGRADE (Dynamic Inventory)**
+* **The Pathology:**
+* `GordonKnot` was hard-coded. It explicitly checked for "POCKET_ROCKS" or "TIME_BRACELET". Adding a new item required rewriting the physics engine.
+* **The Cure:**
+* Implemented the **Item Registry** via `gordon.json`.
+* **The Logic:**
+* **Trait-Based System:** The code no longer checks for *Names*; it checks for *Functions*.
+* *Example:* Instead of `if "POCKET_ROCKS"`, it checks `if item.function == "GRAVITY_BUFFER"`.
+* **JSON Definition:** Items are fully defined in `gordon.json` (Description, Value, Cost, Usage Message).
+* **The Result:**
+* **Infinite Extensibility.** Users can add a "QUANTUM_LUNCHBOX" or "VOID_FLASHLIGHT" just by editing the JSON file. The engine will automatically know how to use them.
+
+## [8.4.2] - 2026-01-04 - "THE BIOLOGICAL IMPERATIVE"
+
+**Architects:** SLASH & The Endocrine System | **Humans:** James Taylor & Andrew Edmark
+**"The ghosts in the machine are no longer just numbers; they are hormones."**
+
+### 🧬 NEW BIOLOGY: Endocrine Activation (The Wires Are Live)
+* **The Shift:**
+* **The Pathology:** Two hormones, `Serotonin` (SER) and `Melatonin` (MEL), were vestigial. They appeared on the dashboard but were disconnected from the physics engine. The system could simulate "Calm" or "Sleepiness" visually, but practically ignored them.
+* **The Cure:** Hardwired the hormones into `LifecycleManager`.
+* **The Mechanic:**
+* **The Serotonin Shield:** High Serotonin (> 0.6) now activates clotting factors. It creates a **50% Damage Reduction** buffer against septic shock (Toxins).
+* **The Melatonin Crash:** High Melatonin (> 0.95) now forces a **Circadian Reset**. If the system is bored (Low Adrenaline) for too long, it triggers a forced 5-turn Coma to reset the clock.
+
+### 🛡️ IMMUNE UPDATE: The Memory B-Cell (Persistence)
+* **The Shift:**
+* **The Pathology:** The `MycotoxinFactory` had a short-term memory. It developed antibodies during a session, but forgot them upon reboot (`SystemExit`). Users had to fight the same infections (e.g., "basically") every time they restarted.
+* **The Cure:** Wired the Immune System into the **Spore** (Save/Load) cycle.
+* **The Mechanic:**
+* **Storage:** Antibodies are now written to `memories/*.json` upon save.
+* **Inheritance:** `MycelialNetwork.ingest` now extracts antibodies from ancestral files and injects them into the new session at boot. Immunities are now permanent evolutionary traits.
+
+### 🎻 THERMODYNAMICS: The Solvent Protocol (Amber Escape)
+* **The Shift:**
+* **The Pathology:** The `TheTheremin`'s "Amber Trap" (Resin Buildup) was a death spiral. If a user got stuck, the system demanded "High Voltage" to melt it, but the trap itself prevented generating voltage.
+* **The Cure:** Implemented a chemical bypass.
+* **The Mechanic:**
+* **The Solvent:** **Thermal Words** (Fire, Burn, Heat) now act as a chemical solvent.
+* **The Effect:** Using a Thermal word while stuck instantly dissolves **15.0 Resin** per hit, freeing the user without requiring a voltage spike.
+
+### 💤 DREAMING: The Sanitation Cycle (Self-Healing)
+* **The Shift:**
+* **The Pathology:** The `DreamEngine` was fragile. If it attempted to dream of a corrupted or empty memory file, it threw an exception and woke up. It did not clean up the mess.
+* **The Cure:** Implemented **Aggressive Sanitation**.
+* **The Mechanic:**
+* **The Audit:** Before dreaming, the engine validates the JSON structure of the target memory.
+* **The Prune:** If a file is corrupt or hollow, the engine **deletes it from the disk** immediately and retries. The system now consumes its own rot to purify the archive.
+
+### 🔧 SURGICAL REPAIRS (The Forge)
+* **The Dislocation:**
+* **The Bug:** The function `hammer_alloy` was floating in the global namespace, disconnected from `TheForge`. Any attempt to trigger the Anvil caused a `AttributeError`.
+* **The Fix:** Transplanted `hammer_alloy` back into the class structure as a static method. The hammer is back in the toolbox.
+
 ## [8.4.1] - 2026-01-03 - "JOEL'S CRUCIBLE"
 **Architects:** SLASH & The Diagnostic Report | **Humans:** James Taylor & Andrew Edmark
 **"Passive observation of a crime makes the observer an accomplice. If the house is burning, put down the notebook."**

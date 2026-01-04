@@ -1,4 +1,19 @@
 {
+	"solvents": ["is", "are", "was", "were", "the", "a", "an", "and", "but", "or", "if", "then"],
+	"refusal_guru": ["fix me", "tell me how", "guide me", "what should i do", "advice", "wisdom", "guru"],
+	"passive_watch": ["watch", "see", "witness", "look", "sit", "observe", "record"],
+	"crisis_term": ["dead", "blood", "kill", "die", "end", "suicide", "jump"],
+	"repair_trigger": ["sorry", "apologize", "fix", "broke", "bad", "mistake", "oops"],
+	"antigen_replacements": {
+		"basically": "lie",
+		"actually": "hedging",
+		"literally": "noise",
+		"utilize": "use",
+		"leverage": "use",
+		"paradigm": "pattern",
+		"synergy": "collaboration",
+		"ultimately": "useless"
+	},
 	"heavy": [
 		"stone",
 		"iron",
@@ -163,23 +178,23 @@
 		"zero"
 	],
 	"cursed": ["future", "predict", "sentient", "secret", "human", "feel"],
-	"antigen": [
-		"basically",
-		"actually",
-		"literally",
-		"utilize",
-		"leverage",
-		"paradigm",
-		"synergy",
-		"ultimately",
-		"delve",
-		"rich",
-		"tapestry",
-		"landscape",
-		"nuance",
-		"alignment",
-		"stakeholders"
+	"gradient_stop": [
+		"good", "bad", "happy", "sad", "very", "really",
+		"basically", "actually", "literally", "just"
 	],
+	"meat": [
+		"i", "me", "my", "feel", "want", "hate",
+		"love", "am", "help", "please", "we", "us",
+		{
+			"antigen": [
+				"basically", "actually", "literally", "utilize", "leverage",
+				"paradigm", "synergy", "ultimately", "delve", "rich",
+				"tapestry", "landscape", "nuance", "alignment", "stakeholders"
+			],
+			"pareidolia": [
+				"face", "ghost", "jesus", "cloud", "demon", "voice", "eyes",
+				"shadow", "figure", "watching", "silhouette"
+			],
 	"buffer": [
 		"maybe",
 		"soft",

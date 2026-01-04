@@ -1,0 +1,244 @@
+# bone_commands.py
+# The "Freezer" for Meta-Logic. Kept cold until needed.
+
+import os
+import shutil
+import random
+from typing import List
+from BoneAmanita842 import Prisma, BoneConfig, TheLexicon, TheCartographer, TheGradientWalker
+
+class CommandProcessor:
+    def __init__(self, engine, prisma_ref, lexicon_ref, config_ref, cartographer_ref, walker_ref):
+        self.eng = engine
+        self.Prisma = prisma_ref
+        self.TheLexicon = lexicon_ref
+        self.BoneConfig = config_ref
+        self.TheCartographer = cartographer_ref
+        self.TheGradientWalker = walker_ref
+
+    def execute(self, text):
+        if not text.startswith("/"):
+            return False
+
+        parts = text.split()
+        cmd = parts[0].lower()
+        P = self.Prisma
+
+        # --- PERMISSION CHECKS ---
+        if cmd in ["/teach", "/kill", "/flag"]:
+            if self.eng.mirror.profile.confidence < 50:
+                print(f"{P.YEL}⚠️ COMMAND LOCKED: Requires 50+ turns of trust (Current: {self.eng.mirror.profile.confidence}).{P.RST}")
+                return True
+
+        # --- LINEAGE ---
+        elif cmd == "/lineage":
+            if not self.eng.mem.lineage_log:
+                print(f"{P.GRY}📜 ARCHIVE EMPTY: We are the first generation.{P.RST}")
+            else:
+                print(f"{P.CYN}📜 THE PALIMPSEST (Ancestral Lineage):{P.RST}")
+                for entry in self.eng.mem.lineage_log:
+                    t_vec = ", ".join([f"{k}:{v}" for k,v in entry['trauma'].items()])
+                    print(f"   {P.MAG}• {entry['source']}{P.RST} ({entry['age_hours']}h ago)")
+                    print(f"     ↳ Mutations: {entry['mutations']} | Trauma: {{{t_vec}}}")
+                print(f"   {P.GRN}• CURRENT SESSION{P.RST} (Living)")
+                curr_t = ", ".join([f"{k}:{v:.1f}" for k,v in self.eng.trauma_accum.items() if v > 0])
+                print(f"     ↳ Ingested: {len(self.eng.mem.lineage_log)} Ancestors | Accumulating: {{{curr_t}}}")
+
+        # --- VOIDS ---
+        elif cmd == "/voids":
+            voids = self.TheCartographer.detect_voids(self.eng.phys.last_physics_packet)
+            if voids:
+                print(f"{P.GRY}🌫️ THE FOG: Detected hollow concepts: {voids}{P.RST}")
+            else:
+                print(f"{P.CYN}✨ CLEAR AIR: No voids detected.{P.RST}")
+
+        # --- MODE ---
+        elif cmd == "/mode":
+            if len(parts) > 1:
+                print(self.eng.governor.set_override(parts[1].upper()))
+
+        # --- STRATA ---
+        elif cmd == "/strata":
+            wells = [(k, v) for k, v in self.eng.mem.graph.items() if "strata" in v]
+            if not wells:
+                print(f"{P.GRY}🪨 STRATA: No Gravity Wells formed yet. The ground is soft.{P.RST}")
+            else:
+                print(f"{P.OCHRE}🪨 GEOLOGICAL STRATA (Gravity Wells):{P.RST}")
+                for word, data in wells:
+                    s = data["strata"]
+                    mass = sum(data["edges"].values())
+                    age = self.eng.tick_count - s['birth_tick']
+                    growth = s.get('growth_rate', 0.0)
+                    print(f"   {P.WHT}● {word.upper()}{P.RST} (Mass: {int(mass)})")
+                    print(f"     ↳ Birth: Tick {s['birth_tick']} | Age: {age}")
+                    print(f"     ↳ Growth: {growth:+.2f}/tick")
+
+        # --- KILL (IMMUNE) ---
+        if cmd == "/kill":
+            if len(parts) >= 2:
+                toxin = parts[1]
+                repl = parts[2] if len(parts) > 2 else ""
+                if self.TheLexicon.learn_antigen(toxin, repl):
+                    print(f"{P.RED}🔪 THE SURGEON: Antigen '{toxin}' mapped to '{repl}'.{P.RST}")
+                else:
+                    print(f"{P.RED}ERROR: Immune system write failure.{P.RST}")
+            else:
+                print(f"{P.YEL}Usage: /kill [toxin] [replacement]{P.RST}")
+
+        # --- TEACH (LEXICON) ---
+        elif cmd == "/teach":
+            if len(parts) >= 3:
+                word = parts[1]
+                cat = parts[2].lower()
+                valid_cats = ["heavy", "kinetic", "abstract", "photo", "aerobic", "thermal", "cryo", "sacred", "cursed", "diversion"]
+                if cat in valid_cats:
+                    self.TheLexicon.teach(word, cat, self.eng.tick_count)
+                    print(f"{P.CYN}🧠 NEUROPLASTICITY: Learned '{word}' is {cat.upper()}.{P.RST}")
+                else:
+                    print(f"{P.RED}ERROR: Invalid category.{P.RST}")
+
+        # --- FLAG (BIAS) ---
+        elif cmd == "/flag":
+            if len(parts) > 1:
+                term = parts[1].lower()
+                self.TheLexicon.USER_FLAGGED_BIAS.add(term)
+                print(f"{P.CYN}🚩 BIAS UPDATE: '{term}' removed from Suburban Watchlist.{P.RST}")
+
+        # --- SEED (MEMORY) ---
+        elif cmd == "/seed":
+            if len(parts) > 1:
+                self.eng.mem.ingest(parts[1])
+            else:
+                print(f"{P.YEL}Usage: /seed [filename]{P.RST}")
+
+        # --- GYM ---
+        elif cmd == "/gym":
+            print(f"{P.OCHRE}{self.eng.trainer.toggle()}{P.RST}")
+
+        # --- MAP ---
+        elif cmd == "/map":
+            is_spun, msg = self.TheCartographer.spin_web(self.eng.mem.graph, self.eng.gordon.inventory, gordon=self.eng.gordon)
+            color = P.MAG if is_spun else P.OCHRE
+            print(f"{color}{msg}{P.RST}")
+            if "ANCHOR_STONE" in self.eng.gordon.inventory:
+                print(f"{P.GRY}   Gordon: 'Coordinates are firm. Stop drifting.'{P.RST}")
+
+        # --- MIRROR ---
+        elif cmd == "/mirror":
+            if len(parts) > 1:
+                print(f"{P.MAG}{self.eng.mirror.engage(parts[1])}{P.RST}")
+            else:
+                print(f"{P.YEL}Usage: /mirror [name] OR /mirror off{P.RST}")
+
+        # --- TRAIN ---
+        elif cmd == "/train":
+            self.eng.training_mode = not self.eng.training_mode
+            status = "ENABLED" if self.eng.training_mode else "DISABLED"
+            color = P.GRN if self.eng.training_mode else P.RED
+            print(f"{color}🛡️ PROTOCOL PAPER_TIGER: {status}.{P.RST}")
+            if self.eng.training_mode:
+                print(f"{P.GRY}   Apoptosis is suspended. Death will be simulated.{P.RST}")
+
+        # --- RESET ---
+        elif cmd == "/reset":
+            if len(parts) > 1 and parts[1] == "--hard":
+                print(f"{P.RED}🧨 FACTORY RESET INITIATED. DELETING ALL MEMORIES...{P.RST}")
+                try:
+                    shutil.rmtree("memories")
+                    os.makedirs("memories")
+                    print(f"{P.GRY}   Tabula Rasa achieved. Restart required.{P.RST}")
+                    exit()
+                except Exception as e:
+                    print(f"{P.RED}Reset failed: {e}{P.RST}")
+            elif len(parts) > 1 and parts[1] == "--soft":
+                self.eng.mem.graph.clear()
+                print(f"{P.OCHRE}🧹 Session memory wiped.{P.RST}")
+            else:
+                print(f"{P.YEL}Usage: /reset --soft (Session) | /reset --hard (Full Wipe){P.RST}")
+
+        # --- PROFILE ---
+        elif cmd == "/profile":
+            try:
+                name = parts[1]
+                likes = []
+                hates = []
+                for p in parts[2:]:
+                    if p.startswith("likes:"):
+                        likes = [x.strip() for x in p.split(":")[1].split(",")]
+                    elif p.startswith("hates:"):
+                        hates = [x.strip() for x in p.split(":")[1].split(",")]
+                if likes:
+                    print(f"{P.CYN}{self.eng.mirror.create_profile(name, likes, hates)}{P.RST}")
+                else:
+                    print(f"{P.RED}ERROR: Must specify 'likes:category'.{P.RST}")
+            except Exception as runtime_error:
+                print(f"{P.YEL}Usage: /profile [name] likes:heavy,kinetic hates:abstract ({runtime_error}){P.RST}")
+
+        # --- FOCUS (RUMINATION) ---
+        elif cmd == "/focus":
+            if len(parts) > 1:
+                target = parts[1].lower()
+                print(f"{P.VIOLET}🧲 MAGNETIC STIMULATION: Targeting '{target}'...{P.RST}")
+                loop = self.eng.tracer.inject(target)
+                if loop:
+                    print(f"  {P.RED}↻ RUMINATION DETECTED:{P.RST} {' -> '.join(loop)}")
+                    msg = self.eng.tracer.psilocybin_rewire(loop)
+                    if msg:
+                        print(f"  {P.GRN}{msg}{P.RST}")
+                    else:
+                        print(f"  {P.RED}Rewire failed.{P.RST}")
+                else:
+                    print(f"  {P.GRY}Trace complete. No pathological abstract loops found.{P.RST}")
+            else:
+                print(f"{P.YEL}Usage: /focus [concept]{P.RST}")
+
+        # --- STATUS ---
+        elif cmd == "/status":
+            print(f"{P.CYN}--- SYSTEM DIAGNOSTICS ---{P.RST}")
+            print(f"Session: {self.eng.mem.session_id}")
+            print(f"Graph:   {len(self.eng.mem.graph)} nodes")
+            print(f"Health:  {self.eng.health}/{self.BoneConfig.MAX_HEALTH}")
+            print(f"Stamina: {self.eng.stamina}/{self.BoneConfig.MAX_STAMINA}")
+
+        # --- ORBIT ---
+        elif cmd == "/orbit":
+            if len(parts) > 1:
+                target = parts[1].lower()
+                if target in self.eng.mem.graph:
+                    self.eng.mem.graph[target]["edges"]["GRAVITY_ASSIST"] = 50
+                    print(f"{P.VIOLET}🌌 GRAVITY ASSIST: Thrusters firing toward '{target.upper()}'.{P.RST}")
+                else:
+                    print(f"{P.RED}❌ NAVIGATION ERROR: '{target}' not found in star map.{P.RST}")
+            else:
+                print(f"{P.YEL}Usage: /orbit [known_concept]{P.RST}")
+
+        # --- LOGIC PROBE ---
+        elif cmd == "/_prove":
+            if len(parts) < 2:
+                print(f"{P.YEL}Usage: /_prove [statement]{P.RST}")
+            else:
+                statement = " ".join(parts[1:])
+                m = self.eng.phys.gaze(statement)
+                truth = m["physics"]["truth_ratio"]
+                verdict = "AXIOMATIC" if truth > 0.6 else ("CONJECTURE" if truth > 0.3 else "NOISE")
+                color = P.CYN if truth > 0.6 else P.GRY
+                print(f"{color}📐 LOGIC PROBE: Density={truth:.2f} [{verdict}]{P.RST}")
+
+        # --- HELP ---
+        elif cmd == "/help":
+            if len(parts) > 1:
+                sub = parts[1]
+                if sub == "teach":
+                    print("Usage: /teach [word] [category]\nEx: /teach glitch kinetic")
+                elif sub == "kill":
+                    print("Usage: /kill [phrase] [replacement]\nEx: /kill actually basically")
+                elif sub == "profile":
+                    print("Usage: /profile [NAME] likes:cat1,cat2 hates:cat3\nEx: /profile BOSS likes:heavy,kinetic hates:abstract")
+            else:
+                print(f"{P.WHT}--- COMMANDS (Type /help [cmd] for details) ---{P.RST}")
+                print("/teach, /lineage, /voids, /mode, /strata, /kill, /seed, /focus, /status, /orbit, /gym, /mirror, /weave, /profile, /debug, /flag, /reset, /_prove")
+
+        else:
+            print(f"{P.RED}Unknown command. Try /help.{P.RST}")
+
+        return True
