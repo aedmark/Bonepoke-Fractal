@@ -1992,25 +1992,6 @@ class DreamEngine:
             None,
             0.0,
         )
-class ResistanceTrainer:
-    def __init__(self):
-        self.training_mode = False
-        self.rep_count = 0
-    def toggle(self):
-        self.training_mode = not self.training_mode
-        state = "ACTIVE" if self.training_mode else "PASSIVE"
-        return f"💪 RESISTANCE TRAINER: {state}. Minimum Drag: {BoneConfig.RESISTANCE_THRESHOLD}"
-    def lift(self, physics):
-        if not self.training_mode:
-            return True, None
-        drag = physics["narrative_drag"]
-        if drag < BoneConfig.RESISTANCE_THRESHOLD:
-            return (
-                True,
-                f"⚠️ MISSED REP: Weightless Input (Drag {drag}). Try a Heavy Noun.",
-            )
-        self.rep_count += 1
-        return True, f"💪 GOOD LIFT. (Rep {self.rep_count})"
 class UserProfile:
     def __init__(self, name="USER"):
         self.name = name
@@ -2034,7 +2015,6 @@ class UserProfile:
         likes = [k for k, v in self.affinities.items() if v > 0.3]
         hates = [k for k, v in self.affinities.items() if v < -0.2]
         return likes, hates
-
     def save(self):
         try:
             with open(self.file_path, "w") as f:
@@ -3028,7 +3008,6 @@ class BoneAmanita:
         self.folly = TheFolly()
         self.gordon = GordonKnot()
         self.mirror = MirrorGraph()
-        self.trainer = ResistanceTrainer()
         self.tracer = ViralTracer(self.mem)
         self.cosmic = CosmicDynamics()
         self.chronos = ChronoStream()
