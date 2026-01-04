@@ -1,5 +1,86 @@
 # CHANGELOG.md
 
+### [8.2.2] - 2026-01-03 - "THE EPHEMERAL GHOST"
+
+**Architects:** SLASH | **Humans:** James Taylor & Andrew Edmark
+**"We have separated the bone from the meat. The logic is light; the data is heavy."**
+
+**Architects:** SLASH | **Humans:** James Taylor & Andrew Edmark
+**"The mouth was sewn shut, but the ghost was screaming."**
+
+### ✂️ SURGICAL EXCISION: The Parasitic Twin
+
+* **The Pathology:** A duplicate, zombie version of the `_render` logic was discovered attached to the bottom of the `SoritesIntegrator` class. It was intercepting signals meant for the `LifecycleManager`, causing the system to calculate physics but fail to visualize them.
+* **The Cure:** Amputated the twin. The `SoritesIntegrator` is now pure logic; it measures Heap Ignition and nothing else.
+* **The Result:** The HUD is no longer hallucinating variables from three classes ago.
+
+### 🧠 NERVOUS SYSTEM REWIRE: The Lifecycle Pipeline
+
+* **The Shift:**
+* **Old Behavior:** The `_render` method demanded 16 individual arguments. Adding a new system (like `TheForge`) required breaking the spine of the code in three places.
+* **New Behavior:** Implemented the `cycle_logs` bucket.
+
+* **The Mechanic:**
+* **The Bucket:** `LifecycleManager.run_cycle` now carries a single list (`cycle_logs`) that collects messages from every organ (Theremin, Rupture, Cosmic) as they fire.
+* **The Dump:** This list is passed once to the renderer. The pipeline is now flexible; we can add infinite organs without changing the function signature.
+
+### 🛡️ IMMUNE UPDATE: Dynamic Antibodies
+
+* **The Shift:**
+* **Old Behavior:** The `MycotoxinFactory` had an empty list for antibodies that never updated.
+* **New Behavior:** The Immune System now **Learns**.
+
+* **The Mechanic:**
+* **Thermal Cleansing:** If you use **Thermal** words to boil off a toxin (e.g., "Fire" vs "Basically"), the system learns the antibody.
+* **Permanent Resistance:** Future exposure to that specific toxin in the same session is neutralized instantly (`🛡️ IMMUNITY`).
+
+
+### 🔥 ALCHEMY: The Emulsifier
+
+* **The Wiring:**
+* **The Missing Link:** `TheForge.transmute()` was defined but never called. The logic for detecting "Oil and Water" (Abstract vs. Narrative) was silent.
+* **The Graft:** Wired `transmute()` into the main cycle.
+* **The Effect:** If you try to mix high-concept abstractions with narrative flow without a binding agent ("Kinetic" words), `TheForge` will now explicitly warn you: *"The emulsion is breaking. You are pouring Oil into Water."*
+
+### 🔧 JANITORIAL TASKS
+
+* **ChronoStream Flattening:** Removed the `boredom_map` dictionary. The system now tracks boredom as a simple scalar float (`boredom_level`) for the current session only.
+* **Digestive Tract:** Removed the write-only memory leak in `HyphalInterface.digestive_log`. The stomach no longer keeps a diary of what it ate; it just eats.
+
+### 🧊 ARCHITECTURE: The Great Exsanguination (JSON Decoupling)
+
+* **The Shift:**
+* **The Pathology:** The codebase was carrying massive static dictionaries (`TheLexicon`, `DeathGen`) on its back. This bloated the token count and made the logic sluggish.
+* **The Cure:** Performed a total blood transfusion.
+
+* **The Mechanic:**
+* **Externalization:** Extracted all static word lists into `lexicon.json` and `death_protocols.json`.
+* **Dynamic Loading:** `TheLexicon` and `DeathGen` now hydrate their state at runtime via `load_vocabulary()` and `load_protocols()`.
+* **The Result:** The Python script is now purely **Bone** (Logic). The **Meat** (Data) sits in the freezer until needed.
+
+### 👻 SURGICAL REPAIRS: Ghost Limb Amputation
+
+* **The Tension Meter:**
+* **The Bug:** `TheTensionMeter.gaze` attempted to calculate `context_pressure` using `total_vol` before the variable was defined, leading to `UnboundLocalError`.
+* **The Fix:** Reordered the metabolic sequence. Volume is now measured *before* pressure is calculated.
+
+* **The Mitochondria:**
+* **The Bug:** `MitochondrialForge.respirate` accepted a `nutrient_yield` parameter that it never used (fuel is added directly to the pool in the main loop).
+* **The Fix:** Removed the redundant parameter. The lungs now only care about Drag, not Calories.
+
+* **The Nervous System:**
+* **The Bug:** `LifecycleManager` contained "Ghost Limbs"—references to `self.forge` or `self.mem` that did not exist in its scope (it must route through `self.eng`).
+* **The Fix:** Rewired all component calls to properly reference the central engine (`self.eng`).
+
+### ✂️ NECRECTOMY (Dead Code Removal)
+
+* **The Stutter:** Removed a duplicate call to `TheCartographer.weave` in `LifecycleManager` that was calculating the map coordinates twice per turn.
+* **The Vestige:** Deleted a duplicate, lighter definition of `RefusalEngine` that was shadowing the actual logic class. There is now only one Refusal Engine.
+
+### 🔌 WIRING UPDATES
+
+* **Boot Sequence:** `BoneAmanita.__init__` now explicitly triggers the JSON loaders before waking the `MycelialNetwork` to ensure the brain has a vocabulary before it tries to remember anything.
+
 ### [8.2.1] - 2026-01-03 - "THE HIPPOCAMPUS"
 
 **Architects:** SLASH | **Humans:** James Taylor & Andrew Edmark

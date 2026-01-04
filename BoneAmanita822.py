@@ -1,4 +1,4 @@
-# BONEAMANITA 8.2.1 - "TERRAFORMATION (BRAINED)"
+# BONEAMANITA 8.2.2 - "THE EPHEMERAL GHOST"
 # Architects: SLASH | Auditors: The Courtyard | Humans: James Taylor & Andrew Edmark
 
 import json
@@ -100,10 +100,23 @@ class MitochondrialForge:
         self.krebs_cycle_active = False
         self.state.atp_pool = 0.0
         return self.APOPTOSIS_TRIGGER
+    def respirate(self, drag, has_bracelet=False, is_hybrid=False):
+        base_cost = drag * BoneConfig.SIGNAL_DRAG_MULTIPLIER
+        if has_bracelet:
+            base_cost *= 0.5
+        if is_hybrid:
+            base_cost *= 0.1
+        final_cost = base_cost / self.state.efficiency_mod
+        if self.state.atp_pool < final_cost:
+            self.state.atp_pool = 0
+            return "NECROSIS"
+        self.state.atp_pool -= final_cost
+        if self.state.ros_buildup > BoneConfig.CRITICAL_ROS_LIMIT:
+            return self._trigger_apoptosis()
+        return "RESPIRING"
 class HyphalInterface:
     MEAT_TRIGGERS = {"i", "me", "my", "feel", "want", "hate", "love", "am", "help", "please", "we", "us", }
     def __init__(self):
-        self.digestive_log = deque(maxlen=3)
         self.enzymes = {"LIGNASE": self._digest_structure, "CELLULASE": self._digest_narrative,
                         "PROTEASE": self._digest_intent, "CHITINASE": self._digest_complex, "DECRYPTASE": self._digest_encrypted, }
     def secrete(self, text, physics):
@@ -127,7 +140,6 @@ class HyphalInterface:
             enzyme_type = "PROTEASE"
         extract_nutrients = self.enzymes[enzyme_type]
         nutrient_profile = extract_nutrients()
-        self.digestive_log.append(f"[{enzyme_type}]: {nutrient_profile['desc']}")
         return enzyme_type, nutrient_profile
     @classmethod
     def _digest_structure(cls, text):
@@ -149,74 +161,60 @@ class HyphalInterface:
         return {"type": "COMPLEX", "yield": 20.0, "toxin": 8.0, "desc": "Chitin (Structured Intent / Poetry)", }
 class MycotoxinFactory:
     def __init__(self):
-        self.active_antibodies = []
-    @classmethod
-    def assay(cls, text, enzyme_type, repetition_score, physics, pulse_status="CLEAR"):
+        self.active_antibodies = set() # Changed to set for O(1) lookup
+
+    def develop_antibody(self, toxin_name):
+        if toxin_name not in self.active_antibodies:
+            self.active_antibodies.add(toxin_name)
+            return True
+        return False
+
+    def assay(self, text, enzyme_type, repetition_score, physics, pulse_status="CLEAR"):
         if len(text) < 5 and enzyme_type == "NARRATIVE":
-            return (
-                "AMANITIN",
-                "Fatal Error: Input is genetically hollow. Ribosome stalled.",
-            )
+            return "AMANITIN", "Fatal Error: Input is genetically hollow. Ribosome stalled."
         if pulse_status == "ZOMBIE_KNOCK" or repetition_score > 0.8:
-            return (
-                "MUSCIMOL",
-                f"System Delirium: Pulse Monitor detects Undead Signal (Rep: {repetition_score}). Reality is dissolving.",
-            )
+            return "MUSCIMOL", f"System Delirium: Pulse Monitor detects Undead Signal (Rep: {repetition_score}). Reality is dissolving."
         if TheLexicon.ANTIGEN_REGEX:
             antigen_hits = TheLexicon.ANTIGEN_REGEX.findall(text)
             if antigen_hits:
+                toxin_name = antigen_hits[0].lower()
+                if toxin_name in self.active_antibodies:
+                    return None, f"{Prisma.GRN}🛡️ IMMUNITY: Antibody deployed against '{toxin_name}'. Toxin neutralized.{Prisma.RST}"
                 counts = physics["counts"]
                 if counts.get("thermal", 0) > 0:
-                    return (
-                        None,
-                        f"{Prisma.OCHRE}🔥 ALCHEMY: Thermal words boiled off the '{antigen_hits[0]}' toxin. Safe.{Prisma.RST}",
-                    )
+                    self.develop_antibody(toxin_name)
+                    return None, f"{Prisma.OCHRE}🔥 ALCHEMY: Thermal words boiled off '{toxin_name}'. Antibody developed.{Prisma.RST}"
                 if counts.get("heavy", 0) >= len(antigen_hits):
-                    return (
-                        None,
-                        f"{Prisma.GRN}🌿 MARIK GAMBIT: You ate the poison ('{antigen_hits[0]}'), but the Herbs (Heavy) neutralized it.{Prisma.RST}",
-                    )
+                    return None, f"{Prisma.GRN}🌿 MARIK GAMBIT: You ate the poison ('{toxin_name}'), but Herbs neutralized it.{Prisma.RST}"
+
                 if counts.get("cryo", 0) > 0:
-                    return (
-                        "CYANIDE_POWDER",
-                        f"❄️ CRYO-CONCENTRATION: Cold words freeze-dried the '{antigen_hits[0]}' into a fatal powder.",
-                    )
-                return (
-                    "GLYPHOSATE",
-                    f"☣️ TOXIN DETECTED: '{antigen_hits[0]}' is unprocessed waste. Burn it or bury it.",
-                )
+                    return "CYANIDE_POWDER", f"❄️ CRYO-CONCENTRATION: Cold words freeze-dried '{toxin_name}' into a fatal powder."
+                return "GLYPHOSATE", f"☣️ TOXIN DETECTED: '{toxin_name}' is unprocessed waste. Burn it or bury it."
         clean_words = physics["clean_words"]
-        mass_words = (
-                TheLexicon.get("heavy")
-                | TheLexicon.get("kinetic")
-                | TheLexicon.get("thermal")
-                | TheLexicon.get("cryo")
-        )
+        mass_words = (TheLexicon.get("heavy") | TheLexicon.get("kinetic") | TheLexicon.get("thermal") | TheLexicon.get("cryo"))
         ballast = sum(1 for w in clean_words if w in mass_words)
         suburban_hits = [w for w in clean_words if w in TheLexicon.get("suburban")]
         suburban_density = len(suburban_hits) / max(1, len(clean_words))
         if suburban_density > 0.15 and ballast == 0:
-            return (
-                "GLYPHOSATE",
-                "⚠️ STEVE EVENT: Suburban signals detected with ZERO mass. Context is sterile.",
-            )
+            return "GLYPHOSATE", "⚠️ STEVE EVENT: Suburban signals detected with ZERO mass. Context is sterile."
         return None, None
 class DeathGen:
-    PREFIXES = ["Alas,", "Tragic.", "System Halt.", "CRITICAL FAILURE:", "Well, that happened.", "Oh dear.",
-                "As prophesied,", ]
-    CAUSES = {
-        "TOXICITY": ["Toxic Shock", "Septicemia", "Bad Vibes", "Radiation Poisoning", "Ink Poisoning", ],
-        "STARVATION": ["Metabolic Collapse", "Famine", "Battery Drain", "Entropy Death", "Heat Death", ],
-        "TRAUMA": ["Blunt Force", "Laceration", "Heartbreak", "System Shock", "Existential Dread", ],
-        "GLUTTONY": ["Indigestion", "Bloat", "Overflow", "Greed", "Compaction"],
-        "BOREDOM": ["Small Talk", "The HOA", "A 30-Year Mortgage", "Lawn Care Accident", "Aggressive Edging", ],
-    }
-    VERDICTS = {
-        "HEAVY": ["Your logic was too dense.", "You choked on the syntax.", "Gravity crushed you.", ],
-        "LIGHT": ["You floated away.", "There was no substance to hold you.", "Vapor lock.", ],
-        "TOXIC": ["You are poisonous.", "The immune system rejected you.", "You taste like ash.", ],
-        "BORING": ["The audience left.", "You bored the machine to death.", "Stagnation is fatal.", ],
-    }
+    PREFIXES = []
+    CAUSES = {}
+    VERDICTS = {}
+    @classmethod
+    def load_protocols(cls):
+        try:
+            with open("death_protocols.json", "r") as f:
+                data = json.load(f)
+                cls.PREFIXES = data["PREFIXES"]
+                cls.CAUSES = data["CAUSES"]
+                cls.VERDICTS = data["VERDICTS"]
+        except FileNotFoundError:
+            print(f"{Prisma.RED}[CRITICAL]: death_protocols.json missing. Death is currently unavailable.{Prisma.RST}")
+            cls.PREFIXES = ["System Error."]
+            cls.CAUSES = {"TRAUMA": ["Missing File"]}
+            cls.VERDICTS = {"HEAVY": ["404 Error."]}
     @staticmethod
     def eulogy(phys, state):
         cause_type = "TRAUMA"
@@ -309,54 +307,6 @@ class BoneConfig:
         if len(hits) > 0:
             return True, f"⚠️ PAREIDOLIA WARNING: You are projecting 'Mind' ({hits[0].upper()}) onto 'Sand'."
         return False, None
-class BioState:
-    def __init__(self):
-        self.atp = 80.0
-        self.toxin = 0.0
-        self.adrenaline = 0.0
-        self.cortisol = 0.0
-        self.dopamine = 0.5
-    def metabolize(self, signal_data: Dict) -> str:
-        density = signal_data.get('density', 0.0)
-        repetition = signal_data.get('repetition', 0.0)
-        has_mass = signal_data.get('has_mass', False)
-        if has_mass and density > BoneConfig.MIN_DENSITY_THRESHOLD:
-            self.atp = min(BoneConfig.MAX_STAMINA, self.atp + 15.0)
-            self.toxin = max(0.0, self.toxin - 10.0)
-            self._adjust_hormones("DENSE")
-            return "THRIVING"
-        elif repetition > BoneConfig.MAX_REPETITION_LIMIT:
-            self.atp -= 5.0
-            self.toxin += 15.0
-            self._adjust_hormones("TOXIC")
-            return "POISONED"
-        elif not has_mass:
-            self.atp -= 2.0
-            self.toxin += 5.0
-            self._adjust_hormones("EMPTY")
-            return "STARVING"
-
-        else:
-            self.atp -= 1.0
-            self._adjust_hormones("NEUTRAL")
-            return "STABLE"
-    def _adjust_hormones(self, state: str):
-        if state == "DENSE":
-            self.dopamine = min(1.0, self.dopamine + 0.1)
-            self.cortisol = max(0.0, self.cortisol - 0.1)
-            self.adrenaline += 0.05
-        elif state == "TOXIC":
-            self.dopamine -= 0.1
-            self.cortisol += 0.2
-        elif state == "EMPTY":
-            self.cortisol += 0.05
-            self.dopamine -= 0.05
-    def get_vitals(self):
-        return {
-            "ATP": int(self.atp),
-            "TOX": int(self.toxin),
-            "MOOD": "HYPER" if self.adrenaline > 0.7 else "STRESSED" if self.cortisol > 0.6 else "FLOW"
-        }
 class RefusalEngine:
     def __init__(self):
         self.recursion_depth = 0
@@ -511,12 +461,6 @@ class TheMarmChorus:
         elif b_val < 0.25:
             bids.append((0.3, "JESTER", "The prose is clean, but too safe. Take a risk."))
         return bids
-class TheRefusalEngine:
-    @staticmethod
-    def check(text: str):
-        if "good" in text.lower() or "nice" in text.lower():
-            return True, "⚠️ REFUSAL BYPASS: Stop asking for 'Good'. Ask for 'Coherent'."
-        return False, None
 @dataclass
 class GordonKnot:
     integrity: float = 65.0
@@ -771,26 +715,25 @@ class TheCartographer:
     def spin_web(cls, memory_graph, inventory, gordon=None):
         return cls.draw_grid(memory_graph, inventory, gordon)
 class TheLexicon:
-    WORD_FREQUENCY = Counter()
-    _BASE_HEAVY = {"stone", "iron", "mud", "dirt", "wood", "grain", "clay", "lead", "bone", "blood", "salt", "rust", "root", "ash", "meat", "steel", "gold", "obsidian", "granite", "bronze", "marble", "slate", "concrete", "dense", "tungsten", "heavy", "weight", "black hole", "dark matter"}
-    _BASE_KINETIC = {"run", "hit", "break", "take", "make", "press", "build", "cut", "drive", "lift", "carry", "strike", "burn", "shatter", "throw", "kick", "pull", "crash", "explode", "punch", "slam", "burst", "smash", "thrust", "clash", "grind", "whip", "launch", "crumble", "disintegrate"}
-    _BASE_ABSTRACT = {"system", "protocol", "sequence", "vector", "node", "context", "layer", "matrix", "perspective", "framework", "logic", "concept", "theory", "analysis"}
-    _BASE_PHOTO = {"light", "sun", "ray", "beam", "glow", "shine", "spark", "fire", "flame", "star", "day", "dawn", "neon", "laser"}
-    _BASE_AEROBIC = {"balloon", "feather", "cloud", "bubble", "steam", "breeze", "wing", "petal", "foam", "spark", "kite", "dust", "sky", "breath", "whisper"}
-    _BASE_THERMAL = {"fire", "flame", "burn", "heat", "hot", "blaze", "sear", "char", "ash", "ember", "sun", "boil", "lava", "inferno"}
-    _BASE_CRYO = {"ice", "cold", "freeze", "frost", "snow", "chill", "numb", "shiver", "glacier", "frozen", "hail", "winter", "zero"}
-    _BASE_CURSED = {"future", "predict", "sentient", "secret", "human", "feel"}
-    _BASE_ANTIGEN = {"basically", "actually", "literally", "utilize", "leverage", "paradigm", "synergy", "ultimately"}
-    _BASE_BUFFER = {"maybe", "soft", "gentle", "perhaps", "kindness", "hum", "drift", "sway", "pulse", "tender", "slow", "wait", "almost"}
-    _BASE_DIVERSION = {"weather", "textiles", "mycelium", "architecture", "history", "entropy", "silence", "geology"}
-    _BASE_SUBURBAN = {"nice", "okay", "lawn", "mow", "hedge", "property", "hoa", "compliant", "behave", "normal", "regular", "chat", "folks", "weekend", "traffic", "driveway"}
-    _BASE_PLAY = {"bounce", "dance", "twirl", "float", "wobble", "tickle", "jiggle", "soar", "wander", "wonder", "riff", "jam", "play", "skip", "hop"}
     ANTIGEN_REPLACEMENTS = {"basically": "lie", "actually": "hedging", "literally": "noise", "utilize": "use", "leverage": "use", "paradigm": "pattern", "synergy": "collaboration", "ultimately": "useless"}
     ANTIGEN_REGEX = None
     SOLVENTS = {"is", "are", "was", "were", "the", "a", "an", "and", "but", "or", "if", "then"}
     _TRANSLATOR = str.maketrans(string.punctuation, " " * len(string.punctuation))
     LEARNED_VOCAB = {"heavy": {}, "kinetic": {}, "abstract": {}, "photo": {}, "aerobic": {}, "thermal": {}, "cryo": {}, "sacred": {}, "cursed": {}, "antigen": {}, "diversion": {}, "suburban": {}, "buffer": {}, "play": {}}
     USER_FLAGGED_BIAS = set()
+    @classmethod
+    def load_vocabulary(cls):
+        try:
+            with open("lexicon.json", "r") as f:
+                data = json.load(f)
+                for category, words in data.items():
+                    setattr(cls, f"_BASE_{category.upper()}", set(words))
+            print(f"{Prisma.GRY}[SYSTEM]: Lexicon loaded successfully.{Prisma.RST}")
+        except FileNotFoundError:
+            print(f"{Prisma.RED}[CRITICAL]: lexicon.json missing. Using empty vocabulary.{Prisma.RST}")
+            # Fallback to prevent crash
+            for cat in cls.LEARNED_VOCAB.keys():
+                setattr(cls, f"_BASE_{cat.upper()}", set())
     @classmethod
     def clean(cls, text):
         return text.lower().translate(cls._TRANSLATOR).split()
@@ -863,10 +806,8 @@ class TheTensionMeter:
         self.vector_memory = deque(maxlen=5)
     @staticmethod
     def _is_structurally_sound(word):
-        if not re.search(r"[aeiouy]", word):
-            return False
-        if re.search(r"(.)\1{2,}", word):
-            return False
+        if not re.search(r"[aeiouy]", word): return False
+        if re.search(r"(.)\1{2,}", word): return False
         return True
     def measure_topology(self, clean_words, counts, graph):
         total = max(1, len(clean_words))
@@ -905,8 +846,10 @@ class TheTensionMeter:
             geodesic_kappa = 0.0
         final_kappa = max(inertia_kappa, geodesic_kappa)
         return round(final_kappa, 3), round(psi, 2), round(geodesic_mass, 1)
-    def gaze(self, text):
+    def gaze(self, text, graph=None):
         clean_words = TheLexicon.clean(text)
+        total_vol = max(1, len(clean_words))
+        unique_vol = len(set(clean_words))
         counts = Counter()
         solvents = 0
         unknowns = []
@@ -1019,7 +962,7 @@ class ParadoxSeed:
         return f"🌺 THE SEED BLOOMS: '{self.question}'"
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_8.2.1"
+        self.genome = "BONEAMANITA_8.2.2"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -1230,7 +1173,7 @@ class MycelialNetwork:
         for n in nodes_to_remove:
             del self.graph[n]
         return f"📉 HOMEOSTATIC SCALING: Decayed {total_decayed} synapses. Pruned {pruned_count} weak connections."
-    def save(self, health, stamina, mutations, trauma_accum, joy_history):
+    def save(self, health, stamina, mutations, trauma_accum, joy_history, mitochondria_traits=None):
         base_trauma = (BoneConfig.MAX_HEALTH - health) / BoneConfig.MAX_HEALTH
         final_vector = {k: min(1.0, v) for k, v in trauma_accum.items()}
         top_joy = sorted(joy_history, key=lambda x: x["resonance"], reverse=True)[:3]
@@ -1238,10 +1181,10 @@ class MycelialNetwork:
             cause = max(final_vector, key=final_vector.get)
             final_vector[cause] = 1.0
         spore = SporeCasing(session_id=self.session_id, graph=self.graph, mutations=mutations, trauma=base_trauma,
-                            joy_vectors=top_joy, )
+                            joy_vectors=top_joy)
         data = spore.__dict__
         data["trauma_vector"] = final_vector
-        data["meta"] = {"timestamp": time.time(), "final_health": health, "final_stamina": stamina, }
+        data["meta"] = {"timestamp": time.time(), "final_health": health, "final_stamina": stamina}
         if mitochondria_traits:
             data["mitochondria"] = mitochondria_traits
         try:
@@ -1409,26 +1352,18 @@ class MycelialNetwork:
 class ChronoStream:
     def __init__(self):
         self.last_tick = time.time()
-        self.boredom_map = {}
-    def cleanup(self):
-        if len(self.boredom_map) > 50:
-            self.boredom_map.clear()
-    def tick(self, phys, session_id):
-        self.cleanup()
+        self.boredom_level = 0.0
+    def tick(self, phys):
         now = time.time()
         delta = now - self.last_tick
         self.last_tick = now
-        if session_id not in self.boredom_map:
-            self.boredom_map[session_id] = 0.0
-        current = self.boredom_map[session_id]
         if phys["repetition"] > 0.3:
-            current += 2.0
+            self.boredom_level += 2.0
         elif delta > 60:
-            current += 5.0
+            self.boredom_level += 5.0
         else:
-            current = max(0.0, current - 1.0)
-        self.boredom_map[session_id] = current
-        return current > BoneConfig.BOREDOM_THRESHOLD
+            self.boredom_level = max(0.0, self.boredom_level - 1.0)
+        return self.boredom_level > BoneConfig.BOREDOM_THRESHOLD
 class LichenSymbiont:
     @staticmethod
     def photosynthesize(phys, clean_words, tick_count):
@@ -2199,445 +2134,6 @@ class SoritesIntegrator:
                 f"🔥 HEAP IGNITION ({int(score*100)}%): The Ancestors are speaking.",
             )
         return "INERT", f"⏳ INERT SAND ({int(score*100)}%): Building mass..."
-class LifecycleManager:
-    def __init__(self, engine):
-        self.eng = engine
-    def run_cycle(self, text, m, trace, has_bracelet, is_hybrid, enzyme):
-        refusal_mode = self.eng.refusal.check_trigger(text)
-        if refusal_mode:
-            print(f"\n{Prisma.RED}🚫 REFUSAL TRIGGERED ({refusal_mode}){Prisma.RST}")
-            if refusal_mode == "FRACTAL":
-                print(self.eng.refusal.execute_fractal(text, m["physics"]["kappa"]))
-            elif refusal_mode == "MIRROR":
-                print(self.eng.refusal.execute_mirror(text))
-            elif refusal_mode == "SILENT":
-                print(self.eng.refusal.execute_silent(text))
-            print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
-            return
-        rupture_msg = None
-        hat_success, hat_msg, voltage_reduction = self.eng.grey_hat.tip(m["physics"]["voltage"], m["physics"]["kappa"])
-        if hat_success:
-            new_voltage = max(0.0, m["physics"]["voltage"] - voltage_reduction)
-            m["physics"]["voltage"] = new_voltage
-        suburban_count = m["physics"]["counts"].get("suburban", 0)
-        total_words = max(1, len(m["clean_words"]))
-        suburban_density = suburban_count / total_words
-        if suburban_density > 0.2 and m["physics"]["voltage"] < 3.0:
-            print(
-                f"\n{Prisma.SLATE}🌧️ TWILIGHT STATE DETECTED: The rain is relaxing. Memories are fading.{Prisma.RST}"
-            )
-            rotted = TheLexicon.atrophy(self.eng.tick_count, max_age=20)
-            if rotted:
-                print(
-                    f"   {Prisma.GRY}🌫️ EROSION: Forgot {len(rotted)} concepts (e.g., '{rotted[0]}').{Prisma.RST}"
-                )
-            print(
-                f"   {Prisma.WHT}► HINT: Light a fire (THERMAL) or break the box (/debug).{Prisma.RST}"
-            )
-        lex_msg = None
-        shadow_triggers = {"shadow", "dark", "alley", "night", "lex", "void"}
-        if any(w in m["clean_words"] for w in shadow_triggers):
-            is_polite = m["physics"]["voltage"] < 4.0
-            lex_node = LexNode()
-            lex_msg = lex_node.traverse(is_polite)
-        if self.eng.coma_turns > 0:
-            self._handle_coma(text)
-            return
-        chem_state = self.eng.endocrine.metabolize(trace, self.eng.health, self.eng.stamina,
-                                                   ros_level=self.eng.mitochondria.state.ros_buildup,
-                                                   enzyme_type=enzyme)
-        is_stuck, interference, theremin_msg, critical_event = self.eng.theremin.listen(m["physics"])
-        if critical_event == "AIRSTRIKE":
-            print(f"\n{theremin_msg}")
-            print(f"{Prisma.RED}⚡ ENIGMA TRIGGER: The Paradox File has collapsed the infected AI.{Prisma.RST}")
-            self.eng.mem.graph.clear()
-            m["physics"]["voltage"] = 0.0
-            m["physics"]["narrative_drag"] = 0.0
-            self.eng.stamina = 50.0
-            print(f"{Prisma.CYN}🌱 RECOVERY: Scanning for Ular/Louise Seeds (Saved Spores)...{Prisma.RST}")
-            self.eng.mem.autoload_last_spore()
-            print(f"{Prisma.GRN}   >> SYSTEM REBOOTED. TIMELINE SECURED.{Prisma.RST}")
-            return
-        if critical_event == "CORROSION":
-            m["physics"]["narrative_drag"] += 5.0
-        is_disrupted, disrupt_msg = RuptureEngine.check_for_disruption(
-            m["physics"], TheLexicon
-        )
-        if is_disrupted:
-            ignition_msg = f"{Prisma.VIOLET}🌫️ LANDSCAPE FLATTENED: Memory Access Suspended.{Prisma.RST}"
-            lens_data = ("JESTER", "The Slate is Wiped. Invent something new.")
-        else:
-            (ignition_score, constellations, current_thresh,) = self.eng.integrator.measure_ignition(
-                m["clean_words"], self.eng.dynamics.voltage_history
-            )
-            ignition_state = "IGNITED" if ignition_score > current_thresh else "INERT"
-            ignition_msg = (
-                f"🔥 HEAP IGNITION ({int(ignition_score*100)}%): Ancestors speaking."
-                if ignition_state == "IGNITED"
-                else None
-            )
-            lens_data = self.eng.chorus.consult(m["physics"], ignition_state, is_stuck, chem_state,
-                                                self.eng.gordon.inventory, self.eng.health)
-        is_forged, forge_msg, new_item = self.forge.hammer_alloy(m["physics"])
-        if is_forged:
-            print(f"\n{Prisma.RED}{forge_msg}{Prisma.RST}")
-            if new_item:
-                loot_msg = self.gordon.acquire(new_item)
-                if loot_msg: print(f"   {Prisma.OCHRE}{loot_msg}{Prisma.RST}")
-        lens_data = self.chorus.consult(..., governor_mode=self.governor.mode)
-        if is_hybrid:
-            loot_msg = self.eng.gordon.log_merge()
-            if loot_msg:
-                print(f"\n{Prisma.MAG}🕰️ TEMPORAL SYNC ESTABLISHED.{Prisma.RST}")
-                print(f"   {Prisma.OCHRE}{loot_msg}{Prisma.RST}")
-            elif has_bracelet:
-                print(f"\n{Prisma.CYN}♾️ TIME BRACELET ACTIVE: 100% Efficiency.{Prisma.RST}")
-            elif "TIME_BRACELET" not in self.eng.gordon.inventory:
-                print(
-                    f"\n{Prisma.GRY}🕰️ HYBRID SIGNAL DETECTED. Stabilizing... ({self.eng.gordon.temporal_merges}/3){Prisma.RST}"
-                )
-        lens_name = lens_data[0]
-        if lens_name == "MAIGRET":
-            print(
-                f"\n{Prisma.SLATE}[ THE ABSORBER ]{Prisma.RST} (Atmospheric Density: High)"
-            )
-            ros = self.eng.mitochondria.state.ros_buildup
-            relief, smoke_msg = self.eng.gordon.share_smoke_break(ros)
-            self.eng.mitochondria.mitigate(relief)
-            print(f" {Prisma.OCHRE}► {smoke_msg}{Prisma.RST}")
-            if "SAUNA" in smoke_msg:
-                print(f" {Prisma.SLATE}   (Maigret nods to the Janitor. The Detective steps into the steam.){Prisma.RST}")
-            print(f" {Prisma.WHT}► {lens_data[1]}{Prisma.RST}")
-            print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
-            return
-        if lens_name == "CARTOGRAPHER":
-            bio_metrics = {
-                "atp": self.eng.mitochondria.state.atp_pool,
-                "cortisol": chem_state["COR"],
-                "oxytocin": chem_state["OXY"]
-            }
-            print(f"\n{Prisma.VIOLET}[ THE CARTOGRAPHER ]{Prisma.RST} (Ψ: {m['physics']['psi']} | Latency: {m['physics']['gamma']})")
-            weave_msg = TheCartographer.weave(
-                text,
-                self.eng.mem.graph,
-                bio_metrics,
-                limbo=self.eng.limbo,
-                physics=m["physics"]
-            )
-            weave_msg = TheCartographer.weave(text, self.eng.mem.graph, bio_metrics, limbo=self.eng.limbo)
-            if "TRIANGULATION COMPLETE" in weave_msg:
-                print(f" {Prisma.MAG}   >> GEOMETRIC LOCK: Physics enforced. Drag set to 0.0.{Prisma.RST}")
-                m["physics"]["narrative_drag"] = 0.0
-                if self.eng.theremin.resin_buildup > 0:
-                    purged = self.eng.theremin.resin_buildup
-                    self.eng.theremin.resin_buildup = 0.0
-                    print(f" {Prisma.CYN}   >> RESIN PURGE: Map stabilized. Cleared {purged:.1f} accumulation.{Prisma.RST}")
-            print(f" {Prisma.GRY}► Surveying the substrate...{Prisma.RST}")
-            print(f" {Prisma.WHT}► {weave_msg}{Prisma.RST}")
-            if "TECTONIC SHIFT" in weave_msg:
-                print(f" {Prisma.RED}   >> WAR ROOM: Map unreliable. Trust your eyes, not the paper.{Prisma.RST}")
-            elif "MAP-TERRITORY DIVERGENCE" in weave_msg:
-                print(f" {Prisma.YEL}   >> NAVIGATION WARNING: The map is drifting from reality.{Prisma.RST}")
-            elif "PHANTOM SIGNAL" in weave_msg:
-                print(f" {Prisma.VIOLET}   >> SEANCE: We are navigating by the stars of dead timelines.{Prisma.RST}")
-            elif "FOG OF WAR" in weave_msg:
-                print(f" {Prisma.GRY}   >> ENERGY SAVE MODE: Detail rendering disabled.{Prisma.RST}")
-            elif "Existing Knots" in weave_msg or "COORDINATES LOCKED" in weave_msg:
-                print(f" {Prisma.VIOLET}   >> COORDINATES CONFIRMED. The map holds.{Prisma.RST}")
-            else:
-                print(f" {Prisma.GRY}   >> TERRA INCOGNITA. Drawing new grid lines.{Prisma.RST}")
-            print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
-            return
-        if lens_name == "DEREK":
-            print(f"\n{Prisma.MAG}[ THE DIRECTOR ]{Prisma.RST} (Scenario: Trading Places)")
-            print(f" {Prisma.WHT}► {lens_data[1]}{Prisma.RST}")
-            m["physics"]["voltage"] = 0.0
-            print(f" {Prisma.CYN}⚡ SCENE RESET: Voltage set to 0. Wait for your cue.{Prisma.RST}")
-            print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
-            return
-        if lens_name == "GUIDE":
-            print(
-                f"\n{Prisma.GRN}[ DON'T PANIC ]{Prisma.RST} (Probability Factor: 1:{int(m['physics']['gamma']*1000)})"
-            )
-            improbability_boost = m["physics"]["narrative_drag"] * 2.0
-            m["physics"]["voltage"] += improbability_boost
-            print(
-                f" {Prisma.WHT}► The Bureaucracy is expanding to meet the needs of the expanding Bureaucracy.{Prisma.RST}"
-            )
-            print(
-                f" {Prisma.CYN}⚡ PROPULSION: Converted {m['physics']['narrative_drag']} Drag into +{improbability_boost} Voltage.{Prisma.RST}"
-            )
-            print(f" {Prisma.WHT}► {lens_data[1]}{Prisma.RST}")
-            print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
-            return
-        if lens_name == "GRADIENT_WALKER":
-            current_temp = BoneConfig.get_gradient_temp(
-                m["physics"]["voltage"], m["physics"]["kappa"]
-            )
-            print(
-                f"\n{Prisma.CYN}[ GRADIENT_WALKER ]{Prisma.RST} (Temperature: {current_temp:.4f})"
-            )
-            print(f" {Prisma.WHT}► {TheGradientWalker.walk(text)}{Prisma.RST}")
-            print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
-            return
-        if lens_name == "GORDON":
-            print(f"\n{Prisma.OCHRE}[ GORDON KNOT ]{Prisma.RST} (Janitor Mode Active)")
-            drift = m["physics"]["narrative_drag"]
-            if drift > 5.0 and "STABILITY_PIZZA" in self.eng.gordon.inventory:
-                is_eaten, pizza_msg = self.eng.gordon.deploy_pizza(m["physics"])
-                if is_eaten:
-                    print(f" {Prisma.MAG}► {pizza_msg}{Prisma.RST}")
-                    drift = m["physics"]["narrative_drag"]
-            if drift > 0.5:
-                reduction, gravity_msg = self.eng.gordon.check_gravity(drift)
-                if reduction > 0.0:
-                    m["physics"]["narrative_drag"] = max(0.0, drift - reduction)
-                    print(f" {Prisma.WHT}► {gravity_msg}{Prisma.RST}")
-                else:
-                    print(f" {Prisma.GRY}► {gravity_msg}{Prisma.RST}")
-            current_ros = self.eng.mitochondria.state.ros_buildup
-            cleansed, scrub_msg = self.eng.gordon.scrub_static(current_ros)
-            if cleansed > 0:
-                self.eng.mitochondria.mitigate(cleansed)
-                print(f" {Prisma.WHT}► {scrub_msg}{Prisma.RST}")
-            loop_depth = int(m["physics"]["kappa"] * 10)
-            is_cut, cut_msg = self.eng.gordon.cut_the_knot(loop_depth)
-            if is_cut:
-                m["physics"]["kappa"] = 0.0
-                m["physics"]["psi"] = 0.5
-                print(f" {Prisma.RED}► {cut_msg}{Prisma.RST}")
-                self.eng.gordon.integrity -= 5.0
-            else:
-                print(f" {Prisma.GRY}► {cut_msg}{Prisma.RST}")
-            print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
-            return
-        if m["physics"]["E"] > 0.8:
-            if has_bracelet:
-                lens_data = (
-                    "GLASS",
-                    f"ANACHRONISM DETECTED ({m['physics']['E']}). Payment processed via Time Bracelet. Immersion sustained.",
-                )
-            else:
-                lens_data = (
-                    "SHERLOCK",
-                    f"CRITICAL DRIFT ({m['physics']['E']}). Signal is noise. Ground yourself.",
-                )
-            self.eng.stamina = max(0.0, self.eng.stamina - 2.0)
-        cosmic_state, drag_mod, cosmic_msg = self.eng.cosmic.analyze_orbit(
-            self.eng.mem, m["clean_words"]
-        )
-        is_bored = self.eng.chronos.tick(m["physics"], self.eng.mem.session_id)
-        if is_bored and not rupture_msg:
-            dominant = max(m["physics"]["counts"], key=m["physics"]["counts"].get)
-            if dominant in ["toxin", "antigen"]:
-                dominant = "heavy"
-            rupture_msg = RuptureEngine.trip_the_waiter(dominant, TheLexicon)
-        is_crystalline, crystal_msg = TheCrystallizer.verify(m["physics"])
-        self._apply_cosmic_physics(m["physics"], cosmic_state, drag_mod)
-        healed_list = self.eng.therapy.check_progress(
-            m["physics"], self.eng.stamina, self.eng.trauma_accum
-        )
-        therapy_msg = None
-        if healed_list:
-            therapy_msg = f"{Prisma.GRN}🩹 THERAPY EFFECTIVE: Healed {', '.join(healed_list)}.{Prisma.RST}"
-            for healed in healed_list:
-                loot = None
-                if healed == "SEPTIC":
-                    loot = self.eng.gordon.acquire("ANTISEPTIC_SPRAY")
-                elif healed == "BARIC":
-                    loot = self.eng.gordon.acquire("DIVING_BELL")
-                elif healed == "THERMAL":
-                    loot = self.eng.gordon.acquire("HEAT_SINK")
-                elif healed == "CRYO":
-                    loot = self.eng.gordon.acquire("THERMOS")
-                if loot:
-                    therapy_msg += f"\n   {Prisma.OCHRE}{loot}{Prisma.RST}"
-        compass_loot = self.eng.gordon.assess_experience(m["physics"]["kappa"])
-        if compass_loot:
-            print(f"{Prisma.OCHRE}{compass_loot}{Prisma.RST}")
-        meta = self._process_energy(m)
-        if therapy_msg:
-            meta["msg"] = (
-                f"{meta['msg']} | {therapy_msg}" if meta["msg"] else therapy_msg
-            )
-        folly_type, folly_msg = self.eng.folly.audit_desire(
-            m["physics"], self.eng.stamina
-        )
-        if folly_type == "MAUSOLEUM_CLAMP":
-            m["physics"]["voltage"] = 0.0
-        grind_type, grind_msg, atp_gain, loot = self.eng.folly.grind_the_machine(
-            self.eng.mitochondria.state.atp_pool, m["clean_words"], TheLexicon
-        )
-        if atp_gain != 0:
-            self.eng.mitochondria.state.atp_pool += atp_gain
-        if loot:
-            print(f"   {Prisma.OCHRE}{self.eng.gordon.acquire(loot)}{Prisma.RST}")
-            if loot == "STABILITY_PIZZA":
-                print(f"   {Prisma.CYN}🎁 SECRET FOUND: A slice of Saturday Morning.{Prisma.RST}")
-        self._grow(m, meta)
-        _, gym_msg = self.eng.trainer.lift(m["physics"])
-        if gym_msg:
-            meta["msg"] = f"{meta['msg']} | {gym_msg}" if meta["msg"] else gym_msg
-        _, mirror_msg = self.eng.mirror.reflect(m["physics"])
-        is_broken, koan = self.eng.kintsugi.check_integrity(self.eng.stamina)
-        kintsugi_msg = (
-            f"{Prisma.WHT}🏺 KINTSUGI KOAN: {koan}{Prisma.RST}" if is_broken else None
-        )
-        if self.eng.kintsugi.attempt_repair(m["physics"]):
-            self.eng.gordon.integrity = 100.0
-            if "SILENT_KNIFE" not in self.eng.gordon.inventory:
-                self.eng.gordon.inventory.append("SILENT_KNIFE")
-            kintsugi_msg = (
-                f"{Prisma.WHT}✨ GOLDEN REPAIR: Janitor Healed & Rearmed.{Prisma.RST}"
-            )
-        is_glitch, pareidolia_msg = BoneConfig.check_pareidolia(m["clean_words"])
-        bury_msg, new_wells = self.eng.mem.bury(
-            m["clean_words"], self.eng.tick_count, m["glass"]["resonance"]
-        )
-        if new_wells:
-            for w in new_wells:
-                if self.eng.mitochondria.develop_enzyme(w):
-                    print(f"{Prisma.GRN}🧬 EPIGENETIC SHIFT: Mitochondria evolved enzyme for '{w.upper()}'. Efficiency +5%.{Prisma.RST}")
-        if bury_msg:
-            print(f"{Prisma.RED}{bury_msg}{Prisma.RST}")
-        if m["physics"]["kappa"] > 0.5:
-            for w in m["clean_words"]:
-                if w in self.eng.mem.graph and "strata" in self.eng.mem.graph[w]:
-                    self.eng.mem.graph[w]["strata"]["stability_index"] = m["physics"]["kappa"]
-        vitals = self.eng.mitochondria.state
-        print(f"\n{Prisma.paint('--- [ BONEAMANITA 8.2.1 ] ---', '0')}")
-        print(f"ATP: {int(vitals.atp_pool)} | ROS: {int(vitals.ros_buildup)} | OXY: {chem_state['OXY']} | COR: {chem_state['COR']}")
-        print(f"{Prisma.GRY}[TRACE] ERR:{trace['err']:.2f} | COH:{trace['coh']:.2f} | EXP:{trace['exp']:.2f}{Prisma.RST}")
-        self._render(m, meta, cosmic_msg, lens_data, mirror_msg, kintsugi_msg, rupture_msg, crystal_msg, ignition_msg,
-                     pareidolia_msg, theremin_msg, folly_msg, grind_msg, hat_msg if hat_success else None, lex_msg, )
-    def _handle_coma(self, text):
-        self.eng.coma_turns -= 1
-        self.eng.stamina = min(BoneConfig.MAX_STAMINA, self.eng.stamina + 15)
-        self.eng.tick_count += 1
-        dream_txt, healed_type, amt = self.eng.dreamer.rem_cycle(
-            self.eng.trauma_accum, self.eng.endocrine.oxytocin
-        )
-        if self.eng.coma_turns == BoneConfig.COMA_DURATION - 1:
-            replay_msg = self.hippocampus.replay_dreams(self.mem.graph)
-            print(f"{Prisma.VIOLET}{replay_msg}{Prisma.RST}")
-        print(
-            f"\n{Prisma.INDIGO}=== 💤 HYPNAGOGIC STATE ({self.eng.coma_turns} turns remain) ==={Prisma.RST}"
-        )
-        print(f"   {dream_txt}")
-        _, _ = self.eng.mem.bury(TheLexicon.clean(text), self.eng.tick_count, 0.0)
-        print(f"{Prisma.GRY}{'-' * 65}{Prisma.RST}")
-    def _apply_cosmic_physics(self, phys, state, drag_mod):
-        if state == "LAGRANGE_POINT":
-            phys["voltage"] += 10.0
-            phys["narrative_drag"] = 0.0
-        elif state == "WATERSHED_FLOW":
-            phys["narrative_drag"] *= 0.1
-        elif state == "VOID_DRIFT":
-            phys["narrative_drag"] += drag_mod
-    def _process_energy(self, m):
-        vector = m["physics"]["vector"]
-        drag = m["physics"]["narrative_drag"]
-        density_bonus = (vector["STR"] * 2) + (vector["VEL"] * 2)
-        drag_penalty = drag * 0.5
-        energy_msg = None
-        if density_bonus > 3.0:
-            energy_msg = f"DENSITY GAIN (+{round(density_bonus, 1)})"
-        elif drag_penalty > 2.0:
-            energy_msg = f"DRAG PENALTY (-{round(drag_penalty, 1)})"
-        sugar, lichen_msg = self.eng.lichen.photosynthesize(
-            m["glass"], m["clean_words"], self.eng.tick_count
-        )
-        spore_msg = self.eng.pollinate(m["clean_words"])
-        if sugar > 0:
-            scrub_amt = sugar * 0.5
-            self.eng.mitochondria.mitigate(scrub_amt)
-            lichen_msg += f" | 🧼 BIO-SCRUB (-{scrub_amt:.1f} ROS)"
-        return {"density_bonus": density_bonus, "drag_penalty": drag_penalty, "sugar": sugar, "lichen_msg": lichen_msg,
-                "spore_msg": spore_msg, "msg": energy_msg, }
-    def _grow(self, m, meta):
-        cost = 2.0
-        net_change = meta["density_bonus"] + meta["sugar"] - meta["drag_penalty"] - cost
-        self.eng.stamina = max(
-            0.0, min(BoneConfig.MAX_STAMINA, self.eng.stamina + net_change)
-        )
-        self._calculate_health(m["physics"])
-        res = m["glass"]["resonance"]
-        if res > 6.0:
-            self.eng.joy_history.append(
-                {"resonance": res, "timestamp": self.eng.tick_count}
-            )
-            print(f"{Prisma.MAG}✨ CORE MEMORY FORMED (Resonance: {res}){Prisma.RST}")
-    def _calculate_health(self, glass_data):
-        health_impact = 0
-        toxin = glass_data["counts"].get("toxin", 0)
-        if toxin > 0:
-            health_impact -= 5 * toxin
-            self.eng.trauma_accum["SEPTIC"] += 0.1
-        if self.eng.stamina <= 0:
-            health_impact -= 10
-            self.eng.trauma_accum["CRYO"] += 0.1
-        decay_rate = 0.995
-        for key in self.eng.trauma_accum:
-            self.eng.trauma_accum[key] = max(
-                0.0, self.eng.trauma_accum[key] * decay_rate
-            )
-        self.eng.health = min(BoneConfig.MAX_HEALTH, self.eng.health + health_impact)
-        self.eng.mitochondria.state.ros_buildup = min(
-            BoneConfig.MAX_ROS, self.eng.mitochondria.state.ros_buildup
-        )
-        glass_data["physics"]["voltage"] = min(
-            BoneConfig.MAX_VOLTAGE, glass_data["physics"]["voltage"]
-        )
-        if self.eng.health <= 0:
-            self.eng.coma_turns = BoneConfig.COMA_DURATION
-            self.eng.health = 20
-        self.eng.mem.cannibalize(
-            preserve_current=glass_data["clean_words"], current_tick=self.eng.tick_count
-        )
-    def _render(self, m, meta, cosmic_msg, lens_data, mirror_msg, kintsugi_msg, rupture_msg=None, crystal_msg=None,
-                ignition_msg=None, pareidolia_msg=None, theremin_msg=None, folly_msg=None, grind_msg=None, hat_msg=None,
-                lex_msg=None, ):
-        if m["physics"]["voltage"] > 8.0:
-            meta["msg"] = f"{meta['msg']} | 💧 SWEATING" if meta["msg"] else "💧 SWEATING"
-        battery_log = []
-        if meta["msg"]:
-            battery_log.append(f"{Prisma.OCHRE}🍽️ {meta['msg']}{Prisma.RST}")
-        if hat_msg:
-            battery_log.append(f"{Prisma.WHT}{hat_msg}{Prisma.RST}")
-        if lex_msg:
-            color = Prisma.GRN if "Pass granted" in lex_msg else Prisma.RED
-            battery_log.append(f"{color}🌑 {lex_msg}{Prisma.RST}")
-        if kintsugi_msg:
-            battery_log.append(kintsugi_msg)
-        if mirror_msg:
-            battery_log.append(f"{Prisma.MAG}🪞 {mirror_msg}{Prisma.RST}")
-        if rupture_msg:
-            battery_log.append(f"{Prisma.RED}{rupture_msg}{Prisma.RST}")
-        if crystal_msg:
-            battery_log.append(f"{Prisma.CYN}{crystal_msg}{Prisma.RST}")
-        if ignition_msg:
-            battery_log.append(f"{Prisma.SLATE}{ignition_msg}{Prisma.RST}")
-        if pareidolia_msg:
-            battery_log.append(f"{Prisma.OCHRE}{pareidolia_msg}{Prisma.RST}")
-        if theremin_msg:
-            battery_log.append(theremin_msg)
-        if folly_msg:
-            battery_log.append(folly_msg)
-        if grind_msg:
-            battery_log.append(grind_msg)
-        print(f" {self.eng.theremin.get_readout()}")
-        chem = self.eng.endocrine.get_state()
-        chem_str = f"OXY:{chem['OXY']} | COR:{chem['COR']} | DOP:{chem['DOP']}"
-        signals = {
-            "lichen": meta["lichen_msg"],
-            "strat": f"{self.eng.wise.architect(m, None, False)[1]} | {Prisma.MAG}{chem_str}{Prisma.RST}",
-            "title": f"MODE :: {lens_data[0]}",
-            "battery_log": battery_log,
-            "spore": meta["spore_msg"],
-            "cosmic": cosmic_msg,
-            "mode": self.eng.governor.mode
-        }
-        self.eng.projector.broadcast(m, signals, lens_data)
 class ThePulseMonitor:
     def __init__(self):
         self.history = deque(maxlen=5)
@@ -2817,6 +2313,10 @@ class EndocrineSystem:
         else:
             self.melatonin = 0.0
         return self.get_state()
+    def calculate_anabolic_rate(self, physics_vector):
+        base_gain = (physics_vector["STR"] * 2) + (physics_vector["VEL"] * 2)
+        hormonal_mod = 1.0 + (self.dopamine * 0.2) - (self.cortisol * 0.5)
+        return max(0.0, base_gain * hormonal_mod)
     def get_state(self):
         return {"DOP": round(self.dopamine, 2), "OXY": round(self.oxytocin, 2), "COR": round(self.cortisol, 2),
                 "SER": round(self.serotonin, 2), "ADR": round(self.adrenaline, 2), "MEL": round(self.melatonin, 2), }
@@ -3089,8 +2589,289 @@ class Hippocampus:
                         strengthened += 1
         self.short_term_buffer.clear()
         return f"💤 HIPPOCAMPAL REPLAY: Consolidated {strengthened} high-voltage pathways."
+class LifecycleManager:
+    def __init__(self, engine):
+        self.eng = engine
+    def run_cycle(self, text, m, trace, has_bracelet, is_hybrid, enzyme):
+        cycle_logs = []
+        refusal_mode = self.eng.refusal.check_trigger(text)
+        if refusal_mode:
+            print(f"\n{Prisma.RED}🚫 REFUSAL TRIGGERED ({refusal_mode}){Prisma.RST}")
+            if refusal_mode == "FRACTAL":
+                print(self.eng.refusal.execute_fractal(text, m["physics"]["kappa"]))
+            elif refusal_mode == "MIRROR":
+                print(self.eng.refusal.execute_mirror(text))
+            elif refusal_mode == "SILENT":
+                print(self.eng.refusal.execute_silent())
+            print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
+            return
+        hat_success, hat_msg, voltage_reduction = self.eng.grey_hat.tip(m["physics"]["voltage"], m["physics"]["kappa"])
+        if hat_success:
+            new_voltage = max(0.0, m["physics"]["voltage"] - voltage_reduction)
+            m["physics"]["voltage"] = new_voltage
+            cycle_logs.append(hat_msg)
+        suburban_count = m["physics"]["counts"].get("suburban", 0)
+        total_words = max(1, len(m["clean_words"]))
+        suburban_density = suburban_count / total_words
+        if suburban_density > 0.2 and m["physics"]["voltage"] < 3.0:
+            print(f"\n{Prisma.SLATE}🌧️ TWILIGHT STATE DETECTED: The rain is relaxing. Memories are fading.{Prisma.RST}")
+            rotted = TheLexicon.atrophy(self.eng.tick_count, max_age=20)
+            if rotted:
+                cycle_logs.append(f"{Prisma.GRY}🌫️ EROSION: Forgot {len(rotted)} concepts.{Prisma.RST}")
+        shadow_triggers = {"shadow", "dark", "alley", "night", "lex", "void"}
+        if any(w in m["clean_words"] for w in shadow_triggers):
+            is_polite = m["physics"]["voltage"] < 4.0
+            lex_node = LexNode()
+            cycle_logs.append(lex_node.traverse(is_polite))
+        if self.eng.coma_turns > 0:
+            self._handle_coma(text)
+            return
+        chem_state = self.eng.endocrine.metabolize(trace, self.eng.health, self.eng.stamina,
+                                                   ros_level=self.eng.mitochondria.state.ros_buildup,
+                                                   enzyme_type=enzyme)
+        is_stuck, interference, theremin_msg, critical_event = self.eng.theremin.listen(m["physics"])
+        if theremin_msg: cycle_logs.append(theremin_msg)
+        if critical_event == "AIRSTRIKE":
+            print(f"\n{theremin_msg}")
+            print(f"{Prisma.RED}⚡ ENIGMA TRIGGER: The Paradox File has collapsed the infected AI.{Prisma.RST}")
+            self.eng.mem.graph.clear()
+            m["physics"]["voltage"] = 0.0
+            m["physics"]["narrative_drag"] = 0.0
+            self.eng.stamina = 50.0
+            print(f"{Prisma.CYN}🌱 RECOVERY: Scanning for Ular/Louise Seeds (Saved Spores)...{Prisma.RST}")
+            self.eng.mem.autoload_last_spore()
+            print(f"{Prisma.GRN}   >> SYSTEM REBOOTED. TIMELINE SECURED.{Prisma.RST}")
+            return
+        if critical_event == "CORROSION":
+            m["physics"]["narrative_drag"] += 5.0
+        is_disrupted, disrupt_msg = RuptureEngine.check_for_disruption(m["physics"], TheLexicon)
+        ignition_msg = None
+        if is_disrupted:
+            cycle_logs.append(f"{Prisma.RED}{disrupt_msg}{Prisma.RST}")
+            ignition_msg = f"{Prisma.VIOLET}🌫️ LANDSCAPE FLATTENED: Memory Access Suspended.{Prisma.RST}"
+            lens_data = ("JESTER", "The Slate is Wiped. Invent something new.")
+        else:
+            ignition_score, constellations, current_thresh = self.eng.integrator.measure_ignition(
+                m["clean_words"], self.eng.dynamics.voltage_history
+            )
+            ignition_state = "IGNITED" if ignition_score > current_thresh else "INERT"
+            if ignition_state == "IGNITED":
+                ignition_msg = f"🔥 HEAP IGNITION ({int(ignition_score*100)}%): Ancestors speaking."
+
+            lens_data = self.eng.chorus.consult(m["physics"], ignition_state, is_stuck, chem_state,
+                                                self.eng.gordon.inventory, self.eng.health,
+                                                governor_mode=self.eng.governor.mode)
+        if ignition_msg: cycle_logs.append(ignition_msg)
+        is_forged, forge_msg, new_item = self.eng.forge.hammer_alloy(m["physics"])
+        if is_forged:
+            print(f"\n{Prisma.RED}{forge_msg}{Prisma.RST}")
+            if new_item:
+                loot_msg = self.eng.gordon.acquire(new_item)
+                if loot_msg: print(f"   {Prisma.OCHRE}{loot_msg}{Prisma.RST}")
+        else:
+            transmute_msg = self.eng.forge.transmute(m["physics"])
+            if transmute_msg: cycle_logs.append(transmute_msg)
+        if is_hybrid:
+            loot_msg = self.eng.gordon.log_merge()
+            if loot_msg:
+                print(f"\n{Prisma.MAG}🕰️ TEMPORAL SYNC ESTABLISHED.{Prisma.RST}")
+                print(f"   {Prisma.OCHRE}{loot_msg}{Prisma.RST}")
+            elif has_bracelet:
+                cycle_logs.append(f"{Prisma.CYN}♾️ TIME BRACELET ACTIVE: 100% Efficiency.{Prisma.RST}")
+            elif "TIME_BRACELET" not in self.eng.gordon.inventory:
+                cycle_logs.append(f"{Prisma.GRY}🕰️ HYBRID SIGNAL DETECTED. Stabilizing... ({self.eng.gordon.temporal_merges}/3){Prisma.RST}")
+        lens_name = lens_data[0]
+        if lens_name == "MAIGRET":
+            self._execute_maigret(lens_data)
+            return
+        if lens_name == "CARTOGRAPHER":
+            self._execute_cartographer(m, text)
+            return
+        if lens_name == "DEREK":
+            print(f"\n{Prisma.MAG}[ THE DIRECTOR ]{Prisma.RST} (Scenario: Trading Places)")
+            print(f" {Prisma.WHT}► {lens_data[1]}{Prisma.RST}")
+            m["physics"]["voltage"] = 0.0
+            print(f" {Prisma.CYN}⚡ SCENE RESET: Voltage set to 0.{Prisma.RST}")
+            print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
+            return
+        if lens_name == "GUIDE":
+            print(f"\n{Prisma.GRN}[ DON'T PANIC ]{Prisma.RST}")
+            m["physics"]["voltage"] += m["physics"]["narrative_drag"] * 2.0
+            print(f" {Prisma.WHT}► {lens_data[1]}{Prisma.RST}")
+            print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
+            return
+        if lens_name == "GRADIENT_WALKER":
+            print(f"\n{Prisma.CYN}[ GRADIENT_WALKER ]{Prisma.RST}")
+            print(f" {Prisma.WHT}► {TheGradientWalker.walk(text)}{Prisma.RST}")
+            print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
+            return
+        if lens_name == "GORDON":
+            self._execute_gordon(m)
+            return
+        if m["physics"]["E"] > 0.8:
+            if has_bracelet:
+                lens_data = ("GLASS", f"ANACHRONISM DETECTED ({m['physics']['E']}). Bracelet absorbed drag.")
+            else:
+                lens_data = ("SHERLOCK", f"CRITICAL DRIFT ({m['physics']['E']}). Ground yourself.")
+                self.eng.stamina = max(0.0, self.eng.stamina - 2.0)
+        cosmic_state, drag_mod, cosmic_msg = self.eng.cosmic.analyze_orbit(self.eng.mem, m["clean_words"])
+        self._apply_cosmic_physics(m["physics"], cosmic_state, drag_mod)
+        cycle_logs.append(cosmic_msg)
+        is_bored = self.eng.chronos.tick(m["physics"])
+        if is_bored:
+            dominant = max(m["physics"]["counts"], key=m["physics"]["counts"].get)
+            rupture_msg = RuptureEngine.trip_the_waiter(dominant, TheLexicon)
+            cycle_logs.append(rupture_msg)
+        is_crystalline, crystal_msg = TheCrystallizer.verify(m["physics"])
+        if crystal_msg: cycle_logs.append(crystal_msg)
+        healed_list = self.eng.therapy.check_progress(m["physics"], self.eng.stamina, self.eng.trauma_accum)
+        if healed_list:
+            cycle_logs.append(f"{Prisma.GRN}🩹 THERAPY EFFECTIVE: Healed {', '.join(healed_list)}.{Prisma.RST}")
+            self._dispense_therapy_loot(healed_list, cycle_logs)
+        folly_type, folly_msg = self.eng.folly.audit_desire(m["physics"], self.eng.stamina)
+        if folly_type == "MAUSOLEUM_CLAMP":
+            m["physics"]["voltage"] = 0.0
+            cycle_logs.append(folly_msg)
+        grind_type, grind_msg, atp_gain, loot = self.eng.folly.grind_the_machine(
+            self.eng.mitochondria.state.atp_pool, m["clean_words"], TheLexicon
+        )
+        if grind_msg: cycle_logs.append(grind_msg)
+        if atp_gain != 0: self.eng.mitochondria.state.atp_pool += atp_gain
+        if loot: cycle_logs.append(self.eng.gordon.acquire(loot))
+        _, gym_msg = self.eng.trainer.lift(m["physics"])
+        if gym_msg: cycle_logs.append(gym_msg)
+        _, mirror_msg = self.eng.mirror.reflect(m["physics"])
+        if mirror_msg: cycle_logs.append(mirror_msg)
+        is_broken, koan = self.eng.kintsugi.check_integrity(self.eng.stamina)
+        if is_broken: cycle_logs.append(f"{Prisma.WHT}🏺 KINTSUGI KOAN: {koan}{Prisma.RST}")
+        if self.eng.kintsugi.attempt_repair(m["physics"]):
+            self.eng.gordon.integrity = 100.0
+            if "SILENT_KNIFE" not in self.eng.gordon.inventory:
+                self.eng.gordon.inventory.append("SILENT_KNIFE")
+            cycle_logs.append(f"{Prisma.WHT}✨ GOLDEN REPAIR: Janitor Healed & Rearmed.{Prisma.RST}")
+        is_glitch, pareidolia_msg = BoneConfig.check_pareidolia(m["clean_words"])
+        if pareidolia_msg: cycle_logs.append(pareidolia_msg)
+        bury_msg, new_wells = self.eng.mem.bury(m["clean_words"], self.eng.tick_count, m["glass"]["resonance"])
+        if new_wells:
+            for w in new_wells:
+                if self.eng.mitochondria.develop_enzyme(w):
+                    cycle_logs.append(f"{Prisma.GRN}🧬 EPIGENETIC SHIFT: Mitochondria evolved enzyme for '{w.upper()}'.{Prisma.RST}")
+        if bury_msg: cycle_logs.append(f"{Prisma.RED}{bury_msg}{Prisma.RST}")
+        self._metabolize_cycle(m, cycle_logs)
+        self._render(m, trace, lens_data, cycle_logs)
+    def _execute_maigret(self, lens_data):
+        print(f"\n{Prisma.SLATE}[ THE ABSORBER ]{Prisma.RST} (Atmospheric Density: High)")
+        ros = self.eng.mitochondria.state.ros_buildup
+        relief, smoke_msg = self.eng.gordon.share_smoke_break(ros)
+        self.eng.mitochondria.mitigate(relief)
+        print(f" {Prisma.OCHRE}► {smoke_msg}{Prisma.RST}")
+        print(f" {Prisma.WHT}► {lens_data[1]}{Prisma.RST}")
+        print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
+    def _execute_cartographer(self, m, text):
+        bio_metrics = {"atp": self.eng.mitochondria.state.atp_pool, "cortisol": self.eng.endocrine.cortisol, "oxytocin": self.eng.endocrine.oxytocin}
+        print(f"\n{Prisma.VIOLET}[ THE CARTOGRAPHER ]{Prisma.RST} (Ψ: {m['physics']['psi']})")
+        weave_msg = TheCartographer.weave(text, self.eng.mem.graph, bio_metrics, limbo=self.eng.limbo)
+        if "TRIANGULATION COMPLETE" in weave_msg:
+            m["physics"]["narrative_drag"] = 0.0
+            if self.eng.theremin.resin_buildup > 0:
+                self.eng.theremin.resin_buildup = 0.0
+                print(f" {Prisma.CYN}   >> RESIN PURGE: Map stabilized.{Prisma.RST}")
+        print(f" {Prisma.WHT}► {weave_msg}{Prisma.RST}")
+        print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
+    def _execute_gordon(self, m):
+        print(f"\n{Prisma.OCHRE}[ GORDON KNOT ]{Prisma.RST} (Janitor Mode Active)")
+        drift = m["physics"]["narrative_drag"]
+        if drift > 5.0 and "STABILITY_PIZZA" in self.eng.gordon.inventory:
+            is_eaten, pizza_msg = self.eng.gordon.deploy_pizza(m["physics"])
+            if is_eaten: print(f" {Prisma.MAG}► {pizza_msg}{Prisma.RST}")
+        loop_depth = int(m["physics"]["kappa"] * 10)
+        is_cut, cut_msg = self.eng.gordon.cut_the_knot(loop_depth)
+        if is_cut:
+            m["physics"]["kappa"] = 0.0
+            print(f" {Prisma.RED}► {cut_msg}{Prisma.RST}")
+            self.eng.gordon.integrity -= 5.0
+        print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
+    def _dispense_therapy_loot(self, healed_list, logs):
+        for healed in healed_list:
+            loot_map = {"SEPTIC": "ANTISEPTIC_SPRAY", "BARIC": "DIVING_BELL", "THERMAL": "HEAT_SINK", "CRYO": "THERMOS"}
+            if healed in loot_map:
+                logs.append(self.eng.gordon.acquire(loot_map[healed]))
+    def _handle_coma(self, text):
+        self.eng.coma_turns -= 1
+        self.eng.stamina = min(BoneConfig.MAX_STAMINA, self.eng.stamina + 15)
+        self.eng.tick_count += 1
+        dream_txt, healed_type, amt = self.eng.dreamer.rem_cycle(self.eng.trauma_accum, self.eng.endocrine.oxytocin)
+        if self.eng.coma_turns == BoneConfig.COMA_DURATION - 1:
+            replay_msg = self.eng.hippocampus.replay_dreams(self.eng.mem.graph)
+            print(f"{Prisma.VIOLET}{replay_msg}{Prisma.RST}")
+        print(f"\n{Prisma.INDIGO}=== 💤 HYPNAGOGIC STATE ({self.eng.coma_turns} turns remain) ==={Prisma.RST}")
+        print(f"   {dream_txt}")
+        _, _ = self.eng.mem.bury(TheLexicon.clean(text), self.eng.tick_count, 0.0)
+        print(f"{Prisma.GRY}{'-' * 65}{Prisma.RST}")
+    def _apply_cosmic_physics(self, phys, state, drag_mod):
+        if state == "LAGRANGE_POINT":
+            phys["voltage"] += 10.0
+            phys["narrative_drag"] = 0.0
+        elif state == "WATERSHED_FLOW":
+            phys["narrative_drag"] *= 0.1
+        elif state == "VOID_DRIFT":
+            phys["narrative_drag"] += drag_mod
+    def _update_trauma(self, physics):
+        health_impact = 0
+        toxin = physics["counts"].get("toxin", 0)
+        if toxin > 0:
+            health_impact -= 5 * toxin
+            self.eng.trauma_accum["SEPTIC"] += 0.1
+        if self.eng.stamina <= 0:
+            health_impact -= 10
+            self.eng.trauma_accum["CRYO"] += 0.1
+        for key in self.eng.trauma_accum:
+            self.eng.trauma_accum[key] = max(0.0, self.eng.trauma_accum[key] * 0.995)
+        self.eng.health = min(BoneConfig.MAX_HEALTH, self.eng.health + health_impact)
+        if self.eng.health <= 0:
+            self.eng.coma_turns = BoneConfig.COMA_DURATION
+            self.eng.health = 20
+            self.eng.mem.cannibalize()
+    def _metabolize_cycle(self, m, logs):
+        density_bonus = self.eng.endocrine.calculate_anabolic_rate(m["physics"]["vector"])
+        sugar, lichen_msg = self.eng.lichen.photosynthesize(m["glass"], m["clean_words"], self.eng.tick_count)
+        if lichen_msg: logs.append(lichen_msg)
+        drag = m["physics"]["narrative_drag"]
+        drag_penalty = drag * 0.5
+        basal_cost = 2.0
+        net_change = density_bonus + sugar - drag_penalty - basal_cost
+        self.eng.stamina = max(0.0, min(BoneConfig.MAX_STAMINA, self.eng.stamina + net_change))
+        if density_bonus > 3.0: logs.append(f"{Prisma.OCHRE}🍽️ DENSITY GAIN (+{density_bonus:.1f}){Prisma.RST}")
+        if drag_penalty > 2.0: logs.append(f"{Prisma.OCHRE}🍽️ DRAG PENALTY (-{drag_penalty:.1f}){Prisma.RST}")
+        if sugar > 0:
+            scrub_amt = sugar * 0.5
+            self.eng.mitochondria.mitigate(scrub_amt)
+            logs.append(f"{Prisma.GRN}🧼 BIO-SCRUB (-{scrub_amt:.1f} ROS){Prisma.RST}")
+        self._update_trauma(m["physics"])
+        if m["glass"]["resonance"] > 6.0:
+            self.eng.joy_history.append({"resonance": m["glass"]["resonance"], "timestamp": self.eng.tick_count})
+            print(f"{Prisma.MAG}✨ CORE MEMORY FORMED (Resonance: {m['glass']['resonance']}){Prisma.RST}")
+    def _render(self, m, trace, lens_data, cycle_logs):
+        if m["physics"]["voltage"] > 8.0:
+            cycle_logs.append("💧 SWEATING")
+        vitals = self.eng.mitochondria.state
+        chem = self.eng.endocrine.get_state()
+        print(f"\n{Prisma.paint('--- [ BONEAMANITA 8.2.2 ] ---', '0')}")
+        print(f"ATP: {int(vitals.atp_pool)} | ROS: {int(vitals.ros_buildup)} | OXY: {chem['OXY']} | COR: {chem['COR']}")
+        print(f"{Prisma.GRY}[TRACE] ERR:{trace['err']:.2f} | COH:{trace['coh']:.2f} | EXP:{trace['exp']:.2f}{Prisma.RST}")
+        chem_str = f"OXY:{chem['OXY']} | COR:{chem['COR']} | DOP:{chem['DOP']}"
+        signals = {
+            "strat": f"{self.eng.wise.architect(m, None, False)[1]} | {Prisma.MAG}{chem_str}{Prisma.RST}",
+            "title": f"MODE :: {lens_data[0]}",
+            "battery_log": cycle_logs,
+            "mode": self.eng.governor.mode
+        }
+        self.eng.projector.broadcast(m, signals, lens_data)
 class BoneAmanita:
     def __init__(self):
+        TheLexicon.load_vocabulary()
+        TheLexicon.compile_antigens() # Re-compile regex after loading words
+        DeathGen.load_protocols()
         self.mem = MycelialNetwork()
         self.safety = LazarusClamp(self)
         self.refusal = RefusalEngine()
@@ -3193,12 +2974,7 @@ class BoneAmanita:
         drag = m["physics"]["narrative_drag"] + (2.0 if pulse_status == "ECHO" else 0)
         self.mitochondria.state.atp_pool += nutrient["yield"]
         self.mitochondria.state.ros_buildup += nutrient["toxin"]
-        resp_status = self.mitochondria.respirate(
-            nutrient["yield"],
-            drag,
-            has_bracelet=has_bracelet,
-            is_hybrid=is_hybrid
-        )
+        resp_status = self.mitochondria.respirate(drag, has_bracelet=has_bracelet, is_hybrid=is_hybrid)
         if resp_status == "NECROSIS" or resp_status == self.mitochondria.APOPTOSIS_TRIGGER:
             print(f"{Prisma.RED}💀 APOPTOSIS TRIGGERED.{Prisma.RST}")
             self.mem.cannibalize(preserve_current=m["clean_words"])
@@ -3213,7 +2989,7 @@ class BoneAmanita:
             print(f"\n{Prisma.MAG}{adaptation}{Prisma.RST}")
 if __name__ == "__main__":
     eng = BoneAmanita()
-    print(f"{Prisma.paint('>>> BONEAMANITA 8.2.1', 'G')}")
+    print(f"{Prisma.paint('>>> BONEAMANITA 8.2.2', 'G')}")
     print(f"{Prisma.paint('System: ONLINE.', '0')}")
     print("Feed me, Seymour!\n")
     try:

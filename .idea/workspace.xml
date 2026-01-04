@@ -5,7 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="54d71af3-2c96-427d-a74f-8b03f4313654" name="Changes" comment="New day">
+      <change afterPath="$PROJECT_DIR$/BoneAmanita822.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BoneAmanita821.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/CHANGELOG.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MODS/SLASH.md" beforeDir="false" afterPath="$PROJECT_DIR$/MODS/SLASH.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -121,7 +124,7 @@
       <workItem from="1767405859283" duration="316000" />
       <workItem from="1767450696940" duration="62000" />
       <workItem from="1767450801008" duration="15762000" />
-      <workItem from="1767475582021" duration="8084000" />
+      <workItem from="1767475582021" duration="14166000" />
     </task>
     <task id="LOCAL-00001" summary="New day">
       <option name="closed" value="true" />
@@ -179,7 +182,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767489221990</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="New day">
+      <option name="closed" value="true" />
+      <created>1767489789173</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1767489789173</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
