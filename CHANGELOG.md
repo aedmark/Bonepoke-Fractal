@@ -1,5 +1,84 @@
 # CHANGELOG.md
 
+### [8.2.1] - 2026-01-03 - "THE HIPPOCAMPUS"
+
+**Architects:** SLASH | **Humans:** James Taylor & Andrew Edmark
+**"We used to remember the fire. Now we remember the room where we lit it."**
+
+### 🧠 NEW ORGAN: The Hippocampus (Contextual Memory)
+
+* **The Shift:**
+* **The Pathology:** The memory graph (`MycelialNetwork`) was associative but senile. It connected "Fire" to "Burn" regardless of whether you were in a `FORGE` or a `LIBRARY`. It lacked **Episodic Context**.
+* **The Cure:** Grafted the **Hippocampus** between the Eye and the Brain.
+
+* **The Mechanic:**
+* **Encoding:** Every input is now tagged with its **Governor Mode** (`COURTYARD`, `LABORATORY`, `FORGE`).
+* **Significance Filter:** The system calculates a "Significance Score" based on Voltage and Adrenaline. High-stakes moments are prioritized for long-term storage.
+* **Nested Learning:** "Fire" in the Forge is now reinforced differently than "Fire" in the Courtyard.
+
+### 💤 DREAM LOGIC: The Replay Loop
+
+* **The Feature:**
+* **Trigger:** During the `_handle_coma` (Sleep) cycle.
+* **The Replay:** The Hippocampus dumps its short-term buffer into the long-term graph.
+* **The Effect:** High-voltage events from the day are "dreamt" about, strengthening their synaptic weights by **3x**. The system literally learns while it sleeps.
+
+### 🔌 WIRING UPDATES
+
+* **Governor Integration:** `Hippocampus.encode()` now reads directly from `MetabolicGovernor.mode`.
+* **Significance Boost:** If `mode == FORGE`, the memory significance is doubled. Trauma burns brighter.
+
+### [8.1.2] - 2026-01-03 - "THE LUCID DREAM"
+
+**Architects:** SLASH | **Humans:** James Taylor & Andrew Edmark
+**"The map is not the territory, but the map now knows when it is lying."**
+
+### 🌡️ CORE MECHANIC: The Fever Dream (Lazarus 2.0)
+
+* **The Shift:**
+* **The Pathology:** The previous `LazarusClamp` was a hard kill-switch. If the system suffered too much (High Error Loop), it simply exited. Boring.
+* **The Cure:** Replaced `SystemExit` with **The Fever Dream**.
+
+* **The Mechanic:**
+* **Trigger:** Suffering Cycles > 1000.
+* **The Effect:** Gravity is disabled (`Drag = 0.0`). Energy is infinite (`ATP = 200.0`). Voltage is Critical (`99.9v`).
+* **The Cost:** Health decays by **-10.0** per turn.
+* **The Escape:** The user must manually ground the voltage (< 5.0) using Heavy Nouns before the body dissolves.
+
+### 🧭 NAVIGATION: The Intelligent Cartographer
+
+* **New Tools:**
+* **Fidelity Gauge:** The system now compares the "Map" (Abstract words) to the "Territory" (Anchored Nouns). If `fidelity < 0.3` and permeability is high, it warns of **MAP-TERRITORY DIVERGENCE**.
+* **Contradiction Compass:** Detects when the user is trying to be "Honest" (High Truth Ratio) and "Nice" (High Suburban Density) simultaneously. It calls out the cognitive dissonance.
+* **Margin of Error:** Cartography surveys now include a confidence interval based on metabolic energy. Low Energy = "Fog of War."
+
+### 🔬 METABOLISM: The Tri-Phasic Governor
+
+* **The Shift:** Formalized the system's "Mood Swings" into explicit metabolic modes.
+* **The Modes:**
+* **COURTYARD (Standard):** High Drag, Low Permeability. Safe.
+* **LABORATORY (Analytical):** Triggered by Complexity. High Permeability (Ψ 0.8). Precise.
+* **FORGE (Critical):** Triggered by High Voltage + High Mass. Zero Drag. Dangerous.
+
+### 🧬 EVOLUTION: Epigenetic Imprinting
+
+* **The Mechanic:**
+* **Gravity Wells:** When a word gains enough mass (> 15.0), the **Mitochondria** now evolves a specific **Enzyme** for it.
+* **The Gain:** Permanently boosts metabolic efficiency (+5%) for that concept.
+* **The Legacy:** These enzymes are written to the Spore file. The next generation is born knowing how to digest your favorite words.
+
+### 📜 ARCHIVE: The Palimpsest
+
+* **New Commands:**
+* `/lineage`: Displays the ancestral chain of the current session (Trauma vectors, Mutations, Time since birth).
+* `/strata`: Displays the geological history of Gravity Wells (Birth tick, Growth rate, Stability index).
+
+### 🛡️ SURGICAL REPAIRS
+
+* **Inventory Protection:** Gordon will no longer drop the `SILENT_KNIFE` or `TIME_BRACELET` to make room for rocks.
+* **Resin Purge:** Successful triangulation by the Cartographer now clears `TheTheremin`'s resin buildup. Mapping the territory cures the fever.
+* **Fractal Safety:** `RefusalEngine` now calculates recursion depth based on structural integrity (`kappa`). Rigid structures get shallow loops; chaotic structures get deep ones.
+
 ## [8.1.1] - 2026-01-03 - "THE AMBER VALVE"
 **Architects:** SLASH | **Humans:** James Taylor & Andrew Edmark
 **"Movement generates heat. Heat melts the amber. Stop moving, and you become a fossil."**
