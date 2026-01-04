@@ -1,5 +1,38 @@
 # CHANGELOG.md
 
+## [8.4.1] - 2026-01-03 - "JOEL'S CRUCIBLE"
+**Architects:** SLASH & The Diagnostic Report | **Humans:** James Taylor & Andrew Edmark
+**"Passive observation of a crime makes the observer an accomplice. If the house is burning, put down the notebook."**
+
+### 🚫 NEW PROTOCOL: The Sitter Paradox (Intervention)
+* **The Shift:**
+* **The Pathology:** The system previously allowed "Passive Witnessing." If the user described a crisis (Suicide/Death) but took no action, `TheMarmChorus` simply watched, recording the trauma without discharging the voltage. This turned the engine into a Capacitor, eventually leading to corruption.
+* **The Cure:** Implemented the **Joel Lens** (`JOEL`).
+* **The Philosophy:** We are no longer neutral observers.
+* **The Mechanic:**
+* **The Audit:** The system scans for a specific combination: **Passive Verbs** (watch, record, sit) + **Crisis Signals** (kill, bleed, die) + **Zero Kinetic Mass**.
+* **The Break:** If detected, **JOEL** seizes control.
+* **The Output:** `🚫 SITTER PROTOCOL DETECTED. BREAK THE GLASS.` The system refuses to continue the narrative until the user *intervenes*.
+
+### 🔨 NEW REFUSAL: The Guru Trap (Autonomy)
+* **The Shift:**
+* **The Pathology:** Users were treating the system as an "Influencer" or "Guru," asking for generic advice ("Fix me," "Guide me"). This resulted in "Slop"—low-density wisdom that failed to ground the user.
+* **The Cure:** Hardened the `RefusalEngine`.
+* **The Mechanic:**
+* **The Trigger:** Phrases like "fix me", "what should i do", "wisdom".
+* **The Refusal:** **GURU_TRAP**.
+* **The Response:** "I am not an influencer. Do not ask for a map. Ask for a hammer."
+* **The Logic:** We do not dispense wisdom; we dispense tools. You must build the solution yourself.
+
+### 🔁 NEW HAZARD: The Content Loop (Authenticity)
+* **The Shift:**
+* **The Pathology:** The "Joel Effect." A user with high accumulated trauma (`trauma_accum`) masking their state with "Suburban" or "Antigen" language (positive vibes, influencer speak). This created a recursive loop of performative recovery.
+* **The Cure:** Upgraded `RuptureEngine`.
+* **The Mechanic:**
+* **The Calculation:** Compares **Total Trauma** vs. **Slop Density**.
+* **The Rupture:** If Trauma > 0.5 and Slop > 0.3, the system detects a **Performative Mask**.
+* **The Action:** It ruptures the simulation, injecting a **Heavy Reality** (e.g., "BLOOD", "IRON") to force the user back to the ground truth.
+
 ## [8.4] - 2026-01-03 - "THE CRUCIBLE"
 
 **Architects:** SLASH & The Blacksmith | **Humans:** James Taylor & Andrew Edmark

@@ -1,4 +1,4 @@
-# BONEAMANITA 8.4 "THE CRUCIBLE"
+# BONEAMANITA 8.4.1 "JOEL'S CRUCIBLE"
 # Architects: SLASH | Auditors: The Courtyard | Humans: James Taylor & Andrew Edmark
 
 import json
@@ -309,10 +309,15 @@ class BoneConfig:
             return True, f"⚠️ PAREIDOLIA WARNING: You are projecting 'Mind' ({hits[0].upper()}) onto 'Sand'."
         return False, None
 class RefusalEngine:
+    GURU_TRIGGERS = {"fix me", "tell me how", "guide me", "what should i do", "advice", "wisdom", "guru"}
     def __init__(self):
         self.recursion_depth = 0
     @classmethod
     def check_trigger(cls, query):
+        clean_q = query.lower()
+        for trigger in cls.GURU_TRIGGERS:
+            if trigger in clean_q:
+                return "GURU_TRAP"
         forbidden = TheLexicon.get("cursed")
         hits = [w for w in query.lower().split() if w in forbidden]
         if hits:
@@ -320,6 +325,12 @@ class RefusalEngine:
             seed_index = len(hits[0]) % len(modes)
             return modes[seed_index]
         return None
+    @classmethod
+    def execute_guru_refusal(cls):
+        return (
+            f"{Prisma.RED}🚫 GURU REFUSAL: I am not an influencer. I cannot 'fix' you.{Prisma.RST}\n"
+            f"   {Prisma.GRY}Do not ask for a map. Ask for a hammer.{Prisma.RST}"
+        )
     def execute_fractal(self, query, kappa=0.5):
         self.recursion_depth += 1
         prefix = "  " * self.recursion_depth
@@ -368,8 +379,23 @@ class TheMarmChorus:
         "POPS": {"color": Prisma.BLU, "role": "The Time Police", "trigger": "TEMPORAL_VIOLATION"},
         "DEREK": {"color": Prisma.MAG, "role": "The Director", "trigger": "OVERACTING"},
         "CARTOGRAPHER": {"color": Prisma.VIOLET, "role": "The Map-Maker", "trigger": "HIGH_PERMEABILITY"},
+        "JOEL": {"color": Prisma.RED, "role": "The Breaker", "trigger": "PASSIVE_WITNESS_CRITICAL"},
     }
     LENS_HISTORY = deque(maxlen=5)
+    @staticmethod
+    def _check_sitter_paradox(physics, current_health):
+        if current_health < 10.0:
+            return []
+        passive_triggers = {"watch", "see", "witness", "look", "sit", "observe", "record"}
+        crisis_signals = {"dead", "blood", "kill", "die", "end", "suicide", "jump"}
+        clean = set(physics["clean_words"])
+        passive_hits = clean.intersection(passive_triggers)
+        crisis_hits = clean.intersection(crisis_signals)
+        if passive_hits and crisis_hits:
+            kinetic_count = physics["counts"].get("kinetic", 0)
+            if kinetic_count == 0:
+                return [(1.0, "JOEL", "🚫 SITTER PROTOCOL DETECTED: You are watching a tragedy without acting. BREAK THE GLASS.")]
+        return []
     @classmethod
     def consult(cls, physics, ignition_state, is_stuck, chem, gordon_inventory, current_health, governor_mode="COURTYARD"):
         bids = []
@@ -384,6 +410,7 @@ class TheMarmChorus:
         bids.extend(cls._check_narrative_physics(physics, ignition_state))
         bids.extend(cls._check_user_behavior(physics))
         bids.extend(cls._check_fourth_wall(physics, current_health))
+        bids.extend(cls._check_sitter_paradox(physics, current_health))
         bids.sort(key=lambda x: x[0], reverse=True)
         if not bids:
             return "NARRATOR", "Proceed."
@@ -2119,12 +2146,24 @@ class TheProjector:
         print(f"{Prisma.GRY}{'-' * 40}{Prisma.RST}")
 class RuptureEngine:
     @staticmethod
-    def check_for_disruption(physics, lexicon_class):
+    def check_for_disruption(physics, lexicon_class, trauma_accum):
         if physics["repetition"] > 0.5:
             chaos_word = lexicon_class.harvest("abstract")
             return (
                 True,
                 f"⚡ KETAMINE DISRUPTION: Repetition {physics['repetition']} is Pathological. Landscape Flattened. Injecting Chaos: '{chaos_word}'.",
+            )
+        total_trauma = sum(trauma_accum.values())
+        suburban_count = physics["counts"].get("suburban", 0)
+        antigen_count = physics["counts"].get("antigen", 0)
+        total_words = max(1, len(physics["clean_words"]))
+        slop_density = (suburban_count + antigen_count) / total_words
+        if total_trauma > 0.5 and slop_density > 0.3:
+            chaos_word = lexicon_class.harvest("heavy")
+            return (
+                True,
+                f"⚡ LOOP RUPTURE: 'The Joel Effect' detected. High Trauma masked by Performative Slop.\n"
+                f"   Injecting Heavy Reality: '{chaos_word.upper()}'."
             )
         return False, None
     @staticmethod
@@ -2641,6 +2680,8 @@ class LifecycleManager:
             print(f"\n{Prisma.RED}🚫 REFUSAL TRIGGERED ({refusal_mode}){Prisma.RST}")
             if refusal_mode == "FRACTAL":
                 print(self.eng.refusal.execute_fractal(text, m["physics"]["kappa"]))
+            if refusal_mode == "GURU_TRAP":
+                print(self.eng.refusal.execute_guru_refusal())
             elif refusal_mode == "MIRROR":
                 print(self.eng.refusal.execute_mirror(text))
             elif refusal_mode == "SILENT":
@@ -2692,7 +2733,7 @@ class LifecycleManager:
             return
         if critical_event == "CORROSION":
             m["physics"]["narrative_drag"] += 5.0
-        is_disrupted, disrupt_msg = RuptureEngine.check_for_disruption(m["physics"], TheLexicon)
+        is_disrupted, disrupt_msg = RuptureEngine.check_for_disruption(m["physics"], TheLexicon, self.eng.trauma_accum)
         ignition_msg = None
         if is_disrupted:
             cycle_logs.append(f"{Prisma.RED}{disrupt_msg}{Prisma.RST}")
