@@ -203,7 +203,7 @@ class DeathGen:
     @classmethod
     def load_protocols(cls):
         try:
-            with open("death_protocols.json", "r") as f:
+            with open("../death_protocols.json", "r") as f:
                 data = json.load(f)
                 cls.PREFIXES = data["PREFIXES"]
                 cls.CAUSES = data["CAUSES"]
@@ -362,7 +362,7 @@ class TheMarmChorus:
     @classmethod
     def load_lenses(cls):
         try:
-            with open("lenses.json", "r") as f:
+            with open("../lenses.json", "r") as f:
                 data = json.load(f)
                 raw_lenses = data.get("LENSES", {})
                 cls.LENSES = {}
@@ -498,7 +498,7 @@ class GordonKnot:
         self.load_config()
     def load_config(self):
         try:
-            with open("gordon.json", "r") as f:
+            with open("../gordon.json", "r") as f:
                 data = json.load(f)
                 if not self.inventory:
                     self.inventory = data.get("STARTING_INVENTORY", ["POCKET_ROCKS"])
@@ -770,7 +770,7 @@ class TheLexicon:
     @classmethod
     def load_vocabulary(cls):
         try:
-            with open("lexicon.json", "r") as f:
+            with open("../lexicon.json", "r") as f:
                 data = json.load(f)
                 cls.ANTIGEN_REPLACEMENTS = data.get("antigen_replacements", {})
                 cls.SOLVENTS = set(data.get("solvents", []))
@@ -1035,7 +1035,7 @@ class MycelialNetwork:
     def load_seeds():
         loaded_seeds = []
         try:
-            with open("seeds.json", "r") as f:
+            with open("../seeds.json", "r") as f:
                 data = json.load(f)
                 for item in data.get("SEEDS", []):
                     seed = ParadoxSeed(item["question"], set(item["triggers"]))
@@ -1446,7 +1446,7 @@ class ApeirogonResonance:
         self.load_resonances()
     def load_resonances(self):
         try:
-            with open("resonances.json", "r") as f:
+            with open("../resonances.json", "r") as f:
                 data = json.load(f)
                 self.DIMENSIONS = data.get("DIMENSIONS", {})
                 self.NOUNS = data.get("NOUNS", {})
@@ -1595,7 +1595,7 @@ class DreamEngine:
         self.load_dreams()
     def load_dreams(self):
         try:
-            with open("dreams.json", "r") as f:
+            with open("../dreams.json", "r") as f:
                 data = json.load(f)
                 self.PROMPTS = data.get("PROMPTS", self.PROMPTS)
                 self.NIGHTMARES = data.get("NIGHTMARES", self.NIGHTMARES)

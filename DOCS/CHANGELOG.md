@@ -1,5 +1,72 @@
 # CHANGELOG.md
 
+### **## [8.5] - 2026-01-04 - "THE HARVEST FESTIVAL"**
+
+**Architects:** SLASH & The User | **Runtime:** Tripartite Monolith
+**"The metal is good, but there was too much slag. We purified."**
+
+#### **🏛️ THE TRIPARTITE MONOLITH (Architecture)**
+
+* **The Pathology:**
+* The `BoneAmanita` class was suffering from "Organ Sprawl"—a flat list of 20+ unorganized classes cluttering the namespace. Accessing them required memorizing distinct variable names, creating cognitive drag.
+* **The Cure:**
+* Structural partitioning. We reorganized the flat anatomy into three distinct biological systems.
+* **The Logic:**
+* **Created `self.bio` (The Wetware):** Contains metabolic organs (Mitochondria, Endocrine, Immune, Gut).
+* **Created `self.phys` (The Hardware):** Contains physics engines (Tension, Crucible, Theremin, Pulse).
+* **Created `self.mind` (The Software):** Contains cognitive layers (Memory, Lexicon, Chorus, Dreams).
+* **The Result:**
+* A clean, navigable namespace. The code now reflects the biological metaphor it claims to represent.
+
+#### **⚡ THE NERVOUS SYSTEM (Event Bus)**
+
+* **The Pathology:**
+* The metabolic cycle relied on appending raw ANSI strings directly to a list (`cycle_logs`). This was "Spaghetti Narrative"—we were painting the wall before building it. The system could not programmatically react to its own history because the data was buried in formatting.
+* **The Cure:**
+* Replaced the string list with a structured `EventBus`.
+* **The Logic:**
+* Organs now emit signals (Events), not prose. `TheProjector` reads the bus and handles the rendering at the end of the cycle.
+* **The Result:**
+* Decoupled logic from presentation. The system can now "feel" its own events without parsing text.
+
+#### **🌾 THE ORGAN HARVEST (Mergers & Deprecation)**
+
+* **The Pathology:**
+* Redundant organs were identified competing for the same resources. The system had "Metabolic Cross-talk."
+* **The Cure:**
+* Surgical consolidation and removal of "Gas" classes.
+* **The Logic:**
+* **Merged:** `TheGreyHat` (Voltage Dampener) was absorbed into `TheCrucible`. One class now manages all voltage regulation.
+* **Merged:** `ChronoStream` and `PulseMonitor` were fused into `ThePacemaker`. One class now manages all temporal pacing (Time + Repetition).
+* **Harvested:** `TheGradientWalker` was demoted from a Class to a static utility in `TheLexicon`. It did not deserve to be an organ.
+* **The Result:**
+* Reduced class count. Higher cohesion. Lower metabolic cost.
+
+#### **🌷 THE GARDEN RESCUE (Feature Restoration)**
+
+* **The Pathology:**
+* The `ParadoxSeed` class existed in the genome but had no execution path. The Garden was dead because the plumbing was disconnected.
+* **The Cure:**
+* Reconnected the irrigation pipes.
+* **The Logic:**
+* Implemented the `/garden` command for manual tending.
+* Hooked `tend_garden` into the main metabolic loop (`LifecycleManager`).
+* **The Result:**
+* Seeds now bloom when the user speaks specific conceptual triggers. The garden is alive.
+
+#### **🧹 THE JANITOR'S SWEEP (Bug Fixes)**
+
+* **The Pathology:**
+* The "Gym" (Trainer) was a broken lambda function that crashed on access. The Linter was panic-spiraling due to shadowed variables (`self`) and type mismatches.
+* **The Cure:**
+* Code hygiene and type enforcement.
+* **The Logic:**
+* **Fixed:** Instantiated the Gym correctly in `__init__`.
+* **Fixed:** Resolved circular dependencies in `bone_commands.py` by using the new `BIO/PHYS/MIND` accessors.
+* **Fixed:** Removed unused variables (`ghost_text`, `ignition_msg`) that were haunting the `run_cycle`.
+* **The Result:**
+* A stable, lint-free runtime that no longer screams when you look at it sideways.
+
 ### **## [8.4.3] - 2026-01-04 - "THE DECOUPLING"**
 
 **Architects:** SLASH & The Butcher | **Humans:** James Taylor & Andrew Edmark

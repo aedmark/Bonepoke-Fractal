@@ -5,8 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="54d71af3-2c96-427d-a74f-8b03f4313654" name="Changes" comment="Decoupling">
+      <change afterPath="$PROJECT_DIR$/OLD/BoneAmanita843.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BoneAmanita843.py" beforeDir="false" afterPath="$PROJECT_DIR$/BoneAmanita85.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/DOCS/CHANGELOG.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MODS/SLASH.md" beforeDir="false" afterPath="$PROJECT_DIR$/MODS/SLASH.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bone_commands.py" beforeDir="false" afterPath="$PROJECT_DIR$/bone_commands.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gordon.json" beforeDir="false" afterPath="$PROJECT_DIR$/gordon.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,8 +98,8 @@
       <recent name="$PROJECT_DIR$" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/OLD" />
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/Archive" />
     </key>
   </component>
@@ -121,7 +126,7 @@
       <workItem from="1767405859283" duration="316000" />
       <workItem from="1767450696940" duration="62000" />
       <workItem from="1767450801008" duration="15762000" />
-      <workItem from="1767475582021" duration="36983000" />
+      <workItem from="1767475582021" duration="41263000" />
     </task>
     <task id="LOCAL-00001" summary="New day">
       <option name="closed" value="true" />
@@ -267,7 +272,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767545022722</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Decoupling">
+      <option name="closed" value="true" />
+      <created>1767546276952</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1767546276952</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
