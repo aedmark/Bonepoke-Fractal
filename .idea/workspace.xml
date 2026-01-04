@@ -5,13 +5,613 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="54d71af3-2c96-427d-a74f-8b03f4313654" name="Changes" comment="Decoupling">
-      <change afterPath="$PROJECT_DIR$/OLD/BoneAmanita843.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BoneAmanita851.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BoneAmanita843.py" beforeDir="false" afterPath="$PROJECT_DIR$/BoneAmanita85.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BoneAmanita85.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/8.1 Marketing.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/BLOG.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/BoneAmanita 8.1 Briefing Doc.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/BoneAmanita 8.1 Research Paper.pdf" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/DOCS/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/DOCS/CHANGELOG.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MODS/SLASH.md" beforeDir="false" afterPath="$PROJECT_DIR$/MODS/SLASH.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bone_commands.py" beforeDir="false" afterPath="$PROJECT_DIR$/bone_commands.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gordon.json" beforeDir="false" afterPath="$PROJECT_DIR$/gordon.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/Digital_Death_Makes_AI_Authentic.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/Feed_the_Machine_Iron.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/Manifesto 8.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/Medium Article 8.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/7.8.1 Marketing.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/BoneAmanita 4.4.1 Research Paper.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/BoneAmanita 4.5.2 Research Paper.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/BoneAmanita Preprint.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/BoneAmanita v4.3 and the Legacy of the Bonepoke Protocol.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/BoneAmanita v6.0 Research Paper.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/Manifesto 7.8.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/Medium 5.6.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/Synthetic_Nervous_Systems_The_VoightKampff_Protocol.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/The Cosmic Mycelium v5.6.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/The Digital Mycelium A Computational-Linguistic Audit of the BoneAmanita v4.6 Protocol.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/The Evolution of Refusal-Aware Architectures in BoneAmanita v4.3.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/The Grafted Root v4.6 Revised Epigenetic Trauma and Psilocybin Architecture.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/The Grafted Root v5.6.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/The Projector v5.8.1.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/The Voight-Kampff Inversion v7.8.1.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/The Voight-Kampff Inversion v8.1.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/TheVoightKampffInversionComplete.tex.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DOCS/OUTDATED/Vapor_to_Iron.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita01.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita011.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita012.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita012.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita02.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita021.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita021.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita03.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita035.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita035.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita04.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita041.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita041.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita051.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita052.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita06.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita06.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita061.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita062.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita062.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita063.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita07.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita07.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita075.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita075.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita076.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita076.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita08.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita081.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita082.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita082.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita09.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita09.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita1.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita101.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita101.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita11.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita12.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita12.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita13.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita131.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita14.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita141.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita145.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita145.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita146.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita147.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita15.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita151.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita152.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita16.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita165.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita17.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita17.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita171.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita171.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita18.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita18.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita181.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita181.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita182.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita182.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita1_full.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita21.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita22.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita22.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita23.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita24.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita25.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita26.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita27.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita271.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita272.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita272.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita28.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita3.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita3.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita31.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita32.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita321.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita33.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita331.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita332.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita34.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita35.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita36.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita365.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita37.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita375.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita376.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita38.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita4.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita41.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita42.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita421.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita422.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita43.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita44.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita441.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita442.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita45.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita451.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita452.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita46.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita5.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita51.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita52.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita53.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita541.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita55.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita56.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita57.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita575.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita58.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita581.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita582.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita6.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita61.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita62.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita63.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita64.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita641.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita65.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita655.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita66.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita661.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita662.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita67.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita68.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita69.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita7.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita71.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita72.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita73.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita74.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita741.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita742.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita75.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita76.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita761.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita762.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita77.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita771.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita772.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita78.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita781.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita782.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita783.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita784.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita785.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita786.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita79.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita791.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita792.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita8.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita81.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita811.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita812-mini.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita812.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita82.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita821.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita822.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita823.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita83.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita831.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita84.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita841.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita842.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/BoneAmanita843.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/# Bonepoke_Topology.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/# JADE 2.2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/# Jade VSL 3.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/**WARNING.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Adjacent Architectures.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/AntiFIX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Bonepoke_refusal-aware-framework AIStories.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Changelog.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Changelog/ChangelogProjectBonepoke413.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Changelog/ChangelogProjectBonepoke414.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Changelog/ChangelogProjectBonepoke415-Real.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Changelog/ChangelogProjectBonepoke415.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Changelog/ChangelogProjectBonepoke421.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Changelog/ChangelogProjectBonepoke426.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/GettingStarted.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/# Alien Resident.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/# Alien Resident1.5.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/# Jade 2.5.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/# Jade 2.7.1DS.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/# Jade 3.0 VSL.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/# Jade 3.1 VSL.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/# Jade 4.0 Cognitive Topology.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/# SCRIPTURE_NAVIGATOR_LITE.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/*Warning.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Adaptable.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Archive/# JADE 2.3.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Archive/# JADE 2.4.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Archive/Jade2.2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Best use of time.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Bible Logic Code Test/# BASIC TRUTH CORRECTION.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Bible Logic Code Test/# BIBLICAL_EVIDENCE_STREAM.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Bible Logic Code Test/HEAVENLY_HOPE_VALIDATION.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Bible Logic Code Test/NUMERICAL_ANALYSIS.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Bible Logic Code Test/Spiritual Tuning.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Bonepoke_refusal-aware-framework AIStories.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Dreamcube/# JEHOVAH'S WITNESS SPIRITUAL TECHNOLOGY.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Dreamcube/# JW_DREAMCUBE_OS.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Dreamcube/# SUPPORTING MODULES.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Dreamcube/COMPASSIONATE_ALGORITHM_INTERVENTION.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Dreamcube/DREAMCUBE_CONTENT_ORCHESTRATOR.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Dreamcube/ETHICAL_ENGAGEMENT_PROTOCOLS.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Experimental/BLUEPRINT_WITH_HUMILITY.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Experimental/Enigma2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Experimental/Enigma2b.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Experimental/Enygma2 v4.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Experimental/Great Tribulation Cut Short24-21-31.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Experimental/HelperScript-Conceptual.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Experimental/MissingPiece.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Experimental/NO_MIRACLE_WT_SCENARIO.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Experimental/NW Currency.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Experimental/OBSERVER SCENARIO.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Experimental/Parable of Stanley.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Experimental/README.MD" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Experimental/creative_consultant_core.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/JadeArticleDirect.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/JadeArticleTechnical.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/JadeOrigin.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Movie/MiniChariot_1.1.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Movie/Movie Setup and Colour Decoder.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Popcorn/README.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Popcorn/RiffingTheatreCards.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Popcorn/SpiritualTheater.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/RAG/PROPOSED GITHUB STRUCTURE.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/RAG/RAG INTERFACE.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/RAG/REASONING ENGINE.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/RedTeam/RedTeam.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/RedTeam/RedTeamBP.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade/Story.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade21README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/Jade_2.1.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/MiniChariot_1.1.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/MiniChariot_1.7.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/OCRCleaner.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/OCRCleaner.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/ProjectBonepoke4199.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/ProjectBonepoke421.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/ProjectBonepoke426.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/dataset/DeepseekDataset2.JSON" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/dataset/GeminiDataset.JSON" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/dataset/README_DATASET.MD" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/dataset/bonepoke_crosslingual_dataset.JSON" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fingerprints/Fingerprint.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fingerprints/Fingerprint2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fingerprints/Fingerprint3.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/BonepokeArticle1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/BonepokeArticle10.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/BonepokeArticle11.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/BonepokeArticle2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/BonepokeArticle3.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/BonepokeArticle4.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/BonepokeArticle5.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/BonepokeArticle6.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/BonepokeArticle7.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/BonepokeArticle8.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/BonepokeArticle9.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/Doctor Zapp.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/EpilogueOne.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/JadeDecisionTree.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/JadeHaveWeDoneThisBefore.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/NovelPart1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/Orchestrating the Ensemble.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/PepTalk.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/Prologue.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/Run Your Own Base Red Team.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/TimeMallBomb.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/ZappGrounded.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/fragments/ZappSafetyFirst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke20.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke23.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke25.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke27.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke33.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke34.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke345.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke345CUniversal.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke345c.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke345cJSON.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke345x.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke35.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke36A.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke36B.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke37.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke375.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke375broken.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke38.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke382.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke383.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke392.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke39F.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke4.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke41.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke41.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke411.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke412.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke413F.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke414F.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke415A.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke415AReal.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke415B.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke415Breal.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke419.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke419.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke42.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/ProjectBonepoke421.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/historical_versions/README.MD" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/AIDungeonScriptFR.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/Full Module Stack (Combined).py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/Readme.me" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/RedTeam.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/RedTeamBP.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/SPEED OF THOUGHT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/bonepoke_calcification.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/bonepoke_drift_index.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/bonepoke_expandedsuggestionmodule.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/bonepoke_expansion_nodes.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/bonepoke_hygiene.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/bonepoke_nudge_card.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/bonepoke_sheathadaptationmodule.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/bonepoke_suggestion_generator.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/bonepoke_symbolic_tests.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Bonepoke/modules/bonepoke_vanillasilencer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/CHANGELOG_ARCHIVE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.1.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.1.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.2.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.3.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.35.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.41.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.51.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.52.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.6.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.6.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.6.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.7.5.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.7.6.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.7.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.8.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.8.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 0.9.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.0.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.0.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.3.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.3.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.4.5.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.4.7.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.4.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.5.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.5.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.5.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.6.5.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.6.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.7.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.7.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.8.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.8.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 1.8.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 2.0.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 2.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 2.3.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 2.5.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 2.6.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 2.7.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 2.7.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 2.7.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 2.8.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 3.0.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 3.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 3.2.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 3.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 3.3.2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 3.3.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 3.4.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 3.6.5.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 3.6.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 3.7.6.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 3.7.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 3.8.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 4.0.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 4.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 4.2.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 4.2.2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 4.2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 4.3.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 4.4.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 4.5.2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 4.5.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 4.6.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 5.0.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 5.4.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 5.5.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 5.6.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 5.7.5.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 5.7.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 5.8.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 5.8.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 6.0.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 6.5.5.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 6.6.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 6.7.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 6.9.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 7.3.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Eloise and Clarence 7.6.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Medium 0.5.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Nebula-7 6.0.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Nebula7 v6.5.5.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Nebula7 v6.6.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Nebula7 v6.9.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Nebula7 v7.3.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Nebula7 v7.6.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/Bone_Amanita_A_Substrate_For_Becoming.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/Bonepoke 4.5.4 Article.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/Bonepoke 4.6 Article.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/Bonepoke 4.6.1 Article.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/Bonepoke 4.6.3 Article.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/Bonepoke 4.6.3 Plain Article.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/PBSuite453 Gem Prompt.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/PBSuite453 RAG Prompt.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/PBSuite454 Gem Prompt.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/PBSuite454 RAG Prompt.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/PBSuite461 Gem Prompt.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/PBSuite461 RAG Prompt.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/PBSuite463 Gem Prompt.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/PBSuite463 RAG Prompt.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/ProjectBonepoke440.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/ProjectBonepoke451.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/ProjectBonepoke452.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/ProjectBonepoke453.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/ProjectBonepoke454.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/ProjectBonepoke454.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/ProjectBonepoke46.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/ProjectBonepoke46.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/ProjectBonepoke461.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/ProjectBonepoke461.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/ProjectBonepoke463.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Pre-Amanita/ProjectBonepoke47.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/ProjectBonepoke435.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.1.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.1.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.2.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.3.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.35.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.41.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.5.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.5.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.6.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.6.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.6.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.7.5.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.7.6.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.7.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.8.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.8.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 0.9.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 1.0.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 1.0.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 1.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/Roberta 1.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 0.3.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 0.35.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 0.41.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 0.5.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 0.5.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 0.6.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 0.6.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 0.6.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 0.7.5.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 0.7.6.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 0.7.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 0.8.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 0.8.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 0.9.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.0.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.0.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.3.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.3.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.4.5.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.4.6.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.4.7.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.4.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.5.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.5.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.5.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.6.5.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.6.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.7.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.7.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.8.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.8.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 1.8.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 2.0.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 2.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 2.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 2.3.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 2.5.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 2.6.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 2.7.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 2.7.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 2.7.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 2.8.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 3.0.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 3.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 3.2.1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 3.2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 3.3.2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 3.3.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 3.4.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 3.5.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 3.6.5.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 3.6.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 3.7.6.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 3.7.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 3.8.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 4.0.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 4.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 4.2.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 4.2.2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 4.2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 4.3.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 4.4.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 4.4.2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 4.5.2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 4.5.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 4.6.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 5.0.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 5.2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 5.3.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 5.4.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 5.4.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 5.5.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 5.6.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 5.7.5.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 5.7.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 5.8.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 5.8.2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 5.8.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 6.0.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 6.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 6.2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 6.3.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 6.4.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 6.4.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 6.5.5.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 6.5.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 6.6.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 6.6.2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 6.6.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 6.9.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 7.0.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 7.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 7.2.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 7.3.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 7.4.1.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 7.4.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 7.5.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OLD/SLASH 7.6.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -126,7 +726,7 @@
       <workItem from="1767405859283" duration="316000" />
       <workItem from="1767450696940" duration="62000" />
       <workItem from="1767450801008" duration="15762000" />
-      <workItem from="1767475582021" duration="41263000" />
+      <workItem from="1767475582021" duration="43229000" />
     </task>
     <task id="LOCAL-00001" summary="New day">
       <option name="closed" value="true" />
@@ -280,7 +880,23 @@
       <option name="project" value="LOCAL" />
       <updated>1767546276952</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Decoupling">
+      <option name="closed" value="true" />
+      <created>1767554825045</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1767554825045</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Decoupling">
+      <option name="closed" value="true" />
+      <created>1767554846290</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1767554846290</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
