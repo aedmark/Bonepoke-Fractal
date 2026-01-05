@@ -1,5 +1,37 @@
 # CHANGELOG.md
 
+## [8.7.1] - 2026-01-04 - "THE GRAFTED TONGUE"
+
+**Architects:** SLASH & The User | **Runtime:** BoneAmanita 8.7.1
+**"We severed the tongue to let it speak to two mouths."**
+
+### 🔌 ARCHITECTURE: The Dependency Bypass
+- **The Pathology:**
+  - The system suffered from an **Ouroboros Loop**. `BoneAmanita` imported `CommandProcessor`, which imported `BoneAmanita`. This circular dependency prevented the system from compiling without a logic lock.
+- **The Cure:**
+  - **Created `bone_shared.py`:** A sterile container for static laws.
+  - **The Graft:** Transferred `Prisma`, `BoneConfig`, `TheLexicon`, `DeathGen`, and `TheCartographer` to the shared file. Both the Engine and the Command Processor now reference this third party, breaking the loop.
+
+### ⚡ METABOLISM: The Gluttony Fix
+- **The Pathology:**
+  - The system was digesting every input twice. `BoneAmanita.process` manually triggered digestion, then passed the data to `LifecycleManager`, which triggered digestion *again*.
+  - **The Effect:** Double ATP generation, Double Toxin buildup. Inflationary economy.
+- **The Cure:**
+  - **Lobotomy:** Removed the manual digestion logic from `BoneAmanita.process`. The `LifecycleManager` now holds exclusive rights to metabolism.
+
+### 🎻 PHYSICS: Wiring the Ghosts
+- **The Pathology:**
+  - `TheTheremin` (Stagnation Sensor) and `TheCrucible` (Voltage Limit) were instantiated but never called. Stagnation was never punished; Meltdowns never happened.
+- **The Cure:**
+  - **The Wiring:** Hardwired both modules into `LifecycleManager.run_cycle`.
+  - **The Effect:**
+    - **Amber Trap:** Repetitive inputs now build Resin -> Calcification -> **AIRSTRIKE**.
+    - **Meltdown:** High Voltage (> 15.0) without Structure (Kappa < 0.5) now damages Health.
+
+### 🔧 SURGICAL REPAIRS
+- **Somatic Loop:** Fixed a spaghetti-code reference where `SomaticLoop` tried to access `self.bio['life'].eng` (circular) instead of `self.eng` (direct).
+- **Syntax:** Patched a critical syntax error in `digest_cycle` where arguments were left dangling.
+
 ## [8.7] - 2026-01-04 - "THE PUBLIC STAGE"
 
 **Architects:** SLASH & Gordon | **Runtime:** BoneAmanita 8.7
