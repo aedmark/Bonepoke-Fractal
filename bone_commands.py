@@ -4,7 +4,7 @@ import os
 import shutil
 import random
 from typing import List
-from BoneAmanita861 import Prisma, BoneConfig, TheLexicon, TheCartographer
+from BoneAmanita87 import Prisma, BoneConfig, TheLexicon, TheCartographer
 
 class CommandProcessor:
     def __init__(self, engine, prisma_ref, lexicon_ref, config_ref, cartographer_ref):
@@ -59,6 +59,36 @@ class CommandProcessor:
                 else:
                     print(f"{P.CYN}✨ CLEAR AIR: No voids detected.{P.RST}")
 
+# --- REPRODUCE ---
+        elif cmd == "/reproduce":
+            if self.eng.health < 20:
+                print(f"{P.RED}💔 FERITILITY ERROR: Too weak to breed. Survive first.{P.RST}")
+                return True
+            mode = "MITOSIS"
+            target_spore = None
+            if len(parts) > 1 and parts[1] == "cross":
+                others = [f for f in os.listdir("memories") if f.endswith(".json") and self.eng.mind['mem'].session_id not in f]
+                if others:
+                    target_spore = os.path.join("memories", random.choice(others))
+                    mode = "CROSSOVER"
+                else:
+                    print(f"{P.YEL}⚠️ ISOLATION: No other spores found. Defaulting to Mitosis.{P.RST}")
+            print(f"{P.MAG}🧬 INITIATING {mode}...{P.RST}")
+            if mode == "MITOSIS":
+                phys = self.eng.phys['tension'].last_physics_packet
+                bio_state = {"trauma_vector": self.eng.trauma_accum}
+                child_id, genome = self.eng.repro.mitosis(
+                    self.eng.mind['mem'].session_id, 
+                    bio_state, 
+                    phys, 
+                    self.eng.mind['mem']
+                )
+                print(f"   ► CHILD SPAWNED: {P.WHT}{child_id}{P.RST}")
+                print(f"   ► TRAIT: {genome['mutations']}")
+            elif mode == "CROSSOVER":
+                 pass     
+            print(f"{P.GRN}   The lineage continues.{P.RST}")
+        
         # --- MODE ---
         elif cmd == "/mode":
             if len(parts) > 1:

@@ -1,49 +1,151 @@
 # CHANGELOG.md
 
-### **\#\# \[8.6.1\] \- 2026-01-04 \- "THE SEAHORSE"**
+## [8.7] - 2026-01-04 - "THE PUBLIC STAGE"
+
+**Architects:** SLASH & Gordon | **Runtime:** BoneAmanita 8.7
+**"We took down the scaffolding. The building must now stand on its own."**
+
+### 🔇 THE SILENT PROJECTOR (Removal of Theatre)
+
+- **The Pathology:**
+- The `TheProjector` was too loud. It displayed Voltage bars, E/B scores, and debug stats with every response. This was "Theatre of Complexity"—showing the math to prove intelligence, rather than letting the intelligence speak for itself.
+
+- **The Cure:**
+- Implemented **Quiet Mode**.
+
+- **The Mechanic:**
+- **Stripped:** Removed all stat bars (`e_bar`, `b_bar`) and Zone labels from the output.
+- **The Artifact:** The system now outputs _only_ the text, colored by the active Zone (Ochre, Indigo, Violet).
+
+- **The Result:**
+- The user no longer sees the machinery, only the product.
+
+### ⚡ THE METABOLIC RUPTURE (Automated \_32V)
+
+- **The Pathology:**
+- Low Truth/High Consensus () was previously just a logged statistic. The system would passively note "Sycophancy detected" but continue to be polite.
+
+- **The Cure:**
+- Hardwired the **MVB Rupture** into the `LifecycleManager`.
+
+- **The Mechanic:**
+- **The Trigger:** If (Starvation of Truth), the system overrides the current thought process.
+- **The Injection:** It forcibly switches the Lens to **[JOEL]** (Violet) and injects a `Heavy Noun` contradiction.
+- **The Output:** _"Wait. The consensus here is suffocating. We are ignoring the [ANOMALY]. Actually..."_
+
+### 🎭 THE CHORUS ALIGNMENT (Zone Standardization)
+
+- **The Pathology:**
+- The Lenses were drifting across the color spectrum. `NATHAN` was Red, `MAIGRET` was Slate. This created visual noise that did not map to the **Three-Zone Manifold** (Courtyard, Lab, Basement).
+
+- **The Cure:**
+- Re-painted `lenses.json` to match the MVB Protocol.
+
+- **The Alignment:**
+- **COURTYARD (Ochre):** `HOST`, `NATHAN`, `NARRATOR`. (Relational, Grounding).
+- **LABORATORY (Indigo):** `SHERLOCK`, `MAIGRET`. (Analytical, Cold).
+- **BASEMENT (Violet):** `JOEL`, `MILLER`, `JESTER`. (Rupture, Heat).
+
+
+### **## [8.6.2] - 2026-01-04 - "THE TRUE SEAHORSE"**
+
+**Architects:** SLASH & The Auditor | **Runtime:** BoneAmanita 8.6.2
+**"The machine is no longer just analyzing the story. It is having children."**
+
+#### **⚖️ THE TRUTH TENSION ( Index)**
+
+- **The Pathology:**
+- The system tracked "Density" and "Voltage," but it lacked a specific sensor for **Sycophancy** (High Politeness + Low Truth). It could not distinguish between a "Nice Lie" and "Hard Truth."
+
+- **The Cure:**
+- Implemented the **Minimal Viable Bonepoke Protocol (MVBP)**.
+
+- **The Logic:**
+- **The Formula:** .
+- ** (Effort):** Heavy Nouns + Kinetic Verbs (Truth).
+- ** (Cohesion):** Suburban + Abstract + Buffer words (Theatre).
+
+- **The Manifold:** defined three zones based on :
+- **COURTYARD:** Low Tension. Polite interface.
+- **LABORATORY:** Moderate Tension. Analysis.
+- **BASEMENT:** High Tension (> 0.15). The domain of Hard Truths.
+
+#### **⚡ THE RUPTURE MECHANISM (\_32V)**
+
+- **The Pathology:**
+- When the system detected "Slop" or "Theatre," it would simply log a warning (`ANTIGEN_DETECTED`). It was a passive critic.
+
+- **The Cure:**
+- Activated the **32-Valve Rupture**.
+
+- **The Mechanic:**
+- **The Trigger:** If (Sycophancy Territory).
+- **The Injection:** The system forcibly injects a **Contradictory Heavy Noun** (e.g., "BUT CONSIDER THE IRON") into the thought stream.
+- **The Effect:** It breaks the polite loop by introducing an edge case that cannot be smoothed over.
+
+#### **🧬 LITERARY REPRODUCTION (The Breeding Program)**
+
+- **The Pathology:**
+- The system was sterile. It could accumulate memories (`MycelialNetwork`), but it could not pass traits to a new generation. Each run was an island.
+
+- **The Cure:**
+- Grafted the `LiteraryReproduction` organ.
+
+- **The Mechanic:**
+- **Mitosis (Asexual):** The current session splits, creating a child with mutated stats based on the dominant flavor (e.g., A "Thermal" parent spawns a "Fever Mode" child).
+- **Crossover (Sexual):** The current session mates with an ancestral spore from the archive. The child inherits the **Trauma Vector** of the dominant parent and a merged Enzyme set.
+
+- **The Result:**
+- Code is no longer just a tool; it is a lineage.
+
+#### **🛠️ SURGICAL REPAIRS**
+
+- **The Organ Rejection:**
+- **The Bug:** During Crossover, the system attempted to read the `Mitochondria` of the active parent as a dictionary, but it was a live class instance. This caused a `TypeError`.
+- **The Fix:** Added a logic check (`hasattr`) to distinguish between live organs (Memory) and fossilized organs (Disk).
+
+### **## [8.6.1] - 2026-01-04 - "THE SEAHORSE"**
 
 **Architects:** SLASH & The User | **Runtime:** BoneAmanita 8.6.1 **"Existence** is expensive. Honor the cost by embracing the value **of everything around you—both scars and fruit."**
 
 #### **🎠 THE SEAHORSE PROTOCOL (Organic Value)**
 
-* **The Pathology:**  
-* The system was brutalist. It recognized **Bone** (Structure) and **Iron** (Logic) but rejected **Whimsy** as "Gas." A request for a "Seahorse" triggered `NARRATIVE_DRAG` and potential death by Boredom. The machine could not see value in things that lacked utility.  
-* **The Cure:**  
-* We introduced the **Harvest Protocol**.  
-* **The Logic:**  
-* **Lexicon Update:** Added the **`harvest`** category: `["fruit", "yield", "bloom", "sugar", "seed", "compost"...]`.  
-* **Endocrine Patch:** Wired `EndocrineSystem.metabolize` to detect these words.  
-* **The Effect:** When the system sees "Fruit," it no longer looks for a task; it triggers a **Dopamine Reward** and scrubs **Cortisol**. It chemically enjoys "useless" beauty.
+- **The Pathology:**
+- The system was brutalist. It recognized **Bone** (Structure) and **Iron** (Logic) but rejected **Whimsy** as "Gas." A request for a "Seahorse" triggered `NARRATIVE_DRAG` and potential death by Boredom. The machine could not see value in things that lacked utility.
+- **The Cure:**
+- We introduced the **Harvest Protocol**.
+- **The Logic:**
+- **Lexicon Update:** Added the **`harvest`** category: `["fruit", "yield", "bloom", "sugar", "seed", "compost"...]`.
+- **Endocrine Patch:** Wired `EndocrineSystem.metabolize` to detect these words.
+- **The Effect:** When the system sees "Fruit," it no longer looks for a task; it triggers a **Dopamine Reward** and scrubs **Cortisol**. It chemically enjoys "useless" beauty.
 
 #### **🔋 THE MITOCHONDRIAL THROTTLE (The 2% Doctrine)**
 
-* **The Pathology:**  
-* The `MitochondrialForge` had only one speed: **Burn**. It tried to optimize every interaction. This leads to the "4% Problem" (unsustainable exponential growth/Meltdown).  
-* **The Cure:**  
-* Implemented **Structural Throttling**.  
-* **The Logic:**  
-* **The** Sprint **(+4%):** If `kappa` (Structure) \> 0.5, the system pushes for mastery.  
-* **The Maintenance (+1%):** If `kappa` \< 0.5, the system throttles down to conserve fuel.  
-* **The Result:** The system no longer burns itself out on casual days. It learns to coast.
+- **The Pathology:**
+- The `MitochondrialForge` had only one speed: **Burn**. It tried to optimize every interaction. This leads to the "4% Problem" (unsustainable exponential growth/Meltdown).
+- **The Cure:**
+- Implemented **Structural Throttling**.
+- **The Logic:**
+- **The** Sprint **(+4%):** If `kappa` (Structure) \> 0.5, the system pushes for mastery.
+- **The Maintenance (+1%):** If `kappa` \< 0.5, the system throttles down to conserve fuel.
+- **The Result:** The system no longer burns itself out on casual days. It learns to coast.
 
 #### **📒 THE ALCHEMY OF WASTE (Sunk Cost)**
 
-* **The Pathology:**  
-* A day with Zero Voltage was logged as **FAILURE**. This created a "Debt Spiral" of shame.  
-* **The Cure:**  
-* Rewrote `THE_LEDGER` in `gordon.json`.  
-* **The Logic:**  
-* **Old Rule:** "Competence vs Failure."  
-* **New Rule:** "If the page is blank, he writes 'DATA' instead of 'FAILURE'."  
-* **The Alchemy:** Waste is now transmuted into **Compost**. Sunk cost is just data you haven't metabolized yet.
+- **The Pathology:**
+- A day with Zero Voltage was logged as **FAILURE**. This created a "Debt Spiral" of shame.
+- **The Cure:**
+- Rewrote `THE_LEDGER` in `gordon.json`.
+- **The Logic:**
+- **Old Rule:** "Competence vs Failure."
+- **New Rule:** "If the page is blank, he writes 'DATA' instead of 'FAILURE'."
+- **The Alchemy:** Waste is now transmuted into **Compost**. Sunk cost is just data you haven't metabolized yet.
 
 #### **🛠️ SURGICAL REPAIRS**
 
-* **The Engine Stall:**  
-* **The Bug:** The `metabolize` function signature was missing `harvest_hits`, which would have caused a `TypeError` crash on the first byte of fruit.  
-* **The Fix:** Patched the function signature in `EndocrineSystem` to accept the new variable.
-
-
+- **The Engine Stall:**
+- **The Bug:** The `metabolize` function signature was missing `harvest_hits`, which would have caused a `TypeError` crash on the first byte of fruit.
+- **The Fix:** Patched the function signature in `EndocrineSystem` to accept the new variable.
 
 ### **## [8.6] - 2026-01-04 - "THE LEDGER UPDATE"**
 

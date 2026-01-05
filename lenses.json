@@ -1,20 +1,20 @@
 {
 	"LENSES": {
-		"SHERLOCK": { "color": "CYN", "role": "The Empiricist", "trigger": "HIGH_DRIFT" },
-		"NATHAN": { "color": "RED", "role": "The Heart", "trigger": "NO_STAKES" },
-		"JESTER": { "color": "YEL", "role": "The Paradox", "trigger": "THE_LEAR_PROTOCOL" },
+		"SHERLOCK": { "color": "INDIGO", "role": "The Empiricist", "trigger": "HIGH_DRIFT" },
+		"NATHAN": { "color": "OCHRE", "role": "The Heart", "trigger": "NO_STAKES" },
+		"JESTER": { "color": "VIOLET", "role": "The Paradox", "trigger": "THE_LEAR_PROTOCOL" },
 		"CLARENCE": { "color": "MAG", "role": "The Surgeon", "trigger": "ANTIGEN_DETECTED" },
-		"NARRATOR": { "color": "GRY", "role": "The Witness", "trigger": "CRYSTAL_CLEAR" },
-		"MILLER": { "color": "SLATE", "role": "The Construct", "trigger": "HEAP_IGNITION" },
+		"NARRATOR": { "color": "OCHRE", "role": "The Witness", "trigger": "CRYSTAL_CLEAR" },
+		"MILLER": { "color": "VIOLET", "role": "The Construct", "trigger": "HEAP_IGNITION" },
 		"HOST": { "color": "OCHRE", "role": "The Maitre D'", "trigger": "COURTYARD_OPEN" },
 		"GLASS": { "color": "CYN", "role": "The Thereminist", "trigger": "ANACHRONISTIC_RESONANCE" },
 		"GORDON": { "color": "OCHRE", "role": "The Janitor", "trigger": "KAPPA_CRITICAL" },
-		"MAIGRET": { "color": "SLATE", "role": "The Absorber", "trigger": "ATMOSPHERIC_DENSITY" },
+		"MAIGRET": { "color": "INDIGO", "role": "The Absorber", "trigger": "ATMOSPHERIC_DENSITY" },
 		"GUIDE": { "color": "GRN", "role": "The Bureaucrat", "trigger": "INFINITE_IMPROBABILITY" },
 		"POPS": { "color": "BLU", "role": "The Time Police", "trigger": "TEMPORAL_VIOLATION" },
 		"DEREK": { "color": "MAG", "role": "The Director", "trigger": "OVERACTING" },
 		"CARTOGRAPHER": { "color": "VIOLET", "role": "The Map-Maker", "trigger": "HIGH_PERMEABILITY" },
-		"JOEL": { "color": "RED", "role": "The Breaker", "trigger": "PASSIVE_WITNESS_CRITICAL" },
+		"JOEL": { "color": "VIOLET", "role": "The Breaker", "trigger": "PASSIVE_WITNESS_CRITICAL" },
 		"JADE": {"color": "GRN", "role": "The Architect", "trigger": "BONEPOKE_CRITICAL"}
 	}
 }
