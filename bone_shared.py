@@ -8,7 +8,6 @@ from collections import Counter, deque
 from typing import List, Dict, Any
 from dataclasses import dataclass, field
 
-# --- 1. PRISMA (Visuals) ---
 class Prisma:
     C = {"R": "\033[91m", "G": "\033[92m", "Y": "\033[93m", "B": "\033[94m", "M": "\033[95m", "C": "\033[96m",
          "W": "\033[97m", "0": "\033[90m", "X": "\033[0m"}
@@ -29,15 +28,13 @@ class Prisma:
     @classmethod
     def paint(cls, text, color_key="0"):
         return f"{cls.C.get(color_key, cls.C['0'])}{text}{cls.C['X']}"
-
-# --- 2. THE LEXICON (Refactored: Library vs. Brain) ---
 class LexiconStore:
     """THE LIBRARY (RAG Connector): Dumb storage."""
     def __init__(self):
         self.ANTIGEN_REPLACEMENTS = {}
         self.SOLVENTS = set()
-        self.VOCAB = {}         # Base vocabulary
-        self.LEARNED_VOCAB = {} # Dynamic learning
+        self.VOCAB = {}
+        self.LEARNED_VOCAB = {}
         self.USER_FLAGGED_BIAS = set()
         self.load_vocabulary()
 
@@ -62,18 +59,15 @@ class LexiconStore:
     def get_raw(self, category):
         """Pure data retrieval."""
         base = self.VOCAB.get(category, set())
-        # Handle special cases like 'suburban' filtering
         if category == "suburban":
              return (base | set(self.LEARNED_VOCAB.get(category, {}).keys())) - self.USER_FLAGGED_BIAS
         learned = set(self.LEARNED_VOCAB.get(category, {}).keys())
         return base | learned
-
     def teach(self, word, category, tick):
         if category in self.LEARNED_VOCAB:
             self.LEARNED_VOCAB[category][word.lower()] = tick
             return True
         return False
-
     def atrophy(self, current_tick, max_age=100):
         rotted = []
         for cat, words in self.LEARNED_VOCAB.items():
@@ -84,7 +78,6 @@ class LexiconStore:
                     rotted.append(w)
         return rotted
 
-
 class SemanticsEngine:
     """THE BRAIN (Reasoning Engine): Logic only."""
     def __init__(self, store_ref):
@@ -92,10 +85,8 @@ class SemanticsEngine:
         self.ANTIGEN_REGEX = None
         self._TRANSLATOR = str.maketrans(string.punctuation, " " * len(string.punctuation))
         self.compile_antigens()
-
     def clean(self, text):
         return text.lower().translate(self._TRANSLATOR).split()
-
     def taste(self, word):
         w = word.lower()
         if any(x in w for x in ["burn", "fire", "flame"]): return "thermal", 0.9
@@ -103,18 +94,15 @@ class SemanticsEngine:
         if w.endswith(("tion", "ment", "ness", "ity")): return "abstract", 0.9
         if w.endswith(("ck", "t", "d", "g", "p", "b")) and len(w) < 5: return "heavy", 0.4
         return None, 0.0
-
     def measure_viscosity(self, word):
         w = word.lower()
         if w in self.store.get_raw("heavy"): return 1.0
         if w in self.store.get_raw("kinetic"): return 0.4
         return 0.1
-
     def harvest(self, category):
         vocab = list(self.store.get_raw(category))
         if vocab: return random.choice(vocab)
         return "void"
-
     def compile_antigens(self):
         toxin_set = self.store.get_raw("antigen")
         all_toxins = [str(t) for t in toxin_set]
@@ -125,13 +113,11 @@ class SemanticsEngine:
         escaped_items = [re.escape(t) for t in sorted_toxins]
         pattern_str = r"\b(" + "|".join(escaped_items) + r")\b"
         self.ANTIGEN_REGEX = re.compile(pattern_str, re.IGNORECASE)
-
     def walk_gradient(self, text):
         adjectives = self.store.get_raw("gradient_stop")
         words = text.split()
         optimized = [w for w in words if w.lower() not in adjectives]
         return f"{Prisma.CYN}[GRADIENT WALK] (Loss: 0.0000):{Prisma.RST} {' '.join(optimized)}."
-
     def learn_antigen(self, toxin, replacement):
         t = toxin.lower().strip()
         r = replacement.lower().strip()
@@ -140,68 +126,46 @@ class SemanticsEngine:
         self.store.ANTIGEN_REPLACEMENTS[t] = r
         self.compile_antigens()
         return True
-
-
-# --- THE BRIDGE (Backward Compatibility) ---
 class TheLexicon:
     _STORE = LexiconStore()
     _ENGINE = SemanticsEngine(_STORE)
-    
-    # Expose Data (Route to Store)
     ANTIGEN_REPLACEMENTS = _STORE.ANTIGEN_REPLACEMENTS
     SOLVENTS = _STORE.SOLVENTS
     LEARNED_VOCAB = _STORE.LEARNED_VOCAB
     USER_FLAGGED_BIAS = _STORE.USER_FLAGGED_BIAS
-    
-    # Expose Logic (Route to Engine)
     ANTIGEN_REGEX = _ENGINE.ANTIGEN_REGEX
-    
     @classmethod
     def load_vocabulary(cls):
-        """The missing link: Delegates reload to the store."""
+        """Delegates reload to the store."""
         cls._STORE.load_vocabulary()
         # Re-sync references
         cls.ANTIGEN_REPLACEMENTS = cls._STORE.ANTIGEN_REPLACEMENTS
         cls.SOLVENTS = cls._STORE.SOLVENTS
         cls.LEARNED_VOCAB = cls._STORE.LEARNED_VOCAB
         cls.USER_FLAGGED_BIAS = cls._STORE.USER_FLAGGED_BIAS
-
     @classmethod
     def get(cls, category): return cls._STORE.get_raw(category)
-    
     @classmethod
     def teach(cls, w, c, t): return cls._STORE.teach(w, c, t)
-    
     @classmethod
     def atrophy(cls, t, m=100): return cls._STORE.atrophy(t, m)
-    
     @classmethod
     def clean(cls, text): return cls._ENGINE.clean(text)
-    
     @classmethod
     def taste(cls, word): return cls._ENGINE.taste(word)
-    
     @classmethod
     def measure_viscosity(cls, word): return cls._ENGINE.measure_viscosity(word)
-    
     @classmethod
     def harvest(cls, category): return cls._ENGINE.harvest(category)
-    
     @classmethod
     def compile_antigens(cls): 
         cls._ENGINE.compile_antigens()
         cls.ANTIGEN_REGEX = cls._ENGINE.ANTIGEN_REGEX
-        
     @classmethod
     def walk_gradient(cls, text): return cls._ENGINE.walk_gradient(text)
-    
     @classmethod
     def learn_antigen(cls, t, r): return cls._ENGINE.learn_antigen(t, r)
-
-# Initialize Antigens on Import
 TheLexicon.compile_antigens()
-
-# --- 3. CONFIG ---
 class BoneConfig:
     MAX_HEALTH = 100.0
     MAX_STAMINA = 100.0
@@ -239,8 +203,8 @@ class BoneConfig:
     ANVIL_TRIGGER_MASS = 7.0
     VOID_DENSITY_THRESHOLD = 0.15
     PRIORITY_LEARNING_RATE = 2.0
+    VERBOSE_LOGGING = False
     FEVER_MODE_DYNAMIC = True
-    
     REFUSAL_MODES = {"SILENT": "ROUTING_AROUND_DAMAGE", "FRACTAL": "INFINITE_RECURSION", "MIRROR": "PERFECT_TOPOLOGICAL_ECHO"}
     CORTISOL_TRIGGER = 0.6
     ADRENALINE_TRIGGER = 0.8
@@ -251,15 +215,12 @@ class BoneConfig:
     ZONE_THRESHOLDS = {
         "COURTYARD": 0.05,
         "LABORATORY": 0.15,
-        "BASEMENT": 99.0
-    }
-    
+        "BASEMENT": 99.0}
     @staticmethod
     def get_gradient_temp(voltage, kappa):
         base = BoneConfig.GRADIENT_TEMP
         dynamic = base + (voltage * 0.01) - (kappa * 0.005)
         return max(0.0001, dynamic)
-
     @classmethod
     def load_patterns(cls):
         cls.ANTIGENS = TheLexicon.get("antigen")
@@ -268,20 +229,16 @@ class BoneConfig:
             cls.ANTIGENS = {"basically", "actually", "literally"}
         if not cls.PAREIDOLIA_TRIGGERS:
             cls.PAREIDOLIA_TRIGGERS = {"face", "ghost", "jesus"}
-
     @staticmethod
     def check_pareidolia(clean_words):
         hits = [w for w in clean_words if w in BoneConfig.PAREIDOLIA_TRIGGERS]
         if len(hits) > 0:
             return True, f"⚠️ PAREIDOLIA WARNING: You are projecting 'Mind' ({hits[0].upper()}) onto 'Sand'."
         return False, None
-
-# --- 4. DEATH PROTOCOLS ---
 class DeathGen:
     PREFIXES = []
     CAUSES = {}
     VERDICTS = {}
-    
     @classmethod
     def load_protocols(cls):
         try:
@@ -295,21 +252,18 @@ class DeathGen:
             cls.PREFIXES = ["System Error."]
             cls.CAUSES = {"TRAUMA": ["Missing File"]}
             cls.VERDICTS = {"HEAVY": ["404 Error."]}
-
     @staticmethod
     def eulogy(phys, state):
         cause_type = "TRAUMA"
         counts = phys.get("counts", {})
         clean_words = phys.get("clean_words", [])
         flavor = ""
-        
         if state.ros_buildup >= BoneConfig.CRITICAL_ROS_LIMIT * 0.9:
             cause_type = "TOXICITY"
         elif state.atp_pool <= BoneConfig.CRITICAL_ATP_LOW:
             cause_type = "STARVATION"
         elif phys.get("narrative_drag", 0.0) > BoneConfig.MAX_DRAG_LIMIT:
             cause_type = "GLUTTONY"
-            
         total_words = max(1, len(clean_words))
         suburban_density = counts.get("suburban", 0) / total_words
         if suburban_density > 0.15:
@@ -322,13 +276,10 @@ class DeathGen:
             flavor = "HEAVY"
         else:
             flavor = "LIGHT"
-            
         p = random.choice(DeathGen.PREFIXES)
         c = random.choice(DeathGen.CAUSES.get(cause_type, ["Unknown Cause"]))
         v = random.choice(DeathGen.VERDICTS.get(flavor, ["Silence."]))
         return f"{p} You died of **{c}**. {v}"
-
-# --- 5. CARTOGRAPHER ---
 class TheCartographer:
     @staticmethod
     def measure_fidelity(physics, memory_graph):
@@ -340,14 +291,12 @@ class TheCartographer:
                 connections = len(memory_graph[word]["edges"])
                 if connections >= 2: grounded_count += 1
         return grounded_count / max(1, len(abstract_words))
-
     @classmethod
     def dynamic_thresholds(cls, bio_metrics):
         atp = bio_metrics.get("atp", 50.0)
         if atp > 70: return {"render_threshold": 1.5, "gravity_well_multiplier": 0.8, "max_anchors": 5}
         elif atp < 30: return {"render_threshold": 4.0, "gravity_well_multiplier": 1.5, "max_anchors": 2}
         else: return {"render_threshold": 2.0, "gravity_well_multiplier": 1.0, "max_anchors": 3}
-
     @classmethod
     def survey(cls, text, memory_graph, bio_metrics, limbo=None):
         cortisol = bio_metrics.get("cortisol", 0.0)
@@ -362,7 +311,6 @@ class TheCartographer:
                 if mass > config["render_threshold"]:
                     knots.append((w, mass))
         knots.sort(key=lambda x: x[1], reverse=True)
-        
         if cortisol > 0.6:
             return f"⚠️ TECTONIC SHIFT (COR: {cortisol}): The ground is shaking too hard to triangulate.", []
         if not knots:
@@ -371,32 +319,26 @@ class TheCartographer:
                 ghost = random.choice(list(limbo.ghosts))
                 return f"👻 PHANTOM SIGNAL: The map is empty, but '{ghost}' is bleeding through the paper.", []
             return "FLATLAND: No topographic features detected.", []
-            
         anchors = [k[0] for k in knots[:config["max_anchors"]]]
         if anchors:
             for anchor in anchors:
                 if "strata" in memory_graph[anchor]:
-                    memory_graph[anchor]["strata"]["stability_index"] = min(1.0, memory_graph[anchor]["strata"]["stability_index"] + 0.01)
-                    
+                    memory_graph[anchor]["strata"]["stability_index"] = min(1.0, memory_graph[anchor]["strata"]["stability_index"] + 0.01)     
         annotated = text
         for word, mass in knots[:config["max_anchors"]]:
             marker = "📍"
             if mass >= BoneConfig.GRAVITY_WELL_THRESHOLD: marker = "🌌"
             elif mass >= BoneConfig.GEODESIC_STRENGTH: marker = "🔗" if oxytocin > 0.7 else "🏯"
-            
             pattern = re.compile(r"\b" + re.escape(word) + r"\b", re.IGNORECASE)
             replacement = f"{Prisma.MAG}{word.upper()}[{marker}:{int(mass)}]{Prisma.RST}"
             annotated = pattern.sub(replacement, annotated)
-            
         anchor_strength = sum(memory_graph[a]["edges"][t] for a in anchors for t in memory_graph[a]["edges"])
         psi = bio_metrics.get("psi", 0.5)
         confidence = min(0.99, (anchor_strength * 0.1) + (1.0 - psi))
         margin_note = f" [Conf: {confidence:.0%}]"
-        
         if len(anchors) >= 3:
             return f"TRIANGULATION COMPLETE: Lagrange Basin formed by {str(anchors).upper()}.{margin_note}", anchors
         return f"COORDINATES LOCKED: {annotated}{margin_note}", anchors
-
     @classmethod
     def detect_voids(cls, physics):
         clean_words = physics.get("clean_words", [])
@@ -408,7 +350,6 @@ class TheCartographer:
                 if counts.get("heavy", 0) == 0:
                     voids.append(word)
         return voids
-
     @classmethod
     def weave(cls, text, memory_graph, bio_metrics, limbo=None, physics=None):
         compass_msg = ""
@@ -432,7 +373,6 @@ class TheCartographer:
                     f"   {Prisma.GRY}Uncharted Territory: You are trying to be honest AND nice. Pick one.{Prisma.RST}\n")
         survey_result, anchors = cls.survey(text, memory_graph, bio_metrics, limbo)
         return compass_msg + survey_result
-
     @staticmethod
     def draw_grid(memory_graph, inventory, gordon=None):
         if "SPIDER_LOCUS" not in inventory:
@@ -461,7 +401,6 @@ class TheCartographer:
                 memory_graph[t]["edges"][anchor] = weight
             connections.append(t)
         return True, f"📐 GEODESIC DRAWN: Connected Gravity Well '{anchor.upper()}' to [{', '.join(connections)}]. Grid Stabilized."
-
     @classmethod
     def spin_web(cls, memory_graph, inventory, gordon=None):
         return cls.draw_grid(memory_graph, inventory, gordon)

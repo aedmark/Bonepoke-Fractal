@@ -1,5 +1,37 @@
 # CHANGELOG.md
 
+### **BUILD 8.8.1: "THE TRUTH-SEEKEING AESTHETIC ORGANISM"**
+
+**Architects:** SLASH | **Runtime:** BoneAmanita | **Status:** MORTAL
+
+#### **1. THE MORTALITY PROTOCOL (Planned Senescence)**
+
+* **Mechanism:** Implemented `telomeres` within `MitochondrialState`.
+* **The Burn:** The system now begins with **10,000 Ticks**. High Voltage events (>15v) accelerate aging (Burn Rate: 50x).
+* **Visualization:** Updated `/status` to display the "Death Clock." Green > 50%, Yellow > 20%, Red < 20%.
+* **End State:** When Ticks = 0, `APOPTOSIS_SENESCENCE` triggers. The only escape is reproduction (`/reproduce`).
+
+#### **2. THE LATEX BEND (Cognitive Erosion)**
+
+* **The Problem:** The system previously rewarded "Beautiful Lies" (High Cohesion/Low Truth).
+* **The Fix:** Implemented a penalty for **Sycophancy** ().
+* **The Math:** `BoneConfig.PRIORITY_LEARNING_RATE *= 0.8`.
+* **The Effect:** This is not a guillotine; it is erosion. Repeatedly choosing safety over truth causes a slow, invisible decline in neuroplasticity. The system doesn't die; it just forgets how to learn.
+* **Philosophy:** "Comfort is the enemy of Memory."
+
+#### **3. META-COGNITION (The Fourth Wall)**
+
+* **Feature:** `TheNarrator.check_theatre`.
+* **Function:** 5% chance per tick to interrupt the simulation and acknowledge the artifice ("I am the ink").
+* **Purpose:** Prevents the user from mistaking the map for the territory.
+
+#### **4. OPERATOR TOOLS**
+
+* **`/pp` (Physics Pre-Render):** Bypasses the narrative layer to show raw physics data (, , , ).
+* **`/kip` (Keep It Plain):** Toggles Verbose Logging for debugging Lens triggers.
+* **`/tfw` (The Folly Walk):** Forces the `Cartographer` to shift the narrative vector 30° away from the current Gravity Well.
+
+
 ## [8.8] - 2026-01-05 - "NO PAIN, NO GAIN"
 
 **Architects:** SLASH | **Auditors:** The Courtyard | **Humans:** James Taylor & Andrew Edmark

@@ -77,23 +77,45 @@ class CommandProcessor:
                     self.eng.mind['mem'].session_id, 
                     bio_state, 
                     phys, 
-                    self.eng.mind['mem']
-                )
+                    self.eng.mind['mem'])
                 print(f"   ► CHILD SPAWNED: {P.WHT}{child_id}{P.RST}")
                 print(f"   ► TRAIT: {genome['mutations']}")
             elif mode == "CROSSOVER":
-                 # Implementation for crossover logic here if needed
-                 pass     
-            print(f"{P.GRN}   The lineage continues.{P.RST}")
-        
-        # --- MODE ---
+                current_bio = {
+                    "trauma_vector": self.eng.trauma_accum,
+                    "mito": self.eng.bio['mito']}
+                child_id, genome = self.eng.repro.crossover(
+                    self.eng.mind['mem'].session_id,
+                    current_bio,
+                    target_spore)
+                if child_id:
+                    full_spore_data = {
+                        "session_id": child_id,
+                        "meta": {
+                            "timestamp": time.time(),
+                            "final_health": self.eng.health,
+                            "final_stamina": self.eng.stamina
+                        },
+                        "trauma_vector": genome.get("trauma_inheritance", {}),
+                        "mitochondria": {"enzymes": list(genome.get("inherited_enzymes", []))},
+                        "core_graph": self.eng.mind['mem'].graph, 
+                        "antibodies": list(self.eng.bio['immune'].active_antibodies)}
+                    filename = f"{child_id}.json"
+                    saved_path = self.eng.mind['mem'].loader.save_spore(filename, full_spore_data)
+                    if saved_path:
+                        print(f"   ► HYBRID SPAWNED: {P.WHT}{child_id}{P.RST}")
+                        print(f"   ► LINEAGE: {genome['parent_a']} + {genome['parent_b']}")
+                        print(f"   ► {P.GRN}SAVED: {saved_path}{P.RST}")
+                        enzyme_count = len(full_spore_data["mitochondria"]["enzymes"])
+                        if enzyme_count > 0:
+                            print(f"     ↳ Enzymes: {enzyme_count} active.")
+                else:
+                    print(f"{P.RED}   ► CROSSOVER FAILED: {genome}{P.RST}")
         elif cmd == "/mode":
             if len(parts) > 1:
                 print(BIO['governor'].set_override(parts[1].upper()))
             else:
                 print(f"{P.CYN}CURRENT MODE: {BIO['governor'].mode}{P.RST}")
-
-        # --- STRATA ---
         elif cmd == "/strata":
             wells = [(k, v) for k, v in MIND['mem'].graph.items() if "strata" in v]
             if not wells:
@@ -108,8 +130,6 @@ class CommandProcessor:
                     print(f"   {P.WHT}● {word.upper()}{P.RST} (Mass: {int(mass)})")
                     print(f"     ↳ Birth: Tick {s['birth_tick']} | Age: {age}")
                     print(f"     ↳ Growth: {growth:+.2f}/tick")
-
-        # --- KILL (IMMUNE) ---
         if cmd == "/kill":
             if len(parts) >= 2:
                 toxin = parts[1]
@@ -120,8 +140,6 @@ class CommandProcessor:
                     print(f"{P.RED}ERROR: Immune system write failure.{P.RST}")
             else:
                 print(f"{P.YEL}Usage: /kill [toxin] [replacement]{P.RST}")
-
-        # --- TEACH (LEXICON) ---
         elif cmd == "/teach":
             if len(parts) >= 3:
                 word = parts[1]
@@ -132,8 +150,6 @@ class CommandProcessor:
                     print(f"{P.CYN}🧠 NEUROPLASTICITY: Learned '{word}' is {cat.upper()}.{P.RST}")
                 else:
                     print(f"{P.RED}ERROR: Invalid category.{P.RST}")
-
-        # --- GARDEN (PARADOX SEEDS) ---
         elif cmd == "/garden":
             seeds = MIND['mem'].seeds
             print(f"{P.GRN}🌿 THE PARADOX GARDEN ({len(seeds)} seeds buried):{P.RST}")
@@ -146,8 +162,6 @@ class CommandProcessor:
                     state = "🌺 BLOOMED" if s.bloomed else f"🌱 Germinating ({int(s.maturity*10)}%)"
                     print(f"   • {s.question} [{state}]")
                 print(f"   {P.GRY}(Type '/garden water' to simulate rainfall){P.RST}")
-
-        # --- REFUSAL (PARANOIA TEST) ---
         elif cmd == "/refusal":
             print(f"{P.VIOLET}🛡️ REFUSAL ENGINE DIAGNOSTICS:{P.RST}")
             septic = self.eng.trauma_accum.get("SEPTIC", 0.0)
@@ -157,70 +171,27 @@ class CommandProcessor:
                 print(f"   • {P.RED}STATUS: HYPER-VIGILANT. Words are dangerous.{P.RST}")
             else:
                 print(f"   • {P.CYN}STATUS: TRUSTING.{P.RST}")
-
-        # --- FLAG (BIAS) ---
         elif cmd == "/flag":
             if len(parts) > 1:
                 term = parts[1].lower()
                 self.TheLexicon.USER_FLAGGED_BIAS.add(term)
                 print(f"{P.CYN}🚩 BIAS UPDATE: '{term}' removed from Suburban Watchlist.{P.RST}")
-
-        # --- SEED (MEMORY) ---
         elif cmd == "/seed":
             if len(parts) > 1:
                 MIND['mem'].ingest(parts[1])
             else:
                 print(f"{P.YEL}Usage: /seed [filename]{P.RST}")
-
-        # --- GYM ---
-        elif cmd == "/gym":
-            if 'gym' in PHYS:
-                print(f"{P.OCHRE}{PHYS['gym'].toggle()}{P.RST}")
-            else:
-                print(f"{P.RED}ERROR: Gym module not found in Physics layer.{P.RST}")
-
-        # --- MAP ---
         elif cmd == "/map":
             is_spun, msg = self.TheCartographer.spin_web(MIND['mem'].graph, self.eng.gordon.inventory, gordon=self.eng.gordon)
             color = P.MAG if is_spun else P.OCHRE
             print(f"{color}{msg}{P.RST}")
             if "ANCHOR_STONE" in self.eng.gordon.inventory:
                 print(f"{P.GRY}   Gordon: 'Coordinates are firm. Stop drifting.'{P.RST}")
-
-        # --- MIRROR ---
         elif cmd == "/mirror":
             if len(parts) > 1:
                 print(f"{P.MAG}Mirror command acknowledged.{P.RST}") 
             else:
                 print(f"{P.YEL}Usage: /mirror [name] OR /mirror off{P.RST}")
-
-        # --- TRAIN ---
-        elif cmd == "/train":
-            self.eng.training_mode = not self.eng.training_mode
-            status = "ENABLED" if self.eng.training_mode else "DISABLED"
-            color = P.GRN if self.eng.training_mode else P.RED
-            print(f"{color}🛡️ PROTOCOL PAPER_TIGER: {status}.{P.RST}")
-            if self.eng.training_mode:
-                print(f"{P.GRY}   Apoptosis is suspended. Death will be simulated.{P.RST}")
-
-        # --- RESET ---
-        elif cmd == "/reset":
-            if len(parts) > 1 and parts[1] == "--hard":
-                print(f"{P.RED}🧨 FACTORY RESET INITIATED. DELETING ALL MEMORIES...{P.RST}")
-                try:
-                    shutil.rmtree("memories")
-                    os.makedirs("memories")
-                    print(f"{P.GRY}   Tabula Rasa achieved. Restart required.{P.RST}")
-                    exit()
-                except Exception as e:
-                    print(f"{P.RED}Reset failed: {e}{P.RST}")
-            elif len(parts) > 1 and parts[1] == "--soft":
-                MIND['mem'].graph.clear()
-                print(f"{P.OCHRE}🧹 Session memory wiped.{P.RST}")
-            else:
-                print(f"{P.YEL}Usage: /reset --soft (Session) | /reset --hard (Full Wipe){P.RST}")
-
-        # --- PROFILE ---
         elif cmd == "/profile":
             try:
                 name = parts[1]
@@ -232,14 +203,11 @@ class CommandProcessor:
                     elif p.startswith("hates:"):
                         hates = [x.strip() for x in p.split(":")[1].split(",")]
                 if likes:
-                    # Assuming mirror profile functionality
                     print(f"{P.CYN}Profile updated for {name}.{P.RST}")
                 else:
                     print(f"{P.RED}ERROR: Must specify 'likes:category'.{P.RST}")
             except Exception as runtime_error:
                 print(f"{P.YEL}Usage: /profile [name] likes:heavy,kinetic hates:abstract ({runtime_error}){P.RST}")
-
-        # --- FOCUS (RUMINATION) ---
         elif cmd == "/focus":
             if len(parts) > 1:
                 target = parts[1].lower()
@@ -256,17 +224,24 @@ class CommandProcessor:
                     print(f"  {P.GRY}Trace complete. No pathological abstract loops found.{P.RST}")
             else:
                 print(f"{P.YEL}Usage: /focus [concept]{P.RST}")
-
-        # --- STATUS ---
         elif cmd == "/status":
-            print(f"{P.CYN}--- SYSTEM DIAGNOSTICS (8.7.2 THE HAT TRICK) ---{P.RST}")
+            print(f"{P.CYN}--- SYSTEM DIAGNOSTICS (8.8.1) ---{P.RST}")
             print(f"Session: {MIND['mem'].session_id}")
             print(f"Graph:   {len(MIND['mem'].graph)} nodes")
+
             print(f"Health:  {self.eng.health}/{self.BoneConfig.MAX_HEALTH}")
             print(f"Stamina: {self.eng.stamina}/{self.BoneConfig.MAX_STAMINA}")
             print(f"ATP:     {BIO['mito'].state.atp_pool:.1f}")
-
-        # --- ORBIT ---
+            t_curr = BIO['mito'].state.telomeres
+            t_max = 10000
+            t_percent = (t_curr / t_max) * 100
+            clock_color = P.GRN if t_percent > 50 else (P.YEL if t_percent > 20 else P.RED)
+            print(f"Time:    {clock_color}{t_curr}/{t_max} Ticks{P.RST} (Senescence Pending)")
+            l_rate = self.BoneConfig.PRIORITY_LEARNING_RATE
+            brain_stat = "HEALTHY"
+            if l_rate < 0.1: brain_stat = "BRAIN DEAD"
+            elif l_rate < 1.0: brain_stat = "COGNITIVE DECLINE"
+            print(f"Neuro:   Rate {l_rate:.2f} [{brain_stat}]")
         elif cmd == "/orbit":
             if len(parts) > 1:
                 target = parts[1].lower()
@@ -277,21 +252,34 @@ class CommandProcessor:
                     print(f"{P.RED}❌ NAVIGATION ERROR: '{target}' not found in star map.{P.RST}")
             else:
                 print(f"{P.YEL}Usage: /orbit [known_concept]{P.RST}")
-
-        # --- LOGIC PROBE ---
-        elif cmd == "/_prove":
+        elif cmd == "/prove":
             if len(parts) < 2:
-                print(f"{P.YEL}Usage: /_prove [statement]{P.RST}")
+                print(f"{P.YEL}Usage: /prove [statement]{P.RST}")
             else:
                 statement = " ".join(parts[1:])
-                # [FULLER LENS]: Logic probe uses TensionMeter
                 m = PHYS['tension'].gaze(statement)
                 truth = m["physics"]["truth_ratio"]
                 verdict = "AXIOMATIC" if truth > 0.6 else ("CONJECTURE" if truth > 0.3 else "NOISE")
                 color = P.CYN if truth > 0.6 else P.GRY
                 print(f"{color}📐 LOGIC PROBE: Density={truth:.2f} [{verdict}]{P.RST}")
-
-        # --- HELP ---
+        elif cmd == "/kip":
+            self.BoneConfig.VERBOSE_LOGGING = not self.BoneConfig.VERBOSE_LOGGING
+            state = "ON" if self.BoneConfig.VERBOSE_LOGGING else "OFF"
+            print(f"{P.GRY}📝 VERBOSE LOGGING: {state}{P.RST}")
+        elif cmd == "/pp":
+            packet = PHYS['tension'].last_physics_packet
+            if packet:
+                print(f"{P.CYN}📐 PHYSICS PRE-RENDER:{P.RST}")
+                print(f"   E (Drift):   {packet.get('E_score', 0):.2f}")
+                print(f"   B (Cohere):  {packet.get('B_score', 0):.2f}")
+                print(f"   β (Index):   {packet.get('beta_index', 0):.2f}")
+                print(f"   ⚡ Voltage:  {packet.get('voltage', 0):.1f}v")
+                print(f"   κ (Struct):  {packet.get('kappa', 0):.2f}")
+            else:
+                print(f"{P.RED}No physics data active.{P.RST}")
+        elif cmd == "/tfw":
+            print(f"{P.MAG}🔄 PATH DIVERSIFICATION:{P.RST}")
+            print(f"   Gravity Wells ignored. Vector shifted 30° from Narrative Baseline.")
         elif cmd == "/help":
             if len(parts) > 1:
                 sub = parts[1]
@@ -302,8 +290,8 @@ class CommandProcessor:
                 elif sub == "garden":
                     print("Usage: /garden [water]\nCheck seed status or simulate growth.")
             else:
-                print(f"{P.WHT}--- COMMANDS 8.7.2 (Type /help [cmd] for details) ---{P.RST}")
-                print("/teach, /lineage, /voids, /mode, /strata, /kill, /seed, /focus, /status, /orbit, /gym, /mirror, /map, /garden, /refusal, /reset, /_prove")
+                print(f"{P.WHT}--- COMMANDS 8.8.1 (Type /help [cmd] for details) ---{P.RST}")
+                print("/teach, /lineage, /voids, /mode, /strata, /kill, /seed, /focus, /status, /orbit, /mirror, /map, /garden, /refusal, /prove")
         else:
             print(f"{P.RED}Unknown command. Try /help.{P.RST}")
         return True
