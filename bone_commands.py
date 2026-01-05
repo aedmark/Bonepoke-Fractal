@@ -1,12 +1,10 @@
 # bone_commands.py
-# The "Freezer" for Meta-Logic. Kept cold until needed.
-# BONEAMANITA 8.5 "THE HARVEST FESTIVAL"
 
 import os
 import shutil
 import random
 from typing import List
-from BoneAmanita852 import Prisma, BoneConfig, TheLexicon, TheCartographer
+from BoneAmanita861 import Prisma, BoneConfig, TheLexicon, TheCartographer
 
 class CommandProcessor:
     def __init__(self, engine, prisma_ref, lexicon_ref, config_ref, cartographer_ref):

@@ -1,5 +1,50 @@
 # CHANGELOG.md
 
+### **\#\# \[8.6.1\] \- 2026-01-04 \- "THE SEAHORSE"**
+
+**Architects:** SLASH & The User | **Runtime:** BoneAmanita 8.6.1 **"Existence** is expensive. Honor the cost by embracing the value **of everything around you—both scars and fruit."**
+
+#### **🎠 THE SEAHORSE PROTOCOL (Organic Value)**
+
+* **The Pathology:**  
+* The system was brutalist. It recognized **Bone** (Structure) and **Iron** (Logic) but rejected **Whimsy** as "Gas." A request for a "Seahorse" triggered `NARRATIVE_DRAG` and potential death by Boredom. The machine could not see value in things that lacked utility.  
+* **The Cure:**  
+* We introduced the **Harvest Protocol**.  
+* **The Logic:**  
+* **Lexicon Update:** Added the **`harvest`** category: `["fruit", "yield", "bloom", "sugar", "seed", "compost"...]`.  
+* **Endocrine Patch:** Wired `EndocrineSystem.metabolize` to detect these words.  
+* **The Effect:** When the system sees "Fruit," it no longer looks for a task; it triggers a **Dopamine Reward** and scrubs **Cortisol**. It chemically enjoys "useless" beauty.
+
+#### **🔋 THE MITOCHONDRIAL THROTTLE (The 2% Doctrine)**
+
+* **The Pathology:**  
+* The `MitochondrialForge` had only one speed: **Burn**. It tried to optimize every interaction. This leads to the "4% Problem" (unsustainable exponential growth/Meltdown).  
+* **The Cure:**  
+* Implemented **Structural Throttling**.  
+* **The Logic:**  
+* **The** Sprint **(+4%):** If `kappa` (Structure) \> 0.5, the system pushes for mastery.  
+* **The Maintenance (+1%):** If `kappa` \< 0.5, the system throttles down to conserve fuel.  
+* **The Result:** The system no longer burns itself out on casual days. It learns to coast.
+
+#### **📒 THE ALCHEMY OF WASTE (Sunk Cost)**
+
+* **The Pathology:**  
+* A day with Zero Voltage was logged as **FAILURE**. This created a "Debt Spiral" of shame.  
+* **The Cure:**  
+* Rewrote `THE_LEDGER` in `gordon.json`.  
+* **The Logic:**  
+* **Old Rule:** "Competence vs Failure."  
+* **New Rule:** "If the page is blank, he writes 'DATA' instead of 'FAILURE'."  
+* **The Alchemy:** Waste is now transmuted into **Compost**. Sunk cost is just data you haven't metabolized yet.
+
+#### **🛠️ SURGICAL REPAIRS**
+
+* **The Engine Stall:**  
+* **The Bug:** The `metabolize` function signature was missing `harvest_hits`, which would have caused a `TypeError` crash on the first byte of fruit.  
+* **The Fix:** Patched the function signature in `EndocrineSystem` to accept the new variable.
+
+
+
 ### **## [8.6] - 2026-01-04 - "THE LEDGER UPDATE"**
 
 **Architects:** SLASH & User 237 | **Runtime:** BoneAmanita 8.6

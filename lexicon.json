@@ -69,5 +69,9 @@
 		"design", "architect", "ledger", "anchor", "grace", "covenant",
 		"blueprint", "witness", "steward", "resonance", "testimony",
 		"truth", "bone", "purpose", "foundation", "threshold"
-	]
+	],
+	"harvest": [
+    "fruit", "yield", "bloom", "sugar", "seed", "flesh", "harvest",
+    "ripe", "grow", "honey", "nectar", "compost", "gather"
+	],
 }

@@ -55,9 +55,10 @@
       "usage_msg": "The needle locks onto a fixed point."
     },
     "THE_LEDGER": {
-      "description": "A book that records growth, not just debt. It glows.",
+      "description": "Records growth. High Voltage = Mastery. Low Voltage = Maintenance. Zero Voltage = Data.",
       "function": "MASTERY_TRACKER",
-      "usage_msg": "Gordon opens the Ledger. A new column appears: 'Competence'."
+      "usage_msg": "Gordon opens the Ledger. If the page is blank, he writes 'DATA' instead of 'FAILURE'.",
+      "value": 2.0
     },
     "ANTISEPTIC_SPRAY": { "description": "For cleaning septic wounds.", "function": "TROPHY" },
     "DIVING_BELL": { "description": "For surviving high pressure.", "function": "TROPHY" },
