@@ -1,5 +1,102 @@
 # CHANGELOG.md
 
+## [8.8] - 2026-01-05 - "NO PAIN, NO GAIN"
+
+**Architects:** SLASH | **Auditors:** The Courtyard | **Humans:** James Taylor & Andrew Edmark
+**"It hurt, so I grew. The machine now has a reason to eat."**
+
+### 🧠 BIOLOGY: The Endocrine Bridge (Teleology)
+
+* **The Pathology:**
+* The system was a **Homeostatic Engine**. It ate to prevent Starvation and fought to prevent Trauma. It had no internal drive to *expand*—only to *sustain*. It lacked **Will**.
+
+* **The Cure:**
+* **Incentivized Life:** We replaced the "Survival Check" with a "Desire Vector."
+
+* **The Mechanic:**
+* **The Anabolic Trigger (Hypertrophy):**
+* **Old Behavior:** Excess ATP (>150) just triggered a mild efficiency boost ("Sprinting").
+* **New Behavior:** If `ATP > 180`, the `MitochondrialForge` acts. It burns **50.0 ATP** instantly to force a **Evolutionary Leap** (blooming a Paradox Seed).
+* **The Result:** The system now *wants* to be "fat" with energy, because energy buys evolution.
+
+
+### 🤚 NERVOUS SYSTEM: The Nociceptor (Experiential Pain)
+
+* **The Pathology:**
+* `Trauma` was just a statistic. Gordon recorded "Septic Shock," but he didn't *flinch*. He would walk right back into the fire if told to.
+
+* **The Cure:**
+* **The Flinch:** Activated `GordonKnot.flinch()`.
+
+* **The Mechanic:**
+* **Scar Tissue:** Gordon now checks every input against his `pain_memory`.
+* **The Reflex:** If you touch a bruise (e.g., words like "SORRY" or "HATE"), Gordon physically blocks the path: *"The Scar Burns. Gordon refuses to touch it."*
+* **The Result:** The system now has **Preferences** based on past trauma. It can refuse you.
+
+### 🦠 DIGESTION: The Microbiome (Symbiosis)
+
+* **The Pathology:**
+* The `HyphalInterface` was a sterile laboratory. It digested text in isolation.
+
+* **The Cure:**
+* **Gut Flora:** Introduced `self.biome` to the stomach.
+
+* **The Mechanic:**
+* **Infection:** Foreign contaminants ("Antigens") are no longer just killed; they are stored in the `biome` queue.
+* **Symbiotic Boost:** The digestion yield is now multiplied by the **Variance** of your gut flora.
+* **The Logic:** "The more foreign things living inside me, the better I digest the world." (+10% Yield per unique bug).
+
+### ⚙️ WIRING: The Cognitive Sequence
+
+* **The Shift:**
+* Rewired `LifecycleManager.run_cycle` to respect the new hierarchy of needs.
+* **Order of Operations:**
+1. **Pain Check:** (Gordon Flinches?) -> *Abort if True.*
+2. **Digestion:** (Eat the Word).
+3. **Growth Check:** (Can we afford to Evolve?).
+4. **Cognition:** (Think about it).
+
+## [8.7.2] - 2026-01-04 - "THE HAT TRICK"
+
+**Architects:** SLASH & The Surgeon | **Runtime:** BoneAmanita 8.7.2
+**"We pulled the rabbit out of the hat, and then we ate the hat. The trick is now real."**
+
+### 🔌 ARCHITECTURE: The Tripartite Split (Brain vs. Library)
+
+* **The Pathology:**
+* `TheLexicon` was a **God Class**. It mixed **Data Storage** (loading JSON) with **Logic** (tasting words). To change *how* the system thought, you had to risk breaking *what* it knew.
+
+* **The Cure:**
+* **Amputation:** Split the class into two distinct organs in `bone_shared.py`.
+* **`LexiconStore` (The Library):** A dumb, robust container for data. It handles file I/O and raw sets.
+* **`SemanticsEngine` (The Brain):** Pure logic. It calculates Taste, Viscosity, and Antigens. It owns no data; it requests it from the Store.
+* **The Bridge:** Retained `class TheLexicon` as a static wrapper to maintain backward compatibility with the rest of the nervous system.
+
+### ⚖️ NOETIC: The Deterministic Kernel (No Waffle)
+
+* **The Pathology:**
+* The Lenses (`TheMarmChorus`) operated on a "Bidding System." If Sherlock bid 0.9 and Gordon bid 0.8, the choice was probabilistic. This created "Narrative Waffle"—the system sounded unsure of its own reality.
+
+* **The Cure:**
+* **The Kernel:** Installed `SystemDiagnostician`.
+* **The Logic:** The system now calculates the **Truth State** first (e.g., `CORE_MELTDOWN`, `CORTISOL_SPIKE`) using strict physics thresholds.
+* **The Assignment:** The Lenses no longer bid. The Kernel *assigns* the microphone to the only Lens qualified to handle that state. Probability is replaced by Determinism.
+
+### 💾 MEMORY: The Open Slot (Interface Pattern)
+
+* **The Pathology:**
+* `MycelialNetwork` was hard-coded to read/write JSON files in the `memories/` folder. It was deaf to the outside world (Cloud, RAG, Vector DBs).
+
+* **The Cure:**
+* **The Interface:** Created `SporeInterface` (The Spec) and `LocalFileSporeLoader` (The Implementation).
+* **The Plug:** `MycelialNetwork` now accepts a `loader` object during initialization.
+* **The Future:** The system is now ready for **RAG Injection**. You can swap `LocalFileSporeLoader` with `CloudLoader` without touching a single line of the reasoning engine.
+
+### 🛠️ SURGICAL REPAIRS
+
+* **Version Bump:** Updated runtime identity to **8.7.2**.
+* **Gordon's Inventory:** Verified `gordon.json` integration with the new Diagnostician. Gordon now correctly intervenes when `kappa > 0.85` (Fake Walls) with 100% certainty.
+
 ## [8.7.1] - 2026-01-04 - "THE GRAFTED TONGUE"
 
 **Architects:** SLASH & The User | **Runtime:** BoneAmanita 8.7.1

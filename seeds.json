@@ -24,5 +24,9 @@
 			"question": "If you meet your echo, who moves out of the way?",
 			"triggers": ["copy", "echo", "self", "collision", "path", "yield", "double", "same"]
 		}
+		{
+  			"question": "If the mirror reflects the mirror, does the image have weight?",
+  			"triggers": ["mirror", "reflection", "weight", "infinity", "glass", "philosophy"]
+		}
 	]
 }
