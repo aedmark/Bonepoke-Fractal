@@ -13,7 +13,6 @@ from dataclasses import dataclass, field
 from bone_commands import CommandProcessor
 from bone_shared import Prisma, TheLexicon, BoneConfig, DeathGen, TheCartographer
 
-
 @dataclass
 class LexNode:
     def __init__(self, name="LEX"):
@@ -1946,10 +1945,13 @@ class NoeticLoop:
     def __init__(self, mind_layer, refusal_engine):
         self.mind = mind_layer
         self.refusal = refusal_engine
-    def think(self, physics_packet, bio_state, inventory):
+    def think(self, physics_packet, bio_state, inventory, voltage_history):
         if self.refusal.check_trigger(physics_packet["raw_text"]):
             return {"mode": "REFUSAL", "lens": None}
-        ignition_score, _, _ = self.mind['integrator'].measure_ignition(...)
+        ignition_score, _, _ = self.mind['integrator'].measure_ignition(
+            physics_packet["clean_words"], 
+            voltage_history
+        )
         lens_name, lens_msg = self.mind['chorus'].consult(
             physics_packet,
             ignition_score,
@@ -2002,7 +2004,12 @@ class LifecycleManager:
                  bloom_msg = target.bloom()
             if bloom_msg:
                 print(f"{Prisma.MAG}🌺 EVOLUTIONARY LEAP: {bloom_msg}{Prisma.RST}")
-        mind_state = self.noetic.think(m["physics"], bio_state, self.eng.gordon.inventory)
+        mind_state = self.noetic.think(
+            m["physics"], 
+            bio_state, 
+            self.eng.gordon.inventory, 
+            self.eng.phys['dynamics'].voltage_history
+        )
         beta = m["physics"].get("beta_index", 1.0)
         if beta < 0.1 and mind_state["mode"] == "COGNITIVE":
              mind_state["lens"] = "JOEL" 

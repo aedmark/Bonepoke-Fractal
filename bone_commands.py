@@ -3,6 +3,7 @@
 import os
 import shutil
 import random
+import time
 from typing import List
 from bone_shared import Prisma, BoneConfig, TheLexicon, TheCartographer
 
@@ -22,14 +23,10 @@ class CommandProcessor:
         BIO = self.eng.bio
         PHYS = self.eng.phys
         MIND = self.eng.mind
-
-        # --- PERMISSION CHECKS ---
         if cmd in ["/teach", "/kill", "/flag", "/garden"]:
             if self.eng.mind['mirror'].profile.confidence < 50:
                 print(f"{P.YEL}⚠️ COMMAND LOCKED: Requires 50+ turns of trust (Current: {self.eng.mind['mirror'].profile.confidence}).{P.RST}")
                 return True
-
-        # --- LINEAGE ---
         elif cmd == "/lineage":
             if not MIND['mem'].lineage_log:
                 print(f"{P.GRY}📜 ARCHIVE EMPTY: We are the first generation.{P.RST}")
@@ -42,8 +39,6 @@ class CommandProcessor:
                 print(f"   {P.GRN}• CURRENT SESSION{P.RST} (Living)")
                 curr_t = ", ".join([f"{k}:{v:.1f}" for k,v in self.eng.trauma_accum.items() if v > 0])
                 print(f"     ↳ Ingested: {len(MIND['mem'].lineage_log)} Ancestors | Accumulating: {{{curr_t}}}")
-
-        # --- VOIDS ---
         elif cmd == "/voids":
             packet = PHYS['tension'].last_physics_packet
             if not packet:
@@ -54,8 +49,6 @@ class CommandProcessor:
                     print(f"{P.GRY}🌫️ THE FOG: Detected hollow concepts: {voids}{P.RST}")
                 else:
                     print(f"{P.CYN}✨ CLEAR AIR: No voids detected.{P.RST}")
-
-        # --- REPRODUCE ---
         elif cmd == "/reproduce":
             if self.eng.health < 20:
                 print(f"{P.RED}💔 FERTILITY ERROR: Too weak to breed. Survive first.{P.RST}")
@@ -83,11 +76,13 @@ class CommandProcessor:
             elif mode == "CROSSOVER":
                 current_bio = {
                     "trauma_vector": self.eng.trauma_accum,
-                    "mito": self.eng.bio['mito']}
+                    "mito": self.eng.bio['mito']
+                }
                 child_id, genome = self.eng.repro.crossover(
                     self.eng.mind['mem'].session_id,
                     current_bio,
-                    target_spore)
+                    target_spore
+                )
                 if child_id:
                     full_spore_data = {
                         "session_id": child_id,
@@ -99,7 +94,8 @@ class CommandProcessor:
                         "trauma_vector": genome.get("trauma_inheritance", {}),
                         "mitochondria": {"enzymes": list(genome.get("inherited_enzymes", []))},
                         "core_graph": self.eng.mind['mem'].graph, 
-                        "antibodies": list(self.eng.bio['immune'].active_antibodies)}
+                        "antibodies": list(self.eng.bio['immune'].active_antibodies)
+                    }
                     filename = f"{child_id}.json"
                     saved_path = self.eng.mind['mem'].loader.save_spore(filename, full_spore_data)
                     if saved_path:
