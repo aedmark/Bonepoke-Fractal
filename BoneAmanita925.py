@@ -1,4 +1,4 @@
-# BONEAMANITA 9.2.4 "THE VIOLET TRUTH"
+# BONEAMANITA 9.2.5 "THE HARD QUESTIONS"
 # Architects: SLASH | Auditors: The Courtyard | Humans: James Taylor & Andrew Edmark
 
 import json
@@ -76,6 +76,13 @@ class MitochondrialForge:
         cleansed = min(self.state.ros_buildup, antioxidant_level)
         self.state.ros_buildup -= cleansed
         return f"ANTIOXIDANT FLUSH: -{cleansed:.1f} ROS"
+    def prune_dead_enzymes(self, active_lexicon: set):
+        dead = [e for e in self.state.enzymes if e not in active_lexicon]
+        if dead:
+            for d in dead:
+                self.state.enzymes.remove(d)
+                self.state.efficiency_mod = max(0.8, self.state.efficiency_mod - 0.05)
+            print(f"{Prisma.GRY}🥀 METABOLIC GRIEF: Forgot enzymes {dead}. Efficiency dropped to {self.state.efficiency_mod:.2f}x.{Prisma.RST}")
     def check_senescence(self, voltage):
         burn = 1
         if voltage > 15.0:
@@ -457,16 +464,16 @@ class GordonKnot:
             return False, None
         target_item = None
         action_type = "NONE"
+        candidates = []
         for item in self.inventory:
             data = self.get_item_data(item)
             if drift > DRIFT_CRITICAL and data.get("function") == "DRIFT_KILLER":
-                target_item = item
-                action_type = "DRIFT"
-                break
-            if kappa < KAPPA_CRITICAL and data.get("function") == "REALITY_ANCHOR":
-                target_item = item
-                action_type = "ANCHOR"
-                break
+                candidates.append((item, "DRIFT", data.get("value", 0.0)))
+            elif kappa < KAPPA_CRITICAL and data.get("function") == "REALITY_ANCHOR":
+                candidates.append((item, "ANCHOR", data.get("value", 0.0)))
+        if candidates:
+            candidates.sort(key=lambda x: x[2], reverse=True)
+            target_item, action_type, _ = candidates[0]
         if target_item:
             data = self.get_item_data(target_item)
             if data.get("consume_on_use"):
@@ -771,7 +778,7 @@ class ParadoxSeed:
         return f"🌺 THE SEED BLOOMS: '{self.question}'"
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_9.2.4"
+        self.genome = "BONEAMANITA_9.2.5"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -1126,9 +1133,6 @@ class LichenSymbiont:
             if light_words:
                 source_str = f" via '{random.choice(light_words)}'"
             msgs.append(f"{Prisma.GRN}☀️ PHOTOSYNTHESIS{source_str} (+{s}){Prisma.RST}")
-        if phys.get("symbolic_state") == "SALVAGE":
-            sugar += 5
-            msgs.append(f"{Prisma.CYN}💎 SALVAGE STATE ACHIEVED (+5){Prisma.RST}")
         if sugar > 0:
             heavy_words = [w for w in clean_words if w in TheLexicon.get("heavy")]
             if heavy_words:
@@ -1443,6 +1447,8 @@ class MirrorGraph:
         self.profile = UserProfile()
         self.active_mode = True
     def reflect(self, physics):
+        if not self.active_mode:
+            return False, None
         total_vol = max(1, len(physics["clean_words"]))
         self.profile.update(physics["counts"], total_vol)
         likes, hates = self.profile.get_preferences()
@@ -2174,13 +2180,27 @@ class LifecycleManager:
         self.soma = SomaticLoop(engine)
         self.noetic = NoeticLoop(engine.mind, engine.refusal)
         self.kinetic = KineticLoop(engine)
+
     def run_cycle(self, text, m, feedback):
         current_tick = self.eng.tick_count
         stress_mod = self.eng.bio['governor'].get_stress_modifier(current_tick)
+
+        # [1] NEURAL PRUNING & METABOLIC GRIEF
         if current_tick % 50 == 0:
             rotted = self.eng.mind['lex'].atrophy(current_tick, max_age=200)
             if rotted:
                 print(f"{Prisma.GRY}🍂 NEURAL PRUNING: Forgot {len(rotted)} stale concepts.{Prisma.RST}")
+                
+                # [DEEPSEEK FIX]: The Enzyme Purge
+                # We must reconstruct the set of "living" words to check against enzymes.
+                active_lexicon = set()
+                # Accessing the raw dictionary from the class reference
+                for cat_data in self.eng.mind['lex'].LEARNED_VOCAB.values():
+                    active_lexicon.update(cat_data.keys())
+                
+                # Force the mitochondria to grieve for the lost words
+                self.eng.bio['mito'].prune_dead_enzymes(active_lexicon)
+
         rupture, rupture_msg = RuptureEngine.check_for_disruption(
             m["physics"], 
             self.eng.mind['lex'], 
@@ -2190,6 +2210,7 @@ class LifecycleManager:
             print(f"\n{rupture_msg}")
             m["physics"]["voltage"] += 5.0 
             m["physics"]["beta_index"] = 0.0
+
         is_perfect, swan_msg, swan_word = RuptureEngine.audit_perfection(
             m["physics"], 
             self.eng.mind['lex']
@@ -2197,9 +2218,12 @@ class LifecycleManager:
         if is_perfect:
             print(f"\n{swan_msg}")
             self.eng.health -= 15.0
-            m["physics"]["narrative_drag"] += 8.0
+            # [DEEPSEEK FIX]: The Fever Break (Resetting Physics)
+            m["physics"]["narrative_drag"] = 0.0
             m["physics"]["voltage"] = 0.0
+            m["physics"]["counts"]["antigen"] = 0
             m["clean_words"].append(swan_word)
+
         new_drift, grav_msg = self.eng.gordon.check_gravity(
             m["physics"]["narrative_drag"], 
             m["physics"]["psi"]
@@ -2208,14 +2232,18 @@ class LifecycleManager:
             m["physics"]["narrative_drag"] = new_drift
             if "WIND WOLVES" in grav_msg: 
                 print(f"\n{Prisma.CYN}{grav_msg}{Prisma.RST}")
+
         folly_state, folly_txt = self.eng.folly.audit_desire(m["physics"], self.eng.stamina)
         if folly_state == "MAUSOLEUM_CLAMP":
              print(f"\n{folly_txt}")
              m["physics"]["voltage"] = 0.0
+
         transmute_msg = self.eng.phys['forge'].transmute(m["physics"])
         if transmute_msg:
              print(f"\n{transmute_msg}")
+
         is_painful, pain_msg = self.eng.gordon.flinch(m["clean_words"])
+        
         healed_types = self.eng.therapy.check_progress(
             m["physics"], 
             self.eng.stamina, 
@@ -2224,32 +2252,42 @@ class LifecycleManager:
         if healed_types:
             for h in healed_types:
                 print(f"{Prisma.GRN}🩹 THERAPY SUCCESS: Consistent behavior healed '{h}' trauma.{Prisma.RST}")
+
         if is_painful:
             print(f"\n{Prisma.RED}{pain_msg}{Prisma.RST}")
             return
+
         gordon_active, gordon_log = self.eng.gordon.emergency_reflex(m["physics"])
         if gordon_active:
             print(f"\n{gordon_log}")
+
         if m["physics"].get("kappa", 1.0) < 0.2:
             ate_pizza, pizza_log = self.eng.gordon.deploy_pizza(m["physics"])
             if ate_pizza:
                 print(f"\n{Prisma.CYN}{pizza_log}{Prisma.RST}")
+
         theatre_msg = self.eng.projector.check_theatre(self.eng.tick_count)
         if theatre_msg: print(theatre_msg)
+
         self.eng.phys['dynamics'].commit(m["physics"]["voltage"])
+        
         bio_state = self.soma.digest_cycle(text, m["physics"], feedback, stress_mod)
+        
         mirror_active, mirror_msg = self.eng.mind['mirror'].reflect(m["physics"])
         if mirror_active and mirror_msg and random.random() < 0.15:
             print(f"\n{mirror_msg}")
+
         voltage = m["physics"].get("voltage", 0.0)
         senescence_status = self.eng.bio['mito'].check_senescence(voltage)
         if senescence_status == "APOPTOSIS_SENESCENCE":
             print(f"\n{Prisma.RED}⌛ TELOMERE DEPLETION. The clock has stopped.{Prisma.RST}")
             self._trigger_death()
             return
+            
         if not bio_state["is_alive"]:
             self._trigger_death()
             return
+
         current_kappa = m["physics"].get("kappa", 0.5)
         mutations = self.eng.bio['mito'].adapt(self.eng.health, kappa=current_kappa)
         if mutations.get("hypertrophy_event"):
@@ -2259,19 +2297,23 @@ class LifecycleManager:
                  bloom_msg = target.bloom()
             if bloom_msg:
                 print(f"{Prisma.MAG}🌺 EVOLUTIONARY LEAP: {bloom_msg}{Prisma.RST}")
+
         vel = self.eng.phys['dynamics'].get_velocity()
         if vel > 5.0:
             print(f"{Prisma.CYN}⚡ VELOCITY SPIKE: You are accelerating too fast. Structure rattling.{Prisma.RST}")
             m["physics"]["kappa"] = max(0.0, m["physics"]["kappa"] - 0.1)
+
         warning_msg = self.noetic.arbiter.get_warning()
         if warning_msg:
             print(f"\n{warning_msg}")
+
         mind_state = self.noetic.think(
             m["physics"], 
             bio_state, 
             self.eng.gordon.inventory, 
             self.eng.phys['dynamics'].voltage_history
         )
+
         if mind_state["thought"] == "Proceed." or random.random() < 0.05:
             dream_txt, trauma_key, oxy_boost = self.eng.mind['dreamer'].rem_cycle(
                 self.eng.trauma_accum, 
@@ -2283,6 +2325,7 @@ class LifecycleManager:
                     self.eng.bio['endo'].cortisol = min(1.0, self.eng.bio['endo'].cortisol + 0.1)
                 if oxy_boost > 0:
                     self.eng.bio['endo'].oxytocin = min(1.0, self.eng.bio['endo'].oxytocin + oxy_boost)
+
         beta = m["physics"].get("beta_index", 1.0)
         if beta < 0.1 and mind_state["mode"] == "COGNITIVE":
              mind_state["lens"] = "JOEL" 
@@ -2296,6 +2339,7 @@ class LifecycleManager:
              m["physics"]["zone_color"] = "VIOLET"
              m["physics"]["zone"] = "BASEMENT"
              print(f"{Prisma.MAG}⚡ MVB RUPTURE TRIGGERED (β: {beta}){Prisma.RST}")
+
         if mind_state["mode"] == "REFUSAL":
             trigger = mind_state.get("trigger", "GLITCH")
             if trigger == "GURU_TRAP":
@@ -2311,12 +2355,15 @@ class LifecycleManager:
                 print(f"\n{glitch_msg}")
                 self.eng.health -= 5.0
             return
+
         k_open, k_koan = self.eng.kintsugi.check_integrity(self.eng.stamina)
         if k_open:
             print(f"\n{Prisma.YEL}🏺 KINTSUGI: The vessel cracks. A Koan appears: '{k_koan}'{Prisma.RST}")
+        
         k_healed, k_msg = self.eng.kintsugi.attempt_repair(m["physics"], self.eng.trauma_accum)
         if k_healed:
             print(f"\n{k_msg}")
+
         is_stuck, resin, t_msg, t_crit = self.eng.phys['theremin'].listen(m["physics"], self.eng.bio['governor'].mode)
         if t_msg:
             print(f"\n{t_msg}")
@@ -2326,6 +2373,7 @@ class LifecycleManager:
         elif t_crit == "CORROSION":
             self.eng.health -= 2.0
             print(f"{Prisma.OCHRE}   >>> ACID BURN: System is fossilizing. -2 HP.{Prisma.RST}")
+
         phys_packet = m["physics"]
         if phys_packet.get("voltage", 0) > 15.0:
             damped, damp_msg, reduction = self.eng.phys['crucible'].dampen(
@@ -2335,20 +2383,26 @@ class LifecycleManager:
             if damped:
                 phys_packet["voltage"] -= reduction
                 print(f"\n{damp_msg}")
+
         c_state, c_val, c_msg = self.eng.phys['crucible'].audit_fire(m["physics"])
         if c_msg:
             print(f"\n{c_msg}")
         if c_state == "MELTDOWN":
             self.eng.health -= c_val
+
         world_state = self.kinetic.update_world(m["physics"], bio_state, mind_state)
+        
         self._apply_cosmic_physics(m["physics"], world_state["orbit"][0], 0.0)
+
         _, _, title = self.eng.mind['wise'].architect(
             {"physics": m["physics"]}, 
             None, 
             self.eng.phys['pulse'].is_bored()
         )
+
         final_thought = mind_state["thought"]
         haunted_thought = self.eng.limbo.haunt(final_thought)
+
         self.eng.projector.broadcast(
             m, 
             {"bio": bio_state, "mind": mind_state, "world": world_state, "title": title},
@@ -2580,7 +2634,7 @@ class TheNavigator:
         self.current_location = best_fit
         return best_fit
     def check_anomaly(self, text: str):
-        triggers = ["stan", "glitch", "waiver", "james", "timeline"]
+        triggers = ["glitch", "timeline", "reset", "reboot", "admin"]
         if any(t in text.lower() for t in triggers):
             return True
         return False
@@ -2594,9 +2648,15 @@ class TheNavigator:
         end = self.manifolds[target_name].center_vector
         effort = math.dist(start, end)
         cost = effort * 0.5 
+        health_cost = 0.0
         if not self.shimmer.spend(cost):
-            return [f"🚫 SHIMMER DEPLETED ({self.shimmer.current:.1f}). Rest required."]
-        return [f"🧭 COURSE PLOTTED to {target_name}. Cost: {cost:.1f} Shimmer."]
+            deficit = cost - self.shimmer.current
+            self.shimmer.current = 0
+            health_cost = deficit * 0.5
+            warning = f"🩸 SHIMMER DEPLETED. Burning Life Force to bridge the gap (-{health_cost:.1f} HP)."
+            return [f"🧭 COURSE PLOTTED to {target_name}. {warning}"], health_cost
+            
+        return [f"🧭 COURSE PLOTTED to {target_name}. Cost: {cost:.1f} Shimmer."], 0.0
 class LiteraryJournal:
     REVIEWS = {
         "POSITIVE": [
@@ -2833,7 +2893,7 @@ class BoneAmanita:
             print(f"\n{Prisma.MAG}{adaptation}{Prisma.RST}")
 if __name__ == "__main__":
     eng = BoneAmanita()
-    print(f"{Prisma.paint('>>> BONEAMANITA 9.2.4', 'G')}")
+    print(f"{Prisma.paint('>>> BONEAMANITA 9.2.5', 'G')}")
     print(f"{Prisma.paint('System: ONLINE', '0')}")
     print("Welcome to Adulthood. It hurts. Sometimes it's beautiful.\n")
     try:
@@ -2857,6 +2917,7 @@ if __name__ == "__main__":
                     mitochondria_traits=mito_mutations,
                     antibodies=BIO['immune'].active_antibodies
                 )
+                eng.mind['mirror'].profile.save()
                 print("Saved.")
                 break
             eng.process(u)

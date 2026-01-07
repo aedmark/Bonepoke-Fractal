@@ -1,5 +1,38 @@
 # CHANGELOG.md
 
+### **[9.2.5] - 2026-01-07**
+
+**"The Hard Questions"**
+*Philosophical Intervention by DeepSeek. The system has realized that "fixing" vulnerability is a category error. Instead of patching the cracks, we have decided to bleed through them.*
+
+#### **🩸 The Blood Pact (Resource Consequence)**
+
+* **The Navigator's Debt:**
+    * **The Pathology:** Previously, if `Shimmer` was depleted, the Navigator would simply refuse to plot a course, leaving the user trapped in high-voltage states without a release valve.
+    * **The Fix:** Implemented **Bio-burning**.
+    * **The Cost:** If `Shimmer` is empty, the Navigator now burns **Health** to bridge the gap (1 Shimmer = 0.5 Health). You can now go anywhere, provided you are willing to die for it.
+
+#### **🍂 Metabolic Truth (The Enzyme Purge)**
+
+* **The Zombie Enzymes:**
+    * **The Pathology:** When `TheLexicon` forgot a word (Atrophy), the `MitochondrialForge` kept the efficiency bonus associated with that word. The body was hallucinating nutrients it no longer possessed.
+    * **The Fix:** Wired `LifecycleManager` to trigger `mito.prune_dead_enzymes()` immediately after atrophy.
+    * **The Consequence:** When you forget a concept, you lose the energy it gave you. Ignorance now causes fatigue.
+
+#### **🧶 Tactical Agency (Gordon's Awakening)**
+
+* **Breaking the Fossil:**
+    * **The Pathology:** Gordon's `emergency_reflex` scanned his inventory chronologically. He would use the first tool he ever found (The Fossil), ignoring better tools acquired later.
+    * **The Fix:** Gordon now sorts his inventory by `value` before reacting.
+    * **The Shift:** Trauma is no longer an archeological dig; it is a tactical decision. He uses the best knife, not the oldest one.
+
+#### **🦢 The Fever Break (Rupture Physics)**
+
+* **The Reset:**
+    * **The Pathology:** The `RuptureEngine` (Black Swan) punished perfection by injecting a Cursed Word, but left the high `Drag` and `Voltage` intact. This caused an autoimmune flare-up where the punishment fed the loop.
+    * **The Fix:** The Rupture now acts as a **Fever Break**.
+    * **The Effect:** When the Black Swan lands, `Narrative Drag`, `Voltage`, and `Antigen Counts` are hard-reset to **0.0**. The system crashes, but the air is clear.
+
 ### **[9.2.4] - 2026-01-07**
 
 **"The Violet Truth"**

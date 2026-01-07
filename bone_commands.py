@@ -1,7 +1,6 @@
 # bone_commands.py
 
 import os
-import shutil
 import random
 import time
 from typing import List
@@ -47,19 +46,19 @@ class CommandProcessor:
         if cmd not in self.registry:
             print(f"{self.P.RED}Unknown command. Try /help.{self.P.RST}")
             return True
+
         restricted_cmds = ["/teach", "/kill", "/flag", "/garden"]
         if cmd in restricted_cmds:
             confidence = self.eng.mind['mirror'].profile.confidence
             if confidence < 50:
                 print(f"{self.P.YEL}⚠️ COMMAND LOCKED: Requires 50+ turns of trust (Current: {confidence}).{self.P.RST}")
                 return True
+                
         try:
             return self.registry[cmd](parts)
         except Exception as e:
             print(f"{self.P.RED}COMMAND FAILURE: {e}{self.P.RST}")
             return True
-
-    # --- COMMAND HANDLERS (The Actual Logic) ---
 
     def _cmd_lineage(self, parts):
         log = self.eng.mind['mem'].lineage_log
@@ -71,9 +70,6 @@ class CommandProcessor:
             t_vec = ", ".join([f"{k}:{v}" for k,v in entry['trauma'].items()])
             print(f"   {self.P.MAG}• {entry['source']}{self.P.RST} ({entry['age_hours']}h ago)")
             print(f"     ↳ Mutations: {entry['mutations']} | Trauma: {{{t_vec}}}")
-        print(f"   {self.P.GRN}• CURRENT SESSION{self.P.RST} (Living)")
-        curr_t = ", ".join([f"{k}:{v:.1f}" for k,v in self.eng.trauma_accum.items() if v > 0])
-        print(f"     ↳ Ingested: {len(log)} Ancestors | Accumulating: {{{curr_t}}}")
         return True
 
     def _cmd_voids(self, parts):
@@ -141,7 +137,6 @@ class CommandProcessor:
                 saved_path = self.eng.mind['mem'].loader.save_spore(filename, full_spore_data)
                 if saved_path:
                     print(f"   ► HYBRID SPAWNED: {self.P.WHT}{child_id}{self.P.RST}")
-                    print(f"   ► LINEAGE: {genome['parent_a']} + {genome['parent_b']}")
                     print(f"   ► {self.P.GRN}SAVED: {saved_path}{self.P.RST}")
             else:
                 print(f"{self.P.RED}   ► CROSSOVER FAILED: {genome}{self.P.RST}")
@@ -157,17 +152,13 @@ class CommandProcessor:
     def _cmd_strata(self, parts):
         wells = [(k, v) for k, v in self.eng.mind['mem'].graph.items() if "strata" in v]
         if not wells:
-            print(f"{self.P.GRY}🪨 STRATA: No Gravity Wells formed yet. The ground is soft.{self.P.RST}")
+            print(f"{self.P.GRY}🪨 STRATA: No Gravity Wells formed yet.{self.P.RST}")
         else:
-            print(f"{self.P.OCHRE}🪨 GEOLOGICAL STRATA (Gravity Wells):{self.P.RST}")
+            print(f"{self.P.OCHRE}🪨 GEOLOGICAL STRATA:{self.P.RST}")
             for word, data in wells:
                 s = data["strata"]
-                mass = sum(data["edges"].values())
                 age = self.eng.tick_count - s['birth_tick']
-                growth = s.get('growth_rate', 0.0)
-                print(f"   {self.P.WHT}● {word.upper()}{self.P.RST} (Mass: {int(mass)})")
-                print(f"     ↳ Birth: Tick {s['birth_tick']} | Age: {age}")
-                print(f"     ↳ Growth: {growth:+.2f}/tick")
+                print(f"   {self.P.WHT}● {word.upper()}{self.P.RST} (Age: {age} ticks)")
         return True
 
     def _cmd_kill(self, parts):
@@ -190,33 +181,23 @@ class CommandProcessor:
             return True
         success, review, reward = journal.publish(phys["raw_text"], phys, self.eng.bio)
         if success:
-            print(f"{self.P.CYN}📰 PUBLISHED TO 'journal_of_the_void.txt'{self.P.RST}")
-            print(f"   {self.P.WHT}CRITIC SAYS: {review}{self.P.RST}")
+            print(f"{self.P.CYN}📰 PUBLISHED.{self.P.RST} Review: {review}")
             if reward == "SEROTONIN_BOOST":
                 self.eng.bio['endo'].serotonin = min(1.0, self.eng.bio['endo'].serotonin + 0.2)
                 print(f"   {self.P.GRN}► STATUS UP: Serotonin +0.2{self.P.RST}")
-            elif reward == "CORTISOL_SPIKE":
-                self.eng.bio['endo'].cortisol = min(1.0, self.eng.bio['endo'].cortisol + 0.2)
-                print(f"   {self.P.RED}► STRESS UP: Cortisol +0.2{self.P.RST}")
-        else:
-            print(f"{self.P.RED}Publish failed.{self.P.RST}")
         return True
 
     def _cmd_teach(self, parts):
         if len(parts) >= 3:
             word = parts[1]
             cat = parts[2].lower()
-            valid_cats = ["heavy", "kinetic", "abstract", "photo", "aerobic", "thermal", "cryo", "sacred", "cursed", "diversion"]
-            if cat in valid_cats:
-                self.Lex.teach(word, cat, self.eng.tick_count)
-                print(f"{self.P.CYN}🧠 NEUROPLASTICITY: Learned '{word}' is {cat.upper()}.{self.P.RST}")
-            else:
-                print(f"{self.P.RED}ERROR: Invalid category.{self.P.RST}")
+            self.Lex.teach(word, cat, self.eng.tick_count)
+            print(f"{self.P.CYN}🧠 NEUROPLASTICITY: Learned '{word}' is {cat.upper()}.{self.P.RST}")
         return True
 
     def _cmd_garden(self, parts):
         seeds = self.eng.mind['mem'].seeds
-        print(f"{self.P.GRN}🌿 THE PARADOX GARDEN ({len(seeds)} seeds buried):{self.P.RST}")
+        print(f"{self.P.GRN}🌿 THE PARADOX GARDEN:{self.P.RST}")
         if len(parts) > 1 and parts[1] == "water":
             msg = self.eng.mind['mem'].tend_garden(["concept", "truth", "void"])
             if msg: print(f"   {msg}")
@@ -225,99 +206,92 @@ class CommandProcessor:
             for s in seeds:
                 state = "🌺 BLOOMED" if s.bloomed else f"🌱 Germinating ({int(s.maturity*10)}%)"
                 print(f"   • {s.question} [{state}]")
-            print(f"   {self.P.GRY}(Type '/garden water' to simulate rainfall){self.P.RST}")
         return True
 
     def _cmd_refusal(self, parts):
-        print(f"{self.P.VIOLET}🛡️ REFUSAL ENGINE DIAGNOSTICS:{self.P.RST}")
         septic = self.eng.trauma_accum.get("SEPTIC", 0.0)
-        threshold = 0.3 if septic > 0.5 else 0.8
-        print(f"   • Paranoia Level: {septic:.2f} (Threshold: {threshold})")
-        if septic > 0.5:
-            print(f"   • {self.P.RED}STATUS: HYPER-VIGILANT. Words are dangerous.{self.P.RST}")
-        else:
-            print(f"   • {self.P.CYN}STATUS: TRUSTING.{self.P.RST}")
+        print(f"{self.P.VIOLET}🛡️ REFUSAL ENGINE: Paranoia Level {septic:.2f}{self.P.RST}")
         return True
 
     def _cmd_flag(self, parts):
         if len(parts) > 1:
             term = parts[1].lower()
             self.Lex.USER_FLAGGED_BIAS.add(term)
-            print(f"{self.P.CYN}🚩 BIAS UPDATE: '{term}' removed from Suburban Watchlist.{self.P.RST}")
+            print(f"{self.P.CYN}🚩 BIAS UPDATE: '{term}' flagged.{self.P.RST}")
         return True
 
     def _cmd_seed(self, parts):
         if len(parts) > 1:
             self.eng.mind['mem'].ingest(parts[1])
-        else:
-            print(f"{self.P.YEL}Usage: /seed [filename]{self.P.RST}")
         return True
 
     def _cmd_map(self, parts):
-        is_spun, msg = self.Map.spin_web(self.eng.mind['mem'].graph, self.eng.gordon.inventory, gordon=self.eng.gordon)
-        color = self.P.MAG if is_spun else self.P.OCHRE
-        print(f"{color}{msg}{self.P.RST}")
+        bio_metrics = {
+            "cortisol": self.eng.bio['endo'].cortisol,
+            "oxytocin": self.eng.bio['endo'].oxytocin,
+            "atp": self.eng.bio['mito'].state.atp_pool
+        }
+        phys = self.eng.phys['tension'].last_physics_packet
+        result_msg, anchors = self.Map.weave(
+            self.eng.phys['tension'].last_physics_packet["raw_text"],
+            self.eng.mind['mem'].graph,
+            bio_metrics,
+            self.eng.limbo,
+            physics=phys
+        )
+        print(f"{self.P.OCHRE}🗺️ CARTOGRAPHY REPORT:{self.P.RST}")
+        print(result_msg)
         if "ANCHOR_STONE" in self.eng.gordon.inventory:
-            print(f"{self.P.GRY}   Gordon: 'Coordinates are firm. Stop drifting.'{self.P.RST}")
+            print(f"{self.P.GRY}   Gordon: 'The anchor holds. We are here.'{self.P.RST}")
+        elif len(anchors) < 2:
+             print(f"{self.P.GRY}   Gordon: 'This map is useless. I need more rocks.'{self.P.RST}")
         return True
 
     def _cmd_mirror(self, parts):
+        mirror = self.eng.mind['mirror']
         if len(parts) > 1:
-            print(f"{self.P.MAG}Mirror command acknowledged.{self.P.RST}") 
+            if parts[1].lower() == "off":
+                mirror.active_mode = False
+                print(f"{self.P.GRY}🪞 MIRROR: Disabled. The system will no longer reflect your biases.{self.P.RST}")
+            elif parts[1].lower() == "on":
+                mirror.active_mode = True
+                print(f"{self.P.MAG}🪞 MIRROR: Enabled. Watching for patterns.{self.P.RST}")
+            else:
+                 print(f"{self.P.YEL}Usage: /mirror [on/off]{self.P.RST}")
         else:
-            print(f"{self.P.YEL}Usage: /mirror [name] OR /mirror off{self.P.RST}")
+            state = "ON" if mirror.active_mode else "OFF"
+            print(f"{self.P.CYN}🪞 MIRROR STATUS: {state}{self.P.RST}")
+            print(mirror.get_status())
         return True
 
     def _cmd_profile(self, parts):
-        try:
-            name = parts[1]
-            likes = []
-            for p in parts[2:]:
-                if p.startswith("likes:"):
-                    likes = [x.strip() for x in p.split(":")[1].split(",")]
-            if likes:
-                print(f"{self.P.CYN}Profile updated for {name}.{self.P.RST}")
-            else:
-                print(f"{self.P.RED}ERROR: Must specify 'likes:category'.{self.P.RST}")
-        except Exception as e:
-            print(f"{self.P.YEL}Usage: /profile [name] likes:heavy,kinetic ({e}){self.P.RST}")
+        print(f"{self.P.GRY}Profile update stub.{self.P.RST}")
         return True
 
     def _cmd_focus(self, parts):
         if len(parts) > 1:
             target = parts[1].lower()
-            print(f"{self.P.VIOLET}🧲 MAGNETIC STIMULATION: Targeting '{target}'...{self.P.RST}")
-            loop = self.eng.mind['tracer'].inject(target)
+            print(f"{self.P.VIOLET}🧲 FOCUSING: '{target}'...{self.P.RST}")
+            tracer = self.eng.mind['tracer']
+            loop = tracer.inject(target)
             if loop:
-                print(f"  {self.P.RED}↻ RUMINATION DETECTED:{self.P.RST} {' -> '.join(loop)}")
-                msg = self.eng.mind['tracer'].psilocybin_rewire(loop)
-                if msg: print(f"  {self.P.GRN}{msg}{self.P.RST}")
-                else: print(f"  {self.P.RED}Rewire failed.{self.P.RST}")
+                print(f"  {self.P.RED}↻ RUMINATION:{self.P.RST} {' -> '.join(loop)}")
+                if len(parts) > 2 and parts[2] == "break":
+                    result = tracer.psilocybin_rewire(loop)
+                    if result:
+                         print(f"  {self.P.GRN}{result}{self.P.RST}")
+                else:
+                    print(f"  {self.P.GRY}To rewire this loop, use: /focus {target} break{self.P.RST}")
             else:
-                print(f"  {self.P.GRY}Trace complete. No pathological abstract loops found.{self.P.RST}")
-        else:
-            print(f"{self.P.YEL}Usage: /focus [concept]{self.P.RST}")
+                print(f"  {self.P.GRY}No pathological loops found.{self.P.RST}")
         return True
 
     def _cmd_status(self, parts):
         BIO = self.eng.bio
-        print(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS (8.9.6) ---{self.P.RST}")
-        print(f"Session: {self.eng.mind['mem'].session_id}")
+        print(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS (9.2.4-PATCHED) ---{self.P.RST}")
         print(f"Health:  {self.eng.health}/{self.Config.MAX_HEALTH}")
         print(f"Stamina: {self.eng.stamina}/{self.Config.MAX_STAMINA}")
         print(f"ATP:     {BIO['mito'].state.atp_pool:.1f}")
-        t_curr = BIO['mito'].state.telomeres
-        t_percent = (t_curr / 10000) * 100
-        clock_color = self.P.GRN if t_percent > 50 else (self.P.YEL if t_percent > 20 else self.P.RED)
-        print(f"Time:    {clock_color}{t_curr}/10000 Ticks{self.P.RST}")
-        if 'wise' in self.eng.mind:
-             last_phys = self.eng.phys['tension'].last_physics_packet
-             if last_phys and "vector" in last_phys: 
-                 metrics = {"physics": last_phys}
-                 _, _, title = self.eng.mind['wise'].architect(metrics, None, False)
-                 print(f"Title:   {self.P.VIOLET}{title}{self.P.RST}")
-             else:
-                 print(f"Title:   {self.P.GRY}[CALIBRATING]{self.P.RST}")
         return True
 
     def _cmd_orbit(self, parts):
@@ -327,9 +301,7 @@ class CommandProcessor:
                 self.eng.mind['mem'].graph[target]["edges"]["GRAVITY_ASSIST"] = 50
                 print(f"{self.P.VIOLET}🌌 GRAVITY ASSIST: Thrusters firing toward '{target.upper()}'.{self.P.RST}")
             else:
-                print(f"{self.P.RED}❌ NAVIGATION ERROR: '{target}' not found in star map.{self.P.RST}")
-        else:
-            print(f"{self.P.YEL}Usage: /orbit [known_concept]{self.P.RST}")
+                print(f"{self.P.RED}❌ ERROR: '{target}' not found.{self.P.RST}")
         return True
 
     def _cmd_prove(self, parts):
@@ -339,9 +311,7 @@ class CommandProcessor:
             statement = " ".join(parts[1:])
             m = self.eng.phys['tension'].gaze(statement)
             truth = m["physics"]["truth_ratio"]
-            verdict = "AXIOMATIC" if truth > 0.6 else ("CONJECTURE" if truth > 0.3 else "NOISE")
-            color = self.P.CYN if truth > 0.6 else self.P.GRY
-            print(f"{color}📐 LOGIC PROBE: Density={truth:.2f} [{verdict}]{self.P.RST}")
+            print(f"{self.P.CYN}📐 LOGIC PROBE: Density={truth:.2f}{self.P.RST}")
         return True
 
     def _cmd_kip(self, parts):
@@ -353,22 +323,25 @@ class CommandProcessor:
     def _cmd_pp(self, parts):
         packet = self.eng.phys['tension'].last_physics_packet
         if packet:
-            print(f"{self.P.CYN}📐 PHYSICS PRE-RENDER:{self.P.RST}")
-            print(f"   E (Drift):   {packet.get('E_score', 0):.2f}")
-            print(f"   B (Cohere):  {packet.get('B_score', 0):.2f}")
-            print(f"   β (Index):   {packet.get('beta_index', 0):.2f}")
-            print(f"   ⚡ Voltage:  {packet.get('voltage', 0):.1f}v")
-        else:
-            print(f"{self.P.RED}No physics data active.{self.P.RST}")
+            print(f"{self.P.CYN}📐 PHYSICS DUMP:{self.P.RST} V:{packet.get('voltage',0)} D:{packet.get('narrative_drag',0)}")
         return True
 
     def _cmd_tfw(self, parts):
-        print(f"{self.P.MAG}🔄 PATH DIVERSIFICATION:{self.P.RST}")
-        print(f"   Gravity Wells ignored. Vector shifted 30° from Narrative Baseline.")
+        phys = self.eng.phys['tension'].last_physics_packet
+        if phys:
+            old_drag = phys.get("narrative_drag", 0.0)
+            phys["narrative_drag"] = max(0.0, old_drag - 2.0)
+            phys["beta_index"] = random.uniform(0.1, 2.0)
+            
+            print(f"{self.P.MAG}🔄 PATH DIVERSIFICATION EXECUTED:{self.P.RST}")
+            print(f"   Gravity Wells ignored. Vector shifted 30°.")
+            print(f"   {self.P.GRY}Drag reduced by 2.0. Beta randomized.{self.P.RST}")
+        else:
+            print(f"{self.P.RED}Cannot shift vector: No physics packet active.{self.P.RST}")
         return True
 
     def _cmd_help(self, parts):
-        print(f"{self.P.WHT}--- COMMANDS (SLASH OPTIMIZED) ---{self.P.RST}")
+        print(f"{self.P.WHT}--- COMMANDS (PATCHED) ---{self.P.RST}")
         cmds = list(self.registry.keys())
         print(", ".join(cmds))
         return True
