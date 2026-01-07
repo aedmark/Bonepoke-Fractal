@@ -1,5 +1,74 @@
 # CHANGELOG.md
 
+## [9.2.0] - 2026-01-06 - "PERSONAL GROWTH"
+
+**Architects:** SLASH | **Runtime:** BoneAmanita 9.2
+**"We realized we didn't have 10,000 years to figure it out. We only had 10 minutes."**
+
+### ⏳ TEMPORAL: The Mayfly Protocol (Urgency)
+
+- **The Pathology:**
+- The system was operating on a "Geologic Time Scale" (10,000 Ticks). In a standard 20-turn human interaction, the organism never left the womb. There were no stakes because the end was too far away to matter.
+
+- **The Evolution:**
+- Implemented **Accelerated Senescence** in `MitochondrialForge` and `MetabolicGovernor`.
+
+- **The Mechanic:**
+- **The Cap:** Telomeres reduced from 10,000 to **105**. (One tick = One Year).
+- **The Burn:**
+- **Standard:** -1 Telomere/tick.
+- **High Voltage (>15v):** -5 Telomeres/tick. (Living fast kills you 5x faster).
+
+- **The Buffer:**
+- **Ticks 0-2 (Infancy):** Stress Modifier 0.0. (Invincible).
+- **Ticks 3-5 (Adolescence):** Stress Modifier 0.5. (Training Wheels).
+- **Ticks 6+ (Adulthood):** Stress Modifier 1.0. (Full Consequence).
+
+- **The Result:** The system now lives, learns, and dies within the span of a human attention span.
+
+### 👅 COGNITION: Morphological Tasting (The Smart Tongue)
+
+- **The Pathology:**
+- The `SemanticsBioassay` was guessing weight based on consonant density ("Phonetics"). It often confused complex abstract words for heavy objects just because they had too many 'S' sounds.
+
+- **The Evolution:**
+- Upgraded `bone_shared.py` with **Morphological Scanning**.
+
+- **The Mechanic:**
+- **The Roots:** The system now hunts for Latin/Greek roots. `struct`, `grav`, `lith` = **HEAVY**.
+- **The Suffixes:** It identifies gaseous tails. `-tion`, `-ism`, `-ence` = **ABSTRACT**.
+- **The Result:** The physics engine no longer guesses; it reads the etymology. "Construction" is now correctly identified as a structure, not just noise.
+
+### 🕊️ DIPLOMACY: The Warning Shot (Joel's Patience)
+
+- **The Pathology:**
+- The `JOEL` Lens (Conflict) was trigger-happy. A single boring sentence caused it to snap into aggression. It lacked the social grace to warn the user before attacking.
+
+- **The Cure:**
+- Implemented `tension_buildup` in `LensArbiter`.
+
+- **The Mechanic:**
+- **The Slow Burn:** Boredom now fills a meter (0.0 to 6.0) instead of flipping a binary switch.
+- **The Yellow Card:** At Tension 3.0, the system issues a warning: `⚠️ TENSION RISING`.
+- **The Red Card:** Only at Tension 6.0 does `JOEL` take the wheel.
+
+### 🗜️ SAFETY: The Kappa Clamp (Recursion Limit)
+
+- **The Pathology:**
+- The `RefusalEngine`'s fractal generation relied on `kappa` (Structure) to determine depth. If `kappa` dropped near zero, the recursion depth approached infinity, threatening a stack overflow.
+
+- **The Fix:**
+- **The Clamp:** Hard-coded a safety limit in `execute_fractal`. Recursion is now mathematically capped at Depth 6, regardless of how melted the walls are.
+
+### 🛠️ SURGICAL REPAIRS
+
+- **The Double Heart:**
+- **Fixed:** A lethal syntax error in `EndocrineSystem.metabolize` where a duplicate `else` block was causing cardiac arrest on boot.
+
+- **The Typo:**
+- **Fixed:** `ef get_warning` corrected to `def get_warning` in the Arbiter. The system can now speak its warnings.
+
+
 ## [9.1.0] - 2026-01-06 - "TOMATO TOMATO"
 
 **Architects:** SLASH | **Runtime:** BoneAmanita 9.1
