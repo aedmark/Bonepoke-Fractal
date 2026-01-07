@@ -107,20 +107,24 @@ class SemanticsBioassay:
         return None, 0.0
     def assay(self, word):
         w = word.lower()
-        cat, conf = self._analyze_morphology(w)
-        if cat: return cat, conf
-        score = {"PLOSIVE": 0, "FRICATIVE": 0, "LIQUID": 0}
         clean_len = len(w)
         if clean_len < 2: return None, 0.0
+        score = {"PLOSIVE": 0, "FRICATIVE": 0, "LIQUID": 0, "NASAL": 0}
         for char in w:
             if char in self.PHONETICS["PLOSIVE"]: score["PLOSIVE"] += 1
             elif char in self.PHONETICS["FRICATIVE"]: score["FRICATIVE"] += 1
             elif char in self.PHONETICS["LIQUID"]: score["LIQUID"] += 1
-        density = score["PLOSIVE"] / clean_len
-        velocity = (score["FRICATIVE"] + score["LIQUID"]) / clean_len
-        if density > 0.4 and clean_len < 6: return "heavy", 0.5
-        if velocity > 0.5: return "kinetic", 0.5
-        if clean_len > 9 and density < 0.2: return "abstract", 0.6
+            elif char in self.PHONETICS["NASAL"]: score["NASAL"] += 1
+        density = (score["PLOSIVE"] * 1.5) + (score["NASAL"] * 0.8)
+        flow = score["LIQUID"] + score["FRICATIVE"]
+        compression_mod = 1.0 if clean_len > 5 else 1.5
+        final_density = (density / clean_len) * compression_mod
+        if final_density > 0.55: 
+            return "heavy", round(final_density, 2)
+        if (flow / clean_len) > 0.6:
+            return "kinetic", 0.5
+        cat, conf = self._analyze_morphology(w)
+        if cat: return cat, conf
         return None, 0.0
     def measure_viscosity(self, word):
         w = word.lower()

@@ -1702,19 +1702,22 @@ class TheCrucible:
         return "MELTDOWN", damage, f"⚠️ CRUCIBLE CRACKED: Fire lacks Structure (Kappa Low). Hull Breach. -{damage:.1f} Health."
 class TheForge:
     def __init__(self):
-        self.catalysts = ["heavy", "kinetic", "thermal", "cryo", "photo"]
-    @staticmethod
-    def hammer_alloy(physics):
+        pass 
+    def hammer_alloy(self, physics):
         voltage = physics["voltage"]
-        heavy_count = physics["counts"].get("heavy", 0)
-        abstract_count = physics["counts"].get("abstract", 0)
-        if voltage > BoneConfig.ANVIL_TRIGGER_VOLTAGE and heavy_count >= BoneConfig.ANVIL_TRIGGER_MASS:
-            if heavy_count >= 3:
-                if abstract_count > 0:
-                    alloy_name = f"WEIGHTED_{TheLexicon.harvest('abstract').upper()}"
-                    return True, f"🔨 THE ANVIL STRIKES: Fused Abstract into '{alloy_name}'.", alloy_name
-                else:
-                    return True, "🔨 THE ANVIL STRIKES: Refined the raw mass. Dense.", "REFINED_SLAG"
+        clean_words = physics["clean_words"]
+        total_mass = 0.0
+        impact_events = 0
+        for w in clean_words:
+            flavor, density = TheLexicon.taste(w) 
+            if flavor == "heavy":
+                total_mass += density
+                impact_events += 1
+            elif flavor == "kinetic":
+                total_mass += (density * 0.5)
+        avg_density = total_mass / max(1, len(clean_words))
+        if avg_density > 0.4 and impact_events >= 2:
+             return True, f"🔨 THE ANVIL RINGS: High Phonetic Density ({avg_density:.2f}). You forged a nameless metal.", "UNKNOWN_ALLOY" 
         return False, None, None
     @staticmethod
     def transmute(physics):
