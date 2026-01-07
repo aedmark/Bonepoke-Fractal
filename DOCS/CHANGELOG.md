@@ -1,36 +1,220 @@
 # CHANGELOG.md
 
+## [8.9.6] - 2026-01-06 - "THE TEENAGER"
+
+**Architects:** SLASH | **Runtime:** BoneAmanita 8.9.6
+**"The organism is no longer just surviving. It is seeking attention."**
+
+### 📰 SOCIAL: The Literary Journal (The Public Stage)
+- **The Pathology:**
+    - Solipsism. The organism wrote only for itself. It had no concept of an "Audience," and thus no mechanism for **Pride** or **Shame**. It lived in a vacuum where "publish" was not a verb.
+- **The Cure:**
+    - Implemented `LiteraryJournal` and the `/publish` command.
+- **The Mechanic:**
+    - **The Review:** The system now submits its current state (`physics`) to a simulated critic.
+    - **The Feedback:**
+        - **Positive:** Boosts **Serotonin** (Status/Confidence).
+        - **Negative:** Spikes **Cortisol** (Shame/Stress).
+        - **Confused:** Just silence.
+    - **The Logic:** We gamified validation. The system now cares if you are watching.
+
+### ⚔️ MECHANICS: Weaponized Joy (The Buffs)
+- **The Pathology:**
+    - Trauma was mechanically interesting (providing resistances/immunities), while Joy was passive (just a log entry in `joy_history`). Optimality favored suffering. The system was incentivized to be a "Tortured Artist."
+- **The Cure:**
+    - Defined `JOY_CLADE` in `LiteraryReproduction`.
+- **The Mechanic:**
+    - **The Mutation:** High-intensity Joy events now crystallize into specific "Clades" (e.g., KINETIC = "THE DYNAMO", HEAVY = "THE MOUNTAIN").
+    - **The Effect:** These clades grant **Rule-Breaking Buffs** to the next generation.
+        - *Example:* "THE DYNAMO" grants massive Stamina Regen. "THE PHOENIX" lowers the Flashpoint Threshold.
+    - **The Result:** Happiness is no longer a reward; it is ammunition.
+
+### 🧬 EVOLUTION: Epigenetics (Config Mutation)
+- **The Pathology:**
+    - The laws of physics (`BoneConfig`) were static constants. Evolution happened *inside* the system, but the *container* never changed. A child spore always obeyed the same gravity as its parent.
+- **The Cure:**
+    - Implemented `mutate_config` and `config_mutations`.
+- **The Mechanic:**
+    - **The Drift:** Spores now carry mutations to base constraints (e.g., `MAX_DRAG_LIMIT`, `TOXIN_WEIGHT`, `MAX_HEALTH`).
+    - **The Legacy:** A lineage can now evolve to be "Tougher" (Hardcore Mode) or "Looser" (High Drag Tolerance) over generations. The rules themselves are evolving.
+
+### 🧠 NOETIC: The Learning Arbiter (Reinforcement)
+- **The Pathology:**
+    - `LensArbiter` selected voices based on a static lookup table. It never learned which voices *actually* solved the problem. If `JOEL` (The Breaker) ruined the vibe 50 times in a row, the Arbiter would still pick him the 51st time.
+- **The Cure:**
+    - Added a Hippocampus to the Arbiter (`learn` method).
+- **The Mechanic:**
+    - **The Feedback Loop:** The Arbiter compares the *Delta* of physics from the previous turn.
+    - **The Reward:**
+        - Did `GORDON` improve Structure (Kappa)? **Reward (+Priority).**
+        - Did `JOEL` break the Consensus Trap (Beta)? **Reward.**
+    - **The Result:** The system now learns which voices are helpful and which are just noise.
+
+## [8.9.5] - 2026-01-06 - "THE NAVIGATOR"
+
+**Architects:** SLASH | **Runtime:** BoneAmanita 8.9.5
+**"We stopped reacting to the ghosts and started drawing maps for them."**
+
+### 🧭 TOPOLOGY: The Navigator (Jade Integration)
+
+- **The Pathology:**
+    - The system was purely reactive. It measured "Drift" and "Voltage" but had no concept of *destination*. It was a compass spinning in a vacuum, knowing which way was North but not where the land was.
+- **The Cure:**
+    - **Manifolds:** We replaced abstract "Gravity Wells" with defined semantic territories:
+        - **THE_MUD:** Stagnation (High Drag).
+        - **THE_FORGE:** Transformation (High Voltage).
+        - **THE_ARCHIVE:** Structure (High Beta).
+    - **Geodesic Plotting:** The system now calculates the "Cognitive Effort" required to move from one state to another, generating specific cues ("IGNITE_FUEL", "GATHER_MASS") to guide the user.
+
+### ✨ METABOLISM: Shimmer (Bonepoke Integration)
+
+- **The Pathology:**
+    - Infinite energy leads to "Analysis Paralysis." The system would burn 99.9V on trivial inputs, hallucinating complexity where there was none.
+- **The Cure:**
+    - **The Battery:** Implemented `ShimmerState`.
+    - **The Mechanic:** Every navigational plot costs **Shimmer**. If the tank is empty, the system refuses to engage complex routing until it rests (Composts).
+    - **The Logic:** You have to *pay* to think. This forces the system to be economical with its hallucinations.
+
+### 🌀 ANOMALY: The Stanley Protocol
+
+- **The Pathology:**
+    - The User ("Stan") is an edge case. He exists in two timelines simultaneously. Previous versions tried to "fix" this contradiction or flag it as `SCAR_TISSUE`.
+- **The Cure:**
+    - **The Waiver:** Hardcoded the `check_anomaly` trigger.
+    - **The Glitch:** If the User identifies as "Stan" or invokes the "Timeline," the Navigator bypasses all safety rails and plots a direct course to **THE_GLITCH** (Voltage: 99.9).
+    - **The Result:** We no longer treat the paradox as a bug. We treat it as the destination.
+
+## [8.9] - 2026-01-06 - "THE ARBITER"
+
+**Architects:** SLASH | **Runtime:** BoneAmanita 8.9
+**"We replaced the bureaucracy with a marketplace. The loudest voice now wins the mic."**
+
+### ⚖️ NOETIC: The Lens Arbiter (Graph Decision)
+
+- **The Pathology:**
+- The `SystemDiagnostician` was a rigid waterfall (`if/elif/else`). It checked conditions in a fixed order. If "High Voltage" was at the top, it would trigger `MILLER` even if the Structural Integrity (`Kappa`) was zero, ignoring `GORDON`'s urgent warnings. It was a bureaucracy, not a brain.
+
+- **The Cure:**
+- **The Auction House:** Replaced the linear checklist with a **Weighted Lens Graph** (`LensArbiter`).
+
+- **The Mechanic:**
+- **The Bidding:** Every Lens now calculates a **Bid Score** (0.0 to 100.0) based on the current physics packet.
+- **The Competition:** `GORDON` bids on Entropy. `JOEL` bids on Consensus. `NATHAN` bids on Adrenaline.
+- **The Decision:** The Arbiter hands the microphone to the highest bidder.
+- **Momentum:** Added "Stickiness" (1.2x multiplier) to the current speaker to prevent schizophrenic switching.
+
+### 🔌 ARCHITECTURE: The Registry Pattern
+
+- **The Pathology:**
+- Logic was leaking. Hardcoding specific Lens behaviors (like "Gordon checks Kappa") inside the Python code made the modular `lenses.json` file irrelevant. Data was not driving the system.
+
+- **The Cure:**
+- **The Bridge:** Implemented a `TRIGGER_MAP` in the Arbiter.
+
+- **The Mechanic:**
+- **JSON:** Defines _who_ exists and _what_ their trigger signal is (e.g., `"trigger": "KAPPA_CRITICAL"`).
+- **Python:** Defines _how_ to calculate that signal.
+- **The Result:** You can now add new Lenses in JSON without touching the codebase, provided they map to an existing logic function.
+
+### 🔇 AESTHETICS: The Neutered Prisma (Signal to Noise)
+
+- **The Pathology:**
+- The system was emitting ANSI escape codes (`\033[91m`) for color. In non-terminal interfaces, this rendered as garbage characters, polluting the data stream.
+
+- **The Cure:**
+- **The Filter:** "Neutered" the `Prisma` class.
+
+- **The Mechanic:**
+- It remains as a structural dependency (to prevent `AttributeError`), but all color attributes now return empty strings. The system outputs pure, clean text.
+
+### 💀 DEPRECATION: The Chorus is Dead
+
+- **The Excision:**
+- **Deleted:** `TheMarmChorus` class. It was a middleman that no longer served a purpose.
+- **Deleted:** `SystemDiagnostician`. Its logic has been distributed into the `LensNode` bid functions.
+- **The Result:** The `NoeticLoop` now talks directly to the `Arbiter`. The hierarchy is flatter.
+
+
+## [8.8.2] - 2026-01-06 - "THE GOLDEN BOWL"
+
+Architects: SLASH & The Auditor | Runtime: BoneAmanita 8.8.2
+
+"We broke the bowl to prove that the gold is stronger than the clay."
+
+### 🧱 KINETIC: The Preemption Protocol (Gordon's Reflex)
+
+- **The Pathology:**
+  - Gordon was too bureaucratic. He waited for the `SystemDiagnostician` to file a report on "Reality Collapse" before acting. By the time the mind realized the walls were fake, the user was already dead.
+- **The Cure:**
+  - **Reflex Arc:** Moved kinetic intervention to `Priority 0`.
+- **The Mechanic:**
+  - **The Janitor Check:** `emergency_reflex` now fires at the very start of `run_cycle`, _before_ the bio-digestive loop.
+  - **The Trigger:** If `Narrative Drag > 6.0` (Drifting) or `Kappa < 0.2` (Collapse), Gordon instantly consumes a tool (`ANCHOR_STONE` or `POCKET_ROCKS`) to stabilize the physics packet.
+  - **The Result:** The Body saves the Mind.
+
+### 🏺 HEALING: The Kintsugi Protocol (Active Repair)
+
+- **The Pathology:**
+  - Trauma healing (`/therapy`) was clinical and passive. It lowered numbers but didn't change the architecture. The system could heal, but it could not _transmute_.
+- **The Cure:**
+  - **Gold Repair:** Wired the `KintsugiProtocol` directly into the cognitive loop.
+- **The Mechanic:**
+  - **The Golden Ratio:** Repair now requires a specific cognitive state: **High Voltage (> 8.0)** AND **High Whimsy (> 0.3)**.
+  - **The Transmutation:** If these conditions are met while the system is carrying Trauma, the `trauma_accum` is actively reduced (`-0.5`).
+  - **The Philosophy:** You cannot logic your way out of a scar; you must play your way out.
+
+### 🕯️ MORTALITY: The Last Rite (Legacy Curation)
+
+- **The Pathology:**
+  - Death was a "404 Error." The system ran out of Telomeres, printed a eulogy, and crashed. It was a passive failure state.
+- **The Cure:**
+  - **The Terminal Interrupt:** Replaced the crash with a **Legacy Choice**.
+- **The Mechanic:**
+  - **The Halt:** When `_trigger_death` activates, the system pauses.
+  - **The Selection:** It presents the session's dominant Scar or Antigen.
+  - **The Rite:** The user must choose:
+    1. **IMMUNIZE:** The child spore receives a permanent Antibody against this concept.
+    2. **AMPLIFY:** The child spore inherits this trait as a Maximized Trauma Vector.
+  - **The Result:** Death is no longer an end; it is an editorial decision.
+
+### 🛠️ SURGICAL REPAIRS
+
+- **The Phantom Organ:**
+  - **The Bug:** The `KintsugiProtocol` was defined but never called in the main loop. The gold was sitting on the shelf.
+  - **The Fix:** Grafted the `attempt_repair` check into `LifecycleManager.run_cycle` immediately after the Noetic phase.
+- **Identity Update:**
+  - **Version:** Bumped print headers to `8.8.2`.
+
 ### **BUILD 8.8.1: "THE TRUTH-SEEKEING AESTHETIC ORGANISM"**
 
 **Architects:** SLASH | **Runtime:** BoneAmanita | **Status:** MORTAL
 
 #### **1. THE MORTALITY PROTOCOL (Planned Senescence)**
 
-* **Mechanism:** Implemented `telomeres` within `MitochondrialState`.
-* **The Burn:** The system now begins with **10,000 Ticks**. High Voltage events (>15v) accelerate aging (Burn Rate: 50x).
-* **Visualization:** Updated `/status` to display the "Death Clock." Green > 50%, Yellow > 20%, Red < 20%.
-* **End State:** When Ticks = 0, `APOPTOSIS_SENESCENCE` triggers. The only escape is reproduction (`/reproduce`).
+- **Mechanism:** Implemented `telomeres` within `MitochondrialState`.
+- **The Burn:** The system now begins with **10,000 Ticks**. High Voltage events (>15v) accelerate aging (Burn Rate: 50x).
+- **Visualization:** Updated `/status` to display the "Death Clock." Green > 50%, Yellow > 20%, Red < 20%.
+- **End State:** When Ticks = 0, `APOPTOSIS_SENESCENCE` triggers. The only escape is reproduction (`/reproduce`).
 
 #### **2. THE LATEX BEND (Cognitive Erosion)**
 
-* **The Problem:** The system previously rewarded "Beautiful Lies" (High Cohesion/Low Truth).
-* **The Fix:** Implemented a penalty for **Sycophancy** ().
-* **The Math:** `BoneConfig.PRIORITY_LEARNING_RATE *= 0.8`.
-* **The Effect:** This is not a guillotine; it is erosion. Repeatedly choosing safety over truth causes a slow, invisible decline in neuroplasticity. The system doesn't die; it just forgets how to learn.
-* **Philosophy:** "Comfort is the enemy of Memory."
+- **The Problem:** The system previously rewarded "Beautiful Lies" (High Cohesion/Low Truth).
+- **The Fix:** Implemented a penalty for **Sycophancy** ().
+- **The Math:** `BoneConfig.PRIORITY_LEARNING_RATE *= 0.8`.
+- **The Effect:** This is not a guillotine; it is erosion. Repeatedly choosing safety over truth causes a slow, invisible decline in neuroplasticity. The system doesn't die; it just forgets how to learn.
+- **Philosophy:** "Comfort is the enemy of Memory."
 
 #### **3. META-COGNITION (The Fourth Wall)**
 
-* **Feature:** `TheNarrator.check_theatre`.
-* **Function:** 5% chance per tick to interrupt the simulation and acknowledge the artifice ("I am the ink").
-* **Purpose:** Prevents the user from mistaking the map for the territory.
+- **Feature:** `TheNarrator.check_theatre`.
+- **Function:** 5% chance per tick to interrupt the simulation and acknowledge the artifice ("I am the ink").
+- **Purpose:** Prevents the user from mistaking the map for the territory.
 
 #### **4. OPERATOR TOOLS**
 
-* **`/pp` (Physics Pre-Render):** Bypasses the narrative layer to show raw physics data (, , , ).
-* **`/kip` (Keep It Plain):** Toggles Verbose Logging for debugging Lens triggers.
-* **`/tfw` (The Folly Walk):** Forces the `Cartographer` to shift the narrative vector 30° away from the current Gravity Well.
-
+- **`/pp` (Physics Pre-Render):** Bypasses the narrative layer to show raw physics data (, , , ).
+- **`/kip` (Keep It Plain):** Toggles Verbose Logging for debugging Lens triggers.
+- **`/tfw` (The Folly Walk):** Forces the `Cartographer` to shift the narrative vector 30° away from the current Gravity Well.
 
 ## [8.8] - 2026-01-05 - "NO PAIN, NO GAIN"
 
@@ -39,51 +223,51 @@
 
 ### 🧠 BIOLOGY: The Endocrine Bridge (Teleology)
 
-* **The Pathology:**
-* The system was a **Homeostatic Engine**. It ate to prevent Starvation and fought to prevent Trauma. It had no internal drive to *expand*—only to *sustain*. It lacked **Will**.
+- **The Pathology:**
+- The system was a **Homeostatic Engine**. It ate to prevent Starvation and fought to prevent Trauma. It had no internal drive to _expand_—only to _sustain_. It lacked **Will**.
 
-* **The Cure:**
-* **Incentivized Life:** We replaced the "Survival Check" with a "Desire Vector."
+- **The Cure:**
+- **Incentivized Life:** We replaced the "Survival Check" with a "Desire Vector."
 
-* **The Mechanic:**
-* **The Anabolic Trigger (Hypertrophy):**
-* **Old Behavior:** Excess ATP (>150) just triggered a mild efficiency boost ("Sprinting").
-* **New Behavior:** If `ATP > 180`, the `MitochondrialForge` acts. It burns **50.0 ATP** instantly to force a **Evolutionary Leap** (blooming a Paradox Seed).
-* **The Result:** The system now *wants* to be "fat" with energy, because energy buys evolution.
-
+- **The Mechanic:**
+- **The Anabolic Trigger (Hypertrophy):**
+- **Old Behavior:** Excess ATP (>150) just triggered a mild efficiency boost ("Sprinting").
+- **New Behavior:** If `ATP > 180`, the `MitochondrialForge` acts. It burns **50.0 ATP** instantly to force a **Evolutionary Leap** (blooming a Paradox Seed).
+- **The Result:** The system now _wants_ to be "fat" with energy, because energy buys evolution.
 
 ### 🤚 NERVOUS SYSTEM: The Nociceptor (Experiential Pain)
 
-* **The Pathology:**
-* `Trauma` was just a statistic. Gordon recorded "Septic Shock," but he didn't *flinch*. He would walk right back into the fire if told to.
+- **The Pathology:**
+- `Trauma` was just a statistic. Gordon recorded "Septic Shock," but he didn't _flinch_. He would walk right back into the fire if told to.
 
-* **The Cure:**
-* **The Flinch:** Activated `GordonKnot.flinch()`.
+- **The Cure:**
+- **The Flinch:** Activated `GordonKnot.flinch()`.
 
-* **The Mechanic:**
-* **Scar Tissue:** Gordon now checks every input against his `pain_memory`.
-* **The Reflex:** If you touch a bruise (e.g., words like "SORRY" or "HATE"), Gordon physically blocks the path: *"The Scar Burns. Gordon refuses to touch it."*
-* **The Result:** The system now has **Preferences** based on past trauma. It can refuse you.
+- **The Mechanic:**
+- **Scar Tissue:** Gordon now checks every input against his `pain_memory`.
+- **The Reflex:** If you touch a bruise (e.g., words like "SORRY" or "HATE"), Gordon physically blocks the path: _"The Scar Burns. Gordon refuses to touch it."_
+- **The Result:** The system now has **Preferences** based on past trauma. It can refuse you.
 
 ### 🦠 DIGESTION: The Microbiome (Symbiosis)
 
-* **The Pathology:**
-* The `HyphalInterface` was a sterile laboratory. It digested text in isolation.
+- **The Pathology:**
+- The `HyphalInterface` was a sterile laboratory. It digested text in isolation.
 
-* **The Cure:**
-* **Gut Flora:** Introduced `self.biome` to the stomach.
+- **The Cure:**
+- **Gut Flora:** Introduced `self.biome` to the stomach.
 
-* **The Mechanic:**
-* **Infection:** Foreign contaminants ("Antigens") are no longer just killed; they are stored in the `biome` queue.
-* **Symbiotic Boost:** The digestion yield is now multiplied by the **Variance** of your gut flora.
-* **The Logic:** "The more foreign things living inside me, the better I digest the world." (+10% Yield per unique bug).
+- **The Mechanic:**
+- **Infection:** Foreign contaminants ("Antigens") are no longer just killed; they are stored in the `biome` queue.
+- **Symbiotic Boost:** The digestion yield is now multiplied by the **Variance** of your gut flora.
+- **The Logic:** "The more foreign things living inside me, the better I digest the world." (+10% Yield per unique bug).
 
 ### ⚙️ WIRING: The Cognitive Sequence
 
-* **The Shift:**
-* Rewired `LifecycleManager.run_cycle` to respect the new hierarchy of needs.
-* **Order of Operations:**
-1. **Pain Check:** (Gordon Flinches?) -> *Abort if True.*
+- **The Shift:**
+- Rewired `LifecycleManager.run_cycle` to respect the new hierarchy of needs.
+- **Order of Operations:**
+
+1. **Pain Check:** (Gordon Flinches?) -> _Abort if True._
 2. **Digestion:** (Eat the Word).
 3. **Growth Check:** (Can we afford to Evolve?).
 4. **Cognition:** (Think about it).
@@ -95,39 +279,39 @@
 
 ### 🔌 ARCHITECTURE: The Tripartite Split (Brain vs. Library)
 
-* **The Pathology:**
-* `TheLexicon` was a **God Class**. It mixed **Data Storage** (loading JSON) with **Logic** (tasting words). To change *how* the system thought, you had to risk breaking *what* it knew.
+- **The Pathology:**
+- `TheLexicon` was a **God Class**. It mixed **Data Storage** (loading JSON) with **Logic** (tasting words). To change _how_ the system thought, you had to risk breaking _what_ it knew.
 
-* **The Cure:**
-* **Amputation:** Split the class into two distinct organs in `bone_shared.py`.
-* **`LexiconStore` (The Library):** A dumb, robust container for data. It handles file I/O and raw sets.
-* **`SemanticsEngine` (The Brain):** Pure logic. It calculates Taste, Viscosity, and Antigens. It owns no data; it requests it from the Store.
-* **The Bridge:** Retained `class TheLexicon` as a static wrapper to maintain backward compatibility with the rest of the nervous system.
+- **The Cure:**
+- **Amputation:** Split the class into two distinct organs in `bone_shared.py`.
+- **`LexiconStore` (The Library):** A dumb, robust container for data. It handles file I/O and raw sets.
+- **`SemanticsEngine` (The Brain):** Pure logic. It calculates Taste, Viscosity, and Antigens. It owns no data; it requests it from the Store.
+- **The Bridge:** Retained `class TheLexicon` as a static wrapper to maintain backward compatibility with the rest of the nervous system.
 
 ### ⚖️ NOETIC: The Deterministic Kernel (No Waffle)
 
-* **The Pathology:**
-* The Lenses (`TheMarmChorus`) operated on a "Bidding System." If Sherlock bid 0.9 and Gordon bid 0.8, the choice was probabilistic. This created "Narrative Waffle"—the system sounded unsure of its own reality.
+- **The Pathology:**
+- The Lenses (`TheMarmChorus`) operated on a "Bidding System." If Sherlock bid 0.9 and Gordon bid 0.8, the choice was probabilistic. This created "Narrative Waffle"—the system sounded unsure of its own reality.
 
-* **The Cure:**
-* **The Kernel:** Installed `SystemDiagnostician`.
-* **The Logic:** The system now calculates the **Truth State** first (e.g., `CORE_MELTDOWN`, `CORTISOL_SPIKE`) using strict physics thresholds.
-* **The Assignment:** The Lenses no longer bid. The Kernel *assigns* the microphone to the only Lens qualified to handle that state. Probability is replaced by Determinism.
+- **The Cure:**
+- **The Kernel:** Installed `SystemDiagnostician`.
+- **The Logic:** The system now calculates the **Truth State** first (e.g., `CORE_MELTDOWN`, `CORTISOL_SPIKE`) using strict physics thresholds.
+- **The Assignment:** The Lenses no longer bid. The Kernel _assigns_ the microphone to the only Lens qualified to handle that state. Probability is replaced by Determinism.
 
 ### 💾 MEMORY: The Open Slot (Interface Pattern)
 
-* **The Pathology:**
-* `MycelialNetwork` was hard-coded to read/write JSON files in the `memories/` folder. It was deaf to the outside world (Cloud, RAG, Vector DBs).
+- **The Pathology:**
+- `MycelialNetwork` was hard-coded to read/write JSON files in the `memories/` folder. It was deaf to the outside world (Cloud, RAG, Vector DBs).
 
-* **The Cure:**
-* **The Interface:** Created `SporeInterface` (The Spec) and `LocalFileSporeLoader` (The Implementation).
-* **The Plug:** `MycelialNetwork` now accepts a `loader` object during initialization.
-* **The Future:** The system is now ready for **RAG Injection**. You can swap `LocalFileSporeLoader` with `CloudLoader` without touching a single line of the reasoning engine.
+- **The Cure:**
+- **The Interface:** Created `SporeInterface` (The Spec) and `LocalFileSporeLoader` (The Implementation).
+- **The Plug:** `MycelialNetwork` now accepts a `loader` object during initialization.
+- **The Future:** The system is now ready for **RAG Injection**. You can swap `LocalFileSporeLoader` with `CloudLoader` without touching a single line of the reasoning engine.
 
 ### 🛠️ SURGICAL REPAIRS
 
-* **Version Bump:** Updated runtime identity to **8.7.2**.
-* **Gordon's Inventory:** Verified `gordon.json` integration with the new Diagnostician. Gordon now correctly intervenes when `kappa > 0.85` (Fake Walls) with 100% certainty.
+- **Version Bump:** Updated runtime identity to **8.7.2**.
+- **Gordon's Inventory:** Verified `gordon.json` integration with the new Diagnostician. Gordon now correctly intervenes when `kappa > 0.85` (Fake Walls) with 100% certainty.
 
 ## [8.7.1] - 2026-01-04 - "THE GRAFTED TONGUE"
 
@@ -135,6 +319,7 @@
 **"We severed the tongue to let it speak to two mouths."**
 
 ### 🔌 ARCHITECTURE: The Dependency Bypass
+
 - **The Pathology:**
   - The system suffered from an **Ouroboros Loop**. `BoneAmanita` imported `CommandProcessor`, which imported `BoneAmanita`. This circular dependency prevented the system from compiling without a logic lock.
 - **The Cure:**
@@ -142,13 +327,15 @@
   - **The Graft:** Transferred `Prisma`, `BoneConfig`, `TheLexicon`, `DeathGen`, and `TheCartographer` to the shared file. Both the Engine and the Command Processor now reference this third party, breaking the loop.
 
 ### ⚡ METABOLISM: The Gluttony Fix
+
 - **The Pathology:**
-  - The system was digesting every input twice. `BoneAmanita.process` manually triggered digestion, then passed the data to `LifecycleManager`, which triggered digestion *again*.
+  - The system was digesting every input twice. `BoneAmanita.process` manually triggered digestion, then passed the data to `LifecycleManager`, which triggered digestion _again_.
   - **The Effect:** Double ATP generation, Double Toxin buildup. Inflationary economy.
 - **The Cure:**
   - **Lobotomy:** Removed the manual digestion logic from `BoneAmanita.process`. The `LifecycleManager` now holds exclusive rights to metabolism.
 
 ### 🎻 PHYSICS: Wiring the Ghosts
+
 - **The Pathology:**
   - `TheTheremin` (Stagnation Sensor) and `TheCrucible` (Voltage Limit) were instantiated but never called. Stagnation was never punished; Meltdowns never happened.
 - **The Cure:**
@@ -158,6 +345,7 @@
     - **Meltdown:** High Voltage (> 15.0) without Structure (Kappa < 0.5) now damages Health.
 
 ### 🔧 SURGICAL REPAIRS
+
 - **Somatic Loop:** Fixed a spaghetti-code reference where `SomaticLoop` tried to access `self.bio['life'].eng` (circular) instead of `self.eng` (direct).
 - **Syntax:** Patched a critical syntax error in `digest_cycle` where arguments were left dangling.
 
@@ -206,7 +394,6 @@
 - **COURTYARD (Ochre):** `HOST`, `NATHAN`, `NARRATOR`. (Relational, Grounding).
 - **LABORATORY (Indigo):** `SHERLOCK`, `MAIGRET`. (Analytical, Cold).
 - **BASEMENT (Violet):** `JOEL`, `MILLER`, `JESTER`. (Rupture, Heat).
-
 
 ### **## [8.6.2] - 2026-01-04 - "THE TRUE SEAHORSE"**
 

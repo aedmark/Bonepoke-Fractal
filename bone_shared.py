@@ -9,25 +9,29 @@ from typing import List, Dict, Any
 from dataclasses import dataclass, field
 
 class Prisma:
-    C = {"R": "\033[91m", "G": "\033[92m", "Y": "\033[93m", "B": "\033[94m", "M": "\033[95m", "C": "\033[96m",
-         "W": "\033[97m", "0": "\033[90m", "X": "\033[0m"}
-    RST = C["X"]
-    RED = C["R"]
-    GRN = C["G"]
-    YEL = C["Y"]
-    BLU = C["B"]
-    MAG = C["M"]
-    CYN = C["C"]
-    WHT = C["W"]
-    GRY = C["0"]
-    INDIGO = BLU
-    OCHRE = YEL
-    VIOLET = MAG
-    SLATE = GRY
-    PALETTE = {"COURTYARD": "Y", "LABORATORY": "B", "RUPTURE": "M", "DEFAULT": "0"}
-    @classmethod
-    def paint(cls, text, color_key="0"):
-        return f"{cls.C.get(color_key, cls.C['0'])}{text}{cls.C['X']}"
+    """
+    THE SILENT MONOLITH.
+    Colors are irrelevant. Text is truth.
+    """
+    RST = ""
+    RED = ""
+    GRN = ""
+    YEL = ""
+    BLU = ""
+    MAG = ""
+    CYN = ""
+    WHT = ""
+    GRY = ""
+    
+    # Aliases
+    INDIGO = ""
+    OCHRE = ""
+    VIOLET = ""
+    SLATE = ""
+    
+    @staticmethod
+    def paint(text, color_key="0"):
+        return text
 class LexiconStore:
     """THE LIBRARY (RAG Connector): Dumb storage."""
     def __init__(self):

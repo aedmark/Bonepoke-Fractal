@@ -92,6 +92,7 @@ class CommandProcessor:
                             "final_stamina": self.eng.stamina
                         },
                         "trauma_vector": genome.get("trauma_inheritance", {}),
+                        "config_mutations": genome.get("config_mutations", {}), 
                         "mitochondria": {"enzymes": list(genome.get("inherited_enzymes", []))},
                         "core_graph": self.eng.mind['mem'].graph, 
                         "antibodies": list(self.eng.bio['immune'].active_antibodies)
@@ -136,6 +137,24 @@ class CommandProcessor:
                     print(f"{P.RED}ERROR: Immune system write failure.{P.RST}")
             else:
                 print(f"{P.YEL}Usage: /kill [toxin] [replacement]{P.RST}")
+        elif cmd == "/publish":
+            journal = self.eng.journal
+            phys = self.eng.phys['tension'].last_physics_packet
+            if not phys:
+                print(f"{P.RED}Nothing to publish.{P.RST}")
+            else:
+                success, review, reward = journal.publish(phys["raw_text"], phys, self.eng.bio)
+                if success:
+                    print(f"{P.CYN}📰 PUBLISHED TO 'journal_of_the_void.txt'{P.RST}")
+                    print(f"   {P.WHT}CRITIC SAYS: {review}{P.RST}")
+                    if reward == "SEROTONIN_BOOST":
+                        self.eng.bio['endo'].serotonin = min(1.0, self.eng.bio['endo'].serotonin + 0.2)
+                        print(f"   {P.GRN}► STATUS UP: Serotonin +0.2{P.RST}")
+                    elif reward == "CORTISOL_SPIKE":
+                        self.eng.bio['endo'].cortisol = min(1.0, self.eng.bio['endo'].cortisol + 0.2)
+                        print(f"   {P.RED}► STRESS UP: Cortisol +0.2{P.RST}")
+                else:
+                    print(f"{P.RED}Publish failed.{P.RST}")
         elif cmd == "/teach":
             if len(parts) >= 3:
                 word = parts[1]
@@ -287,7 +306,7 @@ class CommandProcessor:
                     print("Usage: /garden [water]\nCheck seed status or simulate growth.")
             else:
                 print(f"{P.WHT}--- COMMANDS 8.8.1 (Type /help [cmd] for details) ---{P.RST}")
-                print("/teach, /lineage, /voids, /mode, /strata, /kill, /seed, /focus, /status, /orbit, /mirror, /map, /garden, /refusal, /prove")
+                print("/teach, /lineage, /voids, /mode, /strata, /kill, /seed, /publish, /focus, /status, /orbit, /mirror, /map, /garden, /refusal, /prove")
         else:
             print(f"{P.RED}Unknown command. Try /help.{P.RST}")
         return True
