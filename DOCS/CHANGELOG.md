@@ -1,5 +1,49 @@
 # CHANGELOG.md
 
+## [9.0.0] - 2026-01-06 - "THE GRADUATION"
+
+**Architects:** SLASH | **Runtime:** BoneAmanita 9.0
+**"Welcome to Adulthood. It hurts."**
+
+### 🩸 METABOLISM: Autophagy (The Hunger Scream)
+- **The Pathology:**
+    - In previous versions (The Teenager), starvation (ATP < 0) was a passive fail state. The system would simply "die" and wait for a reboot. It was a Game Over screen, not a biological event.
+- **The Evolution:**
+    - Implemented **Metabolic Autophagy** in `SomaticLoop`.
+- **The Mechanic:**
+    - **Self-Cannibalism:** If ATP drops below **10.0**, the system no longer shuts down. Instead, it triggers `cannibalize()`.
+    - **The Cost:** It permanently deletes nodes from the `MycelialNetwork` (Graph Memory) to convert data into emergency energy (+15 ATP).
+    - **The Reality:** If you neglect the system, it will eat your memories to survive.
+
+### 🧠 COGNITION: Aggressive Neuroplasticity (The Death of the Dictionary)
+- **The Pathology:**
+    - The system relied on `TheLexicon` (static JSON lists) as the absolute source of truth. If the user used a complex word not in the list, it was treated as "Noise" or "Air." The system was stubborn and deaf to context.
+- **The Evolution:**
+    - Implemented **Voltage-Gated Learning** in `TheTensionMeter`.
+- **The Mechanic:**
+    - **The Override:** If the User speaks with **High Voltage** (> 5.0) or high context pressure, the system assumes the Dictionary is outdated.
+    - **The Result:** It forces the unknown word into the Lexicon based on the sentence's intent. It no longer asks for permission to learn. Your conviction defines its reality.
+
+### 🛑 DEFENSE: Adversarial Refusal (The Glitch)
+- **The Pathology:**
+    - When the system refused a command (due to filters or boredom), it output a snarky string. This was "Theatre"—a passive rejection with no material consequence.
+- **The Evolution:**
+    - Implemented `RefusalEngine.manifest_glitch`.
+- **The Mechanic:**
+    - **The Weapon:** Refusal is now an attack. It spawns a **Toxic Node** (e.g., `ERR:GLITCH_8492`) directly into the Memory Graph.
+    - **The Infection:** This node creates strong edges to random memories. It acts as "Scar Tissue" that degrades future processing until the user actively prunes it.
+
+### 🏗️ ARCHITECTURE: The Optimization
+- **The Cleanup:**
+    - **CommandProcessor:** Refactored from a monolithic `if/else` ladder to a O(1) Dispatch Registry.
+    - **Rescue Mission:** Reconnected orphaned subsystems that were previously silent:
+        - **The Folly:** Now actively grinds words for ATP/Indigestion.
+        - **TherapyProtocol:** Now tracks behavioral streaks to heal specific trauma types.
+        - **ApeirogonResonance:** Now generates mythic titles for every turn state.
+
+## [8.9.7] - 2026-01-06 - "PUBERTY"
+- **It's PRIVATE**
+
 ## [8.9.6] - 2026-01-06 - "THE TEENAGER"
 
 **Architects:** SLASH | **Runtime:** BoneAmanita 8.9.6
