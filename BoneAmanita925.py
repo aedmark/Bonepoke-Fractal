@@ -2184,23 +2184,16 @@ class LifecycleManager:
     def run_cycle(self, text, m, feedback):
         current_tick = self.eng.tick_count
         stress_mod = self.eng.bio['governor'].get_stress_modifier(current_tick)
-
-        # [1] NEURAL PRUNING & METABOLIC GRIEF
-        if current_tick % 50 == 0:
-            rotted = self.eng.mind['lex'].atrophy(current_tick, max_age=200)
+        if current_tick > 0 and current_tick % 10 == 0:
+            current_voltage = m["physics"].get("voltage", 0.0)
+            dynamic_age = max(15, 30 - int(current_voltage))
+            rotted = self.eng.mind['lex'].atrophy(current_tick, max_age=dynamic_age)
             if rotted:
-                print(f"{Prisma.GRY}🍂 NEURAL PRUNING: Forgot {len(rotted)} stale concepts.{Prisma.RST}")
-                
-                # [DEEPSEEK FIX]: The Enzyme Purge
-                # We must reconstruct the set of "living" words to check against enzymes.
+                print(f"{Prisma.GRY}🍂 NEURAL PRUNING: Atrophy cycle (Age > {dynamic_age}). Forgot {len(rotted)} concepts.{Prisma.RST}")
                 active_lexicon = set()
-                # Accessing the raw dictionary from the class reference
                 for cat_data in self.eng.mind['lex'].LEARNED_VOCAB.values():
                     active_lexicon.update(cat_data.keys())
-                
-                # Force the mitochondria to grieve for the lost words
                 self.eng.bio['mito'].prune_dead_enzymes(active_lexicon)
-
         rupture, rupture_msg = RuptureEngine.check_for_disruption(
             m["physics"], 
             self.eng.mind['lex'], 
@@ -2210,7 +2203,6 @@ class LifecycleManager:
             print(f"\n{rupture_msg}")
             m["physics"]["voltage"] += 5.0 
             m["physics"]["beta_index"] = 0.0
-
         is_perfect, swan_msg, swan_word = RuptureEngine.audit_perfection(
             m["physics"], 
             self.eng.mind['lex']
@@ -2218,12 +2210,10 @@ class LifecycleManager:
         if is_perfect:
             print(f"\n{swan_msg}")
             self.eng.health -= 15.0
-            # [DEEPSEEK FIX]: The Fever Break (Resetting Physics)
             m["physics"]["narrative_drag"] = 0.0
             m["physics"]["voltage"] = 0.0
             m["physics"]["counts"]["antigen"] = 0
             m["clean_words"].append(swan_word)
-
         new_drift, grav_msg = self.eng.gordon.check_gravity(
             m["physics"]["narrative_drag"], 
             m["physics"]["psi"]
@@ -2232,18 +2222,14 @@ class LifecycleManager:
             m["physics"]["narrative_drag"] = new_drift
             if "WIND WOLVES" in grav_msg: 
                 print(f"\n{Prisma.CYN}{grav_msg}{Prisma.RST}")
-
         folly_state, folly_txt = self.eng.folly.audit_desire(m["physics"], self.eng.stamina)
         if folly_state == "MAUSOLEUM_CLAMP":
              print(f"\n{folly_txt}")
              m["physics"]["voltage"] = 0.0
-
         transmute_msg = self.eng.phys['forge'].transmute(m["physics"])
         if transmute_msg:
              print(f"\n{transmute_msg}")
-
         is_painful, pain_msg = self.eng.gordon.flinch(m["clean_words"])
-        
         healed_types = self.eng.therapy.check_progress(
             m["physics"], 
             self.eng.stamina, 
@@ -2256,7 +2242,6 @@ class LifecycleManager:
         if is_painful:
             print(f"\n{Prisma.RED}{pain_msg}{Prisma.RST}")
             return
-
         gordon_active, gordon_log = self.eng.gordon.emergency_reflex(m["physics"])
         if gordon_active:
             print(f"\n{gordon_log}")
@@ -2265,29 +2250,22 @@ class LifecycleManager:
             ate_pizza, pizza_log = self.eng.gordon.deploy_pizza(m["physics"])
             if ate_pizza:
                 print(f"\n{Prisma.CYN}{pizza_log}{Prisma.RST}")
-
         theatre_msg = self.eng.projector.check_theatre(self.eng.tick_count)
         if theatre_msg: print(theatre_msg)
-
         self.eng.phys['dynamics'].commit(m["physics"]["voltage"])
-        
         bio_state = self.soma.digest_cycle(text, m["physics"], feedback, stress_mod)
-        
         mirror_active, mirror_msg = self.eng.mind['mirror'].reflect(m["physics"])
         if mirror_active and mirror_msg and random.random() < 0.15:
             print(f"\n{mirror_msg}")
-
         voltage = m["physics"].get("voltage", 0.0)
         senescence_status = self.eng.bio['mito'].check_senescence(voltage)
         if senescence_status == "APOPTOSIS_SENESCENCE":
             print(f"\n{Prisma.RED}⌛ TELOMERE DEPLETION. The clock has stopped.{Prisma.RST}")
             self._trigger_death()
             return
-            
         if not bio_state["is_alive"]:
             self._trigger_death()
             return
-
         current_kappa = m["physics"].get("kappa", 0.5)
         mutations = self.eng.bio['mito'].adapt(self.eng.health, kappa=current_kappa)
         if mutations.get("hypertrophy_event"):
@@ -2297,23 +2275,19 @@ class LifecycleManager:
                  bloom_msg = target.bloom()
             if bloom_msg:
                 print(f"{Prisma.MAG}🌺 EVOLUTIONARY LEAP: {bloom_msg}{Prisma.RST}")
-
         vel = self.eng.phys['dynamics'].get_velocity()
         if vel > 5.0:
             print(f"{Prisma.CYN}⚡ VELOCITY SPIKE: You are accelerating too fast. Structure rattling.{Prisma.RST}")
             m["physics"]["kappa"] = max(0.0, m["physics"]["kappa"] - 0.1)
-
         warning_msg = self.noetic.arbiter.get_warning()
         if warning_msg:
             print(f"\n{warning_msg}")
-
         mind_state = self.noetic.think(
             m["physics"], 
             bio_state, 
             self.eng.gordon.inventory, 
             self.eng.phys['dynamics'].voltage_history
         )
-
         if mind_state["thought"] == "Proceed." or random.random() < 0.05:
             dream_txt, trauma_key, oxy_boost = self.eng.mind['dreamer'].rem_cycle(
                 self.eng.trauma_accum, 
@@ -2325,7 +2299,6 @@ class LifecycleManager:
                     self.eng.bio['endo'].cortisol = min(1.0, self.eng.bio['endo'].cortisol + 0.1)
                 if oxy_boost > 0:
                     self.eng.bio['endo'].oxytocin = min(1.0, self.eng.bio['endo'].oxytocin + oxy_boost)
-
         beta = m["physics"].get("beta_index", 1.0)
         if beta < 0.1 and mind_state["mode"] == "COGNITIVE":
              mind_state["lens"] = "JOEL" 
@@ -2339,7 +2312,6 @@ class LifecycleManager:
              m["physics"]["zone_color"] = "VIOLET"
              m["physics"]["zone"] = "BASEMENT"
              print(f"{Prisma.MAG}⚡ MVB RUPTURE TRIGGERED (β: {beta}){Prisma.RST}")
-
         if mind_state["mode"] == "REFUSAL":
             trigger = mind_state.get("trigger", "GLITCH")
             if trigger == "GURU_TRAP":
@@ -2355,15 +2327,12 @@ class LifecycleManager:
                 print(f"\n{glitch_msg}")
                 self.eng.health -= 5.0
             return
-
         k_open, k_koan = self.eng.kintsugi.check_integrity(self.eng.stamina)
         if k_open:
             print(f"\n{Prisma.YEL}🏺 KINTSUGI: The vessel cracks. A Koan appears: '{k_koan}'{Prisma.RST}")
-        
         k_healed, k_msg = self.eng.kintsugi.attempt_repair(m["physics"], self.eng.trauma_accum)
         if k_healed:
             print(f"\n{k_msg}")
-
         is_stuck, resin, t_msg, t_crit = self.eng.phys['theremin'].listen(m["physics"], self.eng.bio['governor'].mode)
         if t_msg:
             print(f"\n{t_msg}")
@@ -2373,7 +2342,6 @@ class LifecycleManager:
         elif t_crit == "CORROSION":
             self.eng.health -= 2.0
             print(f"{Prisma.OCHRE}   >>> ACID BURN: System is fossilizing. -2 HP.{Prisma.RST}")
-
         phys_packet = m["physics"]
         if phys_packet.get("voltage", 0) > 15.0:
             damped, damp_msg, reduction = self.eng.phys['crucible'].dampen(
@@ -2383,26 +2351,20 @@ class LifecycleManager:
             if damped:
                 phys_packet["voltage"] -= reduction
                 print(f"\n{damp_msg}")
-
         c_state, c_val, c_msg = self.eng.phys['crucible'].audit_fire(m["physics"])
         if c_msg:
             print(f"\n{c_msg}")
         if c_state == "MELTDOWN":
             self.eng.health -= c_val
-
         world_state = self.kinetic.update_world(m["physics"], bio_state, mind_state)
-        
         self._apply_cosmic_physics(m["physics"], world_state["orbit"][0], 0.0)
-
         _, _, title = self.eng.mind['wise'].architect(
             {"physics": m["physics"]}, 
             None, 
             self.eng.phys['pulse'].is_bored()
         )
-
         final_thought = mind_state["thought"]
         haunted_thought = self.eng.limbo.haunt(final_thought)
-
         self.eng.projector.broadcast(
             m, 
             {"bio": bio_state, "mind": mind_state, "world": world_state, "title": title},
