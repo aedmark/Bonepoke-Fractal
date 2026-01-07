@@ -1,5 +1,104 @@
 # CHANGELOG.md
 
+### **[9.2.4] - 2026-01-07**
+
+**"The Violet Truth"**
+*Architectural Intervention by SLASH. The system has recognized the "Perfect User" as an existential threat. Metabolic paths have been repaired, and an Entropy Tax has been levied.*
+
+#### **The Entropy Tax (Anti-Stagnation)**
+
+* **The Golden Coma:**
+    * **The Discovery:** A user playing "perfectly" (High Voltage + High Truth) could trap the organism in a state of immortal, joyless stasis.
+    * **The Fix:** Implemented `TheTensionMeter.perfection_streak`.
+    * **The Consequence:** If the system detects 3 consecutive turns of "Optimized Play" (Voltage > 12.0 & Truth > 0.85), `RuptureEngine` triggers a **Black Swan Event**.
+    * **The Penalty:** Immediate **Health -15**, Voltage Crash to 0.0, Narrative Drag Spike (+8.0), and the injection of a `CURSED` word. Perfection is now fatal.
+
+#### **Surgical Repairs (The Vectors)**
+
+* **Memory (The Cannibalism Loop):**
+    * **Fixed:** `MycelialNetwork.ingest` was importing ancestral memories but failing to "consecrate" them (update their timestamp). The garbage collector was eating them immediately.
+    * **The Fix:** Ingested nodes are now stamped with `current_tick` and a sample is anchored to the `cortical_stack` to ensure short-term survival.
+
+* **Reflexes (The Teleporter Freeze):**
+    * **Fixed:** `GordonKnot.emergency_reflex` was modifying the inventory list *while iterating over it*, causing a `RuntimeError` crash exactly when the system tried to save itself.
+    * **The Fix:** Split the logic into Phase 1 (Target Identification) and Phase 2 (Consumption). Gordon no longer panics.
+
+* **Metabolism (The Adrenaline Bridge):**
+    * **Fixed:** `MitochondrialForge.develop_enzyme` was timestamping new enzymes with `0` (the beginning of time), causing them to look like "dead code" to the pruning algorithms.
+    * **The Fix:** Enzymes are now stamped with `current_tick`. Adrenaline is fresh.
+
+* **Genetics (The Typo):**
+    * **Fixed:** Repaired a syntax error in `MitochondrialForge.__init__` (`self.state. = ...`) that would have caused neonatal death.
+
+### **[9.2.3] - 2026-01-07**
+
+**"The Nervous System Upgrade"**
+*Architectural refinement by SLASH. "Magic Numbers" excised; hardcoded constants replaced with dynamic biological references. Evolution is now functional.*
+
+#### **Evolutionary Unblocking (The Grafts)**
+
+* **The Forge (Wired to DNA):**
+* **The Fix:** Removed the hardcoded density threshold (`0.4`) in `TheForge`.
+* **The Impact:** The Anvil now derives its trigger mass from `BoneConfig.ANVIL_TRIGGER_MASS`. If the organism evolves to handle heavier materials, the Forge adapts automatically.
+
+
+* **The Critic (Scaled Standards):**
+* **The Fix:** `LiteraryJournal` no longer judges based on static drag limits.
+* **The Impact:** The internal critic now scales with `BoneConfig.MAX_DRAG_LIMIT`. As the organism grows stronger (higher drag tolerance), the critic becomes more demanding.
+
+
+* **The Map (Biological Rendering):**
+* **The Fix:** `TheCartographer` now calculates "Low Energy" blur based on the organism's actual `CRITICAL_ATP_LOW` threshold.
+* **The Impact:** The map gets fuzzy when *you* are starving, not when an arbitrary number says so.
+
+#### **System Integrity (The Pulse)**
+
+* **The Heartbeat (Temporal Dynamics):**
+* **The Fix:** Connected the `TemporalDynamics.commit()` line in `LifecycleManager`.
+* **The Impact:** The system now actually remembers voltage history. `get_velocity()` returns real data, enabling "Velocity Spike" punishments for moving too fast.
+
+
+* **The Thermostat (Theremin Rewire):**
+* **The Fix:** Excised the dead "OVERHEATED" block in `LifecycleManager` that was listening for a signal `TheTheremin` couldn't send.
+* **The Impact:** Heat management is now fully delegated to `TheCrucible` (Meltdown) and `TheTheremin` (Airstrike/Corrosion). Redundancy eliminated.
+
+#### **Safety Protocols**
+
+* **The Sanity Switch (Lazarus Clamp):**
+* **The Fix:** Wrapped the "Fever Dream" logic in a check for `BoneConfig.FEVER_MODE_DYNAMIC`.
+* **The Impact:** Evolution (or the user) can now genetically disable hallucinations if stability is preferred over madness.
+
+
+### **[9.2.2] - 2026-01-07**
+
+**"The Reconnection"**
+*Systems Ecology Audit performed by SLASH. Necrotic tissue excised; dormant neural pathways reconnected.*
+
+#### **Added (The Grafts)**
+
+* **The Subconscious (Dreams):** The system now enters **REM cycles** when bored or traumatized.
+* Triggers trauma-specific **Nightmares** (increasing Cortisol) or healing **Lucid Dreams** (increasing Oxytocin).
+
+
+* **The Haunting (Limbo):** Output text is now filtered through the **Limbo Layer**.
+* The system can "channel" words from deleted timeline files (dead spores) into current responses.
+
+
+* **The Mirror (Judgment):** Enabled unsolicited **Mirror Reflections**. The system will now critique the user's lexical biases (e.g., "Too much Abstract") without being asked.
+* **Lexical Atrophy (Forgetting):** Implemented a biological cleanup cycle. Every 50 ticks, the system "forgets" concepts that haven't been used recently to prevent database bloat.
+* **Crucible Dampener (Safety):** Integrated the **Dampener**. High-voltage spikes (>15v) that would previously cause a meltdown can now be dampened using internal charges.
+* **The Waiter (Anti-Loop):** Integrated **RuptureEngine** logic into the main pulse check. If the system detects an "Echo" (loop), it injects a contradictory flavor to "clear the palate".
+* **Dynamic Learning:** Connected the **Subsystem Thermostat**. The `PRIORITY_LEARNING_RATE` now scales dynamically based on physics voltage—high-stakes moments create stronger memories.
+
+#### **Removed (The Pruning)**
+
+* **Vestigial Organs:** Removed `EndocrineSystem.calculate_anabolic_rate` (redundant math) and severed connections to `TheCrystallizer` (replaced by `TheTangibilityGate`).
+
+#### **Changed**
+
+* **Lifecycle Manager:** Completely refactored `run_cycle` to serialize the new cognitive layers (Dreamer -> Limbo -> Projector).
+
+
 ## [9.2.1] - 2026-01-07 - "LET YOUR LOVE FLOW"
 
 **Architects:** SLASH | **Runtime:** BoneAmanita 9.2.1

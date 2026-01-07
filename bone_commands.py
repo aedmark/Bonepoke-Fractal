@@ -5,7 +5,6 @@ import shutil
 import random
 import time
 from typing import List
-from bone_shared import Prisma, BoneConfig, TheLexicon, TheCartographer
 
 class CommandProcessor:
     def __init__(self, engine, prisma_ref, lexicon_ref, config_ref, cartographer_ref):

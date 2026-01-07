@@ -214,7 +214,6 @@ class BoneConfig:
     STAMINA_REGEN = 5.0
     COMA_DURATION = 3
     DRIFT_THRESHOLD = 0.7
-    CRYSTAL_THRESHOLD = 0.75
     SHAPLEY_MASS_THRESHOLD = 15.0
     MAX_MEMORY_CAPACITY = 50
     LAGRANGE_TOLERANCE = 2.0
@@ -238,9 +237,7 @@ class BoneConfig:
     VOID_THRESHOLD = 0.1
     BASE_IGNITION_THRESHOLD = 0.4
     KAPPA_THRESHOLD = 0.85
-    PERMEABILITY_INDEX = 0.5
     FRACTAL_DEPTH_LIMIT = 4
-    GRADIENT_TEMP = 0.001
     ANVIL_TRIGGER_VOLTAGE = 8.0
     ANVIL_TRIGGER_MASS = 7.0
     VOID_DENSITY_THRESHOLD = 0.15
@@ -258,11 +255,6 @@ class BoneConfig:
         "COURTYARD": 0.05,
         "LABORATORY": 0.15,
         "BASEMENT": 99.0}
-    @staticmethod
-    def get_gradient_temp(voltage, kappa):
-        base = BoneConfig.GRADIENT_TEMP
-        dynamic = base + (voltage * 0.01) - (kappa * 0.005)
-        return max(0.0001, dynamic)
     @classmethod
     def load_patterns(cls):
         cls.ANTIGENS = TheLexicon.get("antigen")
@@ -336,9 +328,14 @@ class TheCartographer:
     @classmethod
     def dynamic_thresholds(cls, bio_metrics):
         atp = bio_metrics.get("atp", 50.0)
-        if atp > 70: return {"render_threshold": 1.5, "gravity_well_multiplier": 0.8, "max_anchors": 5}
-        elif atp < 30: return {"render_threshold": 4.0, "gravity_well_multiplier": 1.5, "max_anchors": 2}
-        else: return {"render_threshold": 2.0, "gravity_well_multiplier": 1.0, "max_anchors": 3}
+        high_energy = 70.0
+        low_energy = BoneConfig.CRITICAL_ATP_LOW * 6.0
+        if atp > high_energy: 
+            return {"render_threshold": 1.5, "gravity_well_multiplier": 0.8, "max_anchors": 5}
+        elif atp < low_energy: 
+            return {"render_threshold": 4.0, "gravity_well_multiplier": 1.5, "max_anchors": 2}
+        else: 
+            return {"render_threshold": 2.0, "gravity_well_multiplier": 1.0, "max_anchors": 3}
     @classmethod
     def survey(cls, text, memory_graph, bio_metrics, limbo=None):
         cortisol = bio_metrics.get("cortisol", 0.0)
