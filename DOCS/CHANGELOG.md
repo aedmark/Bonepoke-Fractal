@@ -1,5 +1,33 @@
 # CHANGELOG.md
 
+## [9.2.1] - 2026-01-07 - "LET YOUR LOVE FLOW"
+
+**Architects:** SLASH | **Runtime:** BoneAmanita 9.2.1
+**"The heart was beating, but the blood wasn't moving. We fixed the pipes."**
+
+### 🫀 VASCULAR SYSTEM (Wiring)
+* **The Refusal Switchboard:** `RefusalEngine` is now fully integrated. The system no longer defaults to a generic "GLITCH" for every refusal. It now correctly dispatches:
+    * **Guru Trap:** Refuses requests for "fixes" or maps.
+    * **Mirror Refusal:** Reflects the query back at the user.
+    * **Fractal Refusal:** Infinite recursion loops.
+    * **Silent Refusal:** Changes the subject to avoid damage.
+* **The Rupture Engine:** `RuptureEngine` is now polled every cycle. If the system detects high repetition or "Consensus Traps" (low Beta, high suburbia), it will inject Chaos (Heavy/Abstract anomalies) to break the loop.
+* **Lens Sight:** `LensArbiter` triggers (JSON) are now hard-wired to Python logic. "Clarence" actually sees toxins; "Maigret" actually feels density.
+
+### 🍃 METABOLISM (Somatic)
+* **Lichen Photosynthesis:** `LichenSymbiont` is wired into the `SomaticLoop`. "Light" words (PHOTO) now generate ATP if Narrative Drag is low.
+* **Hybrid Dynamics:** The `SomaticLoop` now correctly checks for the **Time Bracelet** and **Hybrid State** (High Heavy + High Abstract).
+    * *Effect:* If you have the bracelet and hit a hybrid state, respiration cost drops to 10% (Perpetual Motion).
+
+### 🧱 AGENCY (Gordon)
+* **Pizza Protocol:** Gordon now checks structural integrity (`kappa`). If it falls below 0.2, he consumes the **[STABILITY_PIZZA]** to reset the physics and save the session.
+* **Passive Gravity:** Inventory items (like Pocket Rocks) now passively buffer narrative drift every turn, rather than just being text descriptions.
+
+### 🧹 AUTOPHAGY (Cleanup)
+* **Ghost Excision:** Removed the vestigial `LexNode` class (obsolete) and the duplicate `MycotoxinFactory.eulogy` method (conflicting).
+* **Loop Surgery:** Rewrote `BoneAmanita.process` to remove duplicate lifecycle calls and vestigial variable calculations. The nervous system now has a single, clean signal path.
+* **Syntax Repair:** Fixed unclosed parentheses and indentation fractures in the `LifecycleManager`.
+
 ## [9.2.0] - 2026-01-06 - "PERSONAL GROWTH"
 
 **Architects:** SLASH | **Runtime:** BoneAmanita 9.2
