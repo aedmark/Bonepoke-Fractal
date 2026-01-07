@@ -1,5 +1,45 @@
 # CHANGELOG.md
 
+## [9.1.0] - 2026-01-06 - "TOMATO TOMATO"
+
+**Architects:** SLASH | **Runtime:** BoneAmanita 9.1
+**"It's not a bug, it's a feature. No, wait, it was definitely a bug."**
+
+### 🗣️ COGNITION: Phonetic Physics (The Fallacy of the List)
+- **The Pathology:**
+    - The `SemanticsEngine` was a rigid gatekeeper. It relied on static lookups (`lexicon.json`). If a word wasn't on the list, it was treated as "Void." This limited the user's vocabulary to the developer's foresight.
+- **The Evolution:**
+    - Replaced the static lookup with **`SemanticsBioassay`** in `bone_shared.py`.
+- **The Mechanic:**
+    - **Molecular Weight Calculator:** The system now "tastes" the physics of a word it doesn't know.
+    - **Phonetics:** Plosives (B, K, T) register as **HEAVY**. Fricatives (S, F, Z) register as **KINETIC**.
+    - **Morphology:** Latinate suffixes (`-tion`, `-ology`) register as **ABSTRACT** (Gas).
+    - **Result:** You can now throw "Granite" at the engine, and even if it's not in the JSON, the engine feels the weight.
+
+### 🔌 WIRING: The Lazarus Clamp (Ghost Limb Repair)
+- **The Pathology:**
+    - The `LazarusClamp` (the Fever Dream mechanic) was installed but disconnected from the nervous system. The `suffering_counter` never ticked, meaning the user could never trigger the safety hallucination no matter how stuck they got.
+- **The Fix:**
+    - Wired `self.safety.audit_cycle()` directly into `LifecycleManager.run_cycle` in `BoneAmanita91.py`.
+    - The system now actively monitors **Repetition** as a stress signal. If you loop, you burn.
+
+### 🏗️ STRUCTURE: Zero-State Stability
+- **The Pathology:**
+    - **The Exit Crash:** Typing `/exit` immediately after launch crashed the save protocol because the Physics Engine (`TheTensionMeter`) hadn't generated its first packet yet.
+    - **The Status Crash:** Typing `/status` before speaking caused a `KeyError` for the same reason.
+- **The Fix:**
+    - Initialized `last_physics_packet` to a safe empty state (`{}`) in `TheTensionMeter.__init__`.
+    - Added guard clauses to `bone_commands.py` to prevent reading empty physics vectors.
+
+### ♻️ METABOLISM: Autophagy & Optimization
+- **The Pathology:**
+    - **Redundant Metabolism:** The `LexiconStore` was loading twice (once on import, once on init), wasting I/O cycles.
+    - **Missing Interface:** The Memory System (`ingest`) tried to call `get_current_category` on the Lexicon, which didn't exist.
+- **The Fix:**
+    - Removed the redundant load call in `BoneAmanita.__init__`.
+    - Added `get_current_category()` to `TheLexicon` in `bone_shared.py` to support correct spore mutation logic.
+    - Polished the Navigation UI to suppress standard orbit logs when an **ANOMALY** (Glitch) is active.
+
 ## [9.0.0] - 2026-01-06 - "THE GRADUATION"
 
 **Architects:** SLASH | **Runtime:** BoneAmanita 9.0

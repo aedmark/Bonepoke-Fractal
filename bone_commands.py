@@ -313,10 +313,12 @@ class CommandProcessor:
         print(f"Time:    {clock_color}{t_curr}/10000 Ticks{self.P.RST}")
         if 'wise' in self.eng.mind:
              last_phys = self.eng.phys['tension'].last_physics_packet
-             if last_phys:
+             if last_phys and "vector" in last_phys: 
                  metrics = {"physics": last_phys}
                  _, _, title = self.eng.mind['wise'].architect(metrics, None, False)
                  print(f"Title:   {self.P.VIOLET}{title}{self.P.RST}")
+             else:
+                 print(f"Title:   {self.P.GRY}[CALIBRATING]{self.P.RST}")
         return True
 
     def _cmd_orbit(self, parts):

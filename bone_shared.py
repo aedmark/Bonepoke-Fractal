@@ -33,7 +33,6 @@ class Prisma:
     def paint(text, color_key="0"):
         return text
 class LexiconStore:
-    """THE LIBRARY (RAG Connector): Dumb storage."""
     def __init__(self):
         self.ANTIGEN_REPLACEMENTS = {}
         self.SOLVENTS = set()
@@ -41,7 +40,6 @@ class LexiconStore:
         self.LEARNED_VOCAB = {}
         self.USER_FLAGGED_BIAS = set()
         self.load_vocabulary()
-
     def load_vocabulary(self):
         try:
             with open("lexicon.json", "r") as f:
@@ -59,7 +57,6 @@ class LexiconStore:
         except FileNotFoundError:
             print(f"{Prisma.RED}[CRITICAL]: lexicon.json missing.{Prisma.RST}")
             self.SOLVENTS = {"the", "and", "is"}
-
     def get_raw(self, category):
         """Pure data retrieval."""
         base = self.VOCAB.get(category, set())
@@ -81,28 +78,60 @@ class LexiconStore:
                     del words[w]
                     rotted.append(w)
         return rotted
-
-class SemanticsEngine:
-    """THE BRAIN (Reasoning Engine): Logic only."""
+class SemanticsBioassay:
     def __init__(self, store_ref):
         self.store = store_ref
-        self.ANTIGEN_REGEX = None
         self._TRANSLATOR = str.maketrans(string.punctuation, " " * len(string.punctuation))
+        self.PHONETICS = {
+            "PLOSIVE": set("bdgkpt"),
+            "FRICATIVE": set("fthszsh"),
+            "LIQUID": set("lr"),
+            "NASAL": set("mn")
+        }
+        self.ROOTS = {
+            "HEAVY": ("lith", "ferr", "petr", "dens", "grav", "struct", "base", "fund"),
+            "KINETIC": ("mot", "mov", "ject", "tract", "pel", "crat", "dynam"),
+            "ABSTRACT": ("tion", "ism", "ence", "ance", "ity", "ology", "ness", "ment", "idea")
+        }
         self.compile_antigens()
     def clean(self, text):
         return text.lower().translate(self._TRANSLATOR).split()
-    def taste(self, word):
+    def _analyze_morphology(self, word):
         w = word.lower()
-        if any(x in w for x in ["burn", "fire", "flame"]): return "thermal", 0.9
-        if any(x in w for x in ["ice", "cold", "freez"]): return "cryo", 0.9
-        if w.endswith(("tion", "ment", "ness", "ity")): return "abstract", 0.9
-        if w.endswith(("ck", "t", "d", "g", "p", "b")) and len(w) < 5: return "heavy", 0.4
+        if w.endswith(self.ROOTS["ABSTRACT"]):
+            return "abstract", 0.8
+        for root in self.ROOTS["HEAVY"]:
+            if root in w: return "heavy", 0.7
+        for root in self.ROOTS["KINETIC"]:
+            if root in w: return "kinetic", 0.7
+        return None, 0.0
+    def assay(self, word):
+        w = word.lower()
+        cat, conf = self._analyze_morphology(w)
+        if cat: return cat, conf
+        score = {"PLOSIVE": 0, "FRICATIVE": 0, "LIQUID": 0}
+        clean_len = len(w)
+        if clean_len < 2: return None, 0.0
+        for char in w:
+            if char in self.PHONETICS["PLOSIVE"]: score["PLOSIVE"] += 1
+            elif char in self.PHONETICS["FRICATIVE"]: score["FRICATIVE"] += 1
+            elif char in self.PHONETICS["LIQUID"]: score["LIQUID"] += 1
+        density = score["PLOSIVE"] / clean_len
+        velocity = (score["FRICATIVE"] + score["LIQUID"]) / clean_len
+        if density > 0.4 and clean_len < 6: return "heavy", 0.5
+        if velocity > 0.5: return "kinetic", 0.5
+        if clean_len > 9 and density < 0.2: return "abstract", 0.6
         return None, 0.0
     def measure_viscosity(self, word):
         w = word.lower()
         if w in self.store.get_raw("heavy"): return 1.0
-        if w in self.store.get_raw("kinetic"): return 0.4
-        return 0.1
+        if w in self.store.get_raw("kinetic"): return 0.6
+        if w in self.store.get_raw("abstract"): return 0.1
+        cat, _ = self.assay(w)
+        if cat == "heavy": return 0.85
+        if cat == "kinetic": return 0.5
+        if cat == "abstract": return 0.15
+        return max(0.1, 1.0 - (len(w) * 0.05))
     def harvest(self, category):
         vocab = list(self.store.get_raw(category))
         if vocab: return random.choice(vocab)
@@ -121,10 +150,10 @@ class SemanticsEngine:
         adjectives = self.store.get_raw("gradient_stop")
         words = text.split()
         optimized = [w for w in words if w.lower() not in adjectives]
-        return f"{Prisma.CYN}[GRADIENT WALK] (Loss: 0.0000):{Prisma.RST} {' '.join(optimized)}."
-    def learn_antigen(self, toxin, replacement):
-        t = toxin.lower().strip()
-        r = replacement.lower().strip()
+        return f"GRADIENT WALK: {' '.join(optimized)}"
+    def learn_antigen(self, t, r):
+        t = t.lower().strip()
+        r = r.lower().strip()
         if not t: return False
         self.store.teach(t, "antigen", 0)
         self.store.ANTIGEN_REPLACEMENTS[t] = r
@@ -132,7 +161,7 @@ class SemanticsEngine:
         return True
 class TheLexicon:
     _STORE = LexiconStore()
-    _ENGINE = SemanticsEngine(_STORE)
+    _ENGINE = SemanticsBioassay(_STORE)
     ANTIGEN_REPLACEMENTS = _STORE.ANTIGEN_REPLACEMENTS
     SOLVENTS = _STORE.SOLVENTS
     LEARNED_VOCAB = _STORE.LEARNED_VOCAB
@@ -140,13 +169,18 @@ class TheLexicon:
     ANTIGEN_REGEX = _ENGINE.ANTIGEN_REGEX
     @classmethod
     def load_vocabulary(cls):
-        """Delegates reload to the store."""
         cls._STORE.load_vocabulary()
-        # Re-sync references
         cls.ANTIGEN_REPLACEMENTS = cls._STORE.ANTIGEN_REPLACEMENTS
         cls.SOLVENTS = cls._STORE.SOLVENTS
         cls.LEARNED_VOCAB = cls._STORE.LEARNED_VOCAB
         cls.USER_FLAGGED_BIAS = cls._STORE.USER_FLAGGED_BIAS
+    @classmethod
+    def get_current_category(cls, word):
+        for cat, vocab in cls.LEARNED_VOCAB.items():
+            if word.lower() in vocab: return cat
+        for cat, vocab in cls._STORE.VOCAB.items():
+            if word.lower() in vocab: return cat
+        return None
     @classmethod
     def get(cls, category): return cls._STORE.get_raw(category)
     @classmethod
@@ -156,7 +190,7 @@ class TheLexicon:
     @classmethod
     def clean(cls, text): return cls._ENGINE.clean(text)
     @classmethod
-    def taste(cls, word): return cls._ENGINE.taste(word)
+    def taste(cls, word): return cls._ENGINE.assay(word)
     @classmethod
     def measure_viscosity(cls, word): return cls._ENGINE.measure_viscosity(word)
     @classmethod
@@ -184,7 +218,7 @@ class BoneConfig:
     RESISTANCE_THRESHOLD = 4.0
     TOXIN_WEIGHT = 5.0
     FLASHPOINT_THRESHOLD = 8.0
-    SIGNAL_DRAG_MULTIPLIER = 2.0
+    SIGNAL_DRAG_MULTIPLIER = 4.0
     KINETIC_GAIN = 1.0
     CRITICAL_ROS_LIMIT = 80.0
     CRITICAL_ATP_LOW = 5.0
