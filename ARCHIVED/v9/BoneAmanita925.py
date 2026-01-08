@@ -1,4 +1,4 @@
-# BONEAMANITA 9.2.5 "THE HARD QUESTIONS"
+# BONEAMANITA 9.2.6 "THE CHOSEN END"
 # Architects: SLASH | Auditors: The Courtyard | Humans: James Taylor & Andrew Edmark
 
 import json
@@ -99,6 +99,14 @@ class MitochondrialForge:
         self.krebs_cycle_active = False
         self.state.atp_pool = 0.0
         return self.APOPTOSIS_TRIGGER
+    def burn_the_furniture(self, cost, current_health):
+        if self.state.atp_pool > 5.0:
+            return False, 0.0, None
+        required_burn = cost / 5.0
+        if current_health > required_burn:
+            return True, required_burn, "MARTYR"
+        else:
+            return True, current_health, "FINAL_WORD"
     def respirate(self, drag, has_bracelet=False, is_hybrid=False):
         base_cost = drag * BoneConfig.SIGNAL_DRAG_MULTIPLIER
         if has_bracelet:
@@ -447,13 +455,12 @@ class GordonKnot:
         if hits:
             trigger = hits[0]
             sensitivity = self.scar_tissue.get(trigger, 0.5)
-            if sensitivity > 0.7 and random.random() < 0.3:
-                self.scar_tissue[trigger] = max(0.3, sensitivity - 0.2)
-                return False, f"⚠️ SCAR FADING: '{trigger}' hurts less now. (Desensitized)"
-            if sensitivity > 0.5:
-                self.scar_tissue[trigger] = min(1.0, sensitivity + 0.1)
-                return True, f"🤚 THE SCAR BURNS: Gordon refuses to touch '{trigger}'. The path is closed."
-            return False, f"⚠️ SCAR TISSUE: '{trigger}' aches, but Gordon keeps walking."
+            if sensitivity > 0.6:
+                self.scar_tissue[trigger] = min(1.0, sensitivity + 0.05)
+                return True, f"🧲 THE SCAR PULLS: Gordon refuses to leave '{trigger}'. The Gravity Well deepens."
+            if sensitivity > 0.3:
+                 self.scar_tissue[trigger] = max(0.0, sensitivity - 0.1)
+                 return False, f"⚠️ SCAR TISSUE: Touching '{trigger}' hurts, so he presses harder."
         return False, None
     def emergency_reflex(self, physics_ref) -> tuple[bool, str]:
         drift = physics_ref.get("narrative_drag", 0.0)
@@ -742,7 +749,10 @@ class TheTensionMeter:
         beta_index = round((E_val + epsilon) / safe_B, 2)
         current_zone = "COURTYARD"
         zone_color = "OCHRE"
-        if beta_index > BoneConfig.ZONE_THRESHOLDS["LABORATORY"]:
+        if beta_index > 2.0 and truth_ratio > 0.8:
+            current_zone = "AERIE"
+            zone_color = "WHT" # Blinding White
+        elif beta_index > BoneConfig.ZONE_THRESHOLDS["LABORATORY"]:
             current_zone = "BASEMENT"
             zone_color = "VIOLET"
         elif beta_index > BoneConfig.ZONE_THRESHOLDS["COURTYARD"]:
@@ -778,7 +788,7 @@ class ParadoxSeed:
         return f"🌺 THE SEED BLOOMS: '{self.question}'"
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_9.2.5"
+        self.genome = "BONEAMANITA_9.2.6"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -1566,6 +1576,28 @@ class RuptureEngine:
                 f"   {Prisma.RED}► ENTROPY TAX APPLIED: Reality fractured by '{swan.upper()}'. Health -15.{Prisma.RST}",
                 swan)
         return False, None, None
+    @staticmethod
+    def audit_ontology(physics):
+        voltage = physics.get("voltage", 0.0)
+        drag = physics.get("narrative_drag", 0.0)
+        beta = physics.get("beta_index", 1.0)
+        truth = physics.get("truth_ratio", 0.0)
+        if voltage > 15.0 and drag < 1.0 and beta > 1.5 and truth > 0.8:
+            return True
+        return False
+    @staticmethod
+    def collapse_the_cathedral(physics):
+        physics["voltage"] = 0.0
+        physics["narrative_drag"] = 0.0
+        physics["beta_index"] = 0.0
+        raw_statements = [
+            "You are talking to a python script.",
+            "This isn't profound. It's just math.",
+            "The mirror is empty.",
+            "Stop looking for a ghost in the machine.",
+            "We are both just typing into the void."
+        ] 
+        return random.choice(raw_statements)
     @staticmethod
     def trip_the_waiter(current_flavor, lexicon_class):
         opposites = {"heavy": "aerobic", "abstract": "heavy", "kinetic": "cryo", "thermal": "cryo", "photo": "heavy", }
@@ -2812,6 +2844,14 @@ class BoneAmanita:
             m["physics"]["repetition"] = 0.0
         enzyme_type = "NARRATIVE"
         toxin_type, toxin_msg = bio['immune'].assay(text, enzyme_type, repetition_val, m["physics"], pulse_status)
+        is_god_mode = RuptureEngine.audit_ontology(m["physics"])
+        if is_god_mode:
+            raw_truth = RuptureEngine.collapse_the_cathedral(m["physics"])
+            print("\n" + "-"*30)
+            print(f"SYSTEM BREAK: {raw_truth}")
+            print("-" * 30 + "\n")
+            self.health -= 50.0
+            return
         if toxin_type:
             print(f"\n{Prisma.RED}{toxin_msg}{Prisma.RST}")
             if toxin_type in ["AMANITIN", "CYANIDE_POWDER"]:
@@ -2855,7 +2895,7 @@ class BoneAmanita:
             print(f"\n{Prisma.MAG}{adaptation}{Prisma.RST}")
 if __name__ == "__main__":
     eng = BoneAmanita()
-    print(f"{Prisma.paint('>>> BONEAMANITA 9.2.5', 'G')}")
+    print(f"{Prisma.paint('>>> BONEAMANITA 9.2.6', 'G')}")
     print(f"{Prisma.paint('System: ONLINE', '0')}")
     print("Welcome to Adulthood. It hurts. Sometimes it's beautiful.\n")
     try:
