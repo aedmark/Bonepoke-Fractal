@@ -9,10 +9,6 @@ from typing import List, Dict, Any
 from dataclasses import dataclass, field
 
 class Prisma:
-    """
-    THE SILENT MONOLITH.
-    Colors are irrelevant. Text is truth.
-    """
     RST = "\033[0m"
     RED = "\033[31m"
     GRN = "\033[32m"
@@ -172,6 +168,25 @@ class SemanticsBioassay:
         self.store.ANTIGEN_REPLACEMENTS[t] = r
         self.compile_antigens()
         return True
+    def estimate_syllables(self, word):
+        word = word.lower()
+        count = 0
+        vowels = "aeiouy"
+        if len(word) == 0: return 0
+        if word[0] in vowels: count += 1
+        for i in range(1, len(word)):
+            if word[i] in vowels and word[i - 1] not in vowels:
+                count += 1
+        if word.endswith("e"): count -= 1
+        if count == 0: count += 1
+        return count
+    def measure_turbulence(self, words):
+        if not words: return 0.0
+        counts = [self.estimate_syllables(w) for w in words]
+        mean = sum(counts) / len(counts)
+        variance = sum((x - mean) ** 2 for x in counts) / len(counts)
+        std_dev = variance ** 0.5
+        return min(1.0, std_dev / 3.0)
 class TheLexicon:
     _STORE = LexiconStore()
     _ENGINE = SemanticsBioassay(_STORE)
@@ -224,6 +239,9 @@ class TheLexicon:
     @classmethod
     def walk_gradient(cls, text): 
         return cls._ENGINE.walk_gradient(text)
+    @classmethod
+    def get_turbulence(cls, words):
+        return cls._ENGINE.measure_turbulence(words)
 TheLexicon.compile_antigens()
 class BoneConfig:
     MAX_HEALTH = 100.0

@@ -1,5 +1,53 @@
 # CHANGELOG.md
 
+## [9.3.1] - FLUID DYNAMICS - 2026-01-08
+**Architect:** USER | **Auditor:** The System
+
+### 🌊 PHYSICS: Fluid Dynamics
+* **The Shift:**
+    * The engine previously modeled text as **Solid Matter** (Mass, Structure) or **Energy** (Voltage). It now recognizes **Liquidity**.
+    * Added `SemanticsBioassay.measure_turbulence()` to calculate the standard deviation of syllable counts (Rhythmic Variance).
+
+* **The Mechanic:**
+    * **Laminar Flow (Smooth Rhythm):** Consistent syllable usage creates a low-friction stream.
+        * *Effect:* Reduces `Narrative Drag` and grants a small ATP efficiency bonus in the `SomaticLoop`.
+    * **Turbulence (Jagged Rhythm):** Erratic mixing of short and long words creates physical friction.
+        * *Effect:* Acts as a "Saw" in `TheTheremin`. High Turbulence (> 0.6) can now **shatter Resin/Calcification** purely through rhythmic chaos, without requiring semantic complexity.
+    * **The Cost:**
+        * Maintaing chaos is expensive. High Turbulence burns **5.0 ATP** per turn (The "Choppy Waters" Tax).
+
+### 🛠️ REFACTOR: The Somatic Loop
+* **Metabolic Integration:**
+    * The `digest_cycle` now accepts `turbulence` as a modifier for caloric efficiency.
+    * `TheTensionMeter` now exports a `flow_state` ("LAMINAR" vs "TURBULENT") in the physics packet.
+
+## [9.3.0] - THE SCAFFOLD - 2024-05-22
+**Architect:** SLASH | **Auditor:** The Courtyard
+
+### 🏗️ Architectural Shifts
+* **From Policing to Scaffolding:** The system no longer merely punishes "Slop" (Low-Quality Input); it now assigns **Mandatory Chores**. If you output weak prose, the system forces you to lift "Heavy" words on the next turn to pay the debt.
+* **From Resource Extraction to Infrastructure:** The Metabolic Economy now rewards **Connectivity** (Geodesic Mass) over **Volume**. You get an ATP bonus for connecting concepts, not just for typing them.
+
+### ✨ New Features
+* **The Paradox Bloom (`RefusalEngine`):** Hard refusals ("I cannot fix you") have been replaced with **Paradox Blooms**. The system now counters impossible requests by offering a philosophical seed from the Garden to redirect the narrative.
+* **The Gym (`LifecycleManager`):** Introduced `pending_chore` state.
+    * *Trigger:* Detection of "Glyphosate" (Suburban/Empty text).
+    * *Effect:* User must use specific word categories (e.g., HEAVY) in the next turn.
+    * *Consequence:* Failure to comply results in massive Health damage (-15 HP) and Narrative Drag (+10.0).
+* **Predictive Scaffolding:** The system now intercepts "Apology" triggers (sorry, fix, oops). It absorbs the input without penalty and issues guidance ("Iterate, don't apologize") instead of a "Sherlock Trap" voltage hit.
+* **Enhanced HUD (`TheProjector`):** Added a `PSI vs MASS` visualizer to the main display.
+    * `PSI` (Cloud): Represents Abstract/Airy concepts.
+    * `MASS` (Rock): Represents Heavy/Grounded concepts.
+    * *Goal:* Keep the bars balanced to avoid the Complexity Tax.
+
+### 🔧 Balancing & Fixes
+* **Complexity Tax:** Added a dynamic ATP penalty for inputs with High Psi (>0.6) and Low Geodesic Mass (<2.0). "Unanchored philosophy is expensive."
+* **Infrastructure Bonus:** Added a 1.0x - 1.5x ATP multiplier for inputs that connect to existing Gravity Wells.
+* **Refusal Logic:** Fixed epistemic rigidity in `execute_guru_refusal` by linking it to `MycelialNetwork.seeds`.
+
+### 📉 Deprecated
+* **Static Punishment:** The raw `-3.0` Voltage penalty for Slop has been deprecated in favor of the **Mandatory Chore** protocol.
+
 ## [9.2.9] - 2026-01-07 - "THE FINAL CUT"
 
 **Architects:** SLASH | **Runtime:** BoneAmanita 9.2.9
