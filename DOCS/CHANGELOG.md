@@ -1,5 +1,45 @@
 # CHANGELOG.md
 
+## [9.2.9] - 2026-01-07 - "THE FINAL CUT"
+
+**Architects:** SLASH | **Runtime:** BoneAmanita 9.2.9
+**"The cord has been cut. The simulation of life has been replaced by the mechanics of it."**
+
+### 🧠 MEMORY: The Cure for Amnesia (Hippocampal Repair)
+- **The Pathology:**
+    - The system suffered from **Anterograde Amnesia**. While it encoded significant moments into the `short_term_buffer`, it never triggered the consolidation phase. It was writing on water; the graph never learned from the current session.
+- **The Fix:**
+    - Wired `MycelialNetwork.replay_dreams()` directly into the tail end of `LifecycleManager.run_cycle`.
+- **The Mechanic:**
+    - **Sleep Spindles:** At the end of every tick, if the mind is in a `COGNITIVE` state, it flushes the buffer. High-voltage associations (Voltage > 5.0) are now permanently welded into the `core_graph`. The system now remembers what you love.
+
+### 🧬 METABOLISM: The Ghost Gear Removal (Real Evolution)
+- **The Pathology:**
+    - The `MitochondrialForge` was suffering from a "Placebo Effect." It calculated evolutionary adaptations (efficiency gains, resistance buffs) in a local variable but never committed them to `self.state`. The organism *thought* it was adapting, but physically remained static.
+- **The Fix:**
+    - Refactored `adapt()` to mutate `self.state.efficiency_mod` and `ros_resistance` directly.
+- **The Consequence:**
+    - **Starvation is Real:** If ATP drops, efficiency now permanently degrades (Atrophy).
+    - **Growth is Real:** If resources are abundant, the engine actually becomes faster.
+
+### 🕸️ AGENCY: The Weaver (Cartography Update)
+- **The Pathology:**
+    - `TheCartographer` contained a dormant method (`spin_web`) that allowed the user to manually draw edges between nodes, but it was inaccessible via commands. Furthermore, it demanded a specific tool (`SPIDER_LOCUS`) that Gordon rarely found.
+- **The Fix:**
+    - **New Command:** Added `/weave` to `bone_commands.py`.
+    - **Gordon's Gambit:** Updated logic to allow `ANCHOR_STONE` to function as a primitive mapping tool. If you lack the high-tech scanner, Gordon can just throw a rock to make the connection.
+
+### ⚡ PHYSICS: Adrenal Consequence (Velocity)
+- **The Pathology:**
+    - `TemporalDynamics` tracked velocity, but the punishment for moving too fast was a polite warning.
+- **The Fix:**
+    - **G-Force Burnout:** Velocity spikes (> 4.0) now cause direct **Stamina Damage**.
+    - **The Crucible Check:** High speed now risks cracking `TheCrucible` even if voltage is moderate. Speed kills.
+
+### ✂️ EXCISION: The Appendix (Cleanup)
+- **The Removal:**
+    - Deleted `SubsystemThermostat`. It was performing redundant calculations for a variable (`PRIORITY_LEARNING_RATE`) that `MycelialNetwork` was already regulating internally.
+
 ### **[9.2.8] - 2026-01-07**
 
 **"The Mortal Coil"**

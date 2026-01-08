@@ -4,6 +4,7 @@ import os
 import random
 import time
 from typing import List
+from bone_shared import ParadoxSeed
 
 class CommandProcessor:
     def __init__(self, engine, prisma_ref, lexicon_ref, config_ref, cartographer_ref):
@@ -25,6 +26,7 @@ class CommandProcessor:
             "/publish": self._cmd_publish,
             "/refusal": self._cmd_refusal,
             "/seed": self._cmd_seed,
+            "/load": self._cmd_load,
             "/map": self._cmd_map,
             "/mirror": self._cmd_mirror,
             "/profile": self._cmd_profile,
@@ -35,6 +37,7 @@ class CommandProcessor:
             "/kip": self._cmd_kip,
             "/pp": self._cmd_pp,
             "/tfw": self._cmd_tfw,
+            "/weave": self._cmd_weave,
             "/help": self._cmd_help
         }
 
@@ -47,11 +50,11 @@ class CommandProcessor:
             print(f"{self.P.RED}Unknown command. Try /help.{self.P.RST}")
             return True
 
-        restricted_cmds = ["/teach", "/kill", "/flag", "/garden"]
+        restricted_cmds = ["/teach", "/kill", "/flag"]
         if cmd in restricted_cmds:
             confidence = self.eng.mind['mirror'].profile.confidence
-            if confidence < 50:
-                print(f"{self.P.YEL}⚠️ COMMAND LOCKED: Requires 50+ turns of trust (Current: {confidence}).{self.P.RST}")
+            if confidence < 10:
+                print(f"{self.P.YEL}⚠️ COMMAND LOCKED: Requires 10+ turns of trust (Current: {confidence}).{self.P.RST}")
                 return True
                 
         try:
@@ -59,6 +62,21 @@ class CommandProcessor:
         except Exception as e:
             print(f"{self.P.RED}COMMAND FAILURE: {e}{self.P.RST}")
             return True
+
+    def _cmd_weave(self, parts):
+        inventory = self.eng.gordon.inventory
+        success, msg = self.Map.spin_web(
+            self.eng.mind['mem'].graph, 
+            inventory, 
+            self.eng.gordon
+        )
+        if success:
+            print(f"{self.P.CYN}{msg}{self.P.RST}")
+            self.eng.stamina = max(0.0, self.eng.stamina - 5.0) 
+            print(f"   {self.P.GRY}(Stamina -5.0){self.P.RST}")
+        else:
+            print(f"{self.P.RED}{msg}{self.P.RST}")
+        return True
 
     def _cmd_lineage(self, parts):
         log = self.eng.mind['mem'].lineage_log
@@ -108,7 +126,6 @@ class CommandProcessor:
                 self.eng.mind['mem'])
             print(f"   ► CHILD SPAWNED: {self.P.WHT}{child_id}{self.P.RST}")
             print(f"   ► TRAIT: {genome['mutations']}")
-            
         elif mode == "CROSSOVER":
             current_bio = {
                 "trauma_vector": self.eng.trauma_accum,
@@ -221,11 +238,40 @@ class CommandProcessor:
         return True
 
     def _cmd_seed(self, parts):
+        if len(parts) < 2:
+            print(f"{self.P.YEL}Usage: /seed [The question or paradox to plant]{self.P.RST}")
+            return True
+        
+        text = " ".join(parts[1:])
+        triggers = set(self.Lex.clean(text))
+        
+        if not triggers:
+            print(f"{self.P.RED}🌱 SEED ERROR: That idea is too hollow. Use heavier words.{self.P.RST}")
+            return True
+
+        new_seed = ParadoxSeed(text, triggers)
+        self.eng.mind['mem'].seeds.append(new_seed)
+        
+        print(f"{self.P.GRN}🌱 GARDEN: Planted new seed.{self.P.RST}")
+        print(f"   Question: '{text}'")
+        print(f"   {self.P.GRY}Triggers: {triggers}{self.P.RST}")
+        return True
+
+    def _cmd_load(self, parts):
         if len(parts) > 1:
-            self.eng.mind['mem'].ingest(parts[1])
+            target = parts[1]
+            if not target.endswith(".json"):
+                target += ".json"
+            self.eng.mind['mem'].ingest(target)
+        else:
+             print(f"{self.P.YEL}Usage: /load [filename]{self.P.RST}")
         return True
 
     def _cmd_map(self, parts):
+        phys = self.eng.phys['tension'].last_physics_packet
+        if not phys or "raw_text" not in phys:
+            print(f"{self.P.GRY}🌫️ FOG OF WAR: No physics data. Speak to the system first to generate terrain.{self.P.RST}")
+            return True
         bio_metrics = {
             "cortisol": self.eng.bio['endo'].cortisol,
             "oxytocin": self.eng.bio['endo'].oxytocin,
@@ -288,9 +334,9 @@ class CommandProcessor:
 
     def _cmd_status(self, parts):
         BIO = self.eng.bio
-        print(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS (9.2.4-PATCHED) ---{self.P.RST}")
-        print(f"Health:  {self.eng.health}/{self.Config.MAX_HEALTH}")
-        print(f"Stamina: {self.eng.stamina}/{self.Config.MAX_STAMINA}")
+        print(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS (9.2.9-PATCHED) ---{self.P.RST}")
+        print(f"Health:  {self.eng.health:.1f}/{self.Config.MAX_HEALTH}")
+        print(f"Stamina: {self.eng.stamina:.1f}/{self.Config.MAX_STAMINA}")
         print(f"ATP:     {BIO['mito'].state.atp_pool:.1f}")
         return True
 
