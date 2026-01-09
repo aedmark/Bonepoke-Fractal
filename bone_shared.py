@@ -7,6 +7,7 @@ import time
 from collections import Counter, deque
 from typing import List, Dict, Any
 from dataclasses import dataclass, field
+from bone_data import LEXICON, DEATH
 
 class Prisma:
     RST = "\033[0m"
@@ -31,33 +32,33 @@ class Prisma:
 
 class LexiconStore:
     def __init__(self):
-        self.ANTIGEN_REPLACEMENTS = {}
-        self.SOLVENTS = set()
-        self.VOCAB = {}
-        self.LEARNED_VOCAB = {}
-        self.USER_FLAGGED_BIAS = set()
+        self.categories = set([
+            "heavy", "kinetic", "explosive", "constructive",
+            "abstract", "photo", "aerobic", "thermal", "cryo",
+            "suburban", "play", "sacred", "buffer", "antigen"
+        ])
+        self._vocab = {}
+        self.SOLVENTS = set(LEXICON.get("solvents", []))
+        self.ANTIGEN_REPLACEMENTS = LEXICON.get("antigen_replacements", {})
+        self.ANTIGEN_REGEX = None
         self.load_vocabulary()
-    
+
     def load_vocabulary(self):
-        try:
-            with open("lexicon.json", "r") as f:
-                data = json.load(f)
-                self.ANTIGEN_REPLACEMENTS = data.get("antigen_replacements", {})
-                self.SOLVENTS = set(data.get("solvents", []))
-                for category, content in data.items():
-                    if category in ["antigen_replacements", "solvents"]:
-                        continue
-                    if isinstance(content, list):
-                        self.VOCAB[category] = set(content)
-                        if category not in self.LEARNED_VOCAB:
-                            self.LEARNED_VOCAB[category] = {}
-            print(f"{Prisma.GRY}[SYSTEM]: LexiconStore loaded.{Prisma.RST}")
-        except FileNotFoundError:
-            print(f"{Prisma.RED}[CRITICAL]: lexicon.json missing.{Prisma.RST}")
-            self.SOLVENTS = {"the", "and", "is"}
+        data = LEXICON
+        for cat, words in data.items():
+            if cat in self.categories:
+                self._vocab[cat] = set(words)
+            elif cat == "refusal_guru":
+                self._vocab["refusal_guru"] = set(words)
+            elif cat == "cursed":
+                self._vocab["cursed"] = set(words)
+        antigens = data.get("antigen", [])
+        if antigens:
+            pattern = "|".join(map(re.escape, antigens))
+            self.ANTIGEN_REGEX = re.compile(fr"\b({pattern})\b", re.IGNORECASE)
+        print(f"{Prisma.GRY}[SYSTEM]: LexiconStore loaded from Data Module.{Prisma.RST}")
     
     def get_raw(self, category):
-        """Pure data retrieval."""
         base = self.VOCAB.get(category, set())
         if category == "suburban":
              return (base | set(self.LEARNED_VOCAB.get(category, {}).keys())) - self.USER_FLAGGED_BIAS
@@ -326,26 +327,11 @@ class BoneConfig:
         return False, None
 
 class DeathGen:
-    PREFIXES = []
-    CAUSES = {}
-    VERDICTS = {}
-    
-    @classmethod
-    def load_protocols(cls):
-        try:
-            with open("death_protocols.json", "r") as f:
-                data = json.load(f)
-                cls.PREFIXES = data.get("PREFIXES", ["System Error."])
-                cls.CAUSES = data.get("CAUSES", {"TRAUMA": ["Missing File"]})
-                cls.VERDICTS = data.get("VERDICTS", {"HEAVY": ["404 Error."]})
-        except FileNotFoundError:
-            print(f"{Prisma.RED}[CRITICAL]: death_protocols.json missing. Death is currently unavailable.{Prisma.RST}")
-            cls.PREFIXES = ["System Error."]
-            cls.CAUSES = {"TRAUMA": ["Missing File"]}
-            cls.VERDICTS = {"HEAVY": ["404 Error."]}
-    
     @staticmethod
     def eulogy(phys, state):
+        prefixes = DEATH.get("PREFIXES", ["System Halt."])
+        causes = DEATH.get("CAUSES", {})
+        verdicts = DEATH.get("VERDICTS", {})
         cause_type = "TRAUMA"
         counts = phys.get("counts", {})
         clean_words = phys.get("clean_words", [])

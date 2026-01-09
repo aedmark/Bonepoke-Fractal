@@ -1,0 +1,48 @@
+{
+  "STARTING_INVENTORY": ["POCKET_ROCKS", "SILENT_KNIFE"],
+
+  "SCAR_TISSUE": {
+    "FEAR": 0.8, "HATE": 0.6, "FATE": 0.9, "REGRET": 0.6, "ABANDONMENT": 0.1, "BETRAYAL": 0.314
+  },
+  "ITEM_REGISTRY": {
+    "POCKET_ROCKS": {
+      "description": "Grey gravel. Breadcrumbs for the mind.",
+      "function": "BREADCRUMB",
+      "usage_msg": "Gordon drops a rock to mark the path. (Psi -0.2)"
+    },
+    "ANCHOR_STONE": {
+      "description": "A dense, black rock that refuses to move.",
+      "function": "DRIFT_KILLER",
+      "consume_on_use": true,
+      "usage_msg": "Gordon kicks the heavy stone into the abyss. The rope snaps taut. (Drag = 0)"
+    },
+    "SILENT_KNIFE": {
+      "description": "A ceramic blade that cuts without sound.",
+      "function": "EDGE_CUTTER",
+      "usage_msg": "The Red String is cut. The connection is severed."
+    },
+    "BUCKET_OF_LIME": {
+      "description": "White powder for covering mistakes.",
+      "function": "HISTORY_SCRUB",
+      "value": 0.7,
+      "usage_msg": "Gordon whitewashes the 'Sorry' from the walls."
+    },
+    "BROKEN_WATCH": {
+      "description": "It is stuck at 11:11.",
+      "function": "STOCHASTIC_FIX",
+      "usage_msg": "Gordon taps the glass. 'Not yet.'"
+    },
+    "STABILITY_PIZZA": {
+      "description": "A frozen slice of reality.",
+      "function": "REALITY_ANCHOR",
+      "consume_on_use": true,
+      "requires": "thermal",
+      "usage_msg": "It tastes like childhood cartoons and hot plastic."
+    },
+    "MEMORY_ARTIFACT": {
+      "description": "Useless junk. Why does he keep these? Proof he triumphed.",
+      "function": "TROPHY",
+      "variants": ["ANTISEPTIC_SPRAY", "DIVING_BELL", "HEAT_SINK", "THERMOS"]
+    }
+  }
+}

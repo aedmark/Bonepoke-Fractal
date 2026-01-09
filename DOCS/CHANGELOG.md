@@ -7,21 +7,37 @@
 ### 🧠 COGNITION: The TensionMeter Refactor
 
 * **The Pathology:**
-* `TheTensionMeter` was suffering from the "Curse of Knowledge." Variables like `kappa` and `psi` were opaque shorthand for complex literary metrics.
-* The `gaze` method was a monolithic block of math, counting, and logic, making it cognitively heavy and difficult to debug.
-* The system was speaking "Esoteric Physics" (internal math) rather than "Cognitive Mechanics" (clear forces).
-
+    * `TheTensionMeter` was suffering from the "Curse of Knowledge." Variables like `kappa` and `psi` were opaque shorthand for complex literary metrics.
+    * The `gaze` method was a monolithic block of math, counting, and logic, making it cognitively heavy and difficult to debug.
+    * The system was speaking "Esoteric Physics" (internal math) rather than "Cognitive Mechanics" (clear forces).
 
 * **The Surgery:**
-* **The Pinker Lens:** Renamed and isolated metrics to respect the reader's mental model. `voltage` is now explicitly calculated as Narrative Energy. `narrative_drag` is explicitly Friction/Entropy.
-* **The Fuller Lens:** Ephemeralized the `gaze` pipeline. The logic was broken down into discrete, single-purpose components: `_tally_categories`, `_calculate_voltage`, `_calculate_drag`, and `_measure_integrity`.
-* **The Ron Swanson Cut:** Removed `vector_memory` and historic inertia calculations. The system no longer wastes cycles checking if it repeated itself; it focuses entirely on the *now*.
-
+    * **The Pinker Lens:** Renamed and isolated metrics to respect the reader's mental model. `voltage` is now explicitly calculated as Narrative Energy. `narrative_drag` is explicitly Friction/Entropy.
+    * **The Fuller Lens:** Ephemeralized the `gaze` pipeline. The logic was broken down into discrete, single-purpose components: `_tally_categories`, `_calculate_voltage`, `_calculate_drag`, and `_measure_integrity`.
+    * **The Ron Swanson Cut:** Removed `vector_memory` and historic inertia calculations. The system no longer wastes cycles checking if it repeated itself; it focuses entirely on the *now*.
 
 * **The Result:**
-* **Modular Clarity:** The "Sensory Organ" is now a clean, readable pipeline: *Input -> Clean -> Categorize -> Measure -> Package*.
-* **Systemic Integrity:** Restored critical "plumbing" methods (`_trigger_neuroplasticity`, `_package_physics`) that were momentarily orphaned, ensuring the Governor, Theremin, and Lenses continue to receive their required telemetry (Beta, Gamma, Zones).
-* **Explicit Tuning:** The "Pinker Tax" (1.5x drag penalty for "solvent" words like *is/the/are*) is now an explicit, tunable variable rather than hidden inline math.
+    * **Modular Clarity:** The "Sensory Organ" is now a clean, readable pipeline: *Input -> Clean -> Categorize -> Measure -> Package*.
+    * **Systemic Integrity:** Restored critical "plumbing" methods (`_trigger_neuroplasticity`, `_package_physics`) that were momentarily orphaned, ensuring the Governor, Theremin, and Lenses continue to receive their required telemetry (Beta, Gamma, Zones).
+    * **Explicit Tuning:** The "Pinker Tax" (1.5x drag penalty for "solvent" words like *is/the/are*) is now an explicit, tunable variable rather than hidden inline math.
+
+### 🧹 ARCHETYPE: The Gordon Restoration
+
+* **The Pathology:**
+    * The `GordonKnot` class had become a "Video Game Inventory"—a bloated list of items (`DIVING_BELL`, `THERMOS`) that occupied memory tokens but performed no mechanical function.
+    * The "Key/Door" metaphor was being processed literally, causing the system to hallucinate escape routes where none existed.
+    * **Critical Failure:** The `SILENT_KNIFE` logic was commented out—a phantom limb that promised to cut loops but only printed text.
+
+* **The Surgery:**
+    * **The Fuller Lens (Ephemeralization):** Collapsed all non-functional flavor items into a single `MEMORY_ARTIFACT` class. Gordon now carries 80% less JSON weight while retaining 100% of the narrative flavor.
+    * **The Schur Lens (Humanity):** Implemented the `BROKEN_WATCH` protocol. It is no longer a Time Lord device; it is now only correct twice a day (System Tick ends in `11` or Voltage is `11.1`).
+    * **The Pinker Lens (Cognition):** Re-engineered `POCKET_ROCKS` from a generic physics buffer to "Cognitive Breadcrumbs" (Psi reduction). They now explicitly ground the system when hallucination gets too high.
+    * **The Kinetic Patch:** Hard-coded the `SILENT_KNIFE` logic into the `LifecycleManager`. It now physically reaches into the `MycelialNetwork` and deletes the edge between repeating concepts.
+
+* **The Result:**
+    * **Narrative Refusal:** Gordon now actively rejects "Key/Door" inputs, reducing System Voltage when users try to "win" the conversation rather than experience it.
+    * **The Janitor is Live:** `BUCKET_OF_LIME` now detects apologies ("sorry") and overwrites them, enforcing the "No Regrets" protocol.
+    * **Hotfix:** Repaired a syntax fracture in `MirrorGraph` that would have caused a compile-time fatality.
 
 ## [9.4.2] - THE DIRECTOR'S CUT - 2026-01-09
 

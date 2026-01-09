@@ -537,21 +537,24 @@ class GordonKnot:
             self.ITEM_REGISTRY = {}
 
     def acquire(self, tool_name):
+        registry_data = self.ITEM_REGISTRY.get(tool_name)
+        if not registry_data:
+            master_artifact = self.ITEM_REGISTRY.get("MEMORY_ARTIFACT")
+            if master_artifact and tool_name in master_artifact.get("variants", []):
+                registry_data = master_artifact   
         if tool_name in self.inventory: return None
         if len(self.inventory) >= 10:
-            victim_index = -1
-            for i, item in enumerate(self.inventory):
-                if item not in self.CRITICAL_ITEMS:
-                    victim_index = i
-                    break
-            if victim_index != -1:
-                dropped = self.inventory.pop(victim_index)
-                return f"{Prisma.GRY}OVERBURDENED: Gordon dropped '{dropped}' to make room for '{tool_name}'.{Prisma.RST}"
-            else:
-                return f"{Prisma.YEL}POCKETS FULL: Gordon looks at '{tool_name}' but leaves it.{Prisma.RST}"
+             return f"{Prisma.GRY}OVERBURDENED: Gordon looks at '{tool_name}' but sighs. 'No room.'{Prisma.RST}"
         self.inventory.append(tool_name)
-        data = self.get_item_data(tool_name)
-        return f"LOOT DROP: Gordon found [{tool_name}]. '{data.get('description', 'Useful.')}'"
+        desc = registry_data.get('description', 'Useful.') if registry_data else "A thing."
+        return f"LOOT DROP: Gordon found [{tool_name}]. '{desc}'"
+
+    def drop_breadcrumb(self, physics_ref):
+        if "POCKET_ROCKS" in self.inventory:
+            physics_ref["psi"] = max(0.0, physics_ref["psi"] - 0.2)
+            physics_ref["narrative_drag"] = max(0.0, physics_ref["narrative_drag"] - 1.0)
+            return True, f"BREADCRUMB: Gordon drops a POCKET_ROCK. The path backward is clear."
+        return False, "Gordon reaches for a rock, but his pockets are empty."
 
     def flinch(self, clean_words: List[str]) -> tuple[bool, str]:
         hits = [w for w in clean_words if w.upper() in self.pain_memory]
@@ -568,6 +571,12 @@ class GordonKnot:
 
     def get_item_data(self, item_name):
         return self.ITEM_REGISTRY.get(item_name, {"description": "Unknown Artifact", "function": "NONE", "usage_msg": "It does nothing."})
+
+    def whitewash_apology(self, clean_words):
+        if "sorry" in clean_words or "apologize" in clean_words:
+            if "BUCKET_OF_LIME" in self.inventory:
+                return True, f"{Prisma.GRY}BUCKET OF LIME: Gordon paints over the apology. 'Don't be sorry. Be better.'{Prisma.RST}"
+        return False, None
 
     def emergency_reflex(self, physics_ref) -> tuple[bool, str]:
         drift = physics_ref.get("narrative_drag", 0.0)
@@ -615,6 +624,11 @@ class GordonKnot:
                 return force, f"🪨 {item}: {data.get('usage_msg', 'Drift Reduced.')} (Integrity -{cost})"
         return 0.0, "He floats. The paper walls are looking flimsy."
 
+    def check_watch(self, tick_count, voltage):
+        if str(tick_count).endswith("11") or abs(voltage - 11.1) < 0.1:
+            return True, f"{Prisma.CYN}BROKEN WATCH: The hands align. 11:11. Synchronicity achieved. (All Penalties Cleared).{Prisma.RST}"
+        return False, None
+    
     def deploy_pizza(self, physics_ref) -> tuple[bool, str]:
         target_item = None
         for item in self.inventory:
@@ -1648,10 +1662,9 @@ class MirrorGraph:
                     True,
                     f"MIRROR DRIFT: Stepping away from your usual {str(likes).upper()} anchor.",)
         return True, None
-    d
-    ef get_status(self):
+    def get_status(self):
         l, h = self.profile.get_preferences()
-        return f"👤 MODEL ({self.profile.confidence} turns): LIKES={l} | HATES={h}"
+        return f"MODEL ({self.profile.confidence} turns): LIKES={l} | HATES={h}"
 
 class CosmicDynamics:
     @staticmethod
@@ -2519,10 +2532,25 @@ class LifecycleManager:
         if is_painful:
             logs.append(f"\n{Prisma.RED}{pain_msg}{Prisma.RST}")
             return "PAIN_INTERRUPT", logs
+        if "key" in m["clean_words"] or "door" in m["clean_words"]:
+            if "POCKET_ROCKS" in self.eng.gordon.inventory:
+                logs.append(f"\n{Prisma.OCHRE}GORDON REFUSAL: He ignores the Door/Key metaphor.{Prisma.RST}")
+                logs.append(f"   He rattles the rocks in his pocket. 'I am not going through. I am staying here.'")
+                m["physics"]["voltage"] = max(0.0, m["physics"]["voltage"] - 2.0)
         gordon_active, gordon_log = self.eng.gordon.emergency_reflex(m["physics"])
         if gordon_active: logs.append(f"\n{gordon_log}")
+        if m["physics"].get("repetition", 0.0) > 0.8 and "SILENT_KNIFE" in self.eng.gordon.inventory:
+            w1 = m["clean_words"][0] if m["clean_words"] else "VOID"
+            cut_target = "NOTHING"
+            mem_graph = self.eng.mind['mem'].graph
+            if w1 in mem_graph and mem_graph[w1]["edges"]:
+                cut_target = max(mem_graph[w1]["edges"], key=mem_graph[w1]["edges"].get)
+                del mem_graph[w1]["edges"][cut_target]
+                if cut_target in mem_graph and w1 in mem_graph[cut_target]["edges"]:
+                    del mem_graph[cut_target]["edges"][w1]
+            logs.append(f"\n{Prisma.RED}SILENT KNIFE: Gordon severs the red string between '{w1}' and '{cut_target}'. Loop broken.{Prisma.RST}")
+            m["physics"]["repetition"] = 0.0
         return "CONTINUE", logs
-
     def _process_metabolism(self, text, m, feedback, stress_mod):
         logs = []
         if self.pending_chore:
