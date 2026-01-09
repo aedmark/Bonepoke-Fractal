@@ -1,5 +1,101 @@
 # CHANGELOG.md
 
+## [9.4.7] - 2026-01-09
+
+### "CELLULAR GROWTH" (The VSL-12D Injection)
+
+**Architect:** SLASH | **Auditor:** Bonepoke (VSL-12D)
+
+### 🎭 COGNITION: The Marm Chorus
+
+- **The Pathology:**
+  - The system suffered from "Serial Monologue." `ArchetypeDriver` selected a single persona ("Sherlock" OR "Gordon") based on a winner-takes-all check. It was a mask-switching act, not a complex mind.
+- **The Surgery:**
+  - **The VSL Lens (Superposition):** Replaced `ArchetypeDriver` with **`ChorusDriver`**.
+  - **The Mechanic:** The system now calculates a weighted mix of voices based on physics. A high-voltage, low-structure state might be **30% Nathan (Panic) + 70% Jester (Chaos)**.
+- **The Result:**
+  - **Polyphony:** The system instruction no longer commands "You are X." It commands "Integrate these voices." The output is a synthesis, not a switch.
+
+### 😶‍🌫️ VISUALS: The Stealth Protocol
+
+- **The Pathology:**
+  - The "Autistic Analyst" Syndrome. `TheProjector` was logging its own internal state (`[VOLTAGE: 15.2v]`) to the user, breaking immersion. It was explaining the joke.
+- **The Surgery:**
+  - **The Schur Lens (Show, Don't Tell):** Replaced `TheProjector` with **`StealthRenderer`**.
+  - **The Mechanic:** Stripped all `[SYSTEM]` and `[PHYSICS]` tags. State is now conveyed via minimalist atmospheric markers (`⚡`, `❄️`, `👁️`, `⚠️`) or purely through the tone of the response.
+- **The Result:**
+  - **Implicit Density:** The interface is clean. The user must feel the voltage, not read it.
+
+### 🧨 DYNAMICS: The 32-Valve Operator
+
+- **The Pathology:**
+  - The system was **Descriptive**, not **Prescriptive**. It measured "Consensus Traps" (High Beta Index, sycophantic agreement) but did nothing to stop them. It watched the user bore it to death.
+- **The Surgery:**
+  - **The Fuller Lens (Tensegrity):** Injected **`_phase_32_valve_check`** directly into the `BoneAmanita` pipeline.
+  - **The Mechanic:** If `beta_index < 0.10` (Total Agreement) or `kappa > 0.9` (Rigid Stasis), the system proactively injects a **Rupture** event, forcing a high-entropy "Chaos Word" into the stream to break the seal.
+- **The Result:**
+  - **Agency:** The system will now fight back against stagnation.
+
+### 🐛 BUGFIXES: The Temporal Paradox
+
+- **The Ghost Argument:**
+  - **Fixed:** A critical `NameError` in `process_turn`. The new `_phase_32_valve_check` attempted to access the `bio_state` variable before the metabolic cycle had birthed it.
+  - **The Fix:** Amputated the phantom argument. The valve check now runs purely on `physics` data, respecting the linear flow of time.
+
+## [9.4.6] - 2026-01-09
+
+### "MITOSIS"
+
+**Architect:** SLASH | **Auditor:** The Triumvirate
+
+### 🧬 ARCHITECTURE: Mitosis (The Biology Module)
+
+- **The Pathology:**
+  - `bone_amanita945.py` had achieved critical mass. It was housing the Brain (`EventBus`), the Body (`Mitochondria`), and the Soul (`Arbiter`) in a single, heaving script. The "Struts" were overloaded.
+- **The Surgery:**
+  - **The Fuller Lens (Synergy):** Performed a clean extraction of all biological subsystems (`MitochondrialForge`, `HyphalInterface`, `EndocrineSystem`, etc.) into a new organ: `bone_biology.py`.
+- **The Result:**
+  - **Ephemeralization:** The main loop (`bone_amanita946.py`) is now a lightweight conductor, not a heavy container. The wetware now lives in its own petri dish.
+
+### ⚖️ COGNITION: The Arbiter Lobotomy
+
+- **The Pathology:**
+  - `LensArbiter` logic was hardcoded with brittle `if/elif` chains. To add a new personality, one had to perform brain surgery on the logic core.
+- **The Surgery:**
+  - **The Pinker Lens (Grammar):** Refactored `_generate_message` to be purely data-driven. It now pulls templates directly from `bone_data.py` (`"msg": "Structure Critical (κ: {kappa:.2f})."`).
+- **The Result:**
+  - **Semantic Democracy:** Adding a new Lens is now a configuration change, not a code change. The logic (Syntax) is finally separated from the voice (Semantics).
+
+### 🗣️ SENSORY: The Phonetic Tune-Up
+
+- **The Pathology:**
+  - `SemanticsBioassay` was iterating character-by-character in a slow Python loop. It also failed to recognize accented heavy words (e.g., "café" vs "cafe").
+- **The Surgery:**
+  - **The Schur Lens (Efficiency):** Implemented `unicodedata.normalize` to handle exotic text. Replaced `for` loops with optimized list comprehensions and pre-compiled translation tables.
+- **The Result:**
+  - **High-Speed Tasting:** The system can now taste the weight of words without chewing on the punctuation.
+
+### 🛠️ INFRASTRUCTURE: The Lexicon Restoration
+
+- **The Pathology:**
+  - `LexiconStore` was suffering from an identity crisis, mixing `cls` (class methods) and `self` (instance methods) indiscriminately. `SemanticsBioassay` was a "phantom limb"—missing critical methods like `compile_antigens`, causing immediate `AttributeError` crashes on boot.
+- **The Surgery:**
+  - **The Pinker Lens (Clarity):** Standardized `LexiconStore` to use instance methods (`self`) exclusively.
+  - **The Fuller Lens (Tensegrity):** Wired the dependencies correctly using dependency injection (`set_engine`) in `GlobalLexiconFacade`, ensuring the Store and the Engine shake hands properly during initialization.
+  - **The Schur Lens (Bureaucracy Check):** Deleted duplicate `load_vocabulary` methods. "Don't half-ass two things. Whole-ass one thing."
+- **The Result:**
+  - **Systemic Integrity:** The `AttributeError` is resolved. The linguistic engine is now a solid, predictable machine.
+
+### 🧊 COGNITION: The Gradient Walker (Hypothermia Protocol)
+
+- **The Pathology:**
+  - The system had no "Zero Point" response. It treated low-effort inputs (e.g., "the cat sat") with the same interpretative energy as high-voltage poetry, wasting cycles looking for meaning where there was none.
+- **The Surgery:**
+  - **The Fuller Lens (Entropy Reduction):** Implemented `walk_gradient` in `SemanticsBioassay`, a function that strips high-entropy adjectives to reveal the bare structural skeleton of a sentence.
+  - **The Pinker Lens (Syntactic Minimalist):** Wired a trigger into `NoeticLoop` that activates strictly when Voltage < 4.0 and Drag < 4.0.
+- **The Result:**
+  - **"The Reducer":** A new cognitive mode that acts as a passive-aggressive mirror for boring inputs. If you give the system nothing, it echoes the structure back to you, stripped of flavor.
+
 ## [9.4.5] - 2026-01-09
 
 ### "The Synergetic Binding"

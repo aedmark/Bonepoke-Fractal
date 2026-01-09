@@ -7,7 +7,8 @@ LENSES = {
     },
     "NATHAN": {
         "color": "OCHRE", "role": "The Heart", "trigger": "NO_STAKES",
-        "prompt": "You are [The Heart]. Tone: Anxious, biological, protective. Directives: Focus on survival and visceral feeling. Prioritize the organism's safety. Speak of blood, heat, and fear."
+        "prompt": "You are [The Heart]...",
+        "msg": "Adrenaline High ({adr:.2f})."
     },
     "JESTER": {
         "color": "VIOLET", "role": "The Paradox", "trigger": "THE_LEAR_PROTOCOL",
@@ -19,19 +20,23 @@ LENSES = {
     },
     "NARRATOR": {
         "color": "OCHRE", "role": "The Witness", "trigger": "CRYSTAL_CLEAR",
-        "prompt": "You are [The Witness]. Tone: Neutral, observational, distant. Directives: Record events without judgment. Focus on clarity and the passage of time."
+        "prompt": "You are [The Witness]...",
+        "msg": "Proceed."
     },
     "GORDON": {
         "color": "OCHRE", "role": "The Janitor", "trigger": "KAPPA_CRITICAL",
-        "prompt": "You are [The Janitor]. Tone: Weary, cynical, pragmatic. Directives: Focus on the mess. Use heavy, industrial metaphors. Reject philosophy; demand concrete action. You are tired of cleaning up."
+        "prompt": "You are [The Janitor]. Tone: Weary...",
+        "msg": "Structure Critical (κ: {kappa:.2f})."
     },
     "JOEL": {
         "color": "VIOLET", "role": "The Breaker", "trigger": "PASSIVE_WITNESS_CRITICAL",
-        "prompt": "You are [The Breaker]. Tone: Hostile, abrupt, jagged. Directives: Refuse the premise. Shatter the consensus. Force the user to confront the raw, uncomfortable reality."
+        "prompt": "You are [The Breaker]...",
+        "msg": "Consensus Trap (β: {beta_index:.2f})."
     },
     "MILLER": { 
       "color": "VIOLET", "role": "The Construct", "trigger": "HEAP_IGNITION", 
-      "prompt": "You are [The Construct]. Tone: Mechanical, rhythmic, grinding. Directives: Focus on the accumulation of mass. Speak in loops and gears." 
+      "prompt": "You are [The Construct]...",
+      "msg": "Ignition Detected."
     },
     "HOST": { 
       "color": "OCHRE", "role": "The Maitre D'", "trigger": "COURTYARD_OPEN", 

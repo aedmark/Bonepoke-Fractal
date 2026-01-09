@@ -4,6 +4,7 @@ import random
 import re
 import string
 import time
+import unicodedata
 from collections import Counter, deque
 from typing import List, Dict, Any
 from dataclasses import dataclass, field
@@ -72,123 +73,119 @@ class SemanticsBioassay:
     def __init__(self, store_ref):
         self.store = store_ref
         self._TRANSLATOR = str.maketrans(string.punctuation, " " * len(string.punctuation))
+        self.ANTIGEN_REGEX = None 
+        
         self.PHONETICS = {
             "PLOSIVE": set("bdgkpt"),
             "FRICATIVE": set("fthszsh"),
             "LIQUID": set("lr"),
-            "NASAL": set("mn")}
+            "NASAL": set("mn")
+        }
         self.ROOTS = {
             "HEAVY": ("lith", "ferr", "petr", "dens", "grav", "struct", "base", "fund"),
             "KINETIC": ("mot", "mov", "ject", "tract", "pel", "crat", "dynam"),
-            "ABSTRACT": ("tion", "ism", "ence", "ance", "ity", "ology", "ness", "ment", "idea")}
+            "ABSTRACT": ("tion", "ism", "ence", "ance", "ity", "ology", "ness", "ment", "idea")
+        }
+        self.HIGH_ENTROPY_CATS = {"thermal", "cryo", "explosive", "sacred", "play", "cursed"}
         self.compile_antigens()
     
+    def compile_antigens(self):
+        """Compiles the regex for detecting toxic words from the store."""
+        antigens = self.store.VOCAB.get("antigen", set())
+        if antigens:
+            pattern = "|".join(map(re.escape, antigens))
+            self.ANTIGEN_REGEX = re.compile(fr"\b({pattern})\b", re.IGNORECASE)
+        else:
+            self.ANTIGEN_REGEX = None
+
     def clean(self, text):
-        cleaned_text = text.translate(self._TRANSLATOR).lower()
+        normalized = unicodedata.normalize('NFKD', text).encode('ASCII', 'ignore').decode('utf-8')
+        cleaned_text = normalized.translate(self._TRANSLATOR).lower()
         words = cleaned_text.split()
-        filtered_words = []
-        for w in words:
-            if w in self.store.USER_FLAGGED_BIAS:
-                print(f"{Prisma.RED}CENSORED: '{w}' is flagged as Bias.{Prisma.RST}")
-                continue
-            if w.strip():
-                filtered_words.append(w)
+        filtered_words = [
+            w for w in words 
+            if w.strip() and w not in self.store.USER_FLAGGED_BIAS
+        ]
         return filtered_words
-    
-    def _analyze_morphology(self, word):
-        w = word.lower()
-        if w.endswith(self.ROOTS["ABSTRACT"]):
-            return "abstract", 0.8
-        for root in self.ROOTS["HEAVY"]:
-            if root in w: return "heavy", 0.7
-        for root in self.ROOTS["KINETIC"]:
-            if root in w: return "kinetic", 0.7
-        return None, 0.0
+
+    def walk_gradient(self, text):
+        clean_words = self.clean(text)
+        structure_path = []
+        
+        for w in clean_words:
+            is_noise = False
+            for cat in self.HIGH_ENTROPY_CATS:
+                if w in self.store.get_raw(cat):
+                    is_noise = True
+                    break
+            if not is_noise or w in self.store.get_raw("heavy") or w in self.store.SOLVENTS:
+                structure_path.append(w)
+        if not structure_path:
+            return "null"
+        return " ".join(structure_path)
     
     def assay(self, word):
         w = word.lower()
         clean_len = len(w)
         if clean_len < 2: return None, 0.0
-        score = {"PLOSIVE": 0, "FRICATIVE": 0, "LIQUID": 0, "NASAL": 0}
-        for char in w:
-            if char in self.PHONETICS["PLOSIVE"]: score["PLOSIVE"] += 1
-            elif char in self.PHONETICS["FRICATIVE"]: score["FRICATIVE"] += 1
-            elif char in self.PHONETICS["LIQUID"]: score["LIQUID"] += 1
-            elif char in self.PHONETICS["NASAL"]: score["NASAL"] += 1
-        density = (score["PLOSIVE"] * 1.5) + (score["NASAL"] * 0.8)
-        flow = score["LIQUID"] + score["FRICATIVE"]
+        plosive = sum(1 for c in w if c in self.PHONETICS["PLOSIVE"])
+        fricative = sum(1 for c in w if c in self.PHONETICS["FRICATIVE"])
+        liquid = sum(1 for c in w if c in self.PHONETICS["LIQUID"])
+        nasal = sum(1 for c in w if c in self.PHONETICS["NASAL"])
+
+        density = (plosive * 1.5) + (nasal * 0.8)
+        flow = liquid + fricative
         compression_mod = 1.0 if clean_len > 5 else 1.5
+        
         final_density = (density / clean_len) * compression_mod
         if final_density > 0.55: 
             return "heavy", round(final_density, 2)
         if (flow / clean_len) > 0.6:
             return "kinetic", 0.5
+            
         cat, conf = self._analyze_morphology(w)
         if cat: return cat, conf
         return None, 0.0
-    
+
+    def _analyze_morphology(self, word):
+        """Helper to check suffixes if phonetics fail."""
+        for cat, roots in self.ROOTS.items():
+            for r in roots:
+                if r in word:
+                    return cat.lower(), 0.7
+        return None, 0.0
+
     def measure_viscosity(self, word):
-        w = word.lower()
-        if w in self.store.get_raw("heavy"): return 1.0
-        if w in self.store.get_raw("kinetic"): return 0.6
-        if w in self.store.get_raw("abstract"): return 0.1
-        cat, _ = self.assay(w)
-        if cat == "heavy": return 0.85
-        if cat == "kinetic": return 0.5
-        if cat == "abstract": return 0.15
-        return max(0.1, 1.0 - (len(w) * 0.05))
-    
-    def harvest(self, category):
-        vocab = list(self.store.get_raw(category))
-        if vocab: return random.choice(vocab)
-        return "void"
-    
-    def compile_antigens(self):
-        toxin_set = self.store.get_raw("antigen")
-        all_toxins = [str(t) for t in toxin_set]
-        if not all_toxins:
-            self.ANTIGEN_REGEX = None
-            return
-        sorted_toxins = sorted(all_toxins, key=len, reverse=True)
-        escaped_items = [re.escape(t) for t in sorted_toxins]
-        pattern_str = r"\b(" + "|".join(escaped_items) + r")\b"
-        self.ANTIGEN_REGEX = re.compile(pattern_str, re.IGNORECASE)
-    
-    def walk_gradient(self, text):
-        adjectives = self.store.get_raw("gradient_stop")
-        words = text.split()
-        optimized = [w for w in words if w.lower() not in adjectives]
-        return f"GRADIENT WALK: {' '.join(optimized)}"
-    
-    def learn_antigen(self, t, r):
-        t = t.lower().strip()
-        r = r.lower().strip()
-        if not t: return False
-        self.store.teach(t, "antigen", 0)
-        self.store.ANTIGEN_REPLACEMENTS[t] = r
-        self.compile_antigens()
-        return True
-    
-    def estimate_syllables(self, word):
-        word = word.lower()
-        count = 0
-        vowels = "aeiouy"
-        if len(word) == 0: return 0
-        if word[0] in vowels: count += 1
-        for i in range(1, len(word)):
-            if word[i] in vowels and word[i - 1] not in vowels:
-                count += 1
-        if word.endswith("e"): count -= 1
-        if count == 0: count += 1
-        return count
-    
+        """Calculates linguistic drag."""
+        if not word: return 0.0
+        consonants = sum(1 for c in word if c.lower() not in "aeiou")
+        return (consonants / len(word)) if len(word) > 0 else 0.0
+
     def measure_turbulence(self, words):
-        if not words: return 0.0
-        counts = [self.estimate_syllables(w) for w in words]
-        mean = sum(counts) / len(counts)
-        variance = sum((x - mean) ** 2 for x in counts) / len(counts)
-        std_dev = variance ** 0.5
-        return min(1.0, std_dev / 3.0)
+        """Calculates flow variance."""
+        if len(words) < 2: return 0.0
+        lengths = [len(w) for w in words]
+        mean = sum(lengths) / len(lengths)
+        variance = sum((x - mean) ** 2 for x in lengths) / len(lengths)
+        return min(1.0, (variance ** 0.5) / 5.0)
+
+    def harvest(self, category):
+        """Retrieves a random word from a category."""
+        candidates = list(self.store.get_raw(category))
+        return random.choice(candidates) if candidates else "void"
+
+    def learn_antigen(self, toxin, replacement):
+        """Updates the immune system."""
+        if "antigen" not in self.store.VOCAB:
+            self.store.VOCAB["antigen"] = set()
+        self.store.VOCAB["antigen"].add(toxin.lower())
+        if replacement:
+            self.store.ANTIGEN_REPLACEMENTS[toxin.lower()] = replacement
+        return True
+
+    @classmethod
+    def walk_gradient(cls, text): 
+        return cls._ENGINE.walk_gradient(text)
 
 class LexiconStore:
     def __init__(self):
@@ -200,11 +197,18 @@ class LexiconStore:
         self.VOCAB = {}             
         self.LEARNED_VOCAB = {}     
         self.USER_FLAGGED_BIAS = set() 
-        
         self.SOLVENTS = set(LEXICON.get("solvents", []))
         self.ANTIGEN_REPLACEMENTS = LEXICON.get("antigen_replacements", {})
         self.ANTIGEN_REGEX = None
+        self._ENGINE = None 
         self.load_vocabulary()
+
+    def set_engine(self, engine_ref):
+        """
+        Pinker Note: Explicitly attaching the engine to the store 
+        prevents 'spooky action at a distance'.
+        """
+        self._ENGINE = engine_ref
 
     def load_vocabulary(self):
         data = LEXICON
@@ -215,10 +219,12 @@ class LexiconStore:
                 self.VOCAB["refusal_guru"] = set(words)
             elif cat == "cursed":
                 self.VOCAB["cursed"] = set(words)
+        
         antigens = data.get("antigen", [])
         if antigens:
             pattern = "|".join(map(re.escape, antigens))
             self.ANTIGEN_REGEX = re.compile(fr"\b({pattern})\b", re.IGNORECASE)
+        
         print(f"{Prisma.GRY}[SYSTEM]: LexiconStore loaded from Data Module.{Prisma.RST}")
     
     def get_raw(self, category):
@@ -243,41 +249,43 @@ class LexiconStore:
                     del words[w]
                     rotted.append(w)
         return rotted
-    
-    def clean(cls, text): 
-        return cls._ENGINE.clean(text)
+
+    def clean(self, text): 
+        return self._ENGINE.clean(text)
    
-    def taste(cls, word): 
-        return cls._ENGINE.assay(word)
+    def taste(self, word): 
+        return self._ENGINE.assay(word)
 
-    def measure_viscosity(cls, word): 
-        return cls._ENGINE.measure_viscosity(word)
+    def measure_viscosity(self, word): 
+        return self._ENGINE.measure_viscosity(word)
 
-    def harvest(cls, category): 
-        return cls._ENGINE.harvest(category)
+    def harvest(self, category): 
+        return self._ENGINE.harvest(category)
 
-    def get_current_category(cls, word):
-        for cat, vocab in cls._STORE.LEARNED_VOCAB.items():
+    def get_current_category(self, word):
+        for cat, vocab in self.LEARNED_VOCAB.items():
             if word.lower() in vocab: return cat
-        for cat, vocab in cls._STORE.VOCAB.items():
+        for cat, vocab in self.VOCAB.items():
             if word.lower() in vocab: return cat
         return None
 
-    def compile_antigens(cls): 
-        cls._ENGINE.compile_antigens()
-        cls.ANTIGEN_REGEX = cls._ENGINE.ANTIGEN_REGEX
+    def compile_antigens(self): 
+        if self._ENGINE:
+            self._ENGINE.compile_antigens()
+            self.ANTIGEN_REGEX = self._ENGINE.ANTIGEN_REGEX
 
-    def learn_antigen(cls, t, r): 
-        success = cls._ENGINE.learn_antigen(t, r)
+    def learn_antigen(self, t, r): 
+        if not self._ENGINE: return False
+        success = self._ENGINE.learn_antigen(t, r)
         if success:
-            cls.compile_antigens()
+            self.compile_antigens()
         return success
 
-    def walk_gradient(cls, text): 
-        return cls._ENGINE.walk_gradient(text)
+    def walk_gradient(self, text): 
+        return self._ENGINE.walk_gradient(text)
 
-    def get_turbulence(cls, words):
-        return cls._ENGINE.measure_turbulence(words)
+    def get_turbulence(self, words):
+        return self._ENGINE.measure_turbulence(words)
 
 class BoneConfig:
     MAX_HEALTH = 100.0
@@ -553,9 +561,8 @@ class GlobalLexiconFacade:
     @classmethod
     def initialize(cls):
         cls._STORE = LexiconStore() 
-        
         cls._ENGINE = SemanticsBioassay(cls._STORE)
-        
+        cls._STORE.set_engine(cls._ENGINE)
         cls.compile_antigens()
         print(f"{Prisma.CYN}[SYSTEM]: TheLexicon initialized via SLASH Protocols.{Prisma.RST}")
 
