@@ -1,4 +1,4 @@
-# BONEAMANITA 9.5.2 "THE GRAMMAR OF SURVIVAL"
+# BONEAMANITA 9.5.3 "THE HOT TAKE"
 # Architects: SLASH, Team Bonepoke | Humans: James Taylor & Andrew Edmark
 
 import json
