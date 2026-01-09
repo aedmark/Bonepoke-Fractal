@@ -1,21 +1,12 @@
-import json
-import os
+# bone_shared.py
+
 import random
 import re
 import string
-import time
 import unicodedata
-from collections import Counter, deque
-from typing import List, Dict, Any
-from dataclasses import dataclass, field
-from bone_data import LEXICON, DEATH, SEEDS
-
+from bone_data import LEXICON, DEATH
+    
 class Prisma:
-    """
-    The Optical Interface.
-    Translates system states into ANSI escape sequences.
-    Pinker Note: Color is information, not just decoration.
-    """
     RST = "\033[0m"
     RED = "\033[31m"
     GRN = "\033[32m"
@@ -29,7 +20,7 @@ class Prisma:
     OCHRE = "\033[33;2m"
     VIOLET = "\033[35;2m"
     SLATE = "\033[30;1m"
-    
+
     @classmethod
     def paint(cls, text, color_key="0"):
         color_map = {
@@ -43,72 +34,31 @@ class Prisma:
             "0": cls.GRY,
             "I": cls.INDIGO,
             "O": cls.OCHRE,
-            "V": cls.VIOLET
-        }
-        
+            "V": cls.VIOLET}
         code = color_map.get(color_key.upper(), cls.WHT)
         return f"{code}{text}{cls.RST}"
 
-    def load_vocabulary(self):
-        data = LEXICON
-        for cat, words in data.items():
-            if cat in self.categories:
-                self._vocab[cat] = set(words)
-            elif cat == "refusal_guru":
-                self._vocab["refusal_guru"] = set(words)
-            elif cat == "cursed":
-                self._vocab["cursed"] = set(words)
-        antigens = data.get("antigen", [])
-        if antigens:
-            pattern = "|".join(map(re.escape, antigens))
-            self.ANTIGEN_REGEX = re.compile(fr"\b({pattern})\b", re.IGNORECASE)
-        print(f"{Prisma.GRY}[SYSTEM]: LexiconStore loaded from Data Module.{Prisma.RST}")
-    
-    def get_raw(self, category):
-        base = self.VOCAB.get(category, set())
-        if category == "suburban":
-             return (base | set(self.LEARNED_VOCAB.get(category, {}).keys())) - self.USER_FLAGGED_BIAS
-        learned = set(self.LEARNED_VOCAB.get(category, {}).keys())
-        return base | learned
-    
-    def teach(self, word, category, tick):
-        if category in self.LEARNED_VOCAB:
-            self.LEARNED_VOCAB[category][word.lower()] = tick
-            return True
-        return False
-    
-    def atrophy(self, current_tick, max_age=100):
-        rotted = []
-        for cat, words in self.LEARNED_VOCAB.items():
-            for w in list(words.keys()):
-                last_seen = words[w]
-                if (current_tick - last_seen) > max_age:
-                    del words[w]
-                    rotted.append(w)
-        return rotted
-
 class SemanticsBioassay:
+    _ENGINE = None
+
     def __init__(self, store_ref):
         self.store = store_ref
         self._TRANSLATOR = str.maketrans(string.punctuation, " " * len(string.punctuation))
-        self.ANTIGEN_REGEX = None 
-        
+        self.ANTIGEN_REGEX = None
+
         self.PHONETICS = {
             "PLOSIVE": set("bdgkpt"),
             "FRICATIVE": set("fthszsh"),
             "LIQUID": set("lr"),
-            "NASAL": set("mn")
-        }
+            "NASAL": set("mn")}
         self.ROOTS = {
             "HEAVY": ("lith", "ferr", "petr", "dens", "grav", "struct", "base", "fund"),
             "KINETIC": ("mot", "mov", "ject", "tract", "pel", "crat", "dynam"),
-            "ABSTRACT": ("tion", "ism", "ence", "ance", "ity", "ology", "ness", "ment", "idea")
-        }
+            "ABSTRACT": ("tion", "ism", "ence", "ance", "ity", "ology", "ness", "ment", "idea")}
         self.HIGH_ENTROPY_CATS = {"thermal", "cryo", "explosive", "sacred", "play", "cursed"}
         self.compile_antigens()
-    
+
     def compile_antigens(self):
-        """Compiles the regex for detecting toxic words from the store."""
         antigens = self.store.VOCAB.get("antigen", set())
         if antigens:
             pattern = "|".join(map(re.escape, antigens))
@@ -121,15 +71,13 @@ class SemanticsBioassay:
         cleaned_text = normalized.translate(self._TRANSLATOR).lower()
         words = cleaned_text.split()
         filtered_words = [
-            w for w in words 
-            if w.strip() and w not in self.store.USER_FLAGGED_BIAS
-        ]
+            w for w in words
+            if w.strip() and w not in self.store.USER_FLAGGED_BIAS]
         return filtered_words
 
     def walk_gradient(self, text):
         clean_words = self.clean(text)
         structure_path = []
-        
         for w in clean_words:
             is_noise = False
             for cat in self.HIGH_ENTROPY_CATS:
@@ -141,7 +89,7 @@ class SemanticsBioassay:
         if not structure_path:
             return "null"
         return " ".join(structure_path)
-    
+
     def assay(self, word):
         w = word.lower()
         clean_len = len(w)
@@ -150,37 +98,33 @@ class SemanticsBioassay:
         fricative = sum(1 for c in w if c in self.PHONETICS["FRICATIVE"])
         liquid = sum(1 for c in w if c in self.PHONETICS["LIQUID"])
         nasal = sum(1 for c in w if c in self.PHONETICS["NASAL"])
-
         density = (plosive * 1.5) + (nasal * 0.8)
         flow = liquid + fricative
         compression_mod = 1.0 if clean_len > 5 else 1.5
-        
         final_density = (density / clean_len) * compression_mod
-        if final_density > 0.55: 
+        if final_density > 0.55:
             return "heavy", round(final_density, 2)
         if (flow / clean_len) > 0.6:
             return "kinetic", 0.5
-            
         cat, conf = self._analyze_morphology(w)
         if cat: return cat, conf
         return None, 0.0
 
     def _analyze_morphology(self, word):
-        """Helper to check suffixes if phonetics fail."""
         for cat, roots in self.ROOTS.items():
             for r in roots:
                 if r in word:
                     return cat.lower(), 0.7
         return None, 0.0
 
-    def measure_viscosity(self, word):
-        """Calculates linguistic drag."""
+    @staticmethod
+    def measure_viscosity(word):
         if not word: return 0.0
         consonants = sum(1 for c in word if c.lower() not in "aeiou")
         return (consonants / len(word)) if len(word) > 0 else 0.0
 
-    def measure_turbulence(self, words):
-        """Calculates flow variance."""
+    @staticmethod
+    def measure_turbulence(words):
         if len(words) < 2: return 0.0
         lengths = [len(w) for w in words]
         mean = sum(lengths) / len(lengths)
@@ -188,12 +132,10 @@ class SemanticsBioassay:
         return min(1.0, (variance ** 0.5) / 5.0)
 
     def harvest(self, category):
-        """Retrieves a random word from a category."""
         candidates = list(self.store.get_raw(category))
         return random.choice(candidates) if candidates else "void"
 
     def learn_antigen(self, toxin, replacement):
-        """Updates the immune system."""
         if "antigen" not in self.store.VOCAB:
             self.store.VOCAB["antigen"] = set()
         self.store.VOCAB["antigen"].add(toxin.lower())
@@ -201,31 +143,20 @@ class SemanticsBioassay:
             self.store.ANTIGEN_REPLACEMENTS[toxin.lower()] = replacement
         return True
 
-    @classmethod
-    def walk_gradient(cls, text): 
-        return cls._ENGINE.walk_gradient(text)
-
 class LexiconStore:
     def __init__(self):
-        self.categories = set([
-            "heavy", "kinetic", "explosive", "constructive",
-            "abstract", "photo", "aerobic", "thermal", "cryo",
-            "suburban", "play", "sacred", "buffer", "antigen"
-        ])
-        self.VOCAB = {}             
-        self.LEARNED_VOCAB = {}     
-        self.USER_FLAGGED_BIAS = set() 
+        self.categories = {"heavy", "kinetic", "explosive", "constructive", "abstract", "photo", "aerobic", "thermal",
+                           "cryo", "suburban", "play", "sacred", "buffer", "antigen"}
+        self.VOCAB = {}
+        self.LEARNED_VOCAB = {}
+        self.USER_FLAGGED_BIAS = set()
         self.SOLVENTS = set(LEXICON.get("solvents", []))
         self.ANTIGEN_REPLACEMENTS = LEXICON.get("antigen_replacements", {})
         self.ANTIGEN_REGEX = None
-        self._ENGINE = None 
+        self._ENGINE = None
         self.load_vocabulary()
 
     def set_engine(self, engine_ref):
-        """
-        Pinker Note: Explicitly attaching the engine to the store 
-        prevents 'spooky action at a distance'.
-        """
         self._ENGINE = engine_ref
 
     def load_vocabulary(self):
@@ -237,27 +168,25 @@ class LexiconStore:
                 self.VOCAB["refusal_guru"] = set(words)
             elif cat == "cursed":
                 self.VOCAB["cursed"] = set(words)
-        
         antigens = data.get("antigen", [])
         if antigens:
             pattern = "|".join(map(re.escape, antigens))
             self.ANTIGEN_REGEX = re.compile(fr"\b({pattern})\b", re.IGNORECASE)
-        
         print(f"{Prisma.GRY}[SYSTEM]: LexiconStore loaded from Data Module.{Prisma.RST}")
-    
+
     def get_raw(self, category):
-        base = self.VOCAB.get(category, set()) 
+        base = self.VOCAB.get(category, set())
         if category == "suburban":
-             return (base | set(self.LEARNED_VOCAB.get(category, {}).keys())) - self.USER_FLAGGED_BIAS
+            return (base | set(self.LEARNED_VOCAB.get(category, {}).keys())) - self.USER_FLAGGED_BIAS
         learned = set(self.LEARNED_VOCAB.get(category, {}).keys())
         return base | learned
-    
+
     def teach(self, word, category, tick):
         if category not in self.LEARNED_VOCAB:
             self.LEARNED_VOCAB[category] = {}
         self.LEARNED_VOCAB[category][word.lower()] = tick
         return True
-    
+
     def atrophy(self, current_tick, max_age=100):
         rotted = []
         for cat, words in self.LEARNED_VOCAB.items():
@@ -268,16 +197,16 @@ class LexiconStore:
                     rotted.append(w)
         return rotted
 
-    def clean(self, text): 
+    def clean(self, text):
         return self._ENGINE.clean(text)
-   
-    def taste(self, word): 
+
+    def taste(self, word):
         return self._ENGINE.assay(word)
 
-    def measure_viscosity(self, word): 
+    def measure_viscosity(self, word):
         return self._ENGINE.measure_viscosity(word)
 
-    def harvest(self, category): 
+    def harvest(self, category):
         return self._ENGINE.harvest(category)
 
     def get_current_category(self, word):
@@ -287,19 +216,19 @@ class LexiconStore:
             if word.lower() in vocab: return cat
         return None
 
-    def compile_antigens(self): 
+    def compile_antigens(self):
         if self._ENGINE:
             self._ENGINE.compile_antigens()
             self.ANTIGEN_REGEX = self._ENGINE.ANTIGEN_REGEX
 
-    def learn_antigen(self, t, r): 
+    def learn_antigen(self, t, r):
         if not self._ENGINE: return False
         success = self._ENGINE.learn_antigen(t, r)
         if success:
             self.compile_antigens()
         return success
 
-    def walk_gradient(self, text): 
+    def walk_gradient(self, text):
         return self._ENGINE.walk_gradient(text)
 
     def get_turbulence(self, words):
@@ -352,7 +281,7 @@ class BoneConfig:
         "COURTYARD": 0.05,
         "LABORATORY": 0.15,
         "BASEMENT": 99.0}
-    
+
     @classmethod
     def load_patterns(cls):
         cls.ANTIGENS = TheLexicon.get("antigen")
@@ -361,7 +290,7 @@ class BoneConfig:
             cls.ANTIGENS = {"basically", "actually", "literally"}
         if not cls.PAREIDOLIA_TRIGGERS:
             cls.PAREIDOLIA_TRIGGERS = {"face", "ghost", "jesus"}
-    
+
     @staticmethod
     def check_pareidolia(clean_words):
         hits = [w for w in clean_words if w in BoneConfig.PAREIDOLIA_TRIGGERS]
@@ -401,7 +330,6 @@ class DeathGen:
             flavor = "HEAVY"
         else:
             flavor = "LIGHT"
-            
         p = random.choice(prefixes)
         c = random.choice(causes.get(cause_type, ["Unknown Cause"]))
         v = random.choice(verdicts.get(flavor, ["Silence."]))
@@ -418,19 +346,19 @@ class TheCartographer:
                 connections = len(memory_graph[word]["edges"])
                 if connections >= 2: grounded_count += 1
         return grounded_count / max(1, len(abstract_words))
-    
+
     @classmethod
     def dynamic_thresholds(cls, bio_metrics):
         atp = bio_metrics.get("atp", 50.0)
         high_energy = 70.0
         low_energy = BoneConfig.CRITICAL_ATP_LOW * 6.0
-        if atp > high_energy: 
+        if atp > high_energy:
             return {"render_threshold": 1.5, "gravity_well_multiplier": 0.8, "max_anchors": 5}
-        elif atp < low_energy: 
+        elif atp < low_energy:
             return {"render_threshold": 4.0, "gravity_well_multiplier": 1.5, "max_anchors": 2}
-        else: 
+        else:
             return {"render_threshold": 2.0, "gravity_well_multiplier": 1.0, "max_anchors": 3}
-    
+
     @classmethod
     def survey(cls, text, memory_graph, bio_metrics, limbo=None):
         cortisol = bio_metrics.get("cortisol", 0.0)
@@ -441,14 +369,14 @@ class TheCartographer:
         for w in words:
             if w in memory_graph:
                 mass = sum(memory_graph[w]["edges"].values())
-                if mass <= 0.1: continue 
+                if mass <= 0.1: continue
                 if mass > config["render_threshold"]:
                     knots.append((w, mass))
         knots.sort(key=lambda x: x[1], reverse=True)
         if cortisol > 0.8:
             return f"TECTONIC SHIFT (COR: {cortisol:.2f}): The ground is shaking too hard to triangulate.", []
         if not knots:
-            if config["max_anchors"] == 2: 
+            if config["max_anchors"] == 2:
                 return "FOG OF WAR: Low ATP. The map is blurry.", []
             if limbo and limbo.ghosts:
                 ghost = random.choice(list(limbo.ghosts))
@@ -474,7 +402,7 @@ class TheCartographer:
         if len(anchors) >= 3:
             return f"TRIANGULATION COMPLETE: Lagrange Basin formed by {str(anchors).upper()}.{margin_note}\n   > {annotated}", anchors
         return f"COORDINATES LOCKED: {annotated}{margin_note}", anchors
-    
+
     @classmethod
     def detect_voids(cls, physics):
         clean_words = physics.get("clean_words", [])
@@ -486,7 +414,7 @@ class TheCartographer:
                 if counts.get("heavy", 0) == 0:
                     voids.append(word)
         return voids
-    
+
     @classmethod
     def weave(cls, text, memory_graph, bio_metrics, limbo=None, physics=None):
         compass_msg = ""
@@ -510,7 +438,7 @@ class TheCartographer:
                     f"   {Prisma.GRY}Uncharted Territory: You are trying to be honest AND nice. Pick one.{Prisma.RST}\n")
         survey_result, anchors = cls.survey(text, memory_graph, bio_metrics, limbo)
         return (compass_msg + survey_result), anchors
-    
+
     @staticmethod
     def draw_grid(memory_graph, inventory, gordon=None):
         has_tool = "SPIDER_LOCUS" in inventory
@@ -544,9 +472,9 @@ class TheCartographer:
                 memory_graph[t]["edges"][anchor] = weight
             connections.append(t)
         if used_anchor:
-             return True, f"GORDON'S GAMBIT: He threw an ANCHOR_STONE at '{anchor.upper()}'. It dragged [{', '.join(connections).upper()}] into alignment."
+            return True, f"GORDON'S GAMBIT: He threw an ANCHOR_STONE at '{anchor.upper()}'. It dragged [{', '.join(connections).upper()}] into alignment."
         return True, f"SPIDER LOCUS: Triangulated '{anchor.upper()}' against [{', '.join(connections).upper()}]. The web tightens."
-    
+
     @classmethod
     def spin_web(cls, memory_graph, inventory, gordon=None):
         return cls.draw_grid(memory_graph, inventory, gordon)
@@ -572,16 +500,21 @@ class ParadoxSeed:
         return f"THE SEED BLOOMS: '{self.question}'"
 
 class GlobalLexiconFacade:
+    _INITIALIZED = False
     _STORE = None
     _ENGINE = None
     ANTIGEN_REGEX = None
+    SOLVENTS = set()
 
     @classmethod
     def initialize(cls):
-        cls._STORE = LexiconStore() 
+        if cls._INITIALIZED: return
+        cls._STORE = LexiconStore()
         cls._ENGINE = SemanticsBioassay(cls._STORE)
         cls._STORE.set_engine(cls._ENGINE)
         cls.compile_antigens()
+        cls._INITIALIZED = True
+        cls.SOLVENTS = cls._STORE.SOLVENTS
         print(f"{Prisma.CYN}[SYSTEM]: TheLexicon initialized via SLASH Protocols.{Prisma.RST}")
 
     @classmethod
@@ -593,21 +526,21 @@ class GlobalLexiconFacade:
         return cls._STORE.teach(word, category, tick)
 
     @classmethod
-    def clean(cls, text): 
+    def clean(cls, text):
         return cls._ENGINE.clean(text)
-   
+
     @classmethod
-    def taste(cls, word): 
+    def taste(cls, word):
         return cls._ENGINE.assay(word)
 
     @classmethod
-    def measure_viscosity(cls, word): 
+    def measure_viscosity(cls, word):
         return cls._ENGINE.measure_viscosity(word)
 
     @classmethod
-    def harvest(cls, category): 
+    def harvest(cls, category):
         return cls._ENGINE.harvest(category)
-        
+
     @classmethod
     def get_turbulence(cls, words):
         return cls._ENGINE.measure_turbulence(words)
@@ -621,12 +554,12 @@ class GlobalLexiconFacade:
         return None
 
     @classmethod
-    def compile_antigens(cls): 
+    def compile_antigens(cls):
         cls._ENGINE.compile_antigens()
         cls.ANTIGEN_REGEX = cls._ENGINE.ANTIGEN_REGEX
 
     @classmethod
-    def learn_antigen(cls, t, r): 
+    def learn_antigen(cls, t, r):
         success = cls._ENGINE.learn_antigen(t, r)
         if success:
             cls.compile_antigens()
@@ -635,8 +568,6 @@ class GlobalLexiconFacade:
     @classmethod
     def atrophy(cls, tick, max_age):
         return cls._STORE.atrophy(tick, max_age)
-
-    SOLVENTS = property(lambda cls: cls._STORE.SOLVENTS)
 
 GlobalLexiconFacade.initialize()
 TheLexicon = GlobalLexiconFacade

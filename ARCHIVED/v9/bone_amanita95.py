@@ -5,11 +5,10 @@ import json
 import os
 import random
 import re
-import string
 import time
 import math
 from collections import Counter, deque
-from typing import List, Set, Union, Optional, Tuple, Dict, Any
+from typing import List, Optional, Tuple, Dict, Any
 from dataclasses import dataclass, field
 
 from bone_commands import CommandProcessor
@@ -846,7 +845,7 @@ class TheTensionMeter:
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_9.4.9.1"
+        self.genome = "BONEAMANITA_9.5"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -2981,7 +2980,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 9.4.9.1', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 9.5', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 

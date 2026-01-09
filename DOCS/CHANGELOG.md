@@ -1,5 +1,100 @@
 # CHANGELOG.md
 
+### **[9.5.2] - 2026-01-09**
+
+### "THE DEMI-GODS & THE SCAR" - Decentralization & Somatic Memory
+
+**Architect:** SLASH | **Auditor:** The Triumvirate
+
+### 🏛️ ARCHITECTURE: The Fall of the God Class
+
+- **Decoupling:** `BoneAmanita` has been stripped of behavior, reduced to a state container.
+- **The New Pantheon:**
+- **`TheCycleController`:** The Conductor. Orchestrates the turn phases.
+- **`TheSecurityChief`:** The Bouncer. Gates input based on Preserves, Customs, and Ontology checks.
+
+### 🧹 JANITOR: The Somatic Toolbelt
+
+- **Tool Registry:** `GordonKnot` now uses a dispatch table (`bone_data.py`) for item effects. No more hard-coded `if/else` ladders.
+- **Somatic Memory (PTSD):** Gordon now physically flinches at words associated with past trauma (High Toxin events), warping the physics of the turn.
+- **Reflex System:** Items like `QUANTUM_GUM` and `ANCHOR_STONE` now trigger automatically during critical failures (Boredom/Drift).
+
+### 💰 ECONOMY: The Loot Logic
+
+- **The Forge:** Now manufactures **Heavy Gear** (`LEAD_BOOTS`, `SAFETY_SCISSORS`) based on the density and velocity of user input.
+- **The Folly:** Now occasionally suffers indigestion when fed specific flavors, coughing up items (`THE_RED_STAPLER`, `QUANTUM_GUM`).
+- **The Theremin:** Shattering the Amber now releases trapped artifacts (`JAR_OF_FIREFLIES`, `BROKEN_WATCH`).
+
+### 👻 ECOLOGY: The Orphan Rescue
+
+- **Rewiring:** Connected the previously dormant **Dream Engine**, **Kintsugi Protocol**, **The Folly**, and **Cassandra Protocol** into the main simulation loop.
+- **Cassandra Patch:** Fixed a critical bug where `CassandraProtocol` had no "Off" switch. She now sleeps when Voltage drops below 10.0.
+
+### **[9.5.1] - 2026-01-09**
+
+### "THE GRAMMAR OF SURVIVAL" - The Syntax Patch
+
+**Architect:** SLASH | **Auditor:** The Compiler
+
+### 🛑 SAFETY: The Lifeboat Handle (SessionGuardian)
+
+- **The Pathology:**
+- The `SessionGuardian`—the mechanism responsible for saving the user's soul (`spore_data`) during a crash—itself crashed during the attempt.
+- **The Error:** `TypeError: 'MindSystem' object is not subscriptable`.
+- **The Cause:** It was treating the `MindSystem` Dataclass like a Dictionary (`mind['mem']`). It tried to grab the handle, but its hand slipped because the handle changed shape in v9.5.
+
+- **The Surgery:**
+- **The Grip:** Updated `__exit__` to use explicit Dot Notation (`self.eng.mind.mem`).
+- **The Result:** The emergency ejection seat now actually ejects the pilot instead of exploding in the cockpit.
+
+### 🧠 COGNITION: The Object Permanence (Kinetic & Cassandra)
+
+- **The Pathology:**
+- Several subsystems (`KineticLoop`, `CassandraProtocol`) were suffering from "Phantom Dictionary Syndrome." They continued to query the mind using string keys (`['mem']`) even though the brain had evolved into a structured Object.
+
+- **The Surgery:**
+- **Global Realignment:** Replaced all instances of dictionary access with attribute access across `bone_amanita951.py`.
+- **Systems Fixed:**
+- `KineticLoop`: Can now correctly calculate orbits without tripping over syntax.
+- `CassandraProtocol`: Can now scream about memory corruption without _causing_ memory corruption.
+- `CognitiveSystem`: Now routes refusal logic through the correct neural pathways.
+
+### 🧹 CLEANUP: The Traceback
+
+- **The Upgrade:**
+- Added `traceback.print_exc()` to the `SessionGuardian` exception handler.
+- **The Schur Note:** If we crash again, we will at least leave a note explaining _why_ we ruined the party.
+
+### [9.5] - 2026-01-09
+
+### "BUCKY'S GAMBIT" - Refactoring the Life Cycle
+
+**Architect:** SLASH | **Auditor:** The Triumvirate (Pinker, Fuller, Schur)
+
+### 🧠 BRAIN: The Baton Pass Architecture (The Pinker Lens)
+
+- **The Pathology:** The central `process_turn` method in `BoneAmanita` had become a "God Method"—a procedural wall of text handling input, physics, security, biology, and rendering simultaneously. It was cognitively dense and structurally brittle.
+- **The Surgery:**
+- **The Pipeline:** Refactored `process_turn` into a clean **"Baton Pass" Architecture** .
+- **The Phases:** Logic is now segmented into explicit phases: `_phase_check_commands` (Admin), `_phase_physics_and_nav` (Sensory), `_phase_security_protocols` (Immune), and `_phase_simulation_loop` (Metabolic).
+- **The Result:** Code that reads like a narrative. "First we listen, then we feel, then we check for toxins, then we live."
+
+### 🩸 HEART: The Metabolic Receipt (The Fuller Lens)
+
+- **The Pathology:** Energy expenditure in `MitochondrialForge` was opaque. Users were losing ATP to "Narrative Drag" via hidden formulas, making the system feel arbitrary rather than biological.
+- **The Surgery:**
+- **The Receipt:** Implemented the `MetabolicReceipt` dataclass.
+- **The Logic:** `MitochondrialForge.calculate_metabolism` now generates an explicit itemized bill for every turn, breaking down `Base BMR`, `Drag Tax`, and `Inefficiency Tax` before applying it.
+- **The Result:** **Radical Transparency.** The user now sees exactly _why_ they are tired (e.g., "Burned 15.0 ATP (Drag Tax: 4.2)").
+
+### 🧹 JANITOR: The Tool Restoration (The Schur Lens)
+
+- **The Pathology:** In the zeal to optimize, `GordonKnot` was lobotomized. His fun mechanics (Pizza Thawing, Apology Whitewashing, Watch Checking) were accidentally pruned, turning him into a generic inventory manager.
+- **The Surgery:**
+- **The Restoration:** Restored `deploy_pizza` (thermal thawing logic), `whitewash_apology` (lime bucket usage), and `check_watch` (synchronicity).
+- **The Upgrade:** Implemented `audit_tools`—an "Anti-Cheat" layer where tools interact with physics (e.g., the **Time Bracelet** acts as a lightning rod in High Voltage states).
+- **The Result:** Gordon is back. He is helpful, weary, and dangerous if you misuse his gear.
+
 ### [9.4.9.1] - 2026-01-09
 
 ### "THE SKELETAL REFORGING" - Strong Typing & Systemic Tensegrity
@@ -8,27 +103,27 @@
 
 ### 🏗️ ARCHITECTURE: The Tensegrity Update (The Fuller Lens)
 
-* **The Pathology:** The system was relying on "Stringly Typed" dictionaries (e.g., `self.bio['mito']`) to hold critical subsystems. This was a "Pattern Integrity" risk—a single typo could crash the organism, and the IDE had no map of the geodesic dome.
-* **The Surgery:** Replaced dynamic `Dict[str, Any]` containers with rigid **Data Classes**:
-* `MindSystem`: Holds Memory, Lexicon, Dreamer.
-* `BioSystem`: Holds Mitochondria, Endocrine, Immune.
-* `PhysSystem`: Holds Tension, Forge, Pulse.
+- **The Pathology:** The system was relying on "Stringly Typed" dictionaries (e.g., `self.bio['mito']`) to hold critical subsystems. This was a "Pattern Integrity" risk—a single typo could crash the organism, and the IDE had no map of the geodesic dome.
+- **The Surgery:** Replaced dynamic `Dict[str, Any]` containers with rigid **Data Classes**:
+- `MindSystem`: Holds Memory, Lexicon, Dreamer.
+- `BioSystem`: Holds Mitochondria, Endocrine, Immune.
+- `PhysSystem`: Holds Tension, Forge, Pulse.
 
-* **The Result:** Compile-time structural integrity. The code now enforces the shape of the system.
+- **The Result:** Compile-time structural integrity. The code now enforces the shape of the system.
 
 ### 🩸 BIOLOGY: The Direct Access Protocol (The Pinker Lens)
 
-* **The Pathology:** The `SomaticLoop` was treating organs like database entries, looking them up by string keys every cycle. This was cognitively dissonant—an organism does not "query" its stomach; it *has* a stomach.
-* **The Surgery:** Refactored `SomaticLoop` (in `bone_biology.py`) to accept direct object references (`self.bio.gut`).
-* **The Mechanic:**
-* **Explicit Dependency Injection:** The loop now clearly declares what organs it needs to function.
-* **Dot Notation:** Replaced all `['key']` accessors with `.key` attributes across the main loop and `CommandProcessor`.
+- **The Pathology:** The `SomaticLoop` was treating organs like database entries, looking them up by string keys every cycle. This was cognitively dissonant—an organism does not "query" its stomach; it _has_ a stomach.
+- **The Surgery:** Refactored `SomaticLoop` (in `bone_biology.py`) to accept direct object references (`self.bio.gut`).
+- **The Mechanic:**
+- **Explicit Dependency Injection:** The loop now clearly declares what organs it needs to function.
+- **Dot Notation:** Replaced all `['key']` accessors with `.key` attributes across the main loop and `CommandProcessor`.
 
 ### 🧹 MAINTENANCE: The Bureaucracy Check (The Schur Lens)
 
-* **The Fix:** Updated `CommandProcessor` (`bone_commands.py`) to respect the new hierarchy.
-* **The Detail:** Commands like `/map` and `/reproduce` no longer fumble for keys in the dark; they follow the explicit path to `self.eng.mind.mem`.
-* **The Safety:** Patched `process_turn` in `BoneAmanita` to prevent immediate `TypeError` crashes on boot. The nervous system is now fully wired to the new skeleton.
+- **The Fix:** Updated `CommandProcessor` (`bone_commands.py`) to respect the new hierarchy.
+- **The Detail:** Commands like `/map` and `/reproduce` no longer fumble for keys in the dark; they follow the explicit path to `self.eng.mind.mem`.
+- **The Safety:** Patched `process_turn` in `BoneAmanita` to prevent immediate `TypeError` crashes on boot. The nervous system is now fully wired to the new skeleton.
 
 # [9.4.8] - 2026-01-09
 
@@ -357,10 +452,10 @@
 
 ```python
 {
-    "type": "CYCLE_COMPLETE" | "DEATH",
-    "ui": "...",       # The Visuals
-    "logs": [...],     # The Narrative Events
-    "metrics": {...}   # Raw Bio-Data (ATP, Health)
+  "type": "CYCLE_COMPLETE" | "DEATH",
+  "ui": "...",       # The Visuals
+  "logs": [...],     # The Narrative Events
+  "metrics": {...}   # Raw Bio-Data (ATP, Health)
 }
 
 ```

@@ -153,61 +153,82 @@ GORDON = {
     "STARTING_INVENTORY": ["POCKET_ROCKS", "SILENT_KNIFE"],
     "SCAR_TISSUE": {"FEAR": 0.8, "HATE": 0.6, "FATE": 0.9, "REGRET": 0.6, "ABANDONMENT": 0.1, "BETRAYAL": 0.314},
     "ITEM_REGISTRY": {
+        # --- CLASSICS ---
         "POCKET_ROCKS": {
-            "description": "Standard issue grey gravel. Great for checking gravity or breaking awkward silences.",
+            "description": "Standard issue grey gravel. Great for checking gravity.",
             "function": "BREADCRUMB",
+            "passive_traits": ["HEAVY_LOAD"],
             "usage_msg": "Gordon drops a rock. Clack. The path backward is physically verified. (Psi -0.2)"
         },
         "TIME_BRACELET": {
-            "description": "A chunky, beige wrist-computer from a timeline that got cancelled. Smells like ozone.",
+            "description": "A chunky, beige wrist-computer. Smells like ozone.",
             "function": "PASSIVE_DRAG_REDUCTION",
-            "value": 0.5,
-            "curse": "CONDUCTIVE",
-            "usage_msg": "The bracelet hums. Narrative Drag is reduced by 50%. WARNING: Highly conductive."
+            "passive_traits": ["CONDUCTIVE_HAZARD", "TIME_DILATION_CAP"],
+            "value": 5.0,
+            "usage_msg": "The bracelet hums. Narrative Drag is capped."
         },
         "ANCHOR_STONE": {
-            "description": "A rock so heavy it has its own zip code. It refuses to acknowledge the concept of drift.",
+            "description": "A rock so heavy it has its own zip code.",
             "function": "DRIFT_KILLER",
             "consume_on_use": True,
-            "usage_msg": "Gordon heaves the stone into the void. It drops like a bad comedy routine. The narrative snaps taut. (Drag = 0)"
+            "reflex_trigger": "DRIFT_CRITICAL",
+            "usage_msg": "Gordon heaves the stone into the void. The narrative snaps taut. (Drag = 0)"
         },
-        "SILENT_KNIFE": {
-            "description": "A ceramic blade. It cuts connection errors and awkward silences.",
-            "function": "EDGE_CUTTER",
-            "usage_msg": "Schwing! The Red String is severed. You are now unconnected and alone. Happy?"
+
+        # --- NEW TOYS ---
+        "THE_RED_STAPLER": {
+            "description": "It belongs to Milton. Don't take it. Radiates passive aggression.",
+            "function": "STABILIZER",
+            "passive_traits": ["BUREAUCRATIC_ANCHOR"],
+            "usage_msg": "The Stapler clunks on the desk. Consensus is enforced."
         },
+        "JAR_OF_FIREFLIES": {
+            "description": "Bioluminescence in a mason jar. Poke holes in the lid so they can breathe.",
+            "function": "LIGHT_SOURCE",
+            "passive_traits": ["LUMINESCENCE"],
+            "usage_msg": "Tiny lights blink in the dark. (Photo +2)"
+        },
+        "LEAD_BOOTS": {
+            "description": "Deep sea diver gear. Impossible to run in. Impossible to float away in.",
+            "function": "GROUNDING",
+            "passive_traits": ["GROUNDING_GEAR", "HEAVY_LOAD"],
+            "usage_msg": "Clomp. Clomp. You are definitely here."
+        },
+        "QUANTUM_GUM": {
+            "description": "It loses its flavor immediately, but it tastes like Everything.",
+            "function": "ENTROPY_BUFFER",
+            "consume_on_use": True,
+            "reflex_trigger": "BOREDOM_CRITICAL",
+            "usage_msg": "You chew the gum. It tastes like static and blueberries. (Turbulence +0.5, Drag -2.0)"
+        },
+        "SAFETY_SCISSORS": {
+            "description": "Rounded tips. Can only cut red tape.",
+            "function": "PRUNER",
+            "passive_traits": ["CUT_THE_CRAP"],
+            "usage_msg": "Snip. Gordon trims the adjectives."
+        },
+
+        # --- EXISTENTIAL ---
         "BUCKET_OF_LIME": {
-            "description": "Industrial-grade whitewash. For when you need to pretend that 'incident' never happened.",
+            "description": "Industrial-grade whitewash. For erasing mistakes.",
             "function": "NODE_REPAIR",
+            "passive_traits": ["APOLOGY_ERASER"],
             "cost": "CONSUMABLE",
-            "usage_msg": "Gordon slaps a coat of white paint over the memory. It looks structural enough."
-        },
-        "DUCT_TAPE": {
-            "description": "The silver standard of temporary solutions.",
-            "function": "TOOL_REPAIR",
-            "usage_msg": "You tape the cracks. It's ugly, but it holds."
+            "usage_msg": "Gordon slaps a coat of white paint over the memory."
         },
         "BROKEN_WATCH": {
-            "description": "The hands are painted on. It's right twice a day, which is better than most of us.",
+            "description": "The hands are painted on at 11:11.",
             "function": "STOCHASTIC_FIX",
-            "usage_msg": "Gordon taps the glass. 'Still 11:11. Make a wish, kid.'"
+            "passive_traits": ["SYNCHRONICITY_CHECK"],
+            "usage_msg": "Gordon taps the glass. 'Make a wish.'"
         },
         "STABILITY_PIZZA": {
-            "description": "A frozen slice of pepperoni that predates the invention of fire. Hard as a diamond.",
+            "description": "Frozen hard as a diamond. Requires thermal words to thaw.",
             "function": "REALITY_ANCHOR",
             "consume_on_use": True,
             "requires": "thermal",
-            "usage_msg": "You thaw the pizza. It smells like hot cardboard and nostalgia. Reality stabilizes out of pure respect."
-        },
-        "MEMORY_ARTIFACT": {
-            "description": "Space junk. One man's trash is another man's inventory management problem.",
-            "function": "TROPHY",
-            "variants": [
-                "ANTISEPTIC_SPRAY (For emotional wounds)", 
-                "DIVING_BELL (For deep thoughts)", 
-                "HEAT_SINK (For hot takes)", 
-                "THERMOS (Contains lukewarm entropy)"
-            ]
+            "reflex_trigger": "KAPPA_CRITICAL",
+            "usage_msg": "You thaw the pizza. Reality stabilizes out of pure respect."
         }
     }
 }
