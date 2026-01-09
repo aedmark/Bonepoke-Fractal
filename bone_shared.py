@@ -7,7 +7,7 @@ import time
 from collections import Counter, deque
 from typing import List, Dict, Any
 from dataclasses import dataclass, field
-from bone_data import LEXICON, DEATH
+from bone_data import LEXICON, DEATH, SEEDS
 
 class Prisma:
     RST = "\033[0m"
@@ -29,19 +29,6 @@ class Prisma:
     @staticmethod
     def paint(text, color_key="0"):
         return text
-
-class LexiconStore:
-    def __init__(self):
-        self.categories = set([
-            "heavy", "kinetic", "explosive", "constructive",
-            "abstract", "photo", "aerobic", "thermal", "cryo",
-            "suburban", "play", "sacred", "buffer", "antigen"
-        ])
-        self._vocab = {}
-        self.SOLVENTS = set(LEXICON.get("solvents", []))
-        self.ANTIGEN_REPLACEMENTS = LEXICON.get("antigen_replacements", {})
-        self.ANTIGEN_REGEX = None
-        self.load_vocabulary()
 
     def load_vocabulary(self):
         data = LEXICON
@@ -203,27 +190,59 @@ class SemanticsBioassay:
         std_dev = variance ** 0.5
         return min(1.0, std_dev / 3.0)
 
-class TheLexicon:
-    _STORE = LexiconStore()
-    _ENGINE = SemanticsBioassay(_STORE)
-    ANTIGEN_REGEX = _ENGINE.ANTIGEN_REGEX
+class LexiconStore:
+    def __init__(self):
+        self.categories = set([
+            "heavy", "kinetic", "explosive", "constructive",
+            "abstract", "photo", "aerobic", "thermal", "cryo",
+            "suburban", "play", "sacred", "buffer", "antigen"
+        ])
+        self.VOCAB = {}             
+        self.LEARNED_VOCAB = {}     
+        self.USER_FLAGGED_BIAS = set() 
+        
+        self.SOLVENTS = set(LEXICON.get("solvents", []))
+        self.ANTIGEN_REPLACEMENTS = LEXICON.get("antigen_replacements", {})
+        self.ANTIGEN_REGEX = None
+        self.load_vocabulary()
+
+    def load_vocabulary(self):
+        data = LEXICON
+        for cat, words in data.items():
+            if cat in self.categories:
+                self.VOCAB[cat] = set(words)
+            elif cat == "refusal_guru":
+                self.VOCAB["refusal_guru"] = set(words)
+            elif cat == "cursed":
+                self.VOCAB["cursed"] = set(words)
+        antigens = data.get("antigen", [])
+        if antigens:
+            pattern = "|".join(map(re.escape, antigens))
+            self.ANTIGEN_REGEX = re.compile(fr"\b({pattern})\b", re.IGNORECASE)
+        print(f"{Prisma.GRY}[SYSTEM]: LexiconStore loaded from Data Module.{Prisma.RST}")
     
-    def load_vocabulary(cls):
-        cls._STORE.load_vocabulary()
-        cls.compile_antigens()
+    def get_raw(self, category):
+        base = self.VOCAB.get(category, set()) 
+        if category == "suburban":
+             return (base | set(self.LEARNED_VOCAB.get(category, {}).keys())) - self.USER_FLAGGED_BIAS
+        learned = set(self.LEARNED_VOCAB.get(category, {}).keys())
+        return base | learned
     
-    @property
-    def USER_FLAGGED_BIAS(cls):
-        return cls._STORE.USER_FLAGGED_BIAS
+    def teach(self, word, category, tick):
+        if category not in self.LEARNED_VOCAB:
+            self.LEARNED_VOCAB[category] = {}
+        self.LEARNED_VOCAB[category][word.lower()] = tick
+        return True
     
-    def get(cls, category): 
-        return cls._STORE.get_raw(category)
-    
-    def teach(cls, w, c, t): 
-        return cls._STORE.teach(w, c, t)
-    
-    def atrophy(cls, t, m=100): 
-        return cls._STORE.atrophy(t, m)
+    def atrophy(self, current_tick, max_age=100):
+        rotted = []
+        for cat, words in self.LEARNED_VOCAB.items():
+            for w in list(words.keys()):
+                last_seen = words[w]
+                if (current_tick - last_seen) > max_age:
+                    del words[w]
+                    rotted.append(w)
+        return rotted
     
     def clean(cls, text): 
         return cls._ENGINE.clean(text)
@@ -259,8 +278,6 @@ class TheLexicon:
 
     def get_turbulence(cls, words):
         return cls._ENGINE.measure_turbulence(words)
-
-TheLexicon.compile_antigens()
 
 class BoneConfig:
     MAX_HEALTH = 100.0
@@ -327,6 +344,10 @@ class BoneConfig:
         return False, None
 
 class DeathGen:
+    @classmethod
+    def load_protocols(cls):
+        print(f"{Prisma.GRY}[SYSTEM]: DeathGen protocols loaded.{Prisma.RST}")
+
     @staticmethod
     def eulogy(phys, state):
         prefixes = DEATH.get("PREFIXES", ["System Halt."])
@@ -354,9 +375,10 @@ class DeathGen:
             flavor = "HEAVY"
         else:
             flavor = "LIGHT"
-        p = random.choice(DeathGen.PREFIXES)
-        c = random.choice(DeathGen.CAUSES.get(cause_type, ["Unknown Cause"]))
-        v = random.choice(DeathGen.VERDICTS.get(flavor, ["Silence."]))
+            
+        p = random.choice(prefixes)
+        c = random.choice(causes.get(cause_type, ["Unknown Cause"]))
+        v = random.choice(verdicts.get(flavor, ["Silence."]))
         return f"{p} You died of **{c}**. {v}"
 
 class TheCartographer:
@@ -522,3 +544,74 @@ class ParadoxSeed:
     def bloom(self):
         self.bloomed = True
         return f"THE SEED BLOOMS: '{self.question}'"
+
+class GlobalLexiconFacade:
+    _STORE = None
+    _ENGINE = None
+    ANTIGEN_REGEX = None
+
+    @classmethod
+    def initialize(cls):
+        cls._STORE = LexiconStore() 
+        
+        cls._ENGINE = SemanticsBioassay(cls._STORE)
+        
+        cls.compile_antigens()
+        print(f"{Prisma.CYN}[SYSTEM]: TheLexicon initialized via SLASH Protocols.{Prisma.RST}")
+
+    @classmethod
+    def get(cls, category):
+        return cls._STORE.get_raw(category)
+
+    @classmethod
+    def teach(cls, word, category, tick):
+        return cls._STORE.teach(word, category, tick)
+
+    @classmethod
+    def clean(cls, text): 
+        return cls._ENGINE.clean(text)
+   
+    @classmethod
+    def taste(cls, word): 
+        return cls._ENGINE.assay(word)
+
+    @classmethod
+    def measure_viscosity(cls, word): 
+        return cls._ENGINE.measure_viscosity(word)
+
+    @classmethod
+    def harvest(cls, category): 
+        return cls._ENGINE.harvest(category)
+        
+    @classmethod
+    def get_turbulence(cls, words):
+        return cls._ENGINE.measure_turbulence(words)
+
+    @classmethod
+    def get_current_category(cls, word):
+        for cat, vocab in cls._STORE.LEARNED_VOCAB.items():
+            if word.lower() in vocab: return cat
+        for cat, vocab in cls._STORE.VOCAB.items():
+            if word.lower() in vocab: return cat
+        return None
+
+    @classmethod
+    def compile_antigens(cls): 
+        cls._ENGINE.compile_antigens()
+        cls.ANTIGEN_REGEX = cls._ENGINE.ANTIGEN_REGEX
+
+    @classmethod
+    def learn_antigen(cls, t, r): 
+        success = cls._ENGINE.learn_antigen(t, r)
+        if success:
+            cls.compile_antigens()
+        return success
+
+    @classmethod
+    def atrophy(cls, tick, max_age):
+        return cls._STORE.atrophy(tick, max_age)
+
+    SOLVENTS = property(lambda cls: cls._STORE.SOLVENTS)
+
+GlobalLexiconFacade.initialize()
+TheLexicon = GlobalLexiconFacade

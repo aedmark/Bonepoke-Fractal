@@ -78,7 +78,6 @@ LEXICON = {
         "valve", "engine", "hull", "anchor", "lens", "screen", "battery", "lung", "spine", "rib", 
         "skull", "nerve", "vein", "gut", "brick", "mortar", "beam", "girdle", "scaffold"
     ],
-    # PATCH 9.4.3: Split Kinetic
     "explosive": [
         "run", "sprint", "explode", "burst", "shatter", "crash", "flash", "snap", "rush", "tear", 
         "break", "launch", "whip", "slam", "strike"
@@ -87,7 +86,6 @@ LEXICON = {
         "build", "forge", "weave", "graft", "carve", "bind", "weld", "anchor", "lift", "carry", 
         "hoist", "stack", "sculpt", "assemble"
     ],
-    "kinetic": [], # Deprecated
     "abstract": [
         "system", "protocol", "sequence", "vector", "node", "context", "layer", "matrix", "perspective", 
         "framework", "logic", "concept", "theory", "analysis", "memory", "hope", "grief", "truth", 
