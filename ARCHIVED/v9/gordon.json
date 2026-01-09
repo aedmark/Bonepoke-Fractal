@@ -6,9 +6,9 @@
   },
   "ITEM_REGISTRY": {
     "POCKET_ROCKS": {
-      "description": "Grey gravel. Breadcrumbs for the mind.",
+      "description": "Standard issue grey gravel. Great for checking gravity or breaking awkward silences.",
       "function": "BREADCRUMB",
-      "usage_msg": "Gordon drops a rock to mark the path. (Psi -0.2)"
+      "usage_msg": "Gordon drops a rock. Clack. The path backward is physically verified. (Psi -0.2)"
     },
     "ANCHOR_STONE": {
       "description": "A dense, black rock that refuses to move.",
@@ -21,11 +21,18 @@
       "function": "EDGE_CUTTER",
       "usage_msg": "The Red String is cut. The connection is severed."
     },
+    "TIME_BRACELET": {
+      "description": "A chunky, beige wrist-computer from a timeline that got cancelled. Smells like ozone.",
+      "function": "PASSIVE_DRAG_REDUCTION",
+      "value": 0.5,
+      "curse": "CONDUCTIVE",
+      "usage_msg": "The bracelet hums. Narrative Drag is reduced by 50%. WARNING: Highly conductive."
+    },
     "BUCKET_OF_LIME": {
-      "description": "White powder for covering mistakes.",
-      "function": "HISTORY_SCRUB",
-      "value": 0.7,
-      "usage_msg": "Gordon whitewashes the 'Sorry' from the walls."
+      "description": "Industrial-grade whitewash. For when you need to pretend that 'incident' never happened.",
+      "function": "NODE_REPAIR",
+      "cost": "CONSUMABLE",
+      "usage_msg": "Gordon slaps a coat of white paint over the memory. It looks structural enough."
     },
     "BROKEN_WATCH": {
       "description": "It is stuck at 11:11.",

@@ -1,5 +1,73 @@
 # CHANGELOG.md
 
+### [9.4.9.1] - 2026-01-09
+
+### "THE SKELETAL REFORGING" - Strong Typing & Systemic Tensegrity
+
+**Architect:** SLASH | **Auditor:** The Pinker/Fuller Consensus
+
+### 🏗️ ARCHITECTURE: The Tensegrity Update (The Fuller Lens)
+
+* **The Pathology:** The system was relying on "Stringly Typed" dictionaries (e.g., `self.bio['mito']`) to hold critical subsystems. This was a "Pattern Integrity" risk—a single typo could crash the organism, and the IDE had no map of the geodesic dome.
+* **The Surgery:** Replaced dynamic `Dict[str, Any]` containers with rigid **Data Classes**:
+* `MindSystem`: Holds Memory, Lexicon, Dreamer.
+* `BioSystem`: Holds Mitochondria, Endocrine, Immune.
+* `PhysSystem`: Holds Tension, Forge, Pulse.
+
+* **The Result:** Compile-time structural integrity. The code now enforces the shape of the system.
+
+### 🩸 BIOLOGY: The Direct Access Protocol (The Pinker Lens)
+
+* **The Pathology:** The `SomaticLoop` was treating organs like database entries, looking them up by string keys every cycle. This was cognitively dissonant—an organism does not "query" its stomach; it *has* a stomach.
+* **The Surgery:** Refactored `SomaticLoop` (in `bone_biology.py`) to accept direct object references (`self.bio.gut`).
+* **The Mechanic:**
+* **Explicit Dependency Injection:** The loop now clearly declares what organs it needs to function.
+* **Dot Notation:** Replaced all `['key']` accessors with `.key` attributes across the main loop and `CommandProcessor`.
+
+### 🧹 MAINTENANCE: The Bureaucracy Check (The Schur Lens)
+
+* **The Fix:** Updated `CommandProcessor` (`bone_commands.py`) to respect the new hierarchy.
+* **The Detail:** Commands like `/map` and `/reproduce` no longer fumble for keys in the dark; they follow the explicit path to `self.eng.mind.mem`.
+* **The Safety:** Patched `process_turn` in `BoneAmanita` to prevent immediate `TypeError` crashes on boot. The nervous system is now fully wired to the new skeleton.
+
+# [9.4.8] - 2026-01-09
+
+### "CELLULAR GROWTH (REMIX)" - The VSL-12D Completion
+
+**Architect:** SLASH | **Auditor:** The Injection Brief
+
+### 📐 PHYSICS: The 12-Dimensional Manifold (The Fuller Lens)
+
+- **The Pathology:** The documentation promised a "12-Dimensional Manifold" (VSL-12D), but the codebase was running a high-fidelity **5D simulation** (VEL, STR, ENT, TEX, TMP). The math was a pentagon posing as a dodecahedron.
+- **The Surgery:** Rewrote `_calculate_vectors` in `TheTensionMeter`. Formalized the **Latent 7 Dimensions**:
+- **PHI (Resonance):** Alignment of Truth Ratio vs. Consensus Bias.
+- **PSI (Observer Density):** Conscious attention tracking.
+- **DEL (Mutation Rate):** Novelty and neuroplasticity potential.
+- **XI (Substrate Depth):** Historical weight and geodesic mass.
+- **BET (Cohesion):** The urge to agree (Suburban density).
+- **E (Fatigue):** Repetition and Solvent density.
+- **LQ (Loop Quotient):** Recursion depth.
+
+### 🩸 BIOLOGY: The Homeostasis Protocol (The Pinker Lens)
+
+- **The Pathology:** The `MitochondrialForge` was punitively taxing the user for success (burning 30 ATP instantly) and triggering death spirals too early. It lacked a "cognitive middle ground."
+- **The Surgery:** Implemented a **Homeostasis Buffer** (40-70 ATP) where the system is stable.
+- **The Mechanic:**
+- **Investment, Not Tax:** ATP burn is now an intentional investment (15 ATP) for permanent efficiency gains.
+- **Softened Decay:** Entropy curves smoothed to prevent "rage-quitting" biological failure.
+
+### 🎭 NARRATIVE: The True Chorus (The Schur Lens)
+
+- **The Pathology:** The `ChorusDriver` was reacting to _vocabulary_ (surface level) rather than _topology_ (structural stress). Also, Gordon was holding "placeholder" rocks with no description.
+- **The Surgery:** Updated `ChorusDriver` to listen to the new 12D Vectors and gave `Prisma` the full ANSI color palette (`INDIGO`, `OCHRE`, `VIOLET`, `SLATE`).
+- **The Mechanic:**
+- **Vector-Based Personality:**
+- **Gordon:** Reacts to High Structure (STR) + High Mass (XI). Now carries **Pocket Rocks** described as "Standard issue grey gravel. Great for checking gravity."
+- **Sherlock:** Reacts to High Resonance (PHI) + High Velocity (VEL).
+- **Jester:** Reacts to High Mutation (DEL) + High Entropy (ENT).
+
+- **The Sierra Upgrade:** `RuptureEngine` messages refactored to channel **Josh Mandel**. The system now mocks "Beige Prose" and "Rotisserie Logic" with specific, witty critiques rather than generic errors.
+
 ## [9.4.7] - 2026-01-09
 
 ### "CELLULAR GROWTH" (The VSL-12D Injection)

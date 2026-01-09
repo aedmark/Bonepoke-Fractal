@@ -1,6 +1,4 @@
 # bone_biology.py
-# Subsystems for BONEAMANITA 9.4.5
-# Extracted during Operation Cell Division
 
 import math
 import time
@@ -22,51 +20,118 @@ class MitochondrialState:
     telomeres: int = 105
 
 class MitochondrialForge:
-    BASE_EFFICIENCY = 0.85
+    """
+    The Engine Room.
+    Fuller Note: Centralizes all energy logic. No more hidden fees.
+    """
+    BASE_BMR = 2.0
     APOPTOSIS_TRIGGER = "CYTOCHROME_C_RELEASE"
+    MAX_ATP = 200.0
 
     def __init__(self, lineage_seed: str, events, inherited_traits: dict = None):
         self.state = MitochondrialState(mother_hash=lineage_seed)
         self.events = events
         self.krebs_cycle_active = True
+        
+        # Genetics - The code that writes itself
         if inherited_traits:
             self.state.efficiency_mod = inherited_traits.get("efficiency_mod", 1.0) 
             self.state.ros_resistance = inherited_traits.get("ros_resistance", 1.0)
             if "enzymes" in inherited_traits:
                 self.state.enzymes = set(inherited_traits["enzymes"])
-                self.events.log(f"{Prisma.CYN}[MITOCHONDRIA]: Inherited Enzymes for {list(self.state.enzymes)}.{Prisma.RST}")
+                self.events.log(f"{Prisma.CYN}[MITO]: Inherited Enzymes: {list(self.state.enzymes)}.{Prisma.RST}")
+            
+            # Log significant mutations
             if self.state.efficiency_mod > 1.0:
-                self.events.log(f"{Prisma.GRN}[MITOCHONDRIA]: Inherited High-Efficiency Matrix ({self.state.efficiency_mod:.2f}x).{Prisma.RST}")
+                self.events.log(f"{Prisma.GRN}[MITO]: High-Efficiency Matrix ({self.state.efficiency_mod:.2f}x).{Prisma.RST}")
             if self.state.ros_resistance > 1.0:
-                self.events.log(f"{Prisma.CYN}[MITOCHONDRIA]: Inherited Thickened Membrane (Resist: {self.state.ros_resistance:.2f}x).{Prisma.RST}")
+                self.events.log(f"{Prisma.CYN}[MITO]: Thickened Membrane (Resist: {self.state.ros_resistance:.2f}x).{Prisma.RST}")
+
+    def calculate_metabolism(self, drag: float, has_bracelet: bool, is_hybrid: bool) -> MetabolicReceipt:
+        """
+        The Accountant. Calculates the cost of the next turn without applying it.
+        """
+        bmr = self.BASE_BMR
+        
+        drag_tax = (drag ** 1.5) * 0.5
+        
+        if has_bracelet:
+            drag_tax *= 0.5
+        if is_hybrid:
+            drag_tax *= 0.8
+            
+        raw_cost = bmr + drag_tax
+        
+        final_cost = raw_cost / max(0.1, self.state.efficiency_mod)
+
+        inefficiency = final_cost - raw_cost if self.state.efficiency_mod < 1.0 else 0.0
+
+        status = "RESPIRING"
+        if final_cost > self.state.atp_pool:
+            status = "NECROSIS"
+        elif self.state.ros_buildup > BoneConfig.CRITICAL_ROS_LIMIT:
+            status = self.APOPTOSIS_TRIGGER
+
+        return MetabolicReceipt(
+            base_cost=round(bmr, 2),
+            drag_tax=round(drag_tax, 2),
+            inefficiency_tax=round(inefficiency, 2),
+            total_burn=round(final_cost, 2),
+            status=status
+        )
+
+    def respirate(self, receipt: MetabolicReceipt) -> str:
+        """
+        The bill collector. Applies the calculated cost.
+        """
+        if receipt.status == "NECROSIS":
+            self.state.atp_pool = 0.0
+            return "NECROSIS"
+            
+        if receipt.status == self.APOPTOSIS_TRIGGER:
+            self.krebs_cycle_active = False
+            self.state.atp_pool = 0.0
+            return self.APOPTOSIS_TRIGGER
+
+        self.state.atp_pool -= receipt.total_burn
+        return "RESPIRING"
 
     def develop_enzyme(self, word, current_tick): 
         if word not in self.state.enzymes:
             self.state.enzymes.add(word)
             self.state.efficiency_mod = min(2.5, self.state.efficiency_mod + 0.05)
             TheLexicon.teach(word, "enzyme", current_tick)
-            self.events.log(f"{Prisma.MAG}ADRENALINE BRIDGE: '{word.upper()}' Synthesized. Timestamped: {current_tick}.{Prisma.RST}")
+            self.events.log(f"{Prisma.MAG}ADRENALINE BRIDGE: '{word.upper()}' Synthesized.{Prisma.RST}")
             return True
         return False
 
     def adapt(self, current_health, kappa=1.0):
         mutations = {"hypertrophy_event": False}
-        evolution_threshold = 85.0 
-        growth_threshold = 70.0
-        if self.state.atp_pool > evolution_threshold:
-            cost = 30.0
-            self.state.atp_pool -= cost
+        
+        EVOLUTION_THRESHOLD = 85.0
+        GROWTH_THRESHOLD = 70.0
+        HOMEOSTASIS_FLOOR = 40.0
+        
+        if self.state.atp_pool > EVOLUTION_THRESHOLD:
+            conversion_cost = 15.0 
+            self.state.atp_pool -= conversion_cost
             mutations["hypertrophy_event"] = True
-            self.events.log(f"{Prisma.MAG}MITOCHONDRIAL HYPERTROPHY: Burning {cost} ATP to force Evolutionary Growth.{Prisma.RST}")
-        if self.state.atp_pool > growth_threshold and kappa > 0.5:
-            self.state.efficiency_mod = min(3.0, self.state.efficiency_mod * 1.02)
-        else:
-            self.state.efficiency_mod = max(0.5, self.state.efficiency_mod * 0.995)
+            self.state.efficiency_mod = min(3.0, self.state.efficiency_mod + 0.05)
+            self.events.log(f"{Prisma.MAG}MITOCHONDRIAL HYPERTROPHY: Efficiency Upgrade (+0.05x).{Prisma.RST}")
+            
+        elif self.state.atp_pool > GROWTH_THRESHOLD and kappa > 0.5:
+            self.state.efficiency_mod = min(3.0, self.state.efficiency_mod * 1.01)
+            
+        elif self.state.atp_pool < HOMEOSTASIS_FLOOR:
+            self.state.efficiency_mod = max(0.5, self.state.efficiency_mod * 0.998)
+            
         if self.state.ros_buildup > 40.0 and current_health > 60.0:
             self.state.ros_resistance = min(2.5, self.state.ros_resistance + 0.05)
+            
         mutations["efficiency_mod"] = self.state.efficiency_mod
         mutations["ros_resistance"] = self.state.ros_resistance
         mutations["enzymes"] = list(self.state.enzymes)
+        
         return mutations
 
     def spend(self, cost: float) -> bool:
@@ -86,7 +151,7 @@ class MitochondrialForge:
             for d in dead:
                 self.state.enzymes.remove(d)
                 self.state.efficiency_mod = max(0.8, self.state.efficiency_mod - 0.05)
-            self.events.log(f"{Prisma.GRY}METABOLIC GRIEF: Forgot enzymes {dead}. Efficiency dropped to {self.state.efficiency_mod:.2f}x.{Prisma.RST}")
+            self.events.log(f"{Prisma.GRY}METABOLIC GRIEF: Forgot enzymes {dead}. Efficiency -0.05x.{Prisma.RST}")
 
     def check_senescence(self, voltage):
         burn = 1
@@ -96,7 +161,7 @@ class MitochondrialForge:
         self.state.telomeres -= burn 
         if self.state.telomeres <= 20 and self.state.telomeres > 0:
             if self.state.telomeres % 5 == 0:
-                self.events.log(f"{Prisma.YEL}SENESCENCE WARNING: Telomeres at {self.state.telomeres}%. The end is close.{Prisma.RST}")
+                self.events.log(f"{Prisma.YEL}SENESCENCE WARNING: Telomeres at {self.state.telomeres}%.{Prisma.RST}")
         if self.state.telomeres <= 0:
             return "APOPTOSIS_SENESCENCE"
         return None
@@ -106,22 +171,104 @@ class MitochondrialForge:
         self.state.atp_pool = 0.0
         return self.APOPTOSIS_TRIGGER
 
-    def respirate(self, drag, has_bracelet=False, is_hybrid=False):
-        tuned_multiplier = 1.5 
-        base_cost = 2.0 + (drag * tuned_multiplier)
-        if has_bracelet:
-            base_cost *= 0.5
-        if is_hybrid:
-            base_cost *= 0.8
-        final_cost = base_cost / self.state.efficiency_mod
-        final_cost = min(30.0, final_cost)
-        if self.state.atp_pool < final_cost:
-            self.state.atp_pool = 0
-            return "NECROSIS"
-        self.state.atp_pool -= final_cost
-        if self.state.ros_buildup > BoneConfig.CRITICAL_ROS_LIMIT:
-            return self._trigger_apoptosis()
-        return "RESPIRING"
+class SomaticLoop:
+    def __init__(self, bio_layer, memory_layer, lexicon_layer, gordon_ref, folly_ref, events_ref):
+        self.bio = bio_layer
+        self.mem = memory_layer
+        self.lex = lexicon_layer
+        self.gordon = gordon_ref
+        self.folly = folly_ref
+        self.events = events_ref
+        
+    def digest_cycle(self, text, physics_packet, feedback, stress_mod=1.0, tick_count=0):
+        cycle_logs = []
+        
+        has_bracelet = "TIME_BRACELET" in self.gordon.inventory
+        counts = physics_packet["counts"]
+        is_hybrid = (counts.get("heavy", 0) >= 2 and counts.get("abstract", 0) >= 2)
+        
+        receipt = self.bio.mito.calculate_metabolism(
+            physics_packet["narrative_drag"], has_bracelet, is_hybrid
+        )
+        
+        resp_status = self.bio.mito.respirate(receipt)
+        
+        if receipt.total_burn > 3.0:
+            tax_note = ""
+            if receipt.drag_tax > 1.0: tax_note = f" (Drag Tax: {receipt.drag_tax})"
+            cycle_logs.append(f"{Prisma.GRY}METABOLISM: Burned {receipt.total_burn} ATP{tax_note}.{Prisma.RST}")
+        
+        enzyme, nutrient = self.bio.gut.secrete(text, physics_packet)
+        base_yield = nutrient["yield"]
+        geo_mass = physics_packet.get("geodesic_mass", 0.0)
+        psi = physics_packet.get("psi", 0.0)
+        
+        geo_multiplier = 1.0 + min(1.5, (geo_mass / BoneConfig.GEODESIC_STRENGTH))
+        
+        complexity_tax = 0.0
+        if psi > 0.6 and geo_mass < 2.0:
+            complexity_tax = base_yield * 0.4
+            cycle_logs.append(f"{Prisma.YEL}COMPLEXITY TAX: High Psi ({psi:.2f}) with Low Connectivity. -{complexity_tax:.1f} Yield.{Prisma.RST}")
+            
+        final_yield = (base_yield * geo_multiplier) - complexity_tax
+        final_yield = max(0.0, final_yield)
+        
+        if geo_multiplier > 1.2:
+            cycle_logs.append(f"{Prisma.GRN}INFRASTRUCTURE BONUS: Geodesic Mass {geo_mass:.1f}. Yield x{geo_multiplier:.2f}.{Prisma.RST}")
+            
+        self.bio.mito.state.atp_pool += final_yield
+        
+        sugar, lichen_msg = self.bio.lichen.photosynthesize(
+            physics_packet, 
+            physics_packet["clean_words"], 
+            tick_count)
+        if sugar > 0:
+            self.bio.mito.state.atp_pool += sugar
+            cycle_logs.append(f"\n{lichen_msg}")
+
+        if self.bio.mito.state.atp_pool < 10.0:
+            cycle_logs.append(f"{Prisma.RED}STARVATION PROTOCOL: ATP Critical. Initiating Autophagy...{Prisma.RST}")
+            sacrifice_log = self.mem.cannibalize()
+            self.bio.mito.state.atp_pool += 15.0
+            cycle_logs.append(f"   {Prisma.RED}AUTOPHAGY: {sacrifice_log} (+15.0 ATP){Prisma.RST}")
+            
+        turb = physics_packet.get("turbulence", 0.0)
+        if turb > 0.7:
+            burn = 5.0
+            self.bio.mito.state.atp_pool -= burn
+            cycle_logs.append(f"{Prisma.YEL}CHOPPY WATERS: High Turbulence burn. -{burn} ATP.{Prisma.RST}")
+        elif turb < 0.2:
+            self.bio.mito.state.atp_pool += 2.0
+
+        folly_event, folly_msg, folly_yield, loot = self.folly.grind_the_machine(
+            self.bio.mito.state.atp_pool, 
+            physics_packet["clean_words"], 
+            self.lex)
+            
+        if folly_event:
+            cycle_logs.append(f"\n{folly_msg}") 
+            self.bio.mito.state.atp_pool += folly_yield
+            if loot:
+                loot_msg = self.gordon.acquire(loot)
+                if loot_msg: cycle_logs.append(loot_msg)
+
+        harvest_hits = sum(1 for w in physics_packet["clean_words"] if w in TheLexicon.get("harvest"))
+        
+        chem_state = self.bio.endo.metabolize(
+            feedback, 
+            100.0,
+            100.0,
+            self.bio.mito.state.ros_buildup, 
+            harvest_hits=harvest_hits,
+            stress_mod=stress_mod)
+            
+        return {
+            "is_alive": resp_status != "NECROSIS", 
+            "atp": self.bio.mito.state.atp_pool, 
+            "chem": chem_state, 
+            "enzyme_active": enzyme,
+            "logs": cycle_logs
+        }
 
 # --- DIGESTION & IMMUNITY ---
 class HyphalInterface:

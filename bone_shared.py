@@ -11,6 +11,11 @@ from dataclasses import dataclass, field
 from bone_data import LEXICON, DEATH, SEEDS
 
 class Prisma:
+    """
+    The Optical Interface.
+    Translates system states into ANSI escape sequences.
+    Pinker Note: Color is information, not just decoration.
+    """
     RST = "\033[0m"
     RED = "\033[31m"
     GRN = "\033[32m"
@@ -20,16 +25,29 @@ class Prisma:
     CYN = "\033[36m"
     WHT = "\033[97m"
     GRY = "\033[90m"
+    INDIGO = "\033[34;1m"
+    OCHRE = "\033[33;2m"
+    VIOLET = "\033[35;2m"
+    SLATE = "\033[30;1m"
     
-    # Aliases
-    INDIGO = ""
-    OCHRE = ""
-    VIOLET = ""
-    SLATE = ""
-    
-    @staticmethod
-    def paint(text, color_key="0"):
-        return text
+    @classmethod
+    def paint(cls, text, color_key="0"):
+        color_map = {
+            "R": cls.RED,
+            "G": cls.GRN,
+            "Y": cls.YEL,
+            "B": cls.BLU,
+            "M": cls.MAG,
+            "C": cls.CYN,
+            "W": cls.WHT,
+            "0": cls.GRY,
+            "I": cls.INDIGO,
+            "O": cls.OCHRE,
+            "V": cls.VIOLET
+        }
+        
+        code = color_map.get(color_key.upper(), cls.WHT)
+        return f"{code}{text}{cls.RST}"
 
     def load_vocabulary(self):
         data = LEXICON

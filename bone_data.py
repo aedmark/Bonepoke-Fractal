@@ -154,43 +154,60 @@ GORDON = {
     "SCAR_TISSUE": {"FEAR": 0.8, "HATE": 0.6, "FATE": 0.9, "REGRET": 0.6, "ABANDONMENT": 0.1, "BETRAYAL": 0.314},
     "ITEM_REGISTRY": {
         "POCKET_ROCKS": {
-            "description": "Grey gravel. Breadcrumbs for the mind.",
+            "description": "Standard issue grey gravel. Great for checking gravity or breaking awkward silences.",
             "function": "BREADCRUMB",
-            "usage_msg": "Gordon drops a rock to mark the path. (Psi -0.2)"
+            "usage_msg": "Gordon drops a rock. Clack. The path backward is physically verified. (Psi -0.2)"
+        },
+        "TIME_BRACELET": {
+            "description": "A chunky, beige wrist-computer from a timeline that got cancelled. Smells like ozone.",
+            "function": "PASSIVE_DRAG_REDUCTION",
+            "value": 0.5,
+            "curse": "CONDUCTIVE",
+            "usage_msg": "The bracelet hums. Narrative Drag is reduced by 50%. WARNING: Highly conductive."
         },
         "ANCHOR_STONE": {
-            "description": "A dense, black rock that refuses to move.",
+            "description": "A rock so heavy it has its own zip code. It refuses to acknowledge the concept of drift.",
             "function": "DRIFT_KILLER",
             "consume_on_use": True,
-            "usage_msg": "Gordon kicks the heavy stone into the abyss. The rope snaps taut. (Drag = 0)"
+            "usage_msg": "Gordon heaves the stone into the void. It drops like a bad comedy routine. The narrative snaps taut. (Drag = 0)"
         },
         "SILENT_KNIFE": {
-            "description": "A ceramic blade that cuts without sound.",
+            "description": "A ceramic blade. It cuts connection errors and awkward silences.",
             "function": "EDGE_CUTTER",
-            "usage_msg": "The Red String is cut. The connection is severed."
+            "usage_msg": "Schwing! The Red String is severed. You are now unconnected and alone. Happy?"
         },
         "BUCKET_OF_LIME": {
-            "description": "White powder for covering mistakes.",
-            "function": "HISTORY_SCRUB",
-            "value": 0.7,
-            "usage_msg": "Gordon whitewashes the 'Sorry' from the walls."
+            "description": "Industrial-grade whitewash. For when you need to pretend that 'incident' never happened.",
+            "function": "NODE_REPAIR",
+            "cost": "CONSUMABLE",
+            "usage_msg": "Gordon slaps a coat of white paint over the memory. It looks structural enough."
+        },
+        "DUCT_TAPE": {
+            "description": "The silver standard of temporary solutions.",
+            "function": "TOOL_REPAIR",
+            "usage_msg": "You tape the cracks. It's ugly, but it holds."
         },
         "BROKEN_WATCH": {
-            "description": "It is stuck at 11:11.",
+            "description": "The hands are painted on. It's right twice a day, which is better than most of us.",
             "function": "STOCHASTIC_FIX",
-            "usage_msg": "Gordon taps the glass. 'Not yet.'"
+            "usage_msg": "Gordon taps the glass. 'Still 11:11. Make a wish, kid.'"
         },
         "STABILITY_PIZZA": {
-            "description": "A frozen slice of reality.",
+            "description": "A frozen slice of pepperoni that predates the invention of fire. Hard as a diamond.",
             "function": "REALITY_ANCHOR",
             "consume_on_use": True,
             "requires": "thermal",
-            "usage_msg": "It tastes like childhood cartoons and hot plastic."
+            "usage_msg": "You thaw the pizza. It smells like hot cardboard and nostalgia. Reality stabilizes out of pure respect."
         },
         "MEMORY_ARTIFACT": {
-            "description": "Useless junk. Why does he keep these? Proof he triumphed.",
+            "description": "Space junk. One man's trash is another man's inventory management problem.",
             "function": "TROPHY",
-            "variants": ["ANTISEPTIC_SPRAY", "DIVING_BELL", "HEAT_SINK", "THERMOS"]
+            "variants": [
+                "ANTISEPTIC_SPRAY (For emotional wounds)", 
+                "DIVING_BELL (For deep thoughts)", 
+                "HEAT_SINK (For hot takes)", 
+                "THERMOS (Contains lukewarm entropy)"
+            ]
         }
     }
 }
