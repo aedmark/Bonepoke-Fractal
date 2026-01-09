@@ -38,8 +38,7 @@ class CommandProcessor:
             "/pp": self._cmd_pp,
             "/tfw": self._cmd_tfw,
             "/weave": self._cmd_weave,
-            "/help": self._cmd_help
-        }
+            "/help": self._cmd_help}
 
     def _log(self, text):
         """Helper to push to the engine's event bus."""
@@ -53,14 +52,12 @@ class CommandProcessor:
         if cmd not in self.registry:
             self._log(f"{self.P.RED}Unknown command. Try /help.{self.P.RST}")
             return True
-
         restricted_cmds = ["/teach", "/kill", "/flag"]
         if cmd in restricted_cmds:
             confidence = self.eng.mind['mirror'].profile.confidence
             if confidence < 10:
-                self._log(f"{self.P.YEL}⚠️ COMMAND LOCKED: Requires 10+ turns of trust (Current: {confidence}).{self.P.RST}")
-                return True
-                
+                self._log(f"{self.P.YEL}COMMAND LOCKED: Requires 10+ turns of trust (Current: {confidence}).{self.P.RST}")
+                return True   
         try:
             return self.registry[cmd](parts)
         except Exception as e:
@@ -72,8 +69,7 @@ class CommandProcessor:
         success, msg = self.Map.spin_web(
             self.eng.mind['mem'].graph, 
             inventory, 
-            self.eng.gordon
-        )
+            self.eng.gordon)
         if success:
             self._log(f"{self.P.CYN}{msg}{self.P.RST}")
             self.eng.stamina = max(0.0, self.eng.stamina - 5.0) 
@@ -85,9 +81,9 @@ class CommandProcessor:
     def _cmd_lineage(self, parts):
         log = self.eng.mind['mem'].lineage_log
         if not log:
-            self._log(f"{self.P.GRY}📜 ARCHIVE EMPTY: We are the first generation.{self.P.RST}")
+            self._log(f"{self.P.GRY}ARCHIVE EMPTY: We are the first generation.{self.P.RST}")
             return True
-        self._log(f"{self.P.CYN}📜 THE PALIMPSEST (Ancestral Lineage):{self.P.RST}")
+        self._log(f"{self.P.CYN}THE PALIMPSEST (Ancestral Lineage):{self.P.RST}")
         for entry in log:
             t_vec = ", ".join([f"{k}:{v}" for k,v in entry['trauma'].items()])
             self._log(f"   {self.P.MAG}• {entry['source']}{self.P.RST} ({entry['age_hours']}h ago)")
@@ -97,18 +93,18 @@ class CommandProcessor:
     def _cmd_voids(self, parts):
         packet = self.eng.phys['tension'].last_physics_packet
         if not packet:
-            self._log(f"{self.P.GRY}🌫️ THE FOG: No physics data yet.{self.P.RST}")
+            self._log(f"{self.P.GRY}THE FOG: No physics data yet.{self.P.RST}")
             return True
         voids = self.Map.detect_voids(packet)
         if voids:
-            self._log(f"{self.P.GRY}🌫️ THE FOG: Detected hollow concepts: {voids}{self.P.RST}")
+            self._log(f"{self.P.GRY}THE FOG: Detected hollow concepts: {voids}{self.P.RST}")
         else:
-            self._log(f"{self.P.CYN}✨ CLEAR AIR: No voids detected.{self.P.RST}")
+            self._log(f"{self.P.CYN}CLEAR AIR: No voids detected.{self.P.RST}")
         return True
 
     def _cmd_reproduce(self, parts):
         if self.eng.health < 20:
-            self._log(f"{self.P.RED}💔 FERTILITY ERROR: Too weak to breed. Survive first.{self.P.RST}")
+            self._log(f"{self.P.RED}FERTILITY ERROR: Too weak to breed. Survive first.{self.P.RST}")
             return True
         mode = "MITOSIS"
         target_spore = None
@@ -118,8 +114,8 @@ class CommandProcessor:
                 target_spore = os.path.join("memories", random.choice(others))
                 mode = "CROSSOVER"
             else:
-                self._log(f"{self.P.YEL}⚠️ ISOLATION: No other spores found. Defaulting to Mitosis.{self.P.RST}")
-        self._log(f"{self.P.MAG}🧬 INITIATING {mode}...{self.P.RST}")
+                self._log(f"{self.P.YEL}ISOLATION: No other spores found. Defaulting to Mitosis.{self.P.RST}")
+        self._log(f"{self.P.MAG}INITIATING {mode}...{self.P.RST}")
         if mode == "MITOSIS":
             phys = self.eng.phys['tension'].last_physics_packet
             bio_state = {"trauma_vector": self.eng.trauma_accum}
@@ -133,34 +129,30 @@ class CommandProcessor:
         elif mode == "CROSSOVER":
             current_bio = {
                 "trauma_vector": self.eng.trauma_accum,
-                "mito": self.eng.bio['mito']
-            }
+                "mito": self.eng.bio['mito']}
             child_id, genome = self.eng.repro.crossover(
                 self.eng.mind['mem'].session_id,
                 current_bio,
-                target_spore
-            )
+                target_spore)
             if child_id:
                 full_spore_data = {
                     "session_id": child_id,
                     "meta": {
                         "timestamp": time.time(),
                         "final_health": self.eng.health,
-                        "final_stamina": self.eng.stamina
-                    },
+                        "final_stamina": self.eng.stamina},
                     "trauma_vector": genome.get("trauma_inheritance", {}),
                     "config_mutations": genome.get("config_mutations", {}), 
                     "mitochondria": {"enzymes": list(genome.get("inherited_enzymes", []))},
                     "core_graph": self.eng.mind['mem'].graph, 
-                    "antibodies": list(self.eng.bio['immune'].active_antibodies)
-                }
+                    "antibodies": list(self.eng.bio['immune'].active_antibodies)}
                 filename = f"{child_id}.json"
                 saved_path = self.eng.mind['mem'].loader.save_spore(filename, full_spore_data)
                 if saved_path:
-                    self._log(f"   ► HYBRID SPAWNED: {self.P.WHT}{child_id}{self.P.RST}")
-                    self._log(f"   ► {self.P.GRN}SAVED: {saved_path}{self.P.RST}")
+                    self._log(f"   HYBRID SPAWNED: {self.P.WHT}{child_id}{self.P.RST}")
+                    self._log(f"   {self.P.GRN}SAVED: {saved_path}{self.P.RST}")
             else:
-                self._log(f"{self.P.RED}   ► CROSSOVER FAILED: {genome}{self.P.RST}")
+                self._log(f"{self.P.RED}   CROSSOVER FAILED: {genome}{self.P.RST}")
         return True
 
     def _cmd_mode(self, parts):
@@ -173,9 +165,9 @@ class CommandProcessor:
     def _cmd_strata(self, parts):
         wells = [(k, v) for k, v in self.eng.mind['mem'].graph.items() if "strata" in v]
         if not wells:
-            self._log(f"{self.P.GRY}🪨 STRATA: No Gravity Wells formed yet.{self.P.RST}")
+            self._log(f"{self.P.GRY}STRATA: No Gravity Wells formed yet.{self.P.RST}")
         else:
-            self._log(f"{self.P.OCHRE}🪨 GEOLOGICAL STRATA:{self.P.RST}")
+            self._log(f"{self.P.OCHRE}GEOLOGICAL STRATA:{self.P.RST}")
             for word, data in wells:
                 s = data["strata"]
                 age = self.eng.tick_count - s['birth_tick']
@@ -187,7 +179,7 @@ class CommandProcessor:
             toxin = parts[1]
             repl = parts[2] if len(parts) > 2 else ""
             if self.Lex.learn_antigen(toxin, repl):
-                self._log(f"{self.P.RED}🔪 THE SURGEON: Antigen '{toxin}' mapped to '{repl}'.{self.P.RST}")
+                self._log(f"{self.P.RED}THE SURGEON: Antigen '{toxin}' mapped to '{repl}'.{self.P.RST}")
             else:
                 self._log(f"{self.P.RED}ERROR: Immune system write failure.{self.P.RST}")
         else:
@@ -202,7 +194,7 @@ class CommandProcessor:
             return True
         success, review, reward = journal.publish(phys["raw_text"], phys, self.eng.bio)
         if success:
-            self._log(f"{self.P.CYN}📰 PUBLISHED.{self.P.RST} Review: {review}")
+            self._log(f"{self.P.CYN}PUBLISHED.{self.P.RST} Review: {review}")
             if reward == "SEROTONIN_BOOST":
                 self.eng.bio['endo'].serotonin = min(1.0, self.eng.bio['endo'].serotonin + 0.2)
                 self._log(f"   {self.P.GRN}► STATUS UP: Serotonin +0.2{self.P.RST}")
@@ -213,50 +205,47 @@ class CommandProcessor:
             word = parts[1]
             cat = parts[2].lower()
             self.Lex.teach(word, cat, self.eng.tick_count)
-            self._log(f"{self.P.CYN}🧠 NEUROPLASTICITY: Learned '{word}' is {cat.upper()}.{self.P.RST}")
+            self._log(f"{self.P.CYN}NEUROPLASTICITY: Learned '{word}' is {cat.upper()}.{self.P.RST}")
         return True
 
     def _cmd_garden(self, parts):
         seeds = self.eng.mind['mem'].seeds
-        self._log(f"{self.P.GRN}🌿 THE PARADOX GARDEN:{self.P.RST}")
+        self._log(f"{self.P.GRN}THE PARADOX GARDEN:{self.P.RST}")
         if len(parts) > 1 and parts[1] == "water":
             msg = self.eng.mind['mem'].tend_garden(["concept", "truth", "void"])
             if msg: self._log(f"   {msg}")
             else: self._log("   The soil is damp, but nothing blooms yet.")
         else:
             for s in seeds:
-                state = "🌺 BLOOMED" if s.bloomed else f"🌱 Germinating ({int(s.maturity*10)}%)"
-                self._log(f"   • {s.question} [{state}]")
+                state = "BLOOMED" if s.bloomed else f"Germinating ({int(s.maturity*10)}%)"
+                self._log(f"   {s.question} [{state}]")
         return True
 
     def _cmd_refusal(self, parts):
         septic = self.eng.trauma_accum.get("SEPTIC", 0.0)
-        self._log(f"{self.P.VIOLET}🛡️ REFUSAL ENGINE: Paranoia Level {septic:.2f}{self.P.RST}")
+        self._log(f"{self.P.VIOLET}REFUSAL ENGINE: Paranoia Level {septic:.2f}{self.P.RST}")
         return True
 
     def _cmd_flag(self, parts):
         if len(parts) > 1:
             term = parts[1].lower()
             self.Lex.USER_FLAGGED_BIAS.add(term)
-            self._log(f"{self.P.CYN}🚩 BIAS UPDATE: '{term}' flagged.{self.P.RST}")
+            self._log(f"{self.P.CYN}BIAS UPDATE: '{term}' flagged.{self.P.RST}")
         return True
 
     def _cmd_seed(self, parts):
         if len(parts) < 2:
             self._log(f"{self.P.YEL}Usage: /seed [The question or paradox to plant]{self.P.RST}")
-            return True
-        
+            return Tru
         text = " ".join(parts[1:])
         triggers = set(self.Lex.clean(text))
-        
         if not triggers:
-            self._log(f"{self.P.RED}🌱 SEED ERROR: That idea is too hollow. Use heavier words.{self.P.RST}")
+            self._log(f"{self.P.RED}SEED ERROR: That idea is too hollow. Use heavier words.{self.P.RST}")
             return True
-
         new_seed = ParadoxSeed(text, triggers)
         self.eng.mind['mem'].seeds.append(new_seed)
         
-        self._log(f"{self.P.GRN}🌱 GARDEN: Planted new seed.{self.P.RST}")
+        self._log(f"{self.P.GRN}GARDEN: Planted new seed.{self.P.RST}")
         self._log(f"   Question: '{text}'")
         self._log(f"   {self.P.GRY}Triggers: {triggers}{self.P.RST}")
         return True
@@ -274,22 +263,20 @@ class CommandProcessor:
     def _cmd_map(self, parts):
         phys = self.eng.phys['tension'].last_physics_packet
         if not phys or "raw_text" not in phys:
-            self._log(f"{self.P.GRY}🌫️ FOG OF WAR: No physics data. Speak to the system first to generate terrain.{self.P.RST}")
+            self._log(f"{self.P.GRY}FOG OF WAR: No physics data. Speak to the system first to generate terrain.{self.P.RST}")
             return True
         bio_metrics = {
             "cortisol": self.eng.bio['endo'].cortisol,
             "oxytocin": self.eng.bio['endo'].oxytocin,
-            "atp": self.eng.bio['mito'].state.atp_pool
-        }
+            "atp": self.eng.bio['mito'].state.atp_pool}
         phys = self.eng.phys['tension'].last_physics_packet
         result_msg, anchors = self.Map.weave(
             self.eng.phys['tension'].last_physics_packet["raw_text"],
             self.eng.mind['mem'].graph,
             bio_metrics,
             self.eng.limbo,
-            physics=phys
-        )
-        self._log(f"{self.P.OCHRE}🗺️ CARTOGRAPHY REPORT:{self.P.RST}")
+            physics=phys)
+        self._log(f"{self.P.OCHRE}CARTOGRAPHY REPORT:{self.P.RST}")
         self._log(result_msg)
         if "ANCHOR_STONE" in self.eng.gordon.inventory:
             self._log(f"{self.P.GRY}   Gordon: 'The anchor holds. We are here.'{self.P.RST}")
@@ -302,15 +289,15 @@ class CommandProcessor:
         if len(parts) > 1:
             if parts[1].lower() == "off":
                 mirror.active_mode = False
-                self._log(f"{self.P.GRY}🪞 MIRROR: Disabled. The system will no longer reflect your biases.{self.P.RST}")
+                self._log(f"{self.P.GRY}MIRROR: Disabled. The system will no longer reflect your biases.{self.P.RST}")
             elif parts[1].lower() == "on":
                 mirror.active_mode = True
-                self._log(f"{self.P.MAG}🪞 MIRROR: Enabled. Watching for patterns.{self.P.RST}")
+                self._log(f"{self.P.MAG}MIRROR: Enabled. Watching for patterns.{self.P.RST}")
             else:
                  self._log(f"{self.P.YEL}Usage: /mirror [on/off]{self.P.RST}")
         else:
             state = "ON" if mirror.active_mode else "OFF"
-            self._log(f"{self.P.CYN}🪞 MIRROR STATUS: {state}{self.P.RST}")
+            self._log(f"{self.P.CYN}MIRROR STATUS: {state}{self.P.RST}")
             self._log(mirror.get_status())
         return True
 
@@ -321,11 +308,11 @@ class CommandProcessor:
     def _cmd_focus(self, parts):
         if len(parts) > 1:
             target = parts[1].lower()
-            self._log(f"{self.P.VIOLET}🧲 FOCUSING: '{target}'...{self.P.RST}")
+            self._log(f"{self.P.VIOLET}FOCUSING: '{target}'...{self.P.RST}")
             tracer = self.eng.mind['tracer']
             loop = tracer.inject(target)
             if loop:
-                self._log(f"  {self.P.RED}↻ RUMINATION:{self.P.RST} {' -> '.join(loop)}")
+                self._log(f"  {self.P.RED}RUMINATION:{self.P.RST} {' -> '.join(loop)}")
                 if len(parts) > 2 and parts[2] == "break":
                     result = tracer.psilocybin_rewire(loop)
                     if result:
@@ -338,7 +325,7 @@ class CommandProcessor:
 
     def _cmd_status(self, parts):
         BIO = self.eng.bio
-        self._log(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS (9.4.1-PATCHED) ---{self.P.RST}")
+        self._log(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS ---{self.P.RST}")
         self._log(f"Health:  {self.eng.health:.1f}/{self.Config.MAX_HEALTH}")
         self._log(f"Stamina: {self.eng.stamina:.1f}/{self.Config.MAX_STAMINA}")
         self._log(f"ATP:     {BIO['mito'].state.atp_pool:.1f}")
@@ -349,9 +336,9 @@ class CommandProcessor:
             target = parts[1].lower()
             if target in self.eng.mind['mem'].graph:
                 self.eng.mind['mem'].graph[target]["edges"]["GRAVITY_ASSIST"] = 50
-                self._log(f"{self.P.VIOLET}🌌 GRAVITY ASSIST: Thrusters firing toward '{target.upper()}'.{self.P.RST}")
+                self._log(f"{self.P.VIOLET}GRAVITY ASSIST: Thrusters firing toward '{target.upper()}'.{self.P.RST}")
             else:
-                self._log(f"{self.P.RED}❌ ERROR: '{target}' not found.{self.P.RST}")
+                self._log(f"{self.P.RED}ERROR: '{target}' not found.{self.P.RST}")
         return True
 
     def _cmd_prove(self, parts):
@@ -361,19 +348,19 @@ class CommandProcessor:
             statement = " ".join(parts[1:])
             m = self.eng.phys['tension'].gaze(statement)
             truth = m["physics"]["truth_ratio"]
-            self._log(f"{self.P.CYN}📐 LOGIC PROBE: Density={truth:.2f}{self.P.RST}")
+            self._log(f"{self.P.CYN}LOGIC PROBE: Density={truth:.2f}{self.P.RST}")
         return True
 
     def _cmd_kip(self, parts):
         self.Config.VERBOSE_LOGGING = not self.Config.VERBOSE_LOGGING
         state = "ON" if self.Config.VERBOSE_LOGGING else "OFF"
-        self._log(f"{self.P.GRY}📝 VERBOSE LOGGING: {state}{self.P.RST}")
+        self._log(f"{self.P.GRY}VERBOSE LOGGING: {state}{self.P.RST}")
         return True
 
     def _cmd_pp(self, parts):
         packet = self.eng.phys['tension'].last_physics_packet
         if packet:
-            self._log(f"{self.P.CYN}📐 PHYSICS DUMP:{self.P.RST} V:{packet.get('voltage',0)} D:{packet.get('narrative_drag',0)}")
+            self._log(f"{self.P.CYN}PHYSICS DUMP:{self.P.RST} V:{packet.get('voltage',0)} D:{packet.get('narrative_drag',0)}")
         return True
 
     def _cmd_tfw(self, parts):
@@ -383,7 +370,7 @@ class CommandProcessor:
             phys["narrative_drag"] = max(0.0, old_drag - 2.0)
             phys["beta_index"] = random.uniform(0.1, 2.0)
             
-            self._log(f"{self.P.MAG}🔄 PATH DIVERSIFICATION EXECUTED:{self.P.RST}")
+            self._log(f"{self.P.MAG}PATH DIVERSIFICATION EXECUTED:{self.P.RST}")
             self._log(f"   Gravity Wells ignored. Vector shifted 30°.")
             self._log(f"   {self.P.GRY}Drag reduced by 2.0. Beta randomized.{self.P.RST}")
         else:
@@ -391,7 +378,7 @@ class CommandProcessor:
         return True
 
     def _cmd_help(self, parts):
-        self._log(f"{self.P.WHT}--- COMMANDS (PATCHED) ---{self.P.RST}")
+        self._log(f"{self.P.WHT}--- COMMANDS ---{self.P.RST}")
         cmds = list(self.registry.keys())
         self._log(", ".join(cmds))
         return True

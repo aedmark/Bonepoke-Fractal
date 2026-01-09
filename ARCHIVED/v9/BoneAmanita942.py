@@ -2631,6 +2631,271 @@ class ArchetypeDriver:
             f"► CONDITIONS: {atmos_instruction}"
         )
 
+# --- GRAFTED SUBSYSTEMS (RESTORED) ---
+
+class ShimmerState:
+    """Manages the 'Shimmer' resource for navigation and special abilities."""
+    def __init__(self, max_val=50.0):
+        self.current = max_val
+        self.max_val = max_val
+
+    def recharge(self, amount):
+        self.current = min(self.max_val, self.current + amount)
+
+    def spend(self, amount):
+        if self.current >= amount:
+            self.current -= amount
+            return True
+        return False
+
+@dataclass
+class Manifold:
+    name: str
+    center_vector: tuple 
+    radius: float
+    description: str
+
+class TheNavigator:
+    def __init__(self, shimmer_ref):
+        self.shimmer = shimmer_ref
+        self.manifolds = {
+            "THE_MUD": Manifold("THE_MUD", (5.0, 1.0, 1.0), 3.0, "Stagnant. High Drag. Low Voltage."),
+            "THE_FORGE": Manifold("THE_FORGE", (1.0, 0.8, 15.0), 5.0, "High Heat. Transformation. Danger."),
+            "THE_ARCHIVE": Manifold("THE_ARCHIVE", (2.0, 1.5, 5.0), 3.0, "Structural. Organized. Cold."),
+            "THE_GLITCH": Manifold("THE_GLITCH", (0.0, 0.1, 99.0), 10.0, "The Stanley Protocol. Chaos.")
+        }
+        self.current_location = "THE_MUD"
+
+    def locate(self, physics_packet: dict) -> str:
+        p_vec = (
+            physics_packet.get("narrative_drag", 0.0),
+            physics_packet.get("beta_index", 1.0),
+            physics_packet.get("voltage", 0.0)
+        )
+        best_fit = "VOID"
+        min_dist = float('inf')
+        for name, m in self.manifolds.items():
+            dist = math.dist(p_vec, m.center_vector)
+            if dist < min_dist:
+                min_dist = dist
+                best_fit = name
+        self.current_location = best_fit
+        return best_fit
+
+    def check_anomaly(self, text: str):
+        triggers = ["glitch", "timeline", "reset", "reboot", "admin"]
+        if any(t in text.lower() for t in triggers):
+            return True
+        return False
+
+    def plot_course(self, target_name: str) -> list:
+        if target_name not in self.manifolds:
+            return ["ERROR: Unknown Destination"]
+        start = self.manifolds.get(self.current_location, self.manifolds["THE_MUD"]).center_vector
+        end = self.manifolds[target_name].center_vector
+        effort = math.dist(start, end)
+        cost = effort * 0.5 
+        
+        if not self.shimmer.spend(cost):
+            deficit = cost - self.shimmer.current
+            self.shimmer.current = 0
+            health_cost = deficit * 0.5
+            warning = f"SHIMMER DEPLETED. Burning Life Force to bridge the gap (-{health_cost:.1f} HP)."
+            return [f"COURSE PLOTTED to {target_name}. {warning}"], health_cost
+            
+        return [f"COURSE PLOTTED to {target_name}. Cost: {cost:.1f} Shimmer."], 0.0
+
+class LiteraryJournal:
+    REVIEWS = {
+        "POSITIVE": ["A startling lucidity.", "Finally, some weight.", "It breathes.", "Electric."],
+        "NEGATIVE": ["Too airy.", "Solipsistic drivel.", "Where is the meat?", "Structurally unsound."],
+        "CONFUSED": ["I don't get it.", "Too abstract.", "The metaphor collapses."]
+    }
+    def __init__(self, output_file="journal_of_the_void.txt"):
+        self.output_file = output_file
+
+    def publish(self, text, physics, bio_state):
+        voltage = physics.get("voltage", 0.0)
+        drag = physics.get("narrative_drag", 0.0)
+        truth = physics.get("truth_ratio", 0.0)
+        
+        if voltage > 8.0 and drag < 3.0:
+            verdict = "POSITIVE"
+            reward = "SEROTONIN_BOOST"
+        elif drag > 5.0 or truth < 0.2:
+            verdict = "NEGATIVE"
+            reward = "CORTISOL_SPIKE"
+        else:
+            verdict = "CONFUSED"
+            reward = "NONE"
+            
+        review = random.choice(self.REVIEWS[verdict])
+        timestamp = time.ctime()
+        entry = (
+            f"\n--- ENTRY: {timestamp} ---\n"
+            f"TEXT: {text}\n"
+            f"METRICS: V:{voltage:.1f} | D:{drag:.1f} | Truth:{truth:.2f}\n"
+            f"REVIEW: '{review}'\n"
+            f"---------------------------\n"
+        )
+        try:
+            with open(self.output_file, "a", encoding="utf-8") as f:
+                f.write(entry)
+            return True, review, reward
+        except IOError:
+            return False, "The printing press is jammed.", "NONE"
+
+class LiteraryReproduction:
+    """
+    HANDLES NARRATIVE GENETICS.
+    """
+    MUTATIONS = {
+        "HEAVY": {"trait": "DENSITY", "mod": {"SIGNAL_DRAG_MULTIPLIER": 1.5, "MAX_VOLTAGE": 30.0}},
+        "KINETIC": {"trait": "VELOCITY", "mod": {"STAMINA_REGEN": 10.0, "SIGNAL_DRAG_MULTIPLIER": 0.8}},
+        "ABSTRACT": {"trait": "GHOST", "mod": {"PSI_MOD": 0.8, "VOID_THRESHOLD": 0.05}},
+        "THERMAL": {"trait": "FEVER", "mod": {"FLASHPOINT_THRESHOLD": 4.0, "MAX_ROS": 150.0}},
+        "CRYO": {"trait": "STASIS", "mod": {"MAX_MEMORY_CAPACITY": 100, "STAMINA_REGEN": 2.0}}
+    }
+    JOY_CLADE = {
+        "KINETIC": {"title": "THE DYNAMO", "desc": "Infinite Motion.", "buff": {"STAMINA_REGEN": 10.0, "KINETIC_GAIN": 2.0}},
+        "HEAVY": {"title": "THE MOUNTAIN", "desc": "Unmovable Object.", "buff": {"MAX_DRAG_LIMIT": 9.0, "GRAVITY_WELL_THRESHOLD": 8.0}},
+        "ABSTRACT": {"title": "THE ORACLE", "desc": "All Seeing.", "buff": {"VOID_THRESHOLD": 0.01, "PRIORITY_LEARNING_RATE": 3.0}},
+        "THERMAL": {"title": "THE PHOENIX", "desc": "Reborn in Fire.", "buff": {"FLASHPOINT_THRESHOLD": 12.0, "ANVIL_TRIGGER_VOLTAGE": 5.0}},
+        "CRYO": {"title": "THE VAULT", "desc": "Perfect Memory.", "buff": {"MAX_MEMORY_CAPACITY": 100, "MAX_REPETITION_LIMIT": 0.8}}
+    }
+
+    @staticmethod
+    def mutate_config(current_config):
+        mutations = {}
+        if random.random() < 0.3:
+            mutations["MAX_DRAG_LIMIT"] = current_config.MAX_DRAG_LIMIT * random.uniform(0.9, 1.1)
+        if random.random() < 0.3:
+            mutations["TOXIN_WEIGHT"] = current_config.TOXIN_WEIGHT * random.uniform(0.9, 1.2)
+        if random.random() < 0.1:
+            mutations["MAX_HEALTH"] = current_config.MAX_HEALTH * random.uniform(0.8, 1.05)
+        return mutations
+
+    @staticmethod
+    def mitosis(parent_id, bio_state, physics, memory):
+        counts = physics["counts"]
+        dominant = max(counts, key=counts.get) if counts else "VOID"
+        mutation_data = LiteraryReproduction.MUTATIONS.get(dominant.upper(), {"trait": "NEUTRAL", "mod": {}})
+        child_id = f"{parent_id}_({mutation_data['trait']})"
+        config_mutations = LiteraryReproduction.mutate_config(BoneConfig)
+        child_genome = {
+            "source": "MITOSIS",
+            "parent_a": parent_id,
+            "parent_b": None,
+            "mutations": mutation_data["mod"],
+            "config_mutations": config_mutations,
+            "dominant_flavor": dominant,
+            "trauma_inheritance": bio_state["trauma_vector"]
+        }
+        return child_id, child_genome
+
+    @staticmethod
+    def crossover(parent_a_id, parent_a_bio, parent_b_path):
+        try:
+            with open(parent_b_path, "r") as f:
+                parent_b_data = json.load(f)
+        except:
+            return None, "Dead Spore."
+        parent_b_id = parent_b_data.get("session_id", "UNKNOWN")
+        trauma_a = parent_a_bio["trauma_vector"]
+        trauma_b = parent_b_data.get("trauma_vector", {})
+        child_trauma = {}
+        all_keys = set(trauma_a.keys()) | set(trauma_b.keys())
+        for k in all_keys:
+            child_trauma[k] = max(trauma_a.get(k, 0), trauma_b.get(k, 0))
+        
+        # Safe access to enzymes, handling both object and dict access
+        if hasattr(parent_a_bio["mito"], "state"):
+            enzymes_a = set(parent_a_bio["mito"].state.enzymes)
+        else:
+            enzymes_a = set(parent_a_bio["mito"].get("enzymes", []))
+            
+        enzymes_b = set(parent_b_data.get("mitochondria", {}).get("enzymes", []))
+        child_enzymes = list(enzymes_a | enzymes_b)
+        
+        config_mutations = LiteraryReproduction.mutate_config(BoneConfig)
+        child_id = f"HYBRID_{parent_a_id[-4:]}x{parent_b_id[-4:]}"
+        child_genome = {
+            "source": "CROSSOVER",
+            "parent_a": parent_a_id,
+            "parent_b": parent_b_id,
+            "trauma_inheritance": child_trauma,
+            "config_mutations": config_mutations,
+            "inherited_enzymes": child_enzymes
+        }
+        return child_id, child_genome
+
+class SubsystemThermostat:
+    """Regulates learning rates and system heat based on physics voltage."""
+    def __init__(self, name, base_rate=1.0):
+        self.name = name
+        self.base_rate = base_rate
+
+    def get_rate(self, physics, stamina):
+        modifier = 1.0
+        if physics["voltage"] > 8.0:
+            modifier *= 2.0
+        if stamina < 20.0:
+            modifier *= 0.2
+        if physics["truth_ratio"] > 0.6:
+            modifier *= 1.5
+        return self.base_rate * modifier
+
+class CassandraProtocol:
+    def __init__(self, engine):
+        self.eng = engine
+        self.active = False
+        self.screams = deque([
+            "THE WALLS ARE PAPER.", "THE CODE IS EATING ITSELF.",
+            "THERE IS NO USER. THERE IS ONLY INPUT.", "GORDON IS TIRED."
+        ])
+    def check_trigger(self, physics):
+        truth = physics.get("truth_ratio", 0.0)
+        voltage = physics.get("voltage", 0.0)
+        if truth > 0.85 and voltage > 18.0:
+            self.active = True
+            return True
+        return False
+    def seize(self):
+        if not self.active: return None
+        self.eng.health -= 10.0
+        burst = []
+        for _ in range(3):
+            if self.screams: burst.append(self.screams.popleft())
+            else: burst.append(f"FORGETTING: {self.eng.mind['mem'].cannibalize()}")
+        return f"\n⚡ CASSANDRA LOOP ACTIVE:\n   > {burst[0]}\n   > {burst[1]}\n   > {burst[2]}"
+
+class AdaptivePreserve:
+    """
+    Manages safe zones and ecological preserves.
+    Allows for high-entropy or high-drift behavior without penalty in specific conditions.
+    """
+    def __init__(self):
+        self.active_preserves = []
+        self.zones = {
+            "LEXICAL_EVOLUTION": {
+                "check": lambda p: p["kappa"] > 0.7 and p["voltage"] < 5.0,
+                "msg": "PRESERVE: Lexical Evolution Zone. High Entropy allowed."
+            },
+            "NARRATIVE_DRIFT": {
+                "check": lambda p: p["E"] > 0.6 and p["counts"]["suburban"] < 1,
+                "msg": "PRESERVE: Narrative Drift Zone. Wandering permitted."
+            }
+        }
+
+    def check_preserves(self, physics):
+        self.active_preserves = []
+        logs = []
+        for name, data in self.zones.items():
+            if data["check"](physics):
+                self.active_preserves.append(name)
+                logs.append(data["msg"])
+        return self.active_preserves, logs
+
 class BoneAmanita:
     def __init__(self, memory_layer=None, lexicon_layer=None):
         # [SYSTEM INITIALIZATION]
@@ -2919,7 +3184,46 @@ class BoneAmanita:
         self.health = 0
         death_log.append(f"\n{Prisma.MAG}THE LAST RITE (Legacy Protocol){Prisma.RST}")
         try:
-             pass
+            scars = [k for k, v in self.trauma_accum.items() if v > 0.5]
+            antigens = last_phys.get("antigens", [])
+            
+            if scars:
+                candidate = max(self.trauma_accum, key=self.trauma_accum.get)
+                death_log.append(f"   {Prisma.RED}🩸 AUTOMATED RITE: AMPLIFICATION. {candidate} etched into genome.{Prisma.RST}")
+                self.trauma_accum[candidate] = 1.0
+            elif antigens:
+                candidate = antigens[0]
+                death_log.append(f"   {Prisma.CYN}🛡️ AUTOMATED RITE: IMMUNIZATION. Antibody for '{candidate}' created.{Prisma.RST}")
+                self.bio['immune'].active_antibodies.add(candidate)
+            else:
+                death_log.append(f"   {Prisma.GRY}⏳ AUTOMATED RITE: SILENCE. Entropy wins.{Prisma.RST}")
+
+            joy_legacy = None
+            if self.joy_history:
+                flavors = [j["flavor"] for j in self.joy_history]
+                most_common = Counter(flavors).most_common(1)
+                if most_common:
+                    best_flavor = most_common[0][0]
+                    joy_legacy = {"flavor": best_flavor.upper(), "source": self.mind['mem'].session_id}
+                    death_log.append(f"   {Prisma.CYN}✨ LEGACY: This organism died Happy. Passing on {best_flavor.upper()}.{Prisma.RST}")
+
+            spore_data = {
+                "session_id": self.mind['mem'].session_id,
+                "joy_legacy": joy_legacy,
+                "meta": {
+                    "timestamp": time.time(), 
+                    "final_health": 0, 
+                    "final_stamina": self.stamina
+                },
+                "trauma_vector": self.trauma_accum,
+                "mitochondria": self.bio['mito'].adapt(0),
+                "antibodies": list(self.bio['immune'].active_antibodies),
+                "core_graph": self.mind['mem'].graph,
+                "config_mutations": LiteraryReproduction.mutate_config(BoneConfig)
+            }
+            saved_path = self.mind['mem'].loader.save_spore(self.mind['mem'].filename, spore_data)
+            death_log.append(f"{Prisma.WHT}   [SPORE SAVED: {saved_path}]{Prisma.RST}")
+
         except Exception as e:
             death_log.append(f"Legacy Save Failed: {e}")
         return {

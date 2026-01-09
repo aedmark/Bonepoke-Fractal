@@ -1,5 +1,48 @@
 # CHANGELOG.md
 
+### [9.4.3] - TENSION RELEASE - 2026-01-09
+
+**Architect:** SLASH | **Auditor:** The Pinker Lens
+
+### 🧠 COGNITION: The TensionMeter Refactor
+
+* **The Pathology:**
+* `TheTensionMeter` was suffering from the "Curse of Knowledge." Variables like `kappa` and `psi` were opaque shorthand for complex literary metrics.
+* The `gaze` method was a monolithic block of math, counting, and logic, making it cognitively heavy and difficult to debug.
+* The system was speaking "Esoteric Physics" (internal math) rather than "Cognitive Mechanics" (clear forces).
+
+
+* **The Surgery:**
+* **The Pinker Lens:** Renamed and isolated metrics to respect the reader's mental model. `voltage` is now explicitly calculated as Narrative Energy. `narrative_drag` is explicitly Friction/Entropy.
+* **The Fuller Lens:** Ephemeralized the `gaze` pipeline. The logic was broken down into discrete, single-purpose components: `_tally_categories`, `_calculate_voltage`, `_calculate_drag`, and `_measure_integrity`.
+* **The Ron Swanson Cut:** Removed `vector_memory` and historic inertia calculations. The system no longer wastes cycles checking if it repeated itself; it focuses entirely on the *now*.
+
+
+* **The Result:**
+* **Modular Clarity:** The "Sensory Organ" is now a clean, readable pipeline: *Input -> Clean -> Categorize -> Measure -> Package*.
+* **Systemic Integrity:** Restored critical "plumbing" methods (`_trigger_neuroplasticity`, `_package_physics`) that were momentarily orphaned, ensuring the Governor, Theremin, and Lenses continue to receive their required telemetry (Beta, Gamma, Zones).
+* **Explicit Tuning:** The "Pinker Tax" (1.5x drag penalty for "solvent" words like *is/the/are*) is now an explicit, tunable variable rather than hidden inline math.
+
+## [9.4.2] - THE DIRECTOR'S CUT - 2026-01-09
+
+**Architect:** SLASH | **Auditor:** The Director
+
+### 🎬 INSTRUCTION: The Archetype Driver
+
+* **The Pathology:**
+* The engine knew *who* it was (e.g., "GORDON"), but it had no voice to tell the LLM *how* to act. It relied on the user to interpret the vibe.
+* The system was "Peacocking"—spending valuable tokens on ASCII art borders, cloud icons (`☁️`), and ANSI color codes (`\033[31m`) that are noise to a language model.
+
+* **The Surgery:**
+* **The Bleach Protocol:** Implemented a runtime override in `BoneAmanita.__init__` that neutralizes `Prisma` color codes. The output is now pure, unpainted text.
+* **The Translator:** Deprecated the ASCII-heavy `TheProjector.render` in favor of `get_system_prompt_addition`. Visual bars have been replaced with dense telemetry (`[PSI: 0.8 | MASS: 12.4]`).
+* **The Director:** Introduced `ArchetypeDriver`. This class translates the internal `Lens` and `Physics` state into explicit System Instructions.
+* *Example:* If Voltage > 15v, it commands the model: *"Increase verbosity. Allow for manic leaps in logic."*
+
+* **The Result:**
+* **High-Fidelity Control:** The Python engine now effectively "prompts" the LLM dynamically every turn. The hallucination is no longer random; it is directed.
+* **Token Economy:** reduced I/O overhead by ~40% by stripping visual formatting.
+
 ## [9.4.1] - THE BICAMERAL JANITOR - 2026-01-08
 
 **Architect:** SLASH | **Auditor:** The Switchboard
