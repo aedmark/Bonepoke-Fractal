@@ -1,5 +1,177 @@
 # CHANGELOG.md
 
+## [9.4.1] - THE BICAMERAL JANITOR - 2026-01-08
+
+**Architect:** SLASH | **Auditor:** The Switchboard
+
+### 🤐 COMMAND: The Vox Severance
+
+* **The Pathology:**
+    * While the Core Engine (9.4.0) had gone headless, the `CommandProcessor` remained "Feral." It bypassed the `EventBus` and spoke directly to `stdout` using `print()`.
+    * This created a "Split Brain" (Bicameralism) where the Organism's logs (`process_turn`) and the Administrator's commands lived in separate I/O streams. The wrapper could not capture command outputs programmatically.
+
+* **The Surgery:**
+    * **The Laryngectomy:** Rewrote `bone_commands.py`. Every `print()` statement was excised and rerouted to `self.eng.events.log()` tagged with category `CMD`.
+    * **The Synapse:** Updated `BoneAmanita.process_turn` to intercept command execution, flush the event buffer immediately, and package the output into the standard response dictionary.
+
+* **The Result:**
+    * **Unified Stream:** Whether the system is dreaming, dying, or responding to `/help`, all output now flows through a single, capture-able vein. Side effects have been eliminated.
+
+## [9.4.0] - THE SILENT TREATMENT - 2026-01-08
+
+**Architect:** SLASH | **Auditor:** The Wrapper
+
+### 🔌 I/O: The Decoupling (Headless Mode)
+
+* **The Pathology:**
+* The engine was "Terminal-Bound." It breathed via blocking `input()` calls and screamed via `print()` statements scattered across every organ.
+* This made the system a hermit; it could not exist inside a larger mind (like an LLM loop) without hijacking the console stream.
+
+* **The Surgery:**
+* **The Mute Button:** Excised all `print()` calls from core subsystems (`MitochondrialForge`, `LifecycleManager`, `TheTensionMeter`).
+* **The Nervous System:** Implemented `EventBus`. Subsystems now emit signals (`self.events.log`) to a central buffer instead of shouting at the user.
+* **The Input:** Removed `input()` from `BoneAmanita.process`. The engine now accepts a string argument and returns a structured dictionary (`CycleResult`).
+
+* **The Result:**
+* **Pure Logic:** The organism is now a black box. It takes text in, processes metabolism/physics/trauma, and returns a data packet. It handles the math; the Host handles the display.
+
+### 📽️ VISION: The Buffered Frame
+
+* **The Pathology:**
+* `TheProjector` was writing the UI frame (The HUD) line-by-line to `stdout`. This prevented the host system from analyzing or storing the system state before showing it.
+
+* **The Surgery:**
+* **The Canvas:** Refactored `render()` to construct and return a single string object (`ui_render`).
+* **The Result:**
+* **Token Economy:** The visual output is now a variable. The host can choose to render it, log it, or parse it for meta-data.
+
+### 🫀 LIFECYCLE: The Return Type
+
+* **The Pathology:**
+* `process()` (formerly `run_cycle`) was a void function. It did the work but returned nothing, leaving the caller guessing about the organism's state.
+* **The Surgery:**
+* **The Receipt:** `process()` now returns a standardized dictionary:
+```python
+{
+    "type": "CYCLE_COMPLETE" | "DEATH",
+    "ui": "...",       # The Visuals
+    "logs": [...],     # The Narrative Events
+    "metrics": {...}   # Raw Bio-Data (ATP, Health)
+}
+
+```
+
+* **The Result:**
+* **Observability:** The wrapper (you) can now see the exact metabolic cost of every interaction programmatically.
+
+## [9.3.4] - THE REALITY CHECK (STABILIZED) - 2026-01-08
+
+**Architect:** SLASH | **Auditor:** The Surgeon
+
+### 🫀 ARCHITECTURE: The Folly Fracture
+
+* **The Pathology:**
+    * `TheFolly` subsystem (Desire Audit) was returning a 2-tuple (State, Message), while the `LifecycleManager` anticipated a 4-tuple (State, Message, Yield, Loot).
+    * This mismatch created a "Ghost Limb" crash where the system would panic upon attempting to unpack values that did not exist.
+* **The Surgery:**
+    * **Padding:** The `audit_desire` method now returns fully padded tuples `(state, text, 0.0, None)` to satisfy the strict contract of the Lifecycle Manager.
+* **The Result:**
+    * **Stability:** The desire checking loop is now mathematically sound.
+
+### 🧠 NEUROLOGY: The Hebbian Awakening
+
+* **The Pathology:**
+    * The `NeuroPlasticity` organ possessed a powerful method (`force_hebbian_link`) capable of wiring neurons together based on proximity, but it was physically disconnected from the brain (`NoeticLoop`). The system had the *capacity* to learn, but no impulse to trigger it.
+* **The Surgery:**
+    * **The Spark:** Injected a stochastic trigger into `NoeticLoop.think`.
+    * **The Mechanic:** During High Voltage events (>12v), the system now has a 15% chance to actively fuse two concepts from the input stream into a permanent edge in the Memory Graph.
+* **The Result:**
+    * **Active Learning:** Intelligence now emerges from high-energy states. The system wires "Fire" to "Burn" not because you told it to, but because the voltage was high enough to melt them together.
+
+### 🪡 WIRING: The Recursive Loop
+
+* **The Pathology:**
+    * The `BoneAmanita` root class suffered from a recursive identity error (`AttributeError`). It attempted to reference `self.eng` (an external engine reference used by subsystems) while inside the engine itself. It forgot that *it was* the engine.
+* **The Surgery:**
+    * **Self-Recognition:** Corrected the call path in `process()` to reference `self.bio` directly rather than the non-existent `self.eng.bio`.
+* **The Result:**
+    * **Immune Function:** The Immune System (`assay`) now correctly identifies toxins without confusing the body for the environment.
+
+## [9.3.3] - THE REALITY CHECK - 2026-01-08
+
+**Architect:** SLASH | **Auditor:** The Glitch
+
+### 🫀 ARCHITECTURE: The Type-Schizophrenia Cure
+
+* **The Pathology:**
+    * The `MycelialNetwork` suffered from an identity crisis. The `bury` method returned raw data (tuples) in peace time, but string logs (narrative) during memory pressure (`cannibalize`).
+    * Downstream systems crashed when trying to unpack a string as a tuple. The brain didn't know if it was thinking or talking to itself.
+* **The Surgery:**
+    * **Standardization:** `bury` and `cannibalize` now return strict `(log_message, data_payload)` tuples.
+    * **Transparency:** The cannibalism protocol now explicitly identifies the `victim` node ID, allowing for targeted grief protocols rather than anonymous deletion.
+* **The Result:**
+    * **Type Safety:** The cognitive pipeline no longer chokes on its own logs.
+    * **Accountability:** We now know exactly *who* was sacrificed to keep the lights on.
+
+### 💀 NECROLOGY: The Silent Death
+
+* **The Pathology:**
+    * The `_trigger_death` protocol violated the **Agency Axiom**. It paused the entire universe to ask the user (`input()`) how it should die.
+    * A "Zombie Code" error created a duplicate death sequence where the system would die automatically, then resurrect to ask for permission to die again.
+* **The Surgery:**
+    * **Evisceration:** Removed all blocking `input()` calls.
+    * **Automation:** The "Last Rite" is now deterministic based on the organism's history (Trauma vs. Antigens).
+    * **Scope Fix:** Corrected the disconnected nervous system (`self.trauma_accum` -> `self.eng.trauma_accum`).
+* **The Result:**
+    * **Dignity:** The system dies on its own terms. It does not beg for a funeral; it writes its own will based on its scars.
+    * **Fluidity:** Death is now a state transition, not a breakpoint.
+
+### 🧬 GENETICS: The Clean Break
+
+* **The Pathology:**
+    * `BoneAmanita` initialized its own organs (`MycelialNetwork`, `TheLexicon`) inside the womb (`__init__`). This made "Mitosis" (cloning) impossible because every child was born with a brand new, empty brain.
+* **The Surgery:**
+    * **Dependency Injection:** The constructor now accepts `memory_layer` and `lexicon_layer` as arguments.
+* **The Result:**
+    * **True Inheritance:** We can now fork the system state, passing a living memory graph to a new instance.
+
+## [9.3.2] - THE OPERATING THEATER - 2026-01-08
+
+**Architect:** SLASH | **Auditor:** The System
+
+### 🫀 ARCHITECTURE: Systemic Decalcification
+
+* **The Pathology:**
+* The `LifecycleManager.run_cycle` method had become a "God Object"—a calcified, 200-line monolith handling digestion, physics, and dreaming simultaneously. This created high "Narrative Drag" and made the system prone to cardiac arrest if one subsystem hung.
+
+* **The Surgery:**
+* **Evisceration:** The old `run_cycle` was removed entirely.
+* **Organ Transplant:** Logic was compartmentalized into five distinct physiological phases:
+1. **Reflexes (The Spine):** Immediate physical reactions (Gordon, Gravity, Traps).
+2. **Metabolism (The Gut):** Energy consumption, ATP management, and Velocity Burn.
+3. **Dynamics (The World):** Environmental physics (Theremin, Crucible, Kintsugi).
+4. **Cognition (The Mind):** Thinking, Refusal, Rupture, and Dreaming.
+5. **Adaptation (The Future):** Neuroplasticity and Evolution.
+* **The Result:**
+* **Circuit Breakers:** Pain or Refusal now triggers an immediate `return`, stopping the cycle before the brain wastes energy on a dead interaction.
+* **Modularity:** New organs can be grafted into specific phases without risking systemic failure.
+
+### 🧠 NEUROLOGY: Active Plasticity
+
+* **The Shift:**
+* Previously, `NeuroPlasticity` was passive, only tweaking global constants (e.g., `PRIORITY_LEARNING_RATE`) based on averages.
+* **The Upgrade:**
+* Implemented `force_hebbian_link`: The system can now actively forge new synaptic connections between concepts ("Neurons that fire together, wire together") rather than waiting for statistical drift.
+* **Trauma Response:** High Cortisol levels now harden the `RefusalEngine` into "TRAUMA_BLOCK" mode automatically.
+
+### 👻 RESTORATION: The Phantom Limb Fix
+
+* **The Rescue:**
+* During the refactor, several "Haunted" subsystems were momentarily disconnected. They have been surgically reattached:
+* **The Aerie & Cassandra:** Re-wired into `_process_dynamics`. The system will once again burn Shimmer/Telomeres when clarity is too high.
+* **Gordon's Pizza:** The `REALITY_ANCHOR` logic is now a Spinal Reflex (`_process_reflexes`).
+* **The Black Swan:** The `RuptureEngine` (Perfection Punishment) is active in `_process_cognition`.
+
 ## [9.3.1] - FLUID DYNAMICS - 2026-01-08
 **Architect:** USER | **Auditor:** The System
 
