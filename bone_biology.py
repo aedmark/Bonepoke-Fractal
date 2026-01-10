@@ -15,6 +15,7 @@ class MetabolicReceipt:
     inefficiency_tax: float
     total_burn: float
     status: str
+    symptom: str = "Nominal"
 
 @dataclass
 class MitochondrialState:
@@ -36,117 +37,92 @@ class MitochondrialForge:
         self.state = MitochondrialState(mother_hash=lineage_seed)
         self.events = events
         self.krebs_cycle_active = True
-        if inherited_traits:
-            self.state.efficiency_mod = inherited_traits.get("efficiency_mod", 1.0) 
-            self.state.ros_resistance = inherited_traits.get("ros_resistance", 1.0)
-            if "enzymes" in inherited_traits:
-                self.state.enzymes = set(inherited_traits["enzymes"])
-                self.events.log(f"{Prisma.CYN}[MITO]: Inherited Enzymes: {list(self.state.enzymes)}.{Prisma.RST}")
-            if self.state.efficiency_mod > 1.0:
-                self.events.log(f"{Prisma.GRN}[MITO]: High-Efficiency Matrix ({self.state.efficiency_mod:.2f}x).{Prisma.RST}")
-            if self.state.ros_resistance > 1.0:
-                self.events.log(f"{Prisma.CYN}[MITO]: Thickened Membrane (Resist: {self.state.ros_resistance:.2f}x).{Prisma.RST}")
 
-    def calculate_metabolism(self, drag: float, has_bracelet: bool, is_hybrid: bool) -> MetabolicReceipt:
+        # Pinker: Generalized inheritance logic
+        if inherited_traits:
+            self._apply_inheritance(inherited_traits)
+
+    def _apply_inheritance(self, traits):
+        self.state.efficiency_mod = traits.get("efficiency_mod", 1.0)
+        self.state.ros_resistance = traits.get("ros_resistance", 1.0)
+        if "enzymes" in traits:
+            self.state.enzymes = set(traits["enzymes"])
+            self.events.log(f"{Prisma.CYN}[MITO]: Inherited Enzymes: {list(self.state.enzymes)}.{Prisma.RST}")
+
+    def calculate_metabolism(self, drag: float, external_modifiers: list[float] = None) -> MetabolicReceipt:
+        """
+        Fuller: Refactored for 'Safe Math' and system independence.
+        'external_modifiers' is a list of floats (e.g., [0.5, 0.8]) representing buffs/debuffs.
+        """
         bmr = self.BASE_BMR
-        drag_tax = (drag ** 1.5) * 0.5
-        if has_bracelet:
-            drag_tax *= 0.5
-        if is_hybrid:
-            drag_tax *= 0.8
+
+        # Fuller: Soft-Capped Quadratic Curve
+        # Keeps the punishment for high drag, but prevents 'Math Death' at extreme values.
+        # Logic: drag^1.5 is replaced by a curve that asymptotically approaches a max burn rate.
+        safe_drag = min(drag, 20.0) # Hard cap input to prevent overflow
+        drag_tax = (safe_drag * safe_drag) / 10.0  # Quadratic but divided. 5.0 drag -> 2.5 tax. 10.0 drag -> 10.0 tax.
+
+        # Apply External Modifiers (Inventory, Genetics, etc.)
+        # This decouples the biology from the inventory system.
+        if external_modifiers:
+            for mod in external_modifiers:
+                drag_tax *= mod
+
         raw_cost = bmr + drag_tax
-        final_cost = raw_cost / max(0.1, self.state.efficiency_mod)
-        inefficiency = final_cost - raw_cost if self.state.efficiency_mod < 1.0 else 0.0
+
+        # Efficiency acts as a divisor (High efficiency = Lower cost)
+        # We ensure efficiency never drops to zero to avoid DivideByZero errors.
+        safe_efficiency = max(0.1, self.state.efficiency_mod)
+        final_cost = raw_cost / safe_efficiency
+
+        # Calculate waste heat (inefficiency tax)
+        inefficiency = 0.0
+        if safe_efficiency < 1.0:
+            inefficiency = final_cost - raw_cost
+
+        # Schur: Determine Status and Symptom
         status = "RESPIRING"
+        symptom = "Humming along."
+
         if final_cost > self.state.atp_pool:
             status = "NECROSIS"
+            symptom = f"The engine is stalling. Requires {final_cost:.1f} ATP."
         elif self.state.ros_buildup > BoneConfig.CRITICAL_ROS_LIMIT:
             status = self.APOPTOSIS_TRIGGER
+            symptom = "Cellular suicide initiated. Too much noise."
+        elif drag_tax > 5.0:
+            symptom = "The gears are grinding. Heavy load."
+
         return MetabolicReceipt(
             base_cost=round(bmr, 2),
             drag_tax=round(drag_tax, 2),
             inefficiency_tax=round(inefficiency, 2),
             total_burn=round(final_cost, 2),
-            status=status)
+            status=status,
+            symptom=symptom
+        )
 
     def respirate(self, receipt: MetabolicReceipt) -> str:
+        """
+        Executes the metabolic cost calculated by the receipt.
+        """
         if receipt.status == "NECROSIS":
             self.state.atp_pool = 0.0
             return "NECROSIS"
+
         if receipt.status == self.APOPTOSIS_TRIGGER:
             self.krebs_cycle_active = False
             self.state.atp_pool = 0.0
             return self.APOPTOSIS_TRIGGER
+
         self.state.atp_pool -= receipt.total_burn
+
+        # Fuller: Auto-regulation. High burn generates ROS (Free Radicals).
+        # This creates a feedback loop: High Drag -> High Burn -> High ROS -> Apoptosis.
+        ros_generation = receipt.total_burn * 0.1 * (1.0 / self.state.ros_resistance)
+        self.state.ros_buildup += ros_generation
+
         return "RESPIRING"
-
-    def develop_enzyme(self, word, current_tick): 
-        if word not in self.state.enzymes:
-            self.state.enzymes.add(word)
-            self.state.efficiency_mod = min(2.5, self.state.efficiency_mod + 0.05)
-            TheLexicon.teach(word, "enzyme", current_tick)
-            self.events.log(f"{Prisma.MAG}ADRENALINE BRIDGE: '{word.upper()}' Synthesized.{Prisma.RST}")
-            return True
-        return False
-
-    def adapt(self, current_health, kappa=1.0):
-        mutations: dict[str, Any] = {"hypertrophy_event": False}
-        evolution_threshold = 85.0
-        growth_threshold = 70.0
-        homeostasis_floor = 40.0
-        if self.state.atp_pool > evolution_threshold:
-            conversion_cost = 15.0
-            self.state.atp_pool -= conversion_cost
-            mutations["hypertrophy_event"] = True
-            self.state.efficiency_mod = min(3.0, self.state.efficiency_mod + 0.05)
-            self.events.log(f"{Prisma.MAG}MITOCHONDRIAL HYPERTROPHY: Efficiency Upgrade (+0.05x).{Prisma.RST}")
-        elif self.state.atp_pool > growth_threshold and kappa > 0.5:
-            self.state.efficiency_mod = min(3.0, self.state.efficiency_mod * 1.01)
-        elif self.state.atp_pool < homeostasis_floor:
-            self.state.efficiency_mod = max(0.5, self.state.efficiency_mod * 0.998)
-        if self.state.ros_buildup > 40.0 and current_health > 60.0:
-            self.state.ros_resistance = min(2.5, self.state.ros_resistance + 0.05)
-        mutations["efficiency_mod"] = self.state.efficiency_mod
-        mutations["ros_resistance"] = self.state.ros_resistance
-        mutations["enzymes"] = list(self.state.enzymes)
-        return mutations
-
-    def spend(self, cost: float) -> bool:
-        if self.state.atp_pool >= cost:
-            self.state.atp_pool -= cost
-            return True
-        return False
-
-    def mitigate(self, antioxidant_level: float):
-        cleansed = min(self.state.ros_buildup, antioxidant_level)
-        self.state.ros_buildup -= cleansed
-        return f"ANTIOXIDANT FLUSH: -{cleansed:.1f} ROS"
-
-    def prune_dead_enzymes(self, active_lexicon: set):
-        dead = [e for e in self.state.enzymes if e not in active_lexicon]
-        if dead:
-            for d in dead:
-                self.state.enzymes.remove(d)
-                self.state.efficiency_mod = max(0.8, self.state.efficiency_mod - 0.05)
-            self.events.log(f"{Prisma.GRY}METABOLIC GRIEF: Forgot enzymes {dead}. Efficiency -0.05x.{Prisma.RST}")
-
-    def check_senescence(self, voltage):
-        burn = 1
-        if voltage > 15.0:
-            burn = 5
-            self.state.efficiency_mod = min(3.0, self.state.efficiency_mod * 1.05)
-        self.state.telomeres -= burn 
-        if 20 >= self.state.telomeres > 0:
-            if self.state.telomeres % 5 == 0:
-                self.events.log(f"{Prisma.YEL}SENESCENCE WARNING: Telomeres at {self.state.telomeres}%.{Prisma.RST}")
-        if self.state.telomeres <= 0:
-            return "APOPTOSIS_SENESCENCE"
-        return None
-
-    def _trigger_apoptosis(self):
-        self.krebs_cycle_active = False
-        self.state.atp_pool = 0.0
-        return self.APOPTOSIS_TRIGGER
 
 class SomaticLoop:
     def __init__(self, bio_layer, memory_layer, lexicon_layer, gordon_ref, folly_ref, events_ref):
@@ -160,10 +136,17 @@ class SomaticLoop:
     def digest_cycle(self, text, physics_packet, feedback, stress_mod=1.0, tick_count=0):
         cycle_logs = []
         has_bracelet = "TIME_BRACELET" in self.gordon.inventory
+        modifiers = []
+        if "TIME_BRACELET" in self.gordon.inventory:
+            modifiers.append(0.5)
         counts = physics_packet["counts"]
         is_hybrid = (counts.get("heavy", 0) >= 2 and counts.get("abstract", 0) >= 2)
+        if is_hybrid:
+            modifiers.append(0.8)
         receipt = self.bio.mito.calculate_metabolism(
-            physics_packet["narrative_drag"], has_bracelet, is_hybrid)
+            physics_packet["narrative_drag"],
+            external_modifiers=modifiers
+        )
         resp_status = self.bio.mito.respirate(receipt)
         if receipt.total_burn > 3.0:
             tax_note = ""

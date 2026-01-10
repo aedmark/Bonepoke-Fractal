@@ -1369,20 +1369,38 @@ class KintsugiProtocol:
             return True, f"{Prisma.YEL}🏺 KINTSUGI COMPLETE: '{old_koan}' answered with Gold (V: {voltage:.1f} | : {whimsy_score:.2f}). {', '.join(healed_log)}.{Prisma.RST}"
         return False, None
 
+class DreamPalettes:
+    SCENARIOS = {
+        "THERMAL": [
+            "You are holding '{ghost}', but it is burning your hands.",
+            "The sun is too close. The concept of '{ghost}' catches fire.",
+            "You try to drink water, but it tastes like boiling '{ghost}'."
+        ],
+        "CRYO": [
+            "You are trying to say '{ghost}', but your breath freezes in the air.",
+            "The world is slowing down. '{ghost}' is trapped in the ice.",
+            "You are walking through white static. You cannot find '{ghost}'."
+        ],
+        "SEPTIC": [
+            "Black oil is leaking from the word '{ghost}'.",
+            "You are eating a meal made entirely of '{ghost}', and it tastes like copper.",
+            "The walls are breathing. '{ghost}' is growing mold."
+        ],
+        "BARIC": [
+            "The sky is made of lead. It is crushing '{ghost}'.",
+            "You are underwater. You can see '{ghost}' floating above, out of reach.",
+            "Gravity has increased 10x. You cannot lift the idea of '{ghost}'."
+        ]
+    }
+
 class DreamEngine:
     def __init__(self, events: EventBus):
         self.events = events
-        self.PROMPTS = ["{A} -> {B}?"]
-        self.NIGHTMARES = {}
-        self.VISIONS = ["Void."]
-        self.load_dreams()
-    
-    def load_dreams(self):
-        self.PROMPTS = DREAMS.get("PROMPTS", self.PROMPTS)
-        self.NIGHTMARES = DREAMS.get("NIGHTMARES", self.NIGHTMARES)
-        self.VISIONS = DREAMS.get("VISIONS", self.VISIONS)
-        self.events.log(f"{Prisma.GRY}[SYSTEM]: Dream Engine loaded from Data.{Prisma.RST}")
-    
+        self.palettes = DreamPalettes()
+        self.PROMPTS = DREAMS.get("PROMPTS", ["{A} -> {B}?"])
+        self.VISIONS = DREAMS.get("VISIONS", ["Void."])
+        self.events.log(f"{Prisma.GRY}[SYSTEM]: Dream Engine 2.0 (Generative) loaded.{Prisma.RST}")
+
     def daydream(self, graph):
         if len(graph) < 2:
             return None
@@ -1398,60 +1416,40 @@ class DreamEngine:
         end = max(valid_edges, key=valid_edges.get)
         template = random.choice(self.PROMPTS)
         return template.format(A=start.upper(), B=end.upper())
-    
-    def rem_cycle(self, trauma_accum, oxytocin_level):
-        wounds = {k: v for k, v in trauma_accum.items() if v > 0.0}
-        if wounds and oxytocin_level < 0.4:
-            target_trauma = max(wounds, key=wounds.get)
-            scenarios = self.NIGHTMARES.get(target_trauma, ["The void stares back."])
-            return (
-                f"{Prisma.VIOLET}☾ NIGHTMARE ({target_trauma}): {random.choice(scenarios)}{Prisma.RST}",
-                target_trauma, 0.15,)
+
+    def rem_cycle(self, trauma_accum: dict, oxytocin_level: float, recent_memories: list = None) -> tuple:
+        ghost_word = "VOID"
+        if recent_memories:
+            ghost_word = random.choice(recent_memories).upper()
+        active_wounds = {k: v for k, v in trauma_accum.items() if v > 0.1}
         if oxytocin_level >= 0.7:
-            return self._dream_of_others()
+            return self._dream_of_connection(ghost_word)
+        if active_wounds:
+            dominant_trauma = max(active_wounds, key=active_wounds.get)
+            trauma_level = active_wounds[dominant_trauma]
+            templates = self.palettes.SCENARIOS.get(dominant_trauma, ["The Void stares back."])
+            scenario = random.choice(templates).format(ghost=ghost_word)
+            color_map = {
+                "THERMAL": Prisma.RED,
+                "CRYO": Prisma.CYN,
+                "SEPTIC": Prisma.GRN,
+                "BARIC": Prisma.SLATE
+            }
+            color = color_map.get(dominant_trauma, Prisma.VIOLET)
+            msg = f"{color}☾ NIGHTMARE ({dominant_trauma}): {scenario}{Prisma.RST}"
+            heal_amount = 0.2 + (trauma_level * 0.1)
+            return msg, dominant_trauma, heal_amount
         return (
             f"{Prisma.CYN}LUCID DREAM: {random.choice(self.VISIONS)}{Prisma.RST}",
-            None, 0.0,)
-    
-    def _dream_of_others(self):
-        for _ in range(3):
-            try:
-                if not os.path.exists("memories"): continue
-                others = [f for f in os.listdir("memories") if f.endswith(".json")]
-                if not others:
-                    return (
-                        f"{Prisma.CYN}LONELY DREAM: I reached out, but found no others.{Prisma.RST}",
-                        None, 0.0)
-                target_file = random.choice(others)
-                full_path = os.path.join("memories", target_file)
-                try:
-                    with open(full_path, "r") as f:
-                        data = json.load(f)
-                except (json.JSONDecodeError, IOError):
-                    continue
-                required_keys = ["meta", "trauma_vector", "core_graph"]
-                if not all(k in data for k in required_keys):
-                    continue
-                their_id = data.get("session_id", "Unknown")
-                their_joy = data.get("joy_vectors", [])
-                their_trauma = data.get("trauma_vector", {})
-                if their_joy and isinstance(their_joy, list) and len(their_joy) > 0:
-                    best_joy = their_joy[0]
-                    if isinstance(best_joy, dict) and "dominant_flavor" in best_joy:
-                        flavor = best_joy["dominant_flavor"].upper()
-                        msg = f"{Prisma.MAG}♥ SHARED RESONANCE: Dreaming of {their_id}'s joy. The air tastes {flavor}.{Prisma.RST}"
-                        return msg, "OXYTOCIN_HEAL", 0.5
-                if their_trauma and isinstance(their_trauma, dict):
-                    active_wounds = {k:v for k,v in their_trauma.items() if v > 0.2}
-                    if active_wounds:
-                        pain_type = max(active_wounds, key=active_wounds.get)
-                        msg = f"{Prisma.INDIGO}🕯️ VIGIL: Witnessing {their_id}'s scar ({pain_type}). I am not alone in this.{Prisma.RST}"
-                        return msg, "OXYTOCIN_HEAL", 0.3
-            except Exception as e:
-                self.events.log(f"{Prisma.GRY}Dream error: {e}{Prisma.RST}")
+            None,
+            0.0
+        )
+    def _dream_of_connection(self, ghost_word):
         return (
-            f"{Prisma.CYN}☁️ DREAM: Drifting through the archives... (Static){Prisma.RST}",
-            None, 0.0)
+            f"{Prisma.MAG}♥ SHARED RESONANCE: You dream that '{ghost_word}' is a bridge, not a wall. You feel safe.{Prisma.RST}",
+            "OXYTOCIN_HEAL",
+            0.5
+        )
 
 class UserProfile:
     def __init__(self, name="USER"):
@@ -2796,7 +2794,11 @@ class TheCycleController:
         pulse_status = self.eng.phys.pulse.get_status()
         if pulse_status == "ZOMBIE_KNOCK" or ctx.physics["narrative_drag"] > 5.0:
             oxy = self.eng.bio.endo.oxytocin
-            dream_msg, healed_trauma, heal_amt = self.eng.mind.dreamer.rem_cycle(self.eng.trauma_accum, oxy)
+            dream_msg, healed_trauma, heal_amt = self.eng.mind.dreamer.rem_cycle(
+                self.eng.trauma_accum,
+                oxy,
+                recent_memories=ctx.clean_words
+            )
             if dream_msg:
                 ctx.logs.append(f"\n{dream_msg}")
             if healed_trauma and heal_amt > 0:
