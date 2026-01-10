@@ -8,6 +8,10 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/ARCHIVED" />
+      <excludeFolder url="file://$MODULE_DIR$/DOCS" />
+      <excludeFolder url="file://$MODULE_DIR$/MEDIA" />
+      <excludeFolder url="file://$MODULE_DIR$/MODS" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.13 (Bonepoke-Fractal)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
