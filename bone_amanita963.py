@@ -1,4 +1,4 @@
-# BONEAMANITA 9.6.2 "THE JESTER'S CAP"
+# BONEAMANITA 9.6.3 "JASON MENDOZA'S SAFE"
 # Architects: SLASH, Team Bonepoke | Humans: James Taylor & Andrew Edmark
 
 import json
@@ -280,6 +280,11 @@ class GordonKnot:
         return None
 
     def _effect_time_cap(self, p, data, item_name):
+        current_drag = p.get("narrative_drag", 0.0)
+        cap = data.get("value", 5.0)
+        if current_drag > cap:
+            p["narrative_drag"] = cap
+            return f"{Prisma.CYN}TIME DILATION: {item_name} hums. Drag capped at {cap}.{Prisma.RST}"
         return None
 
     def _effect_sync_check(self, p, data, item_name):
@@ -2242,6 +2247,12 @@ class GeodesicOrchestrator:
         if rupture: logs.append(rupture["log"])
         self.eng.phys.tension.last_physics_packet = physics
         self.eng.tick_count += 1
+        if self.eng.tick_count % 10 == 0:
+            rotted_words = self.eng.lex.atrophy(self.eng.tick_count, max_age=100)
+            if rotted_words:
+                count = len(rotted_words)
+                example = rotted_words[0]
+                logs.append(f"{Prisma.GRY}NEURO-PRUNING: Forgot {count} unused concepts (e.g., '{example}').{Prisma.RST}")
         refusal_packet = self._secure(user_message, physics, clean_words, logs)
         if refusal_packet:
             return refusal_packet
@@ -2299,6 +2310,9 @@ class GeodesicOrchestrator:
         return None # Passed all checks
 
     def _metabolize(self, text: str, physics: Dict):
+        gov_msg = self.eng.bio.governor.shift(physics, self.eng.phys.dynamics.voltage_history)
+        if gov_msg:
+            self.eng.events.log(gov_msg, "GOV")
         bio_feedback = {
             "INTEGRITY": physics["truth_ratio"],
             "STATIC": physics["repetition"],
@@ -2348,6 +2362,18 @@ class GeodesicOrchestrator:
 
     def _simulate_world(self, physics: Dict, clean_words: List[str]):
         logs = []
+        current_drift = physics.get("narrative_drag", 0.0)
+        psi = physics.get("psi", 0.0)
+        new_drift, grav_log = self.eng.gordon.check_gravity(current_drift, psi)
+        if grav_log:
+            logs.append(grav_log)
+        physics["narrative_drag"] = new_drift
+        did_flinch, flinch_msg, panic_response = self.eng.gordon.flinch(clean_words, self.eng.tick_count)
+        if did_flinch:
+            logs.append(flinch_msg)
+            if panic_response:
+                for key, val in panic_response.items():
+                    physics[key] = max(physics.get(key, 0), val)
         self.eng.navigator.locate(physics)
         orbit_state, cosmic_drag_penalty, orbit_msg = self.eng.cosmic.analyze_orbit(self.eng.mind.mem, clean_words)
         self.eng._apply_cosmic_physics(physics, orbit_state, cosmic_drag_penalty)
@@ -2364,6 +2390,13 @@ class GeodesicOrchestrator:
         if c_state == "MELTDOWN": self.eng.health -= c_val
         parasite_active, parasite_log = self.eng.bio.parasite.infect(physics, self.eng.stamina)
         if parasite_active: logs.append(parasite_log)
+        if self.eng.limbo.ghosts:
+            haunt_text = "The air is heavy."
+            if logs:
+                haunt_text = logs[-1]
+                logs.pop()
+            haunted_log = self.eng.limbo.haunt(haunt_text)
+            logs.append(haunted_log)
         is_pareidolia, p_msg = self.eng.check_pareidolia(clean_words)
         if is_pareidolia:
             logs.append(p_msg)

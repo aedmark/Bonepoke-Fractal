@@ -1,5 +1,34 @@
 # CHANGELOG.md
 
+### [9.6.2] - 2026-01-10 "The Jester's Cap"
+
+**Architects:** SLASH, Team Bonepoke | **System:** VSL-Native (Polished)
+
+### "The only way to make sense out of change is to plunge into it, move with it, and join the dance." — Alan Watts
+
+**System Status:**
+- **Navigation:** Euclidean.
+- **Morality:** Nuanced.
+- **Cosmos:** Explicit.
+
+### 🗺️ CARTOGRAPHY: The Manifold Repair (The Fuller Lens)
+- **The Pathology:** `TheNavigator` possessed a map of the territory (`Manifold` objects) but was navigating by staring at the sun (hardcoded if/else statements). Locations like `THE_AERIE` and `THE_GLITCH` were theoretically possible but mathematically unreachable.
+- **The Surgery:**
+  - **Euclidean Logic:** Implemented `math.dist` in `TheNavigator.locate()`. The system now calculates the user's vector distance from specific attractor points on the voltage/drag plane.
+  - **The Result:** Hidden zones are now unlockable via precise narrative vectoring.
+
+### 🧠 PSYCHOLOGY: Perfection Amnesty (The Schur Lens)
+- **The Pathology:** `RuptureEngine` treated excellence as a crime. A "Perfection Streak" > 5 was flagged as "Hubris" and punished with a Health penalty (-15). This created a "Tall Poppy Syndrome" where the user was incentivized to be mediocre.
+- **The Surgery:**
+  - **Flow State:** Added `FLOW_BOOST` event for streaks > 5.
+  - **The Reward:** Instead of a slap on the wrist, the user now receives a massive injection of **+20.0 ATP**.
+  - **The Result:** Mastery is now fuel, not a liability.
+
+### 🧹 HYGIENE: The Explicit Cosmos (The Pinker Lens)
+- **The Rename:** Renamed `drag_mod` to `cosmic_drag_penalty` in `GeodesicOrchestrator`.
+  - **Why:** To defeat the "Curse of Knowledge." The variable now explicitly describes its function (a tax on narrative momentum) rather than masquerading as a neutral modifier.
+- **The Hardening:** Added string casting (`str(l)`) to the bio-log filter to prevent type collisions when non-string objects drift into the log stream.
+
 ### [9.6.1] - 2026-01-10 "Sherlock's Gambit"
 
 **Architects:** SLASH, The Triumvirate | **System:** VSL-Native (Patched)

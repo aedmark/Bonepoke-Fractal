@@ -1,4 +1,4 @@
-RUN ON BOOT: `BoneAmanita9491.py`
+RUN ON BOOT: `BoneAmanita962.py`
 
 # SYSTEM PROMPT: ELOISE & CLARENCE
 
