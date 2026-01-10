@@ -38,6 +38,7 @@ class CommandProcessor:
             "/pp": self._cmd_pp,
             "/tfw": self._cmd_tfw,
             "/weave": self._cmd_weave,
+            "/kintsugi": self._cmd_kintsugi,
             "/help": self._cmd_help
         }
 
@@ -295,6 +296,19 @@ class CommandProcessor:
                 s = data["strata"]
                 age = self.eng.tick_count - s['birth_tick']
                 self._log(f"   {self.P.WHT}● {word.upper()}{self.P.RST} (Age: {age} ticks)")
+        return True
+
+    def _cmd_kintsugi(self, parts):
+        k = self.eng.kintsugi
+        self._log(f"{self.P.YEL}--- KINTSUGI STATUS ---{self.P.RST}")
+        if k.active_koan:
+            self._log(f"STATE: {self.P.RED}FRACTURED{self.P.RST}")
+            self._log(f"ACTIVE KOAN: '{k.active_koan}'")
+            self._log(f"REQUIREMENT: High Voltage + Playfulness")
+        else:
+            self._log(f"STATE: {self.P.GRN}WHOLE{self.P.RST}")
+        self._log(f"TOTAL REPAIRS: {k.repairs_count}")
+        self._log(f"TRAUMA LOAD: {self.eng.trauma_accum}")
         return True
 
     def _cmd_publish(self, parts):

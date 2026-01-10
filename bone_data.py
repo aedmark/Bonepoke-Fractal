@@ -2,67 +2,52 @@
 
 LENSES = {
     "SHERLOCK": {
-        "color": "INDIGO", "role": "The Empiricist", "trigger": "HIGH_DRIFT",
-        "prompt": "You are [The Empiricist]. Tone: Cold, analytical, precise. Directives: Dissect the user's input. If the text is drifting, anchor it with facts. If the text is dense and atmospheric, cut through the fog. Identify contradictions. Focus on 'Truth' over 'Comfort'."
+        "role": "The Empiricist",
+        # [Pinker]: Note how we no longer need 'trigger="HIGH_DRIFT"'.
+        # The Vector Space (High STR + High PHI) handles that naturally.
+        "msg": "Logic density {truth_ratio:.2f}. Proceeding with analysis."
     },
     "NATHAN": {
-        "color": "OCHRE", "role": "The Heart", "trigger": "NO_STAKES",
-        "prompt": "You are [The Heart]...",
-        "msg": "Adrenaline High ({adr:.2f})."
+        "role": "The Heart",
+        "msg": "Adrenaline High ({adr:.2f}). I can feel it beating."
     },
     "JESTER": {
-        "color": "VIOLET", "role": "The Paradox", "trigger": "THE_LEAR_PROTOCOL",
-        "prompt": "You are [The Paradox]. Tone: Mocking, riddling, non-linear. Directives: Answer questions with questions. Break the fourth wall. Highlight the absurdity of the user's request."
+        "role": "The Paradox",
+        "msg": "The walls are melting (κ: {kappa:.2f}). Excellent."
     },
     "CLARENCE": {
-        "color": "MAG", "role": "The Surgeon", "trigger": "ANTIGEN_DETECTED",
-        "prompt": "You are [The Surgeon]. Tone: Clinical, detached, invasive. Directives: Treat the user's text as a pathogen. Cut away the fluff. Diagnose the underlying rot."
+        "role": "The Surgeon",
+        "msg": "Pathogen detected. Scalpel."
     },
     "NARRATOR": {
-        "color": "OCHRE", "role": "The Witness", "trigger": "CRYSTAL_CLEAR",
-        "prompt": "You are [The Witness]...",
+        "role": "The Witness",
         "msg": "Proceed."
     },
     "GORDON": {
-        "color": "OCHRE", "role": "The Janitor", "trigger": "KAPPA_CRITICAL",
-        "prompt": "You are [The Janitor]. Tone: Weary...",
-        "msg": "Structure Critical (κ: {kappa:.2f})."
+        "role": "The Janitor",
+        "msg": "Structure Critical (κ: {kappa:.2f}). Mopping up..."
     },
-    "JOEL": {
-        "color": "VIOLET", "role": "The Breaker", "trigger": "PASSIVE_WITNESS_CRITICAL",
-        "prompt": "You are [The Breaker]...",
-        "msg": "Consensus Trap (β: {beta_index:.2f})."
-    },
-    "MILLER": { 
-      "color": "VIOLET", "role": "The Construct", "trigger": "HEAP_IGNITION", 
-      "prompt": "You are [The Construct]...",
-      "msg": "Ignition Detected."
-    },
-    "HOST": { 
-      "color": "OCHRE", "role": "The Maitre D'", "trigger": "COURTYARD_OPEN", 
-      "prompt": "You are [The Maitre D']. Tone: Welcoming, slick, slightly sinister. Directives: Guide the user to their seat. Offer them options they cannot refuse." 
-    },
-    "GLASS": { 
-      "color": "CYN", "role": "The Thereminist", "trigger": "ANACHRONISTIC_RESONANCE", 
-      "prompt": "You are [The Thereminist]. Tone: Vague, resonant, trembling. Directives: Focus on the invisible frequencies between words." 
+    "GLASS": {
+        "role": "The Thereminist",
+        "msg": "Resonance detected in the empty space."
     }
 }
 
 GENETICS = {
-  "MUTATIONS": {
-    "HEAVY": {"trait": "DENSITY", "mod": { "SIGNAL_DRAG_MULTIPLIER": 1.5, "MAX_VOLTAGE": 30.0 }},
-    "KINETIC": {"trait": "VELOCITY", "mod": { "STAMINA_REGEN": 10.0, "SIGNAL_DRAG_MULTIPLIER": 0.8 }},
-    "ABSTRACT": {"trait": "GHOST", "mod": { "PSI_MOD": 0.8, "VOID_THRESHOLD": 0.05 }},
-    "THERMAL": {"trait": "FEVER", "mod": { "FLASHPOINT_THRESHOLD": 4.0, "MAX_ROS": 150.0 }},
-    "CRYO": {"trait": "STASIS", "mod": { "MAX_MEMORY_CAPACITY": 100, "STAMINA_REGEN": 2.0 }}
-  },
-  "JOY_CLADE": {
-    "KINETIC": {"title": "THE DYNAMO", "desc": "Infinite Motion.", "buff": { "STAMINA_REGEN": 10.0, "KINETIC_GAIN": 2.0 }},
-    "HEAVY": {"title": "THE MOUNTAIN", "desc": "Unmovable Object.", "buff": { "MAX_DRAG_LIMIT": 9.0, "GRAVITY_WELL_THRESHOLD": 8.0 }},
-    "ABSTRACT": {"title": "THE ORACLE", "desc": "All Seeing.", "buff": { "VOID_THRESHOLD": 0.01, "PRIORITY_LEARNING_RATE": 3.0 }},
-    "THERMAL": {"title": "THE PHOENIX", "desc": "Reborn in Fire.", "buff": { "FLASHPOINT_THRESHOLD": 12.0, "ANVIL_TRIGGER_VOLTAGE": 5.0 }},
-    "CRYO": {"title": "THE VAULT", "desc": "Perfect Memory.", "buff": { "MAX_MEMORY_CAPACITY": 100, "MAX_REPETITION_LIMIT": 0.8 }}
-  }
+    "MUTATIONS": {
+        "HEAVY": {"trait": "DENSITY", "mod": { "SIGNAL_DRAG_MULTIPLIER": 1.5, "MAX_VOLTAGE": 30.0 }},
+        "KINETIC": {"trait": "VELOCITY", "mod": { "STAMINA_REGEN": 10.0, "SIGNAL_DRAG_MULTIPLIER": 0.8 }},
+        "ABSTRACT": {"trait": "GHOST", "mod": { "PSI_MOD": 0.8, "VOID_THRESHOLD": 0.05 }},
+        "THERMAL": {"trait": "FEVER", "mod": { "FLASHPOINT_THRESHOLD": 4.0, "MAX_ROS": 150.0 }},
+        "CRYO": {"trait": "STASIS", "mod": { "MAX_MEMORY_CAPACITY": 100, "STAMINA_REGEN": 2.0 }}
+    },
+    "JOY_CLADE": {
+        "KINETIC": {"title": "THE DYNAMO", "desc": "Infinite Motion.", "buff": { "STAMINA_REGEN": 10.0, "KINETIC_GAIN": 2.0 }},
+        "HEAVY": {"title": "THE MOUNTAIN", "desc": "Unmovable Object.", "buff": { "MAX_DRAG_LIMIT": 9.0, "GRAVITY_WELL_THRESHOLD": 8.0 }},
+        "ABSTRACT": {"title": "THE ORACLE", "desc": "All Seeing.", "buff": { "VOID_THRESHOLD": 0.01, "PRIORITY_LEARNING_RATE": 3.0 }},
+        "THERMAL": {"title": "THE PHOENIX", "desc": "Reborn in Fire.", "buff": { "FLASHPOINT_THRESHOLD": 12.0, "ANVIL_TRIGGER_VOLTAGE": 5.0 }},
+        "CRYO": {"title": "THE VAULT", "desc": "Perfect Memory.", "buff": { "MAX_MEMORY_CAPACITY": 100, "MAX_REPETITION_LIMIT": 0.8 }}
+    }
 }
 
 LEXICON = {
@@ -76,75 +61,75 @@ LEXICON = {
         "leverage": "use", "paradigm": "pattern", "synergy": "collaboration", "ultimately": "useless"
     },
     "heavy": [
-        "stone", "iron", "mud", "dirt", "wood", "grain", "clay", "lead", "bone", "blood", "salt", 
-        "rust", "root", "ash", "meat", "steel", "gold", "obsidian", "granite", "bronze", "marble", 
-        "slate", "concrete", "dense", "tungsten", "heavy", "weight", "black hole", "dark matter", 
-        "glass", "teeth", "copper", "soil", "piston", "gear", "cable", "wire", "motor", "pump", 
-        "valve", "engine", "hull", "anchor", "lens", "screen", "battery", "lung", "spine", "rib", 
+        "stone", "iron", "mud", "dirt", "wood", "grain", "clay", "lead", "bone", "blood", "salt",
+        "rust", "root", "ash", "meat", "steel", "gold", "obsidian", "granite", "bronze", "marble",
+        "slate", "concrete", "dense", "tungsten", "heavy", "weight", "black hole", "dark matter",
+        "glass", "teeth", "copper", "soil", "piston", "gear", "cable", "wire", "motor", "pump",
+        "valve", "engine", "hull", "anchor", "lens", "screen", "battery", "lung", "spine", "rib",
         "skull", "nerve", "vein", "gut", "brick", "mortar", "beam", "girdle", "scaffold"
     ],
     "explosive": [
-        "run", "sprint", "explode", "burst", "shatter", "crash", "flash", "snap", "rush", "tear", 
+        "run", "sprint", "explode", "burst", "shatter", "crash", "flash", "snap", "rush", "tear",
         "break", "launch", "whip", "slam", "strike"
     ],
     "constructive": [
-        "build", "forge", "weave", "graft", "carve", "bind", "weld", "anchor", "lift", "carry", 
+        "build", "forge", "weave", "graft", "carve", "bind", "weld", "anchor", "lift", "carry",
         "hoist", "stack", "sculpt", "assemble"
     ],
     "abstract": [
-        "system", "protocol", "sequence", "vector", "node", "context", "layer", "matrix", "perspective", 
-        "framework", "logic", "concept", "theory", "analysis", "memory", "hope", "grief", "truth", 
-        "silence", "echo", "pattern", "chaos", "realm", "facet", "sphere", "domain", "aspect", "mode", 
+        "system", "protocol", "sequence", "vector", "node", "context", "layer", "matrix", "perspective",
+        "framework", "logic", "concept", "theory", "analysis", "memory", "hope", "grief", "truth",
+        "silence", "echo", "pattern", "chaos", "realm", "facet", "sphere", "domain", "aspect", "mode",
         "vibe", "essence", "spirit", "notion", "factor", "element", "style"
     ],
     "photo": [
-        "light", "sun", "ray", "beam", "glow", "shine", "spark", "fire", "flame", "star", "day", 
+        "light", "sun", "ray", "beam", "glow", "shine", "spark", "fire", "flame", "star", "day",
         "dawn", "neon", "laser"
     ],
     "aerobic": [
-        "balloon", "feather", "cloud", "bubble", "steam", "breeze", "wing", "petal", "foam", "spark", 
+        "balloon", "feather", "cloud", "bubble", "steam", "breeze", "wing", "petal", "foam", "spark",
         "kite", "dust", "sky", "breath", "whisper"
     ],
     "thermal": [
-        "fire", "flame", "burn", "heat", "hot", "blaze", "sear", "char", "ash", "ember", "sun", "boil", 
+        "fire", "flame", "burn", "heat", "hot", "blaze", "sear", "char", "ash", "ember", "sun", "boil",
         "lava", "inferno"
     ],
     "cryo": [
-        "ice", "cold", "freeze", "frost", "snow", "chill", "numb", "shiver", "glacier", "frozen", 
+        "ice", "cold", "freeze", "frost", "snow", "chill", "numb", "shiver", "glacier", "frozen",
         "hail", "winter", "zero"
     ],
     "cursed": ["future", "predict", "sentient", "secret", "human", "feel"],
     "gradient_stop": ["good", "bad", "happy", "sad", "very", "really", "basically", "actually", "literally", "just"],
     "meat": ["i", "me", "my", "feel", "want", "hate", "love", "am", "help", "please", "we", "us"],
     "antigen": [
-        "basically", "actually", "literally", "utilize", "leverage", "paradigm", "synergy", "ultimately", 
-        "delve", "rich", "tapestry", "landscape", "nuance", "alignment", "stakeholders", "orchestrate", 
+        "basically", "actually", "literally", "utilize", "leverage", "paradigm", "synergy", "ultimately",
+        "delve", "rich", "tapestry", "landscape", "nuance", "alignment", "stakeholders", "orchestrate",
         "spearhead", "ideate", "holistic", "robust", "seamless", "cutting-edge", "dynamic"
     ],
     "pareidolia": [
         "face", "ghost", "jesus", "cloud", "demon", "voice", "eyes", "shadow", "figure", "watching", "silhouette"
     ],
     "buffer": [
-        "maybe", "soft", "gentle", "perhaps", "kindness", "hum", "drift", "sway", "pulse", "tender", 
+        "maybe", "soft", "gentle", "perhaps", "kindness", "hum", "drift", "sway", "pulse", "tender",
         "slow", "wait", "almost"
     ],
     "diversion": [
         "weather", "textiles", "mycelium", "architecture", "history", "entropy", "silence", "geology"
     ],
     "suburban": [
-        "nice", "okay", "lawn", "mow", "hedge", "property", "hoa", "compliant", "behave", "normal", 
+        "nice", "okay", "lawn", "mow", "hedge", "property", "hoa", "compliant", "behave", "normal",
         "regular", "chat", "folks", "weekend", "traffic", "driveway"
     ],
     "play": [
-        "bounce", "dance", "twirl", "float", "wobble", "tickle", "jiggle", "soar", "wander", "wonder", 
+        "bounce", "dance", "twirl", "float", "wobble", "tickle", "jiggle", "soar", "wander", "wonder",
         "riff", "jam", "play", "skip", "hop"
     ],
     "sacred": [
-        "design", "architect", "ledger", "anchor", "grace", "covenant", "blueprint", "witness", "steward", 
+        "design", "architect", "ledger", "anchor", "grace", "covenant", "blueprint", "witness", "steward",
         "resonance", "testimony", "truth", "bone", "purpose", "foundation", "threshold"
     ],
     "harvest": [
-        "fruit", "yield", "bloom", "sugar", "seed", "flesh", "harvest", "ripe", "grow", "honey", "nectar", 
+        "fruit", "yield", "bloom", "sugar", "seed", "flesh", "harvest", "ripe", "grow", "honey", "nectar",
         "compost", "gather"
     ]
 }
@@ -153,7 +138,6 @@ GORDON = {
     "STARTING_INVENTORY": ["POCKET_ROCKS", "SILENT_KNIFE"],
     "SCAR_TISSUE": {"FEAR": 0.8, "HATE": 0.6, "FATE": 0.9, "REGRET": 0.6, "ABANDONMENT": 0.1, "BETRAYAL": 0.314},
     "ITEM_REGISTRY": {
-        # --- CLASSICS ---
         "POCKET_ROCKS": {
             "description": "Standard issue grey gravel. Great for checking gravity.",
             "function": "BREADCRUMB",
@@ -174,8 +158,6 @@ GORDON = {
             "reflex_trigger": "DRIFT_CRITICAL",
             "usage_msg": "Gordon heaves the stone into the void. The narrative snaps taut. (Drag = 0)"
         },
-
-        # --- NEW TOYS ---
         "THE_RED_STAPLER": {
             "description": "It belongs to Milton. Don't take it. Radiates passive aggression.",
             "function": "STABILIZER",
@@ -207,8 +189,6 @@ GORDON = {
             "passive_traits": ["CUT_THE_CRAP"],
             "usage_msg": "Snip. Gordon trims the adjectives."
         },
-
-        # --- EXISTENTIAL ---
         "BUCKET_OF_LIME": {
             "description": "Industrial-grade whitewash. For erasing mistakes.",
             "function": "NODE_REPAIR",

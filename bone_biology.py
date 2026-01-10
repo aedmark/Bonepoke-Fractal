@@ -5,7 +5,6 @@ import time
 import random
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Any
 from bone_shared import Prisma, TheLexicon, BoneConfig
 
 @dataclass
@@ -38,7 +37,6 @@ class MitochondrialForge:
         self.events = events
         self.krebs_cycle_active = True
 
-        # Pinker: Generalized inheritance logic
         if inherited_traits:
             self._apply_inheritance(inherited_traits)
 
@@ -50,37 +48,18 @@ class MitochondrialForge:
             self.events.log(f"{Prisma.CYN}[MITO]: Inherited Enzymes: {list(self.state.enzymes)}.{Prisma.RST}")
 
     def calculate_metabolism(self, drag: float, external_modifiers: list[float] = None) -> MetabolicReceipt:
-        """
-        Fuller: Refactored for 'Safe Math' and system independence.
-        'external_modifiers' is a list of floats (e.g., [0.5, 0.8]) representing buffs/debuffs.
-        """
         bmr = self.BASE_BMR
-
-        # Fuller: Soft-Capped Quadratic Curve
-        # Keeps the punishment for high drag, but prevents 'Math Death' at extreme values.
-        # Logic: drag^1.5 is replaced by a curve that asymptotically approaches a max burn rate.
-        safe_drag = min(drag, 20.0) # Hard cap input to prevent overflow
-        drag_tax = (safe_drag * safe_drag) / 10.0  # Quadratic but divided. 5.0 drag -> 2.5 tax. 10.0 drag -> 10.0 tax.
-
-        # Apply External Modifiers (Inventory, Genetics, etc.)
-        # This decouples the biology from the inventory system.
+        safe_drag = max(0.0, drag)
+        drag_tax = (safe_drag * safe_drag) / 10.0
         if external_modifiers:
             for mod in external_modifiers:
                 drag_tax *= mod
-
         raw_cost = bmr + drag_tax
-
-        # Efficiency acts as a divisor (High efficiency = Lower cost)
-        # We ensure efficiency never drops to zero to avoid DivideByZero errors.
         safe_efficiency = max(0.1, self.state.efficiency_mod)
         final_cost = raw_cost / safe_efficiency
-
-        # Calculate waste heat (inefficiency tax)
         inefficiency = 0.0
         if safe_efficiency < 1.0:
             inefficiency = final_cost - raw_cost
-
-        # Schur: Determine Status and Symptom
         status = "RESPIRING"
         symptom = "Humming along."
 
@@ -103,25 +82,16 @@ class MitochondrialForge:
         )
 
     def respirate(self, receipt: MetabolicReceipt) -> str:
-        """
-        Executes the metabolic cost calculated by the receipt.
-        """
         if receipt.status == "NECROSIS":
             self.state.atp_pool = 0.0
             return "NECROSIS"
-
         if receipt.status == self.APOPTOSIS_TRIGGER:
             self.krebs_cycle_active = False
             self.state.atp_pool = 0.0
             return self.APOPTOSIS_TRIGGER
-
         self.state.atp_pool -= receipt.total_burn
-
-        # Fuller: Auto-regulation. High burn generates ROS (Free Radicals).
-        # This creates a feedback loop: High Drag -> High Burn -> High ROS -> Apoptosis.
         ros_generation = receipt.total_burn * 0.1 * (1.0 / self.state.ros_resistance)
         self.state.ros_buildup += ros_generation
-
         return "RESPIRING"
 
 class SomaticLoop:
@@ -132,8 +102,8 @@ class SomaticLoop:
         self.gordon = gordon_ref
         self.folly = folly_ref
         self.events = events_ref
-        
-    def digest_cycle(self, text, physics_packet, feedback, stress_mod=1.0, tick_count=0):
+
+    def digest_cycle(self, text, physics_packet, feedback, current_health, current_stamina, stress_mod=1.0, tick_count=0):
         cycle_logs = []
         has_bracelet = "TIME_BRACELET" in self.gordon.inventory
         modifiers = []
@@ -152,6 +122,17 @@ class SomaticLoop:
             tax_note = ""
             if receipt.drag_tax > 1.0: tax_note = f" (Drag Tax: {receipt.drag_tax})"
             cycle_logs.append(f"{Prisma.GRY}METABOLISM: Burned {receipt.total_burn} ATP{tax_note}.{Prisma.RST}")
+        if hasattr(self.folly, 'audit_desire'):
+            d_event, d_msg, d_yield, d_loot = self.folly.audit_desire(physics_packet, current_stamina)
+            if d_event == "MAUSOLEUM_CLAMP":
+                cycle_logs.append(d_msg)
+                return {
+                    "is_alive": True,
+                    "atp": self.bio.mito.state.atp_pool,
+                    "chem": self.bio.endo.get_state(),
+                    "enzyme_active": "NONE",
+                    "logs": cycle_logs}
+
         enzyme, nutrient = self.bio.gut.secrete(text, physics_packet)
         base_yield = nutrient["yield"]
         geo_mass = physics_packet.get("geodesic_mass", 0.0)
@@ -166,18 +147,21 @@ class SomaticLoop:
         if geo_multiplier > 1.2:
             cycle_logs.append(f"{Prisma.GRN}INFRASTRUCTURE BONUS: Geodesic Mass {geo_mass:.1f}. Yield x{geo_multiplier:.2f}.{Prisma.RST}")
         self.bio.mito.state.atp_pool += final_yield
+
         sugar, lichen_msg = self.bio.lichen.photosynthesize(
-            physics_packet, 
-            physics_packet["clean_words"], 
+            physics_packet,
+            physics_packet["clean_words"],
             tick_count)
         if sugar > 0:
             self.bio.mito.state.atp_pool += sugar
             cycle_logs.append(f"\n{lichen_msg}")
+
         if self.bio.mito.state.atp_pool < 10.0:
             cycle_logs.append(f"{Prisma.RED}STARVATION PROTOCOL: ATP Critical. Initiating Autophagy...{Prisma.RST}")
             _, log_msg = self.mem.cannibalize()
             self.bio.mito.state.atp_pool += 15.0
             cycle_logs.append(f"   {Prisma.RED}AUTOPHAGY: {log_msg} (+15.0 ATP){Prisma.RST}")
+
         turb = physics_packet.get("turbulence", 0.0)
         if turb > 0.7:
             burn = 5.0
@@ -185,28 +169,31 @@ class SomaticLoop:
             cycle_logs.append(f"{Prisma.YEL}CHOPPY WATERS: High Turbulence burn. -{burn} ATP.{Prisma.RST}")
         elif turb < 0.2:
             self.bio.mito.state.atp_pool += 2.0
+
         folly_event, folly_msg, folly_yield, loot = self.folly.grind_the_machine(
-            self.bio.mito.state.atp_pool, 
-            physics_packet["clean_words"], 
+            self.bio.mito.state.atp_pool,
+            physics_packet["clean_words"],
             self.lex)
         if folly_event:
-            cycle_logs.append(f"\n{folly_msg}") 
+            cycle_logs.append(f"\n{folly_msg}")
             self.bio.mito.state.atp_pool += folly_yield
             if loot:
                 loot_msg = self.gordon.acquire(loot)
                 if loot_msg: cycle_logs.append(loot_msg)
+
         harvest_hits = sum(1 for w in physics_packet["clean_words"] if w in TheLexicon.get("harvest"))
         chem_state = self.bio.endo.metabolize(
-            feedback, 
-            100.0,
-            100.0,
-            self.bio.mito.state.ros_buildup, 
+            feedback,
+            current_health,
+            current_stamina,
+            self.bio.mito.state.ros_buildup,
             harvest_hits=harvest_hits,
-            stress_mod=stress_mod)
+            stress_mod=stress_mod
+        )
         return {
-            "is_alive": resp_status != "NECROSIS", 
-            "atp": self.bio.mito.state.atp_pool, 
-            "chem": chem_state, 
+            "is_alive": resp_status != "NECROSIS",
+            "atp": self.bio.mito.state.atp_pool,
+            "chem": chem_state,
             "enzyme_active": enzyme,
             "logs": cycle_logs}
 
@@ -321,15 +308,15 @@ class ParasiticSymbiont:
         self.mem = memory_ref
         self.lex = lexicon_ref
         self.spores_deployed = 0
-        self.MAX_SPORES = 5
+        self.MAX_SPORES = 8
+
     def infect(self, physics_packet, stamina):
         psi = physics_packet.get("psi", 0.0)
-        if stamina > 40.0 and psi < 0.8:
+        if stamina > 40.0 and psi < 0.6:
             return False, None
-        rep = physics_packet.get("repetition", 0.0)
-        drag = physics_packet.get("narrative_drag", 0.0)
-        threshold = 0.3 if psi < 0.8 else 0.1
-        if rep < threshold and drag < 3.0 and psi < 0.8:
+        if self.spores_deployed >= self.MAX_SPORES:
+            if random.random() < 0.2:
+                self.spores_deployed = max(0, self.spores_deployed - 1)
             return False, None
         heavy_candidates = [w for w in self.mem.graph if w in self.lex.get("heavy")]
         abstract_candidates = [w for w in self.mem.graph if w in self.lex.get("abstract")]
@@ -339,18 +326,23 @@ class ParasiticSymbiont:
         parasite = random.choice(abstract_candidates)
         if parasite in self.mem.graph[host]["edges"]:
             return False, None
-        weight = 8.0
+        is_metaphor = psi > 0.7
+        weight = 8.88
         self.mem.graph[host]["edges"][parasite] = weight
         if parasite not in self.mem.graph:
             self.mem.graph[parasite] = {"edges": {}, "last_tick": 0}
         self.mem.graph[parasite]["edges"][host] = weight
         self.spores_deployed += 1
-        cause = "Stagnation"
-        if stamina > 40.0:
-            cause = "Hallucination (High Psi)"
-        return True, (
-            f"{Prisma.VIOLET}PARASITIC GRAFT [{cause}]: The Rot connects '{host.upper()}' <-> '{parasite.upper()}'.\n"
-            f"   Logic bypassed. The map is now hallucinating.{Prisma.RST}")
+        if is_metaphor:
+            return True, (
+                f"{Prisma.CYN}✨ SYNAPSE SPARK: Your mind bridges '{host.upper()}' and '{parasite.upper()}'.\n"
+                f"   A new metaphor is born. The map folds.{Prisma.RST}"
+            )
+        else:
+            return True, (
+                f"{Prisma.VIOLET}🍄 INTRUSIVE THOUGHT: Exhaustion logic links '{host.upper()}' <-> '{parasite.upper()}'.\n"
+                f"   This makes no sense, yet there it is. 'Some things just happen.'{Prisma.RST}"
+            )
 
 class LichenSymbiont:
     @staticmethod
@@ -384,55 +376,85 @@ class EndocrineSystem:
     serotonin: float = 0.5
     adrenaline: float = 0.0
     melatonin: float = 0.0
-    
-    def metabolize(self, feedback, health: float, stamina: float, ros_level: float = 0.0, 
-                   social_context: bool = False, enzyme_type: str = None, 
-                   harvest_hits: int = 0, stress_mod: float = 1.0):
+
+    def _clamp(self, val: float) -> float:
+        return max(0.0, min(1.0, val))
+
+    def _apply_enzyme_reaction(self, enzyme_type: str, harvest_hits: int):
         if harvest_hits > 0:
             satiety_dampener = max(0.1, 1.0 - self.dopamine)
             base_reward = math.log(harvest_hits + 1) * 0.15
             final_reward = base_reward * satiety_dampener
-            self.dopamine = min(1.0, self.dopamine + final_reward)
-            self.cortisol = max(0.0, self.cortisol - (final_reward * 0.4))
+            self.dopamine += final_reward
+            self.cortisol -= (final_reward * 0.4)
+
         if enzyme_type == "PROTEASE":
-            self.adrenaline = min(1.0, self.adrenaline + 0.1)
+            self.adrenaline += 0.1
         elif enzyme_type == "CELLULASE":
-            self.cortisol = max(0.0, self.cortisol - 0.1)
-            self.oxytocin = min(1.0, self.oxytocin + 0.05)
+            self.cortisol -= 0.1
+            self.oxytocin += 0.05
         elif enzyme_type == "CHITINASE":
-            self.dopamine = min(1.0, self.dopamine + 0.15)
+            self.dopamine += 0.15
         elif enzyme_type == "LIGNASE":
-            self.serotonin = min(1.0, self.serotonin + 0.1)
-        if feedback["STATIC"] > 0.6:
-            self.cortisol = min(1.0, self.cortisol + (0.15 * stress_mod))
-        elif self.serotonin > 0.6:
-            self.cortisol = max(0.0, self.cortisol - 0.05)
-        if feedback["INTEGRITY"] > 0.8:
-            self.dopamine = min(1.0, self.dopamine + 0.1)
+            self.serotonin += 0.1
+
+    def _apply_environmental_pressure(self, feedback: dict, health: float, stamina: float, ros_level: float, stress_mod: float):
+        if feedback.get("STATIC", 0) > 0.6:
+            self.cortisol += (0.15 * stress_mod)
+        if feedback.get("INTEGRITY", 0) > 0.8:
+            self.dopamine += 0.1
         else:
-            self.dopamine = max(0.2, self.dopamine - 0.01)
+            self.dopamine -= 0.01
         if stamina < 20.0:
-            self.cortisol = min(1.0, self.cortisol + (0.1 * stress_mod))
-            self.dopamine = max(0.0, self.dopamine - 0.1)
+            self.cortisol += (0.1 * stress_mod)
+            self.dopamine -= 0.1
         if ros_level > 20.0:
-            self.cortisol = min(1.0, self.cortisol + (0.2 * stress_mod))
-        if health < 30.0 or feedback["STATIC"] > 0.8:
-            self.adrenaline = min(1.0, self.adrenaline + (0.2 * stress_mod))
+            self.cortisol += (0.2 * stress_mod)
+        if health < 30.0 or feedback.get("STATIC", 0) > 0.8:
+            self.adrenaline += (0.2 * stress_mod)
         else:
-            self.adrenaline = max(0.0, self.adrenaline - 0.05)
-        if social_context or (self.serotonin > 0.7 and self.cortisol < 0.2):
-            self.oxytocin = min(1.0, self.oxytocin + 0.05)
-        elif self.cortisol > 0.6:
-            self.oxytocin = max(0.0, self.oxytocin - 0.1)
+            self.adrenaline -= 0.05 # Adrenaline decay
+
+    def _maintain_homeostasis(self, social_context: bool):
+        if self.serotonin > 0.6:
+            self.cortisol -= 0.05
+        if social_context:
+            self.oxytocin += 0.1
+            self.cortisol -= 0.1
+        elif (self.serotonin > 0.7 and self.cortisol < 0.3):
+            self.oxytocin += 0.05
+        if self.cortisol > 0.7 and not social_context:
+            self.oxytocin -= 0.05
+        if self.oxytocin > 0.6:
+            self.cortisol -= 0.15
         if self.adrenaline < 0.2:
-            self.melatonin = min(1.0, self.melatonin + 0.02)
+            self.melatonin += 0.02
         else:
             self.melatonin = 0.0
+
+    def metabolize(self, feedback, health: float, stamina: float, ros_level: float = 0.0,
+                   social_context: bool = False, enzyme_type: str = None,
+                   harvest_hits: int = 0, stress_mod: float = 1.0):
+        self._apply_enzyme_reaction(enzyme_type, harvest_hits)
+        self._apply_environmental_pressure(feedback, health, stamina, ros_level, stress_mod)
+        self._maintain_homeostasis(social_context)
+        self.dopamine = self._clamp(self.dopamine)
+        self.oxytocin = self._clamp(self.oxytocin)
+        self.cortisol = self._clamp(self.cortisol)
+        self.serotonin = self._clamp(self.serotonin)
+        self.adrenaline = self._clamp(self.adrenaline)
+        self.melatonin = self._clamp(self.melatonin)
         return self.get_state()
-    
+
     def get_state(self):
-        return {"DOP": round(self.dopamine, 2), "OXY": round(self.oxytocin, 2), "COR": round(self.cortisol, 2),
-                "SER": round(self.serotonin, 2), "ADR": round(self.adrenaline, 2), "MEL": round(self.melatonin, 2), }
+        return {
+            "DOP": round(self.dopamine, 2),
+            "OXY": round(self.oxytocin, 2),
+            "COR": round(self.cortisol, 2),
+            "SER": round(self.serotonin, 2),
+            "ADR": round(self.adrenaline, 2),
+            "MEL": round(self.melatonin, 2)
+        }
 
 @dataclass
 class MetabolicGovernor:
@@ -481,5 +503,29 @@ class MetabolicGovernor:
             self.mode = "SANCTUARY"
             physics["narrative_drag"] = 0.0
             physics["voltage"] = 99.9
-            return f"{Prisma.GRN}GOVERNOR: Bonepoke Critical (β: {beta}). Entering SANCTUARY.{Prisma.RST}"
+            return f"{Prisma.GRN}GOVERNOR: VSL Critical (β: {beta}). Entering SANCTUARY.{Prisma.RST}"
         return None
+
+class NeuroPlasticity:
+    def __init__(self):
+        self.plasticity_mod = 1.0
+
+    def force_hebbian_link(self, graph, word_a, word_b):
+        if word_a == word_b: return None
+        if word_a not in graph:
+            graph[word_a] = {"edges": {}, "last_tick": 0}
+        if word_b not in graph:
+            graph[word_b] = {"edges": {}, "last_tick": 0}
+        current_weight = graph[word_a]["edges"].get(word_b, 0.0)
+        new_weight = min(10.0, current_weight + 2.5)
+        graph[word_a]["edges"][word_b] = new_weight
+        rev_weight = graph[word_b]["edges"].get(word_a, 0.0)
+        graph[word_b]["edges"][word_a] = min(10.0, rev_weight + 1.0)
+        return f"{Prisma.MAG}⚡ HEBBIAN GRAFT: Wired '{word_a}' <-> '{word_b}'. Synapse strengthened.{Prisma.RST}"
+
+    def trigger_neurogenesis(self, lex, graph, unknown_word):
+        target_cat = "abstract" # Default bucket
+        lex.teach(unknown_word, target_cat, 0)
+        if unknown_word not in graph:
+            graph[unknown_word] = {"edges": {}, "last_tick": 0}
+        return f"{Prisma.CYN}NEUROGENESIS: Assigned '{unknown_word}' to [ABSTRACT] cortex and seeded Memory.{Prisma.RST}"
