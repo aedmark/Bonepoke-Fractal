@@ -1,5 +1,55 @@
 # CHANGELOG.md
 
+## [9.6.4] - 2026-01-10
+### Refactored
+- **Biology:** `MitochondrialForge` now uses strict typing and returns a `MetabolicReceipt` dataclass for clearer cost tracking.
+- **Endocrine:** Replaced magic numbers with named constants (`REWARD_MEDIUM`, `STRESS_LARGE`) and mapped enzyme reactions to a dictionary for easier balancing.
+- **Orchestrator:** `GeodesicOrchestrator` rewritten into a 6-phase pipeline (Observe -> Secure -> Metabolize -> Simulate -> Cognate -> Render) for better debuggability and Tensegrity.
+- **VSL:** Clarified `E` (Exhaustion) and `B` (Binding) metrics in `VSL_Geodesic` with explicit documentation.
+
+### Added
+- Comprehensive docstrings to all refactored classes (The Pinker Lens).
+- Type hinting for critical biological systems.
+
+### [9.6.3] - 2026-01-10 "Jason Mendoza's Safe"
+
+**Architects:** SLASH, Team Bonepoke | **System:** Hemodynamically Stable
+
+### "Any time I had a problem, and I threw a Molotov cocktail... Boom! Right away, I had a different problem." — Jason Mendoza
+
+**System Status:**
+- **Janitor:** Awake.
+- **Thermodynamics:** Enforced.
+- **Ghosts:** Vocal.
+
+### 🧹 LOGIC: The Janitorial Awakening (The Schur Lens)
+- **The Pathology:** `GordonKnot` was a silent protagonist. He had `flinch()` and `check_gravity()` methods, but they were effectively "ghost code"—never invoked by the main loop. He collected rocks but felt no pain.
+- **The Surgery:**
+  - **Re-Wiring:** Connected `Gordon.flinch()` to `GeodesicOrchestrator._simulate_world`.
+  - **The Result:** The system now respects Trauma. If you type words that trigger Gordon's PTSD (e.g., "FEAR", "HATE"), he will drop items or spike narrative drag.
+  - **Passive Buffs:** `TIME_BRACELET` and `GRAVITY_BUFFER` items now passively reduce drag as intended.
+
+### 📉 BIOLOGY: The No-Free-Lunch Protocol (The Fuller Lens)
+- **The Pathology:** `SomaticLoop` contained a "Benjamin Button Bug" where memory age was calculated incorrectly, making all memories immortal. Worse, the `cannibalize()` function awarded 15.0 ATP even if it failed to find a victim.
+- **The Surgery:**
+  - **Time Sync:** Passed `tick_count` correctly to the cannibalization logic.
+  - **Thermodynamics:** Added a conditional check. You now only get energy if you actually sacrifice a memory.
+  - **Feature Cut:** Deprecated the `DECRYPTASE` enzyme (Weather Cipher). It was an unfinished exploit vector.
+
+### 🏛️ GOVERNANCE: The Sleeping Giants (The Pinker Lens)
+- **The Pathology:** Three sophisticated systems were comatose due to missing wiring:
+  1. **MetabolicGovernor:** Never shifted modes automatically.
+  2. **LimboLayer:** Collected ghosts but never spoke.
+  3. **TheLexicon:** Learned words forever, leading to cognitive bloat.
+- **The Surgery:**
+  - **Active Governance:** `MetabolicGovernor.shift()` is now called every turn. High voltage will force a shift to `FORGE`; high drag to `LABORATORY`.
+  - **Hauntings:** `LimboLayer.haunt()` now injects text from dead timelines into the log stream.
+  - **Neuro-Hygiene:** `TheLexicon.atrophy()` now runs every 10 turns to prune unused words.
+
+### 🐛 MINOR FIXES
+- **Syntax:** Fixed import pathing for `bone_vsl`.
+- **UI:** Added `[GOV]` log channel for mode shifts.
+
 ### [9.6.2] - 2026-01-10 "The Jester's Cap"
 
 **Architects:** SLASH, Team Bonepoke | **System:** VSL-Native (Polished)

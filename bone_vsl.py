@@ -33,7 +33,22 @@ class VSL_Humility:
         return False, text
 
 class VSL_Geodesic:
+    """
+    Maps text to a 2D coordinate system of Fatigue vs. Tension.
+
+    Dimensions:
+    1. E (Entropy/Exhaustion):
+       - Measures 'dilution' of meaning.
+       - Driven by high word count and 'filler words' (solvents).
+       - High E = The Mud (Stagnation).
+
+    2. B (Beta/Binding):
+       - Measures 'structural tension'.
+       - Driven by punctuation density and special characters.
+       - High B = The Forge (High Energy).
+    """
     def __init__(self):
+        # Manifolds are gravity wells in this 2D space.
         self.manifolds = {
             "THE_MUD":      {"E": 0.8, "B": 0.2, "Desc": "High Fatigue, Low Tension (Stagnation)"},
             "THE_FORGE":    {"E": 0.1, "B": 0.9, "Desc": "Low Fatigue, High Tension (Transformation)"},
@@ -42,20 +57,35 @@ class VSL_Geodesic:
             "THE_GARDEN":   {"E": 0.5, "B": 0.5, "Desc": "Balanced State (Integration)"}
         }
 
-    def calculate_metrics(self, text):
+    def calculate_metrics(self, text: str) -> tuple[float, float]:
+        """Returns (E_metric, B_metric) normalized 0.0 to 1.0."""
         length = len(text)
         if length == 0: return 0.0, 0.0
+
+        # E-Metric Calculation (Exhaustion)
+        # We count 'solvents' (low-value grammatical glue).
         ftg_words = ['i', 'you', 'said', 'the', 'and', 'was', 'a', 'is', 'it']
         ftg_count = sum(text.lower().count(w) for w in ftg_words)
+
+        # E increases with length and solvent density.
         e_metric = min(1.0, (ftg_count / 30.0) + (length / 1000.0))
+
+        # B-Metric Calculation (Binding/Tension)
+        # We look for symbols that break flow or indicate complex syntax.
         c_count = sum(1 for char in text if char in '!?%@#$')
+
+        # Logarithmic scaling prevents long texts from hitting 1.0 too easily.
         base_b = min(1.0, math.log1p(c_count + 1) / math.log1p(length + 1))
+
         return round(e_metric, 3), round(base_b, 3)
 
-    def locate_manifold(self, e_val, b_val):
+    def locate_manifold(self, e_val: float, b_val: float) -> tuple[str, float]:
+        """Finds the nearest semantic gravity well (Manifold)."""
         best_fit = "THE_MUD"
-        min_dist = 10.0
+        min_dist = 10.0 # Arbitrary high start value
+
         for name, coords in self.manifolds.items():
+            # Euclidean distance in E-B space
             dist = math.sqrt((e_val - coords["E"])**2 + (b_val - coords["B"])**2)
             if dist < min_dist:
                 min_dist = dist

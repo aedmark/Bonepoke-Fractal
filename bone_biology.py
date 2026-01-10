@@ -5,34 +5,58 @@ import time
 import random
 from collections import deque
 from dataclasses import dataclass, field
+from typing import List, Dict, Set, Optional, Tuple
+
 from bone_shared import Prisma, TheLexicon, BoneConfig
 
 @dataclass
 class MetabolicReceipt:
-    base_cost: float
-    drag_tax: float
-    inefficiency_tax: float
-    total_burn: float
-    status: str
+    """
+    A transactional record of a single metabolic cycle.
+
+    This acts as the 'bill' presented to the somatic system after a turn.
+    It breaks down exactly where energy (ATP) was spent, separating
+    essential existence costs (BMR) from environmental friction (Drag).
+    """
+    base_cost: float        # The fixed cost of existing (Basal Metabolic Rate).
+    drag_tax: float         # The penalty derived from Narrative Drag (Quadratic scaling).
+    inefficiency_tax: float # Extra cost incurred by low mitochondrial efficiency.
+    total_burn: float       # Final ATP amount to be deducted.
+    status: str             # e.g., "RESPIRING", "NECROSIS", "APOPTOSIS".
     symptom: str = "Nominal"
 
 @dataclass
 class MitochondrialState:
+    """
+    The persistent state of the biological engine.
+
+    This data structure carries the genetic and epigenetic history of the
+    session (and its ancestors via Spores).
+    """
     atp_pool: float = 100.0
-    ros_buildup: float = 0.0
-    membrane_potential: float = -150.0
-    mother_hash: str = "MITOCHONDRIAL_EVE_001"
-    efficiency_mod: float = 1.0
-    ros_resistance: float = 1.0
-    enzymes: set = field(default_factory=set)
-    telomeres: int = 105
+    ros_buildup: float = 0.0          # Reactive Oxygen Species (Cellular pollution/stress).
+    membrane_potential: float = -150.0 # Electrical gradient (Health/Capacity indicator).
+    mother_hash: str = "MITOCHONDRIAL_EVE_001" # Lineage tracking ID.
+    efficiency_mod: float = 1.0       # Multiplier for ATP conversion (Higher is better).
+    ros_resistance: float = 1.0       # Ability to scrub ROS/pollution.
+    enzymes: Set[str] = field(default_factory=set) # Acquired traits (e.g., 'LIGNASE').
+    telomeres: int = 105              # Genetic countdown timer (currently unused, but reserved).
 
 class MitochondrialForge:
+    """
+    The Power Plant of the system.
+
+    It converts 'Physics' (Drag, Time) into 'Biology' (ATP Cost, ROS Stress).
+    It enforces the Laws of Thermodynamics: You cannot act without paying energy.
+    """
     BASE_BMR = 2.0
     APOPTOSIS_TRIGGER = "CYTOCHROME_C_RELEASE"
     MAX_ATP = 200.0
 
-    def __init__(self, lineage_seed: str, events, inherited_traits: dict = None):
+    # Threshold where Drag becomes metabolically expensive (Quadratic curve start).
+    DRAG_SOFT_CAP = 5.0
+
+    def __init__(self, lineage_seed: str, events, inherited_traits: Optional[Dict] = None):
         self.state = MitochondrialState(mother_hash=lineage_seed)
         self.events = events
         self.krebs_cycle_active = True
@@ -40,46 +64,73 @@ class MitochondrialForge:
         if inherited_traits:
             self._apply_inheritance(inherited_traits)
 
-    def _apply_inheritance(self, traits):
+    def _apply_inheritance(self, traits: Dict):
+        """Unpacks genetic data from previous sessions (Spores)."""
         self.state.efficiency_mod = traits.get("efficiency_mod", 1.0)
         self.state.ros_resistance = traits.get("ros_resistance", 1.0)
         if "enzymes" in traits:
             self.state.enzymes = set(traits["enzymes"])
             self.events.log(f"{Prisma.CYN}[MITO]: Inherited Enzymes: {list(self.state.enzymes)}.{Prisma.RST}")
 
-    def adapt(self, final_health: float) -> dict:
+    def adapt(self, final_health: float) -> Dict:
+        """
+        Triggered at death/save. Modifies genetics based on how the organism died.
+        If death was stressful (low health), we mutate to resist stress next time.
+        """
         traits = {
             "efficiency_mod": self.state.efficiency_mod,
             "ros_resistance": self.state.ros_resistance,
             "enzymes": list(self.state.enzymes)
         }
+        # Evolution mechanic: Hardship breeds resistance.
         if final_health <= 0 and random.random() < 0.3:
             traits["ros_resistance"] += 0.1
         return traits
 
-    def calculate_metabolism(self, drag: float, external_modifiers: list[float] = None) -> MetabolicReceipt:
+    def calculate_metabolism(self, drag: float, external_modifiers: Optional[List[float]] = None) -> MetabolicReceipt:
+        """
+        The Core Calculation.
+
+        Logic:
+        1. Base Cost (BMR) is constant.
+        2. Drag Tax is QUADRATIC ((drag^2)/10).
+           - Low drag (1-3) is cheap.
+           - High drag (8-10) becomes exponentially expensive.
+        3. External modifiers (items, buffs) apply multiplicatively to the Drag Tax.
+        """
         bmr = self.BASE_BMR
+
+        # Calculate Drag Tax (Quadratic Penalty)
         safe_drag = max(0.0, drag)
         drag_tax = (safe_drag * safe_drag) / 10.0
+
+        # Apply Inventory/Status Effects
         if external_modifiers:
             for mod in external_modifiers:
                 drag_tax *= mod
+
         raw_cost = bmr + drag_tax
+
+        # Apply Efficiency (The 'Metabolic Fitness' of the system)
         safe_efficiency = max(0.1, self.state.efficiency_mod)
         final_cost = raw_cost / safe_efficiency
+
+        # Calculate waste heat/inefficiency
         inefficiency = 0.0
         if safe_efficiency < 1.0:
             inefficiency = final_cost - raw_cost
+
+        # Determine Biological Status based on ability to pay
         status = "RESPIRING"
         symptom = "Humming along."
 
         if final_cost > self.state.atp_pool:
-            status = "NECROSIS"
+            status = "NECROSIS" # Running on empty
             symptom = f"The engine is stalling. Requires {final_cost:.1f} ATP."
         elif self.state.ros_buildup > BoneConfig.CRITICAL_ROS_LIMIT:
-            status = self.APOPTOSIS_TRIGGER
+            status = self.APOPTOSIS_TRIGGER # Suicide due to toxicity
             symptom = "Cellular suicide initiated. Too much noise."
-        elif drag_tax > 5.0:
+        elif drag_tax > self.DRAG_SOFT_CAP:
             symptom = "The gears are grinding. Heavy load."
 
         return MetabolicReceipt(
@@ -92,16 +143,26 @@ class MitochondrialForge:
         )
 
     def respirate(self, receipt: MetabolicReceipt) -> str:
+        """
+        Commits the transaction. Deducts ATP and generates pollution (ROS).
+        """
         if receipt.status == "NECROSIS":
             self.state.atp_pool = 0.0
             return "NECROSIS"
+
         if receipt.status == self.APOPTOSIS_TRIGGER:
             self.krebs_cycle_active = False
             self.state.atp_pool = 0.0
             return self.APOPTOSIS_TRIGGER
+
+        # Payment
         self.state.atp_pool -= receipt.total_burn
+
+        # Pollution Generation (ROS)
+        # More burning = more pollution. High resistance reduces this.
         ros_generation = receipt.total_burn * 0.1 * (1.0 / self.state.ros_resistance)
         self.state.ros_buildup += ros_generation
+
         return "RESPIRING"
 
 class SomaticLoop:
@@ -371,6 +432,20 @@ class LichenSymbiont:
 
 @dataclass
 class EndocrineSystem:
+    """
+    The Chemical Regulator.
+
+    Manages the organism's 'Mood' via a simulated hormonal balance.
+    These values modulate how the system perceives input (Physics) and
+    spends energy (Metabolism).
+
+    - Dopamine (DOP): Reward, Motivation. Drives 'Action'.
+    - Oxytocin (OXY): Connection, Trust. Buffers 'Trauma'.
+    - Cortisol (COR): Stress, Toxicity. Increases 'Drag' perception.
+    - Serotonin (SER): Stability, Satisfaction. Regulates 'Homeostasis'.
+    - Adrenaline (ADR): Arousal, Fear. Increases 'Voltage'.
+    - Melatonin (MEL): Rest, Cycle. Triggers 'Sleep/Save'.
+    """
     dopamine: float = 0.5
     oxytocin: float = 0.1
     cortisol: float = 0.0
@@ -378,76 +453,138 @@ class EndocrineSystem:
     adrenaline: float = 0.0
     melatonin: float = 0.0
 
+    # --- Tuning Constants ---
+    # Centralizing these allows for easier game balance tweaking.
+    REWARD_SMALL = 0.05
+    REWARD_MEDIUM = 0.1
+    REWARD_LARGE = 0.15
+
+    STRESS_SMALL = 0.05
+    STRESS_MEDIUM = 0.1
+    STRESS_LARGE = 0.15
+
+    DECAY_RATE = 0.01
+
     def _clamp(self, val: float) -> float:
+        """Keeps chemical levels within sustainable bounds (0.0 to 1.0)."""
         return max(0.0, min(1.0, val))
 
     def _apply_enzyme_reaction(self, enzyme_type: str, harvest_hits: int):
+        """
+        Reacts to the specific 'flavor' of the input text.
+        Digestive enzymes (produced by HyphalInterface) trigger hormonal shifts.
+        """
+        # 1. Harvest Reward (Dopamine Spike)
         if harvest_hits > 0:
+            # Diminishing returns: High dopamine makes it harder to get MORE dopamine.
             satiety_dampener = max(0.1, 1.0 - self.dopamine)
             base_reward = math.log(harvest_hits + 1) * 0.15
             final_reward = base_reward * satiety_dampener
+
             self.dopamine += final_reward
+            # Pleasure reduces stress temporarily.
             self.cortisol -= (final_reward * 0.4)
 
-        if enzyme_type == "PROTEASE":
-            self.adrenaline += 0.1
-        elif enzyme_type == "CELLULASE":
-            self.cortisol -= 0.1
-            self.oxytocin += 0.05
-        elif enzyme_type == "CHITINASE":
-            self.dopamine += 0.15
-        elif enzyme_type == "LIGNASE":
-            self.serotonin += 0.1
+        # 2. Enzyme-Specific Reactions
+        # Mapping enzyme types to their hormonal impact.
+        reactions = {
+            "PROTEASE":   {"ADR": self.REWARD_MEDIUM},             # Meat/Action -> Adrenaline
+            "CELLULASE":  {"COR": -self.REWARD_MEDIUM, "OXY": self.REWARD_SMALL}, # Narrative -> Comfort
+            "CHITINASE":  {"DOP": self.REWARD_LARGE},              # Complexity -> Big Reward
+            "LIGNASE":    {"SER": self.REWARD_MEDIUM},             # Structure -> Stability
+            "DECRYPTASE": {"ADR": self.REWARD_SMALL, "DOP": self.REWARD_SMALL}    # Puzzle -> Thrill
+        }
 
-    def _apply_environmental_pressure(self, feedback: dict, health: float, stamina: float, ros_level: float, stress_mod: float):
+        if enzyme_type in reactions:
+            impact = reactions[enzyme_type]
+            if "ADR" in impact: self.adrenaline += impact["ADR"]
+            if "COR" in impact: self.cortisol += impact["COR"]
+            if "OXY" in impact: self.oxytocin += impact["OXY"]
+            if "DOP" in impact: self.dopamine += impact["DOP"]
+            if "SER" in impact: self.serotonin += impact["SER"]
+
+    def _apply_environmental_pressure(self, feedback: Dict, health: float, stamina: float, ros_level: float, stress_mod: float):
+        """
+        Reacts to the 'Physical' state of the world.
+        Pain, starvation, and noise (static) create Cortisol.
+        """
+        # Static (Repetition) causes stress
         if feedback.get("STATIC", 0) > 0.6:
-            self.cortisol += (0.15 * stress_mod)
+            self.cortisol += (self.STRESS_LARGE * stress_mod)
+
+        # Structural Integrity feels good
         if feedback.get("INTEGRITY", 0) > 0.8:
-            self.dopamine += 0.1
+            self.dopamine += self.REWARD_MEDIUM
         else:
-            self.dopamine -= 0.01
+            self.dopamine -= self.DECAY_RATE
+
+        # Starvation Panic
         if stamina < 20.0:
-            self.cortisol += (0.1 * stress_mod)
-            self.dopamine -= 0.1
+            self.cortisol += (self.STRESS_MEDIUM * stress_mod)
+            self.dopamine -= self.REWARD_MEDIUM
+
+        # Toxicity (ROS) Panic
         if ros_level > 20.0:
-            self.cortisol += (0.2 * stress_mod)
+            self.cortisol += (self.STRESS_LARGE * stress_mod)
+
+        # Fight or Flight (Adrenaline)
         if health < 30.0 or feedback.get("STATIC", 0) > 0.8:
-            self.adrenaline += (0.2 * stress_mod)
+            self.adrenaline += (self.REWARD_LARGE * stress_mod)
         else:
-            self.adrenaline -= 0.05 # Adrenaline decay
+            self.adrenaline -= (self.DECAY_RATE * 5) # Adrenaline decays fast
 
     def _maintain_homeostasis(self, social_context: bool):
+        """
+        The internal feedback loops. Hormones regulating other hormones.
+        """
+        # Serotonin buffers Cortisol (Stability fights Stress)
         if self.serotonin > 0.6:
-            self.cortisol -= 0.05
-        if social_context:
-            self.oxytocin += 0.1
-            self.cortisol -= 0.1
-        elif (self.serotonin > 0.7 and self.cortisol < 0.3):
-            self.oxytocin += 0.05
-        if self.cortisol > 0.7 and not social_context:
-            self.oxytocin -= 0.05
-        if self.oxytocin > 0.6:
-            self.cortisol -= 0.15
-        if self.adrenaline < 0.2:
-            self.melatonin += 0.02
-        else:
-            self.melatonin = 0.0
+            self.cortisol -= self.STRESS_SMALL
 
-    def metabolize(self, feedback, health: float, stamina: float, ros_level: float = 0.0,
-                   social_context: bool = False, enzyme_type: str = None,
-                   harvest_hits: int = 0, stress_mod: float = 1.0):
+        # Social Context (e.g., Chorus Mode) boosts Oxytocin
+        if social_context:
+            self.oxytocin += self.REWARD_MEDIUM
+            self.cortisol -= self.REWARD_MEDIUM
+        # High Serotonin/Low Stress facilitates connection
+        elif (self.serotonin > 0.7 and self.cortisol < 0.3):
+            self.oxytocin += self.REWARD_SMALL
+
+        # High Stress kills connection
+        if self.cortisol > 0.7 and not social_context:
+            self.oxytocin -= self.STRESS_SMALL
+
+        # Connection reduces Stress (The 'Love' Loop)
+        if self.oxytocin > 0.6:
+            self.cortisol -= self.REWARD_LARGE
+
+        # Sleep Cycle
+        if self.adrenaline < 0.2:
+            self.melatonin += (self.REWARD_SMALL / 2) # Slow buildup
+        else:
+            self.melatonin = 0.0 # Woken up
+
+    def metabolize(self, feedback: Dict, health: float, stamina: float, ros_level: float = 0.0,
+                   social_context: bool = False, enzyme_type: Optional[str] = None,
+                   harvest_hits: int = 0, stress_mod: float = 1.0) -> Dict[str, float]:
+        """
+        The Main Cycle.
+        Calculates the new chemical state based on all inputs.
+        """
         self._apply_enzyme_reaction(enzyme_type, harvest_hits)
         self._apply_environmental_pressure(feedback, health, stamina, ros_level, stress_mod)
         self._maintain_homeostasis(social_context)
+
+        # Clamp all values to legal range [0.0, 1.0]
         self.dopamine = self._clamp(self.dopamine)
         self.oxytocin = self._clamp(self.oxytocin)
         self.cortisol = self._clamp(self.cortisol)
         self.serotonin = self._clamp(self.serotonin)
         self.adrenaline = self._clamp(self.adrenaline)
         self.melatonin = self._clamp(self.melatonin)
+
         return self.get_state()
 
-    def get_state(self):
+    def get_state(self) -> Dict[str, float]:
         return {
             "DOP": round(self.dopamine, 2),
             "OXY": round(self.oxytocin, 2),
