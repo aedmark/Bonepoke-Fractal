@@ -627,7 +627,7 @@ class TheTensionMeter:
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_9.6.1"
+        self.genome = "BONEAMANITA_9.6.2"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -1480,25 +1480,24 @@ class RuptureEngine:
                 f"   I'm throwing a brick through the window: '{chaos_word.upper()}'."
             )
         return False, None
-    
+
     @staticmethod
     def audit_perfection(physics, lexicon_class):
         streak = physics.get("perfection_streak", 0)
         if streak >= 5:
             return (
                 True,
-                f"{Prisma.CYN}✨ FLOW STATE: You are walking on air (Streak {streak}).{Prisma.RST}\n"
-                f"   The narrator is impressed. {Prisma.GRN}ATP +20.0.{Prisma.RST}",
+                f"{Prisma.CYN}✨ FLOW STATE DETECTED: You are walking on air (Streak {streak}).{Prisma.RST}\n"
+                f"   The Narrator is impressed. {Prisma.GRN}ATP +20.0.{Prisma.RST}",
                 "FLOW_BOOST"
             )
         if streak >= 3:
             swan = lexicon_class.harvest("cursed")
             if swan == "void": swan = "CHAOS"
             return (
-                True, 
-                f"{Prisma.VIOLET}HUBRIS DETECTED: You are walking a tightrope without a net (Streak {streak}).{Prisma.RST}\n"
-                f"   The narrator is bored of your competence. He greased the floor.\n"
-                f"   {Prisma.RED}► YOU TRIPPED OVER A '{swan.upper()}'. Health -15.{Prisma.RST}",
+                True,
+                f"{Prisma.VIOLET}HUBRIS DETECTED: You are walking a tightrope (Streak {streak}).{Prisma.RST}\n"
+                f"   The floor is greased. {Prisma.RED}► YOU TRIPPED OVER A '{swan.upper()}'. Health -15.{Prisma.RST}",
                 swan
             )
         return False, None, None
@@ -2043,7 +2042,7 @@ class TheNavigator:
             return self.current_location
         drag = min(10.0, max(0.0, physics_packet.get("narrative_drag", 0.0)))
         volt = min(20.0, max(0.0, physics_packet.get("voltage", 0.0)))
-        current_vec = (drag / 10.0, volt / 20.0)
+        current_vec = (round(drag / 10.0, 2), round(volt / 20.0, 2))
         best_fit = "THE_MUD"
         min_dist = 999.0
         for name, manifold in self.manifolds.items():
@@ -2316,7 +2315,7 @@ class GeodesicOrchestrator:
             stress_mod,
             self.eng.tick_count
         )
-        critical_logs = [l for l in bio_result["logs"] if "CRITICAL" in l or "TAX" in l or "Poison" in l]
+        critical_logs = [l for l in bio_result["logs"] if "CRITICAL" in str(l) or "TAX" in str(l) or "Poison" in str(l)]
         hubris_hit, hubris_msg, _ = RuptureEngine.audit_perfection(physics, self.eng.lex)
         if hubris_hit:
             self.eng.health -= 15.0
@@ -2346,8 +2345,8 @@ class GeodesicOrchestrator:
     def _simulate_world(self, physics: Dict, clean_words: List[str]):
         logs = []
         self.eng.navigator.locate(physics)
-        orbit_state, drag_mod, orbit_msg = self.eng.cosmic.analyze_orbit(self.eng.mind.mem, clean_words)
-        self.eng._apply_cosmic_physics(physics, orbit_state, drag_mod)
+        orbit_state, cosmic_drag_penalty, orbit_msg = self.eng.cosmic.analyze_orbit(self.eng.mind.mem, clean_words)
+        self.eng._apply_cosmic_physics(physics, orbit_state, cosmic_drag_penalty)
         transmute_msg = self.eng.phys.forge.transmute(physics)
         if transmute_msg: logs.append(transmute_msg)
         _, _, forge_msg, new_item = self.eng.phys.forge.hammer_alloy(physics)
@@ -2546,8 +2545,8 @@ class BoneAmanita:
         return False
 
     @staticmethod
-    def _apply_cosmic_physics(physics, state, drag_mod):
-        physics["narrative_drag"] += drag_mod
+    def _apply_cosmic_physics(physics, state, cosmic_drag_penalty):
+        physics["narrative_drag"] += cosmic_drag_penalty
         if state == "VOID_DRIFT": physics["voltage"] = max(0.0, physics["voltage"] - 0.5)
         elif state == "LAGRANGE_POINT": physics["narrative_drag"] = max(0.1, physics["narrative_drag"] - 2.0)
         elif state == "WATERSHED_FLOW": physics["voltage"] += 0.5
@@ -2561,7 +2560,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 9.6.1', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 9.6.2', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
