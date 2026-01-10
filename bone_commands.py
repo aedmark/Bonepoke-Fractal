@@ -3,6 +3,7 @@
 import os
 import random
 import time
+import math
 from typing import Dict, List, Callable
 from bone_shared import ParadoxSeed
 
@@ -32,6 +33,7 @@ class CommandProcessor:
             "/mirror": self._cmd_mirror,
             "/focus": self._cmd_focus,
             "/status": self._cmd_status,
+            "/manifold": self._cmd_manifold,
             "/orbit": self._cmd_orbit,
             "/prove": self._cmd_prove,
             "/kip": self._cmd_kip,
@@ -44,6 +46,40 @@ class CommandProcessor:
 
     def _log(self, text):
         self.eng.events.log(text, "CMD")
+
+    def _cmd_manifold(self, parts):
+        nav = self.eng.navigator
+        current = nav.current_location
+
+        # Calculate distances to all manifolds
+        # We need the last physics packet to know where we are *exactly*
+        phys = self.eng.phys.tension.last_physics_packet
+        if not phys or "voltage" not in phys:
+            self._log(f"{self.P.GRY}NAVIGATION OFFLINE: No physics data yet.{self.P.RST}")
+            return True
+
+        drag = min(10.0, max(0.0, phys.get("narrative_drag", 0.0)))
+        volt = min(20.0, max(0.0, phys.get("voltage", 0.0)))
+
+        # Normalize to 0.0-1.0 space used by Navigator
+        my_vec = (round(drag / 10.0, 2), round(volt / 20.0, 2))
+
+        self._log(f"{self.P.CYN}--- MANIFOLD NAVIGATION ---{self.P.RST}")
+        self._log(f"Current Vector: [Drag: {my_vec[0]} | Voltage: {my_vec[1]}]")
+        self._log(f"Location: {self.P.WHT}{current}{self.P.RST}")
+        self._log(f"Shimmer Reserves: {self.eng.shimmer_state.current:.1f}")
+
+        self._log(f"\n{self.P.GRY}Destinations:{self.P.RST}")
+        for name, data in nav.manifolds.items():
+            dist = math.dist(my_vec, data.center_vector)
+            # Visual distance bar
+            bar_len = int((1.0 - min(1.0, dist)) * 10)
+            bar = "█" * bar_len + "░" * (10 - bar_len)
+
+            highlight = self.P.GRN if name == current else self.P.GRY
+            self._log(f"   {highlight}{name:<12}{self.P.RST} {bar} ({dist:.2f} AU) - {data.description}")
+
+        return True
 
     def execute(self, text):
         if not text.startswith("/"):

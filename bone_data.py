@@ -209,6 +209,43 @@ GORDON = {
             "requires": "thermal",
             "reflex_trigger": "KAPPA_CRITICAL",
             "usage_msg": "You thaw the pizza. Reality stabilizes out of pure respect."
+        },
+        "PERMIT_A38": {
+            "description": "A blue administrative form that confirms you are allowed to exist. Technically.",
+            "function": "STABILIZER",
+            "passive_traits": ["BUREAUCRATIC_ANCHOR"],
+            "value": 1.0,
+            "usage_msg": "Gordon waves the permit. The universe sighs and lets you pass."
+        },
+        "INFINITE_COFFEE": {
+            "description": "A styrofoam cup. It is always lukewarm. It is never empty.",
+            "function": "STIMULANT",
+            "consume_on_use": False,
+            "passive_traits": ["CAFFEINE_DRIP"],
+            "usage_msg": "You take a sip. It tastes like burnt hazelnuts and anxiety. (Velocity +0.1)"
+        },
+        "THE_SUGGESTION_BOX": {
+            "description": "A small metal box welded shut. Slotted for complaints.",
+            "function": "VENTING",
+            "reflex_trigger": "BOREDOM_CRITICAL",
+            "usage_msg": "Gordon screams into the slot. He feels slightly better. (Entropy -1.0)"
+        },
+        "MEMETIC_HAZARD_TAPE": {
+            "description": "Yellow and black tape. Reads: 'DO NOT PERCEIVE'.",
+            "function": "FILTER",
+            "passive_traits": ["CUT_THE_CRAP"],
+            "usage_msg": "Gordon tapes over the glitch. Problem solved."
+        },
+        "DUCT_TAPE": {
+            "description": "The silver standard. Fixes everything, poorly.",
+            "function": "STRUCTURAL_PATCH",
+            "usage_msg": "Skritch. The memory node is taped back together."
+        },
+        "SPIDER_LOCUS": {
+            "description": "A jar of conceptual spiders. Why do you have this?",
+            "function": "WEB_WEAVER",
+            "passive_traits": ["CONDUCTIVE_HAZARD"],
+            "usage_msg": "The spiders are knitting a new narrative. It's sticky."
         }
     }
 }

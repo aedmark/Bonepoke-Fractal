@@ -1,4 +1,4 @@
-# BONEAMANITA 9.6.4 "SOUP'S ON"
+# BONEAMANITA 9.6.5 "THE COMEDOWN"
 # Architects: SLASH, Team Bonepoke | Humans: James Taylor & Andrew Edmark
 
 import json
@@ -18,6 +18,7 @@ from bone_biology import (
     MitochondrialForge, EndocrineSystem, HyphalInterface, MycotoxinFactory, 
     LichenSymbiont, MetabolicGovernor, ParasiticSymbiont, SomaticLoop, NeuroPlasticity
 )
+from bone_pipeline import CycleContext, EventBus
 from bone_vsl import VSL_32Valve, VSL_HNInterface, VSL_DissipativeRefusal, VSL_ChromaticController, VSL_SemanticFilter
 
 @dataclass
@@ -52,22 +53,6 @@ class PhysSystem:
     gate: 'TheTangibilityGate'
     dynamics: 'TemporalDynamics'
     nav: 'TheNavigator'
-
-class EventBus:
-    def __init__(self):
-        self.buffer = []
-
-    def log(self, text: str, category: str = "SYSTEM"):
-        self.buffer.append({
-            "text": text,
-            "category": category,
-            "timestamp": time.time()
-        })
-
-    def flush(self) -> List[Dict]:
-        logs = list(self.buffer)
-        self.buffer.clear()
-        return logs
 
 class SynergeticLensArbiter:
     def __init__(self, events: EventBus):
@@ -195,7 +180,8 @@ class GordonKnot:
             "BUREAUCRATIC_ANCHOR": self._effect_bureaucratic_anchor,
             "LUMINESCENCE": self._effect_luminescence,
             "GROUNDING_GEAR": self._effect_grounding_gear,
-            "CUT_THE_CRAP": self._effect_safety_scissors
+            "CUT_THE_CRAP": self._effect_safety_scissors,
+            "CAFFEINE_DRIP": self._effect_caffeine_drip
         }
         self.REFLEX_MAP = {
             "DRIFT_CRITICAL": lambda p: p.get("narrative_drag", 0) > 6.0,
@@ -238,6 +224,14 @@ class GordonKnot:
                     msg = handler(physics_ref, data, item)
                     if msg: logs.append(msg)
         return logs
+
+    def _effect_caffeine_drip(self, p, data, item_name):
+        # Pinker Note: Caffeine increases speed but creates jitters (turbulence).
+        p["vector"]["VEL"] = min(1.0, p["vector"].get("VEL", 0) + 0.1)
+        if random.random() < 0.2:
+            p["turbulence"] = min(1.0, p.get("turbulence", 0) + 0.2)
+            return f"{Prisma.CYN}CAFFEINE JITTERS: Velocity UP, Stability DOWN.{Prisma.RST}"
+        return None
 
     def _effect_bureaucratic_anchor(self, p, data, item_name):
         if p.get("beta_index", 0) < 1.0:
@@ -514,28 +508,44 @@ class TheTensionMeter:
     def _derive_complex_metrics(self, counts, words, voltage, drag, integrity):
         total_vol = max(1, len(words))
         turbulence = TheLexicon.get_turbulence(words)
+
+        # [Pinker Lens]: Flow is about the balance between challenge and skill.
         flow_state = "LAMINAR" if turbulence < 0.3 else "TURBULENT"
+
         mass_words = counts["heavy"] + counts["kinetic"] + counts["thermal"] + counts["cryo"]
         cohesion_words = counts["suburban"] + counts["buffer"] + counts["antigen"] + (counts["abstract"] * 0.5)
+
         E_val = mass_words / total_vol
         B_val = cohesion_words / total_vol
+
         safe_B = max(BoneConfig.BETA_EPSILON, B_val)
         beta_index = round((E_val + BoneConfig.BETA_EPSILON) / safe_B, 2)
+
         total_viscosity = sum(TheLexicon.measure_viscosity(w) for w in words)
         avg_viscosity = total_viscosity / total_vol
+
         repetition_score = round(1.0 - (len(set(words)) / total_vol), 2)
+
         bond_strength = max(0.1, integrity["kappa"] + (repetition_score * 0.5))
         voltage_load = max(0.1, voltage / 10.0)
         gamma = round((bond_strength * avg_viscosity) / (1.0 + voltage_load), 2)
+
         truth_signals = counts["heavy"] + counts["kinetic"]
         cohesion_signals = counts["abstract"] + counts["suburban"]
         truth_ratio = truth_signals / max(1, cohesion_signals + truth_signals)
         truth_ratio = round(truth_ratio, 2)
+
         if truth_ratio > 0.85 and voltage > 12.0:
             self.perfection_streak += 1
         else:
             self.perfection_streak = 0
+
+        # THE HUBRIS WARNING
+        if self.perfection_streak == 4:
+            flow_state = "HUBRIS_RISK" # Special flag for the renderer
+
         zone, zone_color = self._determine_zone(beta_index, truth_ratio)
+
         return {
             "beta_index": beta_index,
             "gamma": gamma,
@@ -632,7 +642,7 @@ class TheTensionMeter:
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_9.6.4"
+        self.genome = "BONEAMANITA_9.6.5"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -1430,9 +1440,17 @@ class TheHoloProjector:
         health_bar = self._draw_bar(signals.get("health", 0), 100.0, 5)
         stamina_bar = self._draw_bar(signals.get("stamina", 0), 100.0, 5)
         atp_indicator = f"{int(atp)}J"
+        flow_state = p.get("flow_state", "LAMINAR")
+        hubris_indicator = ""
+        if flow_state == "HUBRIS_RISK":
+            hubris_indicator = f" {Prisma.YEL}[⚠ HUBRIS IMMINENT]{Prisma.RST}"
+        elif p.get("perfection_streak", 0) >= 5:
+            hubris_indicator = f" {Prisma.CYN}[∞ FLOW STATE]{Prisma.RST}"
+
         dashboard_top = (
             f"{Prisma.GRY}[HP: {health_bar}] [STM: {stamina_bar}] "
             f"[ATP: {atp_indicator}] [V:{voltage:.1f}⚡] [D:{drag:.1f}⚓]{Prisma.RST}"
+            f"{hubris_indicator}"
         )
         dop = chem.get("DOP", 0)
         cor = chem.get("COR", 0)
@@ -2232,19 +2250,11 @@ class CassandraProtocol:
 class GeodesicOrchestrator:
     """
     The Conductor of the Simulation Loop.
-
-    It enforces the strict sequence of existence:
-    1. Observe (Read Input)
-    2. Secure  (Check Constraints/Immunity)
-    3. Metabolize (Burn Energy)
-    4. Simulate (Physics & World Events)
-    5. Cognate (Generate Thought)
-    6. Render (Update UI)
     """
     def __init__(self, engine_ref):
         self.eng = engine_ref
 
-        # Sub-systems for specific checks
+        # Sub-systems
         self.vsl_32v = VSL_32Valve(self.eng.mind.lex, self.eng.mind.mem)
         self.vsl_hn = VSL_HNInterface()
         self.vsl_vent = VSL_DissipativeRefusal(self.eng.mind.mem)
@@ -2253,236 +2263,244 @@ class GeodesicOrchestrator:
 
     def run_turn(self, user_message: str) -> Dict[str, Any]:
         """
-        Executes a single tick of the simulation.
-        Returns a dictionary containing the UI, Logs, and Metrics.
+        Executes a single tick of the simulation via the Pipeline Pattern.
         """
-        self.eng.events.flush() # Clear old logs
-        logs = []
+        # 1. Initialization
+        self.eng.events.flush() # Clear async events from previous ticks
+        ctx = CycleContext(input_text=user_message)
 
-        # --- PHASE 1: OBSERVATION ---
-        # "The Eye opens."
-        physics, clean_words, obs_logs = self._observe(user_message)
-        logs.extend(obs_logs)
+        try:
+            # PHASE 1: OBSERVATION
+            self._phase_observe(ctx)
 
-        # Check for immediate structural failure (Rupture)
-        rupture = self.vsl_32v.analyze(physics)
-        if rupture: logs.append(rupture["log"])
+            # MAINTENANCE: Neuro-Pruning & Limbo Feeding
+            # [Fuller Lens]: We do this early so the system is clean before calculating costs.
+            if self.eng.tick_count % 10 == 0:
+                self._maintenance_prune(ctx)
 
-        # Store state for next turn continuity
-        self.eng.phys.tension.last_physics_packet = physics
+            # PHASE 2: SECURITY
+            self._phase_secure(ctx)
+            if ctx.refusal_triggered:
+                return ctx.refusal_packet
+
+            # PHASE 3: METABOLISM
+            self._phase_metabolize(ctx)
+            if not ctx.is_alive:
+                return self.eng._trigger_death(ctx.physics)
+
+            # PHASE 4: SIMULATION (Physics & Items)
+            self._phase_simulate(ctx)
+
+            # PHASE 5: COGNITION
+            self._phase_cognate(ctx)
+
+            # PHASE 6: RENDERING
+            return self._phase_render(ctx)
+
+        except Exception as e:
+            # [Schur Lens]: "Everything is fine." (It's not).
+            import traceback
+            traceback.print_exc()
+            return {
+                "type": "CRITICAL_FAILURE",
+                "ui": f"{Prisma.RED}SYSTEM PANIC: The Geodesic Dome has collapsed.\n{e}{Prisma.RST}",
+                "logs": ctx.logs,
+                "metrics": self.eng._get_metrics()
+            }
+
+    # --- PHASE 1: OBSERVATION ---
+    def _phase_observe(self, ctx: CycleContext):
+        """The Eye opens. Calculates physics vectors."""
+        gaze_result = self.eng.phys.tension.gaze(ctx.input_text, self.eng.mind.mem.graph)
+        ctx.physics = gaze_result["physics"]
+        ctx.clean_words = gaze_result["clean_words"]
+
+        # Store state for continuity
+        self.eng.phys.tension.last_physics_packet = ctx.physics
         self.eng.tick_count += 1
 
-        # Maintenance (Neuro-pruning)
-        if self.eng.tick_count % 10 == 0:
-            self._prune_memory(logs)
-
-        # --- PHASE 2: SECURITY ---
-        # "The Gatekeeper checks credentials."
-        refusal_packet = self._secure(user_message, physics, clean_words, logs)
-        if refusal_packet:
-            return refusal_packet
-
-        # --- PHASE 3: METABOLISM ---
-        # "The Engine burns fuel."
-        bio_result, is_alive, bio_logs = self._metabolize(user_message, physics)
-        logs.extend(bio_logs)
-
-        if not is_alive:
-            return self.eng._trigger_death(physics)
-
-        # --- PHASE 4: SIMULATION ---
-        # "The World reacts to the energy."
-        world_state, world_logs = self._simulate_world(physics, clean_words)
-        logs.extend(world_logs)
-
-        # --- PHASE 5: COGNITION ---
-        # "The Mind forms a thought."
-        mind_state = self._cognate(physics, clean_words, bio_result)
-
-        # --- PHASE 6: RENDERING ---
-        # "The Projector displays the reality."
-        return self._render(physics, bio_result, world_state, mind_state, clean_words, logs)
-
-    def _observe(self, text: str) -> Tuple[Dict, List[str], List[str]]:
-        """Calculates Physics vectors and Clean Words from raw text."""
-        gaze_result = self.eng.phys.tension.gaze(text, self.eng.mind.mem.graph)
-        physics = gaze_result["physics"]
-        clean_words = gaze_result["clean_words"]
-        logs = []
-
-        # Mirror Logic: Does the input reflect the user's history?
-        mirror_active, mirror_msg = self.eng.mind.mirror.reflect(physics)
+        # Mirror Logic
+        mirror_active, mirror_msg = self.eng.mind.mirror.reflect(ctx.physics)
         if mirror_active and mirror_msg:
-            logs.append(f"{Prisma.CYN}🪞 {mirror_msg}{Prisma.RST}")
+            ctx.log(f"{Prisma.CYN}🪞 {mirror_msg}{Prisma.RST}")
 
-        return physics, clean_words, logs
+        # Rupture Check (VSL)
+        rupture = self.vsl_32v.analyze(ctx.physics)
+        if rupture:
+            ctx.log(rupture["log"])
 
-    def _prune_memory(self, logs: List[str]):
-        """Forgets unused words to prevent database bloat."""
-        rotted_words = self.eng.lex.atrophy(self.eng.tick_count, max_age=100)
-        if rotted_words:
-            count = len(rotted_words)
-            example = rotted_words[0]
-            logs.append(f"{Prisma.GRY}NEURO-PRUNING: Forgot {count} unused concepts (e.g., '{example}').{Prisma.RST}")
-
-    def _secure(self, text: str, physics: Dict, clean_words: List[str], current_logs: List[str]) -> Optional[Dict]:
+    # --- MAINTENANCE (UPDATED) ---
+    def _maintenance_prune(self, ctx: CycleContext):
         """
-        The Immune System.
-        Checks for:
-        1. Hacker News Mode (HN Interface) - An easter egg state.
-        2. Tangibility Gate (Do you have enough Stamina/Mass?).
-        3. Toxicity (Antigens/Poison words).
-        4. Semantic Refusal (Forbidden concepts).
-        5. Dissipative Refusal (Thermodynamic venting).
-
-        Returns a 'Turn Packet' immediately if refused, else None.
+        Forgets unused words to prevent database bloat.
+        [Fuller Synergy]: Rotting words now feed the Limbo layer (Recycling).
         """
-        # 1. HN State Check
-        hn_output = self.vsl_hn.attempt_entry(physics, clean_words)
+        try:
+            rotted_words = self.eng.lex.atrophy(self.eng.tick_count, max_age=100)
+            if rotted_words:
+                # FEED THE GHOSTS
+                for w in rotted_words:
+                    self.eng.limbo.ghosts.append(f"👻{w.upper()}_ECHO")
+
+                example = rotted_words[0]
+                ctx.log(f"{Prisma.GRY}NEURO-PRUNING: {len(rotted_words)} concepts decayed (e.g., '{example}').{Prisma.RST}")
+                ctx.log(f"{Prisma.VIOLET}   (They have drifted into Limbo.){Prisma.RST}")
+        except Exception as e:
+            ctx.log(f"{Prisma.RED}ATROPHY ERROR: {e}{Prisma.RST}")
+
+    # --- PHASE 2: SECURITY ---
+    def _phase_secure(self, ctx: CycleContext):
+        """The Immune System. Filters inputs."""
+        physics = ctx.physics
+        clean = ctx.clean_words
+
+        # 1. HN State
+        hn_output = self.vsl_hn.attempt_entry(physics, clean)
         if hn_output and self.vsl_hn.in_hn_state:
-            return {
+            ctx.refusal_triggered = True
+            ctx.refusal_packet = {
                 "type": "HN_SINGLETON",
                 "ui": hn_output,
                 "logs": [],
                 "metrics": self.eng._get_metrics()
             }
+            return
 
-        # 2. Tangibility Check (The "You must be this tall to ride" sign)
+        # 2. Tangibility (Stamina Check)
         passed_gate, gate_msg = self.eng.phys.gate.weigh(physics, self.eng.stamina)
-        if gate_msg: current_logs.append(gate_msg)
+        if gate_msg: ctx.log(gate_msg)
 
         if not passed_gate:
             self.eng.stamina = max(0.0, self.eng.stamina - 2.0)
-            return self.eng._package_turn("REFUSAL", current_logs, {"physics": physics})
+            ctx.refusal_triggered = True
+            ctx.refusal_packet = self.eng._package_turn("REFUSAL", ctx.logs, {"physics": physics})
+            return
 
-        # 3. Toxicity / Repetition Check
-        repetition_val = self.eng.phys.pulse.check_pulse(clean_words)
+        # 3. Toxicity
+        repetition_val = self.eng.phys.pulse.check_pulse(clean)
         physics["repetition"] = repetition_val
         pulse_status = self.eng.phys.pulse.get_status()
 
         toxin_type, toxin_msg = self.eng.bio.immune.assay(
-            text, "NARRATIVE", repetition_val, physics, pulse_status)
+            ctx.input_text, "NARRATIVE", repetition_val, physics, pulse_status
+        )
 
         if toxin_type:
-            current_logs.append(f"{Prisma.RED}{toxin_msg}{Prisma.RST}")
-            # Fatal Toxins trigger instant feedback
+            ctx.log(f"{Prisma.RED}{toxin_msg}{Prisma.RST}")
             if toxin_type in ["AMANITIN", "CYANIDE_POWDER"]:
                 self.eng.health -= 20.0
-                scar_log = self.eng.gordon.learn_scar(clean_words, 20.0)
-                if scar_log: current_logs.append(scar_log)
-                return self.eng._package_turn("TOXICITY", current_logs, {"physics": physics})
+                scar_log = self.eng.gordon.learn_scar(clean, 20.0)
+                if scar_log: ctx.log(scar_log)
 
-        # 4. Semantic Refusal (The "Guru" or "Fractal" blocks)
-        semantic_refusal = self.vsl_semantic.audit(text)
+                ctx.refusal_triggered = True
+                ctx.refusal_packet = self.eng._package_turn("TOXICITY", ctx.logs, {"physics": physics})
+            return
+
+        # 4. Semantic Refusal
+        semantic_refusal = self.vsl_semantic.audit(ctx.input_text)
         if semantic_refusal:
-            return self.eng._package_turn("REFUSAL", current_logs + [semantic_refusal], {"physics": physics})
+            ctx.refusal_triggered = True
+            ctx.logs.append(semantic_refusal)
+            ctx.refusal_packet = self.eng._package_turn("REFUSAL", ctx.logs, {"physics": physics})
+            return
 
-        # 5. Dissipative Refusal (Venting entropy)
+        # 5. Dissipative Refusal
         vent_msg = self.vsl_vent.check(physics)
         if vent_msg:
-            return self.eng._package_turn("REFUSAL", current_logs + [vent_msg], {"physics": physics})
+            ctx.refusal_triggered = True
+            ctx.logs.append(vent_msg)
+            ctx.refusal_packet = self.eng._package_turn("REFUSAL", ctx.logs, {"physics": physics})
+            return
 
-        return None # Passed all checks
+    # --- PHASE 3: METABOLISM ---
+    def _phase_metabolize(self, ctx: CycleContext):
+        """The Engine burns fuel."""
+        physics = ctx.physics
 
-    def _metabolize(self, text: str, physics: Dict) -> Tuple[Dict, bool, List[str]]:
-        """
-        Calculates energy cost and hormonal response.
-        Updates Health/Stamina based on the result.
-        """
-        # 1. Governor Check (Mode switching based on stress)
+        # Governor Check
         gov_msg = self.eng.bio.governor.shift(physics, self.eng.phys.dynamics.voltage_history)
-        if gov_msg:
-            self.eng.events.log(gov_msg, "GOV")
+        if gov_msg: self.eng.events.log(gov_msg, "GOV")
 
-        # 2. Biological Feedback Loop
+        # Feedback Construction
         bio_feedback = {
-            "INTEGRITY": physics["truth_ratio"],
-            "STATIC": physics["repetition"],
-            "FORCE": physics["voltage"] / 20.0,
+            "INTEGRITY": physics.get("truth_ratio", 0.0),
+            "STATIC": physics.get("repetition", 0.0),
+            "FORCE": physics.get("voltage", 0.0) / 20.0,
             "BETA": physics.get("beta_index", 1.0)
         }
         stress_mod = self.eng.bio.governor.get_stress_modifier(self.eng.tick_count)
 
-        # 3. The Somatic Loop (Digestion & Respiration)
-        bio_result = self.eng.soma.digest_cycle(
-            text,
-            physics,
-            bio_feedback,
-            self.eng.health,
-            self.eng.stamina,
-            stress_mod,
-            self.eng.tick_count
+        # Execute Somatic Loop
+        ctx.bio_result = self.eng.soma.digest_cycle(
+            ctx.input_text, physics, bio_feedback,
+            self.eng.health, self.eng.stamina, stress_mod, self.eng.tick_count
         )
 
-        critical_logs = [l for l in bio_result["logs"] if "CRITICAL" in str(l) or "TAX" in str(l) or "Poison" in str(l)]
+        # Determine survival
+        ctx.is_alive = ctx.bio_result["is_alive"]
 
-        # 4. Hubris/Flow Check (The "Icarus" Mechanic)
+        # Filter critical logs
+        for log in ctx.bio_result["logs"]:
+            if any(x in str(log) for x in ["CRITICAL", "TAX", "Poison"]):
+                ctx.log(log)
+
+        # Hubris Check
         hubris_hit, hubris_msg, event_type = RuptureEngine.audit_perfection(physics, self.eng.lex)
         if hubris_hit:
+            ctx.log(hubris_msg)
             if event_type == "FLOW_BOOST":
                 self.eng.bio.mito.state.atp_pool += 20.0
-                critical_logs.append(hubris_msg)
             else:
-                self.eng.health -= 15.0 # The sun melts the wax wings
-                critical_logs.append(hubris_msg)
+                self.eng.health -= 15.0
 
-        # 5. Healing (Kintsugi / Therapy)
-        self._apply_healing_logic(physics, critical_logs)
+        # Auto-Healing
+        self._apply_healing_logic(ctx)
 
-        return bio_result, bio_result["is_alive"], critical_logs
-
-    def _apply_healing_logic(self, physics: Dict, logs: List[str]):
-        """Checks for automatic repair protocols."""
-        # Kintsugi (Gold Repair)
+    def _apply_healing_logic(self, ctx: CycleContext):
+        """Kintsugi and Therapy protocols."""
         is_cracked, koan = self.eng.kintsugi.check_integrity(self.eng.stamina)
         if is_cracked:
-            logs.append(f"{Prisma.YEL}🏺 KINTSUGI ACTIVATED: Vessel cracking (Stamina Low).{Prisma.RST}")
-            logs.append(f"   {Prisma.WHT}KOAN: {koan}{Prisma.RST}")
+            ctx.log(f"{Prisma.YEL}🏺 KINTSUGI ACTIVATED: Vessel cracking.{Prisma.RST}")
+            ctx.log(f"   {Prisma.WHT}KOAN: {koan}{Prisma.RST}")
 
         if self.eng.kintsugi.active_koan:
-            repair_result = self.eng.kintsugi.attempt_repair(physics, self.eng.trauma_accum)
-            if repair_result and repair_result["success"]:
-                logs.append(repair_result["msg"])
+            repair = self.eng.kintsugi.attempt_repair(ctx.physics, self.eng.trauma_accum)
+            if repair and repair["success"]:
+                ctx.log(repair["msg"])
                 self.eng.stamina = min(BoneConfig.MAX_STAMINA, self.eng.stamina + 20.0)
-                logs.append(f"   {Prisma.GRN}STAMINA RESTORED (+20.0){Prisma.RST}")
-            elif self.eng.kintsugi.active_koan:
-                logs.append(f"{Prisma.GRY}The crack remains: '{self.eng.kintsugi.active_koan}'{Prisma.RST}")
+                ctx.log(f"   {Prisma.GRN}STAMINA RESTORED (+20.0){Prisma.RST}")
 
-        # Therapy (Trauma Healing)
-        healed_list = self.eng.therapy.check_progress(physics, self.eng.stamina, self.eng.trauma_accum)
-        if healed_list:
-            joined = ", ".join(healed_list)
-            logs.append(f"{Prisma.GRN}❤️ THERAPY STREAK: Healing [{joined}]. Health +5.{Prisma.RST}")
+        healed = self.eng.therapy.check_progress(ctx.physics, self.eng.stamina, self.eng.trauma_accum)
+        if healed:
+            joined = ", ".join(healed)
+            ctx.log(f"{Prisma.GRN}❤️ THERAPY STREAK: Healing [{joined}]. Health +5.{Prisma.RST}")
             self.eng.health = min(BoneConfig.MAX_HEALTH, self.eng.health + 5.0)
 
-    def _simulate_world(self, physics: Dict, clean_words: List[str]) -> Tuple[Dict, List[str]]:
-        """
-        The Physics Engine.
-        Handles Gravity, Items, Orbit, and The Theremin.
-        """
-        logs = []
+    # --- PHASE 4: SIMULATION ---
+    def _phase_simulate(self, ctx: CycleContext):
+        """Physics interactions: Gravity, Items, Orbit."""
+        physics = ctx.physics
+        logs = ctx.logs
+        clean = ctx.clean_words
 
-        # Gravity / Drag
-        current_drift = physics.get("narrative_drag", 0.0)
-        psi = physics.get("psi", 0.0)
-        new_drift, grav_log = self.eng.gordon.check_gravity(current_drift, psi)
+        # Gravity & Gordon
+        new_drag, grav_log = self.eng.gordon.check_gravity(physics.get("narrative_drag", 0), physics.get("psi", 0))
         if grav_log: logs.append(grav_log)
-        physics["narrative_drag"] = new_drift
+        physics["narrative_drag"] = new_drag
 
-        # Gordon's Trauma (Flinch mechanic)
-        did_flinch, flinch_msg, panic_response = self.eng.gordon.flinch(clean_words, self.eng.tick_count)
+        # Gordon's Trauma
+        did_flinch, flinch_msg, panic = self.eng.gordon.flinch(clean, self.eng.tick_count)
         if did_flinch:
             logs.append(flinch_msg)
-            if panic_response:
-                for key, val in panic_response.items():
-                    physics[key] = max(physics.get(key, 0), val)
+            if panic: physics.update(panic)
 
-        # Navigation & Orbit
+        # Navigation
         self.eng.navigator.locate(physics)
-        orbit_state, cosmic_drag_penalty, orbit_msg = self.eng.cosmic.analyze_orbit(self.eng.mind.mem, clean_words)
-        self.eng._apply_cosmic_physics(physics, orbit_state, cosmic_drag_penalty)
+        orbit_state, drag_pen, orbit_msg = self.eng.cosmic.analyze_orbit(self.eng.mind.mem, clean)
+        self.eng._apply_cosmic_physics(physics, orbit_state, drag_pen)
+        ctx.world_state["orbit"] = orbit_state
 
-        # The Forge (Creating items)
+        # Forge & Alchemy
         transmute_msg = self.eng.phys.forge.transmute(physics)
         if transmute_msg: logs.append(transmute_msg)
 
@@ -2490,74 +2508,81 @@ class GeodesicOrchestrator:
         if forge_msg: logs.append(forge_msg)
         if new_item: logs.append(self.eng.gordon.acquire(new_item))
 
-        # The Theremin (Resonance/Calcification)
+        # Theremin (The AIRSTRIKE Fix)
         _, _, theremin_msg, t_crit = self.eng.phys.theremin.listen(physics, self.eng.bio.governor.mode)
         if theremin_msg: logs.append(theremin_msg)
-        if t_crit == "AIRSTRIKE": self.eng.health -= 25.0
+        if t_crit == "AIRSTRIKE":
+            damage = 25.0
+            self.eng.health -= damage
+            # [Schur Lens]: "If we bomb them, tell them they were bombed."
+            logs.append(f"{Prisma.RED}*** CRITICAL THEREMIN DISCHARGE ***{Prisma.RST}")
+            logs.append(f"{Prisma.RED}    The resin shattered explosively. You took {damage} Damage.{Prisma.RST}")
 
-        # The Crucible (Voltage management)
+        # Crucible
         c_state, c_val, c_msg = self.eng.phys.crucible.audit_fire(physics)
         if c_msg: logs.append(c_msg)
         if c_state == "MELTDOWN": self.eng.health -= c_val
 
-        # Biological Parasites & Ghosts
-        parasite_active, parasite_log = self.eng.bio.parasite.infect(physics, self.eng.stamina)
-        if parasite_active: logs.append(parasite_log)
+        # Parasites & Ghosts (The Log Preservation Fix)
+        p_active, p_log = self.eng.bio.parasite.infect(physics, self.eng.stamina)
+        if p_active: logs.append(p_log)
 
         if self.eng.limbo.ghosts:
-            haunt_text = logs.pop() if logs else "The air is heavy."
-            logs.append(self.eng.limbo.haunt(haunt_text))
+            # [Pinker Lens]: We preserve the structure of history by modifying the last entry,
+            # rather than deleting it. This creates a palimpsest effect.
+            if logs:
+                last_log = logs[-1]
+                logs[-1] = self.eng.limbo.haunt(last_log)
+            else:
+                logs.append(self.eng.limbo.haunt("The air is heavy."))
 
-        # Pareidolia (Seeing faces in the noise)
-        is_pareidolia, p_msg = self.eng.check_pareidolia(clean_words)
-        if is_pareidolia:
+        # Pareidolia
+        is_p, p_msg = self.eng.check_pareidolia(clean)
+        if is_p:
             logs.append(p_msg)
             physics["psi"] = min(1.0, physics["psi"] + 0.3)
 
-        return {"orbit": orbit_state}, logs
-
-    def _cognate(self, physics: Dict, clean_words: List[str], bio_result: Dict) -> Dict:
-        """Encodes memory and generates a Lens response."""
-        self.eng.mind.mem.encode(clean_words, physics, "GEODESIC")
-        return self.eng.noetic.think(
-            physics, bio_result, self.eng.gordon.inventory,
+    # --- PHASE 5: COGNITION ---
+    def _phase_cognate(self, ctx: CycleContext):
+        """The Mind forms a thought."""
+        self.eng.mind.mem.encode(ctx.clean_words, ctx.physics, "GEODESIC")
+        ctx.mind_state = self.eng.noetic.think(
+            ctx.physics, ctx.bio_result, self.eng.gordon.inventory,
             self.eng.phys.dynamics.voltage_history
         )
 
-    def _render(self, physics, bio_result, world_state, mind_state, clean_words, logs) -> Dict:
-        """
-        Constructs the Final UI packet.
-        Combines the HoloProjector output with system logs.
-        """
-        # Cassandra (Prophecy/Madness) Injection
+    # --- PHASE 6: RENDERING ---
+    def _phase_render(self, ctx: CycleContext) -> Dict[str, Any]:
+        """Final UI Construction."""
+        physics = ctx.physics
+        logs = ctx.logs
+        mind = ctx.mind_state
+
+        # Cassandra Injection
         if self.eng.cassandra.check_trigger(physics):
-            c_scream = self.eng.cassandra.seize()
-            if c_scream: logs.append(c_scream)
+            scream = self.eng.cassandra.seize()
+            if scream: logs.append(scream)
 
-        # Rupture Check (VSL Failure)
-        rupture = self.vsl_32v.analyze(physics)
-        if rupture: logs.append(rupture["log"])
-
-        # Title/Theme Generation
+        # Title Generation
         title_data = self.eng.mind.wise.architect(
-            {"physics": physics, "clean_words": clean_words},
-            (mind_state.get("lens"), mind_state.get("thought"), mind_state.get("role")),
+            {"physics": physics, "clean_words": ctx.clean_words},
+            (mind.get("lens"), mind.get("thought"), mind.get("role")),
             False
         )
 
-        # Core Rendering
+        # Projector Render
         raw_output = self.eng.projector.render(
             {"physics": physics},
             {
                 "title": title_data,
                 "health": self.eng.health,
-                "bio": bio_result,
-                "world": world_state
+                "bio": ctx.bio_result,
+                "world": ctx.world_state
             },
-            (mind_state.get("lens"), mind_state.get("thought"))
+            (mind.get("lens"), mind.get("thought"))
         )
 
-        # Chorus Logic (Multiple Voices)
+        # Chorus Logic
         sys_instruction = ""
         active_lenses = []
         if physics.get("kappa", 0) > 0.4:
@@ -2565,19 +2590,22 @@ class GeodesicOrchestrator:
             if active_lenses:
                 logs.append(f"{Prisma.GRY}CHORUS ACTIVE: {', '.join(active_lenses)}{Prisma.RST}")
 
-        # VSL Coloring (Applying the 'Mood' filter)
-        final_output = self.vsl_chroma.modulate(raw_output, physics["vector"])
+        # VSL Coloring
+        final_output = self.vsl_chroma.modulate(raw_output, physics.get("vector", {}))
+
+        # Rupture Prefix
+        rupture = self.vsl_32v.analyze(physics)
         if rupture:
             final_output = f"{rupture['log']}\n\n{final_output}"
 
-        # Collect async logs from EventBus
+        # Collect Async Logs
         logs.extend([e['text'] for e in self.eng.events.flush()])
 
         return {
             "type": "GEODESIC_COMPLETE",
             "ui": final_output,
             "logs": logs,
-            "metrics": self.eng._get_metrics(bio_result["atp"]),
+            "metrics": self.eng._get_metrics(ctx.bio_result.get("atp", 0.0)),
             "system_instruction": sys_instruction
         }
 
@@ -2729,7 +2757,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 9.6.4', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 9.6.5', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 

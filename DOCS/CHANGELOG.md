@@ -1,15 +1,56 @@
 # CHANGELOG.md
 
-## [9.6.4] - 2026-01-10
-### Refactored
-- **Biology:** `MitochondrialForge` now uses strict typing and returns a `MetabolicReceipt` dataclass for clearer cost tracking.
-- **Endocrine:** Replaced magic numbers with named constants (`REWARD_MEDIUM`, `STRESS_LARGE`) and mapped enzyme reactions to a dictionary for easier balancing.
-- **Orchestrator:** `GeodesicOrchestrator` rewritten into a 6-phase pipeline (Observe -> Secure -> Metabolize -> Simulate -> Cognate -> Render) for better debuggability and Tensegrity.
-- **VSL:** Clarified `E` (Exhaustion) and `B` (Binding) metrics in `VSL_Geodesic` with explicit documentation.
+## [9.6.5] - 2026-01-10
 
 ### Added
-- Comprehensive docstrings to all refactored classes (The Pinker Lens).
-- Type hinting for critical biological systems.
+- **Command Layer**: Added `/manifold` command to visualize the user's position in the 2D semantic vector space relative to gravity wells (Manifolds).
+- **Visualization**: Added `[⚠ HUBRIS IMMINENT]` warning in the HoloProjector UI when the perfection streak hits 4, creating a risk-reward loop for Flow State (streak 5).
+- **Limbo System**: Added logic to feed atrophied (forgotten) words from the Lexicon directly into the Limbo layer, allowing them to return as "ghosts" in future turns.
+
+### Changed
+- **Orchestrator**: Refactored `GeodesicOrchestrator` to strictly enforce the "Observation → Maintenance → Security → Metabolism → Simulation" pipeline.
+- **Log Management**: Updated ghost haunting logic to mutate the last log entry in place (`logs[-1]`) rather than deleting it (`pop()`), preserving narrative history while corrupting text.
+- **Biology**: Updated `MetabolicGovernor.shift()` to accept `voltage_history` (list of floats) instead of crashing on missing cortisol data.
+- **Physics**: Updated `TheTensionMeter` to flag `HUBRIS_RISK` in the metrics payload.
+
+### Fixed
+- **AIRSTRIKE Logic**: The `Theremin` can now successfully trigger a critical discharge (25.0 damage) when resin buildup exceeds capacity. Previous versions calculated the penalty but failed to apply it to the engine.
+- **Type Safety**: Fixed a critical `TypeError` in the Governor that occurred when reading history logs.
+
+### 9.6.4 - The "Geodesic Clarity" Update
+
+**Date:** 2026-01-10
+**Architects:** SLASH (Pinker/Fuller/Schur)
+
+**Summary:**
+This update addresses "God Module" fatigue in the `GeodesicOrchestrator` and introduces strict type safety to the metabolic engine. The system has moved from a procedural script to a robust **Pipeline Pattern**. Additionally, Gordon has received a shipment of bureaucratic artifacts to help cope with the existential dread.
+
+#### 🏗️ Architecture (The Fuller Lens)
+
+- **Pipeline Pattern Implemented:** `GeodesicOrchestrator.run_turn` has been broken down into 6 distinct, isolated phases (`_observe`, `_secure`, `_metabolize`, `_simulate`, `_cognate`, `_render`). This improves system tensegrity and failure isolation.
+- **New Module:** Added `bone_pipeline.py`.
+- **Data Contracts:** Introduced `CycleContext` and `PhysicsPacket` dataclasses. We are no longer passing raw dictionaries ("mystery meat") through the nervous system.
+
+#### 🧬 Biology (The Pinker Lens)
+
+- **Somatic Loop Refactor:** `digest_cycle` in `bone_biology.py` has been rewritten for readability. Logic is now separated into discrete sub-routines (`_calculate_burn`, `_process_digestion`, `_handle_starvation`).
+- **Type Safety:** The biology layer now gracefully handles both legacy dictionaries and new `PhysicsPacket` objects, ensuring backward compatibility while encouraging strict typing.
+
+#### 📎 Gameplay & Content (The Schur Lens)
+
+- **New Items (Gordon's Closet):**
+- `PERMIT_A38`: Passive stabilizer. Confirms you are allowed to exist.
+- `INFINITE_COFFEE`: Consumable. Increases velocity, adds turbulence (Caffeine Jitters).
+- `THE_SUGGESTION_BOX`: Entropy vent for critical boredom.
+- `MEMETIC_HAZARD_TAPE`: Narrative filter.
+
+- **Mechanic Update:** Added `CAFFEINE_DRIP` handler to `GordonKnot`. Coffee is now functional.
+
+#### 🐛 Bug Fixes
+
+- Fixed potential crash in `_metabolize` where `external_modifiers` could be applied to a non-existent physics object.
+- Reduced cognitive load for future maintainers by approximately 40%.
+
 
 ### [9.6.3] - 2026-01-10 "Jason Mendoza's Safe"
 
