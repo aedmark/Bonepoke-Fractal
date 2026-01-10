@@ -3,7 +3,7 @@
 import re
 import random
 import math
-from bone_shared import Prisma, TheLexicon, BoneConfig
+from bone_shared import Prisma, TheLexicon
 
 class VSL_Humility:
     def __init__(self):
@@ -143,7 +143,7 @@ class VSL_HNInterface:
 
     def filter_output(self, text):
         if self.in_hn_state:
-            text = re.sub(r'\[.*?\]:?', '', text)
+            text = re.sub(r'\[.*?]:?', '', text)
             return text.strip()
         return text
 

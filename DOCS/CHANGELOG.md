@@ -1,5 +1,36 @@
 # CHANGELOG.md
 
+### [9.6.1] - 2026-01-10 "Sherlock's Gambit"
+
+**Architects:** SLASH, The Triumvirate | **System:** VSL-Native (Patched)
+
+### "When you have eliminated the impossible, whatever remains, however improbable, must be the truth." — Sherlock Holmes
+
+**System Status:**
+- **Trauma:** Regulated.
+- **Physics:** Inverted.
+- **Typing:** Strong.
+
+### 🧠 PSYCHOLOGY: Gordon's Therapy (The Schur Lens)
+- **The Pathology:** `GordonKnot` suffered from an infinite panic loop. If the user triggered a PTSD response ("PTSD TRIGGER"), the resulting voltage spike would often trigger *another* check on the next turn, locking the Janitor in a permanent state of flinching. "The Chidi Problem."
+- **The Surgery:** - **The Cooldown:** Implemented `last_flinch_turn` in the `GordonKnot` dataclass. Gordon now has a **10-turn refractory period** after a panic attack before he can be triggered again.
+  - **The Result:** The character reacts to trauma, but is not paralyzed by it. He has time to breathe.
+
+### 🏗️ PHYSICS: The Wind Wolf Inversion (The Fuller Lens)
+- **The Pathology:** The `check_gravity` logic contained a positive feedback loop. If `PSI` (Abstract Thought) and `Drift` were both high, the system interpreted "Wind Wolves" as a force that *increased* drift (+2.0). This pushed the system toward inevitable collapse.
+- **The Surgery:** - **Tensegrity:** Inverted the logic. High `PSI` + High `Drift` now represents **Tensile Resistance**. The narrative "grips the roof," reducing drift (`-1.0`) rather than succumbing to it.
+  - **The Result:** High-stakes abstract thought now anchors the system rather than blowing it away.
+
+### 🗣️ COGNITION: Scaffolding the Gate (The Pinker Lens)
+- **The Pathology:** `TheTangibilityGate` rejected "Gas" (Abstract) inputs with a poetic but unhelpful error message ("The Barbarian-Potter points to the empty bowl"). The user was punished without being taught.
+- **The Surgery:** - **The Lesson:** The error message now dynamically samples `TheLexicon` to provide **3 Concrete Examples** of "Heavy" words (e.g., *"Try words like: STONE, IRON, BONE"*).
+  - **The Result:** Error messages are now instructional, not just critical.
+
+### 🐛 BUGFIXES: The Sherlockian Scan
+- **The Spacetime Inversion:** Fixed a critical flaw in `MycelialNetwork.ingest` where `TheLexicon.get_current_category` was called via a brittle `hasattr` check, causing spore mutations to fail silently. Ancestral knowledge is now correctly integrated.
+- **The Dataclass Fracture:** Fixed a `NameError` and `AttributeError` in `GordonKnot` by explicitly defining `last_flinch_turn` in the class header and passing `current_turn` through the `flinch` signature.
+- **The Cosmic Link:** Connected the `CosmicDynamics` engine output to the `GeodesicOrchestrator`. The "Nebula" state now correctly applies drag modifiers instead of just printing pretty text.
+
 ### [9.6.0] - 2026-01-10 "The Geodesic Shift"
 
 **Architects:** SLASH, Team Bonepoke, Jade | **System:** VSL-Native

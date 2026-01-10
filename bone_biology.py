@@ -47,6 +47,16 @@ class MitochondrialForge:
             self.state.enzymes = set(traits["enzymes"])
             self.events.log(f"{Prisma.CYN}[MITO]: Inherited Enzymes: {list(self.state.enzymes)}.{Prisma.RST}")
 
+    def adapt(self, final_health: float) -> dict:
+        traits = {
+            "efficiency_mod": self.state.efficiency_mod,
+            "ros_resistance": self.state.ros_resistance,
+            "enzymes": list(self.state.enzymes)
+        }
+        if final_health <= 0 and random.random() < 0.3:
+            traits["ros_resistance"] += 0.1
+        return traits
+
     def calculate_metabolism(self, drag: float, external_modifiers: list[float] = None) -> MetabolicReceipt:
         bmr = self.BASE_BMR
         safe_drag = max(0.0, drag)

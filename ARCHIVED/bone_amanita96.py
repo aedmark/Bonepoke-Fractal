@@ -2014,6 +2014,13 @@ class TheNavigator:
     def __init__(self, shimmer_ref):
         self.shimmer = shimmer_ref
         self.current_location = "THE_MUD"
+        self.manifolds = {
+            "THE_MUD": Manifold("THE_MUD", (0.8, 0.2), 0.2, "High Fatigue, Low Tension"),
+            "THE_FORGE": Manifold("THE_FORGE", (0.1, 0.9), 0.2, "Low Fatigue, High Tension"),
+            "THE_AERIE": Manifold("THE_AERIE", (0.2, 0.1), 0.2, "Low Fatigue, Low Tension"),
+            "THE_GLITCH": Manifold("THE_GLITCH", (0.9, 0.9), 0.1, "High Fatigue, High Tension"),
+            "THE_GARDEN": Manifold("THE_GARDEN", (0.5, 0.5), 0.3, "Balanced State")
+        }
 
     def locate(self, physics_packet: dict) -> str:
         if self.check_anomaly(physics_packet.get("raw_text", "")):
@@ -2225,8 +2232,8 @@ class GeodesicOrchestrator:
             return self.eng._trigger_death(physics)
         world_state, world_logs = self._simulate_world(physics, clean_words)
         logs.extend(world_logs)
-        mind_state = self._cognate(physics, clean_words, None)
-        return self._render(physics, {}, world_state, mind_state, clean_words, logs)
+        mind_state = self._cognate(physics, clean_words, bio_result)
+        return self._render(physics, bio_result, world_state, mind_state, clean_words, logs)
 
     def _observe(self, text: str):
         gaze_result = self.eng.phys.tension.gaze(text, self.eng.mind.mem.graph)
@@ -2351,7 +2358,7 @@ class GeodesicOrchestrator:
         if self.eng.cassandra.check_trigger(physics):
             c_scream = self.eng.cassandra.seize()
             if c_scream: logs.append(c_scream)
-        rupture = self.vsl_32v.audit(physics)
+        rupture = self.vsl_32v.analyze(physics)
         if rupture: logs.append(rupture["log"])
         title_data = self.eng.mind.wise.architect(
             {"physics": physics, "clean_words": clean_words},
@@ -2508,19 +2515,10 @@ class BoneAmanita:
         return {"health": self.health, "stamina": self.stamina, "atp": atp, "tick": self.tick_count}
 
     def _ethical_audit(self):
-        """
-        PINKER/SCHUR SAFETY VALVE:
-        Checks if the system is 'suffering' (high trauma/low health) by design or desperation.
-        If desperation, it grants a mercy release.
-        """
         trauma_sum = sum(self.trauma_accum.values())
         health_ratio = self.health / BoneConfig.MAX_HEALTH
-
-        # Desperation Index
         desperation = trauma_sum * (1.0 - health_ratio)
-
         if desperation > 0.7:
-            # Mercy: Force the next turn into HN State to clear the trauma board
             self.events.log(f"{Prisma.WHT}ETHICAL RELEASE: Desperation ({desperation:.2f}) exceeds limits.{Prisma.RST}", "SYS")
             self.trauma_accum = {k:0.0 for k in self.trauma_accum}
             self.health = min(self.health + 30.0, 100.0)

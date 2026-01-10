@@ -4,18 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="54d71af3-2c96-427d-a74f-8b03f4313654" name="Changes" comment="Hanzo">
-      <change afterPath="$PROJECT_DIR$/ARCHIVED/bone_amanita959.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bone_amanita96.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bone_vsl.py" afterDir="false" />
+    <list default="true" id="54d71af3-2c96-427d-a74f-8b03f4313654" name="Changes" comment="Return of the MACK">
+      <change afterPath="$PROJECT_DIR$/bone_amanita961.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DOCS/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/DOCS/CHANGELOG.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MODS/SLASH.md" beforeDir="false" afterPath="$PROJECT_DIR$/MODS/SLASH.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bone_amanita953.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bone_amanita96.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/bone_biology.py" beforeDir="false" afterPath="$PROJECT_DIR$/bone_biology.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bone_commands.py" beforeDir="false" afterPath="$PROJECT_DIR$/bone_commands.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bone_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/bone_data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bone_shared.py" beforeDir="false" afterPath="$PROJECT_DIR$/bone_shared.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bone_vsl.py" beforeDir="false" afterPath="$PROJECT_DIR$/bone_vsl.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -140,7 +137,7 @@
       <workItem from="1767565780305" duration="1936000" />
       <workItem from="1767988820718" duration="264000" />
       <workItem from="1767989090926" duration="12392000" />
-      <workItem from="1768004832468" duration="17700000" />
+      <workItem from="1768004832468" duration="21716000" />
     </task>
     <task id="LOCAL-00001" summary="New day">
       <option name="closed" value="true" />
@@ -358,7 +355,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768015161941</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="Return of the MACK">
+      <option name="closed" value="true" />
+      <created>1768059369538</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1768059369538</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -382,6 +387,7 @@
     <MESSAGE value="idk" />
     <MESSAGE value="Decoupling" />
     <MESSAGE value="Hanzo" />
-    <option name="LAST_COMMIT_MESSAGE" value="Hanzo" />
+    <MESSAGE value="Return of the MACK" />
+    <option name="LAST_COMMIT_MESSAGE" value="Return of the MACK" />
   </component>
 </project>
