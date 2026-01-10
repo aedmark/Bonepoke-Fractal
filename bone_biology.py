@@ -142,7 +142,6 @@ class SomaticLoop:
                     "chem": self.bio.endo.get_state(),
                     "enzyme_active": "NONE",
                     "logs": cycle_logs}
-
         enzyme, nutrient = self.bio.gut.secrete(text, physics_packet)
         base_yield = nutrient["yield"]
         geo_mass = physics_packet.get("geodesic_mass", 0.0)
@@ -157,7 +156,6 @@ class SomaticLoop:
         if geo_multiplier > 1.2:
             cycle_logs.append(f"{Prisma.GRN}INFRASTRUCTURE BONUS: Geodesic Mass {geo_mass:.1f}. Yield x{geo_multiplier:.2f}.{Prisma.RST}")
         self.bio.mito.state.atp_pool += final_yield
-
         sugar, lichen_msg = self.bio.lichen.photosynthesize(
             physics_packet,
             physics_packet["clean_words"],
@@ -165,13 +163,14 @@ class SomaticLoop:
         if sugar > 0:
             self.bio.mito.state.atp_pool += sugar
             cycle_logs.append(f"\n{lichen_msg}")
-
         if self.bio.mito.state.atp_pool < 10.0:
             cycle_logs.append(f"{Prisma.RED}STARVATION PROTOCOL: ATP Critical. Initiating Autophagy...{Prisma.RST}")
-            _, log_msg = self.mem.cannibalize()
-            self.bio.mito.state.atp_pool += 15.0
-            cycle_logs.append(f"   {Prisma.RED}AUTOPHAGY: {log_msg} (+15.0 ATP){Prisma.RST}")
-
+            victim, log_msg = self.mem.cannibalize(current_tick=tick_count)
+            if victim:
+                self.bio.mito.state.atp_pool += 15.0
+                cycle_logs.append(f"   {Prisma.RED}AUTOPHAGY: {log_msg} (+15.0 ATP){Prisma.RST}")
+            else:
+                cycle_logs.append(f"   {Prisma.RED}AUTOPHAGY FAILED: {log_msg} (No Energy Gained){Prisma.RST}")
         turb = physics_packet.get("turbulence", 0.0)
         if turb > 0.7:
             burn = 5.0
@@ -190,7 +189,6 @@ class SomaticLoop:
             if loot:
                 loot_msg = self.gordon.acquire(loot)
                 if loot_msg: cycle_logs.append(loot_msg)
-
         harvest_hits = sum(1 for w in physics_packet["clean_words"] if w in TheLexicon.get("harvest"))
         chem_state = self.bio.endo.metabolize(
             feedback,
@@ -268,9 +266,6 @@ class HyphalInterface:
         is_list = any(l.strip().startswith(("-", "*", "1.", "•")) for l in lines[:3])
         is_poetic = len(lines) > 2 and avg_line_len < 8 and not is_list
         enzyme_type = "CELLULASE"
-        weather_hits = sum(1 for w in physics["clean_words"] if w in self.WEATHER_CIPHER)
-        if weather_hits > 0:
-            enzyme_type = "DECRYPTASE"
         if (code_density > 0.02 and meat_density > 0.05) or is_poetic:
             enzyme_type = "CHITINASE"
         elif code_density > 0.05 or "def " in text or "class " in text:
@@ -296,10 +291,6 @@ class HyphalInterface:
             lines = text.splitlines()
             loc = len([l for l in lines if l.strip()])
         return {"type": "STRUCTURAL", "yield": 15.0, "toxin": 5.0, "desc": f"Hard Lignin ({loc} LOC)", }
-
-    @staticmethod
-    def _digest_encrypted(_text=None):
-        return {"type": "ENCRYPTED", "yield": 25.6, "toxin": 2.0, "desc": "Barometric Data (High Resource Allocation)"}
 
     @staticmethod
     def _digest_narrative(_text=None):
