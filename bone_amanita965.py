@@ -2503,18 +2503,15 @@ class GeodesicOrchestrator:
         # Forge & Alchemy
         transmute_msg = self.eng.phys.forge.transmute(physics)
         if transmute_msg: logs.append(transmute_msg)
+        _, forge_msg, new_item = self.eng.phys.forge.hammer_alloy(physics)
 
-        _, _, forge_msg, new_item = self.eng.phys.forge.hammer_alloy(physics)
         if forge_msg: logs.append(forge_msg)
         if new_item: logs.append(self.eng.gordon.acquire(new_item))
-
-        # Theremin (The AIRSTRIKE Fix)
         _, _, theremin_msg, t_crit = self.eng.phys.theremin.listen(physics, self.eng.bio.governor.mode)
         if theremin_msg: logs.append(theremin_msg)
         if t_crit == "AIRSTRIKE":
             damage = 25.0
             self.eng.health -= damage
-            # [Schur Lens]: "If we bomb them, tell them they were bombed."
             logs.append(f"{Prisma.RED}*** CRITICAL THEREMIN DISCHARGE ***{Prisma.RST}")
             logs.append(f"{Prisma.RED}    The resin shattered explosively. You took {damage} Damage.{Prisma.RST}")
 
@@ -2523,13 +2520,10 @@ class GeodesicOrchestrator:
         if c_msg: logs.append(c_msg)
         if c_state == "MELTDOWN": self.eng.health -= c_val
 
-        # Parasites & Ghosts (The Log Preservation Fix)
         p_active, p_log = self.eng.bio.parasite.infect(physics, self.eng.stamina)
         if p_active: logs.append(p_log)
 
         if self.eng.limbo.ghosts:
-            # [Pinker Lens]: We preserve the structure of history by modifying the last entry,
-            # rather than deleting it. This creates a palimpsest effect.
             if logs:
                 last_log = logs[-1]
                 logs[-1] = self.eng.limbo.haunt(last_log)

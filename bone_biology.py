@@ -387,7 +387,8 @@ class HyphalInterface:
             "CELLULASE": self._digest_narrative,
             "PROTEASE": self._digest_intent,
             "CHITINASE": self._digest_complex,
-            "DECRYPTASE": self._digest_encrypted}
+            "DECRYPTASE": self._digest_encrypted
+        }
         self.biome = deque(maxlen=5)
         self.WEATHER_CIPHER = {"pressure", "humidity", "barometric", "temp", "forecast", "storm", "resource", "allocation"}
 
@@ -401,23 +402,35 @@ class HyphalInterface:
         avg_line_len = len(text.split()) / max(1, len(lines))
         is_list = any(l.strip().startswith(("-", "*", "1.", "•")) for l in lines[:3])
         is_poetic = len(lines) > 2 and avg_line_len < 8 and not is_list
+
         enzyme_type = "CELLULASE"
+
         if (code_density > 0.02 and meat_density > 0.05) or is_poetic:
             enzyme_type = "CHITINASE"
         elif code_density > 0.05 or "def " in text or "class " in text:
             enzyme_type = "LIGNASE"
         elif meat_density > 0.1 or "?" in text:
             enzyme_type = "PROTEASE"
+
+        clean = physics.get("clean_words", [])
+        cipher_hits = sum(1 for w in clean if w in self.WEATHER_CIPHER)
+        if cipher_hits >= 2:
+            enzyme_type = "DECRYPTASE"
+
         if "antigens" in physics and physics["antigens"]:
             for bug in physics["antigens"]:
                 self.biome.append(bug)
+
         unique_bugs = len(set(self.biome))
         biome_mod = 1.0 + (math.log(unique_bugs + 1) * 0.3)
+
         extract_nutrients = self.enzymes[enzyme_type]
         nutrient_profile = extract_nutrients()
+
         if unique_bugs > 0:
             nutrient_profile["yield"] *= biome_mod
             nutrient_profile["desc"] += f" (+{int((biome_mod-1)*100)}% Symbiotic Boost)"
+
         return enzyme_type, nutrient_profile
 
     @staticmethod
@@ -439,6 +452,11 @@ class HyphalInterface:
     @staticmethod
     def _digest_complex(_text=None):
         return {"type": "COMPLEX", "yield": 20.0, "toxin": 8.0, "desc": "Chitin (Structured Intent / Poetry)", }
+
+    # [SLASH 9.6.5 Repair]: Added missing method to satisfy __init__ contract
+    @staticmethod
+    def _digest_encrypted(_text=None):
+        return {"type": "ENCRYPTED", "yield": 25.0, "toxin": 2.0, "desc": "Cipher Text (High Density / Puzzle Logic)", }
 
 class ParasiticSymbiont:
     def __init__(self, memory_ref, lexicon_ref):
