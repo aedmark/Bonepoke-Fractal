@@ -1,5 +1,29 @@
 # CHANGELOG.md
 
+## [9.6.6] - 2026-01-10
+
+### "The Tempered Glass Update" (Logic Hardening & Memory Hygiene)
+
+This release focuses on structural integrity, addressing critical state leaks, logic inversions, and potential singularities identified during the `FORENSIC_CRYSTALLOGRAPHY` audit.
+
+### Fixed
+
+- **Global State Leakage:** `GordonKnot` now initializes `ITEM_REGISTRY` using `copy.deepcopy`. This prevents tool modifications (e.g., from `TheTinkerer`) from bleeding into the global module state and affecting subsequent sessions.
+- **Memory Overflow (Infinite Growth):** `MycelialNetwork.bury` now implements a "Forced Amnesia" protocol. If the standard "polite" cannibalization fails to find a victim, the system now forcibly deletes the oldest node to respect `MAX_MEMORY_CAPACITY`.
+- **Chemical Desynchronization:** `BoneAmanita._ethical_audit` (The Mercy Signal) now correctly resets the `EndocrineSystem`. Previously, it healed physical stats (Health/Stamina) but left the chemical state (Cortisol) in panic mode. It now zeros Cortisol and boosts Serotonin.
+- **Logic Inversion (The Theremin Trap):** `TheTheremin.listen` no longer returns `is_stuck=True` immediately after a "Shatter Event." Breaking the resin now correctly frees the player instead of immobilizing them.
+- **Ghost Inhibitions:** `SynergeticLensArbiter.consult` now uses _live_ scores during the inhibition loop, preventing dampened lenses from inhibiting others based on their pre-dampened strength.
+- **Hubris Logic Trap:** `RuptureEngine.audit_perfection` now explicitly handles a streak of 4 ("The Wobble"), preventing a logic gap where a player could be punished for performing better than a streak of 3 but less than 5.
+- **Null Storms (Zero Division):**
+- Added zero-division guards to `ChorusDriver.generate_chorus_instruction` to prevent crashes during vector collapse events.
+- Added a "physics floor" to `TheTensionMeter._derive_complex_metrics` to ensure `gamma` and `viscosity` never drop to absolute zero on empty inputs, preventing logic locks in downstream systems like `TheForge`.
+
+### Changed
+
+- **Theremin Mechanics:** A "Shatter Event" (Resin > 80.0) now explicitly returns `is_stuck=False`, prioritizing player agency over punishment when the containment breaks.
+- **Perfection Audit:** Streak 4 is now defined as a "Warning State" (Wobble) rather than falling through to the default or Hubris punishment cases.
+
+
 ## [9.6.5] - 2026-01-10
 
 ### Added

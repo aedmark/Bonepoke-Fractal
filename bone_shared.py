@@ -148,6 +148,65 @@ class SemanticsBioassay:
                 structure_path.append(w)
         return " ".join(structure_path) if structure_path else "null"
 
+class TheTinkerer:
+    def __init__(self, gordon_ref, events_ref):
+        self.gordon = gordon_ref
+        self.events = events_ref
+        self.tool_confidence = {}
+
+    def audit_tool_use(self, physics_packet, inventory_list):
+        if isinstance(physics_packet, dict):
+            truth = physics_packet.get("truth_ratio", 0.0)
+            voltage = physics_packet.get("voltage", 0.0)
+            drag = physics_packet.get("narrative_drag", 0.0)
+        else:
+            truth = physics_packet.truth_ratio
+            voltage = physics_packet.voltage
+            drag = physics_packet.narrative_drag
+        success = (voltage > 12.0) or (drag < 2.0)
+        learning_rate = 0.05
+
+        for item_name in inventory_list:
+            if item_name not in self.tool_confidence:
+                self.tool_confidence[item_name] = 1.0
+
+            current = self.tool_confidence[item_name]
+
+            if success:
+                self.tool_confidence[item_name] = min(2.0, current + learning_rate)
+                if random.random() < 0.1:
+                    self.events.log(f"{Prisma.CYN}[TINKER]: {item_name} feels heavier (Confidence {self.tool_confidence[item_name]:.2f}).{Prisma.RST}", "SYS")
+            else:
+                self.tool_confidence[item_name] = max(0.5, current - learning_rate)
+
+            self._mutate_tool_stats(item_name, self.tool_confidence[item_name])
+
+    def _mutate_tool_stats(self, item_name, confidence):
+        item_data = self.gordon.ITEM_REGISTRY.get(item_name)
+        if not item_data:
+            return
+
+        if "value" in item_data:
+            if "base_value" not in item_data:
+                item_data["base_value"] = item_data["value"]
+
+            new_value = item_data["base_value"] * confidence
+            item_data["value"] = round(new_value, 2)
+
+        if confidence > 1.5 and "LUCKY" not in item_data.get("passive_traits", []):
+            if "passive_traits" not in item_data: item_data["passive_traits"] = []
+            item_data["passive_traits"].append("LUCKY")
+            self.events.log(f"{Prisma.CYN}✨ EVOLUTION: {item_name} gained trait [LUCKY].{Prisma.RST}", "TINKER")
+
+    def save_state(self):
+        return self.tool_confidence
+
+    def load_state(self, data):
+        if data:
+            self.tool_confidence = data
+            for item, conf in self.tool_confidence.items():
+                self._mutate_tool_stats(item, conf)
+
 class LexiconStore:
     def __init__(self):
         self.categories = {

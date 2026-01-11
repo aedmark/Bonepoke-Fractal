@@ -1,4 +1,4 @@
-# BONEAMANITA 9.6.5 "THE COMEDOWN"
+# BONEAMANITA 9.6.6 "The Tempered Glass"
 # Architects: SLASH, Team Bonepoke | Humans: James Taylor & Andrew Edmark
 
 import json
@@ -7,12 +7,13 @@ import random
 import re
 import time
 import math
+import copy
 from collections import Counter, deque
 from typing import List, Optional, Tuple, Dict, Any
 from dataclasses import dataclass, field
 
 from bone_commands import CommandProcessor
-from bone_shared import TheLexicon, Prisma, BoneConfig, ParadoxSeed, DeathGen, TheCartographer
+from bone_shared import TheLexicon, Prisma, BoneConfig, ParadoxSeed, DeathGen, TheCartographer, TheTinkerer
 from bone_data import LENSES, GORDON, DREAMS, RESONANCE
 from bone_biology import (
     MitochondrialForge, EndocrineSystem, HyphalInterface, MycotoxinFactory, 
@@ -101,12 +102,13 @@ class SynergeticLensArbiter:
             bids["CLARENCE"] += 60.0
         sorted_candidates = sorted(bids.items(), key=lambda x: x[1], reverse=True)
         active_inhibitions = []
-        for leader, score in sorted_candidates:
-            if score < 15.0: continue
+        for leader, snapshot_score in sorted_candidates:
+            current_score = bids[leader]
+            if current_score < 15.0: continue
             targets = self.INHIBITION_MATRIX.get(leader, [])
             for target in targets:
                 if target in bids:
-                    dampener = score * 0.5
+                    dampener = current_score * 0.5
                     bids[target] = max(0.0, bids[target] - dampener)
                     active_inhibitions.append(f"{leader}->{target}")
         winner = max(bids, key=bids.get)
@@ -168,7 +170,7 @@ class GordonKnot:
         if not self.scar_tissue:
             self.scar_tissue = default_scars
 
-        self.ITEM_REGISTRY = data.get("ITEM_REGISTRY", {})
+        self.ITEM_REGISTRY = copy.deepcopy(data.get("ITEM_REGISTRY", {}))
 
     def _initialize_dispatch_tables(self):
         self.TOOL_EFFECTS = {
@@ -226,7 +228,6 @@ class GordonKnot:
         return logs
 
     def _effect_caffeine_drip(self, p, data, item_name):
-        # Pinker Note: Caffeine increases speed but creates jitters (turbulence).
         p["vector"]["VEL"] = min(1.0, p["vector"].get("VEL", 0) + 0.1)
         if random.random() < 0.2:
             p["turbulence"] = min(1.0, p.get("turbulence", 0) + 0.2)
@@ -284,7 +285,6 @@ class GordonKnot:
     def _effect_sync_check(self, p, data, item_name):
         tick = p.get("tick_count", 0)
         voltage = p.get("voltage", 0.0)
-        # Schur Lens: 11:11 magic
         if str(tick).endswith("11") or abs(voltage - 11.1) < 0.1:
             p["narrative_drag"] = 0.0
             p["voltage"] = 11.1
@@ -508,8 +508,6 @@ class TheTensionMeter:
     def _derive_complex_metrics(self, counts, words, voltage, drag, integrity):
         total_vol = max(1, len(words))
         turbulence = TheLexicon.get_turbulence(words)
-
-        # [Pinker Lens]: Flow is about the balance between challenge and skill.
         flow_state = "LAMINAR" if turbulence < 0.3 else "TURBULENT"
 
         mass_words = counts["heavy"] + counts["kinetic"] + counts["thermal"] + counts["cryo"]
@@ -523,12 +521,16 @@ class TheTensionMeter:
 
         total_viscosity = sum(TheLexicon.measure_viscosity(w) for w in words)
         avg_viscosity = total_viscosity / total_vol
+        if total_vol <= 1 and not words:
+            avg_viscosity = 0.1
 
         repetition_score = round(1.0 - (len(set(words)) / total_vol), 2)
 
         bond_strength = max(0.1, integrity["kappa"] + (repetition_score * 0.5))
         voltage_load = max(0.1, voltage / 10.0)
+
         gamma = round((bond_strength * avg_viscosity) / (1.0 + voltage_load), 2)
+        gamma = max(0.01, gamma)
 
         truth_signals = counts["heavy"] + counts["kinetic"]
         cohesion_signals = counts["abstract"] + counts["suburban"]
@@ -540,9 +542,8 @@ class TheTensionMeter:
         else:
             self.perfection_streak = 0
 
-        # THE HUBRIS WARNING
         if self.perfection_streak == 4:
-            flow_state = "HUBRIS_RISK" # Special flag for the renderer
+            flow_state = "HUBRIS_RISK"
 
         zone, zone_color = self._determine_zone(beta_index, truth_ratio)
 
@@ -617,7 +618,7 @@ class TheTensionMeter:
             "clean_words": clean_words,
             "raw_text": text,
             "vector": metrics["vector"],
-            "antigens": counts.get("antigen", 0), # Simplified for packaging
+            "antigens": counts.get("antigen", 0),
             "repetition": metrics["repetition"],
             "perfection_streak": self.perfection_streak,
             "avg_viscosity": metrics["avg_viscosity"],
@@ -637,12 +638,12 @@ class TheTensionMeter:
     @staticmethod
     def _is_structurally_sound(word):
         if not re.search(r"[aeiouy]", word): return False
-        if re.search(r"(.)\1{2,}", word): return False # Triple letters
+        if re.search(r"(.)\1{2,}", word): return False
         return True
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_9.6.5"
+        self.genome = "BONEAMANITA_9.6.6"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -828,6 +829,14 @@ class MycelialNetwork:
                 self.graph[prev]["edges"][current] = min(10.0, self.graph[prev]["edges"][current] + rev_delta)
         if len(self.graph) > BoneConfig.MAX_MEMORY_CAPACITY:
             victim, log_msg = self.cannibalize(current_tick=tick)
+            if not victim:
+                oldest = min(self.graph.keys(), key=lambda k: self.graph[k].get("last_tick", 0))
+                del self.graph[oldest]
+                for node in self.graph:
+                    if oldest in self.graph[node]["edges"]:
+                        del self.graph[node]["edges"][oldest]
+                victim = oldest
+                log_msg = f"FORCED AMNESIA: '{oldest}' deleted to save space."
             return log_msg, [victim] if victim else []
         new_wells = []
         for w in filtered:
@@ -1514,6 +1523,13 @@ class RuptureEngine:
                 f"   The Narrator is impressed. {Prisma.GRN}ATP +20.0.{Prisma.RST}",
                 "FLOW_BOOST"
             )
+        if streak == 4:
+            return (
+                True,
+                f"{Prisma.VIOLET}WOBBLE: You are almost perfect. That is dangerous.{Prisma.RST}\n"
+                f"   Don't look down.",
+                None # No penalty, just a warning
+            )
         if streak >= 3:
             swan = lexicon_class.harvest("cursed")
             if swan == "void": swan = "CHAOS"
@@ -1915,7 +1931,7 @@ class TheTheremin:
         if self.resin_buildup > self.SHATTER_POINT:
             self.resin_buildup = 0.0
             self.calcification_turns = 0
-            return True, resin_flow, f"{Prisma.RED}SHATTER EVENT: Resin overflow. System is solid amber. INITIATING AIRSTRIKE.{Prisma.RST}", "AIRSTRIKE"
+            return False, resin_flow, f"{Prisma.RED}SHATTER EVENT: Resin overflow. System is solid amber. INITIATING AIRSTRIKE.{Prisma.RST}", "AIRSTRIKE"
         if self.calcification_turns > 3:
             critical_event = "CORROSION"
             theremin_msg = f"{theremin_msg} | {Prisma.YEL}FOSSILIZATION IMMINENT{Prisma.RST}"
@@ -2006,6 +2022,8 @@ class ChorusDriver:
             "NARRATOR": (vec.get("PSI", 0) * 0.7) + (1.0 - vec.get("VEL", 0)) * 0.3
         }
         total = sum(lens_weights.values())
+        if total <= 0.001:
+            return "SYSTEM INSTRUCTION: Vector silence. Default to NARRATOR.", ["NARRATOR"]
         if total > 0:
             lens_weights = {k: v/total for k, v in lens_weights.items()}
         else:
@@ -2248,9 +2266,6 @@ class CassandraProtocol:
         return f"\n{Prisma.VIOLET}⚡ CASSANDRA LOOP ACTIVE: (Health -10.0)\n   > {burst[0]}\n   > {burst[1]}\n   > {burst[2]}{Prisma.RST}"
 
 class GeodesicOrchestrator:
-    """
-    The Conductor of the Simulation Loop.
-    """
     def __init__(self, engine_ref):
         self.eng = engine_ref
 
@@ -2262,9 +2277,7 @@ class GeodesicOrchestrator:
         self.vsl_semantic = VSL_SemanticFilter(self.eng.mind.mem)
 
     def run_turn(self, user_message: str) -> Dict[str, Any]:
-        """
-        Executes a single tick of the simulation via the Pipeline Pattern.
-        """
+
         # 1. Initialization
         self.eng.events.flush() # Clear async events from previous ticks
         ctx = CycleContext(input_text=user_message)
@@ -2274,7 +2287,6 @@ class GeodesicOrchestrator:
             self._phase_observe(ctx)
 
             # MAINTENANCE: Neuro-Pruning & Limbo Feeding
-            # [Fuller Lens]: We do this early so the system is clean before calculating costs.
             if self.eng.tick_count % 10 == 0:
                 self._maintenance_prune(ctx)
 
@@ -2298,7 +2310,7 @@ class GeodesicOrchestrator:
             return self._phase_render(ctx)
 
         except Exception as e:
-            # [Schur Lens]: "Everything is fine." (It's not).
+            # "Everything is fine." (It's not).
             import traceback
             traceback.print_exc()
             return {
@@ -2310,7 +2322,6 @@ class GeodesicOrchestrator:
 
     # --- PHASE 1: OBSERVATION ---
     def _phase_observe(self, ctx: CycleContext):
-        """The Eye opens. Calculates physics vectors."""
         gaze_result = self.eng.phys.tension.gaze(ctx.input_text, self.eng.mind.mem.graph)
         ctx.physics = gaze_result["physics"]
         ctx.clean_words = gaze_result["clean_words"]
@@ -2331,10 +2342,6 @@ class GeodesicOrchestrator:
 
     # --- MAINTENANCE (UPDATED) ---
     def _maintenance_prune(self, ctx: CycleContext):
-        """
-        Forgets unused words to prevent database bloat.
-        [Fuller Synergy]: Rotting words now feed the Limbo layer (Recycling).
-        """
         try:
             rotted_words = self.eng.lex.atrophy(self.eng.tick_count, max_age=100)
             if rotted_words:
@@ -2414,7 +2421,6 @@ class GeodesicOrchestrator:
 
     # --- PHASE 3: METABOLISM ---
     def _phase_metabolize(self, ctx: CycleContext):
-        """The Engine burns fuel."""
         physics = ctx.physics
 
         # Governor Check
@@ -2478,7 +2484,6 @@ class GeodesicOrchestrator:
 
     # --- PHASE 4: SIMULATION ---
     def _phase_simulate(self, ctx: CycleContext):
-        """Physics interactions: Gravity, Items, Orbit."""
         physics = ctx.physics
         logs = ctx.logs
         clean = ctx.clean_words
@@ -2529,6 +2534,8 @@ class GeodesicOrchestrator:
                 logs[-1] = self.eng.limbo.haunt(last_log)
             else:
                 logs.append(self.eng.limbo.haunt("The air is heavy."))
+        if self.eng.gordon.inventory:
+            self.eng.tinkerer.audit_tool_use(physics, self.eng.gordon.inventory)
 
         # Pareidolia
         is_p, p_msg = self.eng.check_pareidolia(clean)
@@ -2661,6 +2668,7 @@ class BoneAmanita:
         self.cmd = CommandProcessor(self, Prisma, self.lex, BoneConfig, TheCartographer)
         self.cassandra = CassandraProtocol(self)
         self.director = ChorusDriver()
+        self.tinkerer = TheTinkerer(self.gordon, self.events)
 
         # [7. THE LOOPS]
         self.soma = SomaticLoop(self.bio, self.mind.mem, self.lex, self.gordon, self.folly, self.events)
@@ -2704,7 +2712,9 @@ class BoneAmanita:
                 "meta": {"timestamp": time.time(), "final_health": 0, "final_stamina": self.stamina},
                 "trauma_vector": self.trauma_accum,
                 "mitochondria": self.bio.mito.adapt(0),
-                "core_graph": self.mind.mem.graph}
+                "core_graph": self.mind.mem.graph,
+                "tool_adaptation": self.tinkerer.save_state()
+            }
             path = self.mind.mem.loader.save_spore(self.mind.mem.filename, spore_data)
             death_log.append(f"{Prisma.WHT}   [LEGACY SAVED: {path}]{Prisma.RST}")
         except Exception as e:
@@ -2732,6 +2742,8 @@ class BoneAmanita:
             self.events.log(f"{Prisma.WHT}ETHICAL RELEASE: Desperation ({desperation:.2f}) exceeds limits.{Prisma.RST}", "SYS")
             self.trauma_accum = {k:0.0 for k in self.trauma_accum}
             self.health = min(self.health + 30.0, 100.0)
+            self.bio.endo.cortisol = 0.0
+            self.bio.endo.serotonin = max(0.5, self.bio.endo.serotonin + 0.3)
             return True
         return False
 
@@ -2751,7 +2763,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 9.6.5', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 9.6.6', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
@@ -2773,7 +2785,9 @@ class SessionGuardian:
                 "mitochondria": self.eng.bio.mito.adapt(self.eng.health),
                 "antibodies": list(self.eng.bio.immune.active_antibodies),
                 "core_graph": self.eng.mind.mem.graph,
-                "config_mutations": self.eng.repro.mutate_config(BoneConfig)}
+                "config_mutations": self.eng.repro.mutate_config(BoneConfig),
+                "tool_adaptation": self.eng.tinkerer.save_state()
+            }
             filename = f"emergency_{self.eng.mind.mem.session_id}.json"
             saved_path = self.eng.mind.mem.loader.save_spore(filename, spore_data)
             if saved_path:

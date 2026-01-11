@@ -7,7 +7,6 @@ import math
 from typing import Dict, List, Callable
 from bone_shared import ParadoxSeed
 
-# noinspection PyUnusedLocal
 class CommandProcessor:
     def __init__(self, engine, prisma_ref, lexicon_ref, config_ref, cartographer_ref):
         self.eng = engine
@@ -50,9 +49,6 @@ class CommandProcessor:
     def _cmd_manifold(self, parts):
         nav = self.eng.navigator
         current = nav.current_location
-
-        # Calculate distances to all manifolds
-        # We need the last physics packet to know where we are *exactly*
         phys = self.eng.phys.tension.last_physics_packet
         if not phys or "voltage" not in phys:
             self._log(f"{self.P.GRY}NAVIGATION OFFLINE: No physics data yet.{self.P.RST}")
@@ -60,8 +56,6 @@ class CommandProcessor:
 
         drag = min(10.0, max(0.0, phys.get("narrative_drag", 0.0)))
         volt = min(20.0, max(0.0, phys.get("voltage", 0.0)))
-
-        # Normalize to 0.0-1.0 space used by Navigator
         my_vec = (round(drag / 10.0, 2), round(volt / 20.0, 2))
 
         self._log(f"{self.P.CYN}--- MANIFOLD NAVIGATION ---{self.P.RST}")

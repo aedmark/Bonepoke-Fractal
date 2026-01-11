@@ -73,8 +73,6 @@ class VSL_Geodesic:
         # B-Metric Calculation (Binding/Tension)
         # We look for symbols that break flow or indicate complex syntax.
         c_count = sum(1 for char in text if char in '!?%@#$')
-
-        # Logarithmic scaling prevents long texts from hitting 1.0 too easily.
         base_b = min(1.0, math.log1p(c_count + 1) / math.log1p(length + 1))
 
         return round(e_metric, 3), round(base_b, 3)
