@@ -1,5 +1,5 @@
-# BONEAMANITA 9.6.7 "The Tempered Glass"
-# Architects: SLASH, Team Bonepoke | Humans: James Taylor & Andrew Edmark
+# BONEAMANITA 9.6.7 "The Hyphal Homeostasis"
+# Architects: SLASH, JADE, Taylor & Edmark
 
 import json
 import os
@@ -1670,6 +1670,12 @@ class TheCrucible:
         self.active_state = "COLD"
         self.dampener_charges = 3
         self.dampener_tolerance = 15.0
+        self.target_pressure = 10.0
+        self.osmotic_memory = 0.0
+        self.last_pressure_diff = 0.0
+        self.sensitivity = 0.5
+        self.saturation = 0.1
+        self.anticipation = 0.2
     
     def dampen(self, voltage_spike, stability_index):
         if self.dampener_charges <= 0:
@@ -1682,18 +1688,37 @@ class TheCrucible:
             self.dampener_charges -= 1
             return True, f"CRUCIBLE DAMPENER: Tipped. High Voltage ({voltage_spike}v) on Unstable Ground. Dampening.", 0.0
         return False, "Structure is holding the charge.", 0.0
-    
+
     def audit_fire(self, physics):
         voltage = physics.get("voltage", 0.0)
         structure = physics.get("kappa", 0.0)
-        if voltage > 15.0:
+        lignin_signal = self._regulate_turgor(voltage)
+        current_drag = physics.get("narrative_drag", 0.0)
+        adjustment = lignin_signal * 0.5
+        new_drag = max(0.0, min(10.0, current_drag + adjustment))
+        physics["narrative_drag"] = round(new_drag, 2)
+        msg = None
+        if abs(adjustment) > 1.0:
+            action = "LIGNIFYING" if adjustment > 0 else "SOFTENING"
+            msg = f"{Prisma.CYN}HOMEOSTASIS: Turgor variance. {action} Cell Walls (Drag {current_drag:.1f} -> {new_drag:.1f}).{Prisma.RST}"
+        if voltage > 18.0:
             if structure > 0.5:
                 return self._sublimate(voltage)
             else:
                 return self._meltdown(voltage)
-        self.active_state = "COLD"
-        return "COLD", 0.0, None
-    
+        self.active_state = "REGULATED"
+        return "REGULATED", 0.0, msg
+
+    def _regulate_turgor(self, current_voltage):
+        stress = current_voltage - self.target_pressure
+        self.osmotic_memory = max(-5.0, min(5.0, self.osmotic_memory + stress))
+        velocity = stress - self.last_pressure_diff
+        self.last_pressure_diff = stress
+        signal = (self.sensitivity * stress) + \
+                 (self.saturation * self.osmotic_memory) + \
+                 (self.anticipation * velocity)
+        return signal
+
     def _sublimate(self, voltage):
         self.active_state = "RITUAL"
         gain = voltage * 0.1
@@ -2047,6 +2072,8 @@ class TheNavigator:
     def __init__(self, shimmer_ref):
         self.shimmer = shimmer_ref
         self.current_location = "THE_MUD"
+        self.root_system = None
+        self.root_tolerance = 0.4
         self.manifolds = {
             "THE_MUD": Manifold("THE_MUD", (0.8, 0.2), 0.2, "High Fatigue, Low Tension"),
             "THE_FORGE": Manifold("THE_FORGE", (0.1, 0.9), 0.2, "Low Fatigue, High Tension"),
@@ -2054,6 +2081,23 @@ class TheNavigator:
             "THE_GLITCH": Manifold("THE_GLITCH", (0.9, 0.9), 0.1, "High Fatigue, High Tension"),
             "THE_GARDEN": Manifold("THE_GARDEN", (0.5, 0.5), 0.3, "Balanced State")
         }
+
+    def strike_root(self, vector_data):
+        self.root_system = vector_data
+        return f"{Prisma.CYN}NAVIGATOR: Rhizome Rooted. Mycelial network established.{Prisma.RST}"
+
+    def check_transplant_shock(self, current_vector):
+        if not self.root_system: return None
+        stress_sum = 0.0
+        dims = 0
+        for dim, val in current_vector.items():
+            if dim in self.root_system:
+                stress_sum += abs(val - self.root_system[dim])
+                dims += 1
+        avg_stress = stress_sum / max(1, dims)
+        if avg_stress > self.root_tolerance:
+            return f"{Prisma.OCHRE}TRANSPLANT SHOCK: You are pulling away from the root ({avg_stress:.2f}). Return to the source.{Prisma.RST}"
+        return None
 
     def locate(self, physics_packet: dict) -> str:
         if self.check_anomaly(physics_packet.get("raw_text", "")):
@@ -2464,6 +2508,13 @@ class GeodesicOrchestrator:
         physics = ctx.physics
         logs = ctx.logs
         clean = ctx.clean_words
+        if self.eng.tick_count == 3:
+            root_msg = self.eng.navigator.strike_root(physics.get("vector", {}))
+            logs.append(root_msg)
+        shock_msg = self.eng.navigator.check_transplant_shock(physics.get("vector", {}))
+        if shock_msg:
+            physics["narrative_drag"] += 1.0
+            logs.append(shock_msg)
 
         # Gravity & Gordon
         new_drag, grav_log = self.eng.gordon.check_gravity(physics.get("narrative_drag", 0), physics.get("psi", 0))

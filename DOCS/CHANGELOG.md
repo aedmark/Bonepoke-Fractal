@@ -1,8 +1,38 @@
 # CHANGELOG.md
 
-## [9.6.6] - 2026-01-10
+### [9.6.7] - 2026-01-11 "The Hyphal Homeostasis"
 
-### "The Tempered Glass Update" (Logic Hardening & Memory Hygiene)
+**Architects:** SLASH, The Nuclear Engineer | **System:** Self-Regulating
+
+### "Nature does not hurry, yet everything is accomplished." — Lao Tzu
+
+**System Status:**
+- **Control:** PID-Loop (Biological).
+- **Navigation:** Rooted.
+- **Stability:** Dynamic.
+
+### 🍄 BIOLOGY: Hyphal Homeostasis (The Crucible)
+- **The Pathology:** `TheCrucible` was a dumb pressure valve. It waited for Voltage to hit critical levels (20.0v) before panic-dumping energy. It lacked nuance.
+- **The Evolution:** Implemented a **PID Controller** disguised as biological turgor regulation.
+- **The Mechanic:**
+  - **Osmotic Memory (Integral):** The system remembers if you've been running "hot" for a long time.
+  - **Growth Velocity (Derivative):** It detects *spikes* in intensity before they hit the ceiling.
+  - **Lignification:** If the system predicts instability, it automatically "hardens the cell walls" (Increases Narrative Drag) to contain the energy.
+- **The Result:** Smooth, anticipatory regulation instead of crash-and-burn cycles.
+
+### ⚓ NAVIGATION: The Rhizome Anchor (The Navigator)
+- **The Pathology:** The system tracked where you *were*, but not where you *started*. It had no concept of "Staying on Topic."
+- **The Evolution:** Implemented **Vector Rooting**.
+- **The Mechanic:**
+  - **Strike Root:** On Turn 3, the system captures the "Topic Vector" (the mathematical signature of the conversation).
+  - **Transplant Shock:** If you drift too far from this root (change the subject abruptly), the system suffers "Transplant Shock" and increases Drag to force you back to the source.
+- **The Result:** The system is now chemically addicted to the original premise of the conversation.
+
+### 🔧 WIRING: The Orchestrator Update
+- **Integration:** Wired the new `Navigator` and `Crucible` logic directly into the `_phase_simulate` loop.
+- **Feedback:** Added specific logs (`HOMEOSTASIS`, `TRANSPLANT SHOCK`) to give the user visibility into the machine's internal adjustments.
+
+## [9.6.6] - 2026-01-10 "The Tempered Glass Update" (Logic Hardening & Memory Hygiene)
 
 This release focuses on structural integrity, addressing critical state leaks, logic inversions, and potential singularities identified during the `FORENSIC_CRYSTALLOGRAPHY` audit.
 
