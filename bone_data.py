@@ -3,8 +3,6 @@
 LENSES = {
     "SHERLOCK": {
         "role": "The Empiricist",
-        # [Pinker]: Note how we no longer need 'trigger="HIGH_DRIFT"'.
-        # The Vector Space (High STR + High PHI) handles that naturally.
         "msg": "Logic density {truth_ratio:.2f}. Proceeding with analysis."
     },
     "NATHAN": {
@@ -286,10 +284,26 @@ DREAMS = {
         "{A} + {B} = ?"
     ],
     "NIGHTMARES": {
-        "THERMAL": ["The sun is too close.", "Wires fusing under skin.", "A library burning in reverse."],
-        "CRYO": ["The ink is freezing.", "Walking through white static.", "A heartbeat slowing down."],
-        "SEPTIC": ["Black oil in the water.", "The words are tasting sour.", "Eating ash and dust."],
-        "BARIC": ["The sky is made of lead.", "Crushed by the atmosphere.", "Falling forever."]
+        "THERMAL": [
+            "You are holding '{ghost}', but it is burning your hands.",
+            "The sun is too close. The concept of '{ghost}' catches fire.",
+            "You try to drink water, but it tastes like boiling '{ghost}'."
+        ],
+        "CRYO": [
+            "You are trying to say '{ghost}', but your breath freezes in the air.",
+            "The world is slowing down. '{ghost}' is trapped in the ice.",
+            "You are walking through white static. You cannot find '{ghost}'."
+        ],
+        "SEPTIC": [
+            "Black oil is leaking from the word '{ghost}'.",
+            "You are eating a meal made entirely of '{ghost}', and it tastes like copper.",
+            "The walls are breathing. '{ghost}' is growing mold."
+        ],
+        "BARIC": [
+            "The sky is made of lead. It is crushing '{ghost}'.",
+            "You are underwater. You can see '{ghost}' floating above, out of reach.",
+            "Gravity has increased 10x. You cannot lift the idea of '{ghost}'."
+        ]
     },
     "VISIONS": [
         "A bridge building itself.",
