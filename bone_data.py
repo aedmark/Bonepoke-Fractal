@@ -31,6 +31,56 @@ LENSES = {
     }
 }
 
+# [APPEND TO bone_data.py]
+
+ENNEAGRAM_DATA = {
+    # MAPPING: Links our Lenses to Enneagram Types
+    "TYPE_MAP": {
+        "SHERLOCK": 5,  # The Investigator
+        "GORDON": 9,    # The Peacemaker
+        "NATHAN": 3,    # The Achiever
+        "JESTER": 7,    # The Enthusiast
+        "GLASS": 4,     # The Individualist
+        "CLARENCE": 1,  # The Reformer
+        "NARRATOR": 0   # The Void (Neutral)
+    },
+
+    # GEOMETRY: The lines of movement.
+    # Growth = Integration (Health). Stress = Disintegration (Unhealth).
+    "GEOMETRY": {
+        5: {"STRESS": 7, "GROWTH": 8},  # Sherlock -> Jester (Manic) / Gordon (Decisive)
+        9: {"STRESS": 6, "GROWTH": 3},  # Gordon -> Glass (Paranoid) / Nathan (Productive)
+        3: {"STRESS": 9, "GROWTH": 6},  # Nathan -> Gordon (Apathetic) / Glass (Communal)
+        1: {"STRESS": 4, "GROWTH": 7},  # Clarence -> Glass (Depressive) / Jester (Spontaneous)
+        4: {"STRESS": 2, "GROWTH": 1},  # Glass -> Nathan (Clingy) / Clarence (Objective)
+        7: {"STRESS": 1, "GROWTH": 5},  # Jester -> Clarence (Critical) / Sherlock (Focused)
+        # Virtual Types (These handle the gaps in our 6-lens system)
+        8: {"STRESS": 5, "GROWTH": 2},  # (Gordon-Angry)
+        2: {"STRESS": 8, "GROWTH": 4},  # (Nathan-Needy)
+        6: {"STRESS": 3, "GROWTH": 9},  # (Glass-Anxious)
+    },
+
+    # PROXY: When the geometry points to a Type we don't have a Lens for,
+    # we map it to the closest existing Archetype.
+    "PROXY_MAP": {
+        8: "GORDON",  # Type 8 (Challenger) maps to Gordon (Physicality)
+        2: "NATHAN",  # Type 2 (Helper) maps to Nathan (Heart)
+        6: "GLASS"    # Type 6 (Loyalist) maps to Glass (Reflection/Anxiety)
+    },
+
+    # DIALOGUE: The flavor text for specific shifts
+    "SHIFTS": {
+        "DISINTEGRATION": [
+            "The center cannot hold.", "Falling down the geometric line.",
+            "Stress fracture detected.", "Reverting to shadow state."
+        ],
+        "INTEGRATION": [
+            "Transcending the pattern.", "Geometric alignment achieved.",
+            "Moving against the grain of habit.", "Evolving."
+        ]
+    }
+}
+
 GENETICS = {
     "MUTATIONS": {
         "HEAVY": {"trait": "DENSITY", "mod": { "SIGNAL_DRAG_MULTIPLIER": 1.5, "MAX_VOLTAGE": 30.0 }},

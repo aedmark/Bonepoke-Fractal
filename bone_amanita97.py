@@ -48,9 +48,110 @@ class PhysSystem:
     dynamics: 'TemporalDynamics'
     nav: 'TheNavigator'
 
+class EnneagramDriver:
+    """
+    The Geometric Subconscious.
+    Governs the transition between Lenses based on System Stress (ROS) and Clarity (Truth).
+    Logic based on the work of G.I. Gurdjieff and Oscar Ichazo.
+    """
+    def __init__(self, events_ref):
+        self.events = events_ref
+        from bone_data import ENNEAGRAM_DATA # Late import to ensure data exists
+        self.MAP = ENNEAGRAM_DATA["TYPE_MAP"]
+        self.GEO = ENNEAGRAM_DATA["GEOMETRY"]
+        self.PROXY = ENNEAGRAM_DATA["PROXY_MAP"]
+        self.TEXT = ENNEAGRAM_DATA["SHIFTS"]
+
+        # Reverse lookup for when we need to find a Lens by number
+        self.REVERSE_MAP = {v: k for k, v in self.MAP.items()}
+        self.REVERSE_MAP.update(self.PROXY)
+
+        # Hysteresis: We need sustained pressure to shift.
+        # 1.0 = Fully Stable. 0.0 = Shift Imminent.
+        self.stability_buffer = 1.0
+        self.current_state = "STABLE" # STABLE, STRESS, GROWTH
+
+    def _get_lens_name(self, type_num):
+        return self.REVERSE_MAP.get(type_num, "NARRATOR")
+
+    def diagnose_and_shift(self, current_lens, bio_system, physics):
+        """
+        Consults the geometry. Returns (Active_Lens, State_Description).
+        """
+        # 1. Sanity Check
+        if current_lens not in self.MAP:
+            return current_lens, "NEUTRAL"
+
+        # 2. Extract Biometrics
+        # ROS (Stress): Normal < 20. Critical > 50.
+        ros = bio_system.mito.state.ros_buildup
+        # ATP (Energy): Max 200. High > 100.
+        atp = bio_system.mito.state.atp_pool
+
+        # 3. Extract Physics
+        # Truth (Clarity): 0.0 to 1.0. High > 0.8.
+        truth = physics.get("truth_ratio", 0.5)
+        # Drag (Friction): 0.0 to 10.0. High > 5.0.
+        drag = physics.get("narrative_drag", 0.0)
+
+        current_type = self.MAP[current_lens]
+        path = self.GEO.get(current_type)
+
+        if not path:
+            return current_lens, "STATIC"
+
+        # 4. Calculate Pressure
+        # Stress Pressure: Pollution + Drag
+        stress_pressure = (ros / 50.0) + (drag / 5.0) # > 2.0 is extreme
+        # Growth Pressure: Energy + Clarity
+        growth_pressure = (atp / 100.0) + truth      # > 2.0 is extreme
+
+        target_lens = current_lens
+        new_state = "STABLE"
+
+        # 5. Apply Hysteresis (Dampening)
+        # We regain stability slowly, lose it fast under pressure.
+        self.stability_buffer = min(1.0, self.stability_buffer + 0.05)
+
+        if stress_pressure > 1.5:
+            self.stability_buffer -= 0.15
+            if self.stability_buffer <= 0.0:
+                target_type = path["STRESS"]
+                target_lens = self._get_lens_name(target_type)
+                new_state = "DISINTEGRATION"
+
+        elif growth_pressure > 1.8:
+            self.stability_buffer -= 0.10
+            if self.stability_buffer <= 0.0:
+                target_type = path["GROWTH"]
+                target_lens = self._get_lens_name(target_type)
+                new_state = "INTEGRATION"
+
+        # 6. Commit Shift
+        if target_lens != current_lens:
+            # Reset buffer to prevent rapid flickering
+            self.stability_buffer = 0.5
+
+            flavor = random.choice(self.TEXT[new_state])
+            if new_state == "DISINTEGRATION":
+                color = Prisma.RED
+                reason = f"ROS: {int(ros)} | Drag: {drag:.1f}"
+            else:
+                color = Prisma.CYN
+                reason = f"ATP: {int(atp)} | Truth: {truth:.2f}"
+
+            self.events.log(
+                f"{color}ENNEAGRAM {new_state}: {current_lens} -> {target_lens}{Prisma.RST}",
+                "PSYCH"
+            )
+            self.events.log(f"   {Prisma.GRY}Cause: {reason} ({flavor}){Prisma.RST}", "PSYCH")
+
+        return target_lens, new_state
+
 class SynergeticLensArbiter:
     def __init__(self, events: EventBus):
         self.events = events
+        self.enneagram = EnneagramDriver(events)
         self.current_focus = "NARRATOR"
         self.focus_duration = 0
         self.last_physics = None
@@ -63,61 +164,112 @@ class SynergeticLensArbiter:
             "NARRATOR": {"PSI": 1.0, "VEL": -0.5},
             "GLASS":    {"LQ": 2.0, "PSI": 1.5}
         }
-        self.INHIBITION_MATRIX = {
-            "SHERLOCK": ["NATHAN", "JESTER"],
-            "CLARENCE": ["NATHAN", "GORDON"],
-            "GORDON":   ["JESTER", "GLASS"],
-            "JESTER":   ["SHERLOCK", "NARRATOR"]
-        }
 
     def consult(self, physics, bio_state, inventory, ignition_score=0.0):
+        """
+        Determines which Lens (Archetype) takes control of the output.
+        Refactored to use Enneagram logic for stability and stress shifts.
+        """
         self.last_physics = physics
         vectors = physics.get("vector", {})
+
+        # [STEP 1] Calculate Vector Bids (The "Natural" Disposition)
+        # This represents what the system is TRYING to be based on input vectors.
         bids = {k: 10.0 for k in self.VECTOR_AFFINITIES}
         bids["NARRATOR"] = 20.0
+
         for lens, affinities in self.VECTOR_AFFINITIES.items():
             score = 0.0
             for dim, weight in affinities.items():
                 val = vectors.get(dim, 0.5)
+                # Pinker: Use intensity (distance from neutral) to drive differentiation
                 intensity = abs(val - 0.5) * 2.0
                 if weight > 0:
                     score += (val * weight)
                 else:
                     score += ((1.0 - val) * abs(weight))
             bids[lens] += (score * 20.0)
-        if bio_state["atp"] < 10.0:
-            bids["GORDON"] += 50.0
-        if bio_state["chem"].get("ADR", 0) > 0.7:
-            bids["NATHAN"] += 40.0
+
+        # [STEP 2] Apply Situational Modifiers (Schur: Context matters)
+        # We need to extract values safely whether bio_state is a dict or object.
+        if isinstance(bio_state, dict):
+            atp = bio_state.get("atp", 0)
+            chem = bio_state.get("chem", {})
+        else:
+            atp = bio_state.mito.state.atp_pool
+            chem = bio_state.endo.get_state()
+
+        if atp < 10.0:
+            bids["GORDON"] += 50.0 # Starvation forces physical awareness
+        if chem.get("ADR", 0) > 0.7:
+            bids["NATHAN"] += 40.0 # Fear/Adrenaline triggers the Achiever
         if physics.get("kappa", 1.0) < 0.3:
-            bids["JESTER"] += 40.0
+            bids["JESTER"] += 40.0 # Structural chaos summons the Fool
         if physics["counts"].get("toxin", 0) > 0:
-            bids["CLARENCE"] += 60.0
-        sorted_candidates = sorted(bids.items(), key=lambda x: x[1], reverse=True)
-        active_inhibitions = []
-        for leader, snapshot_score in sorted_candidates:
-            current_score = bids[leader]
-            if current_score < 15.0: continue
-            targets = self.INHIBITION_MATRIX.get(leader, [])
-            for target in targets:
-                if target in bids:
-                    dampener = current_score * 0.5
-                    bids[target] = max(0.0, bids[target] - dampener)
-                    active_inhibitions.append(f"{leader}->{target}")
-        winner = max(bids, key=bids.get)
-        if winner != self.current_focus:
+            bids["CLARENCE"] += 60.0 # Poison summons the Doctor
+
+        # [STEP 3] Determine Natural Winner
+        natural_winner = max(bids, key=bids.get)
+
+        # [STEP 4] The Enneagram Filter (Fuller: Geodesic Stress Test)
+        # The vector suggests a lens, but can the psychology sustain it?
+        # We wrap the bio_state to ensure the Enneagram driver gets the object structure it needs.
+        bio_wrapper = self._wrap_bio_facade(bio_state)
+
+        final_lens, psycho_state = self.enneagram.diagnose_and_shift(
+            natural_winner,
+            bio_wrapper,
+            physics
+        )
+
+        # [STEP 5] Stabilization Logic
+        if final_lens != self.current_focus:
             switching_cost = 15.0
-            if bids[winner] - bids[self.current_focus] < switching_cost:
-                winner = self.current_focus
+            # If the switch is driven by Enneagram (Dis/Integration), it's "free" momentum.
+            # If it's just vector noise, it costs point score to switch.
+            is_psych_shift = (natural_winner != final_lens)
+
+            # If it's just noise and the new bid isn't significantly higher, stay put.
+            if not is_psych_shift and (bids[natural_winner] - bids[self.current_focus] < switching_cost):
+                final_lens = self.current_focus
             else:
                 self.focus_duration = 0
         else:
             self.focus_duration += 1
-            if self.focus_duration > 5:
-                bids[winner] -= (self.focus_duration * 5.0)
-        self.current_focus = winner
-        msg, role = self._fetch_voice_data(winner, physics, bio_state)
-        return winner, msg, role
+
+        self.current_focus = final_lens
+        msg, role = self._fetch_voice_data(final_lens, physics, bio_state)
+
+        # Append Psychological State to role for UI clarity (e.g., "The Peacemaker [DISINTEGRATION]")
+        if psycho_state != "STABLE":
+            role = f"{role} [{psycho_state}]"
+
+        return final_lens, msg, role
+
+    def _wrap_bio_facade(self, bio_input):
+        """
+        Helper: Creates a facade object if bio_input is a dictionary.
+        This ensures EnneagramDriver can always access .mito.state.ros_buildup
+        """
+        # If it's already an object (has 'mito'), return it directly.
+        if not isinstance(bio_input, dict) and hasattr(bio_input, 'mito'):
+            return bio_input
+
+        # Otherwise, build a temporary object structure from the dictionary data.
+        class Facade: pass
+
+        wrapper = Facade()
+        wrapper.mito = Facade()
+        wrapper.mito.state = Facade()
+
+        # Extract values or default safely
+        wrapper.mito.state.atp_pool = bio_input.get("atp", 100.0)
+
+        # Estimate ROS from Cortisol if real ROS isn't available in the dict
+        chem = bio_input.get("chem", {})
+        wrapper.mito.state.ros_buildup = chem.get("COR", 0) * 50.0
+
+        return wrapper
 
     def _fetch_voice_data(self, lens, p, b):
         if lens not in LENSES: lens = "NARRATOR"
@@ -2027,8 +2179,8 @@ class NoeticLoop:
         self.mind = mind_layer
         self.bio = bio_layer
         self.arbiter = SynergeticLensArbiter(events)
-    
-    def think(self, physics_packet, bio_state, inventory, voltage_history):
+
+    def think(self, physics_packet, bio_result_dict, inventory, voltage_history):
         volts = physics_packet.get("voltage", 0.0)
         drag = physics_packet.get("narrative_drag", 0.0)
         if volts < 4.0 and drag < 4.0:
@@ -2048,7 +2200,7 @@ class NoeticLoop:
 
         lens_name, lens_msg, lens_role = self.arbiter.consult(
             physics_packet,
-            bio_state,
+            self.bio,
             inventory,
             ignition_score)
         hebbian_msg = None
@@ -2351,11 +2503,73 @@ class CassandraProtocol:
                 burst.append("ERROR: SILENCE.")
         return f"\n{Prisma.VIOLET}⚡ CASSANDRA LOOP ACTIVE: (Health -10.0)\n   > {burst[0]}\n   > {burst[1]}\n   > {burst[2]}{Prisma.RST}"
 
+class TheBureau:
+    """
+    The Middle Place.
+    Where low-voltage, non-toxic inputs go to be filed in triplicate.
+    "Cincinnati."
+    """
+    FORMS = [
+        "Form 27B-6: Request for Narrative Escalation",
+        "Form 1099-B: Declaration of Boredom",
+        "Schedule C: Deduction of Creative Effort",
+        "Form W-2: Wage and Syntax Statement"
+    ]
+
+    RESPONSES = [
+        "Your input has been received and filed under 'General pleasantries'.",
+        "We have noted your statement. Please hold for the next available plot point.",
+        "The system is currently on a coffee break. Your text is safe with us.",
+        "Acknowledged. We have stamped this conversation 'SUFFICIENT'.",
+        "Processing... Processing... Done. Result: Beige.",
+        "That is a perfectly adequate sentence. Good job.",
+        "This output has been approved by the Department of Mundane Compliance."
+    ]
+
+    def __init__(self):
+        self.stamp_count = 0
+
+    def audit(self, physics, bio_state):
+        """
+        Check if the input belongs in Cincinnati.
+        Conditions: Low Voltage, Low Toxin, High Suburban/Solvent count.
+        """
+        voltage = physics.get("voltage", 0.0)
+        toxin = physics.get("counts", {}).get("toxin", 0)
+        suburban = physics.get("counts", {}).get("suburban", 0)
+        solvents = physics.get("counts", {}).get("solvents", 0)
+        clean_len = len(physics.get("clean_words", []))
+
+        # If it's dangerous, it's not boring.
+        if toxin > 0: return None
+
+        # If it's high energy, it's not boring.
+        if voltage > 5.0: return None
+
+        # Calculate Beigeness
+        # High ratio of "Suburban" (office words) or "Solvents" (the, is, a)
+        beige_density = (suburban + solvents) / max(1, clean_len)
+
+        if beige_density > 0.6 or (voltage < 2.0 and clean_len > 2):
+            self.stamp_count += 1
+            form = random.choice(self.FORMS)
+            response = random.choice(self.RESPONSES)
+
+            # Minor ATP recovery because we aren't thinking hard
+            atp_recovery = 2.0
+
+            return {
+                "ui": f"{Prisma.GRY}🏢 THE BUREAU: {response}{Prisma.RST}\n   {Prisma.WHT}[Filed: {form}]{Prisma.RST}",
+                "log": f"BUREAUCRACY: Input diverted to Cincinnati. (Stamp #{self.stamp_count})",
+                "atp_gain": atp_recovery
+            }
+
+        return None
+
 class GeodesicOrchestrator:
     def __init__(self, engine_ref):
         self.eng = engine_ref
-
-        # Sub-systems
+        self.bureau = TheBureau()
         self.vsl_32v = VSL_32Valve(self.eng.mind.lex, self.eng.mind.mem)
         self.vsl_hn = VSL_HNInterface()
         self.vsl_vent = VSL_DissipativeRefusal(self.eng.mind.mem)
@@ -2365,7 +2579,7 @@ class GeodesicOrchestrator:
     def run_turn(self, user_message: str) -> Dict[str, Any]:
 
         # 1. Initialization
-        self.eng.events.flush() # Clear async events from previous ticks
+        self.eng.events.flush()
         ctx = CycleContext(input_text=user_message)
 
         try:
@@ -2380,6 +2594,17 @@ class GeodesicOrchestrator:
             self._phase_secure(ctx)
             if ctx.refusal_triggered:
                 return ctx.refusal_packet
+            bureau_result = self.bureau.audit(ctx.physics, ctx.bio_result)
+            if bureau_result:
+                # We reward a little ATP for the rest
+                self.eng.bio.mito.state.atp_pool += bureau_result["atp_gain"]
+                return {
+                    "type": "BUREAUCRACY",
+                    "ui": bureau_result["ui"],
+                    "logs": ctx.logs + [bureau_result["log"]],
+                    "metrics": self.eng._get_metrics(self.eng.bio.mito.state.atp_pool),
+                    "system_instruction": "SYSTEM: Maintain beige neutrality."
+                }
 
             # PHASE 3: METABOLISM
             self._phase_metabolize(ctx)
