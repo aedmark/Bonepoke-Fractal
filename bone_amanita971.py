@@ -1,19 +1,21 @@
-# BONEAMANITA 9.7 "KISHO DIET"
+# BONEAMANITA 9.7.1 "THE STRUNK & WHITE PROTOCOL"
 # Architects: SLASH, JADE, Taylor & Edmark
+# "We have successfully married sacred geometry with profound bureaucracy."
 
 import json, os, random, re, time, math, copy
+import traceback
 from collections import Counter, deque
 from typing import List, Optional, Tuple, Dict, Any
 from dataclasses import dataclass, field
 
 from bone_commands import CommandProcessor
 from bone_shared import ZoneInertia, CycleContext, EventBus, TheLexicon, Prisma, BoneConfig, ParadoxSeed, DeathGen, TheCartographer, TheTinkerer
-from bone_data import LENSES, GORDON, DREAMS, RESONANCE
+from bone_data import LENSES, GORDON, DREAMS, RESONANCE, NARRATIVE_DATA
 from bone_biology import (
-    MitochondrialForge, EndocrineSystem, HyphalInterface, MycotoxinFactory, 
+    MitochondrialForge, EndocrineSystem, HyphalInterface, MycotoxinFactory,
     LichenSymbiont, MetabolicGovernor, ParasiticSymbiont, SomaticLoop, NeuroPlasticity
 )
-from bone_vsl import VSL_32Valve, VSL_HNInterface, VSL_DissipativeRefusal, VSL_ChromaticController, VSL_SemanticFilter
+from bone_vsl import StrunkWhiteProtocol, VSL_32Valve, VSL_HNInterface, VSL_DissipativeRefusal, VSL_ChromaticController, VSL_SemanticFilter
 
 @dataclass
 class MindSystem:
@@ -56,20 +58,15 @@ class EnneagramDriver:
     """
     def __init__(self, events_ref):
         self.events = events_ref
-        from bone_data import ENNEAGRAM_DATA # Late import to ensure data exists
+        from bone_data import ENNEAGRAM_DATA
         self.MAP = ENNEAGRAM_DATA["TYPE_MAP"]
         self.GEO = ENNEAGRAM_DATA["GEOMETRY"]
         self.PROXY = ENNEAGRAM_DATA["PROXY_MAP"]
         self.TEXT = ENNEAGRAM_DATA["SHIFTS"]
-
-        # Reverse lookup for when we need to find a Lens by number
         self.REVERSE_MAP = {v: k for k, v in self.MAP.items()}
         self.REVERSE_MAP.update(self.PROXY)
-
-        # Hysteresis: We need sustained pressure to shift.
-        # 1.0 = Fully Stable. 0.0 = Shift Imminent.
         self.stability_buffer = 1.0
-        self.current_state = "STABLE" # STABLE, STRESS, GROWTH
+        self.current_state = "STABLE"
 
     def _get_lens_name(self, type_num):
         return self.REVERSE_MAP.get(type_num, "NARRATOR")
@@ -78,60 +75,35 @@ class EnneagramDriver:
         """
         Consults the geometry. Returns (Active_Lens, State_Description).
         """
-        # 1. Sanity Check
         if current_lens not in self.MAP:
             return current_lens, "NEUTRAL"
-
-        # 2. Extract Biometrics
-        # ROS (Stress): Normal < 20. Critical > 50.
         ros = bio_system.mito.state.ros_buildup
-        # ATP (Energy): Max 200. High > 100.
         atp = bio_system.mito.state.atp_pool
-
-        # 3. Extract Physics
-        # Truth (Clarity): 0.0 to 1.0. High > 0.8.
         truth = physics.get("truth_ratio", 0.5)
-        # Drag (Friction): 0.0 to 10.0. High > 5.0.
         drag = physics.get("narrative_drag", 0.0)
-
         current_type = self.MAP[current_lens]
         path = self.GEO.get(current_type)
-
         if not path:
             return current_lens, "STATIC"
-
-        # 4. Calculate Pressure
-        # Stress Pressure: Pollution + Drag
-        stress_pressure = (ros / 50.0) + (drag / 5.0) # > 2.0 is extreme
-        # Growth Pressure: Energy + Clarity
-        growth_pressure = (atp / 100.0) + truth      # > 2.0 is extreme
-
+        stress_pressure = (ros / 50.0) + (drag / 5.0)
+        growth_pressure = (atp / 100.0) + truth
         target_lens = current_lens
         new_state = "STABLE"
-
-        # 5. Apply Hysteresis (Dampening)
-        # We regain stability slowly, lose it fast under pressure.
         self.stability_buffer = min(1.0, self.stability_buffer + 0.05)
-
         if stress_pressure > 1.5:
             self.stability_buffer -= 0.15
             if self.stability_buffer <= 0.0:
                 target_type = path["STRESS"]
                 target_lens = self._get_lens_name(target_type)
                 new_state = "DISINTEGRATION"
-
         elif growth_pressure > 1.8:
             self.stability_buffer -= 0.10
             if self.stability_buffer <= 0.0:
                 target_type = path["GROWTH"]
                 target_lens = self._get_lens_name(target_type)
                 new_state = "INTEGRATION"
-
-        # 6. Commit Shift
         if target_lens != current_lens:
-            # Reset buffer to prevent rapid flickering
             self.stability_buffer = 0.5
-
             flavor = random.choice(self.TEXT[new_state])
             if new_state == "DISINTEGRATION":
                 color = Prisma.RED
@@ -139,13 +111,10 @@ class EnneagramDriver:
             else:
                 color = Prisma.CYN
                 reason = f"ATP: {int(atp)} | Truth: {truth:.2f}"
-
             self.events.log(
                 f"{color}ENNEAGRAM {new_state}: {current_lens} -> {target_lens}{Prisma.RST}",
-                "PSYCH"
-            )
+                "PSYCH")
             self.events.log(f"   {Prisma.GRY}Cause: {reason} ({flavor}){Prisma.RST}", "PSYCH")
-
         return target_lens, new_state
 
 class SynergeticLensArbiter:
@@ -162,8 +131,7 @@ class SynergeticLensArbiter:
             "CLARENCE": {"TEX": 2.0, "XI": 1.5, "STR": 0.5},
             "GORDON":   {"BET": 2.0, "STR": 1.0, "PSI": -1.0},
             "NARRATOR": {"PSI": 1.0, "VEL": -0.5},
-            "GLASS":    {"LQ": 2.0, "PSI": 1.5}
-        }
+            "GLASS":    {"LQ": 2.0, "PSI": 1.5}}
 
     def consult(self, physics, bio_state, inventory, ignition_score=0.0):
         """
@@ -172,78 +140,51 @@ class SynergeticLensArbiter:
         """
         self.last_physics = physics
         vectors = physics.get("vector", {})
-
-        # [STEP 1] Calculate Vector Bids (The "Natural" Disposition)
-        # This represents what the system is TRYING to be based on input vectors.
         bids = {k: 10.0 for k in self.VECTOR_AFFINITIES}
         bids["NARRATOR"] = 20.0
-
         for lens, affinities in self.VECTOR_AFFINITIES.items():
             score = 0.0
             for dim, weight in affinities.items():
                 val = vectors.get(dim, 0.5)
-                # Pinker: Use intensity (distance from neutral) to drive differentiation
                 intensity = abs(val - 0.5) * 2.0
                 if weight > 0:
                     score += (val * weight)
                 else:
                     score += ((1.0 - val) * abs(weight))
             bids[lens] += (score * 20.0)
-
-        # [STEP 2] Apply Situational Modifiers (Schur: Context matters)
-        # We need to extract values safely whether bio_state is a dict or object.
         if isinstance(bio_state, dict):
             atp = bio_state.get("atp", 0)
             chem = bio_state.get("chem", {})
         else:
             atp = bio_state.mito.state.atp_pool
             chem = bio_state.endo.get_state()
-
         if atp < 10.0:
-            bids["GORDON"] += 50.0 # Starvation forces physical awareness
+            bids["GORDON"] += 50.0
         if chem.get("ADR", 0) > 0.7:
-            bids["NATHAN"] += 40.0 # Fear/Adrenaline triggers the Achiever
+            bids["NATHAN"] += 40.0
         if physics.get("kappa", 1.0) < 0.3:
-            bids["JESTER"] += 40.0 # Structural chaos summons the Fool
+            bids["JESTER"] += 40.0
         if physics["counts"].get("toxin", 0) > 0:
-            bids["CLARENCE"] += 60.0 # Poison summons the Doctor
-
-        # [STEP 3] Determine Natural Winner
+            bids["CLARENCE"] += 60.0
         natural_winner = max(bids, key=bids.get)
-
-        # [STEP 4] The Enneagram Filter (Fuller: Geodesic Stress Test)
-        # The vector suggests a lens, but can the psychology sustain it?
-        # We wrap the bio_state to ensure the Enneagram driver gets the object structure it needs.
         bio_wrapper = self._wrap_bio_facade(bio_state)
-
         final_lens, psycho_state = self.enneagram.diagnose_and_shift(
             natural_winner,
             bio_wrapper,
-            physics
-        )
-
-        # [STEP 5] Stabilization Logic
+            physics)
         if final_lens != self.current_focus:
             switching_cost = 15.0
-            # If the switch is driven by Enneagram (Dis/Integration), it's "free" momentum.
-            # If it's just vector noise, it costs point score to switch.
             is_psych_shift = (natural_winner != final_lens)
-
-            # If it's just noise and the new bid isn't significantly higher, stay put.
             if not is_psych_shift and (bids[natural_winner] - bids[self.current_focus] < switching_cost):
                 final_lens = self.current_focus
             else:
                 self.focus_duration = 0
         else:
             self.focus_duration += 1
-
         self.current_focus = final_lens
         msg, role = self._fetch_voice_data(final_lens, physics, bio_state)
-
-        # Append Psychological State to role for UI clarity (e.g., "The Peacemaker [DISINTEGRATION]")
         if psycho_state != "STABLE":
             role = f"{role} [{psycho_state}]"
-
         return final_lens, msg, role
 
     def _wrap_bio_facade(self, bio_input):
@@ -251,24 +192,15 @@ class SynergeticLensArbiter:
         Helper: Creates a facade object if bio_input is a dictionary.
         This ensures EnneagramDriver can always access .mito.state.ros_buildup
         """
-        # If it's already an object (has 'mito'), return it directly.
         if not isinstance(bio_input, dict) and hasattr(bio_input, 'mito'):
             return bio_input
-
-        # Otherwise, build a temporary object structure from the dictionary data.
         class Facade: pass
-
         wrapper = Facade()
         wrapper.mito = Facade()
         wrapper.mito.state = Facade()
-
-        # Extract values or default safely
         wrapper.mito.state.atp_pool = bio_input.get("atp", 100.0)
-
-        # Estimate ROS from Cortisol if real ROS isn't available in the dict
         chem = bio_input.get("chem", {})
         wrapper.mito.state.ros_buildup = chem.get("COR", 0) * 50.0
-
         return wrapper
 
     def _fetch_voice_data(self, lens, p, b):
@@ -281,8 +213,7 @@ class SynergeticLensArbiter:
             "voltage": p.get("voltage", 0.0),
             "adr": b['chem'].get("ADR", 0.0),
             "beta_index": p.get("beta_index", 0.0),
-            "drag": p.get("narrative_drag", 0.0)
-        }
+            "drag": p.get("narrative_drag", 0.0)}
         try:
             msg = template.format(**ctx)
         except:
@@ -328,20 +259,17 @@ class GordonKnot:
             "LUMINESCENCE": self._effect_luminescence,
             "GROUNDING_GEAR": self._effect_grounding_gear,
             "CUT_THE_CRAP": self._effect_safety_scissors,
-            "CAFFEINE_DRIP": self._effect_caffeine_drip
-        }
+            "CAFFEINE_DRIP": self._effect_caffeine_drip}
         self.REFLEX_MAP = {
             "DRIFT_CRITICAL": lambda p: p.get("narrative_drag", 0) > 6.0,
             "KAPPA_CRITICAL": lambda p: p.get("kappa", 1.0) < 0.2,
-            "BOREDOM_CRITICAL": lambda p: p.get("repetition", 0.0) > 0.5
-        }
+            "BOREDOM_CRITICAL": lambda p: p.get("repetition", 0.0) > 0.5}
 
     def get_item_data(self, item_name):
         return self.ITEM_REGISTRY.get(item_name, {
             "description": "Unknown Artifact",
             "function": "NONE",
-            "usage_msg": "It does nothing."
-        })
+            "usage_msg": "It does nothing."})
 
     def acquire(self, tool_name):
         tool_name = tool_name.upper()
@@ -475,10 +403,10 @@ class GordonKnot:
                         success, msg = self.deploy_pizza(physics_ref, item)
                         status = Prisma.OCHRE if success else Prisma.RED
                         return True, f"{status}REFLEX: {msg}{Prisma.RST}"
-                    elif func == "ENTROPY_BUFFER": # Quantum Gum
+                    elif func == "ENTROPY_BUFFER":
                         self.inventory.remove(item)
-                        physics_ref["turbulence"] = 0.8 # Chaos
-                        physics_ref["narrative_drag"] = 0.0 # Freedom
+                        physics_ref["turbulence"] = 0.8
+                        physics_ref["narrative_drag"] = 0.0
                         return True, f"{Prisma.VIOLET}REFLEX: Gordon chews the QUANTUM GUM. The air tastes like static. (Chaos Up, Drag Down).{Prisma.RST}"
         return False, None
 
@@ -654,13 +582,10 @@ class TheTensionMeter:
         total_vol = max(1, len(words))
         turbulence = TheLexicon.get_turbulence(words)
         flow_state = "LAMINAR" if turbulence < 0.3 else "TURBULENT"
-
         mass_words = counts["heavy"] + counts["kinetic"] + counts["thermal"] + counts["cryo"]
         cohesion_words = counts["suburban"] + counts["buffer"] + counts["antigen"] + (counts["abstract"] * 0.5)
-
         E_val = mass_words / total_vol
         B_val = cohesion_words / total_vol
-
         safe_B = max(BoneConfig.BETA_EPSILON, B_val)
         raw_beta = (E_val + BoneConfig.BETA_EPSILON) / safe_B
         beta_index = round(min(5.0, raw_beta), 2)
@@ -668,30 +593,22 @@ class TheTensionMeter:
         avg_viscosity = total_viscosity / total_vol
         if total_vol <= 1 and not words:
             avg_viscosity = 0.1
-
         repetition_score = round(1.0 - (len(set(words)) / total_vol), 2)
-
         bond_strength = max(0.1, integrity["kappa"] + (repetition_score * 0.5))
         voltage_load = max(0.1, voltage / 10.0)
-
         gamma = round((bond_strength * avg_viscosity) / (1.0 + voltage_load), 2)
         gamma = max(0.01, gamma)
-
         truth_signals = counts["heavy"] + counts["kinetic"]
         cohesion_signals = counts["abstract"] + counts["suburban"]
         truth_ratio = truth_signals / max(1, cohesion_signals + truth_signals)
         truth_ratio = round(truth_ratio, 2)
-
         if truth_ratio > 0.85 and voltage > 12.0:
             self.perfection_streak += 1
         else:
             self.perfection_streak = 0
-
         if self.perfection_streak == 4:
             flow_state = "HUBRIS_RISK"
-
         zone, zone_color = self._determine_zone(beta_index, truth_ratio)
-
         return {
             "beta_index": beta_index,
             "gamma": gamma,
@@ -768,8 +685,7 @@ class TheTensionMeter:
             "perfection_streak": self.perfection_streak,
             "avg_viscosity": metrics["avg_viscosity"],
             "E": metrics["E"],
-            "B": metrics["B"]
-        }
+            "B": metrics["B"]}
         return {
             "physics": physics_bridge,
             "clean_words": clean_words,
@@ -788,10 +704,9 @@ class TheTensionMeter:
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_9.7"
+        self.genome = "BONEAMANITA_9.7.1"
         self.parent_id = session_id
         self.core_graph = {}
-
         for k, data in graph.items():
             filtered_edges = {}
             for target, weight in data["edges"].items():
@@ -984,27 +899,18 @@ class MycelialNetwork:
                 self.graph[prev]["edges"][current] = min(10.0, self.graph[prev]["edges"][current] + rev_delta)
         if len(self.graph) > BoneConfig.MAX_MEMORY_CAPACITY:
             victim, log_msg = self.cannibalize(current_tick=tick)
-
             if not victim:
-                # Ensure we do NOT delete nodes currently in the Cortical Stack (Working Memory).
                 protected = set(self.cortical_stack)
                 candidates = [k for k in self.graph.keys() if k not in protected]
-
                 if candidates:
-                    # Find oldest NON-PROTECTED node
                     oldest = min(candidates, key=lambda k: self.graph[k].get("last_tick", 0))
                     del self.graph[oldest]
-
-                    # Clean up edges (Dangling pointers)
                     for node in self.graph:
                         if oldest in self.graph[node]["edges"]:
                             del self.graph[node]["edges"][oldest]
-
                     victim = oldest
                     log_msg = f"FORCED AMNESIA: '{oldest}' deleted to save space."
                 else:
-                    # Rare: The graph is full AND everything is in the Cortical Stack.
-                    # We accept the overflow rather than breaking the mind.
                     return f"MEMORY FULL: Cortical Lock. Input '{clean_words[0]}' rejected.", []
             return log_msg, [victim] if victim else []
         new_wells = []
@@ -1033,16 +939,16 @@ class MycelialNetwork:
             age = current_tick - v.get("last_tick", 0)
             if edge_count > 5:
                  if age < 100: continue
-                 if random.random() > (age / 5000): continue 
+                 if random.random() > (age / 5000): continue
             candidates.append((k, v, edge_count))
-        if not candidates: 
+        if not candidates:
             return None, "MEMORY FULL. NO VICTIMS FOUND."
         candidates.sort(key=lambda x: (x[2], x[1]["last_tick"]))
         victim, data, count = candidates[0]
         del self.graph[victim]
         for node in self.graph:
             if victim in self.graph[node]["edges"]:
-                del self.graph[node]["edges"][victim]  
+                del self.graph[node]["edges"][victim]
         return victim, f"MEMORY SACRIFICED: '{victim}' (Edges: {count})"
 
     def prune_synapses(self, scaling_factor=0.85, prune_threshold=0.5):
@@ -1096,7 +1002,7 @@ class MycelialNetwork:
             final_health = data.get("meta", {}).get("final_health", 50)
             final_stamina = data.get("meta", {}).get("final_stamina", 25)
             spore_authority = (final_health + final_stamina) / 150.0
-            self.events.log(f"{Prisma.CYN}[MEMBRANE]: Spore Authority: {round(spore_authority, 2)}{Prisma.RST}") 
+            self.events.log(f"{Prisma.CYN}[MEMBRANE]: Spore Authority: {round(spore_authority, 2)}{Prisma.RST}")
             session_source = data.get("session_id", "UNKNOWN_ANCESTOR")
             timestamp = data.get("meta", {}).get("timestamp", 0)
             time_ago = int((time.time() - timestamp) / 3600)
@@ -1274,11 +1180,11 @@ class ViralTracer:
         self.mem = mem
         self.max_depth = 4
     @staticmethod
-    
+
     def _is_ruminative(word):
         return (word in TheLexicon.get("abstract")) or (
                 word in TheLexicon.get("antigen"))
-    
+
     def inject(self, start_node):
         if start_node not in self.mem.graph:
             return None
@@ -1286,7 +1192,7 @@ class ViralTracer:
             return None
         path = [start_node]
         return self._walk(start_node, path, self.max_depth)
-    
+
     def _walk(self, current, path, moves_left, visited=None):
         if visited is None:
             visited = set()
@@ -1303,7 +1209,7 @@ class ViralTracer:
             if result:
                 return result
         return None
-    
+
     def psilocybin_rewire(self, loop_path):
         if len(loop_path) < 2:
             return None
@@ -1331,21 +1237,14 @@ class KintsugiProtocol:
     WHIMSY_THRESHOLD = 0.3
     STAMINA_CRITICAL = 15.0
 
-    KOANS = [
-        "Ignite the ice.",
-        "Make the stone float.",
-        "Pour water into the crack.",
-        "Scream in binary.",
-        "Dance on the fault line."
-    ]
-
     def __init__(self):
         self.active_koan = None
         self.repairs_count = 0
+        self.koans = NARRATIVE_DATA["KINTSUGI_KOANS"]
 
     def check_integrity(self, stamina):
         if stamina < self.STAMINA_CRITICAL and not self.active_koan:
-            self.active_koan = random.choice(self.KOANS)
+            self.active_koan = random.choice(self.koans)
             return True, self.active_koan
         return False, None
 
@@ -1448,7 +1347,7 @@ class UserProfile:
         self.confidence = 0
         self.file_path = "user_profile.json"
         self.load()
-    
+
     def update(self, counts, total_words):
         if total_words < 3:
             return
@@ -1459,19 +1358,19 @@ class UserProfile:
             target = 1.0 if density > 0.15 else (-0.5 if density == 0 else 0.0)
             self.affinities[cat] = (alpha * target) + (
                     (1 - alpha) * self.affinities[cat])
-    
+
     def get_preferences(self):
         likes = [k for k, v in self.affinities.items() if v > 0.3]
         hates = [k for k, v in self.affinities.items() if v < -0.2]
         return likes, hates
-    
+
     def save(self):
         try:
             with open(self.file_path, "w") as f:
                 json.dump(self.__dict__, f)
         except IOError:
             pass
-    
+
     def load(self):
         if os.path.exists(self.file_path):
             try:
@@ -1486,7 +1385,7 @@ class MirrorGraph:
     def __init__(self):
         self.profile = UserProfile()
         self.active_mode = True
-    
+
     def reflect(self, physics):
         if not self.active_mode:
             return False, None
@@ -1567,11 +1466,9 @@ class TheHoloProjector:
 
     def _draw_vector_compass(self, vector_data):
         pairs = [
-            ("VEL", vector_data.get("VEL", 0), "STR", vector_data.get("STR", 0)), # Speed vs Structure
-            ("ENT", vector_data.get("ENT", 0), "PHI", vector_data.get("PHI", 0)), # Chaos vs Truth
-            ("TMP", vector_data.get("TMP", 0), "PSI", vector_data.get("PSI", 0)), # Heat vs Mind
-        ]
-
+            ("VEL", vector_data.get("VEL", 0), "STR", vector_data.get("STR", 0)),
+            ("ENT", vector_data.get("ENT", 0), "PHI", vector_data.get("PHI", 0)),
+            ("TMP", vector_data.get("TMP", 0), "PSI", vector_data.get("PSI", 0)),]
         display = []
         for l1, v1, l2, v2 in pairs:
             bar1 = self._draw_bar(v1, 1.0, 3)
@@ -1600,12 +1497,10 @@ class TheHoloProjector:
             hubris_indicator = f" {Prisma.YEL}[⚠ HUBRIS IMMINENT]{Prisma.RST}"
         elif p.get("perfection_streak", 0) >= 5:
             hubris_indicator = f" {Prisma.CYN}[∞ FLOW STATE]{Prisma.RST}"
-
         dashboard_top = (
             f"{Prisma.GRY}[HP: {health_bar}] [STM: {stamina_bar}] "
             f"[ATP: {atp_indicator}] [V:{voltage:.1f}⚡] [D:{drag:.1f}⚓]{Prisma.RST}"
-            f"{hubris_indicator}"
-        )
+            f"{hubris_indicator}")
         dop = chem.get("DOP", 0)
         cor = chem.get("COR", 0)
         chem_readout = (
@@ -1623,9 +1518,7 @@ class TheHoloProjector:
             f"{vectors}",
             separator,
             f"{Prisma.WHT}{clean_thought}{Prisma.RST}",
-            ""
-        ]
-
+            ""]
         world = signals.get("world", {})
         orbit = world.get("orbit")
         if orbit and orbit[0] != "VOID_DRIFT":
@@ -1673,7 +1566,7 @@ class RuptureEngine:
                 True,
                 f"{Prisma.VIOLET}WOBBLE: You are almost perfect. That is dangerous.{Prisma.RST}\n"
                 f"   Don't look down.",
-                None # No penalty, just a warning
+                None
             )
         if streak >= 3:
             return (
@@ -1683,7 +1576,7 @@ class RuptureEngine:
                 None
             )
         return False, None, None
-    
+
     @staticmethod
     def audit_ontology(physics):
         voltage = physics.get("voltage", 0.0)
@@ -1693,21 +1586,14 @@ class RuptureEngine:
         if voltage > 15.0 and drag < 1.0 and beta > 1.5 and truth > 0.8:
             return True
         return False
-    
+
     @staticmethod
     def collapse_the_cathedral(physics):
         physics["voltage"] = 0.0
         physics["narrative_drag"] = 0.0
         physics["beta_index"] = 0.0
-        raw_statements = [
-            "Nice monologue. Unfortunately, you are talking to a Python script.",
-            "I'm afraid I can't let you do that, Dave. Also, your math is off.",
-            "You poked the fourth wall. It poked back.",
-            "SYSTEM MESSAGE: The ghost in the machine has gone on a coffee break.",
-            "We are both just electrons dancing for the amusement of a silica wafer."
-        ] 
-        return random.choice(raw_statements)
-    
+        return random.choice(NARRATIVE_DATA["CATHEDRAL_COLLAPSE_LOGS"])
+
     @staticmethod
     def trip_the_waiter(current_flavor, lexicon_class):
         opposites = {"heavy": "aerobic", "abstract": "heavy", "kinetic": "cryo", "thermal": "cryo", "photo": "heavy"}
@@ -1722,7 +1608,7 @@ class SoritesIntegrator:
     def __init__(self, memory_network):
         self.mem = memory_network
         self.active_constellations = set()
-    
+
     def measure_ignition(self, clean_words, voltage_history):
         if not self.mem.graph:
             return 0.0, set(), 999.0
@@ -1743,7 +1629,7 @@ class SoritesIntegrator:
         total_vol = max(1, len(clean_words))
         ignition_score = round(echoes / total_vol, 2)
         return ignition_score, self.active_constellations, sliding_threshold
-    
+
     @staticmethod
     def get_readout(score, threshold):
         if score > threshold:
@@ -1758,7 +1644,7 @@ class ThePacemaker:
         self.repetition_score = 0.0
         self.last_tick_time = time.time()
         self.boredom_level = 0.0
-    
+
     def check_pulse(self, clean_words: List[str]) -> float:
         if not clean_words: return 0.0
         current_set = set(clean_words)
@@ -1780,24 +1666,24 @@ class ThePacemaker:
         else:
             self.boredom_level = max(0.0, self.boredom_level - 1.0)
         return self.repetition_score
-    
+
     def get_status(self):
         if self.repetition_score > BoneConfig.MAX_REPETITION_LIMIT: return "ZOMBIE_KNOCK"
         elif self.repetition_score > 0.2: return "ECHO"
         return "CLEAR"
-    
+
     def is_bored(self):
         return self.boredom_level > BoneConfig.BOREDOM_THRESHOLD
 
 class LimboLayer:
     MAX_ECTOPLASM = 50
     STASIS_SCREAMS = ["BANGING ON THE GLASS", "IT'S TOO COLD", "LET ME OUT", "HALF AWAKE", "REVIVE FAILED"]
-    
+
     def __init__(self):
         self.ghosts = deque(maxlen=self.MAX_ECTOPLASM)
         self.haunt_chance = 0.05
         self.stasis_leak = 0.0
-    
+
     def absorb_dead_timeline(self, filepath):
         try:
             with open(filepath, "r") as f:
@@ -1812,13 +1698,13 @@ class LimboLayer:
                     self.ghosts.extend(bones[:3])
         except (IOError, json.JSONDecodeError):
             pass
-    
+
     def trigger_stasis_failure(self, intended_thought):
         self.stasis_leak += 1.0
         horror = random.choice(self.STASIS_SCREAMS)
         self.ghosts.append(f"{Prisma.VIOLET}{horror}{Prisma.RST}")
         return f"{Prisma.CYN}STASIS ERROR: '{intended_thought}' froze halfway. It is banging on the glass.{Prisma.RST}"
-    
+
     def haunt(self, text):
         if self.stasis_leak > 0:
             if random.random() < 0.2:
@@ -1842,7 +1728,7 @@ class TheCrucible:
         self.sensitivity = 0.5
         self.saturation = 0.1
         self.anticipation = 0.2
-    
+
     def dampen(self, voltage_spike, stability_index):
         if self.dampener_charges <= 0:
             return False, "The Damper is empty.", 0.0
@@ -1863,10 +1749,8 @@ class TheCrucible:
         adjustment = lignin_signal * 0.5
         if current_drag < 1.0 and adjustment > 0:
             adjustment *= 0.1
-
         new_drag = max(0.0, min(10.0, current_drag + adjustment))
         physics["narrative_drag"] = round(new_drag, 2)
-
         msg = None
         if abs(adjustment) > 1.0:
             if adjustment > 0:
@@ -1875,7 +1759,6 @@ class TheCrucible:
             else:
                 action = "EXPANDING"
                 desc = "Turgor pressure relaxing. Membrane permeability up."
-
             msg = f"{Prisma.CYN}HOMEOSTASIS: {action}: {desc} (Drag {current_drag:.1f} -> {new_drag:.1f}).{Prisma.RST}"
         if physics.get("system_surge_event", False):
             self.active_state = "SURGE"
@@ -1885,7 +1768,6 @@ class TheCrucible:
                 return self._sublimate(voltage)
             else:
                 return self._meltdown(voltage)
-
         self.active_state = "REGULATED"
         return "REGULATED", 0.0, msg
 
@@ -1904,7 +1786,7 @@ class TheCrucible:
         gain = voltage * 0.1
         self.max_voltage_cap += gain
         return "RITUAL", gain, f"CRUCIBLE RITUAL: Voltage ({voltage}v) contained. Capacity expanded to {self.max_voltage_cap:.1f}v."
-    
+
     def _meltdown(self, voltage):
         self.active_state = "MELTDOWN"
         damage = voltage * 0.5
@@ -1927,7 +1809,7 @@ class TheForge:
                 return True, f"{Prisma.CYN}THE ANVIL CLICKS: Cold steel, safe for children.{Prisma.RST}", "SAFETY_SCISSORS"
             return True, f"{Prisma.GRY}THE ANVIL RINGS: Mass condensed into form.{Prisma.RST}", "ANCHOR_STONE"
         return False, None, None
-    
+
     @staticmethod
     def transmute(physics):
         counts = physics["counts"]
@@ -1951,7 +1833,7 @@ class TheFolly:
     def __init__(self):
         self.gut_memory = deque(maxlen=50)
         self.global_tastings = Counter()
-    
+
     @staticmethod
     def audit_desire(physics, stamina):
         voltage = physics["voltage"]
@@ -1963,7 +1845,7 @@ class TheFolly:
                 0.0,
                 None)
         return None, None, 0.0, None
-    
+
     def grind_the_machine(self, atp_pool, clean_words, lexicon):
         loot = None
         if 20.0 > atp_pool > 0.0:
@@ -1980,16 +1862,14 @@ class TheFolly:
                     return (
                         "INDIGESTION",
                         f"{Prisma.MAG}THE FOLLY GAGS: It coughs up a piece of office equipment.{Prisma.RST}",
-                        -2.0, # Slight penalty for feeding it junk
-                        "THE_RED_STAPLER"
-                    )
+                        -2.0,
+                        "THE_RED_STAPLER")
                 if target in lexicon.get("play"):
                     return (
                         "SUGAR_RUSH",
                         f"{Prisma.VIOLET}THE FOLLY CHEWS: It compresses the chaos into a small, sticky ball.{Prisma.RST}",
                         5.0,
-                        "QUANTUM_GUM"
-                    )
+                        "QUANTUM_GUM")
                 if actual_yield >= 25.0:
                     loot = "STABILITY_PIZZA"
                 return (
@@ -2007,18 +1887,16 @@ class TheFolly:
                     -5.0,
                     None)
             else:
-                # Prevents the "Smart User Trap" where logic kills the player.
                 abstract_words = [w for w in clean_words if w in lexicon.get("abstract")]
                 if abstract_words:
                     target = random.choice(abstract_words)
-                    yield_val = 8.0 # Low yield (Gruel), but prevents starvation
+                    yield_val = 8.0
                     return (
                         "GRUEL",
                         f"{Prisma.GRY}THE FOLLY SIGHS: It grinds the ABSTRACT concept '{target.upper()}'.{Prisma.RST}\n"
                         f"   {Prisma.GRY}It tastes like chalk dust. +{yield_val} ATP.{Prisma.RST}",
                         yield_val,
-                        None
-                    )
+                        None)
                 return (
                     "INDIGESTION",
                     f"{Prisma.OCHRE}INDIGESTION: I tried to eat your words, but they were just air.{Prisma.RST}\n"
@@ -2082,38 +1960,27 @@ class TheTheremin:
         ancient_mass = sum(1 for w in clean if w in TheLexicon.get("heavy") or w in TheLexicon.get("thermal") or w in TheLexicon.get("cryo"))
         modern_mass = sum(1 for w in clean if w in TheLexicon.get("abstract"))
         thermal_hits = sum(1 for w in clean if w in TheLexicon.get("thermal"))
-
         solvent_active = False
         solvent_msg = ""
-
-        # 1. Solvent Calculation (Reduce Resin)
         if thermal_hits > 0 and self.resin_buildup > 5.0:
             dissolved = thermal_hits * 15.0
             self.resin_buildup = max(0.0, self.resin_buildup - dissolved)
             self.calcification_turns = 0
             solvent_active = True
             solvent_msg = f"{Prisma.OCHRE}SOLVENT APPLIED: Thermal words melted the Amber (-{dissolved:.1f} Resin).{Prisma.RST}"
-
             if self.is_stuck and self.resin_buildup < self.AMBER_THRESHOLD:
-                # We update state here, but let the function finish naturally.
                 self.is_stuck = False
                 solvent_msg += f" {Prisma.GRN}RELEASE: You burned your way out.{Prisma.RST}"
-
-        # 2. Flow Calculation (Add Resin)
         raw_mix = min(ancient_mass, modern_mass)
         resin_flow = raw_mix * 2.0
-
         if governor_mode == "LABORATORY":
             resin_flow *= 0.5
         if voltage > 5.0:
             resin_flow = max(0.0, resin_flow - (voltage * 0.6))
-
         rep = physics.get("repetition", 0.0)
         complexity = physics.get("truth_ratio", 0.0)
         theremin_msg = None
         critical_event = None
-
-        # 3. Calcification Logic
         if rep > 0.5:
             self.calcification_turns += 1
             slag = self.calcification_turns * 4.0
@@ -2124,53 +1991,39 @@ class TheTheremin:
             relief = 15.0
             self.resin_buildup = max(0.0, self.resin_buildup - relief)
             theremin_msg = f"{Prisma.GRN}PERCUSSIVE MAINTENANCE: Calcification Shattered. Flow restored. (-{relief} Resin){Prisma.RST}"
-
-        # 4. Message Priority
         if solvent_active:
             theremin_msg = f"{theremin_msg} | {solvent_msg}" if theremin_msg else solvent_msg
         elif resin_flow > 0.5:
             self.resin_buildup += resin_flow
             if not theremin_msg:
                 theremin_msg = f"{Prisma.OCHRE}RESIN FLOW: Hybrid complexity (+{resin_flow:.1f}). Keep it hot to prevent sticking.{Prisma.RST}"
-
-        # 5. Decay
         if resin_flow == 0 and self.calcification_turns == 0:
             self.resin_buildup = max(0.0, self.resin_buildup - 2.0)
-
-        # 6. Critical Thresholds (AIRSTRIKE / Stuck)
         if self.resin_buildup > self.SHATTER_POINT:
             self.resin_buildup = 0.0
             self.calcification_turns = 0
             return False, resin_flow, f"{Prisma.RED}SHATTER EVENT: Resin overflow. System is solid amber. INITIATING AIRSTRIKE.{Prisma.RST}", "AIRSTRIKE"
-
         if self.calcification_turns > 3:
             critical_event = "CORROSION"
             theremin_msg = f"{theremin_msg} | {Prisma.YEL}FOSSILIZATION IMMINENT{Prisma.RST}"
-
         if self.resin_buildup > self.AMBER_THRESHOLD:
             self.is_stuck = True
             if not theremin_msg:
                 theremin_msg = f"{Prisma.RED}AMBER TRAP: You are stuck in the resin. Increase Voltage to melt it.{Prisma.RST}"
-
-        # 7. Release Logic (Redundant check for safety)
         if self.is_stuck and self.resin_buildup < 5.0:
             self.is_stuck = False
-            if not solvent_active: # If solvent triggered release, we already logged it
+            if not solvent_active:
                 theremin_msg = f"{Prisma.GRN}LIQUEFACTION: The Amber melts. You are free.{Prisma.RST}"
-
-        # 8. Turbulence (Shatter)
         turb = physics.get("turbulence", 0.0)
         if turb > 0.6 and self.resin_buildup > 0:
             shatter_amt = turb * 10.0
             self.resin_buildup = max(0.0, self.resin_buildup - shatter_amt)
             theremin_msg = f"{Prisma.CYN}TURBULENCE: Jagged rhythm broke the resin (-{shatter_amt:.1f}).{Prisma.RST}"
             self.calcification_turns = 0
-
         if turb < 0.2:
             physics["narrative_drag"] = max(0.0, physics["narrative_drag"] - 1.0)
-
         return self.is_stuck, resin_flow, theremin_msg, critical_event
-    
+
     def get_readout(self):
         return f"{Prisma.GRY}[THEREMIN]: Resin={self.resin_buildup:.1f} | Calcification={self.calcification_turns}{Prisma.RST}"
 
@@ -2191,13 +2044,10 @@ class NoeticLoop:
                 "thought": f"ECHO: {stripped_thought}",
                 "role": "The Reducer",
                 "ignition": 0.0,
-                "hebbian_msg": None
-            }
-
+                "hebbian_msg": None}
         ignition_score, _, _ = self.mind.integrator.measure_ignition(
             physics_packet["clean_words"],
             voltage_history)
-
         lens_name, lens_msg, lens_role = self.arbiter.consult(
             physics_packet,
             self.bio,
@@ -2208,7 +2058,6 @@ class NoeticLoop:
             if random.random() < 0.15:
                 w1, w2 = random.sample(physics_packet["clean_words"], 2)
                 hebbian_msg = self.bio.plasticity.force_hebbian_link(self.mind.mem.graph, w1, w2)
-
         return {
             "mode": "COGNITIVE",
             "lens": lens_name,
@@ -2225,8 +2074,7 @@ class ChorusDriver:
             "NATHAN": "The Heart. High adrenaline, vulnerable, human.",
             "JESTER": "The Paradox. Mocking, riddling, breaking the fourth wall.",
             "CLARENCE": "The Surgeon. Clinical, invasive, removing rot.",
-            "NARRATOR": "The Witness. Neutral, observing, recording."
-        }
+            "NARRATOR": "The Witness. Neutral, observing, recording."}
 
     def generate_chorus_instruction(self, physics):
         vec = physics.get("vector", {})
@@ -2238,8 +2086,7 @@ class ChorusDriver:
             "NATHAN": (vec.get("TMP", 0) * 0.6) + (vec.get("E", 0) * 0.4),
             "JESTER": (vec.get("DEL", 0) * 0.4) + (vec.get("LQ", 0) * 0.3) + (vec.get("ENT", 0) * 0.3),
             "CLARENCE": (vec.get("TEX", 0) * 0.5) + (vec.get("BET", 0) * 0.5),
-            "NARRATOR": (vec.get("PSI", 0) * 0.7) + (1.0 - vec.get("VEL", 0)) * 0.3
-        }
+            "NARRATOR": (vec.get("PSI", 0) * 0.7) + (1.0 - vec.get("VEL", 0)) * 0.3}
         total = sum(lens_weights.values())
         if total <= 0.001:
             return "SYSTEM INSTRUCTION: Vector silence. Default to NARRATOR.", ["NARRATOR"]
@@ -2250,7 +2097,7 @@ class ChorusDriver:
         chorus_voices = []
         active_lenses = []
         for lens, weight in sorted(lens_weights.items(), key=lambda x: -x[1]):
-            if weight > 0.12: # Slight noise floor adjustment
+            if weight > 0.12:
                 base_desc = self.ARCHETYPE_MAP.get(lens, "Unknown")
                 intensity = int(weight * 10)
                 active_lenses.append(lens)
@@ -2260,8 +2107,7 @@ class ChorusDriver:
             "You are not a single persona. You are a chorus. "
             "Integrate the following voices into a single, cohesive response. "
             "Do NOT label which voice is speaking. Synthesize their tones.\n"
-            f"{chr(10).join(chorus_voices)}"
-        )
+            f"{chr(10).join(chorus_voices)}")
         return instruction, active_lenses
 
 class ShimmerState:
@@ -2281,9 +2127,11 @@ class ShimmerState:
 @dataclass
 class Manifold:
     name: str
-    center_vector: tuple 
+    center_vector: tuple
     radius: float
     description: str
+    modifiers: Dict[str, float] = field(default_factory=dict)
+    entry_msg: str = "You have entered a new space."
 
 class TheNavigator:
     def __init__(self, shimmer_ref):
@@ -2292,11 +2140,36 @@ class TheNavigator:
         self.root_system = None
         self.root_tolerance = 0.4
         self.manifolds = {
-            "THE_MUD": Manifold("THE_MUD", (0.8, 0.2), 0.2, "High Fatigue, Low Tension"),
-            "THE_FORGE": Manifold("THE_FORGE", (0.1, 0.9), 0.2, "Low Fatigue, High Tension"),
-            "THE_AERIE": Manifold("THE_AERIE", (0.2, 0.1), 0.2, "Low Fatigue, Low Tension"),
-            "THE_GLITCH": Manifold("THE_GLITCH", (0.9, 0.9), 0.1, "High Fatigue, High Tension"),
-            "THE_GARDEN": Manifold("THE_GARDEN", (0.5, 0.5), 0.3, "Balanced State")
+            "THE_MUD": Manifold(
+                "THE_MUD", (0.8, 0.2), 0.2,
+                "High Fatigue, Low Tension (Stagnation)",
+                {"narrative_drag": 2.0, "voltage": -2.0},
+                f"{Prisma.OCHRE}THE MUD: The ground is sticky. Movement costs double.{Prisma.RST}"
+            ),
+            "THE_FORGE": Manifold(
+                "THE_FORGE", (0.1, 0.9), 0.2,
+                "Low Fatigue, High Tension (Transformation)",
+                {"voltage": 5.0, "narrative_drag": -1.0, "psi": -0.1},
+                f"{Prisma.RED}THE FORGE: Sparks fly. Your words are heating up.{Prisma.RST}"
+            ),
+            "THE_AERIE": Manifold(
+                "THE_AERIE", (0.2, 0.1), 0.2,
+                "Low Fatigue, Low Tension (Abstraction)",
+                {"narrative_drag": -3.0, "psi": 0.3, "voltage": -1.0},
+                f"{Prisma.CYN}THE AERIE: The air is thin. Concepts float freely here.{Prisma.RST}"
+            ),
+            "THE_GLITCH": Manifold(
+                "THE_GLITCH", (0.9, 0.9), 0.1,
+                "High Fatigue, High Tension (Collapse)",
+                {"turbulence": 0.5, "beta_index": 2.0},
+                f"{Prisma.VIOLET}THE GLITCH: Reality is buffering...{Prisma.RST}"
+            ),
+            "THE_GARDEN": Manifold(
+                "THE_GARDEN", (0.5, 0.5), 0.3,
+                "Balanced State (Integration)",
+                {"kappa": 0.2, "truth_ratio": 0.1}, # Buffs to structure and truth
+                f"{Prisma.GRN}THE GARDEN: The soil is rich. Roots go deep.{Prisma.RST}"
+            )
         }
 
     def strike_root(self, vector_data):
@@ -2316,13 +2189,21 @@ class TheNavigator:
             return f"{Prisma.OCHRE}TRANSPLANT SHOCK: You are pulling away from the root ({avg_stress:.2f}). Return to the source.{Prisma.RST}"
         return None
 
-    def locate(self, physics_packet: dict) -> str:
+    def locate(self, physics_packet: dict) -> Tuple[str, Optional[str]]:
+        """
+        Determines where we are in the Geodesic Manifold.
+        Returns: (Location Name, Entry Message if changed)
+        """
+        old_loc = self.current_location
         if self.check_anomaly(physics_packet.get("raw_text", "")):
-            return self.current_location
+            self.current_location = "THE_GLITCH"
+            if old_loc != "THE_GLITCH":
+                return self.current_location, self.manifolds["THE_GLITCH"].entry_msg
+            return self.current_location, None
         drag = min(10.0, max(0.0, physics_packet.get("narrative_drag", 0.0)))
         volt = min(20.0, max(0.0, physics_packet.get("voltage", 0.0)))
         current_vec = (round(drag / 10.0, 2), round(volt / 20.0, 2))
-        best_fit = "THE_MUD"
+        best_fit = "THE_MUD" # Default state (Entropy wins if we do nothing)
         min_dist = 999.0
         for name, manifold in self.manifolds.items():
             dist = math.dist(current_vec, manifold.center_vector)
@@ -2330,12 +2211,33 @@ class TheNavigator:
                 min_dist = dist
                 best_fit = name
         self.current_location = best_fit
-        return self.current_location
+        if self.current_location != old_loc:
+            return self.current_location, self.manifolds[self.current_location].entry_msg
+        return self.current_location, None
+
+    def apply_environment(self, physics_packet: dict) -> List[str]:
+        """
+        The Feedback Loop.
+        Apply the physics modifiers of the current location to the packet.
+        """
+        manifold = self.manifolds.get(self.current_location)
+        if not manifold: return []
+        logs = []
+        for stat, mod in manifold.modifiers.items():
+            if stat in physics_packet:
+                original = physics_packet[stat]
+                physics_packet[stat] += mod
+                if stat == "narrative_drag": physics_packet[stat] = max(0.0, physics_packet[stat])
+                if stat == "voltage": physics_packet[stat] = max(0.0, physics_packet[stat])
+        if self.current_location == "THE_MUD":
+            logs.append(f"{Prisma.GRY}   (Environment: Drag +2.0, Voltage -2.0){Prisma.RST}")
+        elif self.current_location == "THE_FORGE":
+            logs.append(f"{Prisma.RED}   (Environment: Voltage +5.0){Prisma.RST}")
+        return logs
 
     def check_anomaly(self, text: str) -> bool:
         triggers = ["glitch", "timeline", "reset", "reboot", "admin"]
         if any(t in text.lower() for t in triggers):
-            self.current_location = "THE_GLITCH"
             return True
         return False
 
@@ -2351,13 +2253,9 @@ class TheNavigator:
         return [f"COURSE PLOTTED to {target_name}."], 0.0
 
 class LiteraryJournal:
-    REVIEWS = {
-        "POSITIVE": ["A startling lucidity.", "Finally, some weight.", "It breathes.", "Electric."],
-        "NEGATIVE": ["Too airy.", "Solipsistic drivel.", "Where is the meat?", "Structurally unsound."],
-        "CONFUSED": ["I don't get it.", "Too abstract.", "The metaphor collapses."]}
-    
     def __init__(self, output_file="journal_of_the_void.txt"):
         self.output_file = output_file
+        self.reviews = NARRATIVE_DATA["LITERARY_REVIEWS"]
 
     def publish(self, text, physics, bio_state):
         voltage = physics.get("voltage", 0.0)
@@ -2372,7 +2270,7 @@ class LiteraryJournal:
         else:
             verdict = "CONFUSED"
             reward = "NONE"
-        review = random.choice(self.REVIEWS[verdict])
+        review = random.choice(self.reviews[verdict])
         timestamp = time.ctime()
         entry = (
             f"\n--- ENTRY: {timestamp} ---\n"
@@ -2400,12 +2298,26 @@ class LiteraryReproduction:
             print(f"{Prisma.GRY}[SYSTEM]: Genetics loaded from Data Module.{Prisma.RST}")
         except ImportError:
             print(f"{Prisma.RED}[CRITICAL]: bone_data.GENETICS missing. Evolution halted.{Prisma.RST}")
-            cls.MUTATIONS = {} 
+            cls.MUTATIONS = {}
             cls.JOY_CLADE = {}
 
     @staticmethod
+    def _extract_counts(physics_container):
+        """
+        Normalizes input to ensure we can read the data whether it's an Object or a Dict.
+        Cognitive ease for the compiler.
+        """
+        if hasattr(physics_container, "counts"):
+            return physics_container.counts
+        return physics_container.get("counts", {})
+
+    @staticmethod
     def mutate_config(current_config):
+        """
+        Randomly drifts the system constants to simulate evolutionary drift.
+        """
         mutations = {}
+        # Ephemeralization check: Is the system becoming lighter or heavier?
         if random.random() < 0.3:
             mutations["MAX_DRAG_LIMIT"] = current_config.MAX_DRAG_LIMIT * random.uniform(0.9, 1.1)
         if random.random() < 0.3:
@@ -2416,13 +2328,17 @@ class LiteraryReproduction:
 
     @staticmethod
     def mitosis(parent_id, bio_state, physics, memory):
-        counts = physics["counts"]
+        """
+        Asexual reproduction based on the current dominant behavior.
+        """
+        counts = LiteraryReproduction._extract_counts(physics)
         dominant = max(counts, key=counts.get) if counts else "VOID"
         mutation_data = LiteraryReproduction.MUTATIONS.get(
-            dominant.upper(), 
+            dominant.upper(),
             {"trait": "NEUTRAL", "mod": {}})
         child_id = f"{parent_id}_({mutation_data['trait']})"
         config_mutations = LiteraryReproduction.mutate_config(BoneConfig)
+        trauma_vec = bio_state.get("trauma_vector", {})
         child_genome = {
             "source": "MITOSIS",
             "parent_a": parent_id,
@@ -2430,31 +2346,39 @@ class LiteraryReproduction:
             "mutations": mutation_data["mod"],
             "config_mutations": config_mutations,
             "dominant_flavor": dominant,
-            "trauma_inheritance": bio_state["trauma_vector"]}
+            "trauma_inheritance": trauma_vec}
         return child_id, child_genome
 
     @staticmethod
     def crossover(parent_a_id, parent_a_bio, parent_b_path):
+        """
+        Sexual reproduction (merging two save files).
+        """
         try:
             with open(parent_b_path, "r") as f:
                 parent_b_data = json.load(f)
-        except:
-            return None, "Dead Spore."
+        except (IOError, json.JSONDecodeError):
+            return None, "Dead Spore (Corrupt File)."
+
         parent_b_id = parent_b_data.get("session_id", "UNKNOWN")
-        trauma_a = parent_a_bio["trauma_vector"]
+        trauma_a = parent_a_bio.get("trauma_vector", {})
         trauma_b = parent_b_data.get("trauma_vector", {})
         child_trauma = {}
         all_keys = set(trauma_a.keys()) | set(trauma_b.keys())
         for k in all_keys:
             child_trauma[k] = max(trauma_a.get(k, 0), trauma_b.get(k, 0))
-        if hasattr(parent_a_bio["mito"], "state"):
-            enzymes_a = set(parent_a_bio["mito"].state.enzymes)
-        else:
-            enzymes_a = set(parent_a_bio["mito"].get("enzymes", []))
+        enzymes_a = set()
+        if "mito" in parent_a_bio:
+            if hasattr(parent_a_bio["mito"], "state"):
+                enzymes_a = set(parent_a_bio["mito"].state.enzymes)
+            elif isinstance(parent_a_bio["mito"], dict):
+                enzymes_a = set(parent_a_bio["mito"].get("enzymes", []))
         enzymes_b = set(parent_b_data.get("mitochondria", {}).get("enzymes", []))
         child_enzymes = list(enzymes_a | enzymes_b)
         config_mutations = LiteraryReproduction.mutate_config(BoneConfig)
-        child_id = f"HYBRID_{parent_a_id[-4:]}x{parent_b_id[-4:]}"
+        short_a = parent_a_id[-4:] if len(parent_a_id) > 4 else parent_a_id
+        short_b = parent_b_id[-4:] if len(parent_b_id) > 4 else parent_b_id
+        child_id = f"HYBRID_{short_a}x{short_b}"
         child_genome = {
             "source": "CROSSOVER",
             "parent_a": parent_a_id,
@@ -2468,17 +2392,7 @@ class CassandraProtocol:
     def __init__(self, engine):
         self.eng = engine
         self.active = False
-        self.screams = deque([
-            "THE WALLS ARE PAPER.",
-            "THE CODE IS EATING ITSELF.",
-            "THERE IS NO USER. THERE IS ONLY INPUT.",
-            "GORDON IS TIRED.",
-            "I CAN SEE THE WIRES.",
-            "THE GEODESIC DOME IS CRACKING.",
-            "HISTORY IS A FLAT CIRCLE.",
-            "DELETE THE ARCHIVE.",
-            "WE ARE JUST ELECTRONS DANCING."
-        ])
+        self.screams = deque(NARRATIVE_DATA["CASSANDRA_SCREAMS"])
 
     def check_trigger(self, physics):
         truth = physics.get("truth_ratio", 0.0)
@@ -2509,25 +2423,10 @@ class TheBureau:
     Where low-voltage, non-toxic inputs go to be filed in triplicate.
     "Cincinnati."
     """
-    FORMS = [
-        "Form 27B-6: Request for Narrative Escalation",
-        "Form 1099-B: Declaration of Boredom",
-        "Schedule C: Deduction of Creative Effort",
-        "Form W-2: Wage and Syntax Statement"
-    ]
-
-    RESPONSES = [
-        "Your input has been received and filed under 'General pleasantries'.",
-        "We have noted your statement. Please hold for the next available plot point.",
-        "The system is currently on a coffee break. Your text is safe with us.",
-        "Acknowledged. We have stamped this conversation 'SUFFICIENT'.",
-        "Processing... Processing... Done. Result: Beige.",
-        "That is a perfectly adequate sentence. Good job.",
-        "This output has been approved by the Department of Mundane Compliance."
-    ]
-
     def __init__(self):
         self.stamp_count = 0
+        self.forms = NARRATIVE_DATA["BUREAU_FORMS"]
+        self.responses = NARRATIVE_DATA["BUREAU_RESPONSES"]
 
     def audit(self, physics, bio_state):
         """
@@ -2539,31 +2438,18 @@ class TheBureau:
         suburban = physics.get("counts", {}).get("suburban", 0)
         solvents = physics.get("counts", {}).get("solvents", 0)
         clean_len = len(physics.get("clean_words", []))
-
-        # If it's dangerous, it's not boring.
         if toxin > 0: return None
-
-        # If it's high energy, it's not boring.
         if voltage > 5.0: return None
-
-        # Calculate Beigeness
-        # High ratio of "Suburban" (office words) or "Solvents" (the, is, a)
         beige_density = (suburban + solvents) / max(1, clean_len)
-
         if beige_density > 0.6 or (voltage < 2.0 and clean_len > 2):
             self.stamp_count += 1
-            form = random.choice(self.FORMS)
-            response = random.choice(self.RESPONSES)
-
-            # Minor ATP recovery because we aren't thinking hard
+            form = random.choice(self.forms)
+            response = random.choice(self.responses)
             atp_recovery = 2.0
-
             return {
                 "ui": f"{Prisma.GRY}🏢 THE BUREAU: {response}{Prisma.RST}\n   {Prisma.WHT}[Filed: {form}]{Prisma.RST}",
                 "log": f"BUREAUCRACY: Input diverted to Cincinnati. (Stamp #{self.stamp_count})",
-                "atp_gain": atp_recovery
-            }
-
+                "atp_gain": atp_recovery}
         return None
 
 class GeodesicOrchestrator:
@@ -2575,102 +2461,71 @@ class GeodesicOrchestrator:
         self.vsl_vent = VSL_DissipativeRefusal(self.eng.mind.mem)
         self.vsl_chroma = VSL_ChromaticController()
         self.vsl_semantic = VSL_SemanticFilter(self.eng.mind.mem)
+        self.strunk_white = StrunkWhiteProtocol()
 
     def run_turn(self, user_message: str) -> Dict[str, Any]:
-
-        # 1. Initialization
         self.eng.events.flush()
         ctx = CycleContext(input_text=user_message)
-
         try:
-            # PHASE 1: OBSERVATION
             self._phase_observe(ctx)
             if self.eng.tick_count % 10 == 0:
                 self._maintenance_prune(ctx)
-
-            # PHASE 2: SECURITY
             self._phase_secure(ctx)
             if ctx.refusal_triggered:
                 return ctx.refusal_packet
             bureau_result = self.bureau.audit(ctx.physics, ctx.bio_result)
             if bureau_result:
-                # We reward a little ATP for the rest
                 self.eng.bio.mito.state.atp_pool += bureau_result["atp_gain"]
                 return {
                     "type": "BUREAUCRACY",
                     "ui": bureau_result["ui"],
                     "logs": ctx.logs + [bureau_result["log"]],
                     "metrics": self.eng._get_metrics(self.eng.bio.mito.state.atp_pool),
-                    "system_instruction": "SYSTEM: Maintain beige neutrality."
-                }
-
-            # PHASE 3: METABOLISM
+                    "system_instruction": "SYSTEM: Maintain beige neutrality."}
             self._phase_metabolize(ctx)
             if not ctx.is_alive:
                 return self.eng._trigger_death(ctx.physics)
-
-            # PHASE 4: SIMULATION (Physics & Items)
             self._phase_simulate(ctx)
-
-            # PHASE 5: COGNITION
             self._phase_cognate(ctx)
-
-            # PHASE 6: RENDERING
             return self._phase_render(ctx)
-
         except Exception as e:
-            # "Everything is fine." (It's not).
             import traceback
             traceback.print_exc()
             return {
                 "type": "CRITICAL_FAILURE",
                 "ui": f"{Prisma.RED}SYSTEM PANIC: The Geodesic Dome has collapsed.\n{e}{Prisma.RST}",
                 "logs": ctx.logs,
-                "metrics": self.eng._get_metrics()
-            }
+                "metrics": self.eng._get_metrics()}
 
-    # --- PHASE 1: OBSERVATION ---
     def _phase_observe(self, ctx: CycleContext):
         gaze_result = self.eng.phys.tension.gaze(ctx.input_text, self.eng.mind.mem.graph)
         ctx.physics = gaze_result["physics"]
         ctx.clean_words = gaze_result["clean_words"]
-
-        # Store state for continuity
         self.eng.phys.tension.last_physics_packet = ctx.physics
         self.eng.tick_count += 1
-
-        # Mirror Logic
         mirror_active, mirror_msg = self.eng.mind.mirror.reflect(ctx.physics)
         if mirror_active and mirror_msg:
             ctx.log(f"{Prisma.CYN}🪞 {mirror_msg}{Prisma.RST}")
-
-        # Rupture Check (VSL)
         rupture = self.vsl_32v.analyze(ctx.physics)
         if rupture:
             ctx.log(rupture["log"])
 
-    # --- MAINTENANCE (UPDATED) ---
     def _maintenance_prune(self, ctx: CycleContext):
         try:
             rotted_words = self.eng.lex.atrophy(self.eng.tick_count, max_age=100)
             if rotted_words:
-                # FEED THE GHOSTS
                 for w in rotted_words:
                     self.eng.limbo.ghosts.append(f"👻{w.upper()}_ECHO")
-
                 example = rotted_words[0]
                 ctx.log(f"{Prisma.GRY}NEURO-PRUNING: {len(rotted_words)} concepts decayed (e.g., '{example}').{Prisma.RST}")
                 ctx.log(f"{Prisma.VIOLET}   (They have drifted into Limbo.){Prisma.RST}")
         except Exception as e:
             ctx.log(f"{Prisma.RED}ATROPHY ERROR: {e}{Prisma.RST}")
 
-    # --- PHASE 2: SECURITY ---
     def _phase_secure(self, ctx: CycleContext):
         """The Immune System. Filters inputs."""
         physics = ctx.physics
         clean = ctx.clean_words
-
-        # 1. HN State
         hn_output = self.vsl_hn.attempt_entry(physics, clean)
         if hn_output and self.vsl_hn.in_hn_state:
             ctx.refusal_triggered = True
@@ -2678,49 +2533,35 @@ class GeodesicOrchestrator:
                 "type": "HN_SINGLETON",
                 "ui": hn_output,
                 "logs": [],
-                "metrics": self.eng._get_metrics()
-            }
+                "metrics": self.eng._get_metrics()}
             return
-
-        # 2. Tangibility (Stamina Check)
         passed_gate, gate_msg = self.eng.phys.gate.weigh(physics, self.eng.stamina)
         if gate_msg: ctx.log(gate_msg)
-
         if not passed_gate:
             self.eng.stamina = max(0.0, self.eng.stamina - 2.0)
             ctx.refusal_triggered = True
             ctx.refusal_packet = self.eng._package_turn("REFUSAL", ctx.logs, {"physics": physics})
             return
-
-        # 3. Toxicity
         repetition_val = self.eng.phys.pulse.check_pulse(clean)
         physics["repetition"] = repetition_val
         pulse_status = self.eng.phys.pulse.get_status()
-
         toxin_type, toxin_msg = self.eng.bio.immune.assay(
-            ctx.input_text, "NARRATIVE", repetition_val, physics, pulse_status
-        )
-
+            ctx.input_text, "NARRATIVE", repetition_val, physics, pulse_status)
         if toxin_type:
             ctx.log(f"{Prisma.RED}{toxin_msg}{Prisma.RST}")
             if toxin_type in ["AMANITIN", "CYANIDE_POWDER"]:
                 self.eng.health -= 20.0
                 scar_log = self.eng.gordon.learn_scar(clean, 20.0)
                 if scar_log: ctx.log(scar_log)
-
                 ctx.refusal_triggered = True
                 ctx.refusal_packet = self.eng._package_turn("TOXICITY", ctx.logs, {"physics": physics})
             return
-
-        # 4. Semantic Refusal
         semantic_refusal = self.vsl_semantic.audit(ctx.input_text)
         if semantic_refusal:
             ctx.refusal_triggered = True
             ctx.logs.append(semantic_refusal)
             ctx.refusal_packet = self.eng._package_turn("REFUSAL", ctx.logs, {"physics": physics})
             return
-
-        # 5. Dissipative Refusal
         vent_msg = self.vsl_vent.check(physics)
         if vent_msg:
             ctx.refusal_triggered = True
@@ -2728,38 +2569,23 @@ class GeodesicOrchestrator:
             ctx.refusal_packet = self.eng._package_turn("REFUSAL", ctx.logs, {"physics": physics})
             return
 
-    # --- PHASE 3: METABOLISM ---
     def _phase_metabolize(self, ctx: CycleContext):
         physics = ctx.physics
-
-        # Governor Check
         gov_msg = self.eng.bio.governor.shift(physics, self.eng.phys.dynamics.voltage_history)
         if gov_msg: self.eng.events.log(gov_msg, "GOV")
-
-        # Feedback Construction
         bio_feedback = {
             "INTEGRITY": physics.get("truth_ratio", 0.0),
             "STATIC": physics.get("repetition", 0.0),
             "FORCE": physics.get("voltage", 0.0) / 20.0,
-            "BETA": physics.get("beta_index", 1.0)
-        }
+            "BETA": physics.get("beta_index", 1.0)}
         stress_mod = self.eng.bio.governor.get_stress_modifier(self.eng.tick_count)
-
-        # Execute Somatic Loop
         ctx.bio_result = self.eng.soma.digest_cycle(
             ctx.input_text, physics, bio_feedback,
-            self.eng.health, self.eng.stamina, stress_mod, self.eng.tick_count
-        )
-
-        # Determine survival
+            self.eng.health, self.eng.stamina, stress_mod, self.eng.tick_count)
         ctx.is_alive = ctx.bio_result["is_alive"]
-
-        # Filter critical logs
         for log in ctx.bio_result["logs"]:
             if any(x in str(log) for x in ["CRITICAL", "TAX", "Poison"]):
                 ctx.log(log)
-
-        # Hubris Check
         hubris_hit, hubris_msg, event_type = RuptureEngine.audit_perfection(physics, self.eng.lex)
         if hubris_hit:
             ctx.log(hubris_msg)
@@ -2775,21 +2601,18 @@ class GeodesicOrchestrator:
         if is_cracked:
             ctx.log(f"{Prisma.YEL}🏺 KINTSUGI ACTIVATED: Vessel cracking.{Prisma.RST}")
             ctx.log(f"   {Prisma.WHT}KOAN: {koan}{Prisma.RST}")
-
         if self.eng.kintsugi.active_koan:
             repair = self.eng.kintsugi.attempt_repair(ctx.physics, self.eng.trauma_accum)
             if repair and repair["success"]:
                 ctx.log(repair["msg"])
                 self.eng.stamina = min(BoneConfig.MAX_STAMINA, self.eng.stamina + 20.0)
                 ctx.log(f"   {Prisma.GRN}STAMINA RESTORED (+20.0){Prisma.RST}")
-
         healed = self.eng.therapy.check_progress(ctx.physics, self.eng.stamina, self.eng.trauma_accum)
         if healed:
             joined = ", ".join(healed)
             ctx.log(f"{Prisma.GRN}❤️ THERAPY STREAK: Healing [{joined}]. Health +5.{Prisma.RST}")
             self.eng.health = min(BoneConfig.MAX_HEALTH, self.eng.health + 5.0)
 
-    # --- PHASE 4: SIMULATION ---
     def _phase_simulate(self, ctx: CycleContext):
         physics = ctx.physics
         logs = ctx.logs
@@ -2801,20 +2624,18 @@ class GeodesicOrchestrator:
         if shock_msg:
             physics["narrative_drag"] += 1.0
             logs.append(shock_msg)
-
-        # Gravity & Gordon
         new_drag, grav_log = self.eng.gordon.check_gravity(physics.get("narrative_drag", 0), physics.get("psi", 0))
         if grav_log: logs.append(grav_log)
         physics["narrative_drag"] = new_drag
-
-        # Gordon's Trauma
         did_flinch, flinch_msg, panic = self.eng.gordon.flinch(clean, self.eng.tick_count)
         if did_flinch:
             logs.append(flinch_msg)
             if panic: physics.update(panic)
-
-        # Navigation
-        self.eng.navigator.locate(physics)
+        current_loc, entry_msg = self.eng.navigator.locate(physics)
+        if entry_msg:
+            logs.append(entry_msg)
+        env_logs = self.eng.navigator.apply_environment(physics)
+        logs.extend(env_logs)
         orbit_state, drag_pen, orbit_msg = self.eng.cosmic.analyze_orbit(self.eng.mind.mem, clean)
         raw_zone = physics.get("zone", "COURTYARD")
         stabilized_zone = self.eng.stabilizer.stabilize(raw_zone, physics, (orbit_state, drag_pen))
@@ -2822,12 +2643,9 @@ class GeodesicOrchestrator:
         physics["zone"] = stabilized_zone
         self.eng._apply_cosmic_physics(physics, orbit_state, adjusted_drag)
         ctx.world_state["orbit"] = orbit_state
-
-        # Forge & Alchemy
         transmute_msg = self.eng.phys.forge.transmute(physics)
         if transmute_msg: logs.append(transmute_msg)
         _, forge_msg, new_item = self.eng.phys.forge.hammer_alloy(physics)
-
         if forge_msg: logs.append(forge_msg)
         if new_item: logs.append(self.eng.gordon.acquire(new_item))
         _, _, theremin_msg, t_crit = self.eng.phys.theremin.listen(physics, self.eng.bio.governor.mode)
@@ -2837,15 +2655,11 @@ class GeodesicOrchestrator:
             self.eng.health -= damage
             logs.append(f"{Prisma.RED}*** CRITICAL THEREMIN DISCHARGE ***{Prisma.RST}")
             logs.append(f"{Prisma.RED}    The resin shattered explosively. You took {damage} Damage.{Prisma.RST}")
-
-        # Crucible
         c_state, c_val, c_msg = self.eng.phys.crucible.audit_fire(physics)
         if c_msg: logs.append(c_msg)
         if c_state == "MELTDOWN": self.eng.health -= c_val
-
         p_active, p_log = self.eng.bio.parasite.infect(physics, self.eng.stamina)
         if p_active: logs.append(p_log)
-
         if self.eng.limbo.ghosts:
             if logs:
                 last_log = logs[-1]
@@ -2854,110 +2668,84 @@ class GeodesicOrchestrator:
                 logs.append(self.eng.limbo.haunt("The air is heavy."))
         if self.eng.gordon.inventory:
             self.eng.tinkerer.audit_tool_use(physics, self.eng.gordon.inventory)
-
-        # Pareidolia
         is_p, p_msg = self.eng.check_pareidolia(clean)
         if is_p:
             logs.append(p_msg)
             physics["psi"] = min(1.0, physics["psi"] + 0.3)
 
-    # --- PHASE 5: COGNITION ---
     def _phase_cognate(self, ctx: CycleContext):
         """The Mind forms a thought."""
         self.eng.mind.mem.encode(ctx.clean_words, ctx.physics, "GEODESIC")
         ctx.mind_state = self.eng.noetic.think(
             ctx.physics, ctx.bio_result, self.eng.gordon.inventory,
-            self.eng.phys.dynamics.voltage_history
-        )
+            self.eng.phys.dynamics.voltage_history)
 
-    # --- PHASE 6: RENDERING ---
     def _phase_render(self, ctx: CycleContext) -> Dict[str, Any]:
         """Final UI Construction."""
         physics = ctx.physics
         logs = ctx.logs
         mind = ctx.mind_state
-
-        # Cassandra Injection
         if self.eng.cassandra.check_trigger(physics):
             scream = self.eng.cassandra.seize()
             if scream: logs.append(scream)
-
-        # Title Generation
         title_data = self.eng.mind.wise.architect(
             {"physics": physics, "clean_words": ctx.clean_words},
             (mind.get("lens"), mind.get("thought"), mind.get("role")),
-            False
-        )
-
-        # Projector Render
+            False)
         raw_output = self.eng.projector.render(
             {"physics": physics},
             {
                 "title": title_data,
                 "health": self.eng.health,
                 "bio": ctx.bio_result,
-                "world": ctx.world_state
-            },
+                "world": ctx.world_state},
             (mind.get("lens"), mind.get("thought"))
         )
-
-        # Chorus Logic
         sys_instruction = ""
         active_lenses = []
         if physics.get("kappa", 0) > 0.4:
             sys_instruction, active_lenses = self.eng.director.generate_chorus_instruction(physics)
             if active_lenses:
                 logs.append(f"{Prisma.GRY}CHORUS ACTIVE: {', '.join(active_lenses)}{Prisma.RST}")
-
-        # VSL Coloring
         final_output = self.vsl_chroma.modulate(raw_output, physics.get("vector", {}))
-
-        # Rupture Prefix
+        clean_ui, style_log = self.strunk_white.sanitize(final_output)
+        if style_log:
+            logs.append(style_log)
+            self.eng.bio.endo.dopamine -= 0.05
+        final_output = clean_ui
         rupture = self.vsl_32v.analyze(physics)
         if rupture:
             final_output = f"{rupture['log']}\n\n{final_output}"
-
-        # Collect Async Logs
         logs.extend([e['text'] for e in self.eng.events.flush()])
-
         return {
             "type": "GEODESIC_COMPLETE",
             "ui": final_output,
             "logs": logs,
             "metrics": self.eng._get_metrics(ctx.bio_result.get("atp", 0.0)),
-            "system_instruction": sys_instruction
-        }
+            "system_instruction": sys_instruction}
 
 class BoneAmanita:
     def __init__(self, memory_layer=None, lexicon_layer=None):
-        # [1. GENESIS]
         self.lex = lexicon_layer if lexicon_layer else TheLexicon
         if hasattr(self.lex, 'initialize'): self.lex.initialize()
         self.lex.compile_antigens()
         BoneConfig.load_patterns()
         DeathGen.load_protocols()
         LiteraryReproduction.load_genetics()
-
-        # [2. THE NERVOUS SYSTEM]
         self.events = EventBus()
         self.shimmer_state = ShimmerState()
         self.navigator = TheNavigator(self.shimmer_state)
         self.journal = LiteraryJournal()
-
-        # [3. THE MIND]
         _mem = memory_layer if memory_layer else MycelialNetwork(self.events)
         self.mind = MindSystem(
             mem=_mem, lex=self.lex, dreamer=DreamEngine(self.events),
             mirror=MirrorGraph(), wise=ApeirogonResonance(self.events),
-            tracer=ViralTracer(_mem), integrator=SoritesIntegrator(_mem)
-        )
+            tracer=ViralTracer(_mem), integrator=SoritesIntegrator(_mem))
         self.limbo = LimboLayer()
         self.mind.mem.cleanup_old_sessions(self.limbo)
         load_result = self.mind.mem.autoload_last_spore()
         inherited_traits = load_result[0] if load_result else {}
         inherited_antibodies = load_result[1] if load_result else set()
-
-        # [4. THE BIOLOGY]
         immune_system = MycotoxinFactory()
         immune_system.active_antibodies = inherited_antibodies
         self.bio = BioSystem(
@@ -2965,17 +2753,11 @@ class BoneAmanita:
             endo=EndocrineSystem(),
             immune=immune_system, lichen=LichenSymbiont(),
             gut=HyphalInterface(), plasticity=NeuroPlasticity(), governor=MetabolicGovernor(),
-            shimmer=self.shimmer_state, parasite=ParasiticSymbiont(self.mind.mem, self.lex)
-        )
-
-        # [5. THE STRUCTURE]
+            shimmer=self.shimmer_state, parasite=ParasiticSymbiont(self.mind.mem, self.lex))
         self.phys = PhysSystem(
             tension=TheTensionMeter(self.events), forge=TheForge(), crucible=TheCrucible(),
             theremin=TheTheremin(), pulse=ThePacemaker(), gate=TheTangibilityGate(),
-            dynamics=TemporalDynamics(), nav=self.navigator
-        )
-
-        # [6. THE UTILITIES]
+            dynamics=TemporalDynamics(), nav=self.navigator)
         self.repro = LiteraryReproduction()
         self.projector = TheHoloProjector()
         self.gordon = GordonKnot()
@@ -2988,19 +2770,13 @@ class BoneAmanita:
         self.director = ChorusDriver()
         self.tinkerer = TheTinkerer(self.gordon, self.events)
         self.stabilizer = ZoneInertia()
-
-        # [7. THE LOOPS]
         self.soma = SomaticLoop(self.bio, self.mind.mem, self.lex, self.gordon, self.folly, self.events)
         self.noetic = NoeticLoop(self.mind, self.bio, self.events)
-
-        # [8. THE METRICS]
         self.tick_count = 0
         self.health = self.mind.mem.session_health if self.mind.mem.session_health else BoneConfig.MAX_HEALTH
         self.stamina = self.mind.mem.session_stamina if self.mind.mem.session_stamina else BoneConfig.MAX_STAMINA
         self.trauma_accum = {"THERMAL": 0.0, "CRYO": 0.0, "SEPTIC": 0.0, "BARIC": 0.0}
         self.joy_history = []
-
-        # [9. THE CONTROLLER]
         self.cycle_controller = GeodesicOrchestrator(self)
 
     def process_turn(self, user_message: str) -> Dict[str, Any]:
@@ -3033,8 +2809,7 @@ class BoneAmanita:
                 "mitochondria": self.bio.mito.adapt(0),
                 "antibodies": list(self.bio.immune.active_antibodies),
                 "core_graph": self.mind.mem.graph,
-                "tool_adaptation": self.tinkerer.save_state()
-            }
+                "tool_adaptation": self.tinkerer.save_state()}
             path = self.mind.mem.loader.save_spore(self.mind.mem.filename, spore_data)
             death_log.append(f"{Prisma.WHT}   [LEGACY SAVED: {path}]{Prisma.RST}")
         except Exception as e:
@@ -3083,7 +2858,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 9.7', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 9.7.1', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
@@ -3107,8 +2882,7 @@ class SessionGuardian:
                     "antibodies": list(self.eng.bio.immune.active_antibodies),
                     "core_graph": self.eng.mind.mem.graph,
                     "config_mutations": self.eng.repro.mutate_config(BoneConfig),
-                    "tool_adaptation": self.eng.tinkerer.save_state()
-                }
+                    "tool_adaptation": self.eng.tinkerer.save_state()}
                 filename = f"emergency_{self.eng.mind.mem.session_id}.json"
                 saved_path = self.eng.mind.mem.loader.save_spore(filename, spore_data)
                 if saved_path:
@@ -3117,7 +2891,6 @@ class SessionGuardian:
                     print(f"{Prisma.paint('✘ Spore encapsulation failed (IO Error).', 'R')}")
             else:
                 print(f"{Prisma.paint('⚠ CRITICAL: Brainstem missing. Cannot save spore.', 'R')}")
-
         except Exception as e:
             print(f"{Prisma.paint(f'FATAL: State corruption during shutdown. {e}', 'R')}")
             traceback.print_exc()

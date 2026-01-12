@@ -1,6 +1,6 @@
-# bone_vsl.py
-
 import re, random, math
+from typing import Optional, Tuple
+
 from bone_shared import Prisma, TheLexicon
 
 class VSL_Humility:
@@ -46,7 +46,6 @@ class VSL_Geodesic:
        - High B = The Forge (High Energy).
     """
     def __init__(self):
-        # Manifolds are gravity wells in this 2D space.
         self.manifolds = {
             "THE_MUD":      {"E": 0.8, "B": 0.2, "Desc": "High Fatigue, Low Tension (Stagnation)"},
             "THE_FORGE":    {"E": 0.1, "B": 0.9, "Desc": "Low Fatigue, High Tension (Transformation)"},
@@ -60,16 +59,11 @@ class VSL_Geodesic:
         length = len(text)
         if length == 0: return 0.0, 0.0
 
-        # E-Metric Calculation (Exhaustion)
-        # We count 'solvents' (low-value grammatical glue).
         ftg_words = ['i', 'you', 'said', 'the', 'and', 'was', 'a', 'is', 'it']
         ftg_count = sum(text.lower().count(w) for w in ftg_words)
 
-        # E increases with length and solvent density.
         e_metric = min(1.0, (ftg_count / 30.0) + (length / 1000.0))
 
-        # B-Metric Calculation (Binding/Tension)
-        # We look for symbols that break flow or indicate complex syntax.
         c_count = sum(1 for char in text if char in '!?%@#$')
         base_b = min(1.0, math.log1p(c_count + 1) / math.log1p(length + 1))
 
@@ -78,10 +72,9 @@ class VSL_Geodesic:
     def locate_manifold(self, e_val: float, b_val: float) -> tuple[str, float]:
         """Finds the nearest semantic gravity well (Manifold)."""
         best_fit = "THE_MUD"
-        min_dist = 10.0 # Arbitrary high start value
+        min_dist = 10.0
 
         for name, coords in self.manifolds.items():
-            # Euclidean distance in E-B space
             dist = math.sqrt((e_val - coords["E"])**2 + (b_val - coords["B"])**2)
             if dist < min_dist:
                 min_dist = dist
@@ -109,7 +102,7 @@ class VSL_32Valve:
         physics["manifold"] = manifold
         is_modified, new_text = self.humility.check_boundary(physics["raw_text"], physics["voltage"])
         if is_modified:
-            physics["raw_text_display"] = new_text # Store for display, don't break logic
+            physics["raw_text_display"] = new_text
             physics["humility_flag"] = True
         return self._audit_rupture(physics, e_val, b_val)
 
@@ -216,7 +209,7 @@ class VSL_ChromaticController:
     def modulate(self, text, vector):
         sorted_vecs = sorted(vector.items(), key=lambda x: abs(x[1] - 0.5), reverse=True)
         primary_dim = sorted_vecs[0][0]
-        selected_color = Prisma.GRY # Default
+        selected_color = Prisma.GRY
         for color_name, (code, d1, d2) in self.PALETTE.items():
             if primary_dim == d1 or primary_dim == d2:
                 selected_color = code
@@ -291,3 +284,46 @@ class VSL_SemanticFilter:
         topic = TheLexicon.harvest("diversion")
         if topic == "void": topic = "the ineffable"
         return f"{Prisma.GRY}[ROUTING AROUND DAMAGE]... Speaking of '{topic.upper()}', let us discuss that instead.{Prisma.RST}"
+
+class StrunkWhiteProtocol:
+    """
+    The Style Enforcer.
+    Detects and corrects 'LLM-speak', hedging, and lazy parallel phrasing.
+    "Omit needless words."
+    """
+    def __init__(self):
+        from bone_data import STYLE_CRIMES
+        self.PATTERNS = STYLE_CRIMES["PATTERNS"]
+        self.BANNED = STYLE_CRIMES["BANNED_PHRASES"]
+
+    def sanitize(self, text: str) -> Tuple[str, Optional[str]]:
+        """
+        Returns: (Sanitized Text, Log Message if changed)
+        """
+        original = text
+        log_msg = None
+        for ban in self.BANNED:
+            if ban in text.lower():
+                text = re.sub(f"(?i){ban}", "", text)
+                text = re.sub(r"\s{2,}", " ", text)
+                log_msg = f"{Prisma.GRY}[STYLE]: Pruned cliche '{ban}'.{Prisma.RST}"
+
+        for p in self.PATTERNS:
+            match = re.search(p["regex"], text)
+            if match:
+                if p["action"] == "STRIP_PREFIX":
+                    parts = text.split(" but ")
+                    if len(parts) > 1:
+                        substance = parts[-1].strip()
+                        substance = substance[0].upper() + substance[1:]
+                        text = substance
+                        log_msg = f"{Prisma.CYN}[STYLE]: Collapsed Negative Comparison ('Not X, but Y').{Prisma.RST}"
+
+                elif p["action"] == "KEEP_TAIL":
+                    text = match.group(1).strip()
+                    text = text[0].upper() + text[1:]
+                    log_msg = f"{Prisma.CYN}[STYLE]: Decoupled Hedging Clause.{Prisma.RST}"
+
+        if text != original:
+            return text.strip(), log_msg
+        return text, None

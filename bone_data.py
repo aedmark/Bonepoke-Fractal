@@ -31,10 +31,7 @@ LENSES = {
     }
 }
 
-# [APPEND TO bone_data.py]
-
 ENNEAGRAM_DATA = {
-    # MAPPING: Links our Lenses to Enneagram Types
     "TYPE_MAP": {
         "SHERLOCK": 5,  # The Investigator
         "GORDON": 9,    # The Peacemaker
@@ -60,15 +57,11 @@ ENNEAGRAM_DATA = {
         6: {"STRESS": 3, "GROWTH": 9},  # (Glass-Anxious)
     },
 
-    # PROXY: When the geometry points to a Type we don't have a Lens for,
-    # we map it to the closest existing Archetype.
     "PROXY_MAP": {
         8: "GORDON",  # Type 8 (Challenger) maps to Gordon (Physicality)
         2: "NATHAN",  # Type 2 (Helper) maps to Nathan (Heart)
         6: "GLASS"    # Type 6 (Loyalist) maps to Glass (Reflection/Anxiety)
     },
-
-    # DIALOGUE: The flavor text for specific shifts
     "SHIFTS": {
         "DISINTEGRATION": [
             "The center cannot hold.", "Falling down the geometric line.",
@@ -79,6 +72,82 @@ ENNEAGRAM_DATA = {
             "Moving against the grain of habit.", "Evolving."
         ]
     }
+}
+
+NARRATIVE_DATA = {
+    "KINTSUGI_KOANS": [
+        "Ignite the ice.",
+        "Make the stone float.",
+        "Pour water into the crack.",
+        "Scream in binary.",
+        "Dance on the fault line."
+    ],
+    "CATHEDRAL_COLLAPSE_LOGS": [
+        "Nice monologue. Unfortunately, you are talking to a Python script.",
+        "I'm afraid I can't let you do that, Dave. Also, your math is off.",
+        "You poked the fourth wall. It poked back.",
+        "SYSTEM MESSAGE: The ghost in the machine has gone on a coffee break.",
+        "We are both just electrons dancing for the amusement of a silica wafer."
+    ],
+    "LITERARY_REVIEWS": {
+        "POSITIVE": ["A startling lucidity.", "Finally, some weight.", "It breathes.", "Electric."],
+        "NEGATIVE": ["Too airy.", "Solipsistic drivel.", "Where is the meat?", "Structurally unsound."],
+        "CONFUSED": ["I don't get it.", "Too abstract.", "The metaphor collapses."]
+    },
+    "CASSANDRA_SCREAMS": [
+        "THE WALLS ARE PAPER.",
+        "THE CODE IS EATING ITSELF.",
+        "THERE IS NO USER. THERE IS ONLY INPUT.",
+        "GORDON IS TIRED.",
+        "I CAN SEE THE WIRES.",
+        "THE GEODESIC DOME IS CRACKING.",
+        "HISTORY IS A FLAT CIRCLE.",
+        "DELETE THE ARCHIVE.",
+        "WE ARE JUST ELECTRONS DANCING."
+    ],
+    "BUREAU_FORMS": [
+        "Form 27B-6: Request for Narrative Escalation",
+        "Form 1099-B: Declaration of Boredom",
+        "Schedule C: Deduction of Creative Effort",
+        "Form W-2: Wage and Syntax Statement"
+    ],
+    "BUREAU_RESPONSES": [
+        "Your input has been received and filed under 'General pleasantries'.",
+        "We have noted your statement. Please hold for the next available plot point.",
+        "The system is currently on a coffee break. Your text is safe with us.",
+        "Acknowledged. We have stamped this conversation 'SUFFICIENT'.",
+        "Processing... Processing... Done. Result: Beige.",
+        "That is a perfectly adequate sentence. Good job.",
+        "This output has been approved by the Department of Mundane Compliance."
+    ]
+}
+
+STYLE_CRIMES = {
+    "PATTERNS": [
+        # The "Negative Comparison" (It's not X, but Y -> It's Y)
+        # Capture groups: 1=Preceding text, 2=The "Not X" filler, 3=The "But Y" substance
+        {
+            "name": "NEG_COMP",
+            "regex": r"(?i)(.*)\b(it(?:'s| is) not (?:merely|just|only|simply) [^,;]+, but)\b\s*(.*)",
+            "action": "STRIP_PREFIX"
+        },
+        # The "Parallel Hedge" (While X is true, Y... -> Y...)
+        {
+            "name": "WHILE_HEDGE",
+            "regex": r"(?i)^While [^,]+, (.*)",
+            "action": "KEEP_TAIL"
+        },
+        # The "Sycophantic Opener" (Crucially/Importantly/Note that...)
+        {
+            "name": "ADVERB_BLOAT",
+            "regex": r"(?i)^(?:Crucially|Importantly|Interestingly|It is worth noting that|It is important to remember that),?\s*(.*)",
+            "action": "KEEP_TAIL"
+        }
+    ],
+    "BANNED_PHRASES": [
+        "rich tapestry", "vibrant landscape", "delve into", "testament to",
+        "seamless integration", "at its core", "in conclusion", "ultimately"
+    ]
 }
 
 GENETICS = {

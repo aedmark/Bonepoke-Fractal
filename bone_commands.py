@@ -1,5 +1,3 @@
-# bone_commands.py
-
 import os, random, time, math
 from typing import Dict, List, Callable
 from bone_shared import ParadoxSeed
@@ -63,7 +61,6 @@ class CommandProcessor:
         self._log(f"\n{self.P.GRY}Destinations:{self.P.RST}")
         for name, data in nav.manifolds.items():
             dist = math.dist(my_vec, data.center_vector)
-            # Visual distance bar
             bar_len = int((1.0 - min(1.0, dist)) * 10)
             bar = "█" * bar_len + "░" * (10 - bar_len)
 

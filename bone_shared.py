@@ -1,5 +1,3 @@
-# bone_shared.py
-
 import re, random, string, unicodedata
 from bone_data import LEXICON, DEATH
 
@@ -29,13 +27,11 @@ class Prisma:
         return f"{code}{text}{cls.RST}"
 
 class BoneConfig:
-    # Vital Stats
     MAX_HEALTH = 100.0
     MAX_STAMINA = 100.0
     STAMINA_REGEN = 1.0
     MAX_ATP = 200.0
 
-    # Physics Thresholds
     SHAPLEY_MASS_THRESHOLD = 5.0
     GRAVITY_WELL_THRESHOLD = 15.0
     GEODESIC_STRENGTH = 10.0
@@ -50,14 +46,12 @@ class BoneConfig:
     KINETIC_GAIN = 1.0
     CRITICAL_ROS_LIMIT = 100.0
 
-    # Map & Memory
     MAX_MEMORY_CAPACITY = 100
     ZONE_THRESHOLDS = {"LABORATORY": 1.5, "COURTYARD": 0.8}
     BETA_EPSILON = 0.01
 
-    # Genetics / Toxin
     TOXIN_WEIGHT = 1.0
-    ANTIGENS = ["basically", "actually", "literally", "utilize"] # Fallback
+    ANTIGENS = ["basically", "actually", "literally", "utilize"]
     TRAUMA_VECTOR = {"THERMAL":0, "CRYO":0, "SEPTIC":0, "BARIC":0}
 
     VERBOSE_LOGGING = True
@@ -152,7 +146,6 @@ class TheTinkerer:
         self.tool_confidence = {}
 
     def audit_tool_use(self, physics_packet, inventory_list):
-        # [STEP 1] Extract Physics Context (Handle Dict or Object)
         if isinstance(physics_packet, dict):
             voltage = physics_packet.get("voltage", 0.0)
             drag = physics_packet.get("narrative_drag", 0.0)
@@ -160,42 +153,32 @@ class TheTinkerer:
             voltage = physics_packet.voltage
             drag = physics_packet.narrative_drag
 
-        # [STEP 2] Determine State
-        # The Forge: High Energy or High Flow (Level Up)
         is_forge = (voltage > 12.0) or (drag < 2.0)
-        # The Mud: Low Energy AND High Drag (Rust)
         is_mud = (voltage < 5.0) and (drag > 6.0)
-        # The Garden: Everything in between (Maintenance/Stasis)
 
         learning_rate = 0.05
         rust_rate = 0.02
         items_to_shed = []
 
-        # [STEP 3] Iterate Inventory
         for item_name in inventory_list:
-            # Initialize confidence if missing
             if item_name not in self.tool_confidence:
                 self.tool_confidence[item_name] = 1.0
 
             current = self.tool_confidence[item_name]
 
             if is_forge:
-                # TEMPERING (Level Up)
                 self.tool_confidence[item_name] = min(2.0, current + learning_rate)
                 if random.random() < 0.1:
                     self.events.log(f"{Prisma.CYN}[TINKER]: {item_name} is tempering in the heat (Confidence {self.tool_confidence[item_name]:.2f}).{Prisma.RST}", "SYS")
 
             elif is_mud:
-                # RUSTING (Decay)
                 self.tool_confidence[item_name] = max(0.0, current - rust_rate)
                 if random.random() < 0.1:
                     self.events.log(f"{Prisma.OCHRE}[TINKER]: {item_name} is rusting in the damp.{Prisma.RST}", "SYS")
 
-            # [STEP 4] The Shed Protocol
             if self.tool_confidence[item_name] <= 0.1:
                 items_to_shed.append(item_name)
 
-        # [STEP 5] Pruning
         for item in items_to_shed:
             if item in inventory_list:
                 inventory_list.remove(item)
@@ -203,7 +186,6 @@ class TheTinkerer:
                 del self.tool_confidence[item]
             self.events.log(f"{Prisma.GRY}[TINKER]: {item} has rusted away. Gordon put it in the Shed.{Prisma.RST}", "SYS")
 
-        # [STEP 6] Apply Stats (Existing Logic)
         for item_name in inventory_list:
             if item_name in self.tool_confidence:
                 self._mutate_tool_stats(item_name, self.tool_confidence[item_name])
@@ -425,17 +407,14 @@ class CycleContext:
     physics: Dict[str, Any] = field(default_factory=dict)
     logs: List[str] = field(default_factory=list)
 
-    # State flags
     is_alive: bool = True
     refusal_triggered: bool = False
     refusal_packet: Optional[Dict] = None
 
-    # Biological results
     bio_result: Dict = field(default_factory=dict)
     world_state: Dict = field(default_factory=dict)
     mind_state: Dict = field(default_factory=dict)
 
-    # Metrics
     timestamp: float = field(default_factory=time.time)
 
     def log(self, message: str):
