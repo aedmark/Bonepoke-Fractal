@@ -5,10 +5,10 @@ import time
 import random
 from collections import deque
 from dataclasses import dataclass, field
-from typing import List, Dict, Set, Optional, Tuple, Any
+from typing import List, Dict, Set, Optional, Any
 
 from bone_shared import Prisma, TheLexicon, BoneConfig
-from bone_pipeline import PhysicsPacket
+from ARCHIVED.bone_pipeline import PhysicsPacket
 
 @dataclass
 class MetabolicReceipt:
@@ -41,7 +41,6 @@ class MitochondrialState:
     efficiency_mod: float = 1.0       # Multiplier for ATP conversion (Higher is better).
     ros_resistance: float = 1.0       # Ability to scrub ROS/pollution.
     enzymes: Set[str] = field(default_factory=set) # Acquired traits (e.g., 'LIGNASE').
-    telomeres: int = 105              # Genetic countdown timer (currently unused, but reserved).
 
 class MitochondrialForge:
     """
@@ -103,7 +102,12 @@ class MitochondrialForge:
 
         # Calculate Drag Tax (Quadratic Penalty)
         safe_drag = max(0.0, drag)
-        drag_tax = (safe_drag * safe_drag) / 10.0
+        if safe_drag <= 5.0:
+            # Low drag is cheap
+            drag_tax = safe_drag * 0.2
+        else:
+            # High drag is expensive, but manageable (Linear)
+            drag_tax = 1.0 + ((safe_drag - 5.0) * 0.5)
 
         # Apply Inventory/Status Effects
         if external_modifiers:
@@ -351,34 +355,33 @@ class MycotoxinFactory:
             return True
         return False
 
-    def assay(self, text, enzyme_type, repetition_score, physics, pulse_status="CLEAR"):
-        if len(text) < 5 and enzyme_type == "NARRATIVE":
-            return "AMANITIN", "Fatal Error: Input is genetically hollow. Ribosome stalled."
-        if pulse_status == "ZOMBIE_KNOCK" or repetition_score > 0.8:
-            return "MUSCIMOL", f"System Delirium: Pulse Monitor detects Undead Signal (Rep: {repetition_score}). Reality is dissolving."
-        if TheLexicon.ANTIGEN_REGEX:
-            antigen_hits = TheLexicon.ANTIGEN_REGEX.findall(text)
-            if antigen_hits:
-                toxin_name = antigen_hits[0].lower()
-                if toxin_name in self.active_antibodies:
-                    return None, f"{Prisma.GRN}IMMUNITY: Antibody deployed against '{toxin_name}'. Toxin neutralized.{Prisma.RST}"
-                counts = physics["counts"]
-                if counts.get("thermal", 0) > 0:
-                    self.develop_antibody(toxin_name)
-                    return None, f"{Prisma.OCHRE}ALCHEMY: Thermal words boiled off '{toxin_name}'. Antibody developed.{Prisma.RST}"
-                if counts.get("heavy", 0) >= len(antigen_hits):
-                    return None, f"{Prisma.GRN}MARIK GAMBIT: You ate the poison ('{toxin_name}'), but Herbs neutralized it.{Prisma.RST}"
-                if counts.get("cryo", 0) > 0:
-                    return "CYANIDE_POWDER", f"CRYO-CONCENTRATION: Cold words freeze-dried '{toxin_name}' into a fatal powder."
-                return "GLYPHOSATE", f"TOXIN DETECTED: '{toxin_name}' is unprocessed waste. Burn it or bury it."
-        clean_words = physics["clean_words"]
-        mass_words = (TheLexicon.get("heavy") | TheLexicon.get("kinetic") | TheLexicon.get("thermal") | TheLexicon.get("cryo"))
-        ballast = sum(1 for w in clean_words if w in mass_words)
-        suburban_hits = [w for w in clean_words if w in TheLexicon.get("suburban")]
-        suburban_density = len(suburban_hits) / max(1, len(clean_words))
-        if suburban_density > 0.15 and ballast == 0:
-            return "GLYPHOSATE", "STEVE EVENT: Suburban signals detected with ZERO mass. Context is sterile."
-        return None, None
+    def assay(self, word):
+        w = word.lower()
+        clean_len = len(w)
+        if clean_len < 3: return None, 0.0
+
+        for cat, roots in self.ROOTS.items():
+            for r in roots:
+                if r in w:
+                    is_anchor = w.startswith(r) or w.endswith(r)
+                    density = len(r) / clean_len
+
+                    if is_anchor or density > 0.5:
+                        return cat.lower(), 0.8
+
+        plosive = sum(1 for c in w if c in self.PHONETICS["PLOSIVE"])
+        liquid = sum(1 for c in w if c in self.PHONETICS["LIQUID"])
+        nasal = sum(1 for c in w if c in self.PHONETICS["NASAL"])
+
+        density_score = (plosive * 1.5) + (nasal * 0.8)
+        flow_score = liquid + sum(1 for c in w if c in self.PHONETICS["FRICATIVE"])
+
+        compression_mod = 1.0 if clean_len > 5 else 1.5
+        final_density = (density_score / clean_len) * compression_mod
+
+        if final_density > 0.55: return "heavy", round(final_density, 2)
+        if (flow_score / clean_len) > 0.6: return "kinetic", 0.5
+        return None, 0.0
 
 class HyphalInterface:
     def __init__(self):

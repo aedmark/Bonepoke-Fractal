@@ -6,12 +6,10 @@ Think of it as running the code through the `VSL manifold`—observing where the
 
 **Mental model:**
 - Every function is a **basin of attraction** in possibility space.
-
 - Every branch (`if/else`, `switch`, `try/catch`) is a **conditional curvature**.
 - Every bug is a **singularity**—a point where the logic metric becomes undefined.
 
  ---
-
 
 ## **II. The Gap Detection Framework**
 

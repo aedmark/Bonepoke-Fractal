@@ -1,9 +1,6 @@
 # bone_shared.py
 
-import re
-import random
-import string
-import unicodedata
+import re, random, string, unicodedata
 from bone_data import LEXICON, DEATH
 
 class Prisma:
@@ -155,31 +152,61 @@ class TheTinkerer:
         self.tool_confidence = {}
 
     def audit_tool_use(self, physics_packet, inventory_list):
+        # [STEP 1] Extract Physics Context (Handle Dict or Object)
         if isinstance(physics_packet, dict):
-            truth = physics_packet.get("truth_ratio", 0.0)
             voltage = physics_packet.get("voltage", 0.0)
             drag = physics_packet.get("narrative_drag", 0.0)
         else:
-            truth = physics_packet.truth_ratio
             voltage = physics_packet.voltage
             drag = physics_packet.narrative_drag
-        success = (voltage > 12.0) or (drag < 2.0)
-        learning_rate = 0.05
 
+        # [STEP 2] Determine State
+        # The Forge: High Energy or High Flow (Level Up)
+        is_forge = (voltage > 12.0) or (drag < 2.0)
+        # The Mud: Low Energy AND High Drag (Rust)
+        is_mud = (voltage < 5.0) and (drag > 6.0)
+        # The Garden: Everything in between (Maintenance/Stasis)
+
+        learning_rate = 0.05
+        rust_rate = 0.02
+        items_to_shed = []
+
+        # [STEP 3] Iterate Inventory
         for item_name in inventory_list:
+            # Initialize confidence if missing
             if item_name not in self.tool_confidence:
                 self.tool_confidence[item_name] = 1.0
 
             current = self.tool_confidence[item_name]
 
-            if success:
+            if is_forge:
+                # TEMPERING (Level Up)
                 self.tool_confidence[item_name] = min(2.0, current + learning_rate)
                 if random.random() < 0.1:
-                    self.events.log(f"{Prisma.CYN}[TINKER]: {item_name} feels heavier (Confidence {self.tool_confidence[item_name]:.2f}).{Prisma.RST}", "SYS")
-            else:
-                self.tool_confidence[item_name] = max(0.5, current - learning_rate)
+                    self.events.log(f"{Prisma.CYN}[TINKER]: {item_name} is tempering in the heat (Confidence {self.tool_confidence[item_name]:.2f}).{Prisma.RST}", "SYS")
 
-            self._mutate_tool_stats(item_name, self.tool_confidence[item_name])
+            elif is_mud:
+                # RUSTING (Decay)
+                self.tool_confidence[item_name] = max(0.0, current - rust_rate)
+                if random.random() < 0.1:
+                    self.events.log(f"{Prisma.OCHRE}[TINKER]: {item_name} is rusting in the damp.{Prisma.RST}", "SYS")
+
+            # [STEP 4] The Shed Protocol
+            if self.tool_confidence[item_name] <= 0.1:
+                items_to_shed.append(item_name)
+
+        # [STEP 5] Pruning
+        for item in items_to_shed:
+            if item in inventory_list:
+                inventory_list.remove(item)
+            if item in self.tool_confidence:
+                del self.tool_confidence[item]
+            self.events.log(f"{Prisma.GRY}[TINKER]: {item} has rusted away. Gordon put it in the Shed.{Prisma.RST}", "SYS")
+
+        # [STEP 6] Apply Stats (Existing Logic)
+        for item_name in inventory_list:
+            if item_name in self.tool_confidence:
+                self._mutate_tool_stats(item_name, self.tool_confidence[item_name])
 
     def _mutate_tool_stats(self, item_name, confidence):
         item_data = self.gordon.ITEM_REGISTRY.get(item_name)
@@ -385,3 +412,125 @@ class TheCartographer:
         if "TIME_BRACELET" in inventory:
             return True, "WEB SPUN: The bracelet helps you tie the knots."
         return False, "WEAVE FAILED: You lack the tools to bind these concepts."
+
+@dataclass
+class CycleContext:
+    """
+    A structural container for the state of a single turn.
+    Pinker Note: Explicitly naming the context reduces cognitive load.
+    Fuller Note: This acts as the tension strut holding the turn data together.
+    """
+    input_text: str
+    clean_words: List[str] = field(default_factory=list)
+    physics: Dict[str, Any] = field(default_factory=dict)
+    logs: List[str] = field(default_factory=list)
+
+    # State flags
+    is_alive: bool = True
+    refusal_triggered: bool = False
+    refusal_packet: Optional[Dict] = None
+
+    # Biological results
+    bio_result: Dict = field(default_factory=dict)
+    world_state: Dict = field(default_factory=dict)
+    mind_state: Dict = field(default_factory=dict)
+
+    # Metrics
+    timestamp: float = field(default_factory=time.time)
+
+    def log(self, message: str):
+        """Adds a message to the cycle logs."""
+        self.logs.append(message)
+
+class EventBus:
+    def __init__(self):
+        self.buffer = []
+
+    def log(self, text: str, category: str = "SYSTEM"):
+        self.buffer.append({
+            "text": text,
+            "category": category,
+            "timestamp": time.time()
+        })
+
+    def flush(self) -> List[Dict]:
+        logs = list(self.buffer)
+        self.buffer.clear()
+        return logs
+
+@dataclass
+class PhysicsPacket:
+    """
+    A strictly typed container for physical reality.
+    """
+    voltage: float
+    narrative_drag: float
+    repetition: float
+    clean_words: List[str]
+    counts: Dict[str, int]
+    vector: Dict[str, float]
+    psi: float = 0.0
+    kappa: float = 0.0
+    beta_index: float = 1.0
+    turbulence: float = 0.0
+    raw_text: str = ""
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]):
+        """Factory to convert the legacy dictionary if needed."""
+        valid_keys = cls.__annotations__.keys()
+        filtered_data = {k: v for k, v in data.items() if k in valid_keys}
+        return cls(**filtered_data)
+
+    import random
+
+class ZoneInertia:
+    def __init__(self, inertia=0.7, min_dwell=2):
+        """
+        inertia: 0.0 = volatile, 1.0 = concrete.
+        min_dwell: minimum turns before a zone shift is allowed.
+        """
+        self.inertia = inertia
+        self.min_dwell = min_dwell
+        self.current_zone = "COURTYARD"
+        self.dwell_counter = 0
+        self.last_vector = None
+
+    def stabilize(self, proposed_zone, physics, cosmic_state):
+        beta = physics.get("beta_index", 1.0)
+        truth = physics.get("truth_ratio", 0.5)
+        grav_pull = 1.0 if cosmic_state[0] != "VOID_DRIFT" else 0.0
+        current_vec = (beta, truth, grav_pull)
+
+        self.dwell_counter += 1
+        if proposed_zone == self.current_zone:
+            self.dwell_counter = 0
+            self.last_vector = current_vec
+            return proposed_zone
+
+        if self.dwell_counter < self.min_dwell:
+            return self.current_zone
+
+        similarity = 0.0
+        if self.last_vector:
+            dist = sum((a - b) ** 2 for a, b in zip(current_vec, self.last_vector)) ** 0.5
+            similarity = max(0.0, 1.0 - (dist / 2.0))
+        change_probability = (1.0 - self.inertia) * (1.0 - similarity)
+        if proposed_zone in ["AERIE", "THE_FORGE"]:
+            change_probability += 0.2
+
+        if random.random() < change_probability:
+            self.current_zone = proposed_zone
+            self.dwell_counter = 0
+            self.last_vector = current_vec
+
+        return self.current_zone
+
+    def override_cosmic_drag(self, cosmic_drag_penalty, current_zone):
+        """
+        If we are locked in a High-Coherence zone (AERIE), we resist
+        the Void's pull. The narrative momentum bridges the gap.
+        """
+        if current_zone == "AERIE" and cosmic_drag_penalty > 0:
+            return cosmic_drag_penalty * 0.3
+        return cosmic_drag_penalty

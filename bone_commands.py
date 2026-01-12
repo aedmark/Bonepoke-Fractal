@@ -1,9 +1,6 @@
 # bone_commands.py
 
-import os
-import random
-import time
-import math
+import os, random, time, math
 from typing import Dict, List, Callable
 from bone_shared import ParadoxSeed
 

@@ -1,8 +1,6 @@
 # bone_vsl.py
 
-import re
-import random
-import math
+import re, random, math
 from bone_shared import Prisma, TheLexicon
 
 class VSL_Humility:
@@ -130,6 +128,7 @@ class VSL_32Valve:
         if anomaly == "void": anomaly = "entropy"
         physics["voltage"] = 25.0
         physics["narrative_drag"] = 0.0
+        physics["system_surge_event"] = True
 
         return {
             "type": "RUPTURE",

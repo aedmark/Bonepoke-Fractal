@@ -1,5 +1,103 @@
 # CHANGELOG.md
 
+### [9.6.9] - 2026-01-11 "FIXING THE WIBBLY WOBBLES"
+
+**Architects:** SLASH, The Forensic Crystallographer | **System:** Reinforced
+
+### "We are applying topological stress to the latent structure."
+
+**System Status:**
+
+- **Lineage:** Drifting.
+- **Tools:** Tempered.
+- **Singularities:** Capped.
+
+### 🧬 GENETICS: The Meiotic Shuffle (Trauma Release)
+
+- **The Pathology:** `SporeCasing` was a perfect photocopier. It preserved "Oligarchic" memory nodes (Weight > 8.0) with perfect fidelity, ensuring that ancestors handed down their obsessions and traumas to children who had no context for them.
+- **The Evolution:** **Meiotic Pruning.**
+- **The Mechanic:**
+- **Trauma Snap:** Bonds > 8.0 now have a 20% chance to break during reproduction.
+- **Synaptic Drift:** All other inherited weights undergo a ±10% random mutation.
+- **The Result:** The child inherits the _shape_ of the parent's mind, but not the _rigidity_.
+
+### 📉 PHYSICS: The Beta Singularity (Metric Collapse)
+
+- **The Pathology:** `TheTensionMeter` calculated `beta_index` by dividing Mass by Cohesion. If Cohesion dropped to near-zero (e.g., a pure list of heavy nouns), Beta skyrocketed to ~100.0, instantly triggering a `SANCTUARY` lockdown.
+- **The Evolution:** **The Beta Cap.**
+- **The Mechanic:**
+- `beta_index` is now hard-capped at **5.0**.
+- **The Result:** Heavy inputs remain heavy, but they no longer tear the geometry of the simulation.
+
+### 🛡️ SECURITY: The VSL Handshake (Boundary Shear)
+
+- **The Pathology:** When `VSL_32Valve` detected a rupture, it surged voltage to 25.0v to reset the narrative. `TheCrucible` interpreted this helpful surge as a hostile attack and triggered a **MELTDOWN** (-12.5 HP). The immune system was attacking the body.
+- **The Evolution:** **The Surge Flag.**
+- **The Mechanic:**
+- VSL now flags its reset pulses as `system_surge_event`.
+- The Crucible recognizes the flag and **grounds the charge** safely instead of melting down.
+
+### 🛠️ MECHANICS: The Garden Shed (Tool Hygiene)
+
+- **The Pathology:** `TheTinkerer` punished homeostasis. Tools rusted unless the user was in a crisis (High Voltage) or a manic state (Low Drag). The "Garden State" (Balance) decayed the inventory.
+- **The Evolution:** **State-Based Maintenance.**
+- **The Mechanic:**
+- **The Forge:** High Energy/Flow = **Level Up** (Tempering).
+- **The Mud:** Stagnation = **Rust** (Decay).
+- **The Garden:** Balance = **Stasis** (Maintenance).
+- **The Shed:** If a tool rusts to 0% confidence, it is removed from inventory. "Gordon put it in the Shed."
+
+### 📐 SEMANTICS: The Turgor Correction
+
+- **The Pathology:** `TheCrucible` labeled low-voltage states as "SOFTENING." In a physics engine where drag is friction, "Soft" implies "Flaccid/High Drag," creating a ludo-narrative dissonance.
+- **The Evolution:** **Semantic Realignment.**
+- **The Mechanic:**
+- Relaxation is now labeled **"EXPANDING"** (Reducing friction), aligning the metaphor with the math (Low Drag).
+
+### [9.6.8] - 2026-01-11 "The Forensic Crystal"
+
+**Architects:** SLASH, The Forensic Crystallographer | **System:** Stress-Tested
+
+### "Every bug is a singularity—a point where the logic metric becomes undefined."
+
+**System Status:**
+- **Geometry:** Euclidean.
+- **Leaks:** Sealed.
+- **Memory:** Crystalized.
+
+### 🩸 METABOLISM: The Linear Correction (The Death Spiral)
+- **The Pathology:** `MitochondrialForge` utilized a quadratic drag tax `(drag^2)/10`. If Narrative Drag spiked to 10.0, the cost became mathematically unpayable (Death Spiral), regardless of user skill.
+- **The Evolution:** **Linearization.**
+- **The Mechanic:**
+  - **The Soft Cap:** Above Drag 5.0, the tax now scales linearly (`0.5` per point) rather than exponentially.
+  - **The Result:** High pressure is now a challenge, not an execution sentence.
+
+### 🧬 SEMANTICS: The Substring Seal (The Hallucination)
+- **The Pathology:** `SemanticsBioassay` used lazy substring matching. "Smother" triggered "Kinetic" physics because it contained the root "mot" (motion). The system hallucinated speed where there was stasis.
+- **The Evolution:** **Anchor Logic.**
+- **The Mechanic:**
+  - Roots must now **Anchor** the word (start/end) or **Dominate** it (>50% length). "Smother" is no longer "Motion."
+
+### 🛡️ STABILITY: The Deadlock Breaker (Memory)
+- **The Pathology:** `MycelialNetwork.bury` (Garbage Collection) selected victims purely by age. It would delete thoughts currently in the **Cortical Stack** (Working Memory) if they were the oldest nodes, shattering semantic continuity.
+- **The Evolution:** **Cortical Protection.**
+- **The Mechanic:**
+  - The Garbage Collector now strictly ignores any node currently active in the Cortical Stack.
+  - **Fail-Safe:** If the entire brain is "Active," the system rejects new input rather than lobotomizing itself.
+
+### ⚓ CONTROL: The Crucible Dampener (Oscillation)
+- **The Pathology:** `TheCrucible` (Homeostasis) fought against `GordonKnot` (Tools). If a tool forced Drag to 0.0, the Crucible saw this as a "Pressure Drop" and instantly jerked Drag back up to 10.0 on the next tick.
+- **The Evolution:** **Feedback Damping.**
+- **The Mechanic:**
+  - If Drag is < 1.0 (indicating Tool Usage), the Crucible applies **90% Resistance** to upward corrections. The system no longer fights its own medicine.
+
+### 🩹 SURGICAL REPAIRS
+- **The Hubris Inversion:** `RuptureEngine` previously punished a Perfection Streak of 3 ("Hubris") with damage. This has been inverted to a "Momentum Warning." The system now warns you of the height rather than pushing you off the ledge.
+- **The Race Condition:** Fixed a critical bug in `TheTheremin` where an "Early Return" prevented the AIRSTRIKE event (Resin > 80.0) from firing, allowing infinite resin buildup without consequence.
+- **The Crash Handler:** `SessionGuardian` now safely checks for `self.eng` initialization before attempting to save a spore, preventing the "Crash-during-a-Crash" loop.
+- **The Folly:** Now digests **ABSTRACT** concepts for a minimal energy yield (8.0 ATP), preventing "Smart User Starvation."
+- **Immunological Memory:** Fixed `_trigger_death` to correctly serialize `active_antibodies`. You no longer lose your immunity to toxins when you die.
+
 ### [9.6.7] - 2026-01-11 "The Hyphal Homeostasis"
 
 **Architects:** SLASH, The Nuclear Engineer | **System:** Self-Regulating
