@@ -2585,8 +2585,6 @@ class GeodesicOrchestrator:
         try:
             # PHASE 1: OBSERVATION
             self._phase_observe(ctx)
-
-            # MAINTENANCE: Neuro-Pruning & Limbo Feeding
             if self.eng.tick_count % 10 == 0:
                 self._maintenance_prune(ctx)
 
