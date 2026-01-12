@@ -1,7 +1,7 @@
 #bone_commands.py - The Command Center
 
 import math, os, random, shlex, time
-from typing import Dict, List, Callable
+from typing import Dict, List, Callable, Any
 from bone_shared import ParadoxSeed
 
 class CommandProcessor:
@@ -12,7 +12,7 @@ class CommandProcessor:
         self.Config = config_ref
         self.Map = cartographer_ref
 
-        self.registry = {
+        self.registry: Dict[str, Callable[[List[str]], bool]] = {
             # ADMIN
             "/save": self._cmd_save,
             "/load": self._cmd_load,
@@ -76,7 +76,7 @@ class CommandProcessor:
             self._log(f"{self.P.RED}COMMAND CRASH: {e}{self.P.RST}")
             return True
 
-    def _cmd_manifold(self, _):
+    def _cmd_manifold(self, parts):
         phys = self.eng.phys.tension.last_physics_packet
         if not phys:
             self._log("NAVIGATION OFFLINE: No physics data yet.")
@@ -98,11 +98,19 @@ class CommandProcessor:
             else:
                 self._log(f"{self.P.YEL}ISOLATION: No partners found. Mitosis fallback.{self.P.RST}")
         self._log(f"{self.P.MAG}INITIATING {mode}...{self.P.RST}")
-        result = self.eng.repro.attempt_reproduction(self.eng, mode, target)
-        self._log(result)
+        log_text, child_mutations = self.eng.repro.attempt_reproduction(self.eng, mode, target)
+        self._log(log_text)
+        if child_mutations:
+            self._log(f"{self.P.CYN}↺ CIRCULATION: The parent learns from the child.{self.P.RST}")
+            for key, val in child_mutations.items():
+                if hasattr(self.Config, key):
+                    old_val = getattr(self.Config, key)
+                    new_val = (old_val + val) / 2
+                    setattr(self.Config, key, new_val)
+                    self._log(f"   [MUTATION ADOPTED]: {key} {old_val:.2f} -> {new_val:.2f}")
         return True
 
-    def _cmd_status(self, _):
+    def _cmd_status(self, parts):
         self._log(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS ---{self.P.RST}")
         self._log(f"Health:  {self.eng.health:.1f} | Stamina: {self.eng.stamina:.1f} | ATP: {self.eng.bio.mito.state.atp_pool:.1f}")
         try:
@@ -112,7 +120,7 @@ class CommandProcessor:
             pass
         return True
 
-    def _cmd_save(self, _):
+    def _cmd_save(self, parts):
         self.eng.mind.mirror.profile.save()
         spore_data = {
             "session_id": self.eng.mind.mem.session_id,
@@ -127,7 +135,7 @@ class CommandProcessor:
         self._log(f"{self.P.GRN}💾 SYSTEM SAVED: {path}{self.P.RST}")
         return True
 
-    def _cmd_rummage(self, _):
+    def _cmd_rummage(self, parts):
         phys = self.eng.phys.tension.last_physics_packet
         if not phys: return True
         success, msg, cost = self.eng.gordon.rummage(phys, self.eng.stamina)
@@ -135,7 +143,7 @@ class CommandProcessor:
         self._log(msg)
         return True
 
-    def _cmd_map(self, _):
+    def _cmd_map(self, parts):
         phys = self.eng.phys.tension.last_physics_packet
         if not phys or "raw_text" not in phys: return True
         # Cartographer logic is already clean, just calling it.
@@ -185,7 +193,7 @@ class CommandProcessor:
         if len(parts) > 1: self.eng.mind.mem.ingest(parts[1] + (".json" if not parts[1].endswith(".json") else ""))
         return True
 
-    def _cmd_kip(self, _):
+    def _cmd_kip(self, parts):
         self.Config.VERBOSE_LOGGING = not self.Config.VERBOSE_LOGGING
         self._log(f"VERBOSE LOGGING: {self.Config.VERBOSE_LOGGING}")
         return True
@@ -210,27 +218,27 @@ class CommandProcessor:
             self._log(f"{self.P.VIOLET}GRAVITY ASSIST: Target '{parts[1]}'.{self.P.RST}")
         return True
 
-    def _cmd_weave(self, _):
+    def _cmd_weave(self, parts):
         s, m = self.Map.spin_web(self.eng.mind.mem.graph, self.eng.gordon.inventory, self.eng.gordon)
         self._log(m)
         if s: self.eng.stamina -= 5.0
         return True
 
-    def _cmd_voids(self, _):
+    def _cmd_voids(self, parts):
         p = self.eng.phys.tension.last_physics_packet
         if p: self._log(f"VOIDS: {self.Map.detect_voids(p) or 'None'}")
         return True
 
-    def _cmd_strata(self, _):
+    def _cmd_strata(self, parts):
         wells = [k for k,v in self.eng.mind.mem.graph.items() if "strata" in v]
         self._log(f"STRATA: {wells if wells else 'None'}")
         return True
 
-    def _cmd_fossils(self, _):
+    def _cmd_fossils(self, parts):
         self._log(f"FOSSILS: {len(self.eng.mind.mem.fossils)} items archived.")
         return True
 
-    def _cmd_lineage(self, _):
+    def _cmd_lineage(self, parts):
         self._log(f"LINEAGE: {len(self.eng.mind.mem.lineage_log)} generations.")
         return True
 
@@ -246,19 +254,19 @@ class CommandProcessor:
             self._log(f"LOGIC DENSITY: {m['physics']['truth_ratio']:.2f}")
         return True
 
-    def _cmd_kintsugi(self, _):
+    def _cmd_kintsugi(self, parts):
         k = self.eng.kintsugi
         state = "FRACTURED" if k.active_koan else "WHOLE"
         self._log(f"KINTSUGI: {state} | Repairs: {k.repairs_count}")
         return True
 
-    def _cmd_publish(self, _):
+    def _cmd_publish(self, parts):
         phys = self.eng.phys.tension.last_physics_packet
         if phys:
             s, r, _ = self.eng.journal.publish(phys["raw_text"], phys, self.eng.bio)
             if s: self._log(f"PUBLISHED: {r}")
         return True
 
-    def _cmd_help(self, _):
+    def _cmd_help(self, parts):
         self._log("COMMANDS: /save, /load, /map, /status, /rummage, /teach, /seed, /reproduce...")
         return True

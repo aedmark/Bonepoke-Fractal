@@ -5,7 +5,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import List, Dict, Set, Optional, Any, Tuple
 from bone_amanita977 import SporeInterface, LocalFileSporeLoader, SporeCasing, LiteraryReproduction
-from bone_shared import Prisma, TheLexicon, BoneConfig, PhysicsPacket, EventBus, ParadoxSeed
+from bone_shared import Prisma, TheLexicon, BoneConfig, PhysicsPacket, EventBus, ParadoxSeed, TheAlmanac
 
 DEFAULT_BMR = 2.0
 
@@ -483,6 +483,14 @@ class MycelialNetwork:
         base_trauma = (BoneConfig.MAX_HEALTH - health) / BoneConfig.MAX_HEALTH
         final_vector = {k: min(1.0, v) for k, v in trauma_accum.items()}
         top_joy = sorted(joy_history, key=lambda x: x["resonance"], reverse=True)[:3]
+        joy_legacy_data = None
+        if top_joy:
+            primary_joy = top_joy[0]
+            joy_legacy_data = {
+                "flavor": primary_joy["dominant_flavor"],
+                "resonance": primary_joy["resonance"],
+                "timestamp": primary_joy["timestamp"]
+            }
         if health <= 0:
             cause = max(final_vector, key=final_vector.get) if final_vector else "UNKNOWN"
             final_vector[cause] = 1.0
@@ -495,6 +503,12 @@ class MycelialNetwork:
         data["fossils"] = list(self.fossils)
         data["meta"] = {"timestamp": time.time(), "final_health": health, "final_stamina": stamina}
         if mitochondria_traits: data["mitochondria"] = mitochondria_traits
+        if joy_legacy_data:
+            data["joy_legacy"] = joy_legacy_data
+        almanac = TheAlmanac()
+        condition, _ = almanac.diagnose_condition(data)
+        future_seed = almanac.get_seed(condition)
+        data["seeds"].append({"q": future_seed, "m": 0.0, "b": False})
         return self.loader.save_spore(self.filename, data)
 
     def ingest(self, target_file, current_tick=0):

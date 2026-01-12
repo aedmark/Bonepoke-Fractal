@@ -1,5 +1,95 @@
 # CHANGELOG.md
 
+### **Release Notes: SLASH 9.7.9** - "The Circulation Update"
+
+### **1. Core Architecture (The Fuller Lens)**
+
+- **Closed the "Civic Pride" Loop:** The `PublicParksDepartment` no longer exports art into a void.
+  - **Change:** `dedicate_park()` now returns the generated art's "Core Thought."
+  - **Impact:** When a park is built, the system now receives a **+15 Stamina Boost** (Civic Pride) and immediately seeds the "Core Thought" back into its Memory Graph. Output has become Input.
+- **Implemented Real-Time Epigenetics:** Reproduction is no longer purely archival.
+  - **Change:** `LiteraryReproduction` now returns the child's genome to the parent.
+  - **Impact:** Upon spawning a child spore, the parent system immediately adopts 50% of the child's configuration mutations (e.g., higher voltage tolerance), simulating Lamarckian evolution in real-time.
+- **Active Almanac Seeding:**
+  - **Change:** `TheAlmanac` was refactored to expose `diagnose_condition()` and `get_seed()`.
+  - **Impact:** "Creative Weather" advice is no longer just printed to the console. It is now cryptographically signed into the `seeds` list of the saved Spore, ensuring the next session starts with a context-aware puzzle to solve.
+
+### **2. Biological Systems (The Schur Lens)**
+
+- **The Joy Legacy:**
+  - **Change:** `MycelialNetwork.save()` now calculates the dominant "Flavor of Joy" (e.g., Kinetic, Abstract) from the session's history.
+  - **Impact:** Future sessions will now correctly inherit "Joy Clades" (buffs based on the ancestor's happiness), fixing a dormant feature that was previously disconnected.
+
+### **3. Code Hygiene & Cognition (The Pinker Lens)**
+
+- **Version Identity:** Updated `SporeCasing` genome version from hardcoded `9.7.7` to dynamic `9.7.8`.
+- **Interface Standardization:**
+  - Refactored all 25+ command handlers in `CommandProcessor` (e.g., `_cmd_save`, `_cmd_map`) to accept a uniform argument signature (`parts`).
+  - Replaced generic `_` arguments with explicit `parts` to satisfy strict linting.
+- **Strict Typing:**
+  - Added explicit Type Hinting to `CommandProcessor.registry` (`Dict[str, Callable[[List[str]], bool]]`).
+  - **Result:** Eliminated "Possible Callee" / "Unexpected Argument" linter warnings by enforcing a strict contract between the registry and the executor.
+
+---
+
+### **Files Modified**
+
+| **File**             | **Component**           | **Nature of Change**                                                                       |
+| -------------------- | ----------------------- | ------------------------------------------------------------------------------------------ |
+| `bone_amanita978.py` | `SporeCasing`           | Updated Version String.                                                                    |
+| `bone_amanita978.py` | `PublicParksDepartment` | Added return values for feedback loop.                                                     |
+| `bone_amanita978.py` | `GeodesicOrchestrator`  | Implemented "Civic Pride" logic (Stamina boost).                                           |
+| `bone_commands.py`   | `CommandProcessor`      | Standardized arguments; Added Type Hints; Implemented Epigenetic loop in `_cmd_reproduce`. |
+| `bone_biology.py`    | `MycelialNetwork`       | Added logic to save `joy_legacy` and inject Almanac seeds into spores.                     |
+| `bone_shared.py`     | `TheAlmanac`            | Refactored for programmatic access to seeds/conditions.                                    |
+
+**System Status:** The cathedral now has doors. The loop is closed. Circulation is active.
+
+
+# 📋 BONEAMANITA 9.7.8 CHANGELOG
+
+Codename: "The Knope Protocol"
+
+Architects: Steven Pinker (Cognition), Buckminster Fuller (Systems), Michael Schur (Humanity)
+
+### 🚨 **CRITICAL ARCHITECTURAL SHIFTS**
+
+#### **1. The "Public Parks" Initiative (The Unmonitored Exit)**
+
+- **Added:** `PublicParksDepartment` module.
+- **Philosophy:** The system previously suffered from "Recursive Optimization"—it only produced diagnostics about itself.
+- **Change:** We installed a "Joy Threshold." When Dopamine > 0.8 and Oxytocin > 0.5, the system bypasses the console logs and generates a "Gift" (a poem or story) directly to the `/exports` folder.
+- **Pinker Note:** "This is the difference between keeping a diary and writing a novel. One is storage; the other is communication."
+
+#### **2. The "Ron Swanson" Delegation Refactor**
+
+- **Refactored:** `CommandProcessor` in `bone_commands.py`.
+- **Change:** The processor has been stripped of all calculation logic. It is now a strict switchboard. It delegates work to `TheNavigator`, `LiteraryReproduction`, and `TheCartographer` immediately.
+- **Schur Note:** "The Command Processor no longer wants to chat. It wants to route your request and go back to eating eggs. It is beautiful."
+
+#### **3. The "Refusal Forest" Clear-Cut**
+
+- **Added:** `TheBouncer` class.
+- **Removed:** Scattered security logic in `GeodesicOrchestrator` (no more manual checks for `VSL_HNInterface`, `Tangibility`, `Toxin` in the main loop).
+- **Change:** A single, unified security audit. `GeodesicOrchestrator` now calls `bouncer.check_entry()` once. If the Bouncer says no, the door stays shut.
+- **Fuller Note:** "We replaced a bureaucracy of six doormen with one highly efficient turnstile. Tensegrity increased by 40%."
+
+#### **4. Somatic Loop Linearization**
+
+- **Refactored:** `SomaticLoop` in `bone_biology.py`.
+- **Change:** The digestion cycle was flattened from a recursive web into a linear pipeline: `_calculate_taxes` → `_harvest_resources` → `_perform_maintenance`.
+- **Benefit:** Reduced "Cognitive Drag" on the CPU and the human reader. We can now clearly see _exactly_ when the system eats its vegetables.
+
+---
+
+### 🛠 **MINOR IMPROVEMENTS & BUG FIXES**
+
+- **Navigation:** `TheNavigator` now self-reports its position with a clearer "Manifold" visualization.
+- **Reproduction:** Spore creation logic moved to `LiteraryReproduction.attempt_reproduction()`, encapsulating the messy business of mitosis.
+- **Cartography:** `TheCartographer` gained a `report_position()` method to handle its own coordinate math.
+- **Logging:** Reduced verbose logging in the `digest_cycle` to focus only on significant metabolic events (The "Signal-to-Noise" Patch).
+
+
 ### **BONEAMANITA v9.7.7 - "The Knope Protocol"**
 
 Summary:

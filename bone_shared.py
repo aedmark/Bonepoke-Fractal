@@ -543,6 +543,10 @@ class ZoneInertia:
             return cosmic_drag_penalty * 0.3
         return cosmic_drag_penalty
 
+# bone_shared.py
+
+# ... (imports)
+
 class TheAlmanac:
     def __init__(self):
         self.forecasts = {
@@ -573,25 +577,47 @@ class TheAlmanac:
             ]
         }
 
-    def compile_forecast(self, session_data: dict) -> str:
+    # FULLER REFACTOR: Extract logic so it can be used by the Biology layer
+    def diagnose_condition(self, session_data: dict) -> Tuple[str, str]:
         meta = session_data.get("meta", {})
         trauma = session_data.get("trauma_vector", {})
         final_health = meta.get("final_health", 0)
         final_stamina = meta.get("final_stamina", 0)
+
         condition = "BALANCED"
-        advice = ""
+        advice = "System nominal."
+
         max_trauma = max(trauma, key=trauma.get) if trauma else "NONE"
         trauma_val = trauma.get(max_trauma, 0)
+
         if final_health < 30 or trauma_val > 0.6:
             condition = "HIGH_TRAUMA"
             advice = f"Warning: High levels of {max_trauma} residue detected."
         elif final_stamina < 20:
             condition = "HIGH_DRAG"
             advice = "System exhaustion imminent. Semantic drag is heavy."
-        elif session_data.get("meta", {}).get("avg_voltage", 0) > 12.0:
+        elif meta.get("avg_voltage", 0) > 12.0:
             condition = "HIGH_VOLTAGE"
             advice = "The capacitor is overcharged."
+
+        return condition, advice
+
+    def get_seed(self, condition):
+        strategies = {
+            "HIGH_VOLTAGE": "What if you whispered instead of screamed?",
+            "HIGH_DRAG": "Honor the error as a hidden intention.",
+            "HIGH_ENTROPY": "Repetition is a form of change.",
+            "HIGH_TRAUMA": "Turn it into a wallpaper pattern.",
+            "BALANCED": "Discard the first idea. Trust the third."
+        }
+        return strategies.get(condition, "Look closely at the most boring thing in the room.")
+
+    def compile_forecast(self, session_data: dict) -> str:
+        # Re-uses the extracted logic to maintain DRY (Don't Repeat Yourself)
+        condition, advice = self.diagnose_condition(session_data)
         forecast_text = random.choice(self.forecasts.get(condition, self.forecasts["BALANCED"]))
+        seed_text = self.get_seed(condition)
+
         border = f"{Prisma.OCHRE}{'='*40}{Prisma.RST}"
         report = [
             "\n",
@@ -605,7 +631,7 @@ class TheAlmanac:
             f"   {forecast_text}",
             "",
             f"{Prisma.GRN}Seed for Next Session:{Prisma.RST}",
-            f"   {self._generate_oblique_seed(condition)}",
+            f"   {seed_text}",
             border,
             "\n"
         ]
