@@ -1,9 +1,17 @@
 import re, random, math
-from typing import Optional, Tuple
-
+from typing import Optional, Tuple, Dict, Any
 from bone_shared import Prisma, TheLexicon
 
+SOLVENT_WORDS = {'i', 'you', 'said', 'the', 'and', 'was', 'a', 'is', 'it'}
+MAX_SOLVENT_TOLERANCE = 30.0
+TEXT_LENGTH_SCALAR = 1000.0
+
+
 class VSL_Humility:
+    """
+    The conscience of the system.
+    Intervenes when the voltage is too high or the claims are too absolute.
+    """
     def __init__(self):
         self.BOUNDARIES = {
             "FUTURE": ["predict", "future", "tomorrow", "will happen", "forecast"],
@@ -17,6 +25,21 @@ class VSL_Humility:
             "This is a probabilistic estimation...",
             "I could be misinterpreting the vector..."
         ]
+
+    def check_boundary(self, text: str, voltage: float) -> Tuple[bool, str]:
+        text_lower = text.lower()
+        violation = None
+
+        for category, triggers in self.BOUNDARIES.items():
+            if any(t in text_lower for t in triggers):
+                violation = category
+                break
+
+        if violation or (voltage > 15.0):
+            prefix = random.choice(self.HUMBLE_PHRASES)
+            return True, f"{Prisma.CYN}{prefix}{Prisma.RST} {text}"
+
+        return False, text
 
     def check_boundary(self, text, voltage):
         text_lower = text.lower()
@@ -32,18 +55,8 @@ class VSL_Humility:
 
 class VSL_Geodesic:
     """
-    Maps text to a 2D coordinate system of Fatigue vs. Tension.
-
-    Dimensions:
-    1. E (Entropy/Exhaustion):
-       - Measures 'dilution' of meaning.
-       - Driven by high word count and 'filler words' (solvents).
-       - High E = The Mud (Stagnation).
-
-    2. B (Beta/Binding):
-       - Measures 'structural tension'.
-       - Driven by punctuation density and special characters.
-       - High B = The Forge (High Energy).
+    Maps text to a 2D coordinate system of Fatigue (Entropy) vs. Tension (Beta).
+    Now also resolves the 12-Dimensional Vector into an Archetypal Trigram.
     """
     def __init__(self):
         self.manifolds = {
@@ -54,33 +67,59 @@ class VSL_Geodesic:
             "THE_GARDEN":   {"E": 0.5, "B": 0.5, "Desc": "Balanced State (Integration)"}
         }
 
-    def calculate_metrics(self, text: str) -> tuple[float, float]:
-        """Returns (E_metric, B_metric) normalized 0.0 to 1.0."""
+        self.TRIGRAM_MAP = {
+            "VEL": ("☳", "ZHEN",  "Thunder",  Prisma.GRN), # Velocity -> Arousing/Movement
+            "STR": ("☶", "GEN",   "Mountain", Prisma.SLATE), # Structure -> Stillness/Blocking
+            "ENT": ("☵", "KAN",   "Water",    Prisma.BLU), # Entropy -> Abysmal/Danger
+            "PHI": ("☲", "LI",    "Fire",     Prisma.RED), # Truth -> Clinging/Clarity
+            "PSI": ("☰", "QIAN",  "Heaven",   Prisma.WHT), # Abstract -> Creative/Pure
+            "BET": ("☴", "XUN",   "Wind",     Prisma.CYN), # Tension -> Gentle/Penetrating
+            "E":   ("☷", "KUN",   "Earth",    Prisma.OCHRE), # Fatigue -> Receptive/Heavy
+            "DEL": ("☱", "DUI",   "Lake",     Prisma.MAG)  # Play -> Joyous/Reflection
+        }
+        # Fallback vectors map to nearest archetype
+        self.TRIGRAM_MAP["TMP"] = self.TRIGRAM_MAP["PHI"] # Temperature -> Fire
+        self.TRIGRAM_MAP["TEX"] = self.TRIGRAM_MAP["STR"] # Texture -> Mountain
+        self.TRIGRAM_MAP["XI"]  = self.TRIGRAM_MAP["BET"] # Complexity -> Wind
+        self.TRIGRAM_MAP["LQ"]  = self.TRIGRAM_MAP["DEL"] # Liquid -> Lake
+
+    def calculate_metrics(self, text: str) -> Tuple[float, float]:
         length = len(text)
         if length == 0: return 0.0, 0.0
-
-        ftg_words = ['i', 'you', 'said', 'the', 'and', 'was', 'a', 'is', 'it']
-        ftg_count = sum(text.lower().count(w) for w in ftg_words)
-
-        e_metric = min(1.0, (ftg_count / 30.0) + (length / 1000.0))
-
+        text_lower = text.lower()
+        solvent_count = sum(text_lower.count(w) for w in SOLVENT_WORDS)
+        e_metric = min(1.0, (solvent_count / MAX_SOLVENT_TOLERANCE) + (length / TEXT_LENGTH_SCALAR))
         c_count = sum(1 for char in text if char in '!?%@#$')
         base_b = min(1.0, math.log1p(c_count + 1) / math.log1p(length + 1))
-
         return round(e_metric, 3), round(base_b, 3)
 
-    def locate_manifold(self, e_val: float, b_val: float) -> tuple[str, float]:
-        """Finds the nearest semantic gravity well (Manifold)."""
+    def locate_manifold(self, e_val: float, b_val: float) -> Tuple[str, float]:
         best_fit = "THE_MUD"
         min_dist = 10.0
-
         for name, coords in self.manifolds.items():
             dist = math.sqrt((e_val - coords["E"])**2 + (b_val - coords["B"])**2)
             if dist < min_dist:
                 min_dist = dist
                 best_fit = name
-
         return best_fit, min_dist
+
+    def resolve_trigram(self, vector: Dict[str, float]) -> Dict[str, Any]:
+        """
+        Determines the active Trigram based on the dominant physics vector.
+        """
+        if not vector:
+            return {"symbol": "☷", "name": "KUN", "color": Prisma.OCHRE, "vector": "E"}
+        dominant_vec = max(vector, key=vector.get)
+        if vector[dominant_vec] < 0.2:
+            dominant_vec = "E"
+        symbol, name, concept, color = self.TRIGRAM_MAP.get(dominant_vec, self.TRIGRAM_MAP["E"])
+        return {
+            "symbol": symbol,
+            "name": name,
+            "concept": concept,
+            "color": color,
+            "vector": dominant_vec
+        }
 
 class VSL_32Valve:
     def __init__(self, lexicon, memory):
@@ -91,34 +130,52 @@ class VSL_32Valve:
         self.OPPOSITES = {
             "heavy": "aerobic", "abstract": "heavy",
             "kinetic": "cryo", "thermal": "cryo",
-            "photo": "heavy", "suburban": "abstract"
-        }
+            "photo": "heavy", "suburban": "abstract"}
 
-    def analyze(self, physics):
+    def analyze(self, physics: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         e_val, b_val = self.geodesic.calculate_metrics(physics["raw_text"])
         physics["E"] = e_val
         physics["B"] = b_val
+
         manifold, dist = self.geodesic.locate_manifold(e_val, b_val)
         physics["manifold"] = manifold
+
         is_modified, new_text = self.humility.check_boundary(physics["raw_text"], physics["voltage"])
         if is_modified:
             physics["raw_text_display"] = new_text
             physics["humility_flag"] = True
+
         return self._audit_rupture(physics, e_val, b_val)
 
     def _audit_rupture(self, physics, e_val, b_val):
-        if e_val > 0.8 and b_val < 0.2:
-            return self._rupture(physics, "FATIGUE_FAILURE", "System exhausted. Low tension.")
-        if b_val > 0.9 and e_val > 0.8:
-            return self._rupture(physics, "GLITCH_SINGULARITY", "High Energy / High Fatigue. Collapse imminent.")
+        """
+        Checks if the sentence structure is collapsing.
+
+        Dimensions:
+        E (Entropy): Dilution (Solvents/Length). 1.0 = Pure Water.
+        B (Beta):    Tension (Punctuation/Density). 1.0 = Pure Crystal.
+        """
+
+        if e_val > 0.75 and b_val < 0.15:
+            return self._rupture(physics, "FATIGUE_FAILURE", "System diluted. Narrative coherence dissolving.")
+
+        if b_val > 0.8 and e_val < 0.3:
+            return self._rupture(physics, "MANIC_FRACTURE", "Crystal lattice too tight. Structure shattering.")
+
+        if b_val > 0.7 and e_val > 0.6:
+            return self._rupture(physics, "GLITCH_SINGULARITY", "High Energy + High Entropy. Semantic collapse.")
+
         return None
 
     def _rupture(self, physics, mode, reason):
         counts = physics["counts"]
         dominant = max(counts, key=counts.get) if counts else "abstract"
         target_flavor = self.OPPOSITES.get(dominant, "abstract")
+
         anomaly = self.lex.harvest(target_flavor)
-        if anomaly == "void": anomaly = "entropy"
+        if anomaly == "void":
+            anomaly = "something_completely_different"
+
         physics["voltage"] = 25.0
         physics["narrative_drag"] = 0.0
         physics["system_surge_event"] = True

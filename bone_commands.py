@@ -1,6 +1,6 @@
-import os, random, time, math
-from typing import Dict, List, Callable
-from bone_shared import ParadoxSeed
+import os, random, time, math, shlex
+from typing import Dict, List, Callable, Optional
+from bone_shared import ParadoxSeed, BoneConfig
 
 class CommandProcessor:
     def __init__(self, engine, prisma_ref, lexicon_ref, config_ref, cartographer_ref):
@@ -10,33 +10,43 @@ class CommandProcessor:
         self.Config = config_ref
         self.Map = cartographer_ref
         self.registry: Dict[str, Callable[[List[str]], bool]] = {
+            # Admin / Learning
             "/teach": self._cmd_teach,
             "/kill": self._cmd_kill,
             "/flag": self._cmd_flag,
-            "/garden": self._cmd_garden,
-            "/lineage": self._cmd_lineage,
-            "/voids": self._cmd_voids,
-            "/reproduce": self._cmd_reproduce,
+            "/save": self._cmd_save,
+
+            # System Control
             "/mode": self._cmd_mode,
-            "/strata": self._cmd_strata,
-            "/publish": self._cmd_publish,
-            "/refusal": self._cmd_refusal,
-            "/seed": self._cmd_seed,
-            "/load": self._cmd_load,
-            "/map": self._cmd_map,
-            "/mirror": self._cmd_mirror,
-            "/focus": self._cmd_focus,
-            "/status": self._cmd_status,
-            "/manifold": self._cmd_manifold,
-            "/orbit": self._cmd_orbit,
-            "/prove": self._cmd_prove,
             "/kip": self._cmd_kip,
+            "/status": self._cmd_status,
+            "/mirror": self._cmd_mirror,
+
+            # Narrative / World
+            "/map": self._cmd_map,
+            "/look": self._cmd_map,
+            "/garden": self._cmd_garden,
+            "/voids": self._cmd_voids,
+            "/strata": self._cmd_strata,
+            "/lineage": self._cmd_lineage,
+
+            # Actions
+            "/focus": self._cmd_focus,
+            "/orbit": self._cmd_orbit,
+            "/reproduce": self._cmd_reproduce,
+            "/seed": self._cmd_seed,
+            "/publish": self._cmd_publish,
+
+            # Debug / VSL
             "/pp": self._cmd_pp,
             "/tfw": self._cmd_tfw,
+            "/manifold": self._cmd_manifold,
+            "/prove": self._cmd_prove,
             "/weave": self._cmd_weave,
+            "/refusal": self._cmd_refusal,
             "/kintsugi": self._cmd_kintsugi,
-            "/help": self._cmd_help
-        }
+
+            "/help": self._cmd_help}
 
     def _log(self, text):
         self.eng.events.log(text, "CMD")
@@ -48,54 +58,78 @@ class CommandProcessor:
         if not phys or "voltage" not in phys:
             self._log(f"{self.P.GRY}NAVIGATION OFFLINE: No physics data yet.{self.P.RST}")
             return True
-
         drag = min(10.0, max(0.0, phys.get("narrative_drag", 0.0)))
         volt = min(20.0, max(0.0, phys.get("voltage", 0.0)))
-        my_vec = (round(drag / 10.0, 2), round(volt / 20.0, 2))
-
         self._log(f"{self.P.CYN}--- MANIFOLD NAVIGATION ---{self.P.RST}")
-        self._log(f"Current Vector: [Drag: {my_vec[0]} | Voltage: {my_vec[1]}]")
-        self._log(f"Location: {self.P.WHT}{current}{self.P.RST}")
+        self._log(f"Current Loc: {self.P.WHT}{current}{self.P.RST}")
+        self._log(f"Coordinates: [Drag: {drag:.1f} | Voltage: {volt:.1f}]")
         self._log(f"Shimmer Reserves: {self.eng.shimmer_state.current:.1f}")
-
-        self._log(f"\n{self.P.GRY}Destinations:{self.P.RST}")
+        self._log(f"\n{self.P.GRY}Nearby Manifolds:{self.P.RST}")
+        my_vec = (round(drag / 10.0, 2), round(volt / 20.0, 2))
         for name, data in nav.manifolds.items():
             dist = math.dist(my_vec, data.center_vector)
             bar_len = int((1.0 - min(1.0, dist)) * 10)
             bar = "█" * bar_len + "░" * (10 - bar_len)
-
             highlight = self.P.GRN if name == current else self.P.GRY
-            self._log(f"   {highlight}{name:<12}{self.P.RST} {bar} ({dist:.2f} AU) - {data.description}")
-
+            self._log(f"   {highlight}{name:<12}{self.P.RST} {bar} {dist:.2f} AU")
         return True
 
-    def execute(self, text):
+    def execute(self, text: str) -> bool:
         if not text.startswith("/"):
             return False
-        parts = text.split()
+        try:
+            parts = shlex.split(text)
+        except ValueError:
+            self._log(f"{self.P.RED}SYNTAX ERROR: Unbalanced quotes.{self.P.RST}")
+            return True
+        if not parts: return False
         cmd = parts[0].lower()
         if cmd not in self.registry:
-            self._log(f"{self.P.RED}Unknown command. Try /help.{self.P.RST}")
+            self._log(f"{self.P.RED}Unknown command '{cmd}'. Try /help.{self.P.RST}")
             return True
         restricted_cmds = ["/teach", "/kill", "/flag"]
         if cmd in restricted_cmds:
+            is_debug = self.Config.VERBOSE_LOGGING
             confidence = self.eng.mind.mirror.profile.confidence
-            if confidence < 10:
-                self._log(f"{self.P.YEL}COMMAND LOCKED: Requires 10+ turns of trust (Current: {confidence}).{self.P.RST}")
+            if not is_debug and confidence < 10:
+                self._log(f"{self.P.YEL}🔒 LOCKED: Trust {confidence}/10 required.{self.P.RST}")
+                self._log(f"   {self.P.GRY}(Hint: Toggle /kip (Debug Mode) to bypass this check.){self.P.RST}")
                 return True
         try:
             handler = self.registry[cmd]
             return handler(parts)
         except Exception as e:
-            self._log(f"{self.P.RED}COMMAND FAILURE: {e}{self.P.RST}")
+            self._log(f"{self.P.RED}COMMAND CRASH: {e}{self.P.RST}")
+            import traceback
+            traceback.print_exc()
             return True
+
+    def _cmd_save(self, parts):
+        """Manually saves the User Profile and current Spore."""
+        self.eng.mind.mirror.profile.save()
+        spore_data = {
+            "session_id": self.eng.mind.mem.session_id,
+            "meta": {"timestamp": time.time(), "final_health": self.eng.health, "final_stamina": self.eng.stamina},
+            "trauma_vector": self.eng.trauma_accum,
+            "mitochondria": self.eng.bio.mito.adapt(self.eng.health),
+            "antibodies": list(self.eng.bio.immune.active_antibodies),
+            "core_graph": self.eng.mind.mem.graph,
+            "tool_adaptation": self.eng.tinkerer.save_state()}
+        path = self.eng.mind.mem.loader.save_spore(self.eng.mind.mem.filename, spore_data)
+        self._log(f"{self.P.GRN}💾 SYSTEM SAVED.{self.P.RST}")
+        self._log(f"   User Trust: {self.eng.mind.mirror.profile.confidence}")
+        self._log(f"   Spore Path: {path}")
+        return True
 
     def _cmd_teach(self, parts):
         if len(parts) >= 3:
             word = parts[1]
             cat = parts[2].lower()
             self.Lex.teach(word, cat, self.eng.tick_count)
-            self._log(f"{self.P.CYN}NEUROPLASTICITY: Learned '{word}' is {cat.upper()}.{self.P.RST}")
+            self._log(f"{self.P.CYN}NEUROPLASTICITY: Forced synaptic link.{self.P.RST}")
+            self._log(f"   '{word}' is now wired to [{cat.upper()}].")
+        else:
+            self._log(f"{self.P.YEL}Usage: /teach \"word\" category{self.P.RST}")
         return True
 
     def _cmd_kill(self, parts):
@@ -103,11 +137,13 @@ class CommandProcessor:
             toxin = parts[1]
             repl = parts[2] if len(parts) > 2 else ""
             if self.Lex.learn_antigen(toxin, repl):
-                self._log(f"{self.P.RED}THE SURGEON: Antigen '{toxin}' mapped to '{repl}'.{self.P.RST}")
+                msg = f"'{toxin}' mapped to '{repl}'" if repl else f"'{toxin}' flagged as antigen."
+                self._log(f"{self.P.RED}THE SURGEON: Immune response updated.{self.P.RST}")
+                self._log(f"   {msg}")
             else:
                 self._log(f"{self.P.RED}ERROR: Immune system write failure.{self.P.RST}")
         else:
-            self._log(f"{self.P.YEL}Usage: /kill [toxin] [replacement]{self.P.RST}")
+            self._log(f"{self.P.YEL}Usage: /kill [toxin] [optional_replacement]{self.P.RST}")
         return True
 
     def _cmd_flag(self, parts):
@@ -379,11 +415,24 @@ class CommandProcessor:
         return True
 
     def _cmd_status(self, parts):
+        """
+        Refactored [SLASH 9.7.3]: Now includes the Psychological Pressure Report.
+        """
         bio = self.eng.bio
         self._log(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS ---{self.P.RST}")
         self._log(f"Health:  {self.eng.health:.1f}/{self.Config.MAX_HEALTH}")
         self._log(f"Stamina: {self.eng.stamina:.1f}/{self.Config.MAX_STAMINA}")
         self._log(f"ATP:     {bio.mito.state.atp_pool:.1f}")
+        try:
+            enneagram = self.eng.noetic.arbiter.enneagram
+            report = enneagram.get_psych_report()
+            current_lens = self.eng.noetic.arbiter.current_focus
+            lens_type = enneagram.MAP.get(current_lens, "?")
+            self._log(f"{self.P.SLATE}{'-'*26}{self.P.RST}")
+            self._log(f"Persona: {self.P.WHT}{current_lens}{self.P.RST} (Type {lens_type})")
+            self._log(f"{report}")
+        except AttributeError:
+            self._log(f"{self.P.GRY}Psych-Graph: OFFLINE{self.P.RST}")
         return True
 
     def _cmd_kip(self, parts):
@@ -413,7 +462,9 @@ class CommandProcessor:
         return True
 
     def _cmd_help(self, parts):
-        self._log(f"{self.P.WHT}--- COMMANDS ---{self.P.RST}")
-        cmds = list(self.registry.keys())
-        self._log(", ".join(cmds))
+        self._log(f"{self.P.WHT}--- AVAILABLE COMMANDS ---{self.P.RST}")
+        self._log(f"{self.P.CYN}Admin:{self.P.RST} /teach, /kill, /flag, /save, /kip, /mode")
+        self._log(f"{self.P.CYN}World:{self.P.RST} /map, /garden, /voids, /strata, /lineage")
+        self._log(f"{self.P.CYN}Action:{self.P.RST} /focus, /reproduce, /seed, /publish, /weave")
+        self._log(f"{self.P.CYN}Debug:{self.P.RST} /manifold, /prove, /kintsugi, /status")
         return True

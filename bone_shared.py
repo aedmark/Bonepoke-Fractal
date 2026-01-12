@@ -1,4 +1,7 @@
 import re, random, string, unicodedata
+import time
+from dataclasses import field, dataclass
+from typing import Dict, Optional, List, Any
 from bone_data import LEXICON, DEATH
 
 class Prisma:
@@ -31,7 +34,7 @@ class BoneConfig:
     MAX_STAMINA = 100.0
     STAMINA_REGEN = 1.0
     MAX_ATP = 200.0
-
+    MAX_DRAG_LIMIT = 5.0
     SHAPLEY_MASS_THRESHOLD = 5.0
     GRAVITY_WELL_THRESHOLD = 15.0
     GEODESIC_STRENGTH = 10.0
@@ -75,13 +78,15 @@ class SemanticsBioassay:
         self._TRANSLATOR = str.maketrans(string.punctuation, " " * len(string.punctuation))
         self.PHONETICS = {
             "PLOSIVE": set("bdgkpt"), "FRICATIVE": set("fthszsh"),
-            "LIQUID": set("lr"), "NASAL": set("mn")
+            "LIQUID": set("lr"), "NASAL": set("mn"),
+            "VOWELS": set("aeiouy")
         }
         self.ROOTS = {
             "HEAVY": ("lith", "ferr", "petr", "dens", "grav", "struct", "base", "fund", "mound"),
             "KINETIC": ("mot", "mov", "ject", "tract", "pel", "crat", "dynam", "flux"),
             "ABSTRACT": ("tion", "ism", "ence", "ance", "ity", "ology", "ness", "ment", "idea"),
-            "SUBURBAN": ("norm", "comm", "stand", "pol", "reg", "mod")
+            "SUBURBAN": ("norm", "comm", "stand", "pol", "reg", "mod"),
+            "VITAL": ("viv", "vita", "spir", "anim", "bio", "luc", "lum", "phot", "phon", "surg", "bloom")
         }
 
     def clean(self, text):
@@ -95,22 +100,21 @@ class SemanticsBioassay:
         w = word.lower()
         clean_len = len(w)
         if clean_len < 3: return None, 0.0
-
         for cat, roots in self.ROOTS.items():
             for r in roots:
                 if r in w: return cat.lower(), 0.8
-
         plosive = sum(1 for c in w if c in self.PHONETICS["PLOSIVE"])
         liquid = sum(1 for c in w if c in self.PHONETICS["LIQUID"])
         nasal = sum(1 for c in w if c in self.PHONETICS["NASAL"])
-
+        vowel = sum(1 for c in w if c in self.PHONETICS["VOWELS"]) # Count breath
         density_score = (plosive * 1.5) + (nasal * 0.8)
         flow_score = liquid + sum(1 for c in w if c in self.PHONETICS["FRICATIVE"])
-
+        vitality_score = (vowel * 1.2) + (flow_score * 0.8)
         compression_mod = 1.0 if clean_len > 5 else 1.5
         final_density = (density_score / clean_len) * compression_mod
-
+        final_vitality = (vitality_score / clean_len) * compression_mod
         if final_density > 0.55: return "heavy", round(final_density, 2)
+        if final_vitality > 0.6: return "play", round(final_vitality, 2)
         if (flow_score / clean_len) > 0.6: return "kinetic", 0.5
         return None, 0.0
 
@@ -406,17 +410,14 @@ class CycleContext:
     clean_words: List[str] = field(default_factory=list)
     physics: Dict[str, Any] = field(default_factory=dict)
     logs: List[str] = field(default_factory=list)
-
     is_alive: bool = True
     refusal_triggered: bool = False
     refusal_packet: Optional[Dict] = None
-
+    is_bureaucratic: bool = False
     bio_result: Dict = field(default_factory=dict)
     world_state: Dict = field(default_factory=dict)
     mind_state: Dict = field(default_factory=dict)
-
     timestamp: float = field(default_factory=time.time)
-
     def log(self, message: str):
         """Adds a message to the cycle logs."""
         self.logs.append(message)

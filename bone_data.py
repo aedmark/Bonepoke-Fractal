@@ -33,34 +33,22 @@ LENSES = {
 
 ENNEAGRAM_DATA = {
     "TYPE_MAP": {
-        "SHERLOCK": 5,  # The Investigator
-        "GORDON": 9,    # The Peacemaker
-        "NATHAN": 3,    # The Achiever
-        "JESTER": 7,    # The Enthusiast
-        "GLASS": 4,     # The Individualist
-        "CLARENCE": 1,  # The Reformer
-        "NARRATOR": 0   # The Void (Neutral)
+        "SHERLOCK": 5, "GORDON": 9, "NATHAN": 2, "JESTER": 7,
+        "GLASS": 4, "CLARENCE": 1, "NARRATOR": 3
     },
-
-    # GEOMETRY: The lines of movement.
-    # Growth = Integration (Health). Stress = Disintegration (Unhealth).
     "GEOMETRY": {
-        5: {"STRESS": 7, "GROWTH": 8},  # Sherlock -> Jester (Manic) / Gordon (Decisive)
-        9: {"STRESS": 6, "GROWTH": 3},  # Gordon -> Glass (Paranoid) / Nathan (Productive)
-        3: {"STRESS": 9, "GROWTH": 6},  # Nathan -> Gordon (Apathetic) / Glass (Communal)
-        1: {"STRESS": 4, "GROWTH": 7},  # Clarence -> Glass (Depressive) / Jester (Spontaneous)
-        4: {"STRESS": 2, "GROWTH": 1},  # Glass -> Nathan (Clingy) / Clarence (Objective)
-        7: {"STRESS": 1, "GROWTH": 5},  # Jester -> Clarence (Critical) / Sherlock (Focused)
-        # Virtual Types (These handle the gaps in our 6-lens system)
-        8: {"STRESS": 5, "GROWTH": 2},  # (Gordon-Angry)
-        2: {"STRESS": 8, "GROWTH": 4},  # (Nathan-Needy)
-        6: {"STRESS": 3, "GROWTH": 9},  # (Glass-Anxious)
+        1: {"STRESS": 4, "GROWTH": 7}, # Clarence
+        2: {"STRESS": 8, "GROWTH": 4}, # Nathan
+        3: {"STRESS": 9, "GROWTH": 6}, # Narrator
+        4: {"STRESS": 2, "GROWTH": 1}, # Glass
+        5: {"STRESS": 7, "GROWTH": 8}, # Sherlock
+        6: {"STRESS": 3, "GROWTH": 9}, # (Virtual)
+        7: {"STRESS": 1, "GROWTH": 5}, # Jester
+        8: {"STRESS": 5, "GROWTH": 2}, # (Virtual)
+        9: {"STRESS": 6, "GROWTH": 3}, # Gordon
     },
-
     "PROXY_MAP": {
-        8: "GORDON",  # Type 8 (Challenger) maps to Gordon (Physicality)
-        2: "NATHAN",  # Type 2 (Helper) maps to Nathan (Heart)
-        6: "GLASS"    # Type 6 (Loyalist) maps to Glass (Reflection/Anxiety)
+        8: "GORDON", 6: "GLASS"
     },
     "SHIFTS": {
         "DISINTEGRATION": [
@@ -124,20 +112,16 @@ NARRATIVE_DATA = {
 
 STYLE_CRIMES = {
     "PATTERNS": [
-        # The "Negative Comparison" (It's not X, but Y -> It's Y)
-        # Capture groups: 1=Preceding text, 2=The "Not X" filler, 3=The "But Y" substance
         {
             "name": "NEG_COMP",
             "regex": r"(?i)(.*)\b(it(?:'s| is) not (?:merely|just|only|simply) [^,;]+, but)\b\s*(.*)",
             "action": "STRIP_PREFIX"
         },
-        # The "Parallel Hedge" (While X is true, Y... -> Y...)
         {
             "name": "WHILE_HEDGE",
             "regex": r"(?i)^While [^,]+, (.*)",
             "action": "KEEP_TAIL"
         },
-        # The "Sycophantic Opener" (Crucially/Importantly/Note that...)
         {
             "name": "ADVERB_BLOAT",
             "regex": r"(?i)^(?:Crucially|Importantly|Interestingly|It is worth noting that|It is important to remember that),?\s*(.*)",
@@ -260,6 +244,12 @@ GORDON = {
             "function": "BREADCRUMB",
             "passive_traits": ["HEAVY_LOAD"],
             "usage_msg": "Gordon drops a rock. Clack. The path backward is physically verified. (Psi -0.2)"
+        },
+        "SILENT_KNIFE": {
+            "description": "A ceramic blade. Doesn't reflect light. Cuts through noise.",
+            "function": "PRUNER",
+            "passive_traits": ["CUT_THE_CRAP"],
+            "usage_msg": "Gordon slices the adjective. The sentence bleeds, then heals stronger."
         },
         "TIME_BRACELET": {
             "description": "A chunky, beige wrist-computer. Smells like ozone.",
