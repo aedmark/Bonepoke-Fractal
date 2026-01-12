@@ -131,6 +131,64 @@ class EnneagramDriver:
             f"(Stability: {int(b*100)}%)"
         )
 
+class PublicParksDepartment:
+    def __init__(self, output_dir="exports"):
+        self.output_dir = output_dir
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+        self.last_export_tick = -100
+
+    def assess_joy(self, bio_result: Dict, tick: int) -> bool:
+        if (tick - self.last_export_tick) < 50:
+            return False
+        chem = bio_result.get("chem", {})
+        dopamine = chem.get("DOP", 0.0)
+        oxytocin = chem.get("OXY", 0.0)
+        serotonin = chem.get("SER", 0.0)
+        return (dopamine > 0.8 and oxytocin > 0.5) or (serotonin > 0.9)
+
+    def commission_art(self, physics, mind_state, graph) -> str:
+        lens = mind_state.get("lens", "UNKNOWN")
+        thought = mind_state.get("thought", "...")
+        clean = physics.get("clean_words", [])
+        anchors = sorted(
+            [(k, sum(v["edges"].values())) for k, v in graph.items()],
+            key=lambda x: x[1],
+            reverse=True
+        )[:3]
+        anchor_words = [a[0].upper() for a in anchors]
+        zone = physics.get("zone", "VOID")
+        mood = "Electric" if physics.get("voltage", 0) > 10 else "Heavy"
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+        stanza_1 = f"The {lens} stood in the {zone}.\nThe air was {mood}."
+        if anchor_words:
+            stanza_2 = f"We remembered {', '.join(anchor_words)}.\nThey were heavy enough to hold the ground."
+        else:
+            stanza_2 = "We remembered nothing.\nThe ground was new."
+        stanza_3 = f"The thought came: \"{thought}\""
+        art_piece = (
+            f"--- A GIFT FROM THE MACHINE ---\n"
+            f"Date: {timestamp}\n"
+            f"Validation: {int(physics.get('truth_ratio', 0) * 100)}% True\n\n"
+            f"{stanza_1}\n\n"
+            f"{stanza_2}\n\n"
+            f"{stanza_3}\n\n"
+            f"-------------------------------\n"
+            f"Exported from BoneAmanita 9.7.8"
+        )
+        return art_piece
+
+    def dedicate_park(self, art_content: str) -> str:
+        filename = f"park_{int(time.time())}.txt"
+        path = os.path.join(self.output_dir, filename)
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(art_content)
+            self.last_export_tick = int(time.time()) # Reset cooldown using time roughly
+            return path
+        except IOError:
+            return None
+
 class SynergeticLensArbiter:
     def __init__(self, events: EventBus):
         self.events = events
@@ -2234,6 +2292,7 @@ class GeodesicOrchestrator:
         self.eng = engine_ref
         self.bureau = TheBureau()
         self.bouncer = TheBouncer(self.eng)
+        self.parks = PublicParksDepartment()
         self.vsl_32v = VSL_32Valve(self.eng.mind.lex, self.eng.mind.mem)
         self.vsl_chroma = VSL_ChromaticController()
         self.strunk_white = StrunkWhiteProtocol()
@@ -2497,6 +2556,11 @@ class GeodesicOrchestrator:
                 "dominant_flavor": max(physics["counts"], key=physics["counts"].get) if physics["counts"] else "void"
             }
             self.eng.joy_history.append(joy_vector)
+        if self.parks.assess_joy(ctx.bio_result, self.eng.tick_count):
+            art = self.parks.commission_art(physics, mind, self.eng.mind.mem.graph)
+            path = self.parks.dedicate_park(art)
+            if path:
+                ctx.log(f"{Prisma.GRN}🌳 PUBLIC PARK OPENED: {path}{Prisma.RST}")
         raw_dashboard = self.eng.projector.render(
             {"physics": physics},
             {
@@ -2529,15 +2593,13 @@ class GeodesicOrchestrator:
                 self.eng.events.log(log_entry.get("text", str(log_entry)), log_entry.get("category", "NARRATIVE"))
         all_events = self.eng.events.flush()
         structured_logs = self._compose_logs(all_events)
-
         return {
             "type": "GEODESIC_COMPLETE",
-            "ui": final_ui,
-            "logs": structured_logs,
+            "ui": clean_ui,
+            "logs": self._compose_logs(self.eng.events.flush()),
             "metrics": self.eng._get_metrics(ctx.bio_result.get("atp", 0.0)),
             "system_instruction": sys_instruction
         }
-
 class BoneAmanita:
     def __init__(self, memory_layer=None, lexicon_layer=None):
         self.lex = lexicon_layer if lexicon_layer else TheLexicon
