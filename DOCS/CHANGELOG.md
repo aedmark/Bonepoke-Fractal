@@ -1,5 +1,114 @@
 # CHANGELOG.md
 
+### **BONEAMANITA v9.7.7 - "The Knope Protocol"**
+
+Summary:
+
+This update transitions the system from a passive observer to an active participant. The Mirror now enforces consequences based on user behavior, the Cartographer now renders actual topology, and Gordon has evolved from a passive storage unit into an active scavenger hunt.
+
+---
+
+#### **1. The Cartographer Upgrade (Spatial Visualization)**
+
+- **File:** `bone_shared.py`
+- **Change:** Completely rewrote `TheCartographer` class.
+- **Feature:** **Procedural ASCII Weaving.**
+  - The map is no longer a text description. It is now a 7x7 generated grid.
+  - **Vectors -> Terrain:**
+    - High Structure (`STR`) $\rightarrow$ **Mountains** (`▲`).
+    - High Entropy (`ENT`) $\rightarrow$ **The Void** (`.`).
+    - High Velocity (`VEL`) $\rightarrow$ **Highways** (`=`).
+    - High Tension (`BET`) $\rightarrow$ **Rocky Ground** (`∷`).
+- **Pinker Note:** This reduces cognitive load by converting abstract math into immediate visual cues.
+
+#### **2. The Mirror Upgrade (Feedback Loops)**
+
+- **File:** `bone_amanita976.py`
+- **Change:** Overhauled `MirrorGraph` and patched `GeodesicOrchestrator`.
+- **Feature:** **Active Bureaucracy.**
+  - The Mirror no longer just _watches_ you; it _taxes_ you.
+  - **Archetypal Consequences:**
+    - **WAR:** System raises shields (Drag x1.5, Loot x2.0).
+    - **ART:** System becomes dreamlike (Voltage Cap 10.0, Plasticity x2.0).
+    - **LAW:** System becomes bureaucratic (Loot Chance 0%, Drag x0.8).
+    - **ROT:** System decays (ATP Tax -2.0, Chaos Up).
+- **Fuller Note:** This creates a cybernetic feedback loop. The user's output shapes the system's constraints.
+
+#### **3. The Janitor Upgrade (Agency & Inventory)**
+
+- **File:** `bone_amanita976.py`, `bone_commands.py`, `bone_data.py`
+- **Change:** Updated `GordonKnot` logic and the Item Registry.
+- **Feature:** **Active Scavenging (`/rummage`).**
+  - Users can now spend **15.0 Stamina** to dig for items using the `/rummage` command.
+  - **Vector-Based Loot Tables:** The item you find depends on the physics of the moment (e.g., High Voltage $\rightarrow$ Chaos Items; High Drag $\rightarrow$ Heavy Items).
+- **Feature:** **New "Pawnee-Tier" Items.**
+  - **Waffle of Persistence:** Restores Health & Morale.
+  - **Binder of Vigilance:** Actively reduces Entropy per turn.
+  - **Li'l Sebastian Plush:** Stabilizes abstract thought (Psi Anchor).
+  - **Galentine Card:** Boosts Oxytocin (Chemical support).
+
+#### **4. Command Interface**
+
+- **File:** `bone_commands.py`
+- **Change:**
+  - Updated `_cmd_map` to print the raw ASCII grid from the new Cartographer.
+  - Added `_cmd_rummage` to handle the new scavenging mechanic.
+
+
+### **BONEAMANITA 9.7.6: "The Kisho Diet"**
+
+**Mission:** Resolve the "Semantic Swamp" (architectural stagnation), enforce strict typing on reality, and give the system a way to speak back to the user upon death.
+
+#### **I. Core Architecture (The Skeleton)**
+
+- **PhysicsPacket Refactor:**
+- **Old:** A chaotic `dict` passed around hoping keys existed.
+- **New:** A strict `@dataclass` (`PhysicsPacket`) in `bone_shared.py`.
+- **Impact:** Reality is now immutable and predictable. No more `KeyError: 'voltage'`.
+- **Files Modified:** `bone_shared.py`, `bone_amanita975.py`.
+
+- **The Physics Resolver (The Brain):**
+- **Old:** Math logic scattered across `bone_vsl.py`, `bone_amanita975.py`, and `bone_biology.py`. Magic numbers everywhere.
+- **New:** Centralized math in `bone_vsl.py` (Class `PhysicsResolver`).
+- **Impact:** One source of truth for "Voltage" and "Drag". Easier tuning via `BoneConfig`.
+- **Files Modified:** `bone_vsl.py`, `bone_amanita975.py`.
+
+#### **II. The Narrative Engine (The Voice)**
+
+- **The Almanac (The Gift):**
+- **New Feature:** A "Creative Weather Report" generated upon session exit.
+- **Function:** Instead of just dying, the system analyzes your session (trauma, voltage, stamina) and gives you a Brian Eno-style oblique strategy for your next writing session.
+- **Impact:** Turns the "Waste Heat" of the session into useful creative fuel.
+- **Files Modified:** `bone_almanac.py` (New), `bone_amanita975.py`.
+
+- **The Ossuary (The Memory):**
+- **Old:** `MycelialNetwork` ruthlessly deleted old memories when full.
+- **New:** Memories are now "Fossilized" (stripped of edges, compressed) and stored in a searchable `fossils` deque.
+- **New Command:** `/fossils` displays these dead memories.
+- **Impact:** The system honors its history instead of erasing it.
+- **Files Modified:** `bone_amanita975.py`, `bone_commands.py`.
+
+#### **III. System Hygiene (The Scrub)**
+
+- **Linter Compliance:**
+- **Visitor Badges:** Applied `_variable_name` syntax to unused arguments across `bone_commands.py`, `bone_shared.py`, and `bone_biology.py`. The interface contracts remain valid, but the linter stops screaming.
+- **Exception Handling:** Patched a dangerous `except: pass` in `cleanup_old_sessions` to allow system interrupts (Ctrl+C).
+- **Type Hinting:** Fixed `Type[BoneConfig]` in `PhysicsResolver` to correctly handle static class references.
+
+#### **IV. Dead Code Removal (The Pruning)**
+
+- **TheTensionMeter:**
+- Removed redundant calculations for `truth_signals` and `cohesion_signals` that were effectively ghost logic.
+- Streamlined `_derive_complex_metrics` to rely on the new `PhysicsResolver` vectors.
+
+**Current Status:**
+
+- **Stability:** High. The system boots, runs, and saves without warnings.
+- **Cognitive Load:** Low. The separation of concerns (Math vs. Narrative vs. State) is much cleaner.
+- **Fun:** High. The Almanac provides a satisfying narrative closure to every session.
+
+
+
 ### **BONEAMANITA v9.7.5 **
 
 **Codename:** _"Treat Yo' Self"_

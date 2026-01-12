@@ -1,3 +1,5 @@
+#bone_shared.py - The Shared Lineage
+
 import re, random, string, unicodedata
 import time
 from dataclasses import field, dataclass
@@ -48,20 +50,13 @@ class BoneConfig:
     SIGNAL_DRAG_MULTIPLIER = 1.0
     KINETIC_GAIN = 1.0
     CRITICAL_ROS_LIMIT = 100.0
-
     MAX_MEMORY_CAPACITY = 100
     ZONE_THRESHOLDS = {"LABORATORY": 1.5, "COURTYARD": 0.8}
     BETA_EPSILON = 0.01
-
     TOXIN_WEIGHT = 1.0
     ANTIGENS = ["basically", "actually", "literally", "utilize"]
     TRAUMA_VECTOR = {"THERMAL":0, "CRYO":0, "SEPTIC":0, "BARIC":0}
-
     VERBOSE_LOGGING = True
-
-    @classmethod
-    def load_patterns(cls):
-        pass
 
     @staticmethod
     def check_pareidolia(words):
@@ -72,7 +67,6 @@ class BoneConfig:
         return False, None
 
 class SemanticsBioassay:
-    """The Tongue: Handles the 'Mouthfeel' of language."""
     def __init__(self, store_ref):
         self.store = store_ref
         self._TRANSLATOR = str.maketrans(string.punctuation, " " * len(string.punctuation))
@@ -156,40 +150,31 @@ class TheTinkerer:
         else:
             voltage = physics_packet.voltage
             drag = physics_packet.narrative_drag
-
         is_forge = (voltage > 12.0) or (drag < 2.0)
         is_mud = (voltage < 5.0) and (drag > 6.0)
-
         learning_rate = 0.05
         rust_rate = 0.02
         items_to_shed = []
-
         for item_name in inventory_list:
             if item_name not in self.tool_confidence:
                 self.tool_confidence[item_name] = 1.0
-
             current = self.tool_confidence[item_name]
-
             if is_forge:
                 self.tool_confidence[item_name] = min(2.0, current + learning_rate)
                 if random.random() < 0.1:
                     self.events.log(f"{Prisma.CYN}[TINKER]: {item_name} is tempering in the heat (Confidence {self.tool_confidence[item_name]:.2f}).{Prisma.RST}", "SYS")
-
             elif is_mud:
                 self.tool_confidence[item_name] = max(0.0, current - rust_rate)
                 if random.random() < 0.1:
                     self.events.log(f"{Prisma.OCHRE}[TINKER]: {item_name} is rusting in the damp.{Prisma.RST}", "SYS")
-
             if self.tool_confidence[item_name] <= 0.1:
                 items_to_shed.append(item_name)
-
         for item in items_to_shed:
             if item in inventory_list:
                 inventory_list.remove(item)
             if item in self.tool_confidence:
                 del self.tool_confidence[item]
             self.events.log(f"{Prisma.GRY}[TINKER]: {item} has rusted away. Gordon put it in the Shed.{Prisma.RST}", "SYS")
-
         for item_name in inventory_list:
             if item_name in self.tool_confidence:
                 self._mutate_tool_stats(item_name, self.tool_confidence[item_name])
@@ -198,14 +183,11 @@ class TheTinkerer:
         item_data = self.gordon.ITEM_REGISTRY.get(item_name)
         if not item_data:
             return
-
         if "value" in item_data:
             if "base_value" not in item_data:
                 item_data["base_value"] = item_data["value"]
-
             new_value = item_data["base_value"] * confidence
             item_data["value"] = round(new_value, 2)
-
         if confidence > 1.5 and "LUCKY" not in item_data.get("passive_traits", []):
             if "passive_traits" not in item_data: item_data["passive_traits"] = []
             item_data["passive_traits"].append("LUCKY")
@@ -286,20 +268,27 @@ class GlobalLexiconFacade:
 
     @classmethod
     def get(cls, category): return cls._STORE.get_raw(category)
+
     @classmethod
     def teach(cls, word, category, tick): return cls._STORE.teach(word, category, tick)
+
     @classmethod
     def clean(cls, text): return cls._ENGINE.clean(text)
+
     @classmethod
     def taste(cls, word): return cls._ENGINE.assay(word)
+
     @classmethod
     def measure_viscosity(cls, word): return cls._ENGINE.measure_viscosity(word)
+
     @classmethod
     def harvest(cls, category):
         candidates = list(cls._STORE.get_raw(category))
         return random.choice(candidates) if candidates else "void"
+
     @classmethod
     def get_turbulence(cls, words): return cls._ENGINE.measure_turbulence(words)
+
     @classmethod
     def get_current_category(cls, word):
         for cat, vocab in cls._STORE.LEARNED_VOCAB.items():
@@ -307,6 +296,7 @@ class GlobalLexiconFacade:
         for cat, vocab in cls._STORE.VOCAB.items():
             if word.lower() in vocab: return cat
         return None
+
     @classmethod
     def compile_antigens(cls):
         antigens = cls._STORE.get_raw("antigen")
@@ -314,6 +304,7 @@ class GlobalLexiconFacade:
             pattern = "|".join(map(re.escape, antigens))
             cls.ANTIGEN_REGEX = re.compile(fr"\b({pattern})\b", re.IGNORECASE)
         else: cls.ANTIGEN_REGEX = None
+
     @classmethod
     def learn_antigen(cls, t, r):
         if "antigen" not in cls._STORE.VOCAB: cls._STORE.VOCAB["antigen"] = set()
@@ -321,8 +312,10 @@ class GlobalLexiconFacade:
         if r: cls._STORE.ANTIGEN_REPLACEMENTS[t.lower()] = r
         cls.compile_antigens()
         return True
+
     @classmethod
     def walk_gradient(cls, text): return cls._ENGINE.walk_gradient(text)
+
     @classmethod
     def atrophy(cls, tick, max_age): return cls._STORE.atrophy(tick, max_age)
 
@@ -330,7 +323,6 @@ GlobalLexiconFacade.initialize()
 TheLexicon = GlobalLexiconFacade
 
 class ParadoxSeed:
-    """The kernel of an idea that grows in the Memory Garden."""
     def __init__(self, question, triggers):
         self.question = question
         self.triggers = {t.lower() for t in triggers}
@@ -375,37 +367,62 @@ class DeathGen:
         return f"{prefix} Cause of Death: {flavor_text}. {verdict}"
 
 class TheCartographer:
+    GRID_SIZE = 7
+
     @staticmethod
-    def weave(text, graph, bio_metrics, limbo, physics=None):
+    def _get_tile(x, y, center, physics, vectors):
+        dist_from_center = ((x - center)**2 + (y - center)**2) ** 0.5
+        entropy_threshold = 3.0 - (vectors.get("ENT", 0.5) * 2.0)
+        if dist_from_center > entropy_threshold:
+            return f"{Prisma.GRY} . {Prisma.RST}"
+        structure_noise = (x * 3 + y * 7) % 10 / 10.0
+        if structure_noise < vectors.get("STR", 0.0):
+            return f"{Prisma.OCHRE} ▲ {Prisma.RST}"
+        if vectors.get("VEL", 0) > 0.6:
+            if x == center or y == center:
+                return f"{Prisma.CYN} = {Prisma.RST}"
+        if vectors.get("BET", 0) > 0.5:
+            return f"{Prisma.SLATE} ∷ {Prisma.RST}"
+        return "   "
+
+    @classmethod
+    def weave(cls, _text, _graph, _bio_metrics, _limbo, physics=None):
+        if not physics:
+            return "MAP ERROR: No Physics Data", []
+        vectors = physics.get("vector", {})
+        center = cls.GRID_SIZE // 2
+        rows = []
+        border = f"{Prisma.GRY}+{'-' * (cls.GRID_SIZE * 3)}+{Prisma.RST}"
+        rows.append(border)
         anchors = []
-        if physics:
-            if physics["counts"]["heavy"] > 2: anchors.append("MOUNTAIN")
-            if physics["counts"]["abstract"] > 2: anchors.append("FOG_BANK")
-            if physics["voltage"] > 10.0: anchors.append("VOLCANIC_VENT")
-        msg = f"TERRAIN: Mixed Elevation. {len(anchors)} features identified."
-        if "MOUNTAIN" in anchors:
-            msg += f"\n   {Prisma.OCHRE}▲ HIGH GROUND: Heavy nouns detected. Good footing.{Prisma.RST}"
-        if "FOG_BANK" in anchors:
-            msg += f"\n   {Prisma.GRY}≋ MIST: High abstraction. Visibility low.{Prisma.RST}"
-        return msg, anchors
+        for y in range(cls.GRID_SIZE):
+            row_str = f"{Prisma.GRY}|{Prisma.RST}"
+            for x in range(cls.GRID_SIZE):
+                if x == center and y == center:
+                    row_str += f"{Prisma.WHT} @ {Prisma.RST}"
+                else:
+                    row_str += cls._get_tile(x, y, center, physics, vectors)
+            row_str += f"{Prisma.GRY}|{Prisma.RST}"
+            rows.append(row_str)
+        rows.append(border)
+        if vectors.get("STR", 0) > 0.7: anchors.append("MOUNTAIN")
+        if vectors.get("ENT", 0) > 0.7: anchors.append("VOID_EDGE")
+        if vectors.get("VEL", 0) > 0.7: anchors.append("HIGHWAY")
+        map_display = "\n".join(rows)
+        return map_display, anchors
 
     @staticmethod
     def detect_voids(packet):
         return [w for w in packet["clean_words"] if w in TheLexicon.get("abstract")]
 
     @staticmethod
-    def spin_web(graph, inventory, gordon):
+    def spin_web(_graph, inventory, _gordon):
         if "TIME_BRACELET" in inventory:
             return True, "WEB SPUN: The bracelet helps you tie the knots."
         return False, "WEAVE FAILED: You lack the tools to bind these concepts."
 
 @dataclass
 class CycleContext:
-    """
-    A structural container for the state of a single turn.
-    Pinker Note: Explicitly naming the context reduces cognitive load.
-    Fuller Note: This acts as the tension strut holding the turn data together.
-    """
     input_text: str
     clean_words: List[str] = field(default_factory=list)
     physics: Dict[str, Any] = field(default_factory=dict)
@@ -418,8 +435,8 @@ class CycleContext:
     world_state: Dict = field(default_factory=dict)
     mind_state: Dict = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
+
     def log(self, message: str):
-        """Adds a message to the cycle logs."""
         self.logs.append(message)
 
 class EventBus:
@@ -440,36 +457,56 @@ class EventBus:
 
 @dataclass
 class PhysicsPacket:
-    """
-    A strictly typed container for physical reality.
-    """
-    voltage: float
-    narrative_drag: float
-    repetition: float
-    clean_words: List[str]
-    counts: Dict[str, int]
-    vector: Dict[str, float]
+    voltage: float = 0.0
+    narrative_drag: float = 0.0
+    repetition: float = 0.0
+    clean_words: List[str] = field(default_factory=list)
+    counts: Dict[str, int] = field(default_factory=dict)
+    vector: Dict[str, float] = field(default_factory=dict)
     psi: float = 0.0
     kappa: float = 0.0
     beta_index: float = 1.0
+    gamma: float = 0.0
     turbulence: float = 0.0
+    flow_state: str = "LAMINAR"
+    zone: str = "COURTYARD"
+    zone_color: str = "OCHRE"
+    truth_ratio: float = 0.0
     raw_text: str = ""
+    antigens: int = 0
+    perfection_streak: int = 0
+    avg_viscosity: float = 0.0
+    E: float = 0.0
+    B: float = 0.0
+    humility_flag: bool = False
+    system_surge_event: bool = False
+    pain_signal: float = 0.0
+
+    def __getitem__(self, key):
+        return getattr(self, key)
+
+    def __setitem__(self, key, value):
+        setattr(self, key, value)
+
+    def get(self, key, default=None):
+        return getattr(self, key, default)
+
+    def update(self, data: Dict):
+        for k, v in data.items():
+            if hasattr(self, k):
+                setattr(self, k, v)
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
-        """Factory to convert the legacy dictionary if needed."""
         valid_keys = cls.__annotations__.keys()
         filtered_data = {k: v for k, v in data.items() if k in valid_keys}
         return cls(**filtered_data)
 
-    import random
+    def to_dict(self):
+        return {k: getattr(self, k) for k in self.__annotations__}
 
 class ZoneInertia:
     def __init__(self, inertia=0.7, min_dwell=2):
-        """
-        inertia: 0.0 = volatile, 1.0 = concrete.
-        min_dwell: minimum turns before a zone shift is allowed.
-        """
         self.inertia = inertia
         self.min_dwell = min_dwell
         self.current_zone = "COURTYARD"
@@ -481,16 +518,13 @@ class ZoneInertia:
         truth = physics.get("truth_ratio", 0.5)
         grav_pull = 1.0 if cosmic_state[0] != "VOID_DRIFT" else 0.0
         current_vec = (beta, truth, grav_pull)
-
         self.dwell_counter += 1
         if proposed_zone == self.current_zone:
             self.dwell_counter = 0
             self.last_vector = current_vec
             return proposed_zone
-
         if self.dwell_counter < self.min_dwell:
             return self.current_zone
-
         similarity = 0.0
         if self.last_vector:
             dist = sum((a - b) ** 2 for a, b in zip(current_vec, self.last_vector)) ** 0.5
@@ -498,19 +532,91 @@ class ZoneInertia:
         change_probability = (1.0 - self.inertia) * (1.0 - similarity)
         if proposed_zone in ["AERIE", "THE_FORGE"]:
             change_probability += 0.2
-
         if random.random() < change_probability:
             self.current_zone = proposed_zone
             self.dwell_counter = 0
             self.last_vector = current_vec
-
         return self.current_zone
 
     def override_cosmic_drag(self, cosmic_drag_penalty, current_zone):
-        """
-        If we are locked in a High-Coherence zone (AERIE), we resist
-        the Void's pull. The narrative momentum bridges the gap.
-        """
         if current_zone == "AERIE" and cosmic_drag_penalty > 0:
             return cosmic_drag_penalty * 0.3
         return cosmic_drag_penalty
+
+class TheAlmanac:
+    def __init__(self):
+        self.forecasts = {
+            "HIGH_VOLTAGE": [
+                "The wire is hot. Write immediately, without editing.",
+                "Burn the fuel before it explodes. Speed is your friend.",
+                "Do not seek structure. Seek impact."
+            ],
+            "HIGH_DRAG": [
+                "The mud is deep. Stop trying to run.",
+                "Focus on texture. Describe the weight of things.",
+                "Slow down. The obstacle *is* the path."
+            ],
+            "HIGH_ENTROPY": [
+                "The center is not holding. Find one true sentence.",
+                "Simplify. Cut the adjectives. Locate the noun.",
+                "Anchor yourself. Pick a physical object and describe it."
+            ],
+            "HIGH_TRAUMA": [
+                "The wound is open. Treat it with care.",
+                "Write what hurts, but write it in the third person.",
+                "Use the pain as fuel, but filter it through the lens."
+            ],
+            "BALANCED": [
+                "The Garden is growing. Tend to the edges.",
+                "Structure and flow are aligned. Build something tall.",
+                "You are in the zone. Maintain the rhythm."
+            ]
+        }
+
+    def compile_forecast(self, session_data: dict) -> str:
+        meta = session_data.get("meta", {})
+        trauma = session_data.get("trauma_vector", {})
+        final_health = meta.get("final_health", 0)
+        final_stamina = meta.get("final_stamina", 0)
+        condition = "BALANCED"
+        advice = ""
+        max_trauma = max(trauma, key=trauma.get) if trauma else "NONE"
+        trauma_val = trauma.get(max_trauma, 0)
+        if final_health < 30 or trauma_val > 0.6:
+            condition = "HIGH_TRAUMA"
+            advice = f"Warning: High levels of {max_trauma} residue detected."
+        elif final_stamina < 20:
+            condition = "HIGH_DRAG"
+            advice = "System exhaustion imminent. Semantic drag is heavy."
+        elif session_data.get("meta", {}).get("avg_voltage", 0) > 12.0:
+            condition = "HIGH_VOLTAGE"
+            advice = "The capacitor is overcharged."
+        forecast_text = random.choice(self.forecasts.get(condition, self.forecasts["BALANCED"]))
+        border = f"{Prisma.OCHRE}{'='*40}{Prisma.RST}"
+        report = [
+            "\n",
+            border,
+            f"{Prisma.CYN}   THE ALMANAC: CREATIVE WEATHER REPORT{Prisma.RST}",
+            border,
+            f"Condition: {Prisma.WHT}{condition}{Prisma.RST}",
+            f"Observation: {Prisma.GRY}{advice}{Prisma.RST}",
+            f"{Prisma.SLATE}---{Prisma.RST}",
+            f"{Prisma.MAG}PRESCRIPTION:{Prisma.RST}",
+            f"   {forecast_text}",
+            "",
+            f"{Prisma.GRN}Seed for Next Session:{Prisma.RST}",
+            f"   {self._generate_oblique_seed(condition)}",
+            border,
+            "\n"
+        ]
+        return "\n".join(report)
+
+    def _generate_oblique_seed(self, condition):
+        strategies = {
+            "HIGH_VOLTAGE": "What if you whispered instead of screamed?",
+            "HIGH_DRAG": "Honor the error as a hidden intention.",
+            "HIGH_ENTROPY": "Repetition is a form of change.",
+            "HIGH_TRAUMA": "Turn it into a wallpaper pattern.",
+            "BALANCED": "Discard the first idea. Trust the third."
+        }
+        return strategies.get(condition, "Look closely at the most boring thing in the room.")

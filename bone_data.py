@@ -1,4 +1,4 @@
-# bone_data.py
+# bone_data.py - The Data Packet
 
 LENSES = {
     "SHERLOCK": {
@@ -353,7 +353,32 @@ GORDON = {
             "function": "WEB_WEAVER",
             "passive_traits": ["CONDUCTIVE_HAZARD"],
             "usage_msg": "The spiders are knitting a new narrative. It's sticky."
-        }
+        },
+        "WAFFLE_OF_PERSISTENCE": {
+            "description": "It is impossibly warm and smells like maple syrup. A monument to not giving up.",
+            "function": "HEAL",
+            "consume_on_use": True,
+            "value": 25.0, # Health Restore
+            "usage_msg": "You eat the waffle. It tastes like victory. (Health +25, Morale Improved)"
+        },
+        "TRAPERKEEPER_OF_VIGILANCE": {
+            "description": "Color-coded tabs. meticulously organized. It demands order.",
+            "function": "ENTROPY_REDUCTION",
+            "passive_traits": ["ORGANIZE_CHAOS"],
+            "usage_msg": "Gordon snaps the binder shut. Loose entropy is filed away. (Entropy -0.5 per turn)"
+        },
+        "HORSE_PLUSHIE": {
+            "description": "A tiny horse. It doesn't do anything, but having it makes you feel infinite.",
+            "function": "MORALE_BOOST",
+            "passive_traits": ["PSI_ANCHOR"],
+            "usage_msg": "You look at the tiny horse. You understand what matters. (Psi stabilized at 0.5)"
+        },
+        "GREETING_CARD": {
+            "description": "A card that says 'Ovaries Before Brovaries' (or 'Systems Before Symptoms').",
+            "function": "OXYTOCIN_BOMB",
+            "consume_on_use": True,
+            "usage_msg": "You read the card. You feel supported. (Oxytocin +0.5, Cortisol -0.5)"
+        },
     }
 }
 

@@ -1,6 +1,8 @@
-import os, random, time, math, shlex
-from typing import Dict, List, Callable, Optional
-from bone_shared import ParadoxSeed, BoneConfig
+#bone_commands.py - The Command Center
+
+import math, os, random, shlex, time
+from typing import Dict, List, Callable
+from bone_shared import ParadoxSeed
 
 class CommandProcessor:
     def __init__(self, engine, prisma_ref, lexicon_ref, config_ref, cartographer_ref):
@@ -9,103 +11,108 @@ class CommandProcessor:
         self.Lex = lexicon_ref
         self.Config = config_ref
         self.Map = cartographer_ref
-        self.registry: Dict[str, Callable[[List[str]], bool]] = {
-            # Admin / Learning
-            "/teach": self._cmd_teach,
-            "/kill": self._cmd_kill,
-            "/flag": self._cmd_flag,
+
+        self.registry = {
+            # ADMIN
             "/save": self._cmd_save,
-
-            # System Control
-            "/mode": self._cmd_mode,
+            "/load": self._cmd_load,
             "/kip": self._cmd_kip,
+            "/mode": self._cmd_mode,
             "/status": self._cmd_status,
-            "/mirror": self._cmd_mirror,
 
-            # Narrative / World
+            # WORLD
             "/map": self._cmd_map,
-            "/look": self._cmd_map,
+            "/manifold": self._cmd_manifold,
             "/garden": self._cmd_garden,
             "/voids": self._cmd_voids,
             "/strata": self._cmd_strata,
+            "/fossils": self._cmd_fossils,
             "/lineage": self._cmd_lineage,
 
-            # Actions
-            "/focus": self._cmd_focus,
-            "/orbit": self._cmd_orbit,
-            "/reproduce": self._cmd_reproduce,
+            # ACTION
+            "/rummage": self._cmd_rummage,
             "/seed": self._cmd_seed,
+            "/reproduce": self._cmd_reproduce,
+            "/weave": self._cmd_weave,
             "/publish": self._cmd_publish,
 
-            # Debug / VSL
-            "/pp": self._cmd_pp,
-            "/tfw": self._cmd_tfw,
-            "/manifold": self._cmd_manifold,
-            "/prove": self._cmd_prove,
-            "/weave": self._cmd_weave,
-            "/refusal": self._cmd_refusal,
+            # DEBUG / ADVANCED
+            "/teach": self._cmd_teach,
+            "/kill": self._cmd_kill,
+            "/flag": self._cmd_flag,
+            "/focus": self._cmd_focus,
+            "/orbit": self._cmd_orbit,
+            "/mirror": self._cmd_mirror,
             "/kintsugi": self._cmd_kintsugi,
-
-            "/help": self._cmd_help}
+            "/prove": self._cmd_prove,
+            "/help": self._cmd_help
+        }
 
     def _log(self, text):
         self.eng.events.log(text, "CMD")
 
-    def _cmd_manifold(self, parts):
-        nav = self.eng.navigator
-        current = nav.current_location
-        phys = self.eng.phys.tension.last_physics_packet
-        if not phys or "voltage" not in phys:
-            self._log(f"{self.P.GRY}NAVIGATION OFFLINE: No physics data yet.{self.P.RST}")
-            return True
-        drag = min(10.0, max(0.0, phys.get("narrative_drag", 0.0)))
-        volt = min(20.0, max(0.0, phys.get("voltage", 0.0)))
-        self._log(f"{self.P.CYN}--- MANIFOLD NAVIGATION ---{self.P.RST}")
-        self._log(f"Current Loc: {self.P.WHT}{current}{self.P.RST}")
-        self._log(f"Coordinates: [Drag: {drag:.1f} | Voltage: {volt:.1f}]")
-        self._log(f"Shimmer Reserves: {self.eng.shimmer_state.current:.1f}")
-        self._log(f"\n{self.P.GRY}Nearby Manifolds:{self.P.RST}")
-        my_vec = (round(drag / 10.0, 2), round(volt / 20.0, 2))
-        for name, data in nav.manifolds.items():
-            dist = math.dist(my_vec, data.center_vector)
-            bar_len = int((1.0 - min(1.0, dist)) * 10)
-            bar = "█" * bar_len + "░" * (10 - bar_len)
-            highlight = self.P.GRN if name == current else self.P.GRY
-            self._log(f"   {highlight}{name:<12}{self.P.RST} {bar} {dist:.2f} AU")
-        return True
-
     def execute(self, text: str) -> bool:
-        if not text.startswith("/"):
-            return False
+        if not text.startswith("/"): return False
         try:
             parts = shlex.split(text)
         except ValueError:
             self._log(f"{self.P.RED}SYNTAX ERROR: Unbalanced quotes.{self.P.RST}")
             return True
-        if not parts: return False
+
         cmd = parts[0].lower()
         if cmd not in self.registry:
             self._log(f"{self.P.RED}Unknown command '{cmd}'. Try /help.{self.P.RST}")
             return True
-        restricted_cmds = ["/teach", "/kill", "/flag"]
-        if cmd in restricted_cmds:
-            is_debug = self.Config.VERBOSE_LOGGING
-            confidence = self.eng.mind.mirror.profile.confidence
-            if not is_debug and confidence < 10:
-                self._log(f"{self.P.YEL}🔒 LOCKED: Trust {confidence}/10 required.{self.P.RST}")
-                self._log(f"   {self.P.GRY}(Hint: Toggle /kip (Debug Mode) to bypass this check.){self.P.RST}")
+
+        if cmd in ["/teach", "/kill", "/flag"] and not self.Config.VERBOSE_LOGGING:
+            trust = self.eng.mind.mirror.profile.confidence
+            if trust < 10:
+                self._log(f"{self.P.YEL}🔒 LOCKED: Trust {trust}/10 required.{self.P.RST}")
                 return True
+
         try:
-            handler = self.registry[cmd]
-            return handler(parts)
+            return self.registry[cmd](parts)
         except Exception as e:
             self._log(f"{self.P.RED}COMMAND CRASH: {e}{self.P.RST}")
-            import traceback
-            traceback.print_exc()
             return True
 
-    def _cmd_save(self, parts):
-        """Manually saves the User Profile and current Spore."""
+    def _cmd_manifold(self, _):
+        phys = self.eng.phys.tension.last_physics_packet
+        if not phys:
+            self._log("NAVIGATION OFFLINE: No physics data yet.")
+        else:
+            self._log(self.eng.navigator.report_position(phys))
+        return True
+
+    def _cmd_reproduce(self, parts):
+        if self.eng.health < 20:
+            self._log(f"{self.P.RED}FERTILITY ERROR: Too weak to breed.{self.P.RST}")
+            return True
+        mode = "MITOSIS"
+        target = None
+        if len(parts) > 1 and parts[1] == "cross":
+            others = [f for f in os.listdir("memories") if f.endswith(".json") and self.eng.mind.mem.session_id not in f]
+            if others:
+                target = os.path.join("memories", random.choice(others))
+                mode = "CROSSOVER"
+            else:
+                self._log(f"{self.P.YEL}ISOLATION: No partners found. Mitosis fallback.{self.P.RST}")
+        self._log(f"{self.P.MAG}INITIATING {mode}...{self.P.RST}")
+        result = self.eng.repro.attempt_reproduction(self.eng, mode, target)
+        self._log(result)
+        return True
+
+    def _cmd_status(self, _):
+        self._log(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS ---{self.P.RST}")
+        self._log(f"Health:  {self.eng.health:.1f} | Stamina: {self.eng.stamina:.1f} | ATP: {self.eng.bio.mito.state.atp_pool:.1f}")
+        try:
+            enneagram = self.eng.noetic.arbiter.enneagram
+            self._log(enneagram.get_psych_report())
+        except AttributeError:
+            pass
+        return True
+
+    def _cmd_save(self, _):
         self.eng.mind.mirror.profile.save()
         spore_data = {
             "session_id": self.eng.mind.mem.session_id,
@@ -114,357 +121,144 @@ class CommandProcessor:
             "mitochondria": self.eng.bio.mito.adapt(self.eng.health),
             "antibodies": list(self.eng.bio.immune.active_antibodies),
             "core_graph": self.eng.mind.mem.graph,
-            "tool_adaptation": self.eng.tinkerer.save_state()}
+            "tool_adaptation": self.eng.tinkerer.save_state()
+        }
         path = self.eng.mind.mem.loader.save_spore(self.eng.mind.mem.filename, spore_data)
-        self._log(f"{self.P.GRN}💾 SYSTEM SAVED.{self.P.RST}")
-        self._log(f"   User Trust: {self.eng.mind.mirror.profile.confidence}")
-        self._log(f"   Spore Path: {path}")
+        self._log(f"{self.P.GRN}💾 SYSTEM SAVED: {path}{self.P.RST}")
         return True
 
-    def _cmd_teach(self, parts):
-        if len(parts) >= 3:
-            word = parts[1]
-            cat = parts[2].lower()
-            self.Lex.teach(word, cat, self.eng.tick_count)
-            self._log(f"{self.P.CYN}NEUROPLASTICITY: Forced synaptic link.{self.P.RST}")
-            self._log(f"   '{word}' is now wired to [{cat.upper()}].")
-        else:
-            self._log(f"{self.P.YEL}Usage: /teach \"word\" category{self.P.RST}")
+    def _cmd_rummage(self, _):
+        phys = self.eng.phys.tension.last_physics_packet
+        if not phys: return True
+        success, msg, cost = self.eng.gordon.rummage(phys, self.eng.stamina)
+        self.eng.stamina = max(0.0, self.eng.stamina - cost)
+        self._log(msg)
         return True
 
-    def _cmd_kill(self, parts):
-        if len(parts) >= 2:
-            toxin = parts[1]
-            repl = parts[2] if len(parts) > 2 else ""
-            if self.Lex.learn_antigen(toxin, repl):
-                msg = f"'{toxin}' mapped to '{repl}'" if repl else f"'{toxin}' flagged as antigen."
-                self._log(f"{self.P.RED}THE SURGEON: Immune response updated.{self.P.RST}")
-                self._log(f"   {msg}")
-            else:
-                self._log(f"{self.P.RED}ERROR: Immune system write failure.{self.P.RST}")
-        else:
-            self._log(f"{self.P.YEL}Usage: /kill [toxin] [optional_replacement]{self.P.RST}")
-        return True
-
-    def _cmd_flag(self, parts):
-        if len(parts) > 1:
-            term = parts[1].lower()
-            self.Lex.USER_FLAGGED_BIAS.add(term)
-            self._log(f"{self.P.CYN}BIAS UPDATE: '{term}' flagged.{self.P.RST}")
+    def _cmd_map(self, _):
+        phys = self.eng.phys.tension.last_physics_packet
+        if not phys or "raw_text" not in phys: return True
+        # Cartographer logic is already clean, just calling it.
+        bio = {"cortisol": self.eng.bio.endo.cortisol, "oxytocin": self.eng.bio.endo.oxytocin}
+        result, anchors = self.Map.weave(phys["raw_text"], self.eng.mind.mem.graph, bio, self.eng.limbo, physics=phys)
+        self._log(f"{self.P.OCHRE}CARTOGRAPHY REPORT:{self.P.RST}\n{result}")
+        if anchors: self._log(f"LANDMARKS: {', '.join(anchors)}")
         return True
 
     def _cmd_garden(self, parts):
-        seeds = self.eng.mind.mem.seeds
         self._log(f"{self.P.GRN}THE PARADOX GARDEN:{self.P.RST}")
         if len(parts) > 1 and parts[1] == "water":
-            msg = self.eng.mind.mem.tend_garden(["concept", "truth", "void"])
-            if msg: self._log(f"   {msg}")
-            else: self._log("   The soil is damp, but nothing blooms yet.")
+            msg = self.eng.mind.mem.tend_garden(["concept", "truth"])
+            self._log(f"   {msg}" if msg else "   The soil is damp.")
         else:
-            for s in seeds:
+            for s in self.eng.mind.mem.seeds:
                 state = "BLOOMED" if s.bloomed else f"Germinating ({int(s.maturity*10)}%)"
                 self._log(f"   {s.question} [{state}]")
         return True
 
-    def _cmd_reproduce(self, parts):
-        if self.eng.health < 20:
-            self._log(f"{self.P.RED}FERTILITY ERROR: Too weak to breed. Survive first.{self.P.RST}")
-            return True
-        mode = "MITOSIS"
-        target_spore = None
-        if len(parts) > 1 and parts[1] == "cross":
-            others = [f for f in os.listdir("memories") if f.endswith(".json") and self.eng.mind.mem.session_id not in f]
-            if others:
-                target_spore = os.path.join("memories", random.choice(others))
-                mode = "CROSSOVER"
-            else:
-                self._log(f"{self.P.YEL}ISOLATION: No other spores found. Defaulting to Mitosis.{self.P.RST}")
-        self._log(f"{self.P.MAG}INITIATING {mode}...{self.P.RST}")
-        if mode == "MITOSIS":
-            phys = self.eng.phys.tension.last_physics_packet
-            bio_state = {"trauma_vector": self.eng.trauma_accum}
-            child_id, genome = self.eng.repro.mitosis(
-                self.eng.mind.mem.session_id,
-                bio_state,
-                phys,
-                self.eng.mind.mem)
-            self._log(f"   ► CHILD SPAWNED: {self.P.WHT}{child_id}{self.P.RST}")
-            self._log(f"   ► TRAIT: {genome['mutations']}")
-        elif mode == "CROSSOVER":
-            current_bio = {
-                "trauma_vector": self.eng.trauma_accum,
-                "mito": self.eng.bio.mito}
-            child_id, genome = self.eng.repro.crossover(
-                self.eng.mind.mem.session_id,
-                current_bio,
-                target_spore)
-            if child_id:
-                full_spore_data = {
-                    "session_id": child_id,
-                    "meta": {
-                        "timestamp": time.time(),
-                        "final_health": self.eng.health,
-                        "final_stamina": self.eng.stamina},
-                    "trauma_vector": genome.get("trauma_inheritance", {}),
-                    "config_mutations": genome.get("config_mutations", {}),
-                    "mitochondria": {"enzymes": list(genome.get("inherited_enzymes", []))},
-                    "core_graph": self.eng.mind.mem.graph,
-                    "antibodies": list(self.eng.bio.immune.active_antibodies)}
-                filename = f"{child_id}.json"
-                saved_path = self.eng.mind.mem.loader.save_spore(filename, full_spore_data)
-                if saved_path:
-                    self._log(f"   HYBRID SPAWNED: {self.P.WHT}{child_id}{self.P.RST}")
-                    self._log(f"   {self.P.GRN}SAVED: {saved_path}{self.P.RST}")
-            else:
-                self._log(f"{self.P.RED}   CROSSOVER FAILED: {genome}{self.P.RST}")
+    def _cmd_teach(self, parts):
+        if len(parts) >= 3:
+            self.Lex.teach(parts[1], parts[2].lower(), self.eng.tick_count)
+            self._log(f"{self.P.CYN}NEUROPLASTICITY: '{parts[1]}' -> [{parts[2].upper()}].{self.P.RST}")
         return True
 
-    def _cmd_mode(self, parts):
+    def _cmd_kill(self, parts):
+        if len(parts) >= 2:
+            self.Lex.learn_antigen(parts[1], parts[2] if len(parts)>2 else "")
+            self._log(f"{self.P.RED}IMMUNE UPDATE: '{parts[1]}' flagged.{self.P.RST}")
+        return True
+
+    def _cmd_flag(self, parts):
         if len(parts) > 1:
-            self._log(self.eng.bio.governor.set_override(parts[1].upper()))
-        else:
-            self._log(f"{self.P.CYN}CURRENT MODE: {self.eng.bio.governor.mode}{self.P.RST}")
+            self.Lex.USER_FLAGGED_BIAS.add(parts[1].lower())
+            self._log(f"{self.P.CYN}BIAS FLAGGED: {parts[1]}{self.P.RST}")
         return True
 
     def _cmd_seed(self, parts):
-        if len(parts) < 2:
-            self._log(f"{self.P.YEL}Usage: /seed [The question or paradox to plant]{self.P.RST}")
-            return True
+        if len(parts) < 2: return True
         text = " ".join(parts[1:])
-        triggers = set(self.Lex.clean(text))
-        if not triggers:
-            self._log(f"{self.P.RED}SEED ERROR: That idea is too hollow. Use heavier words.{self.P.RST}")
-            return True
-        new_seed = ParadoxSeed(text, triggers)
-        self.eng.mind.mem.seeds.append(new_seed)
-
-        self._log(f"{self.P.GRN}GARDEN: Planted new seed.{self.P.RST}")
-        self._log(f"   Question: '{text}'")
-        self._log(f"   {self.P.GRY}Triggers: {triggers}{self.P.RST}")
+        self.eng.mind.mem.seeds.append(ParadoxSeed(text, set(self.Lex.clean(text))))
+        self._log(f"{self.P.GRN}PLANTED: '{text}'{self.P.RST}")
         return True
 
     def _cmd_load(self, parts):
-        if len(parts) > 1:
-            target = parts[1]
-            if not target.endswith(".json"):
-                target += ".json"
-            self.eng.mind.mem.ingest(target)
-        else:
-            self._log(f"{self.P.YEL}Usage: /load [filename]{self.P.RST}")
+        if len(parts) > 1: self.eng.mind.mem.ingest(parts[1] + (".json" if not parts[1].endswith(".json") else ""))
         return True
 
-    def _cmd_mirror(self, parts):
-        mirror = self.eng.mind.mirror
-        if len(parts) > 1:
-            if parts[1].lower() == "off":
-                mirror.active_mode = False
-                self._log(f"{self.P.GRY}MIRROR: Disabled. The system will no longer reflect your biases.{self.P.RST}")
-            elif parts[1].lower() == "on":
-                mirror.active_mode = True
-                self._log(f"{self.P.MAG}MIRROR: Enabled. Watching for patterns.{self.P.RST}")
-            else:
-                self._log(f"{self.P.YEL}Usage: /mirror [on/off]{self.P.RST}")
-        else:
-            state = "ON" if mirror.active_mode else "OFF"
-            self._log(f"{self.P.CYN}MIRROR STATUS: {state}{self.P.RST}")
-            self._log(mirror.get_status())
+    def _cmd_kip(self, _):
+        self.Config.VERBOSE_LOGGING = not self.Config.VERBOSE_LOGGING
+        self._log(f"VERBOSE LOGGING: {self.Config.VERBOSE_LOGGING}")
+        return True
+
+    def _cmd_mode(self, parts):
+        if len(parts) > 1: self._log(self.eng.bio.governor.set_override(parts[1].upper()))
         return True
 
     def _cmd_focus(self, parts):
         if len(parts) > 1:
-            target = parts[1].lower()
-            self._log(f"{self.P.VIOLET}FOCUSING: '{target}'...{self.P.RST}")
-            tracer = self.eng.mind.tracer
-            loop = tracer.inject(target)
+            loop = self.eng.mind.tracer.inject(parts[1].lower())
             if loop:
-                self._log(f"  {self.P.RED}RUMINATION:{self.P.RST} {' -> '.join(loop)}")
+                self._log(f"{self.P.RED}RUMINATION:{self.P.RST} {'->'.join(loop)}")
                 if len(parts) > 2 and parts[2] == "break":
-                    result = tracer.psilocybin_rewire(loop)
-                    if result:
-                        self._log(f"  {self.P.GRN}{result}{self.P.RST}")
-                else:
-                    self._log(f"  {self.P.GRY}To rewire this loop, use: /focus {target} break{self.P.RST}")
-            else:
-                self._log(f"  {self.P.GRY}No pathological loops found.{self.P.RST}")
+                    self._log(self.eng.mind.tracer.psilocybin_rewire(loop))
+            else: self._log("No loop found.")
         return True
 
     def _cmd_orbit(self, parts):
-        if len(parts) > 1:
-            target = parts[1].lower()
-            if target in self.eng.mind.mem.graph:
-                self.eng.mind.mem.graph[target]["edges"]["GRAVITY_ASSIST"] = 50
-                self._log(f"{self.P.VIOLET}GRAVITY ASSIST: Thrusters firing toward '{target.upper()}'.{self.P.RST}")
-            else:
-                self._log(f"{self.P.RED}ERROR: '{target}' not found.{self.P.RST}")
+        if len(parts) > 1 and parts[1] in self.eng.mind.mem.graph:
+            self.eng.mind.mem.graph[parts[1]]["edges"]["GRAVITY_ASSIST"] = 50
+            self._log(f"{self.P.VIOLET}GRAVITY ASSIST: Target '{parts[1]}'.{self.P.RST}")
+        return True
+
+    def _cmd_weave(self, _):
+        s, m = self.Map.spin_web(self.eng.mind.mem.graph, self.eng.gordon.inventory, self.eng.gordon)
+        self._log(m)
+        if s: self.eng.stamina -= 5.0
+        return True
+
+    def _cmd_voids(self, _):
+        p = self.eng.phys.tension.last_physics_packet
+        if p: self._log(f"VOIDS: {self.Map.detect_voids(p) or 'None'}")
+        return True
+
+    def _cmd_strata(self, _):
+        wells = [k for k,v in self.eng.mind.mem.graph.items() if "strata" in v]
+        self._log(f"STRATA: {wells if wells else 'None'}")
+        return True
+
+    def _cmd_fossils(self, _):
+        self._log(f"FOSSILS: {len(self.eng.mind.mem.fossils)} items archived.")
+        return True
+
+    def _cmd_lineage(self, _):
+        self._log(f"LINEAGE: {len(self.eng.mind.mem.lineage_log)} generations.")
+        return True
+
+    def _cmd_mirror(self, parts):
+        m = self.eng.mind.mirror
+        if len(parts) > 1: m.active_mode = (parts[1].lower() == "on")
+        self._log(f"MIRROR: {'ON' if m.active_mode else 'OFF'} | {m.get_status()}")
         return True
 
     def _cmd_prove(self, parts):
-        if len(parts) < 2:
-            self._log(f"{self.P.YEL}Usage: /prove [statement]{self.P.RST}")
-        else:
-            statement = " ".join(parts[1:])
-            m = self.eng.phys.tension.gaze(statement)
-            truth = m["physics"]["truth_ratio"]
-            self._log(f"{self.P.CYN}LOGIC PROBE: Density={truth:.2f}{self.P.RST}")
+        if len(parts) > 1:
+            m = self.eng.phys.tension.gaze(" ".join(parts[1:]))
+            self._log(f"LOGIC DENSITY: {m['physics']['truth_ratio']:.2f}")
         return True
 
-    def _cmd_weave(self, parts):
-        inventory = self.eng.gordon.inventory
-        success, msg = self.Map.spin_web(
-            self.eng.mind.mem.graph,
-            inventory,
-            self.eng.gordon)
-        if success:
-            self._log(f"{self.P.CYN}{msg}{self.P.RST}")
-            self.eng.stamina = max(0.0, self.eng.stamina - 5.0)
-            self._log(f"   {self.P.GRY}(Stamina -5.0){self.P.RST}")
-        else:
-            self._log(f"{self.P.RED}{msg}{self.P.RST}")
-        return True
-
-    def _cmd_lineage(self, parts):
-        log = self.eng.mind.mem.lineage_log
-        if not log:
-            self._log(f"{self.P.GRY}ARCHIVE EMPTY: We are the first generation.{self.P.RST}")
-            return True
-        self._log(f"{self.P.CYN}THE PALIMPSEST (Ancestral Lineage):{self.P.RST}")
-        for entry in log:
-            t_vec = ", ".join([f"{k}:{v}" for k,v in entry['trauma'].items()])
-            self._log(f"   {self.P.MAG}• {entry['source']}{self.P.RST} ({entry['age_hours']}h ago)")
-            self._log(f"     ↳ Mutations: {entry['mutations']} | Trauma: {{{t_vec}}}")
-        return True
-
-    def _cmd_voids(self, parts):
-        packet = self.eng.phys.tension.last_physics_packet
-        if not packet:
-            self._log(f"{self.P.GRY}THE FOG: No physics data yet.{self.P.RST}")
-            return True
-        voids = self.Map.detect_voids(packet)
-        if voids:
-            self._log(f"{self.P.GRY}THE FOG: Detected hollow concepts: {voids}{self.P.RST}")
-        else:
-            self._log(f"{self.P.CYN}CLEAR AIR: No voids detected.{self.P.RST}")
-        return True
-
-    def _cmd_strata(self, parts):
-        wells = [(k, v) for k, v in self.eng.mind.mem.graph.items() if "strata" in v]
-        if not wells:
-            self._log(f"{self.P.GRY}STRATA: No Gravity Wells formed yet.{self.P.RST}")
-        else:
-            self._log(f"{self.P.OCHRE}GEOLOGICAL STRATA:{self.P.RST}")
-            for word, data in wells:
-                s = data["strata"]
-                age = self.eng.tick_count - s['birth_tick']
-                self._log(f"   {self.P.WHT}● {word.upper()}{self.P.RST} (Age: {age} ticks)")
-        return True
-
-    def _cmd_kintsugi(self, parts):
+    def _cmd_kintsugi(self, _):
         k = self.eng.kintsugi
-        self._log(f"{self.P.YEL}--- KINTSUGI STATUS ---{self.P.RST}")
-        if k.active_koan:
-            self._log(f"STATE: {self.P.RED}FRACTURED{self.P.RST}")
-            self._log(f"ACTIVE KOAN: '{k.active_koan}'")
-            self._log(f"REQUIREMENT: High Voltage + Playfulness")
-        else:
-            self._log(f"STATE: {self.P.GRN}WHOLE{self.P.RST}")
-        self._log(f"TOTAL REPAIRS: {k.repairs_count}")
-        self._log(f"TRAUMA LOAD: {self.eng.trauma_accum}")
+        state = "FRACTURED" if k.active_koan else "WHOLE"
+        self._log(f"KINTSUGI: {state} | Repairs: {k.repairs_count}")
         return True
 
-    def _cmd_publish(self, parts):
-        journal = self.eng.journal
-        phys = self.eng.phys.tension.last_physics_packet
-        if not phys:
-            self._log(f"{self.P.RED}Nothing to publish.{self.P.RST}")
-            return True
-        success, review, reward = journal.publish(phys["raw_text"], phys, self.eng.bio)
-        if success:
-            self._log(f"{self.P.CYN}PUBLISHED.{self.P.RST} Review: {review}")
-            if reward == "SEROTONIN_BOOST":
-                self.eng.bio.endo.serotonin = min(1.0, self.eng.bio.endo.serotonin + 0.2)
-                self._log(f"   {self.P.GRN}► STATUS UP: Serotonin +0.2{self.P.RST}")
-        return True
-
-    def _cmd_refusal(self, parts):
-        septic = self.eng.trauma_accum.get("SEPTIC", 0.0)
-        self._log(f"{self.P.VIOLET}REFUSAL ENGINE: Paranoia Level {septic:.2f}{self.P.RST}")
-        return True
-
-    def _cmd_map(self, parts):
-        phys = self.eng.phys.tension.last_physics_packet
-        if not phys or "raw_text" not in phys:
-            self._log(f"{self.P.GRY}FOG OF WAR: No physics data. Speak to the system first to generate terrain.{self.P.RST}")
-            return True
-        bio_metrics = {
-            "cortisol": self.eng.bio.endo.cortisol,
-            "oxytocin": self.eng.bio.endo.oxytocin,
-            "atp": self.eng.bio.mito.state.atp_pool}
-        phys = self.eng.phys.tension.last_physics_packet
-        result_msg, anchors = self.Map.weave(
-            self.eng.phys.tension.last_physics_packet["raw_text"],
-            self.eng.mind.mem.graph,
-            bio_metrics,
-            self.eng.limbo,
-            physics=phys)
-        self._log(f"{self.P.OCHRE}CARTOGRAPHY REPORT:{self.P.RST}")
-        self._log(result_msg)
-        if "ANCHOR_STONE" in self.eng.gordon.inventory:
-            self._log(f"{self.P.GRY}   Gordon: 'The anchor holds. We are here.'{self.P.RST}")
-        elif len(anchors) < 2:
-            self._log(f"{self.P.GRY}   Gordon: 'This map is useless. I need more rocks.'{self.P.RST}")
-        return True
-
-    def _cmd_status(self, parts):
-        """
-        Refactored [SLASH 9.7.3]: Now includes the Psychological Pressure Report.
-        """
-        bio = self.eng.bio
-        self._log(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS ---{self.P.RST}")
-        self._log(f"Health:  {self.eng.health:.1f}/{self.Config.MAX_HEALTH}")
-        self._log(f"Stamina: {self.eng.stamina:.1f}/{self.Config.MAX_STAMINA}")
-        self._log(f"ATP:     {bio.mito.state.atp_pool:.1f}")
-        try:
-            enneagram = self.eng.noetic.arbiter.enneagram
-            report = enneagram.get_psych_report()
-            current_lens = self.eng.noetic.arbiter.current_focus
-            lens_type = enneagram.MAP.get(current_lens, "?")
-            self._log(f"{self.P.SLATE}{'-'*26}{self.P.RST}")
-            self._log(f"Persona: {self.P.WHT}{current_lens}{self.P.RST} (Type {lens_type})")
-            self._log(f"{report}")
-        except AttributeError:
-            self._log(f"{self.P.GRY}Psych-Graph: OFFLINE{self.P.RST}")
-        return True
-
-    def _cmd_kip(self, parts):
-        self.Config.VERBOSE_LOGGING = not self.Config.VERBOSE_LOGGING
-        state = "ON" if self.Config.VERBOSE_LOGGING else "OFF"
-        self._log(f"{self.P.GRY}VERBOSE LOGGING: {state}{self.P.RST}")
-        return True
-
-    def _cmd_pp(self, parts):
-        packet = self.eng.phys.tension.last_physics_packet
-        if packet:
-            self._log(f"{self.P.CYN}PHYSICS DUMP:{self.P.RST} V:{packet.get('voltage',0)} D:{packet.get('narrative_drag',0)}")
-        return True
-
-    def _cmd_tfw(self, parts):
+    def _cmd_publish(self, _):
         phys = self.eng.phys.tension.last_physics_packet
         if phys:
-            old_drag = phys.get("narrative_drag", 0.0)
-            phys["narrative_drag"] = max(0.0, old_drag - 2.0)
-            phys["beta_index"] = random.uniform(0.1, 2.0)
-
-            self._log(f"{self.P.MAG}PATH DIVERSIFICATION EXECUTED:{self.P.RST}")
-            self._log(f"   Gravity Wells ignored. Vector shifted 30°.")
-            self._log(f"   {self.P.GRY}Drag reduced by 2.0. Beta randomized.{self.P.RST}")
-        else:
-            self._log(f"{self.P.RED}Cannot shift vector: No physics packet active.{self.P.RST}")
+            s, r, _ = self.eng.journal.publish(phys["raw_text"], phys, self.eng.bio)
+            if s: self._log(f"PUBLISHED: {r}")
         return True
 
-    def _cmd_help(self, parts):
-        self._log(f"{self.P.WHT}--- AVAILABLE COMMANDS ---{self.P.RST}")
-        self._log(f"{self.P.CYN}Admin:{self.P.RST} /teach, /kill, /flag, /save, /kip, /mode")
-        self._log(f"{self.P.CYN}World:{self.P.RST} /map, /garden, /voids, /strata, /lineage")
-        self._log(f"{self.P.CYN}Action:{self.P.RST} /focus, /reproduce, /seed, /publish, /weave")
-        self._log(f"{self.P.CYN}Debug:{self.P.RST} /manifold, /prove, /kintsugi, /status")
+    def _cmd_help(self, _):
+        self._log("COMMANDS: /save, /load, /map, /status, /rummage, /teach, /seed, /reproduce...")
         return True
