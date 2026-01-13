@@ -4,8 +4,7 @@ import json, math, time, random
 from collections import deque
 from dataclasses import dataclass, field
 from typing import List, Dict, Set, Optional, Any, Tuple
-from bone_amanita977 import SporeInterface, LocalFileSporeLoader, SporeCasing, LiteraryReproduction
-from bone_shared import Prisma, TheLexicon, BoneConfig, PhysicsPacket, EventBus, ParadoxSeed, TheAlmanac
+from bone_shared import SporeInterface, LocalFileSporeLoader, SporeCasing, LiteraryReproduction, Prisma, TheLexicon, BoneConfig, PhysicsPacket, EventBus, ParadoxSeed, TheAlmanac
 
 DEFAULT_BMR = 2.0
 
@@ -753,6 +752,7 @@ class EndocrineSystem:
     serotonin: float = 0.5
     adrenaline: float = 0.0
     melatonin: float = 0.0
+    glimmers: int = 0
     REWARD_SMALL = 0.05
     REWARD_MEDIUM = 0.1
     REWARD_LARGE = 0.15
@@ -821,19 +821,42 @@ class EndocrineSystem:
         else:
             self.melatonin = 0.0
 
+    def check_for_glimmer(self, feedback: Dict, harvest_hits: int) -> Optional[str]:
+        """
+        The Schur Lens: detecting moments of unadulterated goodness.
+        """
+        # Glimmer Condition 1: High Truth + High Structure (The "Ron Swanson" Resonance)
+        if feedback.get("INTEGRITY", 0) > 0.9 and feedback.get("STATIC", 0) < 0.2:
+            self.glimmers += 1
+            self.serotonin += 0.2
+            return "GLIMMER: Perfect structural integrity detected. A moment of zen."
+
+        # Glimmer Condition 2: High Vitality (The "Leslie Knope" Energy)
+        # Assuming harvest_hits represents productive engagement
+        if harvest_hits > 2 and self.dopamine > 0.8:
+            self.glimmers += 1
+            self.oxytocin += 0.2
+            return "GLIMMER: Infectious enthusiasm detected. The work is good."
+
+        return None
+
     def metabolize(self, feedback: Dict, health: float, stamina: float, ros_level: float = 0.0,
                    social_context: bool = False, enzyme_type: Optional[str] = None,
                    harvest_hits: int = 0, stress_mod: float = 1.0) -> Dict[str, float]:
         self._apply_enzyme_reaction(enzyme_type, harvest_hits)
         self._apply_environmental_pressure(feedback, health, stamina, ros_level, stress_mod)
         self._maintain_homeostasis(social_context)
+        glimmer_msg = self.check_for_glimmer(feedback, harvest_hits)
         self.dopamine = self._clamp(self.dopamine)
         self.oxytocin = self._clamp(self.oxytocin)
         self.cortisol = self._clamp(self.cortisol)
         self.serotonin = self._clamp(self.serotonin)
         self.adrenaline = self._clamp(self.adrenaline)
         self.melatonin = self._clamp(self.melatonin)
-        return self.get_state()
+        state = self.get_state()
+        if glimmer_msg:
+            state["glimmer_msg"] = glimmer_msg
+        return state
 
     def get_state(self) -> Dict[str, float]:
         return {

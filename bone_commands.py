@@ -268,5 +268,27 @@ class CommandProcessor:
         return True
 
     def _cmd_help(self, parts):
-        self._log("COMMANDS: /save, /load, /map, /status, /rummage, /teach, /seed, /reproduce...")
+        help_menu = [
+            f"\n{self.P.CYN}--- BONEAMANITA 9.8.0 MANUAL ---{self.P.RST}",
+            f"{self.P.WHT}CORE:{self.P.RST}",
+            "  /status   - Diagnostic check (Health, ATP, Enneagram).",
+            "  /save     - Cryopreserve the current timeline.",
+            "  /load [x] - Ingest a specific spore file.",
+
+            f"{self.P.WHT}WORLD:{self.P.RST}",
+            "  /map      - Cartographic visualization of the current text.",
+            "  /manifold - Check your coordinates in the Geodesic VSL.",
+            "  /garden   - Visit the Paradox Seeds.",
+
+            f"{self.P.WHT}ACTION:{self.P.RST}",
+            "  /rummage  - Dig for artifacts (Costs Stamina).",
+            "  /reproduce- Attempt Mitosis or Crossover.",
+            "  /publish  - Submit the current thought to the Literary Journal.",
+
+            f"{self.P.WHT}DEBUG:{self.P.RST}",
+            "  /teach [w] [c] - Force neuroplasticity (Word -> Category).",
+            "  /kip      - Toggle Verbose Logging (The 'Developer Mode').",
+            f"\n{self.P.GRY}Type carefully. The machine is listening.{self.P.RST}"
+        ]
+        self._log("\n".join(help_menu))
         return True

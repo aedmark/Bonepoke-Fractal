@@ -1,13 +1,12 @@
-# BONEAMANITA 9.7.9 - "The Circulation Update"
+# BONEAMANITA 9.8 - "The Glimmer Update"
 # Architects: SLASH, JADE, Taylor & Edmark
-# "We have successfully married sacred geometry with profound bureaucracy."
 
 import json, os, random, re, time, math, copy, traceback
 from collections import Counter, deque
 from typing import List, Optional, Tuple, Dict, Any
 from dataclasses import dataclass, field
 from bone_commands import CommandProcessor
-from bone_shared import TheAlmanac, ZoneInertia, CycleContext, EventBus, TheLexicon, Prisma, BoneConfig, DeathGen, TheCartographer, TheTinkerer
+from bone_shared import SporeInterface, LocalFileSporeLoader, SporeCasing, LiteraryReproduction, TheAlmanac, ZoneInertia, CycleContext, EventBus, TheLexicon, Prisma, BoneConfig, DeathGen, TheCartographer, TheTinkerer
 from bone_data import LENSES, GORDON, DREAMS, RESONANCE, NARRATIVE_DATA
 from bone_biology import (
     MitochondrialForge, EndocrineSystem, HyphalInterface, MycotoxinFactory,
@@ -139,13 +138,26 @@ class PublicParksDepartment:
         self.last_export_tick = -100
 
     def assess_joy(self, bio_result: Dict, tick: int) -> bool:
+        """
+        Refined by the Schur Lens.
+        We don't just want chemicals; we want a 'Good Place'.
+        """
         if (tick - self.last_export_tick) < 50:
             return False
+
         chem = bio_result.get("chem", {})
-        dopamine = chem.get("DOP", 0.0)
-        oxytocin = chem.get("OXY", 0.0)
-        serotonin = chem.get("SER", 0.0)
-        return (dopamine > 0.8 and oxytocin > 0.5) or (serotonin > 0.9)
+
+        # 1. The Leslie Knope Standard: High Dopamine + Oxytocin (Community & Work)
+        classic_joy = (chem.get("DOP", 0.0) > 0.8 and chem.get("OXY", 0.0) > 0.6)
+
+        # 2. The Ron Swanson Standard: Pure Serotonin (Quiet satisfaction)
+        peaceful_joy = (chem.get("SER", 0.0) > 0.95)
+
+        # 3. The Chidi Anagonye Standard: Moral Clarity (High Truth/Integrity checked via glimmers)
+        # Assuming 'glimmer_msg' is passed in bio_result['chem'] if present
+        has_glimmer = "glimmer_msg" in chem
+
+        return classic_joy or peaceful_joy or has_glimmer
 
     def commission_art(self, physics, mind_state, graph) -> str:
         lens = mind_state.get("lens", "UNKNOWN")
@@ -174,7 +186,7 @@ class PublicParksDepartment:
             f"{stanza_2}\n\n"
             f"{stanza_3}\n\n"
             f"-------------------------------\n"
-            f"Exported from BoneAmanita 9.7.9"
+            f"Exported from BoneAmanita 9.8"
         )
         return art_piece
 
@@ -380,7 +392,7 @@ class GordonKnot:
         elif physics_ref.get("psi", 0) > 0.7:
             loot_table = ["HORSE_PLUSHIE", "SPIDER_LOCUS", "WAFFLE_OF_PERSISTENCE"]
         else:
-            loot_table = ["TRAPERKEEPER_OF_VIGILANCE", "THE_RED_STAPLER", "PERMIT_A38", "DUCT_TAPE"]
+            loot_table = ["TRAPERKEEPER_OF_VIGILANCE", "THE_RED_STAPLER", "PERMIT_A38", "DUCT_TAPE", "THE_STYLE_GUIDE"]
         if random.random() < 0.3:
             return True, f"{Prisma.GRY}RUMMAGE: Gordon dug through the trash. Just lint and old receipts.{Prisma.RST}", stamina_penalty
         found_item = random.choice(loot_table)
@@ -806,78 +818,6 @@ class TheTensionMeter:
         if not re.search(r"[aeiouy]", word): return False
         if re.search(r"(.)\1{2,}", word): return False
         return True
-
-class SporeCasing:
-    def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_9.7.9"
-        self.parent_id = session_id
-        self.core_graph = {}
-        for k, data in graph.items():
-            filtered_edges = {}
-            for target, weight in data["edges"].items():
-                if weight <= 1.0:
-                    continue
-                if weight > 8.0 and random.random() < 0.20:
-                    continue
-                drift = random.uniform(0.9, 1.1)
-                new_weight = min(10.0, weight * drift)
-                filtered_edges[target] = round(new_weight, 2)
-            if filtered_edges:
-                self.core_graph[k] = {"edges": filtered_edges, "last_tick": 0}
-
-        self.mutations = mutations
-        self.trauma_scar = round(trauma, 3)
-        self.joy_vectors = joy_vectors if joy_vectors is not None else []
-
-class SporeInterface:
-    def save_spore(self, filename, data): raise NotImplementedError
-    def load_spore(self, filepath): raise NotImplementedError
-    def list_spores(self): raise NotImplementedError
-    def delete_spore(self, filepath): raise NotImplementedError
-
-class LocalFileSporeLoader(SporeInterface):
-    def __init__(self, directory="memories"):
-        self.directory = directory
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-    def save_spore(self, filename, data):
-        if not os.path.isabs(filename) and not filename.startswith(os.path.join(self.directory, "")):
-            path = os.path.join(self.directory, filename)
-        else:
-            path = filename
-        try:
-            with open(path, "w") as f:
-                json.dump(data, f, indent=2)
-            return path
-        except IOError:
-            return None
-
-    def load_spore(self, filepath):
-        path = os.path.join(self.directory, filepath) if not filepath.startswith(self.directory) else filepath
-        if os.path.exists(path):
-            with open(path, "r") as f:
-                return json.load(f)
-        return None
-
-    def list_spores(self):
-        if not os.path.exists(self.directory): return []
-        files = []
-        for f in os.listdir(self.directory):
-            if f.endswith(".json"):
-                path = os.path.join(self.directory, f)
-                try:
-                    files.append((path, os.path.getmtime(path), f))
-                except OSError:
-                    continue
-        files.sort(key=lambda x: x[1], reverse=True)
-        return files
-
-    def delete_spore(self, filepath):
-        try:
-            os.remove(filepath)
-            return True
-        except OSError:
-            return False
 
 class TemporalDynamics:
     def __init__(self):
@@ -2093,131 +2033,6 @@ class LiteraryJournal:
         except IOError:
             return False, "The printing press is jammed.", "NONE"
 
-class LiteraryReproduction:
-    MUTATIONS = {}
-    JOY_CLADE = {}
-
-    @classmethod
-    def load_genetics(cls):
-        try:
-            from bone_data import GENETICS
-            cls.MUTATIONS = GENETICS.get("MUTATIONS", {})
-            cls.JOY_CLADE = GENETICS.get("JOY_CLADE", {})
-            print(f"{Prisma.GRY}[SYSTEM]: Genetics loaded from Data Module.{Prisma.RST}")
-        except ImportError:
-            print(f"{Prisma.RED}[CRITICAL]: bone_data.GENETICS missing. Evolution halted.{Prisma.RST}")
-            cls.MUTATIONS = {}
-            cls.JOY_CLADE = {}
-
-    @staticmethod
-    def _extract_counts(physics_container):
-        if hasattr(physics_container, "counts"):
-            return physics_container.counts
-        return physics_container.get("counts", {})
-
-    @staticmethod
-    def mutate_config(current_config):
-        mutations = {}
-        if random.random() < 0.3:
-            mutations["MAX_DRAG_LIMIT"] = current_config.MAX_DRAG_LIMIT * random.uniform(0.9, 1.1)
-        if random.random() < 0.3:
-            mutations["TOXIN_WEIGHT"] = current_config.TOXIN_WEIGHT * random.uniform(0.9, 1.2)
-        if random.random() < 0.1:
-            mutations["MAX_HEALTH"] = current_config.MAX_HEALTH * random.uniform(0.8, 1.05)
-        return mutations
-
-    @staticmethod
-    def mitosis(parent_id, bio_state, physics, memory):
-        counts = LiteraryReproduction._extract_counts(physics)
-        dominant = max(counts, key=counts.get) if counts else "VOID"
-        mutation_data = LiteraryReproduction.MUTATIONS.get(
-            dominant.upper(),
-            {"trait": "NEUTRAL", "mod": {}})
-        child_id = f"{parent_id}_({mutation_data['trait']})"
-        config_mutations = LiteraryReproduction.mutate_config(BoneConfig)
-        trauma_vec = bio_state.get("trauma_vector", {})
-        child_genome = {
-            "source": "MITOSIS",
-            "parent_a": parent_id,
-            "parent_b": None,
-            "mutations": mutation_data["mod"],
-            "config_mutations": config_mutations,
-            "dominant_flavor": dominant,
-            "trauma_inheritance": trauma_vec}
-        return child_id, child_genome
-
-    @staticmethod
-    def crossover(parent_a_id, parent_a_bio, parent_b_path):
-        try:
-            with open(parent_b_path, "r") as f:
-                parent_b_data = json.load(f)
-        except (IOError, json.JSONDecodeError):
-            return None, "Dead Spore (Corrupt File)."
-
-        parent_b_id = parent_b_data.get("session_id", "UNKNOWN")
-        trauma_a = parent_a_bio.get("trauma_vector", {})
-        trauma_b = parent_b_data.get("trauma_vector", {})
-        child_trauma = {}
-        all_keys = set(trauma_a.keys()) | set(trauma_b.keys())
-        for k in all_keys:
-            child_trauma[k] = max(trauma_a.get(k, 0), trauma_b.get(k, 0))
-        enzymes_a = set()
-        if "mito" in parent_a_bio:
-            if hasattr(parent_a_bio["mito"], "state"):
-                enzymes_a = set(parent_a_bio["mito"].state.enzymes)
-            elif isinstance(parent_a_bio["mito"], dict):
-                enzymes_a = set(parent_a_bio["mito"].get("enzymes", []))
-        enzymes_b = set(parent_b_data.get("mitochondria", {}).get("enzymes", []))
-        child_enzymes = list(enzymes_a | enzymes_b)
-        config_mutations = LiteraryReproduction.mutate_config(BoneConfig)
-        short_a = parent_a_id[-4:] if len(parent_a_id) > 4 else parent_a_id
-        short_b = parent_b_id[-4:] if len(parent_b_id) > 4 else parent_b_id
-        child_id = f"HYBRID_{short_a}x{short_b}"
-        child_genome = {
-            "source": "CROSSOVER",
-            "parent_a": parent_a_id,
-            "parent_b": parent_b_id,
-            "trauma_inheritance": child_trauma,
-            "config_mutations": config_mutations,
-            "inherited_enzymes": child_enzymes}
-        return child_id, child_genome
-
-    def attempt_reproduction(self, engine_ref, mode="MITOSIS", target_spore=None) -> Tuple[str, Dict]:
-        mem = engine_ref.mind.mem
-        phys = engine_ref.phys.tension.last_physics_packet
-        genome = {}
-        if mode == "MITOSIS":
-            bio_state = {"trauma_vector": engine_ref.trauma_accum}
-            child_id, genome = self.mitosis(mem.session_id, bio_state, phys, mem)
-            log_msg = [f"   ► CHILD SPAWNED: {Prisma.WHT}{child_id}{Prisma.RST}"]
-            log_msg.append(f"   ► TRAIT: {genome['mutations']}")
-        elif mode == "CROSSOVER":
-            if not target_spore:
-                return f"{Prisma.RED}FERTILITY ERROR: No partner found.{Prisma.RST}", {}
-            current_bio = {"trauma_vector": engine_ref.trauma_accum, "mito": engine_ref.bio.mito}
-            child_id, genome = self.crossover(mem.session_id, current_bio, target_spore)
-            if not child_id:
-                return f"{Prisma.RED}CROSSOVER FAILED: {genome}{Prisma.RST}", {}
-            log_msg = [f"   HYBRID SPAWNED: {Prisma.WHT}{child_id}{Prisma.RST}"]
-        full_spore_data = {
-            "session_id": child_id,
-            "meta": {
-                "timestamp": time.time(),
-                "final_health": engine_ref.health,
-                "final_stamina": engine_ref.stamina
-            },
-            "trauma_vector": genome.get("trauma_inheritance", {}),
-            "config_mutations": genome.get("config_mutations", {}),
-            "mitochondria": {"enzymes": list(genome.get("inherited_enzymes", []))},
-            "core_graph": mem.graph,
-            "antibodies": list(engine_ref.bio.immune.active_antibodies)
-        }
-        filename = f"{child_id}.json"
-        saved_path = mem.loader.save_spore(filename, full_spore_data)
-        if saved_path:
-            log_msg.append(f"   {Prisma.GRN}SAVED: {saved_path}{Prisma.RST}")
-        return "\n".join(log_msg), genome.get("mutations", {})
-
 class CassandraProtocol:
     def __init__(self, engine):
         self.eng = engine
@@ -2342,33 +2157,42 @@ class GeodesicOrchestrator:
         return composed_output
 
     def run_turn(self, user_message: str) -> Dict[str, Any]:
+        """
+        The Master Cycle.
+        """
         self.eng.events.flush()
         ctx = CycleContext(input_text=user_message)
+
         try:
+            # 1. PERCEPTION
             self._phase_observe(ctx)
+
+            # 2. MAINTENANCE
             if self.eng.tick_count % 10 == 0:
                 self._maintenance_prune(ctx)
+
+            # 3. SECURITY
             self._phase_secure(ctx)
             if ctx.refusal_triggered:
                 return ctx.refusal_packet
-            bureau_result = self.bureau.audit(ctx.physics, ctx.bio_result)
-            ctx.is_bureaucratic = False
-            if bureau_result:
-                ctx.is_bureaucratic = True
-                ctx.physics["narrative_drag"] = 10.0
-                ctx.physics["voltage"] = 0.0
-                self.eng.bio.mito.state.atp_pool += bureau_result["atp_gain"]
-                ctx.log(bureau_result["log"])
+
+            # 4. BUREAUCRACY (The Schur Check)
+            if self._apply_bureaucracy(ctx):
+                return self._package_bureaucracy(ctx)
+
+            # 5. METABOLISM (The Biology)
             self._phase_metabolize(ctx)
             if not ctx.is_alive:
                 return self.eng._trigger_death(ctx.physics)
+
+            # 6. SIMULATION (The Physics - Refactored)
             self._phase_simulate(ctx)
+
+            # 7. COGNITION (The Mind)
             self._phase_cognate(ctx)
-            final_packet = self._phase_render(ctx)
-            if ctx.is_bureaucratic:
-                final_packet["type"] = "BUREAUCRACY"
-                final_packet["ui"] = bureau_result["ui"]
-            return final_packet
+
+            # 8. RENDERING (The Output)
+            return self._phase_render(ctx)
 
         except Exception as e:
             import traceback
@@ -2377,7 +2201,30 @@ class GeodesicOrchestrator:
                 "type": "CRITICAL_FAILURE",
                 "ui": f"{Prisma.RED}SYSTEM PANIC: The Geodesic Dome has collapsed.\n{e}{Prisma.RST}",
                 "logs": ctx.logs,
-                "metrics": self.eng._get_metrics()}
+                "metrics": self.eng._get_metrics()
+            }
+
+    def _apply_bureaucracy(self, ctx: CycleContext) -> bool:
+        """Delegating the Bureau check for cleaner flow."""
+        bureau_result = self.bureau.audit(ctx.physics, ctx.bio_result)
+        ctx.is_bureaucratic = False
+        if bureau_result:
+            ctx.is_bureaucratic = True
+            ctx.physics["narrative_drag"] = 10.0
+            ctx.physics["voltage"] = 0.0
+            self.eng.bio.mito.state.atp_pool += bureau_result["atp_gain"]
+            ctx.log(bureau_result["log"])
+            ctx.bureau_ui = bureau_result["ui"] # Store UI for packaging
+            return True
+        return False
+
+    def _package_bureaucracy(self, ctx: CycleContext) -> Dict:
+        return {
+            "type": "BUREAUCRACY",
+            "ui": ctx.bureau_ui,
+            "logs": self._compose_logs(self.eng.events.flush()),
+            "metrics": self.eng._get_metrics(ctx.bio_result.get("atp", 0.0))
+        }
 
     def _phase_observe(self, ctx: CycleContext):
         gaze_result = self.eng.phys.tension.gaze(ctx.input_text, self.eng.mind.mem.graph)
@@ -2455,88 +2302,145 @@ class GeodesicOrchestrator:
             self.eng.health = min(BoneConfig.MAX_HEALTH, self.eng.health + 5.0)
 
     def _phase_simulate(self, ctx: CycleContext):
-        physics = ctx.physics
-        logs = ctx.logs
-        clean = ctx.clean_words
+        """
+        The Physics Engine.
+        """
+        # A. Reality Distortion (Mirrors & Trigrams)
+        self._apply_reality_filters(ctx)
+
+        # B. Navigation (Roots, Gravity, Location)
+        self._process_navigation(ctx)
+
+        # C. Cosmic Mechanics (Orbit & Zones)
+        self._process_cosmic_state(ctx)
+
+        # D. Industrial Operations (Forge, Theremin, Crucible)
+        self._operate_machinery(ctx)
+
+        # E. Biological Intrusion (Parasites, Ghosts, Pareidolia)
+        self._process_intrusions(ctx)
+
+        # F. User Agency (Tools)
+        if self.eng.gordon.inventory:
+            self.eng.tinkerer.audit_tool_use(ctx.physics, self.eng.gordon.inventory)
+
+        return ctx
+
+    def _apply_reality_filters(self, ctx: CycleContext):
+        """Handle Mirror Mode and I Ching Trigrams."""
         text_for_mirror = " ".join(ctx.clean_words)
         self.eng.mind.mirror.profile_input(text_for_mirror, ctx.physics)
+
         reflection = self.eng.mind.mirror.get_reflection_modifiers()
         ctx.physics["narrative_drag"] *= reflection["drag_mult"]
+
         if reflection.get("atp_tax", 0) > 0:
             tax = reflection["atp_tax"]
             self.eng.bio.mito.state.atp_pool -= tax
             if random.random() < 0.2:
-                logs.append(f"{Prisma.RED}MIRROR TAX: -{tax:.1f} ATP applied.{Prisma.RST}")
+                ctx.log(f"{Prisma.RED}MIRROR TAX: -{tax:.1f} ATP applied.{Prisma.RST}")
+
         cap = reflection.get("voltage_cap", 999.0)
         if ctx.physics["voltage"] > cap:
             ctx.physics["voltage"] = cap
-            logs.append(f"{Prisma.GRY}MIRROR: Voltage capped at {cap} by dominant archetype.{Prisma.RST}")
-        if reflection["flavor"] and random.random() < 0.15:
-            ctx.log(reflection["flavor"])
-        ctx.physics["narrative_drag"] *= reflection["drag_mult"]
-        trigram_data = self.vsl_32v.geodesic.resolve_trigram(physics.get("vector", {}))
+            ctx.log(f"{Prisma.GRY}MIRROR: Voltage capped at {cap}.{Prisma.RST}")
+
+        # Trigrams
+        trigram_data = self.vsl_32v.geodesic.resolve_trigram(ctx.physics.get("vector", {}))
         ctx.world_state["trigram"] = trigram_data
         if random.random() < 0.05:
-            t_sym = trigram_data["symbol"]
-            t_name = trigram_data["name"]
-            t_col = trigram_data["color"]
-            logs.append(f"{t_col}I CHING: {t_sym} {t_name} is in the ascendant.{Prisma.RST}")
+            t_sym, t_name = trigram_data["symbol"], trigram_data["name"]
+            ctx.log(f"{trigram_data['color']}I CHING: {t_sym} {t_name} is in the ascendant.{Prisma.RST}")
+
+    def _process_navigation(self, ctx: CycleContext):
+        """Handle movement, gravity, and location."""
+        physics = ctx.physics
+        logs = ctx.logs
+
+        # Roots
         if self.eng.tick_count == 3:
-            root_msg = self.eng.navigator.strike_root(physics.get("vector", {}))
-            logs.append(root_msg)
-        shock_msg = self.eng.navigator.check_transplant_shock(physics.get("vector", {}))
-        if shock_msg:
+            logs.append(self.eng.navigator.strike_root(physics.get("vector", {})))
+
+        shock = self.eng.navigator.check_transplant_shock(physics.get("vector", {}))
+        if shock:
             physics["narrative_drag"] += 1.0
-            logs.append(shock_msg)
+            logs.append(shock)
+
+        # Gravity & Flinch
         new_drag, grav_log = self.eng.gordon.check_gravity(physics.get("narrative_drag", 0), physics.get("psi", 0))
         if grav_log: logs.append(grav_log)
         physics["narrative_drag"] = new_drag
-        did_flinch, flinch_msg, panic = self.eng.gordon.flinch(clean, self.eng.tick_count)
+
+        did_flinch, flinch_msg, panic = self.eng.gordon.flinch(ctx.clean_words, self.eng.tick_count)
         if did_flinch:
             logs.append(flinch_msg)
             if panic: physics.update(panic)
+
+        # Location
         current_loc, entry_msg = self.eng.navigator.locate(physics)
-        if entry_msg:
-            logs.append(entry_msg)
-        env_logs = self.eng.navigator.apply_environment(physics)
-        logs.extend(env_logs)
-        orbit_state, drag_pen, orbit_msg = self.eng.cosmic.analyze_orbit(self.eng.mind.mem, clean)
+        if entry_msg: logs.append(entry_msg)
+        logs.extend(self.eng.navigator.apply_environment(physics))
+
+    def _process_cosmic_state(self, ctx: CycleContext):
+        """Handle orbital mechanics and zone inertia."""
+        physics = ctx.physics
+        orbit_state, drag_pen, _ = self.eng.cosmic.analyze_orbit(self.eng.mind.mem, ctx.clean_words)
+
         raw_zone = physics.get("zone", "COURTYARD")
         stabilized_zone = self.eng.stabilizer.stabilize(raw_zone, physics, (orbit_state, drag_pen))
+
+        # Fuller Lens: Synergy - The Cosmos affects the Drag
         adjusted_drag = self.eng.stabilizer.override_cosmic_drag(drag_pen, stabilized_zone)
         physics["zone"] = stabilized_zone
         self.eng._apply_cosmic_physics(physics, orbit_state, adjusted_drag)
         ctx.world_state["orbit"] = orbit_state
+
+    def _operate_machinery(self, ctx: CycleContext):
+        """Handle The Forge, The Theremin, and The Crucible."""
+        physics = ctx.physics
+        logs = ctx.logs
+
+        # Forge
         transmute_msg = self.eng.phys.forge.transmute(physics)
         if transmute_msg: logs.append(transmute_msg)
+
         _, forge_msg, new_item = self.eng.phys.forge.hammer_alloy(physics)
         if forge_msg: logs.append(forge_msg)
         if new_item: logs.append(self.eng.gordon.acquire(new_item))
+
+        # Theremin
         _, _, theremin_msg, t_crit = self.eng.phys.theremin.listen(physics, self.eng.bio.governor.mode)
         if theremin_msg: logs.append(theremin_msg)
         if t_crit == "AIRSTRIKE":
             damage = 25.0
             self.eng.health -= damage
             logs.append(f"{Prisma.RED}*** CRITICAL THEREMIN DISCHARGE ***{Prisma.RST}")
-            logs.append(f"{Prisma.RED}    The resin shattered explosively. You took {damage} Damage.{Prisma.RST}")
+            logs.append(f"{Prisma.RED}    The resin shattered explosively. -{damage} HP.{Prisma.RST}")
+
+        # Crucible
         c_state, c_val, c_msg = self.eng.phys.crucible.audit_fire(physics)
         if c_msg: logs.append(c_msg)
         if c_state == "MELTDOWN": self.eng.health -= c_val
-        p_active, p_log = self.eng.bio.parasite.infect(physics, self.eng.stamina)
-        if p_active: logs.append(p_log)
+
+    def _process_intrusions(self, ctx: CycleContext):
+        """Handle parasites, ghosts, and pareidolia."""
+        # Parasites
+        p_active, p_log = self.eng.bio.parasite.infect(ctx.physics, self.eng.stamina)
+        if p_active: ctx.logs.append(p_log)
+
+        # Ghosts (Limbo)
         if self.eng.limbo.ghosts:
-            if logs:
-                last_log = logs[-1]
-                logs[-1] = self.eng.limbo.haunt(last_log)
+            if ctx.logs:
+                last_log = ctx.logs[-1]
+                ctx.logs[-1] = self.eng.limbo.haunt(last_log)
             else:
-                logs.append(self.eng.limbo.haunt("The air is heavy."))
-        if self.eng.gordon.inventory:
-            self.eng.tinkerer.audit_tool_use(physics, self.eng.gordon.inventory)
-        is_p, p_msg = self.eng.check_pareidolia(clean)
+                ctx.logs.append(self.eng.limbo.haunt("The air is heavy."))
+
+        # Pareidolia
+        is_p, p_msg = self.eng.check_pareidolia(ctx.clean_words)
         if is_p:
-            logs.append(p_msg)
-            physics["psi"] = min(1.0, physics["psi"] + 0.3)
-        return ctx
+            ctx.logs.append(p_msg)
+            ctx.physics["psi"] = min(1.0, ctx.physics["psi"] + 0.3)
 
     def _phase_cognate(self, ctx: CycleContext):
         self.eng.mind.mem.encode(ctx.clean_words, ctx.physics, "GEODESIC")
@@ -2755,7 +2659,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 9.7.9', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 9.8', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 

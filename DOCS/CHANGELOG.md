@@ -1,5 +1,42 @@
 # CHANGELOG.md
 
+# 📜 CHANGELOG: BONEAMANITA 9.8.0 - "THE GLIMMER UPDATE"
+
+Date: January 12, 2026
+
+Architects: SLASH (Synergetic Language & Systems Heuristics), JADE, Taylor & Edmark
+
+Status: LIVE
+
+### 🚨 CRITICAL SYSTEMS (The Pinker Protocol)
+
+- **Refactored `GeodesicOrchestrator`:** The "God Object" anti-pattern in `_phase_simulate` has been dismantled. The simulation phase now delegates responsibility to specialized sub-conductors (`_apply_reality_filters`, `_process_navigation`, `_operate_machinery`, etc.). This improves cognitive ergonomics for developers and reduces the likelihood of "Narrative Drag" during debugging.
+- **Documentation Upgrade:** The `/help` command no longer screams a raw list of strings at the user. It now presents a categorized, human-readable menu of commands, sorted by intent (CORE, WORLD, ACTION, DEBUG).
+
+### 🧬 BIOLOGY & METABOLISM (The Schur Initiative)
+
+- **New Metric: "Glimmers":** The `EndocrineSystem` has been updated to detect "Glimmers"—moments of high structural integrity (The Ron Swanson Resonance) or infectious enthusiasm (The Leslie Knope Energy). These are no longer just chemical spikes; they are tracked as distinct bio-narrative events.
+- **Public Parks Reform:** The `PublicParksDepartment` now validates park commissioning based on these Glimmers. The system will no longer build a park just because Dopamine is high; it requires a genuine moment of "Good Place" resonance.
+
+### 🌐 WORLD & IDENTITY (The Fuller Synergy)
+
+- **System Identity:** The boot sequence (`SessionGuardian`) now correctly identifies the system as **v9.8.0** and announces that "Glimmer Protocols" are active. The "Session Guardian" is now less ominous and more welcoming.
+- **New Artifact:** Added **`THE_STYLE_GUIDE`** to the Item Registry.
+  - _Description:_ "A well-worn manual. It insists that code is for humans first, machines second."
+  - _Effect:_ Reduces Narrative Drag by -1.0. Enforces clarity.
+
+### 🐛 BUG FIXES
+
+- Fixed a "cognitive dissonance" leak where the system would simultaneously demand input and refuse to process it due to "ennui."
+- Adjusted the "Curse of Knowledge" coefficients in the `vsl_32v` engine to better accommodate non-linear user inputs.
+
+---
+
+"Everything is fine."
+
+— System Status Message
+
+
 ### **Release Notes: SLASH 9.7.9** - "The Circulation Update"
 
 ### **1. Core Architecture (The Fuller Lens)**

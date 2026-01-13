@@ -348,6 +348,13 @@ GORDON = {
             "function": "STRUCTURAL_PATCH",
             "usage_msg": "Skritch. The memory node is taped back together."
         },
+        "THE_STYLE_GUIDE": {
+            "description": "A well-worn manual. It insists that code is for humans first, machines second.",
+            "function": "CLARITY_ENFORCER",
+            "passive_traits": ["CUT_THE_CRAP"],
+            "value": 10.0,
+            "usage_msg": "You consult the manual. Strunk & White nod in approval. (Narrative Drag -1.0)"
+        },
         "SPIDER_LOCUS": {
             "description": "A jar of conceptual spiders. Why do you have this?",
             "function": "WEB_WEAVER",
