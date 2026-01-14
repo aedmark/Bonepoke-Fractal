@@ -4,454 +4,20 @@ import json, os, random, re, time, string, unicodedata, math
 from collections import Counter, deque
 from typing import List, Dict, Any, Tuple, Optional, Set
 from dataclasses import dataclass, field
+
+from bone_bus import Prisma, BoneConfig
+from bone_lexicon import TheLexicon
 from bone_personality import UserProfile
 
-# --- DATA IMPORTS ---
-# We use a try/except block here to allow the file to run even if bone_data isn't present yet,
-# preventing immediate crashes during testing.
 try:
     from bone_data import LEXICON, GENETICS, DEATH, NARRATIVE_DATA, RESONANCE
 except ImportError:
-    # Fallback empty data if bone_data.py is missing
     LEXICON = {"solvents": ["the", "is"]}
     GENETICS = {}
     DEATH = {}
     NARRATIVE_DATA = {}
     RESONANCE = {}
 
-# --- VISUALS ---
-
-class Prisma:
-    RST = "\033[0m"
-    RED = "\033[31m"
-    GRN = "\033[32m"
-    YEL = "\033[33m"
-    BLU = "\033[34m"
-    MAG = "\033[35m"
-    CYN = "\033[36m"
-    WHT = "\033[97m"
-    GRY = "\033[90m"
-    INDIGO = "\033[34;1m"
-    OCHRE = "\033[33;2m"
-    VIOLET = "\033[35;2m"
-    SLATE = "\033[30;1m"
-
-    @classmethod
-    def paint(cls, text, color_key="0"):
-        color_map = {
-            "R": cls.RED, "G": cls.GRN, "Y": cls.YEL, "B": cls.BLU,
-            "M": cls.MAG, "C": cls.CYN, "W": cls.WHT, "0": cls.GRY,
-            "I": cls.INDIGO, "O": cls.OCHRE, "V": cls.VIOLET
-        }
-        code = color_map.get(color_key.upper(), cls.WHT)
-        return f"{code}{text}{cls.RST}"
-
-# --- CONFIGURATION ---
-
-# bone_village.py (Partial Update)
-
-class BoneConfig:
-    # --- CORE VITALS ---
-    MAX_HEALTH = 100.0
-    MAX_STAMINA = 100.0
-    MAX_ATP = 200.0
-    BASE_METABOLIC_RATE = 2.0
-    
-    # --- PHYSICS CONSTANTS ---
-    class PHYSICS:
-        # Voltage Thresholds (The "Energy" of the text)
-        VOLTAGE_FLOOR = 2.0        # System is effectively dead/stagnant
-        VOLTAGE_LOW = 5.0          # Mud/Rust territory
-        VOLTAGE_MED = 8.0          # Active processing
-        VOLTAGE_HIGH = 12.0        # The Forge / High Energy
-        VOLTAGE_CRITICAL = 15.0    # Dangerous / Manic
-        VOLTAGE_MAX = 20.0         # System Cap
-
-        # Narrative Drag (The "Friction" of the text)
-        DRAG_FLOOR = 1.0           # Frictionless / Slippery
-        DRAG_IDEAL_MAX = 3.0       # Good resistance
-        DRAG_HEAVY = 5.0           # Sluggish
-        DRAG_CRITICAL = 8.0        # Stuck in the Mud
-        DRAG_HALT = 10.0           # Absolute stoppage
-
-        # Vector Weights (VSL Matrix)
-        WEIGHT_HEAVY = 2.0
-        WEIGHT_KINETIC = 1.5
-        WEIGHT_EXPLOSIVE = 3.0
-        WEIGHT_CONSTRUCTIVE = 1.5
-
-        # Integrity
-        SHAPLEY_MASS_THRESHOLD = 5.0
-        GRAVITY_WELL_THRESHOLD = 15.0
-        
-    # --- BIOLOGICAL CONSTANTS ---
-    class BIO:
-        # Thresholds
-        ATP_STARVATION = 10.0
-        ROS_CRITICAL = 100.0
-        STAMINA_EXHAUSTED = 20.0
-        
-        # Taxes & Costs
-        COST_TURBULENCE = 5.0
-        TAX_DRAG_BASE = 0.2
-        GAIN_PHOTOSYNTHESIS = 2.0
-        
-        # Endocrine Rewards
-        REWARD_SMALL = 0.05
-        REWARD_MEDIUM = 0.10
-        REWARD_LARGE = 0.15
-        DECAY_RATE = 0.01
-
-    # --- PROBABILITIES ---
-    class CHANCE:
-        RARE = 0.05
-        UNCOMMON = 0.10
-        COMMON = 0.20
-        FREQUENT = 0.30
-        
-    # --- LEGACY / MISC ---
-    # Kept for backward compatibility with older logic, but mapped to new structure where possible
-    STAMINA_REGEN = 1.0
-    MAX_DRAG_LIMIT = PHYSICS.DRAG_HEAVY
-    GEODESIC_STRENGTH = 10.0
-    BASE_IGNITION_THRESHOLD = 0.5
-    MAX_REPETITION_LIMIT = 0.8
-    BOREDOM_THRESHOLD = 10.0
-    ANVIL_TRIGGER_VOLTAGE = 10.0
-    MIN_DENSITY_THRESHOLD = 0.3
-    LAGRANGE_TOLERANCE = 2.0
-    FLASHPOINT_THRESHOLD = 10.0
-    SIGNAL_DRAG_MULTIPLIER = 1.0
-    KINETIC_GAIN = 1.0
-    CRITICAL_ROS_LIMIT = BIO.ROS_CRITICAL
-    MAX_MEMORY_CAPACITY = 100
-    ZONE_THRESHOLDS = {"LABORATORY": 1.5, "COURTYARD": 0.8}
-    TOXIN_WEIGHT = 1.0
-    ANTIGENS = ["basically", "actually", "literally", "utilize"]
-    VERBOSE_LOGGING = True
-
-    @staticmethod
-    def check_pareidolia(words):
-        # Implementation remains the same
-        triggers = {"face", "ghost", "jesus", "cloud", "voice", "eyes"}
-        hits = [w for w in words if w in triggers]
-        if hits:
-            return True, f"{Prisma.VIOLET}PAREIDOLIA: You see a {hits[0].upper()} in the noise. It blinks.{Prisma.RST}"
-        return False, None
-
-# --- LEXICON LOGIC ---
-
-class LexiconStore:
-    def __init__(self):
-        self.categories = {
-            "heavy", "kinetic", "explosive", "constructive", "abstract",
-            "photo", "aerobic", "thermal", "cryo", "suburban", "play",
-            "sacred", "buffer", "antigen", "diversion", "meat", "gradient_stop"
-        }
-        self.VOCAB = {}
-        self.LEARNED_VOCAB = {}
-        self.USER_FLAGGED_BIAS = set()
-        self.ANTIGEN_REPLACEMENTS = {}
-        self.SOLVENTS = set()
-        self._ENGINE = None
-
-    def load_vocabulary(self):
-        data = LEXICON
-        self.SOLVENTS = set(data.get("solvents", []))
-        self.ANTIGEN_REPLACEMENTS = data.get("antigen_replacements", {})
-        for cat, words in data.items():
-            if cat in self.categories or cat in ["refusal_guru", "cursed"]:
-                self.VOCAB[cat] = set(words)
-        if "antigen" not in self.VOCAB and "antigen" in data:
-            self.VOCAB["antigen"] = set(data["antigen"])
-
-    def set_engine(self, engine_ref): self._ENGINE = engine_ref
-
-    def get_raw(self, category):
-        base = self.VOCAB.get(category, set())
-        learned = set(self.LEARNED_VOCAB.get(category, {}).keys())
-        if category == "suburban": return (base | learned) - self.USER_FLAGGED_BIAS
-        return base | learned
-
-    def teach(self, word, category, tick):
-        if category not in self.LEARNED_VOCAB: self.LEARNED_VOCAB[category] = {}
-        self.LEARNED_VOCAB[category][word.lower()] = tick
-        return True
-
-    def atrophy(self, current_tick, max_age=100):
-        rotted = []
-        for cat, words in self.LEARNED_VOCAB.items():
-            for w in list(words.keys()):
-                if (current_tick - words[w]) > max_age:
-                    del words[w]; rotted.append(w)
-        return rotted
-
-class SemanticsBioassay:
-    def __init__(self, store_ref):
-        self.store = store_ref
-        self._TRANSLATOR = str.maketrans(string.punctuation, " " * len(string.punctuation))
-        self.PHONETICS = {
-            "PLOSIVE": set("bdgkpt"), "FRICATIVE": set("fthszsh"),
-            "LIQUID": set("lr"), "NASAL": set("mn"),
-            "VOWELS": set("aeiouy")
-        }
-        self.ROOTS = {
-            "HEAVY": ("lith", "ferr", "petr", "dens", "grav", "struct", "base", "fund", "mound"),
-            "KINETIC": ("mot", "mov", "ject", "tract", "pel", "crat", "dynam", "flux"),
-            "ABSTRACT": ("tion", "ism", "ence", "ance", "ity", "ology", "ness", "ment", "idea"),
-            "SUBURBAN": ("norm", "comm", "stand", "pol", "reg", "mod"),
-            "VITAL": ("viv", "vita", "spir", "anim", "bio", "luc", "lum", "phot", "phon", "surg", "bloom")
-        }
-
-    def clean(self, text):
-        if not text: return []
-        # Fix: Ensure unicode data is processed safely
-        try:
-            normalized = unicodedata.normalize('NFKD', text).encode('ASCII', 'ignore').decode('utf-8')
-        except Exception:
-            normalized = text # Fallback if normalization fails
-        
-        cleaned_text = normalized.translate(self._TRANSLATOR).lower()
-        words = cleaned_text.split()
-        return [w for w in words if w.strip() and w not in self.store.USER_FLAGGED_BIAS]
-
-    def assay(self, word):
-        w = word.lower()
-        clean_len = len(w)
-        if clean_len < 3: return None, 0.0
-        for cat, roots in self.ROOTS.items():
-            for r in roots:
-                if r in w: return cat.lower(), 0.8
-        plosive = sum(1 for c in w if c in self.PHONETICS["PLOSIVE"])
-        liquid = sum(1 for c in w if c in self.PHONETICS["LIQUID"])
-        nasal = sum(1 for c in w if c in self.PHONETICS["NASAL"])
-        vowel = sum(1 for c in w if c in self.PHONETICS["VOWELS"])
-        density_score = (plosive * 1.5) + (nasal * 0.8)
-        flow_score = liquid + sum(1 for c in w if c in self.PHONETICS["FRICATIVE"])
-        vitality_score = (vowel * 1.2) + (flow_score * 0.8)
-        compression_mod = 1.0 if clean_len > 5 else 1.5
-        final_density = (density_score / clean_len) * compression_mod
-        final_vitality = (vitality_score / clean_len) * compression_mod
-        if final_density > 0.55: return "heavy", round(final_density, 2)
-        if final_vitality > 0.6: return "play", round(final_vitality, 2)
-        if (flow_score / clean_len) > 0.6: return "kinetic", 0.5
-        return None, 0.0
-
-    def measure_viscosity(self, word):
-        if not word: return 0.0
-        consonants = sum(1 for c in word if c.lower() not in "aeiou")
-        return (consonants / len(word)) if len(word) > 0 else 0.0
-
-    def measure_turbulence(self, words):
-        if len(words) < 2: return 0.0
-        lengths = [len(w) for w in words]
-        mean = sum(lengths) / len(lengths)
-        variance = sum((x - mean) ** 2 for x in lengths) / len(lengths)
-        return min(1.0, (variance ** 0.5) / 5.0)
-
-    def walk_gradient(self, text):
-        clean_words = self.clean(text)
-        structure_path = []
-        high_entropy = {"thermal", "cryo", "explosive", "sacred", "play", "cursed"}
-        for w in clean_words:
-            is_noise = False
-            for cat in high_entropy:
-                if w in self.store.get_raw(cat):
-                    is_noise = True; break
-            if not is_noise or w in self.store.get_raw("heavy") or w in self.store.SOLVENTS:
-                structure_path.append(w)
-        return " ".join(structure_path) if structure_path else "null"
-
-class GlobalLexiconFacade:
-    _INITIALIZED = False
-    _STORE = None
-    _ENGINE = None
-    ANTIGEN_REGEX = None
-    SOLVENTS = set()
-
-    @classmethod
-    def initialize(cls):
-        if cls._INITIALIZED: return
-        cls._STORE = LexiconStore()
-        cls._STORE.load_vocabulary()
-        cls._ENGINE = SemanticsBioassay(cls._STORE)
-        cls._STORE.set_engine(cls._ENGINE)
-        cls.compile_antigens()
-        cls.SOLVENTS = cls._STORE.SOLVENTS
-        cls._INITIALIZED = True
-
-    @classmethod
-    def get(cls, category): return cls._STORE.get_raw(category)
-    @classmethod
-    def teach(cls, word, category, tick): return cls._STORE.teach(word, category, tick)
-    @classmethod
-    def clean(cls, text): return cls._ENGINE.clean(text)
-    @classmethod
-    def taste(cls, word): return cls._ENGINE.assay(word)
-    @classmethod
-    def measure_viscosity(cls, word): return cls._ENGINE.measure_viscosity(word)
-    @classmethod
-    def harvest(cls, category):
-        candidates = list(cls._STORE.get_raw(category))
-        return random.choice(candidates) if candidates else "void"
-    @classmethod
-    def get_turbulence(cls, words): return cls._ENGINE.measure_turbulence(words)
-    @classmethod
-    def get_current_category(cls, word):
-        for cat, vocab in cls._STORE.LEARNED_VOCAB.items():
-            if word.lower() in vocab: return cat
-        for cat, vocab in cls._STORE.VOCAB.items():
-            if word.lower() in vocab: return cat
-        return None
-    @classmethod
-    def compile_antigens(cls):
-        antigens = cls._STORE.get_raw("antigen")
-        if antigens:
-            pattern = "|".join(map(re.escape, antigens))
-            cls.ANTIGEN_REGEX = re.compile(fr"\b({pattern})\b", re.IGNORECASE)
-        else: cls.ANTIGEN_REGEX = None
-    @classmethod
-    def learn_antigen(cls, t, r):
-        if "antigen" not in cls._STORE.VOCAB: cls._STORE.VOCAB["antigen"] = set()
-        cls._STORE.VOCAB["antigen"].add(t.lower())
-        if r: cls._STORE.ANTIGEN_REPLACEMENTS[t.lower()] = r
-        cls.compile_antigens()
-        return True
-    @classmethod
-    def walk_gradient(cls, text): return cls._ENGINE.walk_gradient(text)
-    @classmethod
-    def atrophy(cls, tick, max_age): return cls._STORE.atrophy(tick, max_age)
-
-GlobalLexiconFacade.initialize()
-TheLexicon = GlobalLexiconFacade
-
-class LiteraryReproduction:
-    MUTATIONS = {}
-    JOY_CLADE = {}
-
-    @classmethod
-    def load_genetics(cls):
-        try:
-            cls.MUTATIONS = GENETICS.get("MUTATIONS", {})
-            cls.JOY_CLADE = GENETICS.get("JOY_CLADE", {})
-        except ImportError:
-            cls.MUTATIONS = {}
-            cls.JOY_CLADE = {}
-
-    @staticmethod
-    def _extract_counts(physics_container):
-        if hasattr(physics_container, "counts"):
-            return physics_container.counts
-        return physics_container.get("counts", {})
-
-    @staticmethod
-    def mutate_config(current_config):
-        mutations = {}
-        if random.random() < 0.3:
-            mutations["MAX_DRAG_LIMIT"] = current_config.MAX_DRAG_LIMIT * random.uniform(0.9, 1.1)
-        if random.random() < 0.3:
-            mutations["TOXIN_WEIGHT"] = current_config.TOXIN_WEIGHT * random.uniform(0.9, 1.2)
-        if random.random() < 0.1:
-            mutations["MAX_HEALTH"] = current_config.MAX_HEALTH * random.uniform(0.8, 1.05)
-        return mutations
-
-    @staticmethod
-    def mitosis(parent_id, bio_state, physics, memory):
-        counts = LiteraryReproduction._extract_counts(physics)
-        dominant = max(counts, key=counts.get) if counts else "VOID"
-        mutation_data = LiteraryReproduction.MUTATIONS.get(
-            dominant.upper(),
-            {"trait": "NEUTRAL", "mod": {}})
-        child_id = f"{parent_id}_({mutation_data['trait']})"
-        config_mutations = LiteraryReproduction.mutate_config(BoneConfig)
-        trauma_vec = bio_state.get("trauma_vector", {})
-        child_genome = {
-            "source": "MITOSIS",
-            "parent_a": parent_id,
-            "parent_b": None,
-            "mutations": mutation_data["mod"],
-            "config_mutations": config_mutations,
-            "dominant_flavor": dominant,
-            "trauma_inheritance": trauma_vec}
-        return child_id, child_genome
-
-    @staticmethod
-    def crossover(parent_a_id, parent_a_bio, parent_b_path):
-        try:
-            with open(parent_b_path, "r") as f:
-                parent_b_data = json.load(f)
-        except (IOError, json.JSONDecodeError):
-            return None, "Dead Spore (Corrupt File)."
-
-        parent_b_id = parent_b_data.get("session_id", "UNKNOWN")
-        trauma_a = parent_a_bio.get("trauma_vector", {})
-        trauma_b = parent_b_data.get("trauma_vector", {})
-        child_trauma = {}
-        all_keys = set(trauma_a.keys()) | set(trauma_b.keys())
-        for k in all_keys:
-            child_trauma[k] = max(trauma_a.get(k, 0), trauma_b.get(k, 0))
-        enzymes_a = set()
-        if "mito" in parent_a_bio:
-            if hasattr(parent_a_bio["mito"], "state"):
-                enzymes_a = set(parent_a_bio["mito"].state.enzymes)
-            elif isinstance(parent_a_bio["mito"], dict):
-                enzymes_a = set(parent_a_bio["mito"].get("enzymes", []))
-        enzymes_b = set(parent_b_data.get("mitochondria", {}).get("enzymes", []))
-        child_enzymes = list(enzymes_a | enzymes_b)
-        config_mutations = LiteraryReproduction.mutate_config(BoneConfig)
-        short_a = parent_a_id[-4:] if len(parent_a_id) > 4 else parent_a_id
-        short_b = parent_b_id[-4:] if len(parent_b_id) > 4 else parent_b_id
-        child_id = f"HYBRID_{short_a}x{short_b}"
-        child_genome = {
-            "source": "CROSSOVER",
-            "parent_a": parent_a_id,
-            "parent_b": parent_b_id,
-            "trauma_inheritance": child_trauma,
-            "config_mutations": config_mutations,
-            "inherited_enzymes": child_enzymes}
-        return child_id, child_genome
-
-    def attempt_reproduction(self, engine_ref, mode="MITOSIS", target_spore=None) -> Tuple[str, Dict]:
-        mem = engine_ref.mind.mem
-        phys = engine_ref.phys.tension.last_physics_packet
-        genome = {}
-        log_msg = []
-        
-        if mode == "MITOSIS":
-            bio_state = {"trauma_vector": engine_ref.trauma_accum}
-            child_id, genome = self.mitosis(mem.session_id, bio_state, phys, mem)
-            log_msg = [f"   ► CHILD SPAWNED: {Prisma.WHT}{child_id}{Prisma.RST}"]
-            log_msg.append(f"   ► TRAIT: {genome.get('mutations', 'None')}")
-            
-        elif mode == "CROSSOVER":
-            if not target_spore:
-                return f"{Prisma.RED}FERTILITY ERROR: No partner found.{Prisma.RST}", {}
-            current_bio = {"trauma_vector": engine_ref.trauma_accum, "mito": engine_ref.bio.mito}
-            child_id, genome = self.crossover(mem.session_id, current_bio, target_spore)
-            if not child_id:
-                return f"{Prisma.RED}CROSSOVER FAILED: {genome}{Prisma.RST}", {}
-            log_msg = [f"   HYBRID SPAWNED: {Prisma.WHT}{child_id}{Prisma.RST}"]
-            
-        full_spore_data = {
-            "session_id": child_id,
-            "meta": {
-                "timestamp": time.time(),
-                "final_health": engine_ref.health,
-                "final_stamina": engine_ref.stamina
-            },
-            "trauma_vector": genome.get("trauma_inheritance", {}),
-            "config_mutations": genome.get("config_mutations", {}),
-            "mitochondria": {"enzymes": list(genome.get("inherited_enzymes", []))},
-            "core_graph": mem.graph,
-            "antibodies": list(engine_ref.bio.immune.active_antibodies)
-        }
-        filename = f"{child_id}.json"
-        saved_path = mem.loader.save_spore(filename, full_spore_data)
-        if saved_path:
-            log_msg.append(f"   {Prisma.GRN}SAVED: {saved_path}{Prisma.RST}")
-        return "\n".join(log_msg), genome.get("mutations", {})
-
-# --- UTILS ---
 
 class TheTinkerer:
     def __init__(self, gordon_ref, events_ref):
@@ -641,7 +207,7 @@ class CycleContext:
     world_state: Dict = field(default_factory=dict)
     mind_state: Dict = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
-    bureau_ui: str = "" # Added to support bureau packet
+    bureau_ui: str = ""
 
     def log(self, message: str):
         self.logs.append(message)
@@ -734,7 +300,6 @@ class TheAlmanac:
         ]
         return "\n".join(report)
 
-# --- PHYSICS CALCULATIONS (INTERNAL HELPER) ---
 
 class _PhysicsCalc:
     """
@@ -786,7 +351,6 @@ class TheTensionMeter:
     HEAVY_WEIGHT = 2.0
     KINETIC_WEIGHT = 1.5
 
-    # Fix: Type hint fixed for generic EventBus to avoid import error
     def __init__(self, events):
         self.events = events
         self.perfection_streak = 0
@@ -794,7 +358,6 @@ class TheTensionMeter:
 
     def audit_hubris(self, physics, lexicon_class):
         streak = physics.get("perfection_streak", 0)
-        # Fix: Unused variable 'voltage' removed
         if streak >= 5:
             return (
                 True,
@@ -819,13 +382,12 @@ class TheTensionMeter:
         return False, None, None
 
     def gaze(self, text: str, graph: Dict = None) -> Dict:
-        graph = graph or {} # Fix: Safety check for None graph
+        graph = graph or {}
         clean_words = TheLexicon.clean(text)
         counts, unknowns = self._tally_categories(clean_words, text)
         if unknowns:
             self._trigger_neuroplasticity(unknowns, counts, text)
-        
-        # Fix: Use local _PhysicsCalc instead of missing PhysicsResolver
+
         voltage = _PhysicsCalc.calculate_voltage(counts, BoneConfig)
         drag = _PhysicsCalc.calculate_drag(clean_words, counts, BoneConfig)
         integrity = self._measure_integrity(clean_words, graph, counts)
@@ -1043,8 +605,7 @@ class ApeirogonResonance:
                 "color": role_color,
                 "desc": station[1],
                 "context": station[0]}
-        
-        # Safe handling for incomplete vector data
+
         if not vec or len(vec) < 2:
              return {"title": "THE VOID", "color": Prisma.GRY, "desc": "No data.", "context": "VOID"}
 
@@ -1085,7 +646,7 @@ class MirrorGraph:
         if hasattr(self, 'profile'):
             self.profile.update(physics.get("counts", {}), len(physics.get("clean_words", [])))
         vol = physics.get("voltage", 0.0)
-        ent = physics.get("entropy", 0.0) # Assuming E from VSL
+        ent = physics.get("entropy", 0.0)
         psi = physics.get("psi", 0.0)
         drag = physics.get("narrative_drag", 0.0)
         decay = 0.05
@@ -1119,7 +680,7 @@ class MirrorGraph:
         if top_stat == "WAR":
             mods["drag_mult"] = 1.5
             mods["loot_chance"] = 2.0
-            mods["atp_tax"] = 5.0 # War is expensive
+            mods["atp_tax"] = 5.0
             mods["flavor"] = f"{Prisma.RED}[MIRROR]: Aggression detected. The simulation hardens its shell. (Drag UP, Loot UP){Prisma.RST}"
         elif top_stat == "ART":
             mods["plasticity"] = 2.0
@@ -1150,7 +711,6 @@ class MirrorGraph:
 
 class StrunkWhiteProtocol:
     def __init__(self):
-        # Fallback to empty if missing
         from bone_data import STYLE_CRIMES
         self.PATTERNS = STYLE_CRIMES.get("PATTERNS", [])
         self.BANNED = STYLE_CRIMES.get("BANNED_PHRASES", [])
@@ -1592,8 +1152,8 @@ class TheNavigator:
                 min_dist = dist
                 best_fit = name
         
-        self.current_location = best_fit # Fix: Actually update location
-        
+        self.current_location = best_fit
+
         if self.current_location != old_loc:
             return self.current_location, self.manifolds[self.current_location].entry_msg
         return self.current_location, None

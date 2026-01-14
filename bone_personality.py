@@ -1,5 +1,18 @@
 # bone_personality - The Charm
 
+import json
+import os
+import random
+import time
+from collections import deque
+from typing import Dict, Tuple, Optional, Counter
+
+from bone_data import LENSES, NARRATIVE_DATA
+from bone_bus import EventBus
+from bone_lexicon import TheLexicon
+from bone_bus import Prisma, BoneConfig
+
+
 class UserProfile:
     def __init__(self, name="USER"):
         self.name = name
@@ -59,8 +72,7 @@ class EnneagramDriver:
     def _validate_enneagram_data(self):
         valid_nodes = set(self.GEO.keys())
         sanitized_geo = {}
-        
-        # 1. Prune Invalid Paths (Pinker: "Grammar Check")
+
         for type_num, paths in self.GEO.items():
             clean_paths = {}
             if "STRESS" in paths:
@@ -79,24 +91,19 @@ class EnneagramDriver:
         
         self.GEO = sanitized_geo
 
-        # 2. Emergency Fallback (Fuller: "Tensegrity Reinforcement")
         if not self.GEO:
             self.events.log(f"{Prisma.RED}[CRITICAL]: ENNEAGRAM MAP EMPTY. PSYCHE COLLAPSE.{Prisma.RST}", "CRITICAL")
-            
-            # Re-establish minimal structural integrity
+
             self.GEO = {5: {"STRESS": 7, "GROWTH": 8}, 9: {"STRESS": 6, "GROWTH": 3}}
-            
-            # CRITICAL FIX: We must also rebuild the REVERSE_MAP, or everyone becomes a Narrator.
-            # (Schur: "We are preventing an identity crisis here.")
+
             self.REVERSE_MAP = {
                 5: "SHERLOCK", 
                 7: "JESTER", 
-                8: "GORDON", # Mapped via Proxy
+                8: "GORDON",
                 9: "GORDON", 
-                6: "GLASS",  # Mapped via Proxy
+                6: "GLASS",
                 3: "NARRATOR"
             }
-            # Ensure MAP mirrors this repair
             self.MAP = {v: k for k, v in self.REVERSE_MAP.items()}
 
     def _get_lens_name(self, type_num):
@@ -276,14 +283,10 @@ class PublicParksDepartment:
 
         chem = bio_result.get("chem", {})
 
-        # 1. The Leslie Knope Standard: High Dopamine + Oxytocin (Community & Work)
         classic_joy = (chem.get("DOP", 0.0) > 0.8 and chem.get("OXY", 0.0) > 0.6)
 
-        # 2. The Ron Swanson Standard: Pure Serotonin (Quiet satisfaction)
         peaceful_joy = (chem.get("SER", 0.0) > 0.95)
 
-        # 3. The Chidi Anagonye Standard: Moral Clarity (High Truth/Integrity checked via glimmers)
-        # Assuming 'glimmer_msg' is passed in bio_result['chem'] if present
         has_glimmer = "glimmer_msg" in chem
 
         return classic_joy or peaceful_joy or has_glimmer
@@ -624,47 +627,39 @@ class TheBureau:
         suburban = physics.get("counts", {}).get("suburban", 0)
         solvents = physics.get("counts", {}).get("solvents", 0)
         clean_len = len(physics.get("clean_words", []))
-        
-        # 1. Immune System handles Toxins, not us.
+
         if toxin > 0: return None
-        
-        # 2. High Voltage Bypass (The "Fast Lane")
+
         if voltage > 8.0: return None
 
         beige_density = (suburban + solvents) / max(1, clean_len)
-        
-        # 3. DETERMINE INFRACTION LEVEL
+
         infraction = None
-        
-        # FELONY: Aggressively boring (High Suburban/Beige content)
+
         if beige_density > 0.6:
             infraction = "BLOCK"
             selected_form = "1099-B" if suburban > 2 else "Form W-2"
-            
-        # MISDEMEANOR: Just lazy (Low Voltage, but not necessarily toxic)
+
         elif voltage < 2.0 and clean_len > 2:
             infraction = "TAX"
-            selected_form = "Schedule C" # Deduction of effort
-            
-        # 4. PROCESS INFRACTION
+            selected_form = "Schedule C"
+
         if infraction:
             self.stamp_count += 1
             full_form_name = next((f for f in self.forms if selected_form in f), self.forms[0])
             response = random.choice(self.responses)
             policy = self.POLICY.get(selected_form, self.POLICY["Form W-2"])
-            
-            # Apply Policy Modifiers
+
             mod_log = []
             for k, v in policy["mod"].items():
                 if k in physics:
-                    # If it's a TAX, we apply the penalty but don't stop the physics engine
-                    physics[k] += v 
+                    physics[k] += v
                     mod_log.append(f"{k} {v:+.1f}")
             
             mod_str = f"({', '.join(mod_log)})" if mod_log else ""
             
             return {
-                "status": infraction, # NEW: "BLOCK" or "TAX"
+                "status": infraction,
                 "ui": f"{Prisma.GRY}🏢 THE BUREAU: {response}{Prisma.RST}\n   {Prisma.WHT}[Filed: {full_form_name}]{Prisma.RST}",
                 "log": f"BUREAUCRACY: Filed {selected_form}. {mod_str} (Stamp #{self.stamp_count})",
                 "atp_gain": policy["atp"]

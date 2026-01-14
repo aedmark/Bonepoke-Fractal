@@ -1,5 +1,19 @@
 #bone_biology.py - The Mycellium
 
+import json
+import math
+import os
+import random
+import time
+from collections import deque
+from typing import List, Tuple, Optional
+from bone_lexicon import LiteraryReproduction
+from bone_data import SEEDS
+from bone_bus import EventBus
+from bone_village import ParadoxSeed, TheLexicon, TheAlmanac
+from bone_bus import Prisma, BoneConfig
+
+
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
         self.genome = "BONEAMANITA_9.9"
@@ -131,7 +145,6 @@ class MycelialNetwork:
             self.events.log(f"{Prisma.GRY}[SYSTEM]: Paradox Seeds loaded ({len(loaded_seeds)} active) from Data Core.{Prisma.RST}")
         except Exception as e:
             self.events.log(f"{Prisma.RED}[CRITICAL]: Seed Injection Failed: {e}{Prisma.RST}")
-            # Emergency Fallback
             loaded_seeds = [ParadoxSeed("Does the mask eat the face?", {"mask", "face", "hide"})]
         return loaded_seeds
 

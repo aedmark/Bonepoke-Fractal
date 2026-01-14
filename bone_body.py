@@ -1,5 +1,19 @@
 # bone_body.py - The Body
 
+import math
+import random
+import time
+from collections import deque
+from dataclasses import dataclass, field
+from typing import Set, Optional, Dict, List, Any, Tuple
+
+from bone_brain import NeuroPlasticity, ShimmerState
+from bone_personality import SynergeticLensArbiter
+from bone_physics import PhysicsPacket
+from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont
+from bone_lexicon import TheLexicon
+from bone_bus import Prisma, BoneConfig
+
 DEFAULT_BMR = 2.0
 
 @dataclass
@@ -244,16 +258,16 @@ class EndocrineSystem:
         bias = {"COR": 0.0, "SER": 0.0, "MEL": 0.0}
         msg = None
         
-        if 6 <= hour < 10: # DAWN
+        if 6 <= hour < 10:
             bias["COR"] = 0.1
             msg = "Dawn Protocol: Cortisol rising."
-        elif 10 <= hour < 18: # DAY
+        elif 10 <= hour < 18:
             bias["SER"] = 0.1
             msg = "Solar Cycle: Serotonin dominant."
-        elif 18 <= hour < 23: # DUSK
+        elif 18 <= hour < 23:
             bias["MEL"] = 0.1
             msg = "Twilight Protocol: Melatonin rising."
-        else: # NIGHT
+        else:
             bias["MEL"] = 0.3
             bias["COR"] = -0.1
             msg = "Lunar Cycle: Melatonin max."
@@ -352,8 +366,7 @@ class EndocrineSystem:
             self.melatonin += circadian_bias.get("MEL", 0.0)
             
         glimmer_msg = self.check_for_glimmer(feedback, harvest_hits)
-        
-        # Clamping
+
         self.dopamine = self._clamp(self.dopamine)
         self.oxytocin = self._clamp(self.oxytocin)
         self.cortisol = self._clamp(self.cortisol)

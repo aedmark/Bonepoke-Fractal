@@ -5,14 +5,14 @@ import math, re, random
 from typing import Dict, List, Any, Tuple, Optional
 from collections import Counter
 from dataclasses import dataclass, field
-
-from bone_village import Prisma, BoneConfig, TheLexicon, CycleContext
+from bone_lexicon import TheLexicon
+from bone_village import CycleContext
+from bone_bus import Prisma, BoneConfig
 
 SOLVENT_WORDS = {'i', 'you', 'said', 'the', 'and', 'was', 'a', 'is', 'it'}
 MAX_SOLVENT_TOLERANCE = 30.0
 TEXT_LENGTH_SCALAR = 1000.0
 
-# --- THE DATA STRUCTURE ---
 
 @dataclass
 class PhysicsPacket:
@@ -66,17 +66,14 @@ class PhysicsPacket:
     def to_dict(self):
         return {k: getattr(self, k) for k in self.__annotations__}
 
-# --- THE CALCULATOR ---
 
 class PhysicsResolver:
     @staticmethod
     def calculate_voltage(counts: dict, config) -> float:
-        # Pinker: Explicit variable names replace "magic" multipliers
         heavy = counts.get("heavy", 0)
         explosive = counts.get("explosive", 0)
         constructive = counts.get("constructive", 0)
-        
-        # Using the new Physics Constitution
+
         raw_charge = (
             (heavy * config.PHYSICS.WEIGHT_HEAVY) + 
             (explosive * config.PHYSICS.WEIGHT_EXPLOSIVE) + 
@@ -92,41 +89,36 @@ class PhysicsResolver:
         solvents = counts.get("solvents", 0)
         suburban = counts.get("suburban", 0)
         play = counts.get("play", 0)
-        
-        # Friction Logic
+
         friction = (solvents * 1.0) + (suburban * 2.5)
         lift = play * 1.5
         
         net_drag = max(0.0, friction - lift)
         normalized_drag = (net_drag / volume) * 10.0
         final_drag = normalized_drag * config.SIGNAL_DRAG_MULTIPLIER
-        
-        # Using the config cap
-        # Schur: "The universe has a speed limit."
+
         return round(min(config.PHYSICS.DRAG_HALT, final_drag), 2)
 
     @staticmethod
     def derive_vector_matrix(counts: dict, total_vol: int, voltage: float, drag: float) -> dict:
         safe_vol = max(1, total_vol)
         def d(cat): return counts.get(cat, 0) / safe_vol
-        
-        # The 12 Dimensions of the VSL
+
         return {
             "VEL": min(1.0, 0.5 + (d("explosive") * 2.0) + (d("kinetic") * 1.0) - (drag * 0.05)),
             "STR": min(1.0, 0.5 + (d("heavy") * 2.0) + (d("constructive") * 1.5)),
             "ENT": min(1.0, 0.5 + (d("antigen") * 3.0) + (d("toxin") * 2.0)),
             "TEX": min(1.0, 0.5 + (d("heavy") * 0.5) + (d("abstract") * 1.0)),
             "TMP": min(1.0, 0.5 + (d("thermal") * 2.0) - (d("cryo") * 2.0) + (voltage * 0.02)),
-            "PHI": min(1.0, (d("heavy") + d("kinetic")) / max(1, d("abstract") + d("heavy"))), # Truth Ratio approximation
+            "PHI": min(1.0, (d("heavy") + d("kinetic")) / max(1, d("abstract") + d("heavy"))),
             "PSI": min(1.0, 0.5 + (d("abstract") * 2.0)),
             "DEL": min(1.0, 0.5 + (d("play") * 2.0) + (d("unknown") * 1.5)),
-            "XI":  min(1.0, (d("suburban") + d("buffer")) * 2.0), # Complexity/Noise
+            "XI":  min(1.0, (d("suburban") + d("buffer")) * 2.0),
             "BET": min(1.0, d("suburban") + d("buffer")),
             "E":   min(1.0, (d("solvents") * 0.4)),
             "LQ":  min(1.0, d("passive_watch") + d("mirror"))
         }
 
-# --- THE SENSORS ---
 
 class TheTensionMeter:
     """
@@ -167,22 +159,18 @@ class TheTensionMeter:
         graph = graph or {} 
         clean_words = TheLexicon.clean(text)
         counts, unknowns = self._tally_categories(clean_words, text)
-        
-        # Neuroplasticity: Learn new words on the fly if voltage is high enough
+
         if unknowns:
             self._trigger_neuroplasticity(unknowns, counts, text)
-        
-        # Calculate Base Metrics
+
         voltage = PhysicsResolver.calculate_voltage(counts, BoneConfig)
         drag = PhysicsResolver.calculate_drag(clean_words, counts, BoneConfig)
         integrity = self._measure_integrity(clean_words, graph, counts)
         vectors = PhysicsResolver.derive_vector_matrix(counts, len(clean_words), voltage, drag)
-        
-        # Derive Complex Metrics (Zone, Flow State, Gamma)
+
         metrics = self._derive_complex_metrics(
             counts, clean_words, voltage, drag, integrity, vectors)
-            
-        # Package it up
+
         packet = self._package_physics(text, clean_words, counts, voltage, drag, integrity, metrics)
 
         self.last_physics_packet = packet["physics"] 
@@ -191,8 +179,7 @@ class TheTensionMeter:
     def _tally_categories(self, clean_words: List[str], raw_text: str) -> Tuple[Counter, List[str]]:
         counts = Counter()
         unknowns = []
-        
-        # 1. Regex checks (Antigens)
+
         if TheLexicon.ANTIGEN_REGEX:
             hits = TheLexicon.ANTIGEN_REGEX.findall(raw_text)
             counts["antigen"] = len(hits)
@@ -200,22 +187,19 @@ class TheTensionMeter:
             
         target_cats = ["heavy", "explosive", "constructive", "abstract", "photo", "aerobic",
                        "thermal", "cryo", "suburban", "play", "sacred", "buffer", "antigen"]
-        
-        # 2. Iterate words
-        solvents = getattr(TheLexicon._STORE, "SOLVENTS", {"the", "is", "a"})
+
+        solvents = getattr(TheLexicon.STORE, "SOLVENTS", {"the", "is", "a"})
         for w in clean_words:
             if w in solvents:
                 counts["solvents"] += 1
                 continue
             
             found = False
-            # Check known lists
             for cat in target_cats:
                 if w in TheLexicon.get(cat):
                     counts[cat] += 1
                     found = True
-            
-            # If not found, try the phonetic "taster"
+
             if not found:
                 flavor, confidence = TheLexicon.taste(w)
                 if flavor and confidence > 0.5:
@@ -226,14 +210,12 @@ class TheTensionMeter:
 
     def _trigger_neuroplasticity(self, unknowns: List[str], counts: Counter, raw_text: str):
         voltage = (counts["heavy"] * 2.0) + (counts["kinetic"] * 1.5)
-        # Only learn if the user is putting in effort (Voltage > 5.0)
         if voltage > 5.0 and unknowns:
             dominant_cat = max(counts, key=counts.get) if counts else "kinetic"
             for stranger in unknowns:
                 if len(stranger) < 3:
                     continue
                 if not self._is_structurally_sound(stranger):
-                    # Gibberish check, but High Voltage overrides syntax rules
                     if voltage < 15.0: continue
                     
                 flavor, confidence = TheLexicon.taste(stranger)
@@ -259,22 +241,17 @@ class TheTensionMeter:
             return {"kappa": 0.0, "psi": 0.0, "mass": 0.0}
             
         anchors = [w for w in words if w in graph]
-        # Mass = sum of edge weights
         mass = sum(sum(graph[w]["edges"].values()) for w in anchors)
-        
-        # Artificial Mass (Constructive words create temporary scaffolding)
+
         artificial_mass = counts["constructive"] * 0.5
-        
-        # Kappa: Structural Integrity (0.0 to 1.0)
+
         kappa = min(1.0, (mass + artificial_mass) / BoneConfig.SHAPLEY_MASS_THRESHOLD)
-        
-        # Psi: Abstract/Metaphysical Integrity
+
         total = len(words)
         abstract_count = counts["abstract"]
         heavy_count = counts["heavy"]
         psi = min(1.0, (abstract_count / total) + 0.2)
-        
-        # Adjustment: Heavy words ground the abstract ones
+
         if heavy_count > abstract_count:
             base_psi = (abstract_count * 0.7 + heavy_count * 0.3) / total
             psi = min(1.0, max(0.1, base_psi + 0.1))
@@ -301,14 +278,12 @@ class TheTensionMeter:
             avg_viscosity = 0.1
             
         repetition_score = round(1.0 - (len(set(words)) / total_vol), 2)
-        
-        # Gamma: The "Surface Tension" of the narrative
+
         bond_strength = max(0.1, integrity["kappa"] + (repetition_score * 0.5))
         voltage_load = max(0.1, voltage / 10.0)
         gamma = round((bond_strength * avg_viscosity) / (1.0 + voltage_load), 2)
         gamma = max(0.01, gamma)
-        
-        # Perfection Streak Logic (The Hubris Mechanic)
+
         if truth_ratio > 0.85 and voltage > BoneConfig.PHYSICS.VOLTAGE_HIGH:
             self.perfection_streak += 1
         else:
@@ -369,7 +344,7 @@ class TheTensionMeter:
             "B": metrics["B"]}
         
         return {
-            "physics": PhysicsPacket(**physics_bridge), # Using the Dataclass now!
+            "physics": PhysicsPacket(**physics_bridge),
             "clean_words": clean_words,
             "raw_text": text,
             "glass": {
@@ -384,7 +359,6 @@ class TheTensionMeter:
         if re.search(r"(.)\1{2,}", word): return False
         return True
 
-# --- THE GATEKEEPERS & SYSTEMS ---
 
 class TheBouncer:
     def __init__(self, engine_ref):
@@ -396,20 +370,17 @@ class TheBouncer:
     def check_entry(self, ctx: CycleContext) -> Tuple[bool, Optional[Dict]]:
         phys = ctx.physics
         clean = ctx.clean_words
-        
-        # 1. HN Interface Check
+
         hn_output = self.hn.attempt_entry(phys, clean)
         if hn_output and self.hn.in_hn_state:
             return False, self._pack_refusal(ctx, "HN_SINGLETON", hn_output)
-            
-        # 2. Tangibility Check (Do you have enough mass?)
+
         passed, gate_msg = self.eng.phys.gate.weigh(phys, self.eng.stamina)
         if gate_msg: ctx.log(gate_msg)
         if not passed:
             self.eng.stamina = max(0.0, self.eng.stamina - 2.0)
             return False, self._pack_refusal(ctx, "REFUSAL")
-            
-        # 3. Toxicity Check
+
         repetition_val = self.eng.phys.pulse.check_pulse(clean)
         phys["repetition"] = repetition_val 
         pulse_status = self.eng.phys.pulse.get_status()
@@ -425,14 +396,12 @@ class TheBouncer:
                 if scar_log: ctx.log(scar_log)
                 return False, self._pack_refusal(ctx, "TOXICITY")
             return False, self._pack_refusal(ctx, "TOXICITY")
-            
-        # 4. Semantic Filter
+
         semantic_refusal = self.semantic.audit(ctx.input_text, phys)
         if semantic_refusal:
             ctx.logs.append(semantic_refusal)
             return False, self._pack_refusal(ctx, "REFUSAL")
-            
-        # 5. Dissipative Vent
+
         vent_msg = self.vent.check(phys)
         if vent_msg:
             ctx.logs.append(vent_msg)
@@ -549,7 +518,6 @@ class VSL_32Valve:
             "photo": "heavy", "suburban": "abstract"}
 
     def analyze(self, physics: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        # VSL-specific metrics
         e_val, b_val = self.geodesic.calculate_metrics(physics["raw_text"])
         physics["E"] = e_val
         physics["B"] = b_val
@@ -842,7 +810,6 @@ class TheTangibilityGate:
         clean_words = physics_packet.get("clean_words", [])
         total_vol = max(1, len(clean_words))
 
-        # Calculate Density (Mass / Volume)
         mass_words = (
                 counts.get("heavy", 0) +
                 counts.get("kinetic", 0) +
@@ -864,8 +831,7 @@ class TheTangibilityGate:
             modifier -= 0.1
 
         required_density *= modifier
-        
-        # The Hard Floor 
+
         required_density = max(0.15, required_density)
 
         if density_ratio < required_density:

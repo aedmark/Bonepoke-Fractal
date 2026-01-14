@@ -4,22 +4,16 @@
 import time
 from typing import Dict, List, Any
 from dataclasses import dataclass
+from bone_bus import Prisma, BoneConfig
 
-# Import Prisma from village for color support
-from bone_village import Prisma, BoneConfig
 
 class GeodesicRenderer:
-    """
-    The Viewport.
-    Responsible for taking the raw 'CycleContext' and rendering
-    it into a format the human eye can ingest without bleeding.
-    """
-
-    def __init__(self, engine_ref):
+    def __init__(self, engine_ref, chroma_ref, strunk_ref, valve_ref):
         self.eng = engine_ref
         self.projector = self.eng.projector
-        self.vsl_chroma = self.eng.vsl_chroma
-        self.strunk_white = self.eng.strunk_white
+        self.vsl_chroma = chroma_ref
+        self.strunk_white = strunk_ref
+        self.vsl_32v = valve_ref
 
     def render_frame(self, ctx) -> Dict[str, Any]:
         """
@@ -30,8 +24,6 @@ class GeodesicRenderer:
         bio = ctx.bio_result
         world = ctx.world_state
 
-        # 1. Generate the Dashboard (The HoloProjector)
-        # We fetch the visual title from the Apeirogon resonance
         title_data = self._get_title_data(mind, physics, ctx.clean_words)
         
         raw_dashboard = self.projector.render(
@@ -46,24 +38,16 @@ class GeodesicRenderer:
             (mind.get("lens"), mind.get("thought"))
         )
 
-        # 2. Apply Chromatic Aberration (VSL Color Theory)
-        # Vectors change the color of the text to match the metaphysical "flavor"
         colored_ui = self.vsl_chroma.modulate(raw_dashboard, physics.get("vector", {}))
 
-        # 3. Apply Strunk & White Style Policing
-        # If the text is sloppy, the system sanitizes it.
         clean_ui, style_log = self.strunk_white.sanitize(colored_ui)
-        
-        # If style crimes were committed, we tax the user's dopamine
+
         if style_log:
             self._punish_style_crime(style_log)
 
-        # 4. Handle VSL Ruptures (System Crashes rendered as UI)
         if physics.get("system_surge_event", False):
             clean_ui = self._inject_rupture_warning(clean_ui)
 
-        # 5. Compose the Log Stream
-        # Merging the internal event bus with the cycle logs
         structured_logs = self._compose_logs(ctx.logs, self.eng.events.flush())
 
         return {
@@ -86,10 +70,8 @@ class GeodesicRenderer:
         """Enforces the Strunk & White Protocol via punishment."""
         self.eng.events.log(log_msg, "SYS")
         self.eng.bio.endo.dopamine -= 0.05
-        # Tax the Shimmer (The navigational fuel)
-        self.eng.phys.nav.shimmer.spend(5.0) 
-        
-        # Record a friction event in short-term memory
+        self.eng.phys.nav.shimmer.spend(5.0)
+
         self.eng.mind.mem.short_term_buffer.append({
             "trigger": ["style_violation"],
             "context": "STRUNK_WHITE",
@@ -100,10 +82,9 @@ class GeodesicRenderer:
 
     def _inject_rupture_warning(self, ui_text):
         """Prepends a rupture warning if physics broke."""
-        # Check if the VSL 32-Valve system detected a rupture
-        rupture = self.eng.vsl_32v.analyze(self.eng.phys.tension.last_physics_packet)
+        rupture = self.vsl_32v.analyze(self.eng.phys.tension.last_physics_packet)
         if rupture:
-             return f"{rupture['log']}\n\n{ui_text}"
+            return f"{rupture['log']}\n\n{ui_text}"
         return ui_text
 
     def _get_chorus_instruction(self, physics):
@@ -120,39 +101,32 @@ class GeodesicRenderer:
         Organizes the chaotic stream of consciousness into a tidy list.
         Schur Lens: "Like filing reports in the Parks Dept."
         """
-        # 1. Convert simple strings to dicts
         all_events = [{"text": l, "category": "NARRATIVE"} for l in cycle_logs]
         all_events.extend(bus_events)
 
         if not all_events: return []
 
-        # 2. Bucket Sort
         buckets = {"CRITICAL": [], "NARRATIVE": [], "CMD": [], "SYS": [], "BIO": [], "PSYCH": [], "OTHER": []}
         
         for e in all_events:
             cat = e.get("category", "OTHER").upper()
             if cat not in buckets: cat = "OTHER"
-            
-            # High priority overrides
+
             text = e.get("text", "")
             if "RUPTURE" in text or "DEATH" in text or "PANIC" in text: 
                 cat = "CRITICAL"
                 
             buckets[cat].append(text)
-        
-        # 3. Construct the Output
+
         composed = []
-        
-        # Critical stuff always comes first and loud
+
         if buckets["CRITICAL"]:
             composed.append(f"{Prisma.RED}--- CRITICAL ALERTS ---{Prisma.RST}")
             composed.extend(buckets["CRITICAL"])
-            
-        # Narrative is the "meat"
+
         if buckets["NARRATIVE"]:
             composed.extend(buckets["NARRATIVE"])
-            
-        # The "Noise" is compressed if verbose logging is off
+
         compressible = [
             ("CMD", Prisma.WHT, "COMMANDS"), 
             ("PSYCH", Prisma.VIOLET, "PSYCHOLOGY"), 
@@ -164,11 +138,9 @@ class GeodesicRenderer:
         for cat, color, label in compressible:
             items = buckets[cat]
             if not items: continue
-            
-            # Header
+
             composed.append(f"{Prisma.SLATE}   .{label} ({len(items)}){' ' * (30 - len(label))}{Prisma.RST}")
-            
-            # If verbose logging is OFF, we truncate heavy logs
+
             if len(items) > 4 and not BoneConfig.VERBOSE_LOGGING:
                 composed.extend([f"   {i}" for i in items[:3]])
                 composed.append(f"   {color}   ... and {len(items)-3} more.{Prisma.RST}")

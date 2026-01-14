@@ -9,12 +9,10 @@ import urllib.request
 import urllib.error
 from typing import Dict, Any, List, Optional
 from collections import deque
+from bone_lexicon import TheLexicon
+from bone_data import LEXICON, DREAMS, LENSES
+from bone_bus import Prisma, BoneConfig
 
-# We import the village constants to ensure we speak the local dialect.
-from bone_village import Prisma, BoneConfig, TheLexicon
-from bone_data import LEXICON, DREAMS
-
-# --- THE INTERFACES (Fuller Lens: Modular Tensegrity) ---
 
 class LLMInterface:
     """
@@ -30,8 +28,7 @@ class LLMInterface:
         self.provider = provider.lower()
         self.api_key = api_key or "sk-dummy-key-for-local"
         self.model = model or "local-model"
-        
-        # Default routing logic
+
         if self.provider == "ollama":
             self.base_url = base_url or "http://localhost:11434/v1/chat/completions"
             self.model = model or "llama3"
@@ -53,7 +50,6 @@ class LLMInterface:
         try:
             return self._http_generation(prompt, temperature)
         except Exception as e:
-            # Graceful degradation (Schur: "The show must go on.")
             return f"[CONNECTION ERROR: {e}] Falling back to internal simulation... " + self._mock_generation(prompt)
 
     def _http_generation(self, prompt: str, temperature: float) -> str:
@@ -82,7 +78,6 @@ class LLMInterface:
         
         with urllib.request.urlopen(req) as response:
             result = json.loads(response.read().decode("utf-8"))
-            # Standard OpenAI format extraction
             return result["choices"][0]["message"]["content"]
 
     def _mock_generation(self, prompt: str) -> str:
@@ -106,18 +101,15 @@ class PromptComposer:
     """
     def compose(self, state: Dict[str, Any], user_query: str) -> str:
         
-        # 1. Deconstruct State
         bio = state.get("bio", {})
         phys = state.get("physics", {})
         mind = state.get("mind", {})
         meta = state.get("metrics", {})
-        
-        # 2. Narrative Context
+
         lens_role = mind.get("role", "The Observer")
         lens_name = mind.get("lens", "NARRATOR")
         sys_instruction = state.get("system_instruction", "")
 
-        # 3. Biological Context -> Mood
         health = meta.get("health", 100)
         stamina = meta.get("stamina", 100)
         chem = bio.get("chem", {})
@@ -130,7 +122,6 @@ class PromptComposer:
         
         mood_block = " ".join(mood_descriptors) if mood_descriptors else "You are functioning within normal parameters."
 
-        # 4. Physics Context -> Style
         voltage = phys.get("voltage", 0.0)
         drag = phys.get("narrative_drag", 0.0)
         
@@ -139,8 +130,8 @@ class PromptComposer:
         elif voltage < 4.0: style_instruction = "Write slowly. Be verbose, meandering, and lethargic."
         
         if drag > 5.0: style_instruction += " You feel heavy resistance. Struggle to complete thoughts."
-
-        # 5. Assembly
+        inventory_list = state.get("inventory", [])
+        valid_commands = "/rummage, /weave, /publish, /map"
         prompt = (
             f"SYSTEM IDENTITY:\n"
             f"You are {lens_name} ({lens_role}).\n"
@@ -164,6 +155,11 @@ class PromptComposer:
             f"Respond to the user acting as the persona described above. "
             f"Integrate the biological and physical constraints into your tone. "
             f"Do not break character. Keep responses concise (under 100 words) unless asked otherwise."
+
+            f"PHYSICAL CONSTRAINTS:\n"
+            f"Inventory: {', '.join(inventory_list) if inventory_list else 'Empty pockets.'}\n"
+            f"You cannot use items you do not have.\n"
+            f"Valid System Commands: {valid_commands}\n\n"
         )
         return prompt
 
@@ -176,7 +172,6 @@ class ResponseValidator:
         self.banned_phrases = ["large language model", "AI assistant", "cannot feel", "as an AI"]
 
     def validate(self, response: str, state: Dict) -> Dict:
-        # 1. Immersion Check
         for phrase in self.banned_phrases:
             if phrase in response:
                 return {
@@ -185,14 +180,11 @@ class ResponseValidator:
                     "replacement": f"{Prisma.GRY}[The system mumbles something about its programming, but you ignore it.]{Prisma.RST}"
                 }
 
-        # 2. Solipsism Check (Redundant safety net)
         if len(response) < 5:
              return {"valid": False, "reason": "TOO_SHORT", "replacement": "..."}
         
         return {"valid": True, "content": response}
 
-
-# --- THE MAIN BRAIN ---
 
 class TheCortex:
     """
@@ -201,28 +193,22 @@ class TheCortex:
     """
     def __init__(self, engine_ref, llm_client: LLMInterface = None):
         self.sub = engine_ref
-        
-        # Dependency Injection
-        # NOTE: You can change 'provider' here to 'ollama' or 'lm_studio'
-        self.llm = llm_client if llm_client else LLMInterface(provider="mock") 
+
+        self.llm = llm_client if llm_client else LLMInterface(provider="mock")
         self.composer = PromptComposer()
         self.validator = ResponseValidator()
-        
-        # State Machines
+
         self.ballast_state = {"active": False, "turns_remaining": 0}
         self.plain_mode_active = False 
         self.solipsism_counter = 0
         self.SOLIPSISM_THRESHOLD = 3
-
-    # --- SIMULATION BRIDGE ---
 
     def process(self, user_input: str) -> Dict[str, Any]:
         """
         The Main Loop.
         Input -> Simulation -> Prompt -> LLM -> Validation -> Output
         """
-        
-        # 1. PRE-PROCESS: Command Intercepts & Plain Mode
+
         if user_input.startswith("??") or self.plain_mode_active:
             clean_input = user_input.replace("??", "")
             if "reset" in clean_input.lower() and self.plain_mode_active:
@@ -230,7 +216,6 @@ class TheCortex:
                  return {"type": "INFO", "ui": f"{Prisma.CYN}Simulation Restored.{Prisma.RST}", "logs": [], "metrics": self.sub._get_metrics()}
             return self._execute_plain_mode(clean_input)
 
-        # 2. SIMULATION
         sim_result = self.sub.cycle_controller.run_turn(user_input)
 
         if sim_result.get("type") in ["DEATH", "BUREAUCRACY", "CRITICAL_FAILURE"]:
@@ -238,7 +223,6 @@ class TheCortex:
         if sim_result.get("refusal_triggered", False):
             return sim_result
 
-        # 3. STATE EXTRACTION
         full_state = {
             "bio": {
                 "chem": self.sub.bio.endo.get_state(),
@@ -252,16 +236,14 @@ class TheCortex:
             },
             "metrics": self.sub._get_metrics(),
             "world": {"orbit": ["Unknown"]}, 
-            "system_instruction": sim_result.get("system_instruction", "")
+            "system_instruction": sim_result.get("system_instruction", ""),
+            "inventory": self.sub.gordon.inventory,
         }
 
-        # 4. PROMPT COMPOSITION
         prompt = self.composer.compose(full_state, user_input)
 
-        # 5. GENERATION
         llm_response = self.llm.generate(prompt)
 
-        # 6. VALIDATION
         validation = self.validator.validate(llm_response, full_state)
         
         final_text = llm_response
@@ -269,16 +251,12 @@ class TheCortex:
             final_text = validation.get("replacement", "[REDACTED]")
             sim_result["logs"].append(f"CORTEX: LLM Response rejected: {validation.get('reason')}")
 
-        # 7. INTEGRATION
         combined_ui = f"{sim_result['ui']}\n\n{Prisma.WHT}{final_text}{Prisma.RST}"
         sim_result["ui"] = combined_ui
-        
-        # 8. SOLIPSISM CHECK
+
         self._audit_output(final_text)
 
         return sim_result
-
-    # --- HELPER PROTOCOLS ---
 
     def _execute_plain_mode(self, query: str):
         """Bypasses the circus. Returns raw facts."""
@@ -316,8 +294,6 @@ class TheCortex:
         self.ballast_state["turns_remaining"] = 3
         self.sub.events.log("CORTEX: Solipsism detected. Ballast Protocol primed.", "SYS")
 
-
-# --- SUPPORT SYSTEMS ---
 
 class NeuroPlasticity:
     def __init__(self):

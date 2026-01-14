@@ -1,4 +1,4 @@
-# BONEAMANITA 9.9 - "THE REALITY DYSFUNCTION"
+# BONEAMANITA 9.9.1 - "THE REALITY DYSFUNCTION"
 # Architects: SLASH, KICHO, Taylor & Edmark
 
 import json, os, random, re, time, math, copy, traceback
@@ -6,31 +6,18 @@ from collections import Counter, deque
 from typing import List, Optional, Tuple, Dict, Any
 from dataclasses import dataclass, field
 from bone_commands import CommandProcessor
-from bone_village import Prisma, BoneConfig, TheLexicon, CycleContext, LiteraryReproduction, DeathGen, TheTensionMeter, TemporalDynamics, ApeirogonResonance, MirrorGraph, TheHoloProjector, SoritesIntegrator, TheCrucible, TheForge, TheTheremin, TheNavigator, LiteraryJournal, TheAlmanac, StrunkWhiteProtocol
+from bone_village import TheLexicon, CycleContext, DeathGen, TheTensionMeter, TemporalDynamics, ApeirogonResonance, MirrorGraph, TheHoloProjector, SoritesIntegrator, TheCrucible, TheForge, TheTheremin, TheNavigator, LiteraryJournal, TheAlmanac, StrunkWhiteProtocol, TheTinkerer, TheCartographer
 from bone_data import LENSES
 from bone_inventory import GordonKnot
 from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont, MycelialNetwork, SporeCasing, LocalFileSporeLoader
 from bone_body import BioSystem, MitochondrialForge, EndocrineSystem, MetabolicGovernor, SomaticLoop, ViralTracer, ThePacemaker, NoeticLoop
 from bone_physics import TheBouncer, VSL_32Valve, VSL_ChromaticController, CosmicDynamics, TheTangibilityGate
-from bone_brain import NeuroPlasticity, The Cortex, ShimmerState, DreamEngine
+from bone_brain import NeuroPlasticity, DreamEngine, TheCortex, ShimmerState, LLMInterface
 from bone_personality import UserProfile, EnneagramDriver, SynergeticLensArbiter, PublicParksDepartment, TherapyProtocol, KintsugiProtocol, LimboLayer, TheFolly, ChorusDriver, CassandraProtocol, TheBureau
 from bone_viewer import GeodesicRenderer
-    
-class EventBus:
-    def __init__(self):
-        self.buffer = []
+from bone_bus import EventBus, Prisma, BoneConfig
+from bone_lexicon import TheLexicon, LiteraryReproduction
 
-    def log(self, text: str, category: str = "SYSTEM"):
-        self.buffer.append({
-            "text": text,
-            "category": category,
-            "timestamp": time.time()
-        })
-
-    def flush(self) -> List[Dict]:
-        logs = list(self.buffer)
-        self.buffer.clear()
-        return logs
 
 @dataclass
 class MindSystem:
@@ -54,9 +41,6 @@ class PhysSystem:
     nav: 'TheNavigator'
 
 class GeodesicOrchestrator:
-    """
-    Manages the flow of Perceive -> Metabolize -> Think -> Act.
-    """
     def __init__(self, engine_ref):
         self.eng = engine_ref
         self.bureau = TheBureau()
@@ -65,42 +49,37 @@ class GeodesicOrchestrator:
         self.vsl_32v = VSL_32Valve(self.eng.mind.lex, self.eng.mind.mem)
         self.vsl_chroma = VSL_ChromaticController()
         self.strunk_white = StrunkWhiteProtocol()
-        self.renderer = GeodesicRenderer(self.eng)
+        self.renderer = GeodesicRenderer(
+            self.eng,
+            self.vsl_chroma,
+            self.strunk_white,
+            self.vsl_32v
+        )
 
     def run_turn(self, user_message: str) -> Dict[str, Any]:
         self.eng.events.flush()
-        # This object travels through the pipeline, accumulating state.
         ctx = CycleContext(input_text=user_message)
         try:
-            # The system parses the text into physics.
             self._phase_observe(ctx)
 
-            # Pruning dead synapses.
             if self.eng.tick_count % 10 == 0:
                 self._maintenance_prune(ctx)
 
-            # Checking for toxicity or administrative overhead.
             if self._phase_gatekeep(ctx):
                 return ctx.refusal_packet or self._package_bureaucracy(ctx)
 
-            # Burning ATP, generating hormones, managing stress.
             self._phase_metabolize(ctx)
-            
-            # Check for death (Starvation/Toxicity)
+
             if not ctx.is_alive:
                 return self.eng._trigger_death(ctx.physics)
 
-            # Gravity, Orbit, Machines, and Intrusions.
             self._phase_simulate(ctx)
 
-            # Encoding memory, forming thoughts, applying lenses.
             self._phase_cognate(ctx)
 
-            # Compiling the UI, painting the text, formatting the logs.
             return self._phase_render(ctx)
 
         except Exception as e:
-            # The dome must not collapse from a single strut failure.
             traceback.print_exc()
             return {
                 "type": "CRITICAL_FAILURE",
@@ -109,30 +88,22 @@ class GeodesicOrchestrator:
                 "metrics": self.eng._get_metrics()
             }
 
-    # --- PHASE 1: OBSERVATION ---
-
     def _phase_observe(self, ctx: CycleContext):
         """Calculates 'Physics' from raw text."""
-        # 1. Gaze into the text
         gaze_result = self.eng.phys.tension.gaze(ctx.input_text, self.eng.mind.mem.graph)
         ctx.physics = gaze_result["physics"]
         ctx.clean_words = gaze_result["clean_words"]
-        
-        # 2. Update global state
+
         self.eng.phys.tension.last_physics_packet = ctx.physics
         self.eng.tick_count += 1
 
-        # 3. Reality Check (Mirror)
         mirror_active, mirror_msg = self.eng.mind.mirror.reflect(ctx.physics)
         if mirror_active and mirror_msg:
             ctx.log(f"{Prisma.CYN}🪞 {mirror_msg}{Prisma.RST}")
 
-        # 4. VSL Analysis
         rupture = self.vsl_32v.analyze(ctx.physics)
         if rupture:
             ctx.log(rupture["log"])
-
-    # --- PHASE 2: MAINTENANCE ---
 
     def _maintenance_prune(self, ctx: CycleContext):
         """Cleans up old concepts from the Lexicon."""
@@ -147,34 +118,27 @@ class GeodesicOrchestrator:
         except Exception: 
             pass
 
-    # --- PHASE 3: GATEKEEPING ---
-
     def _phase_gatekeep(self, ctx: CycleContext) -> bool:
-        # 1. Bouncer Check (Security is absolute)
         allowed, refusal_packet = self.bouncer.check_entry(ctx)
         if not allowed:
             ctx.refusal_triggered = True
             ctx.refusal_packet = refusal_packet
-            return True # Exit early
+            return True
 
-        # 2. Bureaucracy Check (Reform: Tax vs Block)
         bureau_result = self.bureau.audit(ctx.physics, ctx.bio_result)
         
         if bureau_result:
-            # Always apply the ATP changes (The Bureau always gets paid)
             self.eng.bio.mito.state.atp_pool += bureau_result["atp_gain"]
             ctx.log(bureau_result["log"])
 
             if bureau_result["status"] == "BLOCK":
-                # FELONY: Stop the simulation
                 ctx.is_bureaucratic = True
                 ctx.physics["narrative_drag"] = 10.0 
                 ctx.physics["voltage"] = 0.0         
                 ctx.bureau_ui = bureau_result["ui"]
-                return True # Exit early
-            
+                return True
+
             elif bureau_result["status"] == "TAX":
-                # MISDEMEANOR: Log the fine, but proceed
                 ctx.log(f"{Prisma.GRY}   (BUREAU TAX APPLIED: Flow continues...){Prisma.RST}")
             
         return False
@@ -187,16 +151,12 @@ class GeodesicOrchestrator:
             "metrics": self.eng._get_metrics(ctx.bio_result.get("atp", 0.0))
         }
 
-    # --- PHASE 4: METABOLISM ---
-
     def _phase_metabolize(self, ctx: CycleContext):
         physics = ctx.physics
-        
-        # 1. Metabolic Governor (Homeostasis)
+
         gov_msg = self.eng.bio.governor.shift(physics, self.eng.phys.dynamics.voltage_history)
         if gov_msg: self.eng.events.log(gov_msg, "GOV")
 
-        # 2. Bio-Feedback Loop
         bio_feedback = {
             "INTEGRITY": physics.get("truth_ratio", 0.0),
             "STATIC": physics.get("repetition", 0.0),
@@ -204,15 +164,13 @@ class GeodesicOrchestrator:
             "BETA": physics.get("beta_index", 1.0)
         }
         stress_mod = self.eng.bio.governor.get_stress_modifier(self.eng.tick_count)
-        
-        # 3. Circadian Rhythm (Every 10 ticks)
+
         circadian_bias = None
         if self.eng.tick_count % 10 == 0:
             circadian_bias, circadian_msg = self.eng.bio.endo.calculate_circadian_bias()
             if circadian_msg:
                 self.eng.events.log(f"{Prisma.CYN}🕒 {circadian_msg}{Prisma.RST}", "BIO")
 
-        # 4. The Somatic Loop (Digestion)
         ctx.bio_result = self.eng.soma.digest_cycle(
             ctx.input_text, physics, bio_feedback,
             self.eng.health, self.eng.stamina, stress_mod, self.eng.tick_count,
@@ -220,23 +178,19 @@ class GeodesicOrchestrator:
         )
         ctx.is_alive = ctx.bio_result["is_alive"]
 
-        # 5. Log Critical Biological Events
         for log in ctx.bio_result["logs"]:
             if any(x in str(log) for x in ["CRITICAL", "TAX", "Poison"]):
                 ctx.log(log)
 
-        # 6. Check Hubris (Flow State)
         hubris_hit, hubris_msg, event_type = self.eng.phys.tension.audit_hubris(physics, self.eng.lex)
         if hubris_hit:
             ctx.log(hubris_msg)
             if event_type == "FLOW_BOOST":
                 self.eng.bio.mito.state.atp_pool += 20.0
 
-        # 7. Apply Healing Logic
         self._apply_healing_logic(ctx)
 
     def _apply_healing_logic(self, ctx: CycleContext):
-        # Kintsugi (Repairing Cracks with Gold)
         is_cracked, koan = self.eng.kintsugi.check_integrity(self.eng.stamina)
         if is_cracked:
             ctx.log(f"{Prisma.YEL}🏺 KINTSUGI ACTIVATED: Vessel cracking.{Prisma.RST}")
@@ -249,33 +203,24 @@ class GeodesicOrchestrator:
                 self.eng.stamina = min(BoneConfig.MAX_STAMINA, self.eng.stamina + 20.0)
                 ctx.log(f"   {Prisma.GRN}STAMINA RESTORED (+20.0){Prisma.RST}")
 
-        # Therapy (Passive Healing)
         healed = self.eng.therapy.check_progress(ctx.physics, self.eng.stamina, self.eng.trauma_accum)
         if healed:
             joined = ", ".join(healed)
             ctx.log(f"{Prisma.GRN}❤️ THERAPY STREAK: Healing [{joined}]. Health +5.{Prisma.RST}")
             self.eng.health = min(BoneConfig.MAX_HEALTH, self.eng.health + 5.0)
 
-    # --- PHASE 5: SIMULATION ---
-
     def _phase_simulate(self, ctx: CycleContext):
         """The Physics Simulation Layer."""
-        # A. Reality Distortion (Mirrors & Trigrams)
         self._apply_reality_filters(ctx)
 
-        # B. Navigation (Roots, Gravity, Location)
         self._process_navigation(ctx)
 
-        # C. Cosmic Mechanics (Orbit & Zones)
         self._process_cosmic_state(ctx)
 
-        # D. Industrial Operations (Forge, Theremin, Crucible)
         self._operate_machinery(ctx)
 
-        # E. Intrusions (Parasites, Ghosts)
         self._process_intrusions(ctx)
 
-        # F. Tool Use
         if self.eng.gordon.inventory:
             self.eng.tinkerer.audit_tool_use(ctx.physics, self.eng.gordon.inventory)
 
@@ -307,8 +252,7 @@ class GeodesicOrchestrator:
     def _process_navigation(self, ctx: CycleContext):
         """Handle movement, gravity, and location."""
         physics = ctx.physics
-        
-        # Roots
+
         if self.eng.tick_count == 3:
             ctx.log(self.eng.navigator.strike_root(physics.get("vector", {})))
 
@@ -317,7 +261,6 @@ class GeodesicOrchestrator:
             physics["narrative_drag"] += 1.0
             ctx.log(shock)
 
-        # Gravity & Flinch
         new_drag, grav_log = self.eng.gordon.check_gravity(physics.get("narrative_drag", 0), physics.get("psi", 0))
         if grav_log: ctx.log(grav_log)
         physics["narrative_drag"] = new_drag
@@ -327,11 +270,9 @@ class GeodesicOrchestrator:
             ctx.log(flinch_msg)
             if panic: physics.update(panic)
 
-        # Location
         current_loc, entry_msg = self.eng.navigator.locate(physics)
         if entry_msg: ctx.log(entry_msg)
-        
-        # Apply Environment
+
         env_logs = self.eng.navigator.apply_environment(physics)
         for e_log in env_logs: ctx.log(e_log)
 
@@ -351,8 +292,7 @@ class GeodesicOrchestrator:
     def _operate_machinery(self, ctx: CycleContext):
         """Industrial Operations."""
         physics = ctx.physics
-        
-        # The Forge (Creating items)
+
         transmute_msg = self.eng.phys.forge.transmute(physics)
         if transmute_msg: ctx.log(transmute_msg)
 
@@ -360,7 +300,6 @@ class GeodesicOrchestrator:
         if forge_msg: ctx.log(forge_msg)
         if new_item: ctx.log(self.eng.gordon.acquire(new_item))
 
-        # The Theremin (Resin Buildup)
         _, _, theremin_msg, t_crit = self.eng.phys.theremin.listen(physics, self.eng.bio.governor.mode)
         if theremin_msg: ctx.log(theremin_msg)
         if t_crit == "AIRSTRIKE":
@@ -368,7 +307,6 @@ class GeodesicOrchestrator:
             self.eng.health -= damage
             ctx.log(f"{Prisma.RED}*** CRITICAL THEREMIN DISCHARGE *** -{damage} HP{Prisma.RST}")
 
-        # The Crucible (Voltage Regulation)
         c_state, c_val, c_msg = self.eng.phys.crucible.audit_fire(physics)
         if c_msg: ctx.log(c_msg)
         if c_state == "MELTDOWN": 
@@ -376,24 +314,19 @@ class GeodesicOrchestrator:
 
     def _process_intrusions(self, ctx: CycleContext):
         """Handle parasites, ghosts, and pareidolia."""
-        # Parasites
         p_active, p_log = self.eng.bio.parasite.infect(ctx.physics, self.eng.stamina)
         if p_active: ctx.log(p_log)
 
-        # Ghosts (Limbo)
         if self.eng.limbo.ghosts:
             if ctx.logs:
                 ctx.logs[-1] = self.eng.limbo.haunt(ctx.logs[-1])
             else:
                 ctx.log(self.eng.limbo.haunt("The air is heavy."))
 
-        # Pareidolia
         is_p, p_msg = self.eng.check_pareidolia(ctx.clean_words)
         if is_p:
             ctx.log(p_msg)
             ctx.physics["psi"] = min(1.0, ctx.physics["psi"] + 0.3)
-
-    # --- PHASE 6: COGNITION ---
 
     def _phase_cognate(self, ctx: CycleContext):
         """The Cognitive Layer."""
@@ -404,13 +337,21 @@ class GeodesicOrchestrator:
             self.eng.phys.dynamics.voltage_history
         )
 
-    # --- PHASE 7: RENDERING ---
-
     def _phase_render(self, ctx: CycleContext) -> Dict[str, Any]:
-		return self.renderer.render_frame(ctx)
+        return self.renderer.render_frame(ctx)
         
 class BoneAmanita:
     def __init__(self, memory_layer=None, lexicon_layer=None):
+        local_brain = LLMInterface(
+            provider="ollama",
+            base_url="http://localhost:11434/v1/chat/completions",
+            model="llama3"
+        )
+        cloud_brain = LLMInterface(
+            provider="openai",
+            api_key="sk-YOUR-ACTUAL-OPENAI-KEY-HERE",
+            model="gpt-4-turbo"
+        )
         self.lex = lexicon_layer if lexicon_layer else TheLexicon
         if hasattr(self.lex, 'initialize'): self.lex.initialize()
         self.lex.compile_antigens()
@@ -432,17 +373,10 @@ class BoneAmanita:
         inherited_antibodies = load_result[1] if load_result else set()
         immune_system = MycotoxinFactory()
         immune_system.active_antibodies = inherited_antibodies
-        self.bio = BioSystem(
-            mito=MitochondrialForge(self.mind.mem.session_id, self.events, inherited_traits),
-            endo=EndocrineSystem(),
-            immune=immune_system,
-            lichen=LichenSymbiont(),
-            gut=HyphalInterface(),
-            plasticity=NeuroPlasticity(),
-            governor=MetabolicGovernor(),
-            shimmer=self.shimmer_state,
-            parasite=ParasiticSymbiont(self.mind.mem, self.lex)
-        )
+        self.bio = BioSystem(mito=MitochondrialForge(self.mind.mem.session_id, self.events, inherited_traits),
+                             endo=EndocrineSystem(), immune=immune_system, lichen=LichenSymbiont(),
+                             gut=HyphalInterface(), plasticity=NeuroPlasticity(), governor=MetabolicGovernor(),
+                             shimmer=self.shimmer_state, parasite=ParasiticSymbiont(self.mind.mem, self.lex))
         self.phys = PhysSystem(
             tension=TheTensionMeter(self.events), forge=TheForge(), crucible=TheCrucible(),
             theremin=TheTheremin(), pulse=ThePacemaker(), gate=TheTangibilityGate(),
@@ -464,10 +398,10 @@ class BoneAmanita:
         self.tick_count = 0
         self.health = self.mind.mem.session_health if self.mind.mem.session_health else BoneConfig.MAX_HEALTH
         self.stamina = self.mind.mem.session_stamina if self.mind.mem.session_stamina else BoneConfig.MAX_STAMINA
-        self.trauma_accum = {"THERMAL": 0.0, "CRYO": 0.0, "SEPTIC": 0.0, "BARIC": 0.0}
+        self.trauma_accum = self.mind.mem.session_trauma_vector if hasattr(self.mind.mem, 'session_trauma_vector') and self.mind.mem.session_trauma_vector else BoneConfig.TRAUMA_VECTOR.copy()
         self.joy_history = []
         self.cycle_controller = GeodesicOrchestrator(self)
-        self.cortex = TheCortex(self)
+        self.cortex = TheCortex(self, llm_client=local_brain)
 
     def _get_avg_voltage(self):
         hist = self.phys.dynamics.voltage_history
@@ -475,12 +409,12 @@ class BoneAmanita:
         return sum(hist) / len(hist)
 
     def process_turn(self, user_message: str) -> Dict[str, Any]:
-		cmd_response = self._phase_check_commands(user_message)
-		if cmd_response:
-			return cmd_response
-		if self._ethical_audit():
-			self.events.log(f"{Prisma.WHT}MERCY SIGNAL: Trauma boards wiped.{Prisma.RST}", "SYS")
-		return self.cortex.process(user_message)
+        cmd_response = self._phase_check_commands(user_message)
+        if cmd_response:
+            return cmd_response
+        if self._ethical_audit():
+            self.events.log(f"{Prisma.WHT}MERCY SIGNAL: Trauma boards wiped.{Prisma.RST}", "SYS")
+        return self.cortex.process(user_message)
 
     def _phase_check_commands(self, user_message):
         if user_message.strip().startswith("/"):

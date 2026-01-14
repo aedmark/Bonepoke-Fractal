@@ -1,5 +1,15 @@
 # bone_commands.py - The Command Center
 
+import inspect
+import os
+import random
+import shlex
+import time
+from typing import Dict, Callable, List
+
+from bone_village import ParadoxSeed
+
+
 class CommandProcessor:
     def __init__(self, engine, prisma_ref, lexicon_ref, config_ref, cartographer_ref):
         self.eng = engine
@@ -8,17 +18,13 @@ class CommandProcessor:
         self.Config = config_ref
         self.Map = cartographer_ref
 
-        # SLASH NOTE: We map commands to functions.
-        # The help system will now read the docstrings from these functions.
         self.registry: Dict[str, Callable[[List[str]], bool]] = {
-            # ADMIN
             "/save": self._cmd_save,
             "/load": self._cmd_load,
             "/kip": self._cmd_kip,
             "/mode": self._cmd_mode,
             "/status": self._cmd_status,
 
-            # WORLD
             "/map": self._cmd_map,
             "/manifold": self._cmd_manifold,
             "/garden": self._cmd_garden,
@@ -27,14 +33,12 @@ class CommandProcessor:
             "/fossils": self._cmd_fossils,
             "/lineage": self._cmd_lineage,
 
-            # ACTION
             "/rummage": self._cmd_rummage,
             "/seed": self._cmd_seed,
             "/reproduce": self._cmd_reproduce,
             "/weave": self._cmd_weave,
             "/publish": self._cmd_publish,
 
-            # DEBUG / ADVANCED
             "/teach": self._cmd_teach,
             "/kill": self._cmd_kill,
             "/flag": self._cmd_flag,
@@ -59,11 +63,9 @@ class CommandProcessor:
 
         cmd = parts[0].lower()
         if cmd not in self.registry:
-            # Pinker Lens: Provide a helpful nudge towards the correct syntax.
             self._log(f"{self.P.RED}Unknown command '{cmd}'. Try /help for the manifesto.{self.P.RST}")
             return True
 
-        # Security/Trust Check
         if cmd in ["/teach", "/kill", "/flag"] and not self.Config.VERBOSE_LOGGING:
             trust = self.eng.mind.mirror.profile.confidence
             if trust < 10:
@@ -75,8 +77,6 @@ class CommandProcessor:
         except Exception as e:
             self._log(f"{self.P.RED}COMMAND CRASH: {e}{self.P.RST}")
             return True
-
-    # --- COMMAND IMPLEMENTATIONS (Now with Documentation) ---
 
     def _cmd_manifold(self, parts):
         """Check your coordinates in the Geodesic VSL."""
@@ -302,7 +302,6 @@ class CommandProcessor:
             f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"
         ]
 
-        # Categorize (Hardcoded categories for visual grouping, but dynamic content)
         categories = {
             "CORE": ["_cmd_status", "_cmd_save", "_cmd_load", "_cmd_help"],
             "WORLD": ["_cmd_map", "_cmd_manifold", "_cmd_garden", "_cmd_voids"],
@@ -310,7 +309,6 @@ class CommandProcessor:
             "DEBUG": ["_cmd_kip", "_cmd_teach", "_cmd_kill", "_cmd_focus"]
         }
 
-        # Helper to format docstring
         def get_doc(func):
             doc = inspect.getdoc(func)
             return doc if doc else "Undocumented protocol."
@@ -322,7 +320,7 @@ class CommandProcessor:
                     cmd_name = m_name.replace("_cmd_", "/")
                     doc = get_doc(getattr(self, m_name))
                     help_lines.append(f"  {cmd_name:<12} - {doc}")
-            help_lines.append("") # Spacer
+            help_lines.append("")
 
         help_lines.append(f"{self.P.GRY}Type carefully. The machine is listening.{self.P.RST}")
         self._log("\n".join(help_lines))

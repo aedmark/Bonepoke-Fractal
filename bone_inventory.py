@@ -6,10 +6,9 @@ import copy
 from dataclasses import dataclass, field
 from typing import List, Dict, Callable, Tuple, Any, Optional
 
-from bone_shared import Prisma, BoneConfig, TheLexicon
+from bone_lexicon import TheLexicon
+from bone_bus import Prisma, BoneConfig
 
-# --- STRATEGY PATTERN FOR TOOL EFFECTS (Fuller Lens) ---
-# Instead of hardcoding "if item == 'LEAD_BOOTS'" chains, we map functions.
 
 def effect_conductive(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
     voltage = physics.get("voltage", 0.0)
@@ -71,10 +70,8 @@ def effect_apology_eraser(physics: Dict, data: Dict, item_name: str) -> Optional
     return None
 
 def effect_sync_check(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
-    # Pinker Lens: Synchronicity is the brain recognizing pattern.
     tick = physics.get("tick_count", 0)
     voltage = physics.get("voltage", 0.0)
-    # Check for "11" in tick count or voltage alignment
     if str(tick).endswith("11") or abs(voltage - 11.1) < 0.1:
         physics["narrative_drag"] = 0.0
         physics["voltage"] = 11.1
@@ -103,7 +100,6 @@ def effect_luminescence(physics: Dict, data: Dict, item_name: str) -> Optional[s
     return None
 
 
-# The Registry maps trait strings to the functions above.
 EFFECT_DISPATCH = {
     "CONDUCTIVE_HAZARD": effect_conductive,
     "HEAVY_LOAD": effect_heavy_load,
@@ -130,12 +126,10 @@ class GordonKnot:
     scar_tissue: Dict[str, float] = field(default_factory=dict)
     pain_memory: set = field(default_factory=set)
     last_flinch_turn: int = -10
-    
-    # Internal registries loaded from config
+
     ITEM_REGISTRY: Dict = field(default_factory=dict, init=False)
     CRITICAL_ITEMS: set = field(default_factory=set, init=False)
-    
-    # Reflex definitions (Triggers -> Predicates)
+
     REFLEX_MAP: Dict = field(init=False, default_factory=dict)
 
     def __post_init__(self):
@@ -144,8 +138,6 @@ class GordonKnot:
         self._initialize_reflexes()
 
     def load_config(self):
-        # We import GORDON data dynamically to avoid circular imports if possible,
-        # or rely on the global provided in bone_data.
         from bone_data import GORDON
         
         if not self.inventory:
@@ -189,7 +181,6 @@ class GordonKnot:
             for trait in traits:
                 handler = EFFECT_DISPATCH.get(trait)
                 if handler:
-                    # Execute the effect function
                     msg = handler(physics_ref, data, item)
                     if msg: 
                         logs.append(msg)
@@ -205,8 +196,7 @@ class GordonKnot:
             return False, f"{Prisma.GRY}GORDON: 'Too tired to dig. Eat something first.'{Prisma.RST}", 0.0
             
         stamina_penalty = cost
-        
-        # Calculate Loot Table based on Physics State (Context-Aware Loot)
+
         vol = physics_ref.get("voltage", 0.0)
         drag = physics_ref.get("narrative_drag", 0.0)
         psi = physics_ref.get("psi", 0.0)
@@ -219,8 +209,7 @@ class GordonKnot:
             loot_table = ["POCKET_ROCKS", "LEAD_BOOTS", "ANCHOR_STONE"]
         elif psi > 0.7:
             loot_table = ["HORSE_PLUSHIE", "SPIDER_LOCUS", "WAFFLE_OF_PERSISTENCE"]
-            
-        # 30% Chance of finding nothing
+
         if random.random() < 0.3:
             return True, f"{Prisma.GRY}RUMMAGE: Gordon dug through the trash. Just lint and old receipts.{Prisma.RST}", stamina_penalty
             
@@ -246,35 +235,26 @@ class GordonKnot:
         desc = registry_data.get('description', 'A thing.')
         return f"{Prisma.GRN}LOOT DROP: Acquired [{tool_name}].{Prisma.RST}\n   {Prisma.GRY}\"{desc}\"{Prisma.RST}"
 
-    # ... [Keep check_gravity, emergency_reflex, flinch, etc., but update them to use self.get_item_data] ...
-    # For brevity in this response, I assume the other methods are copied over 
-    # but utilize the cleaner `get_item_data` accessor.
-    
     def check_gravity(self, current_drift: float, psi: float) -> Tuple[float, Optional[str]]:
-        # Refactored for readability
         for item in self.inventory:
             data = self.get_item_data(item)
-            
-            # Special logic for Gravity Buffer items
+
             if data.get("function") == "GRAVITY_BUFFER" and current_drift > 0.5:
                 force = data.get("value", 2.0)
                 cost = data.get("cost_value", 0.0)
                 if data.get("cost") == "INTEGRITY":
                     self.integrity -= cost
                 return max(0.0, current_drift - force), f"🪨 {item}: {data.get('usage_msg', 'Drift Reduced.')} (Integrity -{cost})"
-        
-        # Wind Wolves logic (Psi resistance)
+
         if psi > 0.8 and current_drift > 4.0:
              return max(4.0, current_drift - 1.0), "WIND WOLVES: The logic is howling. You grip the roof. (Drift Resisted)."
              
         return current_drift, None
 
     def flinch(self, clean_words: List[str], current_turn: int) -> Tuple[bool, Optional[str], Optional[Dict]]:
-        # Refactored for clarity (Pinker Lens)
         if (current_turn - self.last_flinch_turn) < 10:
             return False, None, None
-            
-        # Detect Trauma Triggers
+
         hits = [w for w in clean_words if w.upper() in self.pain_memory]
         if not hits:
             return False, None, None
@@ -299,7 +279,6 @@ class GordonKnot:
             return True, msg, panic_response
             
         else:
-            # Desensitization (Healing)
             self.scar_tissue[trigger] = max(0.0, sensitivity - 0.05)
             msg = f"{Prisma.GRY}CALLOUS: '{trigger}' hit an old scar. Gordon ignores it.{Prisma.RST}"
             return False, msg, None
@@ -314,15 +293,13 @@ class GordonKnot:
         else:
             self.scar_tissue[culprit] = min(1.0, self.scar_tissue[culprit] + 0.3)
             return f"{Prisma.VIOLET}TRAUMA DEEPENED: The scar on '{culprit}' is worse.{Prisma.RST}"
-            
-    # Include deploy_pizza and emergency_reflex with minor cleanups
+
     def deploy_pizza(self, physics_ref, item_name="STABILITY_PIZZA") -> Tuple[bool, str]:
         data = self.get_item_data(item_name)
         req_type = data.get("requires", "thermal")
         clean_words = physics_ref.get("clean_words", [])
-        
-        # We need access to lexicon for check. In the new architecture, passed in or imported.
-        from bone_shared import TheLexicon
+
+        from bone_village  import TheLexicon
         source = [w for w in clean_words if w in TheLexicon.get(req_type)]
         
         if not source:
