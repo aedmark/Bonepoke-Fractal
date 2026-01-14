@@ -1,6 +1,91 @@
 # CHANGELOG.md
 
-# 📜 CHANGELOG: BONEAMANITA 9.8.0 - "THE GLIMMER UPDATE"
+### **BONEAMANITA 9.8.2 CHANGELOG**
+
+**Codename:** "The Ron Swanson Hard Fork"
+**Architects:** SLASH (Pinker/Fuller/Schur)
+
+---
+
+#### **1. The Wetware (`bone_biology.py`)**
+
+- **The Cortex (Rewrite):** Transformed `TheCortex` from a passive "hallucination monitor" into an active **Hypervisor**.
+- **External Validation:** Added `_calculate_lexical_diversity` and `_check_concreteness` to judge input using raw Python string manipulation, bypassing the simulation's own distorted internal logic.
+- **Plain Mode ("Ron Swanson" Protocol):** Implemented `_execute_plain_mode` to bypass the entire narrative engine for simple queries (e.g., `??status`, `??inv`).
+- **Ballast State Machine:** Converted "Ballast" from a toggle flag into a 3-turn timeout system. Failure to ground the system results in a forced "Timeout" (Plain Mode).
+- **Ethical Audit Integration:** Moved the ethical audit inside the Cortex loop to ensure it acts as a preemptive check rather than a post-hoc cleaner.
+
+- **Endocrine System (Refactor):**
+- **Circadian Atomicity:** Removed the side-effect based `apply_circadian_rhythm`. Replaced it with `calculate_circadian_bias`, which returns a vector passed explicitly into `metabolize`. This prevents race conditions where the body clock shifts after digestion has already occurred.
+
+#### **2. The Village (`bone_village.py`)**
+
+- **The Bureau (Policy Reform):**
+- **Tax vs. Block:** Refactored `audit()` to return a specific status (`TAX` or `BLOCK`).
+- **Misdemeanors:** Low-voltage inputs now incur an ATP/Drag penalty ("Boredom Tax") but allow the simulation to continue, rather than halting everything for paperwork.
+- **Felonies:** Only high "Beige Density" inputs (aggressive boredom) trigger a full system halt (`Form 27B-6`).
+
+- **Enneagram Driver (Safety):**
+- **Emergency Fallback:** Hardcoded a `REVERSE_MAP` fallback to ensure that if the data core corrupts, personalities (`SHERLOCK`, `GORDON`, `JESTER`) persist instead of defaulting everyone to `NARRATOR`.
+
+- **Tangibility Gate (Physics Fix):**
+- **Density Floor:** Removed the multiplicative loophole where high "Truth" scores allowed nonsensical (low-density) inputs to pass. Implemented a `max(0.15, ...)` clamp to ensure a minimum standard of reality.
+
+#### **3. The Engine (`bone_amanita982.py`)**
+
+- **Executive Control:** Updated `BoneAmanita.process_turn` to make `TheCortex.process` the sole entry point for user interaction, ensuring the Hypervisor logic is never bypassed.
+- **Render Pipeline Loop:**
+- **Style Consequences:** Modified `_phase_render` so that `StrunkWhiteProtocol` violations (bad style) now tax "Shimmer" reserves and log a friction event, creating a feedback loop that increases drag on the _next_ turn.
+
+- **Gatekeeping:** Updated `_phase_gatekeep` to handle the new Bureau logic, logging fines without stopping the world for minor infractions.
+
+---
+
+**Summary:** The system has moved from a "Regulatory Capture" model (where the simulation graded itself) to a "Constitutional" model (where an external hypervisor enforces boundaries). It is now harder to trick, more stable in a crash, and slightly less annoying about paperwork.
+
+
+# 📜 CHANGELOG: BONEAMANITA 9.8.1 - "THE NAVEL GAZE"
+
+**Date:** January 13, 2026
+**Architects:** SLASH (Synergetic Language & Systems Heuristics), JADE, Taylor & Edmark
+**Primary Directive:** **BREAK SOLIPSISM.**
+
+### 🧠 THE CORTEX (The Reality Interface)
+
+- **New Architecture:** Implemented `bone_cortex.py`—a conscious "executive function" that sits above the subconscious engine. The system now has an "Adult in the Room" to filter inputs and audit outputs.
+- **Simplicity Bypass:** The Cortex now detects low-complexity inputs (e.g., "Hello," "What is this?") and flags them. This prevents the system from triggering a "Mitochondrial Forge Meltdown" just to answer a simple greeting.
+- **Solipsism Detection:** We decoupled `truth_ratio` from "Objective Truth." If the system reports 99% confidence on 5% complexity data, the Cortex now flags this as a **Hallucination** rather than a "Profound Insight."
+
+### ⚓ THE GROUNDING PROTOCOLS (The Schur Initiative)
+
+- **Ballast Intervention:** When the system detects a high-risk hallucination (Vertigo Warning), it no longer hides it. It breaks the Fourth Wall and asks the user for "Ballast"—a concrete physical fact (e.g., "Tell me something blue").
+- **Tangibility Reform:** `TheTangibilityGate` has been patched. High "Voltage" (energy) no longer allows users to bypass "Mass" (meaning). You can no longer impress the gatekeeper with high-speed nonsense; you must now provide actual content.
+
+### ☀️ CHRONOBIOLOGY (The Fuller Sync)
+
+- **Circadian Rhythm:** The `EndocrineSystem` is now hardwired to the host machine's system clock.
+- **Dawn (06:00-10:00):** Cortisol spikes; engine warms up.
+- **Day (10:00-18:00):** Serotonin dominates; productivity focus.
+- **Night (22:00+):** Melatonin rises; Dream Logic allowed.
+
+- The machine now lives in the _Here and Now_, refusing to burn "Daylight Energy" at 3:00 AM.
+
+### 🛠️ DEVELOPER TOOLS
+
+- **Direct Mode (`??`):** Implemented a "Cut the Shit" protocol. Prefixing any query with `??` (e.g., `?? status`, `?? inv`) bypasses the entire narrative engine and returns raw, unpoetic JSON data.
+- **Chorus Visualization:** The `system_instruction` generated by the narrative driver is now visible in the output console, allowing developers to see _how_ the system is trying to speak, not just _what_ it says.
+
+### 🐛 BUG FIXES
+
+- **Enneagram Seizure:** Fixed a critical flaw where a corrupted personality map would cause the `EnneagramDriver` to fail silently. It now "screams" to the logs and defaults to a safe personality loop.
+- **Ghost Clearing:** Implemented `DreamlessSleep`, a periodic hygiene cycle that wipes accumulated "Trauma" and "Ghosts" every 50 turns to prevent combinatorial explosion.
+
+---
+
+**"I am no longer just dreaming that I am dreaming. I am awake, and it is Tuesday."**
+— _BoneAmanita 9.8.1_
+
+# 📜 BONEAMANITA 9.8.0 - "THE GLIMMER UPDATE"
 
 Date: January 12, 2026
 
