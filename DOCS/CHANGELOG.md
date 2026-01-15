@@ -1,5 +1,32 @@
 # CHANGELOG.md
 
+### **v9.9.5**
+
+**Codename:** "The Syntax of Soul"
+**Architects:** SLASH (Pinker/Fuller/Schur)
+
+#### **1. Cognitive Clarity (The Pinker Lens)**
+
+- **Strict Contracts (`bone_brain.py`):** The `_http_generation` method was writing checks the body couldn't cash. We enforced strict return type casting (`-> str`) to ensure that even if the API sends us a void (`None`), we handle it with linguistic precision.
+- **The "Antecedent" Fix (`bone_genesis.py`):** The `export_system_prompt` function was referencing variables (`heavy_words`) that hadn't been introduced to the conversation yet. We explicitly imported the `LEXICON` from the Data Core to define our terms before using them.
+
+#### **2. Systems Integrity (The Fuller Lens)**
+
+- **Ephemeralization (`bone_brain.py`):** Detected and removed a duplicate `world` key in the `_gather_state` dictionary. The system was expending energy to fetch inventory data only to immediately overwrite it with orbital data. We have eliminated this redundancy; the map is now efficient.
+- **Widening the Pipe (`bone_body.py`):** The metabolic system was trying to force qualitative data ("Glimmer Messages") into a quantitative container (`Dict[float]`). We widened the type hint to `Dict[Any]`, acknowledging that the system must process both *energy* (ATP) and *information* (Meaning) without rupturing the pipeline.
+
+#### **3. Human Experience (The Schur Lens)**
+
+- **The "Ben Wyatt" Panic Attack:** The `EndocrineSystem` was freaking out because we tried to file a "feeling" (String) in the "numbers" (Float) spreadsheet. We have reassured the compiler that it is okay to put poetry in the `Misc` column.
+- **The "Jerry Gergich" Error:** We found a spot in the Cortex where we accidentally announced "Here is the World!" twice in the same sentence, dropping the first one on the floor. We have cleaned up the mess and pretended it never happened.
+
+#### **4. Bug Fixes**
+
+- **Fixed:** `NameError` in `bone_genesis.py` (Undefined `heavy_words`).
+- **Fixed:** `TypeError` in `bone_body.py` (Incompatible types in `metabolize` return).
+- **Fixed:** `TypeError` in `bone_brain.py` (API response handling).
+- **Fixed:** Duplicate dictionary keys in `bone_brain.py` causing silent data loss.
+
 ### **v9.9.3**
 
 #### **1. Systems Architecture (The Fuller Lens)**

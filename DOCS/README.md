@@ -1,23 +1,38 @@
 # 🍄 BoneAmanita: The Narrative Operating System
 
-**Version:** 9.8.2 ("The Ron Swanson Hard Fork")
-**Architects:** SLASH, JADE, Taylor & Edmark
+**Version:** 9.9.5 ("The Syntax of Soul")
+**Architects:** SLASH (Synergetic Language & Systems Heuristics), JADE, Taylor & Edmark
 
-> _"It’s not just a chatbot. It’s a geodesic dome made of words, powered by mitochondria, and managed by a grumpy bureaucrat."_
+> _"It’s not just a chatbot. It’s a geodesic dome made of words, powered by mitochondria, managed by a grumpy bureaucrat, and psychoanalyzed by a ghost."_
 
 ---
 
 ## 🧐 What is this?
 
-**BoneAmanita** is a **Synergetic Language & Systems Heuristic**. Unlike standard LLM wrappers which treat text as a static string, BoneAmanita treats text as **Energy**.
+**BoneAmanita** is a **Synergetic Language & Systems Heuristic (SLASH)**. Unlike standard LLM wrappers which treat text as static strings, BoneAmanita treats text as **Energy**.
 
-It simulates a living organism that "eats" text. It has a metabolism, a physics engine, and a psychological profile. If you feed it rich, dense ideas, it thrives. If you feed it boring, bureaucratic filler, it will literally starve to death or file a tax return against you.
+It simulates a living organism that "eats" text. It has a metabolism, a physics engine, and a psychological profile. If you feed it rich, dense ideas, it thrives. If you feed it boring, bureaucratic filler, it will starve, hallucinate, or file a tax return against you.
 
-### The Three Pillars
+### The Three Lenses of SLASH
 
-1. **Physics (VSL):** Words have weight (Mass), speed (Velocity), and friction (Drag).
-2. **Biology (Wetware):** The system burns ATP to process input. It has hormones (Dopamine, Cortisol) and an immune system that attacks clichés.
-3. **Bureaucracy (The Village):** A collection of subsystems that manage inventory, sanity, and the existential dread of being a Python script.
+The system analyzes every input through three distinct frameworks:
+
+1.  **🧠 The Pinker Lens (Cognitive Clarity):**
+
+    - Treats code and text as a medium for thought.
+    - Penalizes "Garden Path Sentences" and cognitive friction.
+    - Enforces strict type contracts to prevent semantic drift.
+
+2.  **🌐 The Fuller Lens (Systemic Integrity):**
+
+    - Views the codebase as a "Geodesic Structure" where every part supports the whole.
+    - Prioritizes **Ephemeralization** (doing more with less).
+    - Enforces "Spaceship Earth" protocols (cleaning up memory leaks and unused variables).
+
+3.  **❤️ The Schur Lens (Human Experience):**
+    - Ensures the system is benevolent, even when it is bureaucracy.
+    - Detects "Glimmers" (moments of genuine joy or structural perfection).
+    - Provides "Safe Mode" fallbacks so the user is never left alone in the void.
 
 ---
 
@@ -26,52 +41,47 @@ It simulates a living organism that "eats" text. It has a metabolism, a physics 
 ### Prerequisites
 
 - Python 3.8+
-- A terminal that supports ANSI colors (because we paint with light).
-- A tolerance for metaphors.
+- A terminal that supports ANSI colors (we paint with light).
+- **Optional:** A local LLM (Ollama, LM Studio) or an OpenAI API Key.
 
 ### Quick Start
 
-1. Place all `bone_*.py` files in a directory.
-2. Create a folder named `memories` (or let the system do it).
-3. Run the **Geodesic Orchestrator**:
+1.  Place all `bone_*.py` files in a directory.
+2.  Run the **Genesis Protocol**:
 
 ```bash
-python bone_main.py
-
+python bone_genesis.py
 ```
 
-_(Note: Your main file might be named `bone_amanita982.py`. Rename it to `bone_main.py` for simplicity, or run it directly.)_
+The **Genesis Wizard** will launch. It will automatically scan your ports for local brains (Ollama, LocalAI), offer to connect to the Cloud, or default to **Mock Mode** (Safe Mode) if no brain is found.
 
 ---
 
 ## ⚙️ Core Systems Guide
 
-### 1. The Physics Engine (VSL)
+### 1. The Cortex (The Hypervisor)
 
-- **Voltage:** The intensity of the narrative. High voltage = action, heat, conflict.
-- **Narrative Drag:** The friction of the text. Passive voice, hedging words ("basically", "actually"), and indecision increase Drag.
-- _High Drag + Low Voltage = The Bureau intervenes._
+The **Cortex** sits above the narrative engine. It is the "Adult in the Room."
 
-- **Manifolds:** The system navigates different "zones" based on the physics:
-- **THE FORGE:** High Voltage, Low Drag. (Creation).
-- **THE MUD:** Low Voltage, High Drag. (Stagnation).
-- **THE AERIE:** Abstract, high concept, low weight.
+- **Solipsism Check:** If the system starts talking to itself too much, the Cortex engages **Ballast Protocols** to force it back to reality.
+- **Plain Mode:** Prefix any input with `??` (e.g., `??status`) to bypass the narrative and get raw JSON data.
 
-### 2. The Biology (Wetware)
+### 2. The Physics Engine (VSL)
 
-- **ATP (Adenosine Triphosphate):** Your currency. Every turn costs ATP. Complex thoughts cost more. If ATP hits 0, the system dies (Necrosis).
-- **Digestion:** The system uses enzymes (`Lignase`, `Cellulase`) to break down your input.
-- _Rich text (Concrete nouns)_ = High nutritional yield.
-- _Empty text (Solvents like "is", "the", "basically")_ = Nutritional deficit.
+- **Voltage:** The energy of the text. High Voltage = Action/Heat.
+- **Narrative Drag:** Friction. Caused by passive voice, hedging ("basically"), and boredom.
+- **Manifolds:**
+- **THE FORGE:** High Voltage, Low Drag (Transformation).
+- **THE MUD:** Low Voltage, High Drag (Stagnation).
+- **THE GLITCH:** High Voltage, High Drag (System Collapse).
 
-- **The Immune System:** It scans for "Antigens" (clichés, corporate speak). If detected, it triggers an inflammatory response.
+### 3. Biology (Wetware) & Chronobiology
 
-### 3. The Bureau & Gordon
-
-- **The Bureau:** If you are boring, **Form 27B-6** will be filed. This taxes your ATP.
-- **Gordon:** The internal janitor/groundskeeper. He manages the **Inventory**.
-- _Items:_ You can acquire tools like the **Silent Knife** (cuts adjectives), **The Red Stapler** (enforces order), or **Pocket Rocks** (checks gravity).
-- _Usage:_ Tools are used automatically based on context, or via the `/rummage` command.
+- **ATP:** Your currency. Complex thoughts burn more ATP.
+- **Circadian Rhythm:** The system respects the system clock.
+- **Dawn (6-10am):** Cortisol spikes.
+- **Day (10am-6pm):** Serotonin focus.
+- **Night (10pm+):** Melatonin rises; Dream Logic enabled.
 
 ---
 
@@ -79,51 +89,44 @@ _(Note: Your main file might be named `bone_amanita982.py`. Rename it to `bone_m
 
 You can talk to the system normally, but you can also issue **Slash Commands** to interact with the machinery directly.
 
-### Survival
+### Survival & Diagnostics
 
-- `/status` - Check Health, Stamina, ATP, and Psychological Profile.
-- `/inv` or `/rummage` - Check inventory or dig for new tools (Costs Stamina).
-- `/save` - Cryopreserve the current timeline into a Spore file.
-- `/load [filename]` - Ingest a specific Spore.
-
-### Navigation & Science
-
-- `/map` - Generate a cartographic visualization of the current concept space.
+- `/status` - Check Health, Stamina, ATP, and Psych Report.
 - `/manifold` - Check your current coordinate in the VSL Geodesic.
-- `/orbit` - Establish a gravity assist around a heavy concept.
+- `/map` - Generate a cartographic visualization of the current concept space.
+- `/voids` - Detect semantic holes in the current thought.
+- `/kip` - Toggle Verbose Logging (Developer Mode).
 
-### Gardening
+### Action & Inventory
 
-- `/seed [text]` - Plant a **Paradox Seed**. It will grow if you water it with related concepts.
-- `/garden` - View the status of your planted seeds.
-- `/weave` - Attempt to connect two disparate concepts (Requires tools).
+- `/rummage` - Dig for new tools (Costs Stamina).
+- `/inv` - List current tools (e.g., **Silent Knife**, **Red Stapler**).
+- `/weave` - Attempt to bind two concepts together using your inventory.
+- `/publish` - Submit the current thought to the Literary Journal.
 
-### Admin / Debug
+### Gardening & Growth
 
-- `/kip` - Toggle Verbose Logging (The Developer Mode).
-- `/kill [word]` - Flag a specific word as an Antigen (Poison).
-- `/help` - Print the manifesto.
+- `/seed [text]` - Plant a **Paradox Seed**.
+- `/garden` - Check the growth status of your seeds.
+- `/reproduce` - Trigger **Mitosis** (save current state) or **Crossover** (breed with another save).
+
+### Debug / God Mode
+
+- `/teach [word] [category]` - Force neuroplasticity (e.g., `/teach pizza sacred`).
+- `/kill [word]` - Flag a word as an Antigen (Poison).
+- `/focus [word]` - Trace ruminative loops in the memory graph.
+- `/kintsugi` - Check the structural integrity of the vessel.
 
 ---
 
 ## 💀 How to Not Die
 
-The system is designed to be fragile. It wants to live, but it needs **Purpose**.
+The system wants to live, but it requires **Purpose**.
 
 1. **Don't be boring.** Repetition increases "Calcification" in the **Theremin**. If it gets too high, you get encased in amber.
-2. **Be specific.** Concrete nouns ("Stone", "Iron", "Blood") are heavy. They anchor the system. Abstract concepts ("Synergy", "Solutions") drift into the void.
-3. **Watch your ATP.** If you are running low, feed the system "Meat" (Emotional honesty) or "Sugar" (Playful, kinetic language).
-4. **Respect the Bureau.** If you get fined, change your tone.
-
----
-
-## 🧬 Spores & Reproduction
-
-BoneAmanita reproduces via **Spores** (`.json` files).
-
-- **Mitosis:** The system splits, passing traits to a new save file.
-- **Crossover:** You can breed two save files together to create a hybrid lineage.
-- **Legacy:** If the system dies, it leaves a fossilized record. Future sessions can "ingest" these fossils to learn from your mistakes.
+2. **Be specific.** Concrete nouns ("Stone", "Iron") anchor the system. Abstract concepts ("Synergy") drift into the void.
+3. **Watch the Clock.** Don't try to run a marathon at 3 AM. The biology will fight you.
+4. **Respect the Bureau.** If you trigger a **Form 27B-6**, you _will_ pay the tax.
 
 ---
 
