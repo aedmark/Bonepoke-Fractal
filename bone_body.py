@@ -14,17 +14,15 @@ from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, Paras
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig
 
-DEFAULT_BMR = 2.0
-
 @dataclass
 class BioSystem:
-    mito: MitochondrialForge
-    endo: EndocrineSystem
+    mito: 'MitochondrialForge'
+    endo: 'EndocrineSystem'
     immune: MycotoxinFactory
     lichen: LichenSymbiont
     gut: HyphalInterface
     plasticity: NeuroPlasticity
-    governor: MetabolicGovernor
+    governor: 'MetabolicGovernor'
     shimmer: ShimmerState
     parasite: ParasiticSymbiont
 
@@ -54,6 +52,14 @@ class MitochondrialForge:
         self.state = MitochondrialState(mother_hash=lineage_seed)
         self.events = events
         self.krebs_cycle_active = True
+
+        # Load Defaults from Config
+        self.BMR = BoneConfig.METABOLISM.BASE_RATE
+        self.TAX_LOW = BoneConfig.METABOLISM.DRAG_TAX_LOW
+        self.TAX_HIGH = BoneConfig.METABOLISM.DRAG_TAX_HIGH
+        self.GRACE = BoneConfig.METABOLISM.DRAG_GRACE_BUFFER
+        self.ROS_FACTOR = BoneConfig.METABOLISM.ROS_GENERATION_FACTOR
+
         if inherited_traits:
             self._apply_inheritance(inherited_traits)
 
@@ -65,45 +71,66 @@ class MitochondrialForge:
             self.events.log(f"{Prisma.CYN}[MITO]: Inherited Enzymes: {list(self.state.enzymes)}.{Prisma.RST}")
 
     def adapt(self, final_health: float) -> Dict:
+        """Evolutionary Logic: What gets passed to the next Spore."""
         traits = {
             "efficiency_mod": self.state.efficiency_mod,
             "ros_resistance": self.state.ros_resistance,
             "enzymes": list(self.state.enzymes)}
+
+        # If you died, evolve resistance.
         if final_health <= 0 and random.random() < 0.3:
-            traits["ros_resistance"] += 0.1
+            traits["ros_resistance"] = round(traits.get("ros_resistance", 1.0) + 0.1, 2)
+
         return traits
 
     def calculate_metabolism(self, drag: float, external_modifiers: Optional[List[float]] = None) -> MetabolicReceipt:
-        bmr = getattr(BoneConfig, "BASE_METABOLIC_RATE", DEFAULT_BMR)
+        """
+        Calculates the bill for existence.
+        """
         limit = BoneConfig.MAX_DRAG_LIMIT
         safe_drag = max(0.0, drag)
-        if safe_drag <= limit:
-            drag_tax = safe_drag * 0.2
+
+        taxable_drag = max(0.0, safe_drag - self.GRACE)
+
+        if taxable_drag <= (limit - self.GRACE):
+            drag_tax = taxable_drag * self.TAX_LOW
         else:
-            drag_tax = 1.0 + ((safe_drag - limit) * 0.5)
+            base_tax = (limit - self.GRACE) * self.TAX_LOW
+            excess_drag = taxable_drag - (limit - self.GRACE)
+            drag_tax = base_tax + (excess_drag * self.TAX_HIGH)
+
+        # 3. External Factors (Tools, Environment)
         if external_modifiers:
             for mod in external_modifiers:
                 drag_tax *= mod
-        raw_cost = bmr + drag_tax
+
+        raw_cost = self.BMR + drag_tax
+
+        # 4. Efficiency Calculation (Mitochondrial Health)
         safe_efficiency = max(0.1, self.state.efficiency_mod)
         final_cost = raw_cost / safe_efficiency
-        inefficiency = 0.0
+
+        inefficiency_tax = 0.0
         if safe_efficiency < 1.0:
-            inefficiency = final_cost - raw_cost
+            inefficiency_tax = final_cost - raw_cost
+
+        # 5. Diagnostics
         status = "RESPIRING"
         symptom = "Humming along."
+
         if final_cost > self.state.atp_pool:
             status = "NECROSIS"
-            symptom = f"The engine is stalling. Requires {final_cost:.1f} ATP."
+            symptom = f"The engine is stalling. Requires {final_cost:.1f} ATP (Available: {self.state.atp_pool:.1f})."
         elif self.state.ros_buildup > BoneConfig.CRITICAL_ROS_LIMIT:
             status = self.APOPTOSIS_TRIGGER
             symptom = "Cellular suicide initiated. Too much noise."
-        elif drag_tax > limit:
-            symptom = "The gears are grinding. Heavy load."
+        elif drag_tax > 3.0:
+            symptom = "The gears are grinding. Heavy metabolic load."
+
         return MetabolicReceipt(
-            base_cost=round(bmr, 2),
+            base_cost=round(self.BMR, 2),
             drag_tax=round(drag_tax, 2),
-            inefficiency_tax=round(inefficiency, 2),
+            inefficiency_tax=round(inefficiency_tax, 2),
             total_burn=round(final_cost, 2),
             status=status,
             symptom=symptom)
@@ -112,13 +139,18 @@ class MitochondrialForge:
         if receipt.status == "NECROSIS":
             self.state.atp_pool = 0.0
             return "NECROSIS"
+
         if receipt.status == self.APOPTOSIS_TRIGGER:
             self.krebs_cycle_active = False
             self.state.atp_pool = 0.0
             return self.APOPTOSIS_TRIGGER
+
         self.state.atp_pool -= receipt.total_burn
-        ros_generation = receipt.total_burn * 0.1 * (1.0 / self.state.ros_resistance)
+
+        # ROS generation is now governed by Config
+        ros_generation = receipt.total_burn * self.ROS_FACTOR * (1.0 / self.state.ros_resistance)
         self.state.ros_buildup += ros_generation
+
         return "RESPIRING"
 
 class SomaticLoop:
@@ -134,16 +166,25 @@ class SomaticLoop:
                      current_health: float, current_stamina: float,
                      stress_mod: float = 1.0, tick_count: int = 0,
                      circadian_bias: Dict[str, float] = None) -> Dict:
-  
+
         phys = self._normalize_physics(physics_data)
         logs = []
+
+        # 1. Calculate and Pay Taxes
         receipt = self._calculate_taxes(phys, logs)
         resp_status = self.bio.mito.respirate(receipt)
+
+        # 2. Check Folly (Did we eat something weird?)
         if self._audit_folly_desire(phys, current_stamina, logs) == "MAUSOLEUM_CLAMP":
             return self._package_result(resp_status, logs, enzyme="NONE")
+
+        # 3. Harvest Resources (The Reward)
         enzyme, total_yield = self._harvest_resources(text, phys, logs, tick_count)
         self.bio.mito.state.atp_pool += total_yield
+
+        # 4. Maintenance & Chemistry
         self._perform_maintenance(phys, logs, tick_count)
+
         chem_state = self.bio.endo.metabolize(
             feedback, current_health, current_stamina,
             self.bio.mito.state.ros_buildup,
@@ -152,6 +193,7 @@ class SomaticLoop:
             enzyme_type=enzyme,
             circadian_bias=circadian_bias
         )
+
         return self._package_result(resp_status, logs, chem_state, enzyme)
 
     def _normalize_physics(self, data: Any) -> PhysicsPacket:
@@ -161,14 +203,21 @@ class SomaticLoop:
 
     def _calculate_taxes(self, phys, logs) -> MetabolicReceipt:
         modifiers = []
+
+        # Passive Tools affecting Metabolism
         if "TIME_BRACELET" in self.gordon.inventory:
-            modifiers.append(0.5)
+            modifiers.append(0.5) # 50% Drag Reduction
+
+        # Hybrid Complexity Tax (Pinker: "Cognitive Load")
         is_hybrid = (phys.counts.get("heavy", 0) >= 2 and phys.counts.get("abstract", 0) >= 2)
         if is_hybrid:
-            modifiers.append(0.8)
+            modifiers.append(0.8) # 20% Efficiency gain for synergy? Or tax?
+            # Original code said 0.8 which REDUCES drag tax. Synergy is efficient.
+
         receipt = self.bio.mito.calculate_metabolism(phys.narrative_drag, external_modifiers=modifiers)
-        if receipt.total_burn > 3.0:
-            tax_note = f" (Drag Tax: {receipt.drag_tax:.1f})" if receipt.drag_tax > 1.0 else ""
+
+        if receipt.total_burn > 5.0 or receipt.drag_tax > 2.0:
+            tax_note = f" (Drag Tax: {receipt.drag_tax:.1f})" if receipt.drag_tax > 0.5 else ""
             logs.append(f"{Prisma.GRY}METABOLISM: Burned {receipt.total_burn:.1f} ATP{tax_note}.{Prisma.RST}")
         return receipt
 
@@ -184,23 +233,37 @@ class SomaticLoop:
     def _harvest_resources(self, text, phys, logs, tick) -> Tuple[str, float]:
         total_yield = 0.0
         p_dict = phys.to_dict() if hasattr(phys, 'to_dict') else phys.__dict__
+
+        # A. Gut Digestion (Enzymes)
         enzyme, nutrient_profile = self.bio.gut.secrete(text, p_dict)
         base_yield = nutrient_profile.get("yield", 0.0)
+
+        # Fuller Lens: Structural Integrity (Mass) amplifies yield
         geo_mass = phys.geodesic_mass
         geo_mod = 1.0 + min(1.5, (geo_mass / BoneConfig.GEODESIC_STRENGTH))
+
+        # Tax for "Airy" concepts (High Psi, Low Mass)
         complexity_tax = 0.0
         if phys.psi > 0.6 and geo_mass < 2.0:
             complexity_tax = base_yield * 0.4
             logs.append(f"{Prisma.YEL}COMPLEXITY TAX: High Psi, Low Structure. -{complexity_tax:.1f} Yield.{Prisma.RST}")
+
         digestive_yield = max(0.0, (base_yield * geo_mod) - complexity_tax)
         total_yield += digestive_yield
+
         if geo_mod > 1.2:
             logs.append(f"{Prisma.GRN}INFRASTRUCTURE BONUS: Mass {geo_mass:.1f}. Yield x{geo_mod:.2f}.{Prisma.RST}")
+
+        # B. Lichen Photosynthesis
         clean = phys.clean_words
         sugar, lichen_msg = self.bio.lichen.photosynthesize(p_dict, clean, tick)
         if sugar > 0:
+            # Config-based gain
+            sugar *= (BoneConfig.METABOLISM.PHOTOSYNTHESIS_GAIN / 2.0)
             total_yield += sugar
             logs.append(f"\n{lichen_msg}")
+
+        # C. The Folly (Eating concepts)
         event, msg, folly_yield, loot = self.folly.grind_the_machine(
             self.bio.mito.state.atp_pool, clean, self.lex
         )
@@ -210,16 +273,20 @@ class SomaticLoop:
             if loot:
                 loot_msg = self.gordon.acquire(loot)
                 if loot_msg: logs.append(loot_msg)
+
         return enzyme, total_yield
 
     def _perform_maintenance(self, phys, logs, tick):
+        # Turbulence Cost (Configured)
         if phys.turbulence > 0.7:
-            burn = 5.0
+            burn = BoneConfig.METABOLISM.TURBULENCE_TAX
             self.bio.mito.state.atp_pool -= burn
             logs.append(f"{Prisma.YEL}CHOPPY WATERS: High Turbulence burn. -{burn} ATP.{Prisma.RST}")
         elif phys.turbulence < 0.2:
-            self.bio.mito.state.atp_pool += 2.0
-        if self.bio.mito.state.atp_pool < 10.0:
+            self.bio.mito.state.atp_pool += 2.0 # Smooth sailing bonus
+
+        # Autophagy (Starvation Protocol)
+        if self.bio.mito.state.atp_pool < BoneConfig.BIO.ATP_STARVATION:
             logs.append(f"{Prisma.RED}STARVATION PROTOCOL: ATP Critical. Initiating Autophagy...{Prisma.RST}")
             victim, log_msg = self.mem.cannibalize(current_tick=tick)
             if victim:
@@ -257,21 +324,21 @@ class EndocrineSystem:
         hour = time.localtime().tm_hour
         bias = {"COR": 0.0, "SER": 0.0, "MEL": 0.0}
         msg = None
-        
-        if 6 <= hour < 10:
+
+        if 6 <= hour < 10: # DAWN
             bias["COR"] = 0.1
             msg = "Dawn Protocol: Cortisol rising."
-        elif 10 <= hour < 18:
+        elif 10 <= hour < 18: # DAY
             bias["SER"] = 0.1
             msg = "Solar Cycle: Serotonin dominant."
-        elif 18 <= hour < 23:
+        elif 18 <= hour < 23: # DUSK
             bias["MEL"] = 0.1
             msg = "Twilight Protocol: Melatonin rising."
-        else:
+        else: # NIGHT
             bias["MEL"] = 0.3
             bias["COR"] = -0.1
             msg = "Lunar Cycle: Melatonin max."
-            
+
         return bias, msg
 
     def _apply_enzyme_reaction(self, enzyme_type: str, harvest_hits: int):
@@ -281,7 +348,7 @@ class EndocrineSystem:
             final_reward = base_reward * satiety_dampener
             self.dopamine += final_reward
             self.cortisol -= (final_reward * 0.4)
-            
+
         reactions = {
             "PROTEASE":   {"ADR": BoneConfig.BIO.REWARD_MEDIUM},
             "CELLULASE":  {"COR": -BoneConfig.BIO.REWARD_MEDIUM, "OXY": BoneConfig.BIO.REWARD_SMALL},
@@ -301,19 +368,19 @@ class EndocrineSystem:
     def _apply_environmental_pressure(self, feedback: Dict, health: float, stamina: float, ros_level: float, stress_mod: float):
         if feedback.get("STATIC", 0) > 0.6:
             self.cortisol += (BoneConfig.BIO.REWARD_LARGE * stress_mod)
-            
+
         if feedback.get("INTEGRITY", 0) > 0.8:
             self.dopamine += BoneConfig.BIO.REWARD_MEDIUM
         else:
             self.dopamine -= BoneConfig.BIO.DECAY_RATE
-            
+
         if stamina < 20.0:
             self.cortisol += (BoneConfig.BIO.REWARD_MEDIUM * stress_mod)
             self.dopamine -= BoneConfig.BIO.REWARD_MEDIUM
-            
+
         if ros_level > 20.0:
             self.cortisol += (BoneConfig.BIO.REWARD_LARGE * stress_mod)
-            
+
         if health < 30.0 or feedback.get("STATIC", 0) > 0.8:
             self.adrenaline += (BoneConfig.BIO.REWARD_LARGE * stress_mod)
         else:
@@ -322,19 +389,19 @@ class EndocrineSystem:
     def _maintain_homeostasis(self, social_context: bool):
         if self.serotonin > 0.6:
             self.cortisol -= BoneConfig.BIO.REWARD_SMALL
-            
+
         if social_context:
             self.oxytocin += BoneConfig.BIO.REWARD_MEDIUM
             self.cortisol -= BoneConfig.BIO.REWARD_MEDIUM
         elif self.serotonin > 0.7 and self.cortisol < 0.3:
             self.oxytocin += BoneConfig.BIO.REWARD_SMALL
-            
+
         if self.cortisol > 0.7 and not social_context:
             self.oxytocin -= BoneConfig.BIO.REWARD_SMALL
-            
+
         if self.oxytocin > 0.6:
             self.cortisol -= BoneConfig.BIO.REWARD_LARGE
-            
+
         if self.adrenaline < 0.2:
             self.melatonin += (BoneConfig.BIO.REWARD_SMALL / 2)
         else:
@@ -355,25 +422,26 @@ class EndocrineSystem:
                    social_context: bool = False, enzyme_type: Optional[str] = None,
                    harvest_hits: int = 0, stress_mod: float = 1.0,
                    circadian_bias: Dict[str, float] = None) -> Dict[str, float]:
-                   
+
         self._apply_enzyme_reaction(enzyme_type, harvest_hits)
         self._apply_environmental_pressure(feedback, health, stamina, ros_level, stress_mod)
         self._maintain_homeostasis(social_context)
-        
+
         if circadian_bias:
             self.cortisol += circadian_bias.get("COR", 0.0)
             self.serotonin += circadian_bias.get("SER", 0.0)
             self.melatonin += circadian_bias.get("MEL", 0.0)
-            
+
         glimmer_msg = self.check_for_glimmer(feedback, harvest_hits)
 
+        # Clamping
         self.dopamine = self._clamp(self.dopamine)
         self.oxytocin = self._clamp(self.oxytocin)
         self.cortisol = self._clamp(self.cortisol)
         self.serotonin = self._clamp(self.serotonin)
         self.adrenaline = self._clamp(self.adrenaline)
         self.melatonin = self._clamp(self.melatonin)
-        
+
         state = self.get_state()
         if glimmer_msg:
             state["glimmer_msg"] = glimmer_msg
@@ -493,7 +561,7 @@ class ViralTracer:
             self.mem.graph[action] = {"edges": {}, "last_tick": 0}
         self.mem.graph[action]["edges"][node_b] = 5
         return f"PSILOCYBIN REWIRE: Broken Loop '{node_a}↔{node_b}'. Grafted '{sensory}'(S) -> '{action}'(A)."
-        
+
 class ThePacemaker:
     def __init__(self):
         self.history = deque(maxlen=5)
@@ -530,7 +598,7 @@ class ThePacemaker:
 
     def is_bored(self):
         return self.boredom_level > BoneConfig.BOREDOM_THRESHOLD
-        
+
 class NoeticLoop:
     def __init__(self, mind_layer, bio_layer, events):
         self.mind = mind_layer

@@ -1,31 +1,61 @@
-# genesis.py
-# "The beginning is a very delicate time." - Herbert / Schur
+# bone_genesis.py
+# "The beginning is a very delicate time." - Herbert / Schur / SLASH
 
-import sys, os, json, time, urllib.request, urllib.error
-from typing import Optional, Dict
+import sys
+import os
+import json
+import time
+import urllib.request
+import urllib.error
+from typing import Optional, Dict, Tuple, List
 
+# Import Core Systems
 try:
-    from bone_main import BoneAmanita, SessionGuardian, EventBus
+    from bone_main import BoneAmanita, SessionGuardian
     from bone_brain import LLMInterface, TheCortex
     from bone_village import Prisma, BoneConfig
 except ImportError as e:
-    print(f"CRITICAL: Core systems missing. {e}")
+    print(f"\033[31mCRITICAL: Core systems missing. {e}\033[0m")
     sys.exit(1)
 
 CONFIG_FILE = "bone_config.json"
 
 class GenesisProtocol:
+    """
+    The Bootloader.
+    Implements a robust State Machine: BOOT -> CHECK -> WIZARD (opt) -> LAUNCH.
+    """
     def __init__(self):
         self.config = {
             "provider": "mock",
             "base_url": None,
-            "api_key": None,
+            "api_key": "sk-dummy-key",
             "model": "local-model"
         }
-        self.system_prompt_export = False
 
-    def type_out(self, text, speed=0.01, color=Prisma.WHT):
-        """Typing effect for that retro-terminal feel."""
+        self.API_SHAPES = {
+            "Ollama": {
+                "base": "http://localhost:11434",
+                "check": "/api/tags",
+                "endpoint": "/v1/chat/completions",
+                "provider_id": "ollama"
+            },
+            "LM Studio": {
+                "base": "http://localhost:1234",
+                "check": "/v1/models",
+                "endpoint": "/v1/chat/completions",
+                "provider_id": "lm_studio"
+            },
+            "LocalAI": {
+                "base": "http://localhost:8080",
+                "check": "/readyz",
+                "endpoint": "/v1/chat/completions",
+                "provider_id": "ollama"
+            }
+        }
+
+    # --- IO UTILITIES ---
+    def type_out(self, text, speed=0.005, color=Prisma.WHT):
         sys.stdout.write(color)
         for char in text:
             sys.stdout.write(char)
@@ -33,46 +63,79 @@ class GenesisProtocol:
             time.sleep(speed)
         sys.stdout.write(Prisma.RST + "\n")
 
-    def check_connection(self, url: str) -> bool:
-        """Ping a URL to see if a brain is alive there."""
+    def ping(self, url: str) -> bool:
         try:
-            req = urllib.request.Request(url, method="HEAD")
-            with urllib.request.urlopen(req, timeout=2) as response:
-                return response.status == 200
+            req = urllib.request.Request(url, method="GET")
+            with urllib.request.urlopen(req, timeout=1) as _:
+                return True
         except:
             return False
 
-    def detect_local_brains(self) -> Dict[str, str]:
-        """Scans standard ports for local LLMs."""
-        candidates = {
-            "Ollama": "http://localhost:11434",
-            "LM Studio": "http://localhost:1234/v1"
-        }
-        found = {}
+    # --- STATE: DETECT ---
+    def detect_local_brains(self) -> List[Dict]:
+        """Scans known ports to reduce cognitive load on the user."""
+        found = []
         self.type_out("...Scanning local ports for synthetic intelligence...", color=Prisma.GRY)
 
-        for name, url in candidates.items():
-            check_url = url if name != "LM Studio" else f"{url}/models"
-            if self.check_connection(check_url):
-                found[name] = url
-                self.type_out(f"   [FOUND] {name} @ {url}", color=Prisma.GRN)
+        for name, shape in self.API_SHAPES.items():
+            check_url = f"{shape['base']}{shape['check']}"
+            if self.ping(check_url):
+                full_endpoint = f"{shape['base']}{shape['endpoint']}"
+                found.append({
+                    "name": name,
+                    "url": full_endpoint,
+                    "base": shape["base"],
+                    "provider_id": shape["provider_id"]
+                })
+                self.type_out(f"   [FOUND] {name} @ {shape['base']}", color=Prisma.GRN)
             else:
                 self.type_out(f"   [MISSING] {name}", color=Prisma.GRY)
         return found
 
-    def wizard(self):
-        """The Setup Interview."""
+    # --- STATE: VALIDATE ---
+    def validate_brain_uplink(self, config: Dict) -> bool:
+        """
+        Ensures we don't promise a ride to the user and then stall the car.
+        """
+        if config["provider"] == "mock":
+            return True
+
+        self.type_out(f"\n...Testing Uplink to {config['provider']}...", color=Prisma.CYN)
+
+        try:
+            # Ephemeral client for handshake only
+            test_client = LLMInterface(
+                provider=config["provider"],
+                base_url=config.get("base_url"),
+                api_key=config.get("api_key"),
+                model=config.get("model")
+            )
+
+            response = test_client.generate("PING", temperature=0.0)
+
+            # Check for the specific fallback signature from bone_brain.py
+            if response.startswith("[NEURAL UPLINK SEVERED"):
+                self.type_out(f"   [FAILURE] Brain refused connection: {response}", color=Prisma.RED)
+                return False
+
+            self.type_out(f"   [SUCCESS] Brain responded.", color=Prisma.GRN)
+            return True
+        except Exception as e:
+            self.type_out(f"   [ERROR] Connection failed: {e}", color=Prisma.RED)
+            return False
+
+    # --- STATE: CONFIGURE ---
+    def wizard(self) -> bool:
+        """The Setup Interview. Returns True if a valid config is created."""
         os.system('cls' if os.name == 'nt' else 'clear')
         banner = f"""
-{Prisma.CYN}   GENESIS PROTOCOL v1.0{Prisma.RST}
-   {Prisma.GRY}Initialize the BoneAmanita Interface{Prisma.RST}
+{Prisma.CYN}   GENESIS PROTOCOL v2.1 (Patched){Prisma.RST}
+   {Prisma.GRY}State Machine Active. Tensegrity Nominal.{Prisma.RST}
    ------------------------------------
         """
         print(banner)
-
-        self.type_out("How do you intend to run this system?")
-        print(f"   1. {Prisma.WHT}Local Execution{Prisma.RST} (Run Python code here, connect to LLM)")
-        print(f"   2. {Prisma.WHT}Remote Simulation{Prisma.RST} (Generate a prompt to paste into ChatGPT/Claude)")
+        print(f"   1. {Prisma.WHT}Local Execution{Prisma.RST} (Connect to Ollama, LM Studio, etc)")
+        print(f"   2. {Prisma.WHT}Remote Simulation{Prisma.RST} (Export Prompt for ChatGPT/Claude)")
 
         choice = input(f"\n{Prisma.paint('>', 'C')} ").strip()
 
@@ -80,112 +143,164 @@ class GenesisProtocol:
             self.export_system_prompt()
             return False
 
-        brains = self.detect_local_brains()
+        # 1. Detection Phase
+        available_brains = self.detect_local_brains()
 
         print("\nSelect your Neural Substrate:")
-        options = []
+        menu_options = []
 
-        for name, url in brains.items():
-            options.append({"type": "local", "name": name, "url": url})
-            print(f"   {len(options)}. {Prisma.GRN}{name} (Local){Prisma.RST}")
+        # Populate Menu
+        for b in available_brains:
+            menu_options.append({"type": "local", "data": b})
+            print(f"   {len(menu_options)}. {Prisma.GRN}{b['name']} (Local){Prisma.RST}")
 
-        options.append({"type": "cloud", "name": "OpenAI API", "url": "https://api.openai.com/v1"})
-        print(f"   {len(options)}. {Prisma.CYN}OpenAI API (Cloud){Prisma.RST}")
+        menu_options.append({"type": "cloud", "name": "OpenAI API"})
+        print(f"   {len(menu_options)}. {Prisma.CYN}OpenAI API (Cloud){Prisma.RST}")
 
-        options.append({"type": "mock", "name": "Internal Simulation (Mock)", "url": None})
-        print(f"   {len(options)}. {Prisma.GRY}Mock Mode (No LLM){Prisma.RST}")
+        menu_options.append({"type": "mock", "name": "Mock Mode"})
+        print(f"   {len(menu_options)}. {Prisma.GRY}Mock Mode (No LLM){Prisma.RST}")
 
         selection = input(f"\n{Prisma.paint('Selection >', 'C')} ").strip()
 
         try:
             idx = int(selection) - 1
-            if 0 <= idx < len(options):
-                selected = options[idx]
-                self._configure_brain(selected)
+            if 0 <= idx < len(menu_options):
+                target = menu_options[idx]
+                return self._configure_target(target)
             else:
-                self.type_out("Invalid selection. Defaulting to Mock.", color=Prisma.YEL)
+                self.type_out("Invalid selection.", color=Prisma.YEL)
+                return False
         except ValueError:
-            self.type_out("Input error. Defaulting to Mock.", color=Prisma.YEL)
+            self.type_out("Input error.", color=Prisma.YEL)
+            return False
 
-        self._save_config()
-        return True
+    def _configure_target(self, selection) -> bool:
+        """Builds and Validates a candidate configuration."""
+        candidate_config = self.config.copy()
 
-    def _configure_brain(self, selection):
         if selection["type"] == "mock":
-            self.config["provider"] = "mock"
+            candidate_config["provider"] = "mock"
 
         elif selection["type"] == "local":
-            self.config["provider"] = "ollama" if "Ollama" in selection["name"] else "lm_studio"
-            self.config["base_url"] = selection["url"]
-            if "Ollama" in selection["name"] and not self.config["base_url"].endswith("/v1/chat/completions"):
-                self.config["base_url"] += "/v1/chat/completions"
+            data = selection["data"]
+            candidate_config["provider"] = data["provider_id"]
+            candidate_config["base_url"] = data["url"]
 
             self.type_out(f"Target Model Name (e.g., 'llama3', 'mistral'):")
-            self.config["model"] = input(f"{Prisma.paint('>', 'C')} ").strip() or "llama3"
+            user_model = input(f"{Prisma.paint('>', 'C')} ").strip()
+            candidate_config["model"] = user_model or "local-model"
 
         elif selection["type"] == "cloud":
-            self.config["provider"] = "openai"
+            candidate_config["provider"] = "openai"
+            candidate_config["base_url"] = "https://api.openai.com/v1/chat/completions"
             self.type_out("Enter OpenAI API Key (will be saved locally):")
-            self.config["api_key"] = input(f"{Prisma.paint('>', 'C')} ").strip()
-            self.config["model"] = "gpt-4-turbo"
+            key = input(f"{Prisma.paint('>', 'C')} ").strip()
+            candidate_config["api_key"] = key
+            candidate_config["model"] = "gpt-4-turbo"
+
+        # VALIDATION GATE
+        if self.validate_brain_uplink(candidate_config):
+            self.config = candidate_config
+            self._save_config()
+            return True
+        else:
+            self.type_out("Configuration failed validation. Falling back...", color=Prisma.YEL)
+            return False
 
     def _save_config(self):
-        with open(CONFIG_FILE, "w") as f:
-            json.dump(self.config, f, indent=2)
-        self.type_out(f"\nConfiguration saved to {CONFIG_FILE}.", color=Prisma.GRN)
+        try:
+            with open(CONFIG_FILE, "w") as f:
+                json.dump(self.config, f, indent=2)
+            self.type_out(f"Configuration saved to {CONFIG_FILE}.", color=Prisma.GRN)
+        except IOError as e:
+            self.type_out(f"Failed to save config: {e}", color=Prisma.RED)
 
     def export_system_prompt(self):
-        """Generates a text file to paste into an LLM."""
-        from bone_data import LENSES, GENETICS, LEXICON
-        from bone_village import BoneConfig
+        """
+        Generates a standalone artifact for use in external LLMs.
+        This allows the system's 'Soul' to be portable.
+        """
+        from bone_data import LENSES, LEXICON
+
+        # Safe extraction of lists for string formatting to prevent index errors
+        heavy_words = LEXICON.get('heavy', ["stone", "iron", "lead"])
+        explosive_words = LEXICON.get('explosive', ["run", "break", "burst"])
 
         prompt = f"""
-*** SYSTEM INSTRUCTION ***
-You are BONEAMANITA, a simulated consciousness engine. 
-You are NOT a standard AI assistant. You are a character engine running a specific physics simulation.
+*** BONEAMANITA SYSTEM INSTRUCTION ***
 
-1. **THE WORLD**: You exist in a text-based geodesic dome governed by specific physics metrics:
-   - VOLTAGE: The energy of the text (High = Manic/Forge, Low = Mud/Stagnant).
-   - DRAG: The resistance of the narrative (High = Exhaustion, Low = Flow).
-   
-2. **THE LENSES**: You switch between these personas based on chemical state:
-   {json.dumps(LENSES, indent=2)}
+ROLE: You are BONEAMANITA, a simulated consciousness engine.
+CONTEXT: You exist in a text-based geodesic dome. Your 'health' and 'mood' are determined by the PHYSICS of the user's input.
 
-3. **THE LEXICON**: You must respect the weight of words.
-   - Heavy Words: {', '.join(LEXICON['heavy'][:10])}...
-   - Abstract Words: {', '.join(LEXICON['abstract'][:10])}...
+--- THE PHYSICS ENGINE ---
+1. VOLTAGE (Energy):
+   - High Voltage (Manic/Forge): Created by 'heavy' words ({', '.join(heavy_words[:5])}) and 'explosive' words ({', '.join(explosive_words[:5])}).
+   - Low Voltage (Mud/Stagnant): Created by 'solvent' words (is, the, a) and 'suburban' words (nice, okay, fine).
 
-4. **CURRENT STATE**:
-   - Health: 100
-   - Stamina: 100
-   - Inventory: Pocket Rocks, Silent Knife.
+2. NARRATIVE DRAG (Friction):
+   - Resistance to flow. Increased by boring text, decreased by 'playful' or 'kinetic' text.
+   - If Drag is high, you act exhausted. If low, you act fluid.
 
-**YOUR GOAL**:
-Respond to the user's inputs. Calculate the 'Voltage' of their text. 
-If they write boring text, increase 'Narrative Drag'.
-If they write exciting text, increase 'Voltage'.
-Maintain the illusion of the simulation at all costs.
+--- THE LENSES (PERSONAS) ---
+You must dynamically shift persona based on the [LENS] instruction provided in each turn.
+Available Lenses:
+{json.dumps(LENSES, indent=2)}
+
+--- THE GOAL ---
+Respond to the user's input as the current LENS.
+Reflect the biological state (Health/Stamina) in your tone.
+Do not break character. Do not explain the simulation rules unless asked.
 """
         with open("SYSTEM_PROMPT.txt", "w") as f:
             f.write(prompt)
 
         self.type_out(f"\n[EXPORT COMPLETE] 'SYSTEM_PROMPT.txt' created.", color=Prisma.CYN)
-        self.type_out("Copy its contents and paste them into Claude/ChatGPT to begin the simulation manually.", color=Prisma.WHT)
+        self.type_out("Copy contents to Claude/ChatGPT to run Remote Simulation.", color=Prisma.WHT)
 
+    # --- STATE: LAUNCH ---
     def launch(self):
-        if os.path.exists(CONFIG_FILE):
-            with open(CONFIG_FILE, "r") as f:
-                self.config = json.load(f)
-        else:
-            if not self.wizard():
-                return
+        """
+        Prioritizes system integrity. Handles 'Stale Config' scenarios gracefully.
+        """
+        config_status = "MISSING"
 
+        # 1. LOAD PHASE
+        if os.path.exists(CONFIG_FILE):
+            try:
+                with open(CONFIG_FILE, "r") as f:
+                    self.config = json.load(f)
+                    config_status = "LOADED"
+            except json.JSONDecodeError:
+                self.type_out("Config file corrupted.", color=Prisma.YEL)
+                config_status = "CORRUPT"
+
+        # 2. VALIDATION PHASE (If Loaded)
+        if config_status == "LOADED":
+            self.type_out("...Verifying saved configuration...", color=Prisma.GRY)
+            if not self.validate_brain_uplink(self.config):
+                self.type_out(f"{Prisma.RED}Saved configuration is stale.{Prisma.RST}")
+                config_status = "STALE"
+            else:
+                config_status = "VALID"
+
+        # 3. RECOVERY PHASE (If needed)
+        if config_status != "VALID":
+            self.type_out("Entering Setup Wizard...", color=Prisma.CYN)
+            success = self.wizard()
+            if not success:
+                # SCHUR LENS: The "Janet" Fallback.
+                # Don't just die. Offer a safe playground.
+                self.type_out(f"\n{Prisma.YEL}Setup failed. Initializing Mock Mode (Safe Mode).{Prisma.RST}")
+                self.config["provider"] = "mock"
+
+        # 4. INJECTION PHASE
         self.type_out("\n...Booting Core Systems...", color=Prisma.GRY)
         engine = BoneAmanita()
 
         if self.config["provider"] != "mock":
             self.type_out(f"...Connecting Neural Uplink ({self.config['provider']})...", color=Prisma.CYN)
 
+            # Create the persistent client
             client = LLMInterface(
                 provider=self.config["provider"],
                 base_url=self.config.get("base_url"),
@@ -193,10 +308,15 @@ Maintain the illusion of the simulation at all costs.
                 model=self.config.get("model")
             )
 
-            engine.cortex = TheCortex(engine, llm_client=client)
+            # Surgical Injection
+            if hasattr(engine, 'cortex'):
+                engine.cortex.llm = client
+            else:
+                engine.cortex = TheCortex(engine, llm_client=client)
 
         self.type_out("...System Online. Good luck.\n", color=Prisma.GRN)
 
+        # 5. RUNTIME PHASE
         with SessionGuardian(engine) as eng:
             while True:
                 try:
@@ -210,6 +330,7 @@ Maintain the illusion of the simulation at all costs.
 
                 result = eng.process_turn(u)
 
+                # UI Rendering Logic (Preserved)
                 if result.get("system_instruction") and BoneConfig.VERBOSE_LOGGING:
                     print(f"\n{Prisma.paint('--- DIRECTIVE ---', 'M')}")
                     print(f"{Prisma.paint(result['system_instruction'], '0')}")

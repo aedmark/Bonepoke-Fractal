@@ -1,4 +1,4 @@
-# BONEAMANITA 9.9.1 - "THE REALITY DYSFUNCTION"
+# BONEAMANITA 9.9.3 - "The Garden is Open..."
 # Architects: SLASH, KICHO, Taylor & Edmark
 
 import json, os, random, re, time, math, copy, traceback
@@ -11,7 +11,7 @@ from bone_data import LENSES
 from bone_inventory import GordonKnot
 from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont, MycelialNetwork, SporeCasing, LocalFileSporeLoader
 from bone_body import BioSystem, MitochondrialForge, EndocrineSystem, MetabolicGovernor, SomaticLoop, ViralTracer, ThePacemaker, NoeticLoop
-from bone_physics import TheBouncer, VSL_32Valve, VSL_ChromaticController, CosmicDynamics, TheTangibilityGate
+from bone_physics import ZoneInertia, TheBouncer, VSL_32Valve, VSL_ChromaticController, CosmicDynamics, TheTangibilityGate
 from bone_brain import NeuroPlasticity, DreamEngine, TheCortex, ShimmerState, LLMInterface
 from bone_personality import UserProfile, EnneagramDriver, SynergeticLensArbiter, PublicParksDepartment, TherapyProtocol, KintsugiProtocol, LimboLayer, TheFolly, ChorusDriver, CassandraProtocol, TheBureau
 from bone_viewer import GeodesicRenderer
@@ -387,6 +387,7 @@ class BoneAmanita:
         self.kintsugi = KintsugiProtocol()
         self.therapy = TherapyProtocol()
         self.folly = TheFolly()
+        self.stabilizer = ZoneInertia()
         self.cosmic = CosmicDynamics()
         self.cmd = CommandProcessor(self, Prisma, self.lex, BoneConfig, TheCartographer)
         self.cassandra = CassandraProtocol(self)
@@ -487,7 +488,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 9.9', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 9.9.3', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 

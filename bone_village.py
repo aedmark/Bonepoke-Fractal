@@ -302,10 +302,6 @@ class TheAlmanac:
 
 
 class _PhysicsCalc:
-    """
-    Internal helper to avoid circular imports with bone_physics.py
-    Contains the logic from PhysicsResolver.
-    """
     @staticmethod
     def calculate_voltage(counts: dict, config) -> float:
         heavy = counts.get("heavy", 0)
@@ -340,11 +336,11 @@ class _PhysicsCalc:
             "TMP": min(1.0, 0.5 + (d("thermal") * 2.0) - (d("cryo") * 2.0) + (voltage * 0.02)),
             "PHI": min(1.0, (d("heavy") + d("kinetic")) / max(1, d("abstract") + d("heavy"))),
             "PSI": min(1.0, 0.5 + (d("abstract") * 2.0)),
-            "DEL": min(1.0, 0.5 + (d("play") * 2.0) + (d("unknown", 0) * 1.5)),
+            "DEL": min(1.0, 0.5 + (d("play") * 2.0) + (d("unknown") * 1.5)),
             "XI":  min(1.0, (d("suburban") + d("buffer")) * 2.0),
             "BET": min(1.0, d("suburban") + d("buffer")),
             "E":   min(1.0, (d("solvents") * 0.4)),
-            "LQ":  min(1.0, d("passive_watch", 0) + d("mirror", 0))
+            "LQ":  min(1.0, d("passive_watch") + d("mirror"))
         }
 
 class TheTensionMeter:
@@ -642,16 +638,32 @@ class MirrorGraph:
         self.active_mode = True
         self.profile = UserProfile()
 
-    def profile_input(self, text: str, physics: Dict):
+    def profile_input(self, text: str, physics: Any):
+        if isinstance(physics, dict):
+            counts = physics.get("counts", {})
+            clean_words = physics.get("clean_words", [])
+            vol = physics.get("voltage", 0.0)
+            ent = physics.get("entropy", 0.0)
+            psi = physics.get("psi", 0.0)
+            drag = physics.get("narrative_drag", 0.0)
+            turbulence = physics.get("turbulence", 0)
+        else:
+            # Assume it's PhysicsPacket dataclass
+            counts = getattr(physics, "counts", {})
+            clean_words = getattr(physics, "clean_words", [])
+            vol = getattr(physics, "voltage", 0.0)
+            ent = getattr(physics, "entropy", 0.0)
+            psi = getattr(physics, "psi", 0.0)
+            drag = getattr(physics, "narrative_drag", 0.0)
+            turbulence = getattr(physics, "turbulence", 0)
+
         if hasattr(self, 'profile'):
-            self.profile.update(physics.get("counts", {}), len(physics.get("clean_words", [])))
-        vol = physics.get("voltage", 0.0)
-        ent = physics.get("entropy", 0.0)
-        psi = physics.get("psi", 0.0)
-        drag = physics.get("narrative_drag", 0.0)
+            self.profile.update(counts, len(clean_words))
+
         decay = 0.05
         for k in self.stats:
             self.stats[k] = max(0.0, self.stats[k] - decay)
+
         if vol > 12.0 or "!" in text:
             self.stats["WAR"] = min(1.0, self.stats["WAR"] + 0.2)
         if psi > 0.6 or "?" in text:
@@ -660,9 +672,26 @@ class MirrorGraph:
             self.stats["LAW"] = min(1.0, self.stats["LAW"] + 0.2)
         if text.startswith("/"):
             self.stats["LAW"] = min(1.0, self.stats["LAW"] + 0.1)
-        if physics.get("turbulence", 0) > 0.5:
+        if turbulence > 0.5:
             self.stats["ROT"] = min(1.0, self.stats["ROT"] + 0.2)
         self.dominant_archetype = max(self.stats, key=self.stats.get)
+
+    def reflect(self, physics: Any) -> Tuple[bool, Optional[str]]:
+        # Extract text for profiling
+        if isinstance(physics, dict):
+            text = physics.get("raw_text", "")
+        else:
+            text = getattr(physics, "raw_text", "")
+
+        self.profile_input(text, physics)
+
+        mods = self.get_reflection_modifiers()
+
+        # If the mirror is active (has flavor text), return True
+        if mods.get("flavor"):
+            return True, mods["flavor"]
+
+        return False, None
 
     def get_reflection_modifiers(self) -> Dict:
         top_stat = self.dominant_archetype

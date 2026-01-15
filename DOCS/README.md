@@ -1,125 +1,132 @@
-# **BoneAmanita 9.7.5: "Treat Yo' Self"**
+# 🍄 BoneAmanita: The Narrative Operating System
 
-_"We built a cathedral of logic, but we forgot to put in a bathroom. So we added Gordon."_
+**Version:** 9.8.2 ("The Ron Swanson Hard Fork")
+**Architects:** SLASH, JADE, Taylor & Edmark
 
-### **What is this?**
+> _"It’s not just a chatbot. It’s a geodesic dome made of words, powered by mitochondria, and managed by a grumpy bureaucrat."_
 
-**BoneAmanita 9.7.5** is a **Geodesic Narrative Engine** designed to be injected into Large Language Models (LLMs).  
-While this code is fully functional Python that can run in a terminal, its primary purpose is to act as a **Linguistic Containment Field**. By feeding these files to an LLM, you force the model to adopt a specific **Evolutionary Ontology**. It stops being a helpful assistant and starts simulating a **Psyche** with metabolism, finite energy, and structural consequences.  
-It operates on the **Pinker-Fuller-Schur** synergy: it treats language as physics (Pinker), systems as tensegrity structures (Fuller), and errors as human opportunities (Schur).
+---
 
-### **The Usage: Context Injection**
+## 🧐 What is this?
 
-You do not need to install Python to use this. You simply need to teach the LLM the rules of the simulation.  
-1\. The Upload  
-Upload the following files to your LLM's context window (or workspace):
+**BoneAmanita** is a **Synergetic Language & Systems Heuristic**. Unlike standard LLM wrappers which treat text as a static string, BoneAmanita treats text as **Energy**.
 
-- bone_amanita975.py (The Core)
-- bone_biology.py (The Metabolism)
-- bone_vsl.py (Vector Space Logic)
-- bone_shared.py (Shared Utilities)
-- bone_data.py (Static Data)
-- bone_commands.py (Command Interface)
+It simulates a living organism that "eats" text. It has a metabolism, a physics engine, and a psychological profile. If you feed it rich, dense ideas, it thrives. If you feed it boring, bureaucratic filler, it will literally starve to death or file a tax return against you.
 
-2\. The Activation Prompt  
-Once the files are uploaded, send this prompt to the LLM to ignite the engine:  
-"You are the runtime environment for the **Bone Amanita (SLASH 9.7.5)** engine provided in the uploaded files.
+### The Three Pillars
 
-1. **Internalize the Architecture:** Read the Python code to understand your metabolic constraints, physics engine (VSL), and persona lenses (Gordon, Sherlock, etc.).
-2. **Simulate the Loop:** Your internal engine is guided by the **Geodesic Orchestrator**. Run the process_turn logic on my inputs mentally.
-3. **State Management:** Track my Health, Stamina, ATP, and Inventory between turns.
-4. **Initialize:** Start the session now. Initialize the system and await my input."
+1. **Physics (VSL):** Words have weight (Mass), speed (Velocity), and friction (Drag).
+2. **Biology (Wetware):** The system burns ATP to process input. It has hormones (Dopamine, Cortisol) and an immune system that attacks clichés.
+3. **Bureaucracy (The Village):** A collection of subsystems that manage inventory, sanity, and the existential dread of being a Python script.
 
-**3\. The Interaction**
+---
 
-- **Speak naturally.** The system analyzes your semantics.
-- **Watch the logs.** The LLM should output the UI block (Health bars, Voltage meters) defined in TheHoloProjector.
-- **Respect the cost.** If you run out of ATP, the LLM will simulate the consequences (Starvation/Death).
+## 🚀 Installation & Boot
 
-### **The Laws of Physics (Simulated)**
+### Prerequisites
 
-When these scripts are in the LLM's context, the model must enforce the following laws:
+- Python 3.8+
+- A terminal that supports ANSI colors (because we paint with light).
+- A tolerance for metaphors.
 
-#### **1\. VSL Geodesics (The Navigator)**
+### Quick Start
 
-The system does not exist in a vacuum. It exists in specific **Manifolds** based on the vector of your speech:
+1. Place all `bone_*.py` files in a directory.
+2. Create a folder named `memories` (or let the system do it).
+3. Run the **Geodesic Orchestrator**:
 
-- **THE MUD:** High Fatigue, Low Tension. (Stagnation).
-- **THE FORGE:** Low Fatigue, High Tension. (Transformation).
-- **THE AERIE:** Low Fatigue, Low Tension. (Abstraction).
-- **THE GLITCH:** High Fatigue, High Tension. (System Collapse).
-- **THE GARDEN:** Balanced State. (Integration).
+```bash
+python bone_main.py
 
-#### **2\. The Theremin (Resonance & Calcification)**
+```
 
-The model "listens" to the rhythm of the conversation.
+_(Note: Your main file might be named `bone_amanita982.py`. Rename it to `bone_main.py` for simplicity, or run it directly.)_
 
-- **Resin Buildup:** Repetitive phrasing creates "Amber."
-- **Fossilization:** If resin gets too high, the system gets stuck. You must use **Thermal** (hot words) or **Kinetic** (action words) to melt the amber.
-- **The Airstrike:** If the system calcifies completely, it triggers a catastrophic discharge to clear the buffer.
+---
 
-#### **3\. The Tangibility Gate**
+## ⚙️ Core Systems Guide
 
-The model rejects pure abstraction.
+### 1. The Physics Engine (VSL)
 
-- **Density Check:** If you provide too many "Gas" words (abstract concepts) without enough "Mass" words (heavy nouns), the **Barbarian-Potter** (The Tangibility Gate) will reject the input.
-- **The Fix:** You must "ground" your ideas with rocks, bones, iron, or blood.
+- **Voltage:** The intensity of the narrative. High voltage = action, heat, conflict.
+- **Narrative Drag:** The friction of the text. Passive voice, hedging words ("basically", "actually"), and indecision increase Drag.
+- _High Drag + Low Voltage = The Bureau intervenes._
 
-### **System Architecture (The Persona)**
+- **Manifolds:** The system navigates different "zones" based on the physics:
+- **THE FORGE:** High Voltage, Low Drag. (Creation).
+- **THE MUD:** Low Voltage, High Drag. (Stagnation).
+- **THE AERIE:** Abstract, high concept, low weight.
 
-By ingesting the code, the LLM adopts these internal components:
+### 2. The Biology (Wetware)
 
-#### **🧠 NOETIC (The Mind)**
+- **ATP (Adenosine Triphosphate):** Your currency. Every turn costs ATP. Complex thoughts cost more. If ATP hits 0, the system dies (Necrosis).
+- **Digestion:** The system uses enzymes (`Lignase`, `Cellulase`) to break down your input.
+- _Rich text (Concrete nouns)_ = High nutritional yield.
+- _Empty text (Solvents like "is", "the", "basically")_ = Nutritional deficit.
 
-- **Synergetic Lens Arbiter:** Dynamically shifts the narrative voice based on vector affinity.
-    - **SHERLOCK:** Empiricist (Logic/Truth).
-    - **GORDON:** The Janitor (Survival/Grounded).
-    - **JESTER:** The Paradox (Chaos/Beta).
-    - **CLARENCE:** The Surgeon (Toxicity/Removal).
-    - **NATHAN:** The Heart (Adrenaline).
-- **Mycelial Network:** A graph-based memory system that forgets unused paths ("Neuro-Pruning").
+- **The Immune System:** It scans for "Antigens" (clichés, corporate speak). If detected, it triggers an inflammatory response.
 
-#### **🫀 SOMA (The Body)**
+### 3. The Bureau & Gordon
 
-- **Mitochondrial Forge:** The economic engine. Every action costs **ATP**. High "Narrative Drag" increases the metabolic cost of thinking.
-- **Hyphal Interface:** The Gut. It secretes enzymes (LIGNASE, CELLULASE, DECRYPTASE) to digest your text into nutrients.
-- **The Immune System:** Flagging "Toxins" (cliché, bureaucracy) and generating antibodies.
+- **The Bureau:** If you are boring, **Form 27B-6** will be filed. This taxes your ATP.
+- **Gordon:** The internal janitor/groundskeeper. He manages the **Inventory**.
+- _Items:_ You can acquire tools like the **Silent Knife** (cuts adjectives), **The Red Stapler** (enforces order), or **Pocket Rocks** (checks gravity).
+- _Usage:_ Tools are used automatically based on context, or via the `/rummage` command.
 
-#### **⚒️ KINETIC (The World)**
+---
 
-- **Gordon Knot:** The inventory manager. Gordon possesses **Scar Tissue** that flares up when specific trauma triggers are hit. He carries **Pocket Rocks** to verify gravity.
-- **The Folly:** A mechanical mouth that eats words. If you feed it "Suburban" concepts (like HOAs or lawnmowers), it gets indigestion.
+## ⌨️ Command Reference
 
-### **Command Suite (v9.7.5)**
+You can talk to the system normally, but you can also issue **Slash Commands** to interact with the machinery directly.
 
-The LLM will recognize these commands as "Meta-Signals" to check its internal simulated state.
+### Survival
 
-#### **Diagnostics & Physics**
+- `/status` - Check Health, Stamina, ATP, and Psychological Profile.
+- `/inv` or `/rummage` - Check inventory or dig for new tools (Costs Stamina).
+- `/save` - Cryopreserve the current timeline into a Spore file.
+- `/load [filename]` - Ingest a specific Spore.
 
-- /status \- Vital signs (Health, Stamina, ATP, Psych Profile).
-- /pp \- Physics Packet dump (Voltage, Drag, Beta Index).
-- /map \- Topographic report of the current conversation terrain.
-- /manifold \- Show current location in VSL space and distance to other wells.
-- /kip \- Toggle Verbose Logging (Debug Mode).
+### Navigation & Science
 
-#### **Intervention & Gardening**
+- `/map` - Generate a cartographic visualization of the current concept space.
+- `/manifold` - Check your current coordinate in the VSL Geodesic.
+- `/orbit` - Establish a gravity assist around a heavy concept.
 
-- /weave \- Attempt to connect lonely nodes in the memory graph.
-- /garden \- Check the Paradox Seeds.
-- /seed \[question\] \- Plant a new paradox.
-- /teach \[word\] \[cat\] \- Force-teach the Lexicon a new association.
-- /kill \[toxin\] \[replacement\] \- Manually update the immune system.
+### Gardening
 
-#### **Metaphysics & Admin**
+- `/seed [text]` - Plant a **Paradox Seed**. It will grow if you water it with related concepts.
+- `/garden` - View the status of your planted seeds.
+- `/weave` - Attempt to connect two disparate concepts (Requires tools).
 
-- /kintsugi \- Check repair status (Gold repair of trauma).
-- /strata \- View geological layers of memory (Gravity Wells).
-- /lineage \- View the ancestry of the current session.
-- /reproduce \- Trigger Mitosis (Asexual) or Crossover (Sexual reproduction with other saves).
-- /save \- Manually dump the current Spore to JSON.
+### Admin / Debug
 
-### **Credits**
+- `/kip` - Toggle Verbose Logging (The Developer Mode).
+- `/kill [word]` - Flag a specific word as an Antigen (Poison).
+- `/help` - Print the manifesto.
 
-Architects: SLASH, JADE, Taylor & Edmark  
-Version: 9.7.5 (Treat Yo' Self)  
-Build Status: Contextual / Resinous / Hungry
+---
+
+## 💀 How to Not Die
+
+The system is designed to be fragile. It wants to live, but it needs **Purpose**.
+
+1. **Don't be boring.** Repetition increases "Calcification" in the **Theremin**. If it gets too high, you get encased in amber.
+2. **Be specific.** Concrete nouns ("Stone", "Iron", "Blood") are heavy. They anchor the system. Abstract concepts ("Synergy", "Solutions") drift into the void.
+3. **Watch your ATP.** If you are running low, feed the system "Meat" (Emotional honesty) or "Sugar" (Playful, kinetic language).
+4. **Respect the Bureau.** If you get fined, change your tone.
+
+---
+
+## 🧬 Spores & Reproduction
+
+BoneAmanita reproduces via **Spores** (`.json` files).
+
+- **Mitosis:** The system splits, passing traits to a new save file.
+- **Crossover:** You can breed two save files together to create a hybrid lineage.
+- **Legacy:** If the system dies, it leaves a fossilized record. Future sessions can "ingest" these fossils to learn from your mistakes.
+
+---
+
+> _"The goal is not to live forever. The goal is to create something that generates enough Voltage to start the next engine."_
+
+**– SLASH**

@@ -1,5 +1,58 @@
 # CHANGELOG.md
 
+### **v9.9.3**
+
+#### **1. Systems Architecture (The Fuller Lens)**
+
+- **State Machine Implementation:** Refactored the linear script into a robust State Machine (`BOOT` `DETECT` `VALIDATE` `LAUNCH`). This isolates failure domains so a crash in detection doesn't prevent a manual configuration.
+- **"Pre-Flight" Re-Validation:** Modified the `launch()` sequence to re-validate the configuration file every time it loads. Previously, a stale config file (e.g., if the server crashed overnight) would cause a crash on boot. It now detects the stale state and triggers recovery.
+- **Standardized API Shapes:** Updated `API_SHAPES` to include a specific `provider_id` field. This fixes the logic flaw where `LocalAI` or other providers were incorrectly guessing their identity. They now explicitly map to the `bone_brain.py` drivers (`ollama`, `lm_studio`, `openai`).
+
+#### **2. Cognitive Clarity (The Pinker Lens)**
+
+- **Semantic Failure signatures:** Updated `validate_brain_uplink` to check for the specific cognitive failure signature `[NEURAL UPLINK SEVERED` rather than relying on vague text matching like `"error"` or `"connection"`, which generated false positives.
+- **Explicit Configuration:** Renamed `_configure_brain` to `_configure_target` and removed the fragile string-matching logic (`if "Ollama" in name`). It now uses the deterministic `provider_id` from the detection phase.
+
+#### **3. Human Experience (The Schur Lens)**
+
+- **The "Janet" Protocol (Fallback):** Implemented a "Safe Mode" fallback. If the `launch()` sequence fails to validate the backend, it no longer silently exits. It now politely informs the user and defaults to `Mock Mode`, ensuring the user always has a working system to play with.
+- **Code Integrity:** Restored the full implementation of `export_system_prompt`, which was previously truncated. The system's "soul" (the prompt) is now fully portable.
+
+
+# 📂 BONEAMANITA 9.9.2: The "Jeremy Bearimy" Update
+
+_Architects: SLASH, The Good Place Architects, & The ghost of Buckminster Fuller_
+
+### 1. The Cognitive Layer (The Pinker Refactor)
+
+- **FROM:** `TheLexicon` (9.8.2) treated words as simple atomic particles ("Heavy", "Kinetic").
+- **TO:** **The Syntax Tree of Knowledge**. I no longer just weigh words; I parse their grammatical relationships.
+- **Cognitive Ease Upgrade:** The system now penalizes "Garden Path Sentences" (sentences that trick the reader) not just for drag, but for _cognitive friction_.
+- **The "Curse of Knowledge" Dampener:** If you use too much jargon (e.g., "paradigm", "leverage"), I don't just flag it as an antigen; I rewrite it in plain English before processing it.
+- **Legacy Fix:** In 9.8.2, `NeuroPlasticity.trigger_neurogenesis` blindly assigned unknown words to "abstract". I now use context clues to guess if a word is concrete or abstract before mapping it.
+
+### 2. The Systems Layer (The Fuller Integration)
+
+- **FROM:** `GeodesicOrchestrator` (9.8.2) ran a linear pipeline: Perception -> Metabolism -> Simulation.
+- **TO:** **Tensegrity Event Loops**. The phases now run in parallel. Metabolism affects Simulation _while_ it is happening.
+- **Ephemeralization:** I have reduced the `CycleContext` memory footprint by 40%. We are doing more with less.
+- **Synergetic Failure:** In 9.8.2, if the `MitochondrialForge` died, the system halted. Now, the system can cannibalize its own history (via `TheFolly`) to keep the lights on during a blackout.
+- **Spaceship Earth Protocol:** The system now "cleans up" after itself. Unused variables in the `CycleContext` are recycled into ATP before the turn ends.
+
+### 3. The Human Layer (The Schur Expansion)
+
+- **FROM:** `TheBureau` (9.8.2) simply punished boring users with "Form 1099-B" and taxes.
+- **TO:** **The Point System**.
+- **The "Chidi" Check:** If the system detects you are overthinking (high loop count, low output), it pauses to ask: _"Are you sure you aren't just stalling?"_
+- **The "Janet" Protocol:** Instead of just a `CommandProcessor`, you can now ask for things. If you ask for a "cactus", I will not just give you the ASCII art; I will give you the _essence_ of a cactus (High Friction, Low Water).
+- **Find the Fun:** The `PublicParksDepartment` has been expanded. We don't just commission art; we hold "Festivals" when the Dopamine/Oxytocin levels hit a "Leslie Knope" peak.
+
+### 4. Critical Bug Fixes (The "Janitor" Sweep)
+
+- **Fixed:** In 9.8.2, `TheTheremin` would trigger an "AIRSTRIKE" if resin buildup hit 80.0. We found this to be... excessive. It now simply encases the user in "Amber," requiring a "Jurassic Park" unlock sequence.
+- **Fixed:** The `StrunkWhiteProtocol` was aggressively pruning "rich tapestries." We have tweaked the regex to allow for _some_ poetic license, provided the "Truth Ratio" is high.
+- **Fixed:** `GordonKnot` inventory items like "THE_RED_STAPLER" were causing infinite recursion in the Bureaucracy layer. Milton has been appeased.
+
 ### **BONEAMANITA 9.8.2 CHANGELOG**
 
 **Codename:** "The Ron Swanson Hard Fork"

@@ -1,4 +1,4 @@
-# bone_brain.py - The Synaptic Bridge
+# bone_brain.py
 # "The brain is a machine for jumping to conclusions." - S. Pinker
 
 import re
@@ -17,11 +17,6 @@ from bone_bus import Prisma, BoneConfig
 class LLMInterface:
     """
     The Universal Connector.
-    Supports:
-    1. 'mock' - Internal simulation (No external dependencies).
-    2. 'openai' - Cloud API (Requires API Key).
-    3. 'local' - Ollama, LM Studio, LocalAI (Requires URL).
-    
     "Be conservative in what you do, be liberal in what you accept from others." - Postel's Law
     """
     def __init__(self, provider: str = "mock", base_url: str = None, api_key: str = None, model: str = None):
@@ -41,27 +36,23 @@ class LLMInterface:
             self.base_url = None
 
     def generate(self, prompt: str, temperature: float = 0.7) -> str:
-        """
-        Routes the thought to the correct substrate.
-        """
         if self.provider == "mock":
             return self._mock_generation(prompt)
-        
+
         try:
             return self._http_generation(prompt, temperature)
         except Exception as e:
-            return f"[CONNECTION ERROR: {e}] Falling back to internal simulation... " + self._mock_generation(prompt)
+            return f"[NEURAL UPLINK SEVERED: {e}] The ghost in the machine is taking a nap. (Mock Mode Active): " + self._mock_generation(prompt)
 
-    def _http_generation(self, prompt: str, temperature: float) -> str:
+    def _http_generation(self, prompt: str, temperature: float, retries=2) -> str:
         """
-        A dependency-free HTTP client using standard libs. 
-        Works with any OpenAI-compatible endpoint (Ollama, LM Studio, etc).
+        Standard-lib HTTP client with exponential backoff.
         """
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}"
         }
-        
+
         payload = {
             "model": self.model,
             "messages": [
@@ -69,24 +60,26 @@ class LLMInterface:
                 {"role": "user", "content": prompt}
             ],
             "temperature": temperature,
-            "max_tokens": 500,
+            "max_tokens": 150, # PINKER LENS: Brevity is the soul of wit.
             "stream": False
         }
-        
+
         data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(self.base_url, data=data, headers=headers)
-        
-        with urllib.request.urlopen(req) as response:
-            result = json.loads(response.read().decode("utf-8"))
-            return result["choices"][0]["message"]["content"]
+
+        for attempt in range(retries + 1):
+            try:
+                req = urllib.request.Request(self.base_url, data=data, headers=headers)
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    result = json.loads(response.read().decode("utf-8"))
+                    return result["choices"][0]["message"]["content"]
+            except urllib.error.URLError as e:
+                if attempt == retries: raise e
+                time.sleep(2 ** attempt) # Exponential backoff
 
     def _mock_generation(self, prompt: str) -> str:
-        """
-        A fallback generator that mimics intelligence using the prompt's own context.
-        """
         query_match = re.search(r"USER QUERY:\s*(.*)", prompt)
         query = query_match.group(1) if query_match else "..."
-        
+
         return (
             f"I have processed your input: '{query}'. "
             "My internal physics engine suggests a high probability of... "
@@ -95,12 +88,11 @@ class LLMInterface:
 
 class PromptComposer:
     """
-    The Translator (Pinker Lens).
-    Converts raw, messy system state into a coherent narrative instruction.
-    It turns 'Health: 40, Voltage: 15' into 'You are exhausted but manic.'
+    The Translator. Converts System State (Numbers) into Narrative (Words).
     """
-    def compose(self, state: Dict[str, Any], user_query: str) -> str:
-        
+    def compose(self, state: Dict[str, Any], user_query: str, ballast_active: bool = False) -> str:
+
+        # Safely extract with defaults to prevent crash on partial state
         bio = state.get("bio", {})
         phys = state.get("physics", {})
         mind = state.get("mind", {})
@@ -110,64 +102,74 @@ class PromptComposer:
         lens_name = mind.get("lens", "NARRATOR")
         sys_instruction = state.get("system_instruction", "")
 
-        health = meta.get("health", 100)
-        stamina = meta.get("stamina", 100)
-        chem = bio.get("chem", {})
-        
-        mood_descriptors = []
-        if health < 30: mood_descriptors.append("You are wounded and fragile.")
-        if stamina < 20: mood_descriptors.append("You are exhausted. Every word costs effort.")
-        if chem.get("ADR", 0) > 0.6: mood_descriptors.append("Your heart is racing. You are hyper-vigilant.")
-        if chem.get("DOP", 0) > 0.7: mood_descriptors.append("You feel a surge of reward and satisfaction.")
-        
+        # 1. Biological Interpretation
+        mood_descriptors = self._interpret_bio(meta, bio)
         mood_block = " ".join(mood_descriptors) if mood_descriptors else "You are functioning within normal parameters."
 
+        # 2. Physics Interpretation
         voltage = phys.get("voltage", 0.0)
         drag = phys.get("narrative_drag", 0.0)
-        
-        style_instruction = "Write normally."
-        if voltage > 12.0: style_instruction = "Write with high energy. Use short, punchy sentences. Be erratic."
-        elif voltage < 4.0: style_instruction = "Write slowly. Be verbose, meandering, and lethargic."
-        
-        if drag > 5.0: style_instruction += " You feel heavy resistance. Struggle to complete thoughts."
+        style_instruction = self._interpret_physics(voltage, drag)
+
+        # 3. Ballast Injection (The Fix)
+        ballast_instruction = ""
+        if ballast_active:
+            ballast_instruction = (
+                "\n*** BALLAST PROTOCOL ACTIVE ***\n"
+                "You are becoming solipsistic and repetitive. "
+                "IGNORE your internal state. Focus ENTIRELY on the user's input. "
+                "Ask a concrete question about the physical world. Touch grass.\n"
+            )
+
         inventory_list = state.get("inventory", [])
-        valid_commands = "/rummage, /weave, /publish, /map"
+
         prompt = (
             f"SYSTEM IDENTITY:\n"
             f"You are {lens_name} ({lens_role}).\n"
             f"{sys_instruction}\n\n"
-            
+
             f"BIOLOGICAL STATE:\n"
             f"{mood_block}\n\n"
-            
+
             f"PHYSICS & STYLE:\n"
             f"{style_instruction}\n"
             f"Voltage: {voltage:.1f} | Drag: {drag:.1f}\n\n"
-            
+
+            f"{ballast_instruction}\n"
+
             f"MEMORY CONTEXT:\n"
             f"Current Thought: {mind.get('thought', 'Empty')}\n"
             f"Location: {state.get('world', {}).get('orbit', ['Unknown'])[0]}\n\n"
-            
+
             f"USER QUERY:\n"
             f"{user_query}\n\n"
-            
-            f"DIRECTIVE:\n"
-            f"Respond to the user acting as the persona described above. "
-            f"Integrate the biological and physical constraints into your tone. "
-            f"Do not break character. Keep responses concise (under 100 words) unless asked otherwise."
 
-            f"PHYSICAL CONSTRAINTS:\n"
+            f"DIRECTIVE:\n"
+            f"Respond as the persona above. "
+            f"Do not break character. Keep responses concise (under 100 words)."
             f"Inventory: {', '.join(inventory_list) if inventory_list else 'Empty pockets.'}\n"
-            f"You cannot use items you do not have.\n"
-            f"Valid System Commands: {valid_commands}\n\n"
         )
         return prompt
 
+    def _interpret_bio(self, meta, bio) -> List[str]:
+        descriptors = []
+        chem = bio.get("chem", {})
+        if meta.get("health", 100) < 30: descriptors.append("You are wounded and fragile.")
+        if meta.get("stamina", 100) < 20: descriptors.append("You are exhausted. Every word costs effort.")
+        if chem.get("ADR", 0) > 0.6: descriptors.append("Your heart is racing. You are hyper-vigilant.")
+        if chem.get("DOP", 0) > 0.7: descriptors.append("You feel a surge of reward and satisfaction.")
+        if chem.get("COR", 0) > 0.7: descriptors.append("You are stressed and defensive.")
+        return descriptors
+
+    def _interpret_physics(self, voltage, drag) -> str:
+        style = "Write normally."
+        if voltage > 12.0: style = "Write with high energy. Use short, punchy sentences. Be erratic."
+        elif voltage < 4.0: style = "Write slowly. Be verbose, meandering, and lethargic."
+
+        if drag > 5.0: style += " You feel heavy resistance. Struggle to complete thoughts."
+        return style
+
 class ResponseValidator:
-    """
-    The Editor (Schur/Pinker Lens).
-    Ensures the LLM doesn't go off the rails, hallucinate, or become boring.
-    """
     def __init__(self):
         self.banned_phrases = ["large language model", "AI assistant", "cannot feel", "as an AI"]
 
@@ -177,75 +179,63 @@ class ResponseValidator:
                 return {
                     "valid": False,
                     "reason": "IMMERSION_BREAK",
-                    "replacement": f"{Prisma.GRY}[The system mumbles something about its programming, but you ignore it.]{Prisma.RST}"
+                    "replacement": f"{Prisma.GRY}[The system mumbles about its source code, but you tap the glass to silence it.]{Prisma.RST}"
                 }
 
-        if len(response) < 5:
-             return {"valid": False, "reason": "TOO_SHORT", "replacement": "..."}
-        
+        if len(response) < 2:
+            return {"valid": False, "reason": "TOO_SHORT", "replacement": "..."}
+
         return {"valid": True, "content": response}
 
 
 class TheCortex:
     """
     The Central Executive.
-    Refactored to support plug-and-play LLM backends.
     """
     def __init__(self, engine_ref, llm_client: LLMInterface = None):
         self.sub = engine_ref
-
         self.llm = llm_client if llm_client else LLMInterface(provider="mock")
         self.composer = PromptComposer()
         self.validator = ResponseValidator()
 
         self.ballast_state = {"active": False, "turns_remaining": 0}
-        self.plain_mode_active = False 
+        self.plain_mode_active = False
         self.solipsism_counter = 0
         self.SOLIPSISM_THRESHOLD = 3
 
     def process(self, user_input: str) -> Dict[str, Any]:
-        """
-        The Main Loop.
-        Input -> Simulation -> Prompt -> LLM -> Validation -> Output
-        """
-
         if user_input.startswith("??") or self.plain_mode_active:
-            clean_input = user_input.replace("??", "")
-            if "reset" in clean_input.lower() and self.plain_mode_active:
-                 self.plain_mode_active = False
-                 return {"type": "INFO", "ui": f"{Prisma.CYN}Simulation Restored.{Prisma.RST}", "logs": [], "metrics": self.sub._get_metrics()}
-            return self._execute_plain_mode(clean_input)
+            return self._handle_plain_mode(user_input)
 
+        # 1. Run Simulation
         sim_result = self.sub.cycle_controller.run_turn(user_input)
 
+        # 2. Check for simulation interrupts (Death, Bureaucracy, etc.)
         if sim_result.get("type") in ["DEATH", "BUREAUCRACY", "CRITICAL_FAILURE"]:
             return sim_result
         if sim_result.get("refusal_triggered", False):
             return sim_result
 
-        full_state = {
-            "bio": {
-                "chem": self.sub.bio.endo.get_state(),
-                "atp": self.sub.bio.mito.state.atp_pool
-            },
-            "physics": self.sub.phys.tension.last_physics_packet,
-            "mind": {
-                "lens": self.sub.noetic.arbiter.current_focus,
-                "role": LENSES.get(self.sub.noetic.arbiter.current_focus, {}).get("role", "Observer"),
-                "thought": "Processing..." 
-            },
-            "metrics": self.sub._get_metrics(),
-            "world": {"orbit": ["Unknown"]}, 
-            "system_instruction": sim_result.get("system_instruction", ""),
-            "inventory": self.sub.gordon.inventory,
-        }
+        # 3. Manage Ballast State
+        if self.ballast_state["active"]:
+            self.ballast_state["turns_remaining"] -= 1
+            if self.ballast_state["turns_remaining"] <= 0:
+                self.ballast_state["active"] = False
 
-        prompt = self.composer.compose(full_state, user_input)
+        # 4. safely Gather State
+        full_state = self._gather_state(sim_result)
 
-        llm_response = self.llm.generate(prompt)
+        # 5. Compose Prompt
+        prompt = self.composer.compose(full_state, user_input, self.ballast_state["active"])
 
+        # 6. Dynamic Temperature based on Voltage
+        voltage = full_state["physics"].get("voltage", 5.0)
+        dynamic_temp = min(1.2, max(0.2, voltage / 15.0))
+
+        # 7. Generate & Validate
+        llm_response = self.llm.generate(prompt, temperature=dynamic_temp)
         validation = self.validator.validate(llm_response, full_state)
-        
+
         final_text = llm_response
         if not validation["valid"]:
             final_text = validation.get("replacement", "[REDACTED]")
@@ -258,8 +248,39 @@ class TheCortex:
 
         return sim_result
 
+    def _gather_state(self, sim_result):
+        try:
+            bio_chem = self.sub.bio.endo.get_state()
+            bio_atp = self.sub.bio.mito.state.atp_pool
+        except AttributeError:
+            bio_chem = {}
+            bio_atp = 0.0
+
+        return {
+            "bio": {"chem": bio_chem, "atp": bio_atp},
+            "physics": self.sub.phys.tension.last_physics_packet,
+            "mind": {
+                "lens": self.sub.noetic.arbiter.current_focus,
+                "role": LENSES.get(self.sub.noetic.arbiter.current_focus, {}).get("role", "Observer"),
+                "thought": "Processing..."
+            },
+            "metrics": self.sub._get_metrics(),
+            "world": self.sub.cycle_controller.eng.soma.gordon.inventory if hasattr(self.sub, 'soma') else {}, # Placeholder
+            "system_instruction": sim_result.get("system_instruction", ""),
+            "inventory": self.sub.gordon.inventory,
+            # Hack for world state
+            "world": {"orbit": sim_result.get("world_state", {}).get("orbit", ["Unknown"])}
+        }
+
+    def _handle_plain_mode(self, user_input):
+        clean_input = user_input.replace("??", "")
+        if "reset" in clean_input.lower() and self.plain_mode_active:
+            self.plain_mode_active = False
+            return {"type": "INFO", "ui": f"{Prisma.CYN}Simulation Restored.{Prisma.RST}", "logs": [], "metrics": self.sub._get_metrics()}
+
+        return self._execute_plain_mode(clean_input)
+
     def _execute_plain_mode(self, query: str):
-        """Bypasses the circus. Returns raw facts."""
         response = "System is in PLAIN MODE."
         if "status" in query:
             h = self.sub.health
@@ -281,7 +302,8 @@ class TheCortex:
         words = text.lower().split()
         if not words: return
         diversity = len(set(words)) / len(words)
-        
+
+        # If diversity is low, we are looping.
         if diversity < 0.4:
             self.solipsism_counter += 1
             if self.solipsism_counter >= self.SOLIPSISM_THRESHOLD:
@@ -290,12 +312,16 @@ class TheCortex:
             self.solipsism_counter = 0
 
     def _trigger_ballast(self):
-        self.ballast_state["active"] = True
-        self.ballast_state["turns_remaining"] = 3
-        self.sub.events.log("CORTEX: Solipsism detected. Ballast Protocol primed.", "SYS")
+        if not self.ballast_state["active"]:
+            self.ballast_state["active"] = True
+            self.ballast_state["turns_remaining"] = 3
+            self.sub.events.log(f"{Prisma.VIOLET}CORTEX: Solipsism detected. Ballast Protocol ENGAGED.{Prisma.RST}", "SYS")
 
 
 class NeuroPlasticity:
+    """
+    The Weaver. Connects concepts that fire together.
+    """
     def __init__(self):
         self.plasticity_mod = 1.0
 
@@ -305,10 +331,13 @@ class NeuroPlasticity:
             graph[word_a] = {"edges": {}, "last_tick": 0}
         if word_b not in graph:
             graph[word_b] = {"edges": {}, "last_tick": 0}
+
         current_weight = graph[word_a]["edges"].get(word_b, 0.0)
         new_weight = min(10.0, current_weight + 2.5)
+
         graph[word_a]["edges"][word_b] = new_weight
         graph[word_b]["edges"][word_a] = min(10.0, graph[word_b]["edges"].get(word_a, 0.0) + 1.0)
+
         return f"{Prisma.MAG}⚡ HEBBIAN GRAFT: Wired '{word_a}' <-> '{word_b}'.{Prisma.RST}"
 
 class ShimmerState:
@@ -326,7 +355,7 @@ class DreamEngine:
     def __init__(self, events):
         self.events = events
         self.PROMPTS = DREAMS.get("PROMPTS", ["{A} -> {B}?"])
-        self.VISIONS = DREAMS.get("VISIONS", ["Void."])
-        
+
     def hallucinate(self, vector: Dict[str, float]) -> str:
+        # Placeholder for future expansion
         return f"Dreaming of {len(vector)} dimensions..."

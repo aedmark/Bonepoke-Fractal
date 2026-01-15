@@ -4,7 +4,7 @@
 import math, re, random
 from typing import Dict, List, Any, Tuple, Optional
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from bone_lexicon import TheLexicon
 from bone_village import CycleContext
 from bone_bus import Prisma, BoneConfig
@@ -59,12 +59,12 @@ class PhysicsPacket:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
-        valid_keys = cls.__annotations__.keys()
+        valid_keys = {f.name for f in fields(cls)}
         filtered_data = {k: v for k, v in data.items() if k in valid_keys}
         return cls(**filtered_data)
 
     def to_dict(self):
-        return {k: getattr(self, k) for k in self.__annotations__}
+        return {f.name: getattr(self, f.name) for f in fields(self)}
 
 
 class PhysicsResolver:
@@ -75,11 +75,11 @@ class PhysicsResolver:
         constructive = counts.get("constructive", 0)
 
         raw_charge = (
-            (heavy * config.PHYSICS.WEIGHT_HEAVY) + 
-            (explosive * config.PHYSICS.WEIGHT_EXPLOSIVE) + 
+            (heavy * config.PHYSICS.WEIGHT_HEAVY) +
+            (explosive * config.PHYSICS.WEIGHT_EXPLOSIVE) +
             (constructive * config.PHYSICS.WEIGHT_CONSTRUCTIVE)
         )
-        
+
         final_voltage = raw_charge * config.KINETIC_GAIN
         return round(final_voltage, 2)
 
@@ -92,7 +92,7 @@ class PhysicsResolver:
 
         friction = (solvents * 1.0) + (suburban * 2.5)
         lift = play * 1.5
-        
+
         net_drag = max(0.0, friction - lift)
         normalized_drag = (net_drag / volume) * 10.0
         final_drag = normalized_drag * config.SIGNAL_DRAG_MULTIPLIER
@@ -122,7 +122,7 @@ class PhysicsResolver:
 
 class TheTensionMeter:
     """
-    The Eye of the System. 
+    The Eye of the System.
     It looks at the text and collapses the wave function into numbers.
     """
     def __init__(self, events):
@@ -156,7 +156,7 @@ class TheTensionMeter:
         return False, None, None
 
     def gaze(self, text: str, graph: Dict = None) -> Dict:
-        graph = graph or {} 
+        graph = graph or {}
         clean_words = TheLexicon.clean(text)
         counts, unknowns = self._tally_categories(clean_words, text)
 
@@ -173,7 +173,7 @@ class TheTensionMeter:
 
         packet = self._package_physics(text, clean_words, counts, voltage, drag, integrity, metrics)
 
-        self.last_physics_packet = packet["physics"] 
+        self.last_physics_packet = packet["physics"]
         return packet
 
     def _tally_categories(self, clean_words: List[str], raw_text: str) -> Tuple[Counter, List[str]]:
@@ -184,7 +184,7 @@ class TheTensionMeter:
             hits = TheLexicon.ANTIGEN_REGEX.findall(raw_text)
             counts["antigen"] = len(hits)
             counts["toxin"] = len(hits)
-            
+
         target_cats = ["heavy", "explosive", "constructive", "abstract", "photo", "aerobic",
                        "thermal", "cryo", "suburban", "play", "sacred", "buffer", "antigen"]
 
@@ -193,7 +193,7 @@ class TheTensionMeter:
             if w in solvents:
                 counts["solvents"] += 1
                 continue
-            
+
             found = False
             for cat in target_cats:
                 if w in TheLexicon.get(cat):
@@ -217,7 +217,7 @@ class TheTensionMeter:
                     continue
                 if not self._is_structurally_sound(stranger):
                     if voltage < 15.0: continue
-                    
+
                 flavor, confidence = TheLexicon.taste(stranger)
                 if flavor and confidence > 0.6:
                     assigned_cat = flavor
@@ -225,7 +225,7 @@ class TheTensionMeter:
                 else:
                     assigned_cat = dominant_cat
                     method = "Context Association"
-                
+
                 TheLexicon.teach(stranger, assigned_cat, 0)
                 self.events.log(
                     f"{Prisma.MAG}NEUROPLASTICITY: '{stranger}' tasted like [{assigned_cat.upper()}] ({method}).{Prisma.RST}",
@@ -239,7 +239,7 @@ class TheTensionMeter:
         """
         if not words:
             return {"kappa": 0.0, "psi": 0.0, "mass": 0.0}
-            
+
         anchors = [w for w in words if w in graph]
         mass = sum(sum(graph[w]["edges"].values()) for w in anchors)
 
@@ -255,28 +255,28 @@ class TheTensionMeter:
         if heavy_count > abstract_count:
             base_psi = (abstract_count * 0.7 + heavy_count * 0.3) / total
             psi = min(1.0, max(0.1, base_psi + 0.1))
-            
+
         return {"kappa": round(kappa, 3), "psi": round(psi, 2), "mass": round(mass, 1)}
 
     def _derive_complex_metrics(self, counts, words, voltage, drag, integrity, vectors):
         total_vol = max(1, len(words))
         turbulence = TheLexicon.get_turbulence(words)
         flow_state = "LAMINAR" if turbulence < 0.3 else "TURBULENT"
-        
+
         mass_words = counts["heavy"] + counts["kinetic"] + counts["thermal"] + counts["cryo"]
         cohesion_words = counts["suburban"] + counts["buffer"] + counts["antigen"] + (counts["abstract"] * 0.5)
-        
+
         E_val = mass_words / total_vol
         B_val = cohesion_words / total_vol
-        
+
         beta_index = vectors["BET"] * 5.0
         truth_ratio = vectors["PHI"]
-        
+
         total_viscosity = sum(TheLexicon.measure_viscosity(w) for w in words)
         avg_viscosity = total_viscosity / total_vol
         if total_vol <= 1 and not words:
             avg_viscosity = 0.1
-            
+
         repetition_score = round(1.0 - (len(set(words)) / total_vol), 2)
 
         bond_strength = max(0.1, integrity["kappa"] + (repetition_score * 0.5))
@@ -288,12 +288,12 @@ class TheTensionMeter:
             self.perfection_streak += 1
         else:
             self.perfection_streak = 0
-            
+
         if self.perfection_streak == 4:
             flow_state = "HUBRIS_RISK"
-            
+
         zone, zone_color = self._determine_zone(beta_index, truth_ratio)
-        
+
         return {
             "beta_index": round(beta_index, 2),
             "vector": vectors,
@@ -342,7 +342,7 @@ class TheTensionMeter:
             "avg_viscosity": metrics["avg_viscosity"],
             "E": metrics["E"],
             "B": metrics["B"]}
-        
+
         return {
             "physics": PhysicsPacket(**physics_bridge),
             "clean_words": clean_words,
@@ -382,9 +382,9 @@ class TheBouncer:
             return False, self._pack_refusal(ctx, "REFUSAL")
 
         repetition_val = self.eng.phys.pulse.check_pulse(clean)
-        phys["repetition"] = repetition_val 
+        phys["repetition"] = repetition_val
         pulse_status = self.eng.phys.pulse.get_status()
-        
+
         toxin_type, toxin_msg = self.eng.bio.immune.assay(
             ctx.input_text, "NARRATIVE", repetition_val, phys, pulse_status
         )
@@ -406,11 +406,11 @@ class TheBouncer:
         if vent_msg:
             ctx.logs.append(vent_msg)
             return False, self._pack_refusal(ctx, "REFUSAL")
-            
+
         return True, None
 
     def _pack_refusal(self, ctx, type_str, specific_ui=None):
-        logs = ctx.logs[:] 
+        logs = ctx.logs[:]
         ui = specific_ui if specific_ui else "\n".join(logs)
         return {
             "type": type_str,
@@ -521,15 +521,15 @@ class VSL_32Valve:
         e_val, b_val = self.geodesic.calculate_metrics(physics["raw_text"])
         physics["E"] = e_val
         physics["B"] = b_val
-        
+
         manifold, dist = self.geodesic.locate_manifold(e_val, b_val)
         physics["manifold"] = manifold
-        
+
         is_modified, new_text = self.humility.check_boundary(physics["raw_text"], physics["voltage"])
         if is_modified:
             physics["raw_text_display"] = new_text
             physics["humility_flag"] = True
-            
+
         return self._audit_rupture(physics, e_val, b_val)
 
     def _audit_rupture(self, physics, e_val, b_val):
@@ -750,7 +750,7 @@ class ZoneInertia:
         if current_zone == "AERIE" and cosmic_drag_penalty > 0:
             return cosmic_drag_penalty * 0.3
         return cosmic_drag_penalty
-        
+
 class CosmicDynamics:
     @staticmethod
     def analyze_orbit(network, clean_words):
@@ -822,8 +822,8 @@ class TheTangibilityGate:
         voltage = physics_packet.get("voltage", 0.0)
         truth = physics_packet.get("truth_ratio", 0.0)
 
-        required_density = BoneConfig.MIN_DENSITY_THRESHOLD 
-        
+        required_density = BoneConfig.MIN_DENSITY_THRESHOLD
+
         modifier = 1.0
         if voltage > self.FORGIVENESS_VOLTAGE:
             modifier -= 0.2
@@ -836,8 +836,8 @@ class TheTangibilityGate:
 
         if density_ratio < required_density:
             gas_words = counts.get("abstract", 0) + counts.get("antigen", 0)
-            
-            examples = list(TheLexicon.get("heavy")) 
+
+            examples = list(TheLexicon.get("heavy"))
             suggestion = random.sample(examples, 3) if len(examples) >= 3 else ["stone", "iron", "bone"]
 
             return False, (

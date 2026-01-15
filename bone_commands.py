@@ -298,7 +298,7 @@ class CommandProcessor:
         Dynamically generates help menu from docstrings.
         """
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 9.9 MANUAL ---{self.P.RST}",
+            f"\n{self.P.CYN}--- BONEAMANITA 9.9.3 MANUAL ---{self.P.RST}",
             f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"
         ]
 
