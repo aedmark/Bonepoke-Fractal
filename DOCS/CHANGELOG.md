@@ -1,5 +1,64 @@
 # CHANGELOG.md
 
+**v9.9.8 - The "Ron Swanson" Patch**
+
+### 1. Robust Uplink Validation (The "Pinker" Patch)
+
+- **The Bug:** The validation logic was hyper-specific, only catching errors that started with a bracket and shouted "ERROR" in uppercase. It was missing polite errors, lowercase errors, and errors wrapped in fancy ANSI colors.
+- **The Fix:** Refactored `validate_brain_uplink` to use **Semantic detection**.
+- We now scan for a broad list of `error_markers` (e.g., "connection refused", "timeout", "not found") regardless of casing or formatting.
+- We treat empty responses ("Silence") as failures.
+- We ignore ANSI color codes when parsing for failure signals.
+
+### 2. Config Hygiene Enforcement (The "Costanza Wallet" Patch)
+
+- **The Bug:** The system would mark a configuration as "STALE" but keep the bad data in its pocket. If the setup wizard failed or was cancelled, the system would launch using that dirty, stale data, leading to unpredictable behavior.
+- **The Fix:** Refactored `launch` to enforce **State Hygiene**.
+- Introduced a `SAFE_CONFIG` (Mock Mode template).
+- If a config file is corrupt or stale, we immediately **overwrite** `self.config` with `SAFE_CONFIG` _before_ asking the user what to do.
+- If the wizard is cancelled, we forcibly reset to `SAFE_CONFIG`. No dirty data survives.
+
+### 3. Manual Config Alignment (The "Semantic" Patch)
+
+- **The Bug:** The manual menu offered a "local" option that the brain didn't recognize (a ghost word) and failed to offer "mock" (a valid option). It was a menu listing items the kitchen couldn't cook.
+- **The Fix:** Refactored `_manual_config_flow`.
+- Removed the ambiguous "local" option.
+- Added "mock" as a first-class citizen.
+- Added logic to skip network configuration questions (URL, API Key) if "mock" is selected, because a mock brain doesn't need Wi-Fi.
+
+### 4. Cloud Democratization (The "Synecdoche" Patch)
+
+- **The Bug:** The "Cloud Uplink" option was hardcoded to `api.openai.com`. It assumed "Cloud" meant only "OpenAI," preventing users from using Azure, Groq, or OpenRouter.
+- **The Fix:** Refactored `_configure_target`.
+- Added a sub-menu to "Cloud Uplink" asking: "Standard OpenAI or Custom Endpoint?"
+- Enabled custom URL entry for exotic providers (Azure, Groq).
+- Allowed the user to specify the Target Model (e.g., `llama3-70b`) instead of forcing `gpt-4-turbo`.
+
+
+# 📜 BONEAMANITA Changelog v9.9.7
+
+**Architects:** SLASH (Pinker, Fuller, Schur)
+
+### 🧠 The Neural Cortex (`bone_brain.py`)
+
+- **Standardized Error Handling (Pinker):** Replaced loose, string-based error checking ("connection error") with explicit Class Constants (`ERR_CONNECTION`, `ERR_TIMEOUT`). The brain now speaks clearly when it fails, rather than mumbling.
+- **Cognitive Resilience (Fuller):** Implemented `_http_generation_with_backoff`. The system now exponentially retries failed network calls (1s -> 2s -> 4s) instead of giving up immediately. We are doing more with less (wasted connections).
+- **Graceful Degradation (Schur):** Updated the `mock_generation` fallback to be less catastrophic and more helpful when the "Cloud Brain" is offline.
+
+### 🔌 The Genesis Protocol (`bone_genesis.py`)
+
+- **Ollama/OpenAI Disambiguation:** Fixed a logic error where the system confused the _Probe URL_ (checking if the service exists) with the _Chat Endpoint_ (where to send the prompt). Ollama and LocalAI are now correctly distinguished.
+- **Patience Buffer (Schur):** Increased the network `ping` timeout from **0.5s** to **3.0s**. We are no longer punishing users for having a slightly slow local network.
+- **The "Ron Swanson" Validation:** Added rigorous input checking to the Manual Configuration flow. The system now refuses to accept empty Base URLs or invalid Provider strings.
+- **Feedback Loop:** The setup wizard now provides specific, color-coded feedback on _why_ a connection failed, rather than just saying "Computer says no."
+
+### 🍄 The Mycelium Memory (`bone_spores.py`)
+
+- **Fixed "The Time Eater" (CRITICAL):** Inverted the logic in `cleanup_old_sessions`. The system previously deleted the **newest** save files when the limit was reached. It now correctly prunes the **oldest** files, preserving recent continuity.
+- **Atomic Writes (Fuller):** Implemented a "Write-Temp-Then-Move" pattern for saving spores. This prevents data corruption if the process crashes mid-save. The integrity of the memory graph is now guaranteed.
+- **Graph Compression:** Optimized how edges are stored in `SporeCasing` to reduce file size without losing semantic density.
+
+
 ### **v9.9.5**
 
 **Codename:** "The Syntax of Soul"

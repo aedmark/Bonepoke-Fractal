@@ -429,6 +429,7 @@ class EndocrineSystem:
 @dataclass
 class MetabolicGovernor:
     mode: str = "COURTYARD"
+    GRACE_PERIOD: int = 5
     psi_mod: float = 0.2
     kappa_target: float = 0.0
     drag_floor: float = 2.0
@@ -449,8 +450,13 @@ class MetabolicGovernor:
             return f"MANUAL OVERRIDE: System locked to {target_mode}."
         return "INVALID MODE."
 
-    def shift(self, physics: Dict, _voltage_history: List[float]) -> Optional[str]:
-        if self.manual_override:
+    def shift(self, physics: Dict, _voltage_history: List[float], current_tick: int = 0) -> Optional[str]:
+        if current_tick <= 5:
+            physics["voltage"] = min(physics.get("voltage", 0.0), 8.0)
+            physics["narrative_drag"] = min(physics.get("narrative_drag", 0.0), 3.0)
+            physics["system_surge_event"] = False
+            if self.mode != "COURTYARD":
+                self.mode = "COURTYARD"
             return None
         current_voltage = physics.get("voltage", 0.0)
         drag = physics.get("narrative_drag", 0.0)
@@ -574,7 +580,7 @@ class NoeticLoop:
         self.bio = bio_layer
         self.arbiter = SynergeticLensArbiter(events)
 
-    def think(self, physics_packet, bio_result_dict, inventory, voltage_history):
+    def think(self, physics_packet, bio_result_dict, inventory, voltage_history, tick_count):
         volts = physics_packet.get("voltage", 0.0)
         drag = physics_packet.get("narrative_drag", 0.0)
         if volts < 1.5 and drag < 1.5:
@@ -593,6 +599,7 @@ class NoeticLoop:
             physics_packet,
             self.bio,
             inventory,
+            tick_count,
             ignition_score)
         hebbian_msg = None
         if physics_packet["voltage"] > 12.0 and len(physics_packet["clean_words"]) >= 2:

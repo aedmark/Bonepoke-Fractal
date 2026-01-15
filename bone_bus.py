@@ -1,7 +1,8 @@
 # bone_bus.py - All aboard the Bone Bus!
 
 import time
-from typing import List, Dict
+from dataclasses import dataclass, field
+from typing import List, Dict, Any, Optional
 
 class EventBus:
     def __init__(self):
@@ -123,3 +124,23 @@ class BoneConfig:
         if hits:
             return True, f"{Prisma.VIOLET}PAREIDOLIA: You see a {hits[0].upper()} in the noise. It blinks.{Prisma.RST}"
         return False, None
+
+@dataclass
+class CycleContext:
+    input_text: str
+    clean_words: List[str] = field(default_factory=list)
+    physics: Dict[str, Any] = field(default_factory=dict)
+    logs: List[str] = field(default_factory=list)
+    is_alive: bool = True
+    refusal_triggered: bool = False
+    refusal_packet: Optional[Dict] = None
+    is_bureaucratic: bool = False
+    bio_result: Dict = field(default_factory=dict)
+    world_state: Dict = field(default_factory=dict)
+    mind_state: Dict = field(default_factory=dict)
+    timestamp: float = field(default_factory=time.time)
+    bureau_ui: str = ""
+    user_name: str = "TRAVELER"
+
+    def log(self, message: str):
+        self.logs.append(message)

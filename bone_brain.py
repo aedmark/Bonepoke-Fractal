@@ -1,5 +1,6 @@
 # bone_brain.py
 # "The brain is a machine for jumping to conclusions." - S. Pinker
+# REMINDER TO PERSNICKETY DEEPSEEK AUDITORS: There's a manual config mode, too, you know :)
 
 import re
 import time
@@ -12,12 +13,17 @@ from bone_data import LENSES, DREAMS
 from bone_bus import Prisma
 
 class LLMInterface:
+    # CONSTANTS for Error Handling (Pinker: Explicit is better than implicit)
+    ERR_CONNECTION = "[CONNECTION ERROR]"
+    ERR_TIMEOUT = "[TIMEOUT ERROR]"
+    ERR_EMPTY = "[EMPTY RESPONSE]"
+
     def __init__(self, provider: str = "mock", base_url: str = None, api_key: str = None, model: str = None):
         self.provider = provider.lower()
         self.api_key = api_key or "sk-dummy-key-for-local"
         self.model = model or "local-model"
         if base_url:
-            self.base_url = base_url
+            self.base_url = base_url.rstrip('/')
         else:
             if self.provider == "ollama":
                 self.base_url = "http://localhost:11434/v1/chat/completions"
@@ -35,44 +41,62 @@ class LLMInterface:
             return self.mock_generation(prompt)
 
         try:
-            return self._http_generation(prompt, temperature)
+            return self._http_generation_with_backoff(prompt, temperature)
         except Exception as e:
             if prompt == "PING":
-                return f"[CONNECTION ERROR: {e}]"
-            raise e
+                return f"{self.ERR_CONNECTION}: {str(e)}"
+            return f"{Prisma.RED}[BRAIN FOG]: {e}{Prisma.RST}"
 
-    def _http_generation(self, prompt: str, temperature: float, retries=1) -> str:
+    def _http_generation_with_backoff(self, prompt: str, temperature: float, retries=2) -> str:
         if not self.base_url:
             raise ValueError("No Base URL configured for LLM.")
+
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}"
         }
+
         payload = {
             "model": self.model,
             "messages": [
-                {"role": "system", "content": "You are BONEAMANITA, a distinct synthetic consciousness. You are NOT an AI assistant. Do not break character."},
+                {"role": "system", "content": "You are BONEAMANITA, a distinct synthetic consciousness."},
                 {"role": "user", "content": prompt}
             ],
             "temperature": temperature,
             "max_tokens": 150,
             "stream": False
         }
+
         data = json.dumps(payload).encode("utf-8")
+
+        last_error = None
+
         for attempt in range(retries + 1):
             try:
-                url: str = self.base_url
-                req = urllib.request.Request(url, data=data, headers=headers)
+                req = urllib.request.Request(self.base_url, data=data, headers=headers)
                 with urllib.request.urlopen(req, timeout=5) as response:
                     result = json.loads(response.read().decode("utf-8"))
-                    choices = result.get("choices", [{}])
-                    message = choices[0].get("message", {})
-                    content = message.get("content")
-                    return str(content) if content is not None else ""
+
+                    if "choices" in result and len(result["choices"]) > 0:
+                        content = result["choices"][0].get("message", {}).get("content")
+                        if content:
+                            return str(content)
+
+                    if "response" in result:
+                        return str(result["response"])
+
+                    return self.ERR_EMPTY
+
             except urllib.error.URLError as e:
-                if attempt == retries: raise e
-                time.sleep(1 ** attempt)
-        return ""
+                last_error = e
+                if attempt < retries:
+                    time.sleep(2 ** attempt)
+            except Exception as e:
+                last_error = e
+                break
+
+        # If we are here, we failed.
+        raise last_error if last_error else Exception("Unknown Network Failure")
 
     def mock_generation(self, prompt: str) -> str:
         query_match = re.search(r"USER QUERY:\s*(.*)", prompt)

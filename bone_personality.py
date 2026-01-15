@@ -183,7 +183,10 @@ class SynergeticLensArbiter:
             "NARRATOR": {"PSI": 1.0, "VEL": -0.5},
             "GLASS":    {"LQ": 2.0, "PSI": 1.5}}
 
-    def consult(self, physics, bio_state, _inventory, _ignition_score=0.0):
+    def consult(self, physics, bio_state, _inventory, current_tick, _ignition_score=0.0):
+        if current_tick <= 5:
+            self.current_focus = "NARRATOR"
+            return "NARRATOR", "The system is listening.", "The Witness"
         self.last_physics = physics
         vectors = physics.get("vector", {})
         bids = {k: 10.0 for k in self.VECTOR_AFFINITIES}

@@ -5,7 +5,7 @@ from collections import Counter, deque
 from typing import List, Dict, Any, Tuple, Optional, Set
 from dataclasses import dataclass, field
 
-from bone_bus import Prisma, BoneConfig
+from bone_bus import Prisma, BoneConfig, CycleContext
 from bone_lexicon import TheLexicon
 from bone_personality import UserProfile
 
@@ -17,7 +17,6 @@ except ImportError:
     DEATH = {}
     NARRATIVE_DATA = {}
     RESONANCE = {}
-
 
 class TheTinkerer:
     def __init__(self, gordon_ref, events_ref):
@@ -192,25 +191,6 @@ class TheCartographer:
         if "TIME_BRACELET" in inventory:
             return True, "WEB SPUN: The bracelet helps you tie the knots."
         return False, "WEAVE FAILED: You lack the tools to bind these concepts."
-
-@dataclass
-class CycleContext:
-    input_text: str
-    clean_words: List[str] = field(default_factory=list)
-    physics: Dict[str, Any] = field(default_factory=dict)
-    logs: List[str] = field(default_factory=list)
-    is_alive: bool = True
-    refusal_triggered: bool = False
-    refusal_packet: Optional[Dict] = None
-    is_bureaucratic: bool = False
-    bio_result: Dict = field(default_factory=dict)
-    world_state: Dict = field(default_factory=dict)
-    mind_state: Dict = field(default_factory=dict)
-    timestamp: float = field(default_factory=time.time)
-    bureau_ui: str = ""
-
-    def log(self, message: str):
-        self.logs.append(message)
 
 class TheAlmanac:
     def __init__(self):
@@ -820,3 +800,27 @@ class LiteraryJournal:
             return True, review, reward
         except IOError:
             return False, "The printing press is jammed.", "NONE"
+
+class TownHall:
+    # Department of Records & History
+    Lexicon = TheLexicon
+    Almanac = TheAlmanac
+    CycleContext = CycleContext
+    Journal = LiteraryJournal
+
+    # Department of Public Works (Physics & Navigation)
+    Cartographer = TheCartographer
+    Navigator = TheNavigator
+    Manifold = Manifold
+
+    # Department of Philosophy & Psychology
+    Tinkerer = TheTinkerer
+    ParadoxSeed = ParadoxSeed
+    DeathGen = DeathGen
+    Apeirogon = ApeirogonResonance
+    Mirror = MirrorGraph
+    Sorites = SoritesIntegrator
+
+    # Department of Visual Arts
+    Projector = TheHoloProjector
+    StrunkWhite = StrunkWhiteProtocol

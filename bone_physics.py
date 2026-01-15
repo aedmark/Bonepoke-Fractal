@@ -370,7 +370,7 @@ class TheTensionMeter:
         if re.search(r"(.)\1{2,}", word): return False
         return True
 
-class VSL_DissipativeRefusal:
+class EntropyVent:
     def __init__(self, memory):
         self.mem = memory
         self.vented_cycles = 0
@@ -415,9 +415,9 @@ class VSL_DissipativeRefusal:
 class TheBouncer:
     def __init__(self, engine_ref):
         self.eng = engine_ref
-        self.hn = VSL_HNInterface()
-        self.semantic = VSL_SemanticFilter(self.eng.mind.mem)
-        self.vent = VSL_DissipativeRefusal(self.eng.mind.mem)
+        self.hn = CutTheShit()
+        self.semantic = SemanticFilter(self.eng.mind.mem)
+        self.vent = EntropyVent(self.eng.mind.mem)
 
     def check_entry(self, ctx: CycleContext) -> Tuple[bool, Optional[Dict]]:
         phys = ctx.physics
@@ -471,7 +471,7 @@ class TheBouncer:
             "metrics": self.eng.get_metrics()
         }
 
-class VSL_Humility:
+class Humility:
     def __init__(self):
         self.BOUNDARIES = {
             "FUTURE": ["predict", "future", "tomorrow", "will happen", "forecast"],
@@ -498,7 +498,7 @@ class VSL_Humility:
             return True, f"{Prisma.CYN}{prefix}{Prisma.RST} {text}"
         return False, text
 
-class VSL_Geodesic:
+class GeodesicDome:
     def __init__(self):
         self.manifolds = {
             "THE_MUD":      {"E": 0.8, "B": 0.2, "Desc": "High Fatigue, Low Tension (Stagnation)"},
@@ -565,12 +565,12 @@ class VSL_Geodesic:
             "vector": dominant_vec
         }
 
-class VSL_32Valve:
+class RuptureValve:
     def __init__(self, lexicon, memory):
         self.lex = lexicon
         self.mem = memory
-        self.humility = VSL_Humility()
-        self.geodesic = VSL_Geodesic()
+        self.humility = Humility()
+        self.geodesic = GeodesicDome()
         self.OPPOSITES = {
             "heavy": "aerobic", "abstract": "heavy",
             "kinetic": "cryo", "thermal": "cryo",
@@ -637,7 +637,7 @@ class VSL_32Valve:
             )
         }
 
-class VSL_HNInterface:
+class CutTheShit:
     def __init__(self):
         self.in_hn_state = False
         self.entropy = 0.0
@@ -668,7 +668,7 @@ class VSL_HNInterface:
             return text.strip()
         return text
 
-class VSL_ChromaticController:
+class ChromaScope:
     PALETTE = {
         "INDIGO": (Prisma.INDIGO, "STR", "PHI"),
         "OCHRE":  (Prisma.OCHRE,  "TMP", "E"),
@@ -688,7 +688,7 @@ class VSL_ChromaticController:
             return f"{Prisma.OCHRE}{text}{Prisma.RST}"
         return f"{selected_color}{text}{Prisma.RST}"
 
-class VSL_SemanticFilter:
+class SemanticFilter:
     def __init__(self, memory_ref):
         self.mem = memory_ref
         self.recursion_depth = 0

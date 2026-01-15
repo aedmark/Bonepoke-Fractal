@@ -1,22 +1,24 @@
-#bone_biology.py - The Mycellium
+# bone_spores.py - The Mycellium (PATCHED)
 
 import json
 import math
 import os
 import random
 import time
+import shutil
+import tempfile
 from collections import deque
-from typing import List, Tuple, Optional
-from bone_lexicon import LiteraryReproduction
+from typing import List, Tuple, Optional, Dict, Any
+
+from bone_lexicon import LiteraryReproduction, TheLexicon
 from bone_data import SEEDS
-from bone_bus import EventBus
-from bone_village import ParadoxSeed, TheLexicon, TheAlmanac
-from bone_bus import Prisma, BoneConfig
+from bone_bus import EventBus, Prisma, BoneConfig
+from bone_village import ParadoxSeed, TheAlmanac
 
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_9.9.5"
+        self.genome = "BONEAMANITA_9.9.8"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -47,23 +49,34 @@ class LocalFileSporeLoader(SporeInterface):
         self.directory = directory
         if not os.path.exists(directory):
             os.makedirs(directory)
+
     def save_spore(self, filename, data):
         if not os.path.isabs(filename) and not filename.startswith(os.path.join(self.directory, "")):
-            path = os.path.join(self.directory, filename)
+            final_path = os.path.join(self.directory, filename)
         else:
-            path = filename
+            final_path = filename
+        os.makedirs(os.path.dirname(final_path), exist_ok=True)
+        temp_path = None
         try:
-            with open(path, "w") as f:
+            fd, temp_path = tempfile.mkstemp(dir=os.path.dirname(final_path), text=True)
+            with os.fdopen(fd, 'w') as f:
                 json.dump(data, f, indent=2)
-            return path
-        except IOError:
+            shutil.move(temp_path, final_path)
+            return final_path
+        except (IOError, OSError) as e:
+            print(f"Error saving spore: {e}")
+            if temp_path and os.path.exists(temp_path):
+                os.remove(temp_path)
             return None
 
     def load_spore(self, filepath):
         path = os.path.join(self.directory, filepath) if not filepath.startswith(self.directory) else filepath
         if os.path.exists(path):
-            with open(path, "r") as f:
-                return json.load(f)
+            try:
+                with open(path, "r") as f:
+                    return json.load(f)
+            except json.JSONDecodeError:
+                return None # Corrupt file
         return None
 
     def list_spores(self):
@@ -76,6 +89,7 @@ class LocalFileSporeLoader(SporeInterface):
                     files.append((path, os.path.getmtime(path), f))
                 except OSError:
                     continue
+        # Sort Newest -> Oldest
         files.sort(key=lambda x: x[1], reverse=True)
         return files
 
@@ -437,13 +451,19 @@ class MycelialNetwork:
             return None
 
     def cleanup_old_sessions(self, limbo_layer=None):
-        files = self.loader.list_spores()
+        files = self.loader.list_spores() # Returns [Newest, ..., Oldest]
         removed = 0
-        for path, age, fname in files:
+        max_files = 20
+        max_age = 86400
+
+        for i, (path, age, fname) in enumerate(files):
             file_age = time.time() - age
-            if file_age > 86400 or (len(files) - removed > 20):
+            is_overflow = i >= max_files
+            is_ancient = file_age > max_age
+            if is_overflow or is_ancient:
                 try:
-                    if limbo_layer: limbo_layer.absorb_dead_timeline(path)
+                    if limbo_layer:
+                        limbo_layer.absorb_dead_timeline(path)
                     if self.loader.delete_spore(path):
                         removed += 1
                 except Exception:
