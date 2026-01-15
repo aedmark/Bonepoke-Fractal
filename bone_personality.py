@@ -274,10 +274,6 @@ class PublicParksDepartment:
         self.last_export_tick = -100
 
     def assess_joy(self, bio_result: Dict, tick: int) -> bool:
-        """
-        Refined by the Schur Lens.
-        We don't just want chemicals; we want a 'Good Place'.
-        """
         if (tick - self.last_export_tick) < 50:
             return False
 
@@ -627,15 +623,11 @@ class TheBureau:
         suburban = physics.get("counts", {}).get("suburban", 0)
         solvents = physics.get("counts", {}).get("solvents", 0)
         clean_len = len(physics.get("clean_words", []))
-
         if toxin > 0: return None
-
         if voltage > 8.0: return None
-
         beige_density = (suburban + solvents) / max(1, clean_len)
-
         infraction = None
-
+        selected_form = None
         if beige_density > 0.6:
             infraction = "BLOCK"
             selected_form = "1099-B" if suburban > 2 else "Form W-2"

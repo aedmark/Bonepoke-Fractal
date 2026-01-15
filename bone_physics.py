@@ -1,6 +1,5 @@
 # bone_physics.py - The Laws of Nature
 # "Gravity is just a habit that space-time hasn't been able to break."
-# Refactored by SLASH 9.9.4: Semantic Structure Recognition
 
 import math, re, random
 from typing import Dict, List, Any, Tuple, Optional
@@ -140,9 +139,6 @@ class PhysicsResolver:
 
 
 class TheTensionMeter:
-    """
-    The Eye of the System.
-    """
     def __init__(self, events):
         self.events = events
         self.perfection_streak = 0
@@ -206,7 +202,7 @@ class TheTensionMeter:
         target_cats = ["heavy", "explosive", "constructive", "abstract", "photo", "aerobic",
                        "thermal", "cryo", "suburban", "play", "sacred", "buffer", "antigen"]
 
-        solvents = getattr(TheLexicon.STORE, "SOLVENTS", {"the", "is", "a"})
+        solvents = getattr(TheLexicon.store, "SOLVENTS", {"the", "is", "a"})
         for w in clean_words:
             if w in solvents:
                 counts["solvents"] += 1
@@ -281,8 +277,8 @@ class TheTensionMeter:
         mass_words = counts["heavy"] + counts["kinetic"] + counts["thermal"] + counts["cryo"]
         cohesion_words = counts["suburban"] + counts["buffer"] + counts["antigen"] + (counts["abstract"] * 0.5)
 
-        E_val = mass_words / total_vol
-        B_val = cohesion_words / total_vol
+        e_val = mass_words / total_vol
+        b_val = cohesion_words / total_vol
 
         beta_index = vectors["BET"] * 5.0
         truth_ratio = vectors["PHI"]
@@ -318,8 +314,8 @@ class TheTensionMeter:
             "truth_ratio": round(truth_ratio, 2),
             "repetition": repetition_score,
             "avg_viscosity": round(avg_viscosity, 2),
-            "E": round(E_val, 2),
-            "B": round(B_val, 2),
+            "E": round(e_val, 2),
+            "B": round(b_val, 2),
             "zone": zone,
             "zone_color": zone_color
         }
@@ -380,7 +376,6 @@ class VSL_DissipativeRefusal:
         self.vented_cycles = 0
 
     def check(self, physics):
-        # Only vent if we are truly incoherent
         is_word_salad = (physics["E"] > 0.85 and physics["kappa"] < 0.1)
         is_manic = (physics["repetition"] > 0.8 and physics["voltage"] < 5.0)
 
@@ -390,10 +385,8 @@ class VSL_DissipativeRefusal:
 
     def _vent(self, physics):
         scattered = []
-        # Use a generator to find valid targets efficiently.
         targets = (w for w in physics["clean_words"] if len(w) > 4)
 
-        # Take up to 3 valid targets
         candidates = []
         for _ in range(3):
             try:
@@ -404,7 +397,6 @@ class VSL_DissipativeRefusal:
         for word in candidates:
             if word in self.mem.graph:
                 edges = list(self.mem.graph[word]["edges"].keys())
-                # Prune connections, not the node itself (Ephemeralization)
                 if edges:
                     target = random.choice(edges)
                     del self.mem.graph[word]["edges"][target]
@@ -476,7 +468,7 @@ class TheBouncer:
             "type": type_str,
             "ui": ui,
             "logs": logs,
-            "metrics": self.eng._get_metrics()
+            "metrics": self.eng.get_metrics()
         }
 
 class VSL_Humility:
@@ -507,9 +499,6 @@ class VSL_Humility:
         return False, text
 
 class VSL_Geodesic:
-    """
-    The Compass.
-    """
     def __init__(self):
         self.manifolds = {
             "THE_MUD":      {"E": 0.8, "B": 0.2, "Desc": "High Fatigue, Low Tension (Stagnation)"},
@@ -529,7 +518,6 @@ class VSL_Geodesic:
             "E":   ("☷", "KUN",   "Earth",    Prisma.OCHRE),
             "DEL": ("☱", "DUI",   "Lake",     Prisma.MAG)
         }
-        # Aliases for vector lookups
         self.TRIGRAM_MAP["TMP"] = self.TRIGRAM_MAP["PHI"]
         self.TRIGRAM_MAP["TEX"] = self.TRIGRAM_MAP["STR"]
         self.TRIGRAM_MAP["XI"]  = self.TRIGRAM_MAP["BET"]
@@ -539,30 +527,17 @@ class VSL_Geodesic:
         length = len(text)
         if length == 0: return 0.0, 0.0
         text_lower = text.lower()
-
-        # 1. Calculate Solvent Density (The Glue)
-        # Higher solvent count = More standard English structure = LOWER Entropy
         solvent_hits = sum(text_lower.count(w) for w in SOLVENT_WORDS)
-        solvent_density = solvent_hits / max(1, (length / 5)) # Approx word count
-
-        # 2. ENTROPY (E): Driven by length and lack of glue.
-        # Long texts without solvents are "Word Salads" (High E).
-        # Long texts WITH solvents are "Literature" (Low E).
+        solvent_density = solvent_hits / max(1.0, (length / 5.0))
         raw_chaos = (length / TEXT_LENGTH_SCALAR)
-        glue_factor = min(1.0, solvent_density * 2.0) # 0.0 to 1.0
-
+        glue_factor = min(1.0, solvent_density * 2.0)
         e_metric = min(1.0, raw_chaos * (1.0 - (glue_factor * 0.8)))
-
-        # 3. STRUCTURE (B): Punctuation + Semantic Mass
         c_count = sum(1 for char in text if char in '!?%@#$;,')
         heavy_words = 0
         if counts:
             heavy_words = counts.get("heavy", 0) + counts.get("constructive", 0) + counts.get("sacred", 0)
-
-        # Fuller Lens: Mass provides gravity.
         structure_score = c_count + (heavy_words * 2)
         base_b = min(1.0, math.log1p(structure_score + 1) / math.log1p(length * 0.1 + 1))
-
         return round(e_metric, 3), round(base_b, 3)
 
     def locate_manifold(self, e_val: float, b_val: float) -> Tuple[str, float]:
@@ -618,9 +593,6 @@ class VSL_32Valve:
         return self._audit_rupture(physics, e_val, b_val)
 
     def _audit_rupture(self, physics, e_val, b_val):
-        # Schur Lens: Don't be a killjoy.
-        # If the user is writing a novel (High B, High E), but the 'truth_ratio' (internal coherence)
-        # is high, we permit it.
         truth = physics.get("truth_ratio", 0.0)
 
         if e_val > 0.85 and b_val < 0.15:
@@ -629,9 +601,7 @@ class VSL_32Valve:
         if b_val > 0.8 and e_val < 0.3:
             return self._rupture(physics, "MANIC_FRACTURE", "Crystal lattice too tight. Structure shattering.")
 
-        # The previous crash point: High Energy + High Entropy
         if b_val > 0.7 and e_val > 0.6:
-            # FIX: If Truth is high, this is barely controlled chaos (Art), not a Glitch.
             if truth > 0.6:
                 physics["flow_state"] = "SUPERCONDUCTIVE"
                 return {

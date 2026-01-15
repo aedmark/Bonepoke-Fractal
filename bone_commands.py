@@ -295,7 +295,7 @@ class CommandProcessor:
 
     def _cmd_help(self, parts):
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 9.9.4 MANUAL ---{self.P.RST}",
+            f"\n{self.P.CYN}--- BONEAMANITA 9.9.5 MANUAL ---{self.P.RST}",
             f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"
         ]
 
@@ -307,8 +307,8 @@ class CommandProcessor:
         }
 
         def get_doc(func):
-            doc = inspect.getdoc(func)
-            return doc if doc else "Undocumented protocol."
+            paperwork = inspect.getdoc(func)
+            return paperwork if paperwork else "Undocumented protocol."
 
         for cat, methods in categories.items():
             help_lines.append(f"{self.P.WHT}{cat}:{self.P.RST}")

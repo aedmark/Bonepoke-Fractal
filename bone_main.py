@@ -1,4 +1,4 @@
-# BONEAMANITA 9.9.4 - "The Bone Machine"
+# BONEAMANITA 9.9.5 - "The 6th Day"
 # Architects: SLASH, KICHO, Taylor & Edmark
 
 import json, os, random, re, time, math, copy, traceback
@@ -72,7 +72,7 @@ class GeodesicOrchestrator:
             self._phase_metabolize(ctx)
 
             if not ctx.is_alive:
-                return self.eng._trigger_death(ctx.physics)
+                return self.eng.trigger_death(ctx.physics)
 
             self._phase_simulate(ctx)
 
@@ -86,7 +86,7 @@ class GeodesicOrchestrator:
                 "type": "CRITICAL_FAILURE",
                 "ui": f"{Prisma.RED}SYSTEM PANIC: Geodesic Strut Failure.\n{e}{Prisma.RST}",
                 "logs": ctx.logs,
-                "metrics": self.eng._get_metrics()
+                "metrics": self.eng.get_metrics()
             }
 
     def _phase_observe(self, ctx: CycleContext):
@@ -148,8 +148,8 @@ class GeodesicOrchestrator:
         return {
             "type": "BUREAUCRACY",
             "ui": ctx.bureau_ui,
-            "logs": self._compose_logs(ctx.logs + [e['text'] for e in self.eng.events.flush()]),
-            "metrics": self.eng._get_metrics(ctx.bio_result.get("atp", 0.0))
+            "logs": self.renderer.compose_logs(ctx.logs, self.eng.events.flush()),
+            "metrics": self.eng.get_metrics(ctx.bio_result.get("atp", 0.0))
         }
 
     def _phase_metabolize(self, ctx: CycleContext):
@@ -179,9 +179,9 @@ class GeodesicOrchestrator:
         )
         ctx.is_alive = ctx.bio_result["is_alive"]
 
-        for log in ctx.bio_result["logs"]:
-            if any(x in str(log) for x in ["CRITICAL", "TAX", "Poison"]):
-                ctx.log(log)
+        for bio_item in ctx.bio_result["logs"]:
+            if any(x in str(bio_item) for x in ["CRITICAL", "TAX", "Poison"]):
+                ctx.log(bio_item)
 
         hubris_hit, hubris_msg, event_type = self.eng.phys.tension.audit_hubris(physics, self.eng.lex)
         if hubris_hit:
@@ -286,7 +286,7 @@ class GeodesicOrchestrator:
         stabilized_zone = self.eng.stabilizer.stabilize(raw_zone, physics, (orbit_state, drag_pen))
         adjusted_drag = self.eng.stabilizer.override_cosmic_drag(drag_pen, stabilized_zone)
         physics["zone"] = stabilized_zone
-        self.eng._apply_cosmic_physics(physics, orbit_state, adjusted_drag)
+        self.eng.apply_cosmic_physics(physics, orbit_state, adjusted_drag)
         ctx.world_state["orbit"] = orbit_state
         if orbit_msg: ctx.log(orbit_msg)
 
@@ -405,7 +405,7 @@ class BoneAmanita:
         self.cycle_controller = GeodesicOrchestrator(self)
         self.cortex = TheCortex(self, llm_client=local_brain)
 
-    def _get_avg_voltage(self):
+    def get_avg_voltage(self):
         hist = self.phys.dynamics.voltage_history
         if not hist: return 0.0
         return sum(hist) / len(hist)
@@ -426,10 +426,10 @@ class BoneAmanita:
                 "type": "COMMAND",
                 "ui": f"\n{Prisma.GRY}Command Processed.{Prisma.RST}",
                 "logs": cmd_logs if cmd_logs else ["Command Executed."],
-                "metrics": self._get_metrics()}
+                "metrics": self.get_metrics()}
         return None
 
-    def _trigger_death(self, last_phys) -> Dict:
+    def trigger_death(self, last_phys) -> Dict:
         eulogy = DeathGen.eulogy(last_phys, self.bio.mito.state)
         death_log = [f"\n{Prisma.RED}SYSTEM HALT: {eulogy}{Prisma.RST}"]
         try:
@@ -445,7 +445,7 @@ class BoneAmanita:
             death_log.append(f"{Prisma.WHT}   [LEGACY SAVED: {path}]{Prisma.RST}")
         except Exception as e:
             death_log.append(f"Save Failed: {e}")
-        return {"type": "DEATH", "ui": "\n".join(death_log), "logs": death_log, "metrics": self._get_metrics(0.0)}
+        return {"type": "DEATH", "ui": "\n".join(death_log), "logs": death_log, "metrics": self.get_metrics(0.0)}
 
     def _package_turn(self, type_str, logs, context):
         event_data = self.events.flush()
@@ -455,9 +455,9 @@ class BoneAmanita:
             "type": type_str,
             "ui": "\n".join(logs),
             "logs": logs,
-            "metrics": self._get_metrics()}
+            "metrics": self.get_metrics()}
 
-    def _get_metrics(self, atp=0.0):
+    def get_metrics(self, atp=0.0):
         return {"health": self.health, "stamina": self.stamina, "atp": atp, "tick": self.tick_count}
 
     def _ethical_audit(self):
@@ -474,7 +474,7 @@ class BoneAmanita:
         return False
 
     @staticmethod
-    def _apply_cosmic_physics(physics, state, cosmic_drag_penalty):
+    def apply_cosmic_physics(physics, state, cosmic_drag_penalty):
         physics["narrative_drag"] += cosmic_drag_penalty
         if state == "VOID_DRIFT": physics["voltage"] = max(0.0, physics["voltage"] - 0.5)
         elif state == "LAGRANGE_POINT": physics["narrative_drag"] = max(0.1, physics["narrative_drag"] - 2.0)
@@ -489,7 +489,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 9.9.4', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 9.9.5', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
@@ -507,7 +507,7 @@ class SessionGuardian:
                         "timestamp": time.time(),
                         "final_health": self.eng.health,
                         "final_stamina": self.eng.stamina,
-                        "avg_voltage": self.eng._get_avg_voltage(),
+                        "avg_voltage": self.eng.get_avg_voltage(),
                         "exit_cause": "INTERRUPT" if exc_type else "MANUAL"
                     },
                     "trauma_vector": self.eng.trauma_accum,
@@ -552,7 +552,7 @@ if __name__ == "__main__":
                 print(result["ui"])
             if result.get("logs") and BoneConfig.VERBOSE_LOGGING:
                 print(f"{Prisma.GRY}--- DEBUG LOGS ---{Prisma.RST}")
-                for log in result["logs"]:
-                    print(log)
+                for entry in result["logs"]:
+                    print(entry)
             if result["type"] == "DEATH":
                 break

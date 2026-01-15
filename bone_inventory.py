@@ -117,10 +117,6 @@ EFFECT_DISPATCH = {
 
 @dataclass
 class GordonKnot:
-    """
-    The Inventory Manager.
-    Refactored by SLASH to support dynamic traits and cleaner physics integration.
-    """
     integrity: float = 65.0
     inventory: List[str] = field(default_factory=list)
     scar_tissue: Dict[str, float] = field(default_factory=dict)
@@ -152,9 +148,6 @@ class GordonKnot:
         self.ITEM_REGISTRY = copy.deepcopy(GORDON.get("ITEM_REGISTRY", {}))
 
     def _initialize_reflexes(self):
-        """
-        Fuller Lens: Predicates for automatic system responses.
-        """
         self.REFLEX_MAP = {
             "DRIFT_CRITICAL": lambda p: p.get("narrative_drag", 0) > 6.0,
             "KAPPA_CRITICAL": lambda p: p.get("kappa", 1.0) < 0.2,
@@ -170,9 +163,6 @@ class GordonKnot:
         })
 
     def audit_tools(self, physics_ref: Dict) -> List[str]:
-        """
-        Iterates through inventory, applying passive effects via the Strategy Pattern.
-        """
         logs = []
         for item in self.inventory:
             data = self.get_item_data(item)
@@ -187,10 +177,6 @@ class GordonKnot:
         return logs
 
     def rummage(self, physics_ref: Dict, stamina_pool: float) -> Tuple[bool, str, float]:
-        """
-        Gordon digs through the trash.
-        Schur Lens: Sometimes you just find lint.
-        """
         cost = 15.0
         if stamina_pool < cost:
             return False, f"{Prisma.GRY}GORDON: 'Too tired to dig. Eat something first.'{Prisma.RST}", 0.0

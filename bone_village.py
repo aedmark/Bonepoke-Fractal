@@ -412,7 +412,6 @@ class MirrorGraph:
             drag = physics.get("narrative_drag", 0.0)
             turbulence = physics.get("turbulence", 0)
         else:
-            # Assume it's PhysicsPacket dataclass
             counts = getattr(physics, "counts", {})
             clean_words = getattr(physics, "clean_words", [])
             vol = getattr(physics, "voltage", 0.0)
@@ -441,7 +440,6 @@ class MirrorGraph:
         self.dominant_archetype = max(self.stats, key=self.stats.get)
 
     def reflect(self, physics: Any) -> Tuple[bool, Optional[str]]:
-        # Extract text for profiling
         if isinstance(physics, dict):
             text = physics.get("raw_text", "")
         else:
@@ -451,7 +449,6 @@ class MirrorGraph:
 
         mods = self.get_reflection_modifiers()
 
-        # If the mirror is active (has flavor text), return True
         if mods.get("flavor"):
             return True, mods["flavor"]
 
@@ -493,7 +490,6 @@ class MirrorGraph:
         return mods
 
     def render_report(self):
-        """For the /mirror command."""
         def bar(v, color): return f"{color}{'█' * int(v * 10)}{'░' * (10 - int(v * 10))}{Prisma.RST}"
         return (
             f"WAR [{self.stats['WAR']:.2f}] {bar(self.stats['WAR'], Prisma.RED)}\n"

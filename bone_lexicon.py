@@ -76,11 +76,10 @@ class SemanticsBioassay:
 
     def clean(self, text):
         if not text: return []
-        # Fix: Ensure unicode data is processed safely
         try:
             normalized = unicodedata.normalize('NFKD', text).encode('ASCII', 'ignore').decode('utf-8')
         except Exception:
-            normalized = text # Fallback if normalization fails
+            normalized = text
 
         cleaned_text = normalized.translate(self._TRANSLATOR).lower()
         words = cleaned_text.split()
@@ -194,7 +193,7 @@ class GlobalLexiconFacade:
     def atrophy(cls, tick, max_age): return cls._STORE.atrophy(tick, max_age)
 
     @property
-    def STORE(self):
+    def store(self):
         return self._STORE
 
 
@@ -290,14 +289,15 @@ class LiteraryReproduction:
     def attempt_reproduction(self, engine_ref, mode="MITOSIS", target_spore=None) -> Tuple[str, Dict]:
         mem = engine_ref.mind.mem
         phys = engine_ref.phys.tension.last_physics_packet
+        child_id = None
         genome = {}
         log_msg = []
 
         if mode == "MITOSIS":
             bio_state = {"trauma_vector": engine_ref.trauma_accum}
             child_id, genome = self.mitosis(mem.session_id, bio_state, phys, mem)
-            log_msg = [f"   ► CHILD SPAWNED: {Prisma.WHT}{child_id}{Prisma.RST}"]
-            log_msg.append(f"   ► TRAIT: {genome.get('mutations', 'None')}")
+            log_msg = [f"   ► CHILD SPAWNED: {Prisma.WHT}{child_id}{Prisma.RST}",
+                       f"   ► TRAIT: {genome.get('mutations', 'None')}"]
 
         elif mode == "CROSSOVER":
             if not target_spore:
@@ -305,7 +305,7 @@ class LiteraryReproduction:
             current_bio = {"trauma_vector": engine_ref.trauma_accum, "mito": engine_ref.bio.mito}
             child_id, genome = self.crossover(mem.session_id, current_bio, target_spore)
             if not child_id:
-                return f"{Prisma.RED}CROSSOVER FAILED: {genome}{Prisma.RST}", {}
+                return f"{Prisma.RED}REPRODUCTION ERROR: Mode '{mode}' yielded no offspring.{Prisma.RST}", {}
             log_msg = [f"   HYBRID SPAWNED: {Prisma.WHT}{child_id}{Prisma.RST}"]
 
         full_spore_data = {

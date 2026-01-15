@@ -16,7 +16,7 @@ from bone_bus import Prisma, BoneConfig
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_9.9.4"
+        self.genome = "BONEAMANITA_9.9.5"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():

@@ -16,9 +16,7 @@ class GeodesicRenderer:
         self.vsl_32v = valve_ref
 
     def render_frame(self, ctx) -> Dict[str, Any]:
-        """
-        Compiles the final UI frame.
-        """
+        """Compiles the final UI frame."""
         physics = ctx.physics
         mind = ctx.mind_state
         bio = ctx.bio_result
@@ -48,13 +46,13 @@ class GeodesicRenderer:
         if physics.get("system_surge_event", False):
             clean_ui = self._inject_rupture_warning(clean_ui)
 
-        structured_logs = self._compose_logs(ctx.logs, self.eng.events.flush())
+        structured_logs = self.compose_logs(ctx.logs, self.eng.events.flush())
 
         return {
             "type": "GEODESIC_FRAME",
             "ui": clean_ui,
             "logs": structured_logs,
-            "metrics": self.eng._get_metrics(bio.get("atp", 0.0)),
+            "metrics": self.eng.get_metrics(bio.get("atp", 0.0)),
             "system_instruction": self._get_chorus_instruction(physics)
         }
 
@@ -96,11 +94,8 @@ class GeodesicRenderer:
                 return instr
         return ""
 
-    def _compose_logs(self, cycle_logs: List[str], bus_events: List[Dict]) -> List[str]:
-        """
-        Organizes the chaotic stream of consciousness into a tidy list.
-        Schur Lens: "Like filing reports in the Parks Dept."
-        """
+    def compose_logs(self, cycle_logs: List[str], bus_events: List[Dict]) -> List[str]:
+        """Organizes the chaotic stream of consciousness into a tidy list."""
         all_events = [{"text": l, "category": "NARRATIVE"} for l in cycle_logs]
         all_events.extend(bus_events)
 

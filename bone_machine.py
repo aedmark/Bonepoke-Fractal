@@ -35,10 +35,9 @@ class TheCrucible:
         lignin_signal = self._regulate_turgor(voltage)
         current_drag = physics.get("narrative_drag", 0.0)
 
-        # Homeostatic adjustment
         adjustment = lignin_signal * 0.5
         if current_drag < 1.0 and adjustment > 0:
-            adjustment *= 0.1 # Less resistance to hardening when already fluid
+            adjustment *= 0.1
 
         new_drag = max(0.0, min(10.0, current_drag + adjustment))
         physics["narrative_drag"] = round(new_drag, 2)
@@ -72,7 +71,6 @@ class TheCrucible:
         velocity = stress - self.last_pressure_diff
         self.last_pressure_diff = stress
 
-        # PID Controller logic for biological turgor
         signal = (self.sensitivity * stress) + \
                  (self.saturation * self.osmotic_memory) + \
                  (self.anticipation * velocity)
@@ -148,7 +146,6 @@ class TheTheremin:
         solvent_active = False
         solvent_msg = ""
 
-        # Solvent logic (Heat melts resin)
         if thermal_hits > 0 and self.resin_buildup > 5.0:
             dissolved = thermal_hits * 15.0
             self.resin_buildup = max(0.0, self.resin_buildup - dissolved)
@@ -192,11 +189,9 @@ class TheTheremin:
             if not theremin_msg:
                 theremin_msg = f"{Prisma.OCHRE}RESIN FLOW: Hybrid complexity (+{resin_flow:.1f}). Keep it hot to prevent sticking.{Prisma.RST}"
 
-        # Decay
         if resin_flow == 0 and self.calcification_turns == 0:
             self.resin_buildup = max(0.0, self.resin_buildup - 2.0)
 
-        # Critical States
         if self.resin_buildup > self.SHATTER_POINT:
             self.resin_buildup = 0.0
             self.calcification_turns = 0
@@ -216,7 +211,6 @@ class TheTheremin:
             if not solvent_active:
                 theremin_msg = f"{Prisma.GRN}LIQUEFACTION: The Amber melts. You are free.{Prisma.RST}"
 
-        # Turbulence shatters resin
         turb = physics.get("turbulence", 0.0)
         if turb > 0.6 and self.resin_buildup > 0:
             shatter_amt = turb * 10.0
@@ -225,7 +219,6 @@ class TheTheremin:
             self.calcification_turns = 0
 
         if turb < 0.2:
-            # Smooth sailing reduces drag
             physics["narrative_drag"] = max(0.0, physics["narrative_drag"] - 1.0)
 
         return self.is_stuck, resin_flow, theremin_msg, critical_event

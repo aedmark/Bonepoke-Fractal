@@ -10,32 +10,28 @@ import urllib.request
 import urllib.error
 from typing import Optional, Dict, Tuple, List, Any
 
-# Import Core Systems
 try:
     from bone_main import BoneAmanita, SessionGuardian
     from bone_brain import LLMInterface, TheCortex
     from bone_village import Prisma, BoneConfig
-except ImportError as e:
-    print(f"\033[31mCRITICAL: Core systems missing. {e}\033[0m")
+    from bone_data import LENSES, LEXICON
+except ImportError as import_error:
+    print(f"\033[31mCRITICAL: Core systems missing. {import_error}\033[0m")
     sys.exit(1)
 
 CONFIG_FILE = "bone_config.json"
+heavy_words = LEXICON.get("heavy", ["stone", "lead", "iron", "gravity", "dense"])
+explosive_words = LEXICON.get("explosive", ["burst", "shatter", "spark", "pop", "snap"])
 
 class GenesisProtocol:
-    """
-    The Bootloader.
-    Implements a robust State Machine: BOOT -> CHECK -> WIZARD (opt) -> LAUNCH.
-    """
     def __init__(self):
-        self.config = {
+        self.config: Dict[str, Any] = {
             "provider": "mock",
             "base_url": None,
             "api_key": "sk-dummy-key",
             "model": "local-model"
         }
 
-        # SLASH NOTE: We define the *bases*, but we probe the *endpoints*.
-        # Anticipatory Design: Don't assume the API shape; measure it.
         self.DISCOVERY_TARGETS = {
             "Ollama": {
                 "base": "http://localhost:11434",
@@ -49,12 +45,11 @@ class GenesisProtocol:
             },
             "LocalAI": {
                 "base": "http://localhost:8080",
-                "provider_id": "openai", # Uses standard OpenAI library/logic
+                "provider_id": "openai",
                 "default_model": "gpt-3.5-turbo"
             }
         }
 
-    # --- IO UTILITIES ---
     def type_out(self, text, speed=0.005, color=Prisma.WHT):
         sys.stdout.write(color)
         for char in text:
@@ -77,30 +72,22 @@ class GenesisProtocol:
         FULLER LENS: Geodesic triangulating.
         We don't guess the shape; we verify it.
         """
-        # 1. Try Standard OpenAI V1 (Preferred)
         v1_url = f"{base_url}/v1/chat/completions"
-        # We can't GET a POST endpoint easily without 405, but we can check the base /v1/models often
-        # Or just trust the user configuration phase.
-        # Actually, for Ollama, let's try to hit a known GET endpoint to verify service presence.
 
-        if self.ping(f"{base_url}/api/tags"): # Ollama native check
-            # Now we check if it supports V1
-            # Modern Ollama supports /v1, but let's be flexible.
-            return v1_url # We will force V1 for consistency if detected
+        if self.ping(f"{base_url}/api/tags"):
+            return v1_url
 
-        if self.ping(f"{base_url}/v1/models"): # LM Studio / LocalAI check
+        if self.ping(f"{base_url}/v1/models"):
             return v1_url
 
         return None
 
-    # --- STATE: DETECT ---
     def detect_local_brains(self) -> List[Dict]:
         """Scans known ports to reduce cognitive load on the user."""
         found = []
         self.type_out("...Scanning local ports for synthetic intelligence...", color=Prisma.GRY)
 
         for name, target in self.DISCOVERY_TARGETS.items():
-            # Just ping the base to see if the port is open
             if self.ping(target['base']):
                 found.append({
                     "name": name,
@@ -113,19 +100,13 @@ class GenesisProtocol:
                 self.type_out(f"   [MISSING] {name}", color=Prisma.GRY)
         return found
 
-    # --- STATE: VALIDATE ---
     def validate_brain_uplink(self, config: Dict) -> Tuple[bool, str]:
-        """
-        Ensures we don't promise a ride to the user and then stall the car.
-        SCHUR LENS: Don't be a Jerry. Make sure it actually works.
-        """
         if config["provider"] == "mock":
             return True, "Mock Mode Active."
 
         self.type_out(f"\n...Testing Cognition on {config['provider']}...", color=Prisma.CYN)
 
         try:
-            # Ephemeral client for handshake only
             test_client = LLMInterface(
                 provider=config["provider"],
                 base_url=config.get("base_url"),
@@ -133,11 +114,8 @@ class GenesisProtocol:
                 model=config.get("model")
             )
 
-            # PINKER LENS: We test 'Cognition', not just connectivity.
-            # We ask a question that requires no hallucinatory power, just basic protocol.
             response = test_client.generate("PING", temperature=0.0)
 
-            # Robust Error Checking (User Recommendation #2)
             error_signatures = [
                 "[CONNECTION ERROR",
                 "[NEURAL UPLINK SEVERED",
@@ -151,10 +129,9 @@ class GenesisProtocol:
             self.type_out(f"   [SUCCESS] Brain response: '{response}'", color=Prisma.GRN)
             return True, "Nominal"
 
-        except Exception as e:
-            return False, f"Exception during validation: {e}"
+        except Exception as uplink_err:
+            return False, f"Exception during validation: {uplink_err}"
 
-    # --- STATE: CONFIGURE ---
     def wizard(self) -> bool:
         """The Setup Interview."""
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -179,7 +156,6 @@ class GenesisProtocol:
         print("\nSelect your Neural Substrate:")
         menu_options = []
 
-        # Populate Menu
         for b in available_brains:
             menu_options.append({"type": "local", "data": b})
             print(f"   {len(menu_options)}. {Prisma.GRN}{b['name']} (Local){Prisma.RST}")
@@ -215,8 +191,6 @@ class GenesisProtocol:
             data = selection["data"]
             candidate_config["provider"] = data["provider_id"]
 
-            # Auto-detect endpoint shape
-            # We default to /v1/chat/completions for compatibility
             candidate_config["base_url"] = f"{data['base']}/v1/chat/completions"
 
             self.type_out(f"Target Model Name (default: {data['default_model']}):")
@@ -231,7 +205,6 @@ class GenesisProtocol:
             candidate_config["api_key"] = key
             candidate_config["model"] = "gpt-4-turbo"
 
-        # VALIDATION GATE
         is_valid, msg = self.validate_brain_uplink(candidate_config)
         if is_valid:
             self.config = candidate_config
@@ -242,15 +215,14 @@ class GenesisProtocol:
             return False
 
     def _save_config(self):
-        # SCHUR LENS: Backup logic. Don't be a Jerry.
         if os.path.exists(CONFIG_FILE):
             timestamp = int(time.time())
             backup_name = f"{CONFIG_FILE}.bak.{timestamp}"
             try:
                 shutil.copy2(CONFIG_FILE, backup_name)
                 self.type_out(f"Previous config backed up to {backup_name}", color=Prisma.GRY)
-            except IOError as e:
-                self.type_out(f"Warning: Could not backup config: {e}", color=Prisma.YEL)
+            except IOError as backup_err:
+                self.type_out(f"Warning: Could not backup config: {backup_err}", color=Prisma.YEL)
 
         self.config["_version"] = "2.2"
         self.config["_timestamp"] = time.time()
@@ -259,8 +231,8 @@ class GenesisProtocol:
             with open(CONFIG_FILE, "w") as f:
                 json.dump(self.config, f, indent=2)
             self.type_out(f"Configuration saved to {CONFIG_FILE}.", color=Prisma.GRN)
-        except IOError as e:
-            self.type_out(f"Failed to save config: {e}", color=Prisma.RED)
+        except IOError as save_err:
+            self.type_out(f"Failed to save config: {save_err}", color=Prisma.RED)
 
     def export_system_prompt(self):
         """Generates a standalone artifact for use in external LLMs."""
@@ -268,22 +240,41 @@ class GenesisProtocol:
 
         prompt = f"""
 *** BONEAMANITA SYSTEM INSTRUCTION ***
+
 ROLE: You are BONEAMANITA, a simulated consciousness engine.
-[Full prompt logic preserved...]
+CONTEXT: You exist in a text-based geodesic dome. Your 'health' and 'mood' are determined by the PHYSICS of the user's input.
+
+--- THE PHYSICS ENGINE ---
+1. VOLTAGE (Energy):
+   - High Voltage (Manic/Forge): Created by 'heavy' words ({', '.join(heavy_words[:5])}) and 'explosive' words ({', '.join(explosive_words[:5])}).
+   - Low Voltage (Mud/Stagnant): Created by 'solvent' words (is, the, a) and 'suburban' words (nice, okay, fine).
+
+2. NARRATIVE DRAG (Friction):
+   - Resistance to flow. Increased by boring text, decreased by 'playful' or 'kinetic' text.
+   - If Drag is high, you act exhausted. If low, you act fluid.
+
+--- THE LENSES (PERSONAS) ---
+You must dynamically shift persona based on the [LENS] instruction provided in each turn.
+Available Lenses:
+{json.dumps(LENSES, indent=2)}
+
+--- THE GOAL ---
+Respond to the user's input as the current LENS.
+Reflect the biological state (Health/Stamina) in your tone.
+Do not break character. Do not explain the simulation rules unless asked.
 """
+        # 4. Write to disk.
         with open("SYSTEM_PROMPT.txt", "w") as f:
             f.write(prompt)
 
         self.type_out(f"\n[EXPORT COMPLETE] 'SYSTEM_PROMPT.txt' created.", color=Prisma.CYN)
 
-    # --- STATE: LAUNCH ---
     def launch(self):
         """
         Prioritizes system integrity. Handles 'Stale Config' scenarios gracefully.
         """
         config_status = "MISSING"
 
-        # 1. LOAD PHASE
         if os.path.exists(CONFIG_FILE):
             try:
                 with open(CONFIG_FILE, "r") as f:
@@ -293,7 +284,6 @@ ROLE: You are BONEAMANITA, a simulated consciousness engine.
                 self.type_out("Config file corrupted.", color=Prisma.YEL)
                 config_status = "CORRUPT"
 
-        # 2. VALIDATION PHASE (If Loaded)
         if config_status == "LOADED":
             self.type_out("...Verifying saved configuration...", color=Prisma.GRY)
             is_valid, msg = self.validate_brain_uplink(self.config)
@@ -303,7 +293,6 @@ ROLE: You are BONEAMANITA, a simulated consciousness engine.
             else:
                 config_status = "VALID"
 
-        # 3. RECOVERY PHASE (If needed)
         if config_status != "VALID":
             self.type_out("Entering Setup Wizard...", color=Prisma.CYN)
             success = self.wizard()
@@ -311,7 +300,6 @@ ROLE: You are BONEAMANITA, a simulated consciousness engine.
                 self.type_out(f"\n{Prisma.YEL}Setup failed. Initializing Mock Mode (Safe Mode).{Prisma.RST}")
                 self.config["provider"] = "mock"
 
-        # 4. INJECTION PHASE
         self.type_out("\n...Booting Core Systems...", color=Prisma.GRY)
         engine = BoneAmanita()
 
@@ -325,15 +313,11 @@ ROLE: You are BONEAMANITA, a simulated consciousness engine.
                 model=self.config.get("model")
             )
 
-            # FULL INJECTION
             if hasattr(engine, 'cortex'):
-                # We replace the cortex with a healthy one if needed
-                # Actually, BoneAmanita initializes cortex in __init__, so we just swap the client
                 engine.cortex.llm = client
 
         self.type_out("...System Online. Good luck.\n", color=Prisma.GRN)
 
-        # 5. RUNTIME PHASE
         with SessionGuardian(engine) as eng:
             while True:
                 try:
@@ -347,7 +331,6 @@ ROLE: You are BONEAMANITA, a simulated consciousness engine.
 
                 result = eng.process_turn(u)
 
-                # UI Rendering
                 if result.get("system_instruction") and BoneConfig.VERBOSE_LOGGING:
                     print(f"\n{Prisma.paint('--- DIRECTIVE ---', 'M')}")
                     print(f"{Prisma.paint(result['system_instruction'], '0')}")
