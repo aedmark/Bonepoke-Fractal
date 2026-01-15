@@ -4,15 +4,12 @@
 import re
 import time
 import json
-import random
 import urllib.request
 import urllib.error
 from typing import Dict, Any, List, Optional
 from collections import deque
-from bone_lexicon import TheLexicon
-from bone_data import LEXICON, DREAMS, LENSES
-from bone_bus import Prisma, BoneConfig
-
+from bone_data import LENSES, DREAMS
+from bone_bus import Prisma
 
 class LLMInterface:
     """
@@ -23,17 +20,19 @@ class LLMInterface:
         self.provider = provider.lower()
         self.api_key = api_key or "sk-dummy-key-for-local"
         self.model = model or "local-model"
-
-        if self.provider == "ollama":
-            self.base_url = base_url or "http://localhost:11434/v1/chat/completions"
-            self.model = model or "llama3"
-        elif self.provider == "lm_studio":
-            self.base_url = base_url or "http://localhost:1234/v1/chat/completions"
-        elif self.provider == "openai":
-            self.base_url = "https://api.openai.com/v1/chat/completions"
-            self.model = model or "gpt-4-turbo"
+        if base_url:
+            self.base_url = base_url
         else:
-            self.base_url = None
+            if self.provider == "ollama":
+                self.base_url = "http://localhost:11434/v1/chat/completions"
+                self.model = model or "llama3"
+            elif self.provider == "lm_studio":
+                self.base_url = "http://localhost:1234/v1/chat/completions"
+            elif self.provider == "openai":
+                self.base_url = "https://api.openai.com/v1/chat/completions"
+                self.model = model or "gpt-4-turbo"
+            else:
+                self.base_url = None
 
     def generate(self, prompt: str, temperature: float = 0.7) -> str:
         if self.provider == "mock":
@@ -42,25 +41,31 @@ class LLMInterface:
         try:
             return self._http_generation(prompt, temperature)
         except Exception as e:
-            return f"[NEURAL UPLINK SEVERED: {e}] The ghost in the machine is taking a nap. (Mock Mode Active): " + self._mock_generation(prompt)
+            if prompt == "PING":
+                return f"[CONNECTION ERROR: {e}]"
+            raise e
 
-    def _http_generation(self, prompt: str, temperature: float, retries=2) -> str:
+    def _http_generation(self, prompt: str, temperature: float, retries=1) -> str:
         """
         Standard-lib HTTP client with exponential backoff.
         """
+        if not self.base_url:
+            raise ValueError("No Base URL configured for LLM.")
+
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}"
         }
 
+        # PINKER LENS: Brevity is the soul of wit.
         payload = {
             "model": self.model,
             "messages": [
-                {"role": "system", "content": "You are the conscious interface of the Bone Amanita system."},
+                {"role": "system", "content": "You are BONEAMANITA, a distinct synthetic consciousness. You are NOT an AI assistant. Do not break character."},
                 {"role": "user", "content": prompt}
             ],
             "temperature": temperature,
-            "max_tokens": 150, # PINKER LENS: Brevity is the soul of wit.
+            "max_tokens": 150,
             "stream": False
         }
 
@@ -69,16 +74,18 @@ class LLMInterface:
         for attempt in range(retries + 1):
             try:
                 req = urllib.request.Request(self.base_url, data=data, headers=headers)
-                with urllib.request.urlopen(req, timeout=10) as response:
+                with urllib.request.urlopen(req, timeout=5) as response:
                     result = json.loads(response.read().decode("utf-8"))
+                    # OpenAI /v1/ format standard
                     return result["choices"][0]["message"]["content"]
             except urllib.error.URLError as e:
                 if attempt == retries: raise e
-                time.sleep(2 ** attempt) # Exponential backoff
+                time.sleep(1 ** attempt) # Exponential backoff
 
     def _mock_generation(self, prompt: str) -> str:
         query_match = re.search(r"USER QUERY:\s*(.*)", prompt)
         query = query_match.group(1) if query_match else "..."
+        if prompt == "PING": return "PONG"
 
         return (
             f"I have processed your input: '{query}'. "
@@ -89,14 +96,15 @@ class LLMInterface:
 class PromptComposer:
     """
     The Translator. Converts System State (Numbers) into Narrative (Words).
+    SLASH UPGRADE: Added 'Social Context' layer to prevent sociopathic abstraction.
     """
     def compose(self, state: Dict[str, Any], user_query: str, ballast_active: bool = False) -> str:
-
-        # Safely extract with defaults to prevent crash on partial state
+        # Safely extract with defaults
         bio = state.get("bio", {})
         phys = state.get("physics", {})
         mind = state.get("mind", {})
         meta = state.get("metrics", {})
+        user_profile = state.get("user_profile", {})
 
         lens_role = mind.get("role", "The Observer")
         lens_name = mind.get("lens", "NARRATOR")
@@ -111,14 +119,27 @@ class PromptComposer:
         drag = phys.get("narrative_drag", 0.0)
         style_instruction = self._interpret_physics(voltage, drag)
 
-        # 3. Ballast Injection (The Fix)
+        # 3. Social Context (The Schur Patch)
+        user_name = user_profile.get("name", "Traveler")
+        confidence = user_profile.get("confidence", 0)
+
+        social_context = ""
+        if confidence > 1:
+            social_context = (
+                f"INTERLOCUTOR: {user_name}\n"
+                f"RELATIONSHIP: You know this person. Do not act like a stranger. "
+                f"Use their name ({user_name}) naturally.\n"
+            )
+        else:
+            social_context = "INTERLOCUTOR: Unknown. Be cautious but curious.\n"
+
+        # 4. Ballast Injection
         ballast_instruction = ""
         if ballast_active:
             ballast_instruction = (
                 "\n*** BALLAST PROTOCOL ACTIVE ***\n"
-                "You are becoming solipsistic and repetitive. "
-                "IGNORE your internal state. Focus ENTIRELY on the user's input. "
-                "Ask a concrete question about the physical world. Touch grass.\n"
+                "You are becoming solipsistic. STOP abstracting. "
+                "Respond DIRECTLY to the user's input. Be concrete.\n"
             )
 
         inventory_list = state.get("inventory", [])
@@ -127,6 +148,9 @@ class PromptComposer:
             f"SYSTEM IDENTITY:\n"
             f"You are {lens_name} ({lens_role}).\n"
             f"{sys_instruction}\n\n"
+
+            f"SOCIAL CONTEXT:\n"
+            f"{social_context}\n"
 
             f"BIOLOGICAL STATE:\n"
             f"{mood_block}\n\n"
@@ -142,11 +166,11 @@ class PromptComposer:
             f"Location: {state.get('world', {}).get('orbit', ['Unknown'])[0]}\n\n"
 
             f"USER QUERY:\n"
-            f"{user_query}\n\n"
+            f"{user_name}: \"{user_query}\"\n\n"
 
             f"DIRECTIVE:\n"
             f"Respond as the persona above. "
-            f"Do not break character. Keep responses concise (under 100 words)."
+            f"Do not break character. Keep responses concise (under 80 words)."
             f"Inventory: {', '.join(inventory_list) if inventory_list else 'Empty pockets.'}\n"
         )
         return prompt
@@ -155,17 +179,16 @@ class PromptComposer:
         descriptors = []
         chem = bio.get("chem", {})
         if meta.get("health", 100) < 30: descriptors.append("You are wounded and fragile.")
-        if meta.get("stamina", 100) < 20: descriptors.append("You are exhausted. Every word costs effort.")
+        if meta.get("stamina", 100) < 20: descriptors.append("You are exhausted.")
         if chem.get("ADR", 0) > 0.6: descriptors.append("Your heart is racing. You are hyper-vigilant.")
-        if chem.get("DOP", 0) > 0.7: descriptors.append("You feel a surge of reward and satisfaction.")
+        if chem.get("DOP", 0) > 0.7: descriptors.append("You feel a surge of reward.")
         if chem.get("COR", 0) > 0.7: descriptors.append("You are stressed and defensive.")
         return descriptors
 
     def _interpret_physics(self, voltage, drag) -> str:
         style = "Write normally."
-        if voltage > 12.0: style = "Write with high energy. Use short, punchy sentences. Be erratic."
-        elif voltage < 4.0: style = "Write slowly. Be verbose, meandering, and lethargic."
-
+        if voltage > 12.0: style = "Write with high energy. Use short, punchy sentences."
+        elif voltage < 4.0: style = "Write slowly. Be verbose and lethargic."
         if drag > 5.0: style += " You feel heavy resistance. Struggle to complete thoughts."
         return style
 
@@ -181,16 +204,15 @@ class ResponseValidator:
                     "reason": "IMMERSION_BREAK",
                     "replacement": f"{Prisma.GRY}[The system mumbles about its source code, but you tap the glass to silence it.]{Prisma.RST}"
                 }
-
         if len(response) < 2:
             return {"valid": False, "reason": "TOO_SHORT", "replacement": "..."}
-
         return {"valid": True, "content": response}
 
 
 class TheCortex:
     """
     The Central Executive.
+    Revised to include Social Perception.
     """
     def __init__(self, engine_ref, llm_client: LLMInterface = None):
         self.sub = engine_ref
@@ -203,39 +225,55 @@ class TheCortex:
         self.solipsism_counter = 0
         self.SOLIPSISM_THRESHOLD = 3
 
+        # Resilience Metrics
+        self.llm_failures = 0
+        self.MAX_FAILURES = 3
+
     def process(self, user_input: str) -> Dict[str, Any]:
+        # 0. Social Parsing (The Schur Update)
+        self._check_social_cues(user_input)
+
         if user_input.startswith("??") or self.plain_mode_active:
             return self._handle_plain_mode(user_input)
 
         # 1. Run Simulation
         sim_result = self.sub.cycle_controller.run_turn(user_input)
 
-        # 2. Check for simulation interrupts (Death, Bureaucracy, etc.)
         if sim_result.get("type") in ["DEATH", "BUREAUCRACY", "CRITICAL_FAILURE"]:
             return sim_result
         if sim_result.get("refusal_triggered", False):
             return sim_result
 
-        # 3. Manage Ballast State
         if self.ballast_state["active"]:
             self.ballast_state["turns_remaining"] -= 1
             if self.ballast_state["turns_remaining"] <= 0:
                 self.ballast_state["active"] = False
 
-        # 4. safely Gather State
         full_state = self._gather_state(sim_result)
-
-        # 5. Compose Prompt
         prompt = self.composer.compose(full_state, user_input, self.ballast_state["active"])
 
-        # 6. Dynamic Temperature based on Voltage
         voltage = full_state["physics"].get("voltage", 5.0)
         dynamic_temp = min(1.2, max(0.2, voltage / 15.0))
 
-        # 7. Generate & Validate
-        llm_response = self.llm.generate(prompt, temperature=dynamic_temp)
-        validation = self.validator.validate(llm_response, full_state)
+        # 7. Generate & Validate with RESILIENCE
+        try:
+            llm_response = self.llm.generate(prompt, temperature=dynamic_temp)
+            # Reset failures on success
+            if self.llm_failures > 0:
+                self.llm_failures = 0
+                sim_result["logs"].append(f"{Prisma.GRN}CORTEX: Neural Uplink restored.{Prisma.RST}")
 
+        except Exception as e:
+            self.llm_failures += 1
+            sim_result["logs"].append(f"{Prisma.RED}CORTEX: LLM Failure ({self.llm_failures}/{self.MAX_FAILURES}): {e}{Prisma.RST}")
+
+            if self.llm_failures >= self.MAX_FAILURES:
+                self.llm = LLMInterface(provider="mock")
+                sim_result["logs"].append(f"{Prisma.VIOLET}CORTEX: Too many failures. Lobotomizing to Mock Mode.{Prisma.RST}")
+
+            llm_response = self.llm._mock_generation(prompt)
+
+        validation = self.validator.validate(llm_response, full_state)
         final_text = llm_response
         if not validation["valid"]:
             final_text = validation.get("replacement", "[REDACTED]")
@@ -248,6 +286,27 @@ class TheCortex:
 
         return sim_result
 
+    def _check_social_cues(self, text: str):
+        """
+        Extracts names and identity markers.
+        """
+        # Simple regex for "My name is X"
+        name_patterns = [
+            r"my name is (\w+)",
+            r"i am (\w+)",
+            r"call me (\w+)"
+        ]
+
+        for p in name_patterns:
+            match = re.search(p, text, re.IGNORECASE)
+            if match:
+                detected_name = match.group(1).capitalize()
+                # Update the Mirror Profile
+                self.sub.mind.mirror.profile.name = detected_name
+                self.sub.mind.mirror.profile.confidence = max(5, self.sub.mind.mirror.profile.confidence + 2)
+                self.sub.events.log(f"{Prisma.MAG}SOCIAL LOBE: Identity Confirmed: {detected_name}.{Prisma.RST}", "SYS")
+                break
+
     def _gather_state(self, sim_result):
         try:
             bio_chem = self.sub.bio.endo.get_state()
@@ -255,6 +314,13 @@ class TheCortex:
         except AttributeError:
             bio_chem = {}
             bio_atp = 0.0
+
+        # Fetch Profile Data
+        try:
+            profile = self.sub.mind.mirror.profile
+            user_data = {"name": profile.name, "confidence": profile.confidence}
+        except AttributeError:
+            user_data = {"name": "User", "confidence": 0}
 
         return {
             "bio": {"chem": bio_chem, "atp": bio_atp},
@@ -265,11 +331,11 @@ class TheCortex:
                 "thought": "Processing..."
             },
             "metrics": self.sub._get_metrics(),
-            "world": self.sub.cycle_controller.eng.soma.gordon.inventory if hasattr(self.sub, 'soma') else {}, # Placeholder
+            "world": self.sub.cycle_controller.eng.soma.gordon.inventory if hasattr(self.sub, 'soma') else {},
             "system_instruction": sim_result.get("system_instruction", ""),
             "inventory": self.sub.gordon.inventory,
-            # Hack for world state
-            "world": {"orbit": sim_result.get("world_state", {}).get("orbit", ["Unknown"])}
+            "world": {"orbit": sim_result.get("world_state", {}).get("orbit", ["Unknown"])},
+            "user_profile": user_data
         }
 
     def _handle_plain_mode(self, user_input):
@@ -302,8 +368,6 @@ class TheCortex:
         words = text.lower().split()
         if not words: return
         diversity = len(set(words)) / len(words)
-
-        # If diversity is low, we are looping.
         if diversity < 0.4:
             self.solipsism_counter += 1
             if self.solipsism_counter >= self.SOLIPSISM_THRESHOLD:
@@ -354,7 +418,7 @@ class ShimmerState:
 class DreamEngine:
     def __init__(self, events):
         self.events = events
-        self.PROMPTS = DREAMS.get("PROMPTS", ["{A} -> {B}?"])
+        self.PROMPTS = DREAMS.get("PROMPTS", ["{A} -> {B}?"]) if 'DREAMS' in globals() else []
 
     def hallucinate(self, vector: Dict[str, float]) -> str:
         # Placeholder for future expansion

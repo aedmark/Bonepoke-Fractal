@@ -294,11 +294,8 @@ class CommandProcessor:
         return True
 
     def _cmd_help(self, parts):
-        """
-        Dynamically generates help menu from docstrings.
-        """
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 9.9.3 MANUAL ---{self.P.RST}",
+            f"\n{self.P.CYN}--- BONEAMANITA 9.9.4 MANUAL ---{self.P.RST}",
             f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"
         ]
 

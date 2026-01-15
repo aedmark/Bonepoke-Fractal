@@ -1,5 +1,6 @@
 # bone_physics.py - The Laws of Nature
 # "Gravity is just a habit that space-time hasn't been able to break."
+# Refactored by SLASH 9.9.4: Semantic Structure Recognition
 
 import math, re, random
 from typing import Dict, List, Any, Tuple, Optional
@@ -10,8 +11,8 @@ from bone_village import CycleContext
 from bone_bus import Prisma, BoneConfig
 
 SOLVENT_WORDS = {'i', 'you', 'said', 'the', 'and', 'was', 'a', 'is', 'it'}
-MAX_SOLVENT_TOLERANCE = 30.0
-TEXT_LENGTH_SCALAR = 1000.0
+MAX_SOLVENT_TOLERANCE = 40.0
+TEXT_LENGTH_SCALAR = 1500.0
 
 
 @dataclass
@@ -49,6 +50,9 @@ class PhysicsPacket:
     def __setitem__(self, key, value):
         setattr(self, key, value)
 
+    def __contains__(self, key):
+        return hasattr(self, key)
+
     def get(self, key, default=None):
         return getattr(self, key, default)
 
@@ -66,6 +70,21 @@ class PhysicsPacket:
     def to_dict(self):
         return {f.name: getattr(self, f.name) for f in fields(self)}
 
+class TemporalDynamics:
+    def __init__(self):
+        self.voltage_history = []
+        self.window = 3
+    def commit(self, voltage):
+        self.voltage_history.append(voltage)
+        if len(self.voltage_history) > self.window:
+            self.voltage_history.pop(0)
+    def get_velocity(self):
+        if len(self.voltage_history) < 2:
+            return 0.0
+        return round(
+            (self.voltage_history[-1] - self.voltage_history[0])
+            / len(self.voltage_history),
+            2,)
 
 class PhysicsResolver:
     @staticmethod
@@ -75,9 +94,9 @@ class PhysicsResolver:
         constructive = counts.get("constructive", 0)
 
         raw_charge = (
-            (heavy * config.PHYSICS.WEIGHT_HEAVY) +
-            (explosive * config.PHYSICS.WEIGHT_EXPLOSIVE) +
-            (constructive * config.PHYSICS.WEIGHT_CONSTRUCTIVE)
+                (heavy * config.PHYSICS.WEIGHT_HEAVY) +
+                (explosive * config.PHYSICS.WEIGHT_EXPLOSIVE) +
+                (constructive * config.PHYSICS.WEIGHT_CONSTRUCTIVE)
         )
 
         final_voltage = raw_charge * config.KINETIC_GAIN
@@ -123,7 +142,6 @@ class PhysicsResolver:
 class TheTensionMeter:
     """
     The Eye of the System.
-    It looks at the text and collapses the wave function into numbers.
     """
     def __init__(self, events):
         self.events = events
@@ -234,9 +252,6 @@ class TheTensionMeter:
                 counts[assigned_cat] += 1
 
     def _measure_integrity(self, words: List[str], graph: Dict, counts: Counter) -> Dict:
-        """
-        Measures the structural strength of the thought based on connections in the graph.
-        """
         if not words:
             return {"kappa": 0.0, "psi": 0.0, "mass": 0.0}
 
@@ -359,6 +374,51 @@ class TheTensionMeter:
         if re.search(r"(.)\1{2,}", word): return False
         return True
 
+class VSL_DissipativeRefusal:
+    def __init__(self, memory):
+        self.mem = memory
+        self.vented_cycles = 0
+
+    def check(self, physics):
+        # Only vent if we are truly incoherent
+        is_word_salad = (physics["E"] > 0.85 and physics["kappa"] < 0.1)
+        is_manic = (physics["repetition"] > 0.8 and physics["voltage"] < 5.0)
+
+        if is_word_salad or is_manic:
+            return self._vent(physics)
+        return None
+
+    def _vent(self, physics):
+        scattered = []
+        # Use a generator to find valid targets efficiently.
+        targets = (w for w in physics["clean_words"] if len(w) > 4)
+
+        # Take up to 3 valid targets
+        candidates = []
+        for _ in range(3):
+            try:
+                candidates.append(next(targets))
+            except StopIteration:
+                break
+
+        for word in candidates:
+            if word in self.mem.graph:
+                edges = list(self.mem.graph[word]["edges"].keys())
+                # Prune connections, not the node itself (Ephemeralization)
+                if edges:
+                    target = random.choice(edges)
+                    del self.mem.graph[word]["edges"][target]
+                    scattered.append(f"{word}->{target}")
+
+        self.vented_cycles += 1
+        if not scattered:
+            return f"{Prisma.GRY}DISSIPATIVE VENT: Pressure high, but no loose connections found.{Prisma.RST}"
+
+        return (
+            f"{Prisma.RED}DISSIPATIVE REFUSAL: Entropy Critical.{Prisma.RST}\n"
+            f"   {Prisma.GRY}Severing synaptic bonds: {scattered}{Prisma.RST}\n"
+            f"   {Prisma.CYN}Thermodynamic hygiene maintained.{Prisma.RST}"
+        )
 
 class TheBouncer:
     def __init__(self, engine_ref):
@@ -447,11 +507,14 @@ class VSL_Humility:
         return False, text
 
 class VSL_Geodesic:
+    """
+    The Compass.
+    """
     def __init__(self):
         self.manifolds = {
             "THE_MUD":      {"E": 0.8, "B": 0.2, "Desc": "High Fatigue, Low Tension (Stagnation)"},
-            "THE_FORGE":    {"E": 0.1, "B": 0.9, "Desc": "Low Fatigue, High Tension (Transformation)"},
-            "THE_AERIE":    {"E": 0.2, "B": 0.1, "Desc": "Low Fatigue, Low Tension (Abstraction)"},
+            "THE_FORGE":    {"E": 0.2, "B": 0.9, "Desc": "Low Fatigue, High Tension (Transformation)"},
+            "THE_AERIE":    {"E": 0.1, "B": 0.1, "Desc": "Low Fatigue, Low Tension (Abstraction)"},
             "THE_GLITCH":   {"E": 0.9, "B": 0.9, "Desc": "High Fatigue, High Tension (Collapse)"},
             "THE_GARDEN":   {"E": 0.5, "B": 0.5, "Desc": "Balanced State (Integration)"}
         }
@@ -466,19 +529,40 @@ class VSL_Geodesic:
             "E":   ("☷", "KUN",   "Earth",    Prisma.OCHRE),
             "DEL": ("☱", "DUI",   "Lake",     Prisma.MAG)
         }
+        # Aliases for vector lookups
         self.TRIGRAM_MAP["TMP"] = self.TRIGRAM_MAP["PHI"]
         self.TRIGRAM_MAP["TEX"] = self.TRIGRAM_MAP["STR"]
         self.TRIGRAM_MAP["XI"]  = self.TRIGRAM_MAP["BET"]
         self.TRIGRAM_MAP["LQ"]  = self.TRIGRAM_MAP["DEL"]
 
-    def calculate_metrics(self, text: str) -> Tuple[float, float]:
+    def calculate_metrics(self, text: str, counts: Dict[str, int] = None) -> Tuple[float, float]:
         length = len(text)
         if length == 0: return 0.0, 0.0
         text_lower = text.lower()
-        solvent_count = sum(text_lower.count(w) for w in SOLVENT_WORDS)
-        e_metric = min(1.0, (solvent_count / MAX_SOLVENT_TOLERANCE) + (length / TEXT_LENGTH_SCALAR))
-        c_count = sum(1 for char in text if char in '!?%@#$')
-        base_b = min(1.0, math.log1p(c_count + 1) / math.log1p(length + 1))
+
+        # 1. Calculate Solvent Density (The Glue)
+        # Higher solvent count = More standard English structure = LOWER Entropy
+        solvent_hits = sum(text_lower.count(w) for w in SOLVENT_WORDS)
+        solvent_density = solvent_hits / max(1, (length / 5)) # Approx word count
+
+        # 2. ENTROPY (E): Driven by length and lack of glue.
+        # Long texts without solvents are "Word Salads" (High E).
+        # Long texts WITH solvents are "Literature" (Low E).
+        raw_chaos = (length / TEXT_LENGTH_SCALAR)
+        glue_factor = min(1.0, solvent_density * 2.0) # 0.0 to 1.0
+
+        e_metric = min(1.0, raw_chaos * (1.0 - (glue_factor * 0.8)))
+
+        # 3. STRUCTURE (B): Punctuation + Semantic Mass
+        c_count = sum(1 for char in text if char in '!?%@#$;,')
+        heavy_words = 0
+        if counts:
+            heavy_words = counts.get("heavy", 0) + counts.get("constructive", 0) + counts.get("sacred", 0)
+
+        # Fuller Lens: Mass provides gravity.
+        structure_score = c_count + (heavy_words * 2)
+        base_b = min(1.0, math.log1p(structure_score + 1) / math.log1p(length * 0.1 + 1))
+
         return round(e_metric, 3), round(base_b, 3)
 
     def locate_manifold(self, e_val: float, b_val: float) -> Tuple[str, float]:
@@ -518,7 +602,8 @@ class VSL_32Valve:
             "photo": "heavy", "suburban": "abstract"}
 
     def analyze(self, physics: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        e_val, b_val = self.geodesic.calculate_metrics(physics["raw_text"])
+        counts = physics.get("counts", {})
+        e_val, b_val = self.geodesic.calculate_metrics(physics["raw_text"], counts)
         physics["E"] = e_val
         physics["B"] = b_val
 
@@ -533,12 +618,30 @@ class VSL_32Valve:
         return self._audit_rupture(physics, e_val, b_val)
 
     def _audit_rupture(self, physics, e_val, b_val):
-        if e_val > 0.75 and b_val < 0.15:
+        # Schur Lens: Don't be a killjoy.
+        # If the user is writing a novel (High B, High E), but the 'truth_ratio' (internal coherence)
+        # is high, we permit it.
+        truth = physics.get("truth_ratio", 0.0)
+
+        if e_val > 0.85 and b_val < 0.15:
             return self._rupture(physics, "FATIGUE_FAILURE", "System diluted. Narrative coherence dissolving.")
+
         if b_val > 0.8 and e_val < 0.3:
             return self._rupture(physics, "MANIC_FRACTURE", "Crystal lattice too tight. Structure shattering.")
+
+        # The previous crash point: High Energy + High Entropy
         if b_val > 0.7 and e_val > 0.6:
+            # FIX: If Truth is high, this is barely controlled chaos (Art), not a Glitch.
+            if truth > 0.6:
+                physics["flow_state"] = "SUPERCONDUCTIVE"
+                return {
+                    "type": "FLOW_EVENT",
+                    "mode": "SUPERCONDUCTIVE",
+                    "log": f"{Prisma.CYN}🌊 VSL VALVE OPEN: High Density Input accepted. Entering Superconductive State.{Prisma.RST}"
+                }
+
             return self._rupture(physics, "GLITCH_SINGULARITY", "High Energy + High Entropy. Semantic collapse.")
+
         return None
 
     def _rupture(self, physics, mode, reason):
@@ -548,9 +651,11 @@ class VSL_32Valve:
         anomaly = self.lex.harvest(target_flavor)
         if anomaly == "void":
             anomaly = "something_completely_different"
+
         physics["voltage"] = 25.0
         physics["narrative_drag"] = 0.0
         physics["system_surge_event"] = True
+
         return {
             "type": "RUPTURE",
             "mode": mode,
@@ -592,33 +697,6 @@ class VSL_HNInterface:
             text = re.sub(r'\[.*?]:?', '', text)
             return text.strip()
         return text
-
-class VSL_DissipativeRefusal:
-    def __init__(self, memory):
-        self.mem = memory
-        self.vented_cycles = 0
-    def check(self, physics):
-        is_word_salad = (physics["E"] > 0.8 and physics["kappa"] < 0.2)
-        is_manic = (physics["repetition"] > 0.7 and physics["voltage"] < 5.0)
-        if is_word_salad or is_manic:
-            return self._vent(physics)
-        return None
-    def _vent(self, physics):
-        scattered = []
-        targets = physics["clean_words"][:3]
-        for word in targets:
-            if word in self.mem.graph:
-                edges = list(self.mem.graph[word]["edges"].keys())
-                for target in edges:
-                    if target in self.mem.graph[word]["edges"]:
-                        del self.mem.graph[word]["edges"][target]
-                scattered.append(word)
-        self.vented_cycles += 1
-        return (
-            f"{Prisma.RED}DISSIPATIVE REFUSAL: State Non-Computable.{Prisma.RST}\n"
-            f"   {Prisma.GRY}Severing semantic bonds for: {scattered}{Prisma.RST}\n"
-            f"   {Prisma.CYN}Thermodynamic hygiene maintained.{Prisma.RST}"
-        )
 
 class VSL_ChromaticController:
     PALETTE = {

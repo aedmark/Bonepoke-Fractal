@@ -1,4 +1,4 @@
-# BONEAMANITA 9.9.3 - "The Garden is Open..."
+# BONEAMANITA 9.9.4 - "The Bone Machine"
 # Architects: SLASH, KICHO, Taylor & Edmark
 
 import json, os, random, re, time, math, copy, traceback
@@ -6,18 +6,19 @@ from collections import Counter, deque
 from typing import List, Optional, Tuple, Dict, Any
 from dataclasses import dataclass, field
 from bone_commands import CommandProcessor
-from bone_village import TheLexicon, CycleContext, DeathGen, TheTensionMeter, TemporalDynamics, ApeirogonResonance, MirrorGraph, TheHoloProjector, SoritesIntegrator, TheCrucible, TheForge, TheTheremin, TheNavigator, LiteraryJournal, TheAlmanac, StrunkWhiteProtocol, TheTinkerer, TheCartographer
+from bone_physics import TheBouncer, VSL_32Valve, VSL_ChromaticController, TheTensionMeter, TheTangibilityGate, \
+    TemporalDynamics, ZoneInertia, CosmicDynamics
+from bone_village import TheLexicon, CycleContext, DeathGen, ApeirogonResonance, MirrorGraph, TheHoloProjector, SoritesIntegrator, TheNavigator, LiteraryJournal, TheAlmanac, StrunkWhiteProtocol, TheTinkerer, TheCartographer
 from bone_data import LENSES
 from bone_inventory import GordonKnot
 from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont, MycelialNetwork, SporeCasing, LocalFileSporeLoader
 from bone_body import BioSystem, MitochondrialForge, EndocrineSystem, MetabolicGovernor, SomaticLoop, ViralTracer, ThePacemaker, NoeticLoop
-from bone_physics import ZoneInertia, TheBouncer, VSL_32Valve, VSL_ChromaticController, CosmicDynamics, TheTangibilityGate
 from bone_brain import NeuroPlasticity, DreamEngine, TheCortex, ShimmerState, LLMInterface
 from bone_personality import UserProfile, EnneagramDriver, SynergeticLensArbiter, PublicParksDepartment, TherapyProtocol, KintsugiProtocol, LimboLayer, TheFolly, ChorusDriver, CassandraProtocol, TheBureau
 from bone_viewer import GeodesicRenderer
 from bone_bus import EventBus, Prisma, BoneConfig
 from bone_lexicon import TheLexicon, LiteraryReproduction
-
+from bone_machine import TheCrucible, TheForge, TheTheremin
 
 @dataclass
 class MindSystem:
@@ -488,7 +489,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 9.9.3', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 9.9.4', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
