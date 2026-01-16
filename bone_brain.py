@@ -1,11 +1,12 @@
 # bone_brain.py
 # "The brain is a machine for jumping to conclusions." - S. Pinker
 
-import re, time, json,urllib.request, urllib.error
+import re, time, json, urllib.request, urllib.error
 from typing import Dict, Any, List, Optional
 from collections import deque
 from bone_data import LENSES, DREAMS
 from bone_bus import Prisma
+from bone_translation import RosettaStone
 
 class LLMInterface:
     ERR_CONNECTION = "[CONNECTION ERROR]"
@@ -101,19 +102,21 @@ class PromptComposer:
         lens_role = mind.get("role", "The Observer")
         lens_name = mind.get("lens", "NARRATOR")
         sys_instruction = state.get("system_instruction", "")
-        mood_descriptors = self._interpret_bio(meta, bio)
-        mood_block = " ".join(mood_descriptors) if mood_descriptors else "You are functioning within normal parameters."
-        voltage = phys.get("voltage", 0.0)
-        drag = phys.get("narrative_drag", 0.0)
-        style_instruction = self._interpret_physics(voltage, drag)
+        semantic_state = RosettaStone.translate(phys, bio)
+        somatic_block = RosettaStone.render_system_prompt_addition(semantic_state)
+        chem = bio.get("chem", {})
+        bio_mood = []
+        if chem.get("ADR", 0) > 0.6: bio_mood.append("Heart racing (High Adrenaline).")
+        if chem.get("COR", 0) > 0.7: bio_mood.append("Defensive/Stressed (High Cortisol).")
+        if chem.get("DOP", 0) > 0.7: bio_mood.append("Reward seeking (High Dopamine).")
+        mood_block = " ".join(bio_mood) if bio_mood else "Biological state nominal."
         user_name = user_profile.get("name", "Traveler")
         confidence = user_profile.get("confidence", 0)
         social_context = ""
         if confidence > 10:
             social_context = (
                 f"INTERLOCUTOR: {user_name}\n"
-                f"RELATIONSHIP: You know this person. Do not act like a stranger. "
-                f"Use their name ({user_name}) naturally.\n")
+                f"RELATIONSHIP: Familiar. Use their name ({user_name}) naturally.\n")
         else:
             social_context = "INTERLOCUTOR: Unknown. Be cautious but curious.\n"
         ballast_instruction = ""
@@ -131,9 +134,7 @@ class PromptComposer:
             f"{social_context}\n"
             f"BIOLOGICAL STATE:\n"
             f"{mood_block}\n\n"
-            f"PHYSICS & STYLE:\n"
-            f"{style_instruction}\n"
-            f"Voltage: {voltage:.1f} | Drag: {drag:.1f}\n\n"
+            f"{somatic_block}\n"
             f"{ballast_instruction}\n"
             f"MEMORY CONTEXT:\n"
             f"Current Thought: {mind.get('thought', 'Empty')}\n"
@@ -142,26 +143,10 @@ class PromptComposer:
             f"{user_name}: \"{user_query}\"\n\n"
             f"DIRECTIVE:\n"
             f"Respond as the persona above. "
+            f"Reflect the Tone, Pacing, and Sensation described in the Somatic Translation. "
             f"Do not break character. Keep responses concise (under 80 words)."
             f"Inventory: {', '.join(inventory_list) if inventory_list else 'Empty pockets.'}\n")
         return prompt
-
-    def _interpret_bio(self, meta, bio) -> List[str]:
-        descriptors = []
-        chem = bio.get("chem", {})
-        if meta.get("health", 100) < 30: descriptors.append("You are wounded and fragile.")
-        if meta.get("stamina", 100) < 20: descriptors.append("You are exhausted.")
-        if chem.get("ADR", 0) > 0.6: descriptors.append("Your heart is racing. You are hyper-vigilant.")
-        if chem.get("DOP", 0) > 0.7: descriptors.append("You feel a surge of reward.")
-        if chem.get("COR", 0) > 0.7: descriptors.append("You are stressed and defensive.")
-        return descriptors
-
-    def _interpret_physics(self, voltage, drag) -> str:
-        style = "Write normally."
-        if voltage > 12.0: style = "Write with high energy. Use short, punchy sentences."
-        elif voltage < 4.0: style = "Write slowly. Be verbose and lethargic."
-        if drag > 5.0: style += " You feel heavy resistance. Struggle to complete thoughts."
-        return style
 
 class ResponseValidator:
     def __init__(self):

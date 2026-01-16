@@ -5,16 +5,25 @@
 **Release Codename:** _"The Good Place"_
 **Focus:** Ephemeralization, Cognitive Persistence, and Structural Decoupling.
 
-### 🧠 The Brain (Lexicon & Memory)
+### 🧠 The Brain (Lexicon, Memory & Cognition)
+
+**File:** `bone_translation.py` **(New)**
+
+- **Feature (The Rosetta Stone):** Introduced a dedicated translation layer (`RosettaStone` class) to convert raw Physics metrics (Voltage, Drag, Kappa) into linguistic instructions (Tone, Pacing, Sensation).
+- _Pinker Lens:_ The system now explicitly articulates its internal state in English before generating text. Observation is separated from Interpretation.
+- _Fuller Lens:_ Decoupled the Physics Engine from the LLM. The Brain no longer needs to know math; it just receives the "Somatic State."
+
+**File:** `bone_brain.py`
+
+- **Refactor (Semantic Bridge):** Replaced hardcoded logic in `PromptComposer` (specifically `_interpret_physics`) with calls to `RosettaStone`.
+- _Schur Lens:_ Solved the "Chidi Anagonye" problem. The brain no longer dithers over the math; it just reads the translation and acts.
 
 **File:** `bone_lexicon.py`
 
 - **Feature (Hive Mind):** Implemented `cortex_hive.json` persistence. The system now remembers learned associations across sessions.
 - _Pinker Lens:_ Language acquisition is now cumulative, not transient.
-
 - **Optimization (Reverse Index):** Replaced iterative list searching with an O(1) Reverse Index (Dictionary/Set lookup).
 - _Fuller Lens:_ Reduced lookup complexity from O(N\*M) to O(1). Massive energy savings.
-
 - **Refactor (Phonetics):** Rewrote `SemanticsBioassay.assay` to perform phonetic analysis in a single pass over the string rather than five separate passes.
 
 ### 💪 The Body (Physics & Mechanics)
@@ -23,7 +32,6 @@
 
 - **Optimization:** Updated `TheTensionMeter._tally_categories` to utilize the new `Lexicon` Reverse Index.
 - _Fuller Lens:_ The physics engine now "knows" word weights instantly via set intersection rather than guessing.
-
 - **Fix:** Added explicit handling for `"kinetic"` words in the physics loop, preventing them from being ignored if not phonetically obvious.
 
 ### 🧬 The Genes (Configuration & Data)
@@ -32,7 +40,6 @@
 
 - **Fix:** Implemented `_save_config` in `GenesisProtocol`.
 - _Schur Lens:_ The system no longer lies to you about saving your settings. The "Save" button is actually connected to wires now.
-
 - **UX:** Added user-friendly confirmation messages using `Prisma` colors.
 
 **File:** `bone_data.py`
@@ -57,12 +64,14 @@
 
 ### 🔍 Summary of Impact
 
-| Metric           | v9.9.8 (Old)  | v10.0 (New)     | Note                                   |
-| ---------------- | ------------- | --------------- | -------------------------------------- |
-| **Lookup Speed** | Linear (Slow) | Constant (Fast) | "Is 'rock' heavy?" is now instant.     |
-| **Memory**       | Amnesiac      | Persistent      | Remembers "fluff" = "antigen" forever. |
-| **Config**       | Broken        | Functional      | API Keys and Color settings now save.  |
-| **Code Style**   | Spaghetti     | Modular         | Logic and Data are strictly separated. |
+| Metric           | v9.9.8 (Old)   | v10.0 (New)         | Note                                        |
+| ---------------- | -------------- | ------------------- | ------------------------------------------- |
+| **Cognition**    | Hardcoded Math | **Semantic Bridge** | Physics translates directly to Tone/Pacing. |
+| **Lookup Speed** | Linear (Slow)  | Constant (Fast)     | "Is 'rock' heavy?" is now instant.          |
+| **Memory**       | Amnesiac       | Persistent          | Remembers "fluff" = "antigen" forever.      |
+| **Config**       | Broken         | Functional          | API Keys and Color settings now save.       |
+| **Code Style**   | Spaghetti      | Modular             | Logic and Data are strictly separated.      |
+
 
 
 **v9.9.8 - The "Ron Swanson" Patch**
