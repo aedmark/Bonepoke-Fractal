@@ -506,3 +506,43 @@ ALMANAC_DATA = {
     },
     "DEFAULT_SEED": "Look closely at the most boring thing in the room."
 }
+SOMATIC_LIBRARY = {
+    "TONE": {
+        "CRITICAL_HIGH": "Manic, high-frequency, bordering on incoherent.",
+        "HIGH": "Energetic, engaged, productive.",
+        "TRANSITION_UP": "Warming up, accelerating, finding rhythm.", # Buffer Zone
+        "NEUTRAL": "Neutral, observant, balanced.",
+        "TRANSITION_DOWN": "Groggy, slowing down, heavy.", # Buffer Zone
+        "LOW": "Lethargic, depressive, heavy.",
+        "VOID": "Hollow, absent, null."
+    },
+    "PACING": {
+        "CRITICAL_HIGH": "Rapid-fire. Short sentences. No commas. Fragments.",
+        "HIGH": "Active voice. Forward momentum. Punchy.",
+        "NEUTRAL": "Standard conversational rhythm.",
+        "LOW": "Meandering sentences. Ellipses... Long pauses...",
+        "VOID": "Silence. Static. ..."
+    },
+    "SENSATION": {
+        "MUD": "You feel like you are walking through waist-deep mud. Every word costs effort.",
+        "SOLID": "You feel the ground solid beneath your feet.",
+        "FLOAT": "You feel weightless, almost untethered. Frictionless.",
+        "VOID": "You feel nothing. There is no ground."
+    },
+    "FOCUS": {
+        "LOCKED": "You are rigid, dogmatic, obsessed with order and structure.",
+        "COHERENT": "You are flexible but coherent.",
+        "DRIFT": "You are struggling to maintain a coherent thought. Drift is high.",
+        "VOID": "No signal."
+    },
+    "MATTER": {
+        "MAGMA": "MAGMA (Molten Solid)",
+        "PLASMA": "PLASMA (Ionized Gas)",
+        "SUBLIMATION": "SUBLIMATION (Solid to Gas)",
+        "GAS": "GAS/VAPOR (High Entropy)",
+        "SOLID": "SOLID/STONE (High Resistance)",
+        "ENERGY": "ELECTRICITY (Pure Energy)",
+        "LIQUID": "LIQUID (Flow State)",
+        "VOID": "VOID (Null State)"
+    }
+}

@@ -1,4 +1,4 @@
-# BONEAMANITA 10.0.1 - "Eden's Apple"
+# BONEAMANITA 10.0.3 - "Eden's Apple (Bitten)"
 # Architects: SLASH, KICHO, The Courtyard, Taylor & Edmark
 
 import json, os, random, re, time, math, copy, traceback
@@ -604,7 +604,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.0.1', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.0.3', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 

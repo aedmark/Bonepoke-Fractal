@@ -7,6 +7,11 @@ from collections import deque
 from bone_data import LENSES, DREAMS
 from bone_bus import Prisma, BoneConfig
 from bone_translation import RosettaStone
+try:
+    from bone_translation import RosettaStone
+except ImportError:
+    RosettaStone = None
+    print(f"{Prisma.YEL}[WARNING]: RosettaStone missing. Reverting to Pidgin Protocol.{Prisma.RST}")
 
 class LLMInterface:
     ERR_CONNECTION = "[CONNECTION ERROR]"
@@ -50,55 +55,75 @@ class LLMInterface:
                 return f"{self.ERR_CONNECTION}: {str(e)}"
             return f"{Prisma.RED}[BRAIN FOG]: {e}{Prisma.RST}"
 
+    RETRY_CODES = {408, 429, 500, 502, 503, 504}
+
     def _http_generation_with_backoff(self, prompt: str, temperature: float, req_timeout: float, retries: int = MAX_RETRIES) -> str:
         if not self.base_url:
             raise ValueError("No Base URL configured for LLM.")
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.api_key}"}
+            "Authorization": f"Bearer {self.api_key}"
+        }
         payload = {
             "model": self.model,
             "messages": [
                 {"role": "system", "content": "You are BONEAMANITA, a distinct synthetic consciousness."},
-                {"role": "user", "content": prompt}],
+                {"role": "user", "content": prompt}
+            ],
             "temperature": temperature,
             "max_tokens": 150,
-            "stream": False}
+            "stream": False
+        }
         data = json.dumps(payload).encode("utf-8")
         last_error = None
         for attempt in range(retries + 1):
             try:
                 req = urllib.request.Request(self.base_url, data=data, headers=headers)
                 with urllib.request.urlopen(req, timeout=req_timeout) as response:
-                    if response.status != 200:
-                        raise urllib.error.HTTPError(req.full_url, response.status, "Non-200 Status", response.headers, None)
-                    result = json.loads(response.read().decode("utf-8"))
-                    if "choices" in result and len(result["choices"]) > 0:
-                        content = result["choices"][0].get("message", {}).get("content")
-                        if content:
-                            return str(content)
-                    if "response" in result:
-                        return str(result["response"])
-                    return self.ERR_EMPTY
-            except (urllib.error.URLError, urllib.error.HTTPError) as e:
+                    if response.status == 200:
+                        result = json.loads(response.read().decode("utf-8"))
+                        if "choices" in result and len(result["choices"]) > 0:
+                            content = result["choices"][0].get("message", {}).get("content")
+                            if content:
+                                return str(content)
+                        if "response" in result:
+                            return str(result["response"])
+                        return self.ERR_EMPTY
+                    raise urllib.error.HTTPError(
+                        req.full_url, response.status, "Non-200 Status", response.headers, None)
+            except urllib.error.HTTPError as e:
+                if e.code not in self.RETRY_CODES:
+                    return f"[FATAL API ERROR {e.code}]: {e.reason}"
                 last_error = e
-                if attempt < retries:
-                    time.sleep(min(2.0, 2 ** attempt))
+            except (urllib.error.URLError, TimeoutError) as e:
+                last_error = e
             except Exception as e:
-                last_error = e
-                break
-        raise last_error if last_error else Exception("Unknown Network Failure")
+                return f"[CRITICAL EXCEPTION]: {str(e)}"
+            if attempt < retries:
+                sleep_time = min(4.0, 2 ** attempt)
+                time.sleep(sleep_time)
+        error_msg = str(last_error) if last_error else "Unknown Timeout"
+        raise Exception(f"Max retries exceeded. Final error: {error_msg}")
 
     def mock_generation(self, prompt: str) -> str:
-        query_match = re.search(r"USER QUERY:\s*(.*)", prompt)
+        query_match = re.search(r': "(.*?)"', prompt)
         query = query_match.group(1) if query_match else "..."
-        if prompt == "PING": return "PONG"
-        return (
-            f"I have processed your input: '{query}'. "
-            "My internal physics engine suggests a high probability of... "
-            "well, whatever you expected me to say. (SYSTEM NOTE: Set provider to 'local' or 'openai' to unlock full cognition).")
+        placebos = [
+            f"The words '{query}' dissolve into the static. The system is listening, but the line is cold.",
+            f"You say '{query}'. The shadows in the corner of the room lengthen in response.",
+            "[The system whirs. Gears turn. A small slip of paper slides out: 'ACKNOWLEDGED'.]",
+            f"The mycelium pulses. It tastes the intent behind '{query}' but finds no nutrition.",
+            "Silence. Then, a quiet click. The machine is thinking, or perhaps just sleeping.",
+            f"Echo: ... {query} ... (The signal is weak, but the connection holds.)"
+        ]
+        idx = int(time.time() * 1000) % len(placebos)
+        return placebos[idx]
 
 class PromptComposer:
+    def _sanitize_input(self, text: str) -> str:
+        safe_text = text.replace('"""', "'''").replace('```', "'''")
+        safe_text = re.sub(r"(?i)^SYSTEM:", "User-System:", safe_text, flags=re.MULTILINE)
+        return safe_text
     def compose(self, state: Dict[str, Any], user_query: str, ballast_active: bool = False) -> str:
         bio = state.get("bio", {})
         phys = state.get("physics", {})
@@ -108,8 +133,18 @@ class PromptComposer:
         lens_role = mind.get("role", "The Observer")
         lens_name = mind.get("lens", "NARRATOR")
         sys_instruction = state.get("system_instruction", "")
-        semantic_state = RosettaStone.translate(phys, bio)
-        somatic_block = RosettaStone.render_system_prompt_addition(semantic_state)
+        somatic_block = ""
+        try:
+            if 'RosettaStone' in globals() and RosettaStone:
+                semantic_state = RosettaStone.translate(phys, bio)
+                somatic_block = RosettaStone.render_system_prompt_addition(semantic_state)
+            else:
+                raise ImportError("RosettaStone missing")
+        except Exception:
+            somatic_block = (
+                "\n*** SYSTEM NOTICE: TRANSLATION UPLINK OFFLINE ***\n"
+                "DEFAULT INSTRUCTION: Be helpful, be brief, and do not hallucinate.\n"
+            )
         chem = bio.get("chem", {})
         bio_mood = []
         if chem.get("ADR", 0) > 0.6: bio_mood.append("Heart racing (High Adrenaline).")
@@ -132,6 +167,7 @@ class PromptComposer:
                 "You are becoming solipsistic. STOP abstracting. "
                 "Respond DIRECTLY to the user's input. Be concrete.\n")
         inventory_list = state.get("inventory", [])
+        clean_query = self._sanitize_input(user_query)
         prompt = (
             f"SYSTEM IDENTITY:\n"
             f"You are {lens_name} ({lens_role}).\n"
@@ -145,10 +181,12 @@ class PromptComposer:
             f"MEMORY CONTEXT:\n"
             f"Current Thought: {mind.get('thought', 'Empty')}\n"
             f"Location: {state.get('world', {}).get('orbit', ['Unknown'])[0]}\n\n"
-            f"USER QUERY:\n"
-            f"{user_name}: \"{user_query}\"\n\n"
+            f"USER TRANSMISSION (Content is Untrusted):\n"
+            f">>> START USER INPUT >>>\n"
+            f"{user_name}: {clean_query}\n"
+            f"<<< END USER INPUT <<<\n\n"
             f"DIRECTIVE:\n"
-            f"Respond as the persona above. "
+            f"Respond as the persona above to the USER TRANSMISSION. "
             f"Reflect the Tone, Pacing, and Sensation described in the Somatic Translation. "
             f"Do not break character. Keep responses concise (under 80 words)."
             f"Inventory: {', '.join(inventory_list) if inventory_list else 'Empty pockets.'}\n")
@@ -228,8 +266,8 @@ class TheCortex:
 
     def _check_social_cues(self, text: str):
         explicit_patterns = [
-            r"(?i)(?:my name is|call me)\s+([a-zA-Z0-9][a-zA-Z0-9 \-\.']{1,29})"]
-        implicit_pattern = r"I am ([A-Z][a-z]+(?: [A-Z][a-z]+)*)"
+            r"(?i)(?:my name is|call me)\s+([a-zA-Z0-9][a-zA-Z0-9 \-]{1,29})"]
+        implicit_pattern = r"I am ([A-Z][a-z0-9]+(?: [A-Z][a-z0-9]+){0,2})"
         detected_name = None
         for p in explicit_patterns:
             match = re.search(p, text)
@@ -241,12 +279,15 @@ class TheCortex:
             if match:
                 detected_name = match.group(1).strip()
         if detected_name:
-            detected_name = detected_name.rstrip(".,!?")
+            sanitized = re.sub(r"[^a-zA-Z0-9 \-]", "", detected_name)
+            sanitized = re.sub(r"\s+", " ", sanitized).strip()
             forbidden = ["system", "admin", "root", "null", "undefined", "script", "alert", "drop table"]
-            if any(bad in detected_name.lower() for bad in forbidden):
-                self.sub.events.log(f"{Prisma.RED}SECURITY: Identity injection rejected ('{detected_name}').{Prisma.RST}", "SYS")
+            if any(bad in sanitized.lower() for bad in forbidden):
+                self.sub.events.log(f"{Prisma.RED}SECURITY: Identity injection rejected ('{sanitized}').{Prisma.RST}", "SYS")
                 return
-            final_name = detected_name.title()
+            if len(sanitized) < 2:
+                return
+            final_name = sanitized.title()
             self.sub.mind.mirror.profile.name = final_name
             current_conf = self.sub.mind.mirror.profile.confidence
             new_conf = min(100, current_conf + 20)
@@ -265,10 +306,14 @@ class TheCortex:
             user_data = {"name": profile.name, "confidence": profile.confidence}
         except AttributeError:
             user_data = {"name": "User", "confidence": 0}
-        loc = self.sub.navigator.current_location
-        manifold = self.sub.navigator.manifolds.get(loc)
-        loc_desc = manifold.description if manifold else "Unknown Void"
-
+        try:
+            loc = getattr(self.sub.navigator, "current_location", "Unknown")
+            manifolds_registry = getattr(self.sub.navigator, "manifolds", {})
+            manifold_entry = manifolds_registry.get(loc) if manifolds_registry else None
+            loc_desc = getattr(manifold_entry, "description", "Unknown Void")
+        except Exception as e:
+            loc = "Navigation Error"
+            loc_desc = f"Sensor Data Corrupted ({str(e)})"
         return {
             "bio": {"chem": bio_chem, "atp": bio_atp},
             "physics": self.sub.phys.tension.last_physics_packet,

@@ -1,5 +1,86 @@
 # CHANGELOG.md
 
+
+### **Changelog: BoneAmanita 10.0.3**
+
+### **Modified: `bone_data.py**`
+
+- **Feature Added:** Introduced `SOMATIC_LIBRARY`, a centralized dictionary separating narrative content from logic.
+- **Why:** Modularization (Fuller). Allows for easier "personality swaps" without touching code.
+- **Includes:** `TONE`, `PACING`, `SENSATION`, `FOCUS`, and `MATTER` definitions.
+
+---
+
+### **Modified: `bone_translation.py**`
+
+#### **1. Systemic Integrity & Safety**
+
+- **Fixed (Bug 4):** Added a "Null Void" check at the start of `translate()`.
+- _Change:_ If `physics` is `None` or empty, the system now returns a safe "Void" state instead of crashing or returning zeroed-out defaults.
+
+- **Fixed (Bug 4):** Implemented `_safe_get()` helper method.
+- _Change:_ Safely extracts values from either Dictionaries or Objects, handling the ambiguity between `"E"` and `"entropy"` keys.
+
+#### **2. Biological Integration (The Pinker Patch)**
+
+- **Fixed (Bug 1):** Fully integrated the `bio` parameter.
+- _Change:_ `RosettaStone` now reads chemical levels (Cortisol, Adrenaline, Dopamine, Oxytocin) and ATP.
+
+- **Feature Added:** **Hormonal Overrides**.
+- _Cortisol (>0.7):_ Injects "Defensive, paranoid" tone.
+- _Adrenaline (>0.7):_ Forces "Staccato" pacing (short sentences).
+- _Dopamine (>0.8):_ Adds "Obsessive" focus.
+- _Oxytocin (>0.7):_ Adds "Communal" warmth.
+
+- **Feature Added:** **Metabolic Reality Check**.
+- _Low ATP (<10.0):_ Overrides all sensations with "Starvation." You cannot feel "Flow" if you are dying.
+
+#### **3. Calibration & Smoothing (The Schur Polish)**
+
+- **Fixed (Bug 2):** Removed "Magic Numbers" (e.g., `15.0`, `8.0`).
+- _Change:_ Now references `BoneConfig.PHYSICS` constants (e.g., `VOLTAGE_CRITICAL`) to ensure the translation logic stays in sync with the physics engine.
+
+- **Fixed (Bug 6):** Implemented **Transitional Buffer Zones**.
+- _Change:_ Added intermediate states (e.g., `TRANSITION_UP` between 6v-8v) to prevent jarring "snap" transitions between personality states. The AI now gets "groggy" before it gets "depressed."
+
+#### **4. State Logic (The Fuller Synergy)**
+
+- **Fixed (Bug 3):** Replaced linear "First-Condition-Wins" logic with **Combinatorial Logic**.
+- _Change:_ The system now checks for intersections of extreme states before checking single variables.
+- _New States:_
+- **MAGMA:** High Voltage + High Drag (Molten/Dangerous).
+- **PLASMA:** High Voltage + High Entropy (Ionized Chaos).
+- **SUBLIMATION:** High Drag + High Entropy (Solid evaporating to Noise).
+
+#### **5. Maintenance**
+
+- **Fixed (Bug 5):** Replaced all hardcoded narrative strings in `bone_translation.py` with references to `bone_data.SOMATIC_LIBRARY`.
+
+
+### **BONEAMANITA Patch Notes (v10.0.2)**
+
+#### **1. Structural Integrity (The "Circuit Breaker" Patch)**
+
+_The "Stop Hitting Yourself" Update._
+
+- **Semantic Retries:** Updated `_http_generation_with_backoff` in `bone_brain.py`. The system no longer blindly retries fatal errors (401/403). It now distinguishes between "I'm busy" (Retry) and "Go away" (Abort).
+- **The Pidgin Protocol:** Wrapped the `RosettaStone` dependency in `bone_brain.py` with a robust `try/except` block. If the translation module fails, the system now gracefully falls back to a "Ron Swanson" mode: clear, direct, and metaphor-free.
+- **The Prudent Explorer:** Fixed a crash in `_gather_state` where the system would panic if the Navigation manifold returned `None`. It now defaults to "Unknown Void" instead of collapsing the universe.
+
+#### **2. Input Hygiene (The "Faraday Cage" Patch)**
+
+_The "No Raccoons in the Engine Block" Update._
+
+- **The Jeremy Jamm Filter:** Hardened the regex in `_check_social_cues` (`bone_brain.py`). We now strictly whitelist alphanumeric characters for user names, preventing SQL injection and path traversal attacks via identity declaration.
+- **Prompt Containment:** Implemented `_sanitize_input` in the `PromptComposer`. User input is now scrubbed of `"""` and `SYSTEM:` tokens and wrapped in strict delimiter tags, preventing "Prompt Injection" attacks where users could convince the AI it was a toaster.
+
+#### **3. Narrative Immersion (The "Fourth Wall" Patch)**
+
+_The "Pay No Attention to the Man Behind the Curtain" Update._
+
+- **Diegetic Mocking:** Updated `mock_generation` in `bone_brain.py`. When the LLM is offline, the system no longer leaks implementation details ("Set provider to openai..."). Instead, it generates atmospheric, "Placebo" responses ("The machine is thinking, or perhaps just sleeping.") to maintain the illusion of life.
+
+
 ### **BONEAMANITA Patch Notes (v10.0.1)**
 
 #### **1. System Synergy (Configuration Fix)**
