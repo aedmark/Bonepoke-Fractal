@@ -6,67 +6,11 @@ from typing import Dict, List, Any, Tuple, Optional
 from collections import Counter
 from dataclasses import dataclass, field, fields
 from bone_lexicon import TheLexicon
-from bone_village import CycleContext
-from bone_bus import Prisma, BoneConfig
+from bone_bus import Prisma, BoneConfig, PhysicsPacket, CycleContext
 
 SOLVENT_WORDS = {'i', 'you', 'said', 'the', 'and', 'was', 'a', 'is', 'it'}
 MAX_SOLVENT_TOLERANCE = 40.0
 TEXT_LENGTH_SCALAR = 1500.0
-
-@dataclass
-class PhysicsPacket:
-    voltage: float = 0.0
-    narrative_drag: float = 0.0
-    repetition: float = 0.0
-    clean_words: List[str] = field(default_factory=list)
-    counts: Dict[str, int] = field(default_factory=dict)
-    vector: Dict[str, float] = field(default_factory=dict)
-    psi: float = 0.0
-    kappa: float = 0.0
-    geodesic_mass: float = 0.0
-    beta_index: float = 1.0
-    gamma: float = 0.0
-    turbulence: float = 0.0
-    flow_state: str = "LAMINAR"
-    zone: str = "COURTYARD"
-    zone_color: str = "OCHRE"
-    truth_ratio: float = 0.0
-    raw_text: str = ""
-    antigens: int = 0
-    perfection_streak: int = 0
-    avg_viscosity: float = 0.0
-    E: float = 0.0
-    B: float = 0.0
-    humility_flag: bool = False
-    system_surge_event: bool = False
-    pain_signal: float = 0.0
-    manifold: str = "THE_MUD"
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def __setitem__(self, key, value):
-        setattr(self, key, value)
-
-    def __contains__(self, key):
-        return hasattr(self, key)
-
-    def get(self, key, default=None):
-        return getattr(self, key, default)
-
-    def update(self, data: Dict):
-        for k, v in data.items():
-            if hasattr(self, k):
-                setattr(self, k, v)
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]):
-        valid_keys = {f.name for f in fields(cls)}
-        filtered_data = {k: v for k, v in data.items() if k in valid_keys}
-        return cls(**filtered_data)
-
-    def to_dict(self):
-        return {f.name: getattr(self, f.name) for f in fields(self)}
 
 class TemporalDynamics:
     def __init__(self):

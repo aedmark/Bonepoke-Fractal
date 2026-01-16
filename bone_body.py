@@ -4,7 +4,6 @@ import math, random, time
 from collections import deque
 from dataclasses import dataclass, field
 from typing import Set, Optional, Dict, List, Any, Tuple
-from bone_brain import NeuroPlasticity, ShimmerState
 from bone_personality import SynergeticLensArbiter
 from bone_physics import PhysicsPacket
 from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont
@@ -18,9 +17,9 @@ class BioSystem:
     immune: MycotoxinFactory
     lichen: LichenSymbiont
     gut: HyphalInterface
-    plasticity: NeuroPlasticity
+    plasticity: Any
     governor: 'MetabolicGovernor'
-    shimmer: ShimmerState
+    shimmer: Any
     parasite: ParasiticSymbiont
 
 @dataclass

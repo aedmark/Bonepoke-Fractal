@@ -328,6 +328,11 @@ Do not break character. Do not explain the simulation rules unless asked.
                 self.config = safe_config.copy()
                 self.config["provider"] = "mock"
         self.type_out("\n...Booting Core Systems...", color=Prisma.GRY)
+        success, msg = BoneConfig.load_from_file(CONFIG_FILE)
+        if success:
+            self.type_out(f"...Config Synced: {msg}", color=Prisma.GRN)
+        else:
+            self.type_out(f"...Config Drift Detected: {msg}", color=Prisma.YEL)
         engine = BoneAmanita()
         if self.config["provider"] != "mock":
             self.type_out(f"...Connecting Neural Uplink ({self.config['provider']})...", color=Prisma.CYN)

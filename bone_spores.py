@@ -22,7 +22,7 @@ class BoneJSONEncoder(json.JSONEncoder):
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_10.0"
+        self.genome = "BONEAMANITA_10.0.1"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -133,7 +133,7 @@ class MycelialNetwork:
         self.graph = {}
         self.cortical_stack = deque(maxlen=15)
         self.fossils = deque(maxlen=200)
-        self.lineage_log = []
+        self.lineage_log = deque(maxlen=50)
         self.seeds = self.load_seeds()
         self.session_health = None
         self.session_stamina = None
@@ -290,6 +290,23 @@ class MycelialNetwork:
                         node_data["strata"]["growth_rate"] = round(growth, 3)
         return None, new_wells
 
+    def enforce_limits(self, current_tick: int):
+        prune_msg = self.prune_synapses()
+        victims = []
+        limit = BoneConfig.MAX_MEMORY_CAPACITY
+        safety_break = 0
+
+        while len(self.graph) > limit and safety_break < 10:
+            victim, log = self.cannibalize(current_tick=current_tick)
+            if victim:
+                victims.append(victim)
+            else:
+                break
+            safety_break += 1
+        if victims:
+            self.events.log(f"{Prisma.YEL}[GC]: Reclaimed {len(victims)} nodes to maintain capacity.{Prisma.RST}", "SYS")
+        return prune_msg
+
     def cannibalize(self, preserve_current=None, current_tick=0) -> Tuple[Optional[str], str]:
         protected = set()
         if preserve_current:
@@ -396,7 +413,13 @@ class MycelialNetwork:
             time_ago = int((time.time() - timestamp) / 3600)
             trauma_summary = {k:v for k,v in data.get("trauma_vector", {}).items() if v > 0.1}
             mutation_count = sum(len(v) for v in data.get("mutations", {}).values())
-            self.lineage_log.append({"source": session_source, "age_hours": time_ago, "trauma": trauma_summary, "mutations": mutation_count, "loaded_at": time.time()})
+            self.lineage_log.append({
+                "source": session_source,
+                "age_hours": time_ago,
+                "trauma": trauma_summary,
+                "mutations": mutation_count,
+                "loaded_at": time.time()
+            })
             if "fossils" in data:
                 self.fossils.extend(data["fossils"])
                 self.events.log(f"{Prisma.GRY}[OSSUARY]: Loaded {len(data['fossils'])} fossilized memories.{Prisma.RST}")

@@ -5,7 +5,7 @@ import re, time, json, urllib.request, urllib.error
 from typing import Dict, Any, List, Optional
 from collections import deque
 from bone_data import LENSES, DREAMS
-from bone_bus import Prisma
+from bone_bus import Prisma, BoneConfig
 from bone_translation import RosettaStone
 
 class LLMInterface:
@@ -15,13 +15,19 @@ class LLMInterface:
     DEFAULT_TIMEOUT = 5.0
     MAX_RETRIES = 1
 
-    def __init__(self, provider: str = "mock", base_url: str = None, api_key: str = None, model: str = None):
-        self.provider = provider.lower()
-        self.api_key = api_key or "sk-dummy-key-for-local"
-        self.model = model or "local-model"
+    def __init__(self, provider: str = None, base_url: str = None, api_key: str = None, model: str = None):
+        # PINKER LENS: Explicit fallback to the Single Source of Truth
+        self.provider = (provider or BoneConfig.PROVIDER).lower()
+        self.api_key = api_key or BoneConfig.API_KEY
+        self.model = model or BoneConfig.MODEL
+
+        # Logic to determine Base URL
         if base_url:
             self.base_url = base_url
+        elif BoneConfig.BASE_URL:
+            self.base_url = BoneConfig.BASE_URL
         else:
+            # Fallback defaults based on provider (as before)
             if self.provider == "ollama":
                 self.base_url = "http://localhost:11434/v1/chat/completions"
                 self.model = model or "llama3"
@@ -193,6 +199,7 @@ class TheCortex:
         prompt = self.composer.compose(full_state, user_input, self.ballast_state["active"])
         voltage = full_state["physics"].get("voltage", 5.0)
         dynamic_temp = min(1.2, max(0.2, voltage / 15.0))
+        start_think = self.sub.observer.clock_in()
         try:
             llm_response = self.llm.generate(prompt, temperature=dynamic_temp)
             if self.llm_failures > 0:
@@ -200,12 +207,15 @@ class TheCortex:
                 sim_result["logs"].append(f"{Prisma.GRN}CORTEX: Neural Uplink restored.{Prisma.RST}")
         except Exception as e:
             self.llm_failures += 1
+            self.sub.observer.log_error("LLM")
             sim_result["logs"].append(f"{Prisma.RED}CORTEX: LLM Failure ({self.llm_failures}/{self.MAX_FAILURES}): {e}{Prisma.RST}")
-
             if self.llm_failures >= self.MAX_FAILURES:
                 self.llm = LLMInterface(provider="mock")
                 sim_result["logs"].append(f"{Prisma.VIOLET}CORTEX: Too many failures. Lobotomizing to Mock Mode.{Prisma.RST}")
             llm_response = self.llm.mock_generation(prompt)
+        duration = self.sub.observer.clock_out(start_think, "llm")
+        if duration > 5.0:
+            sim_result["logs"].append(f"{Prisma.GRY}[METRICS]: High Cognitive Latency ({duration:.2f}s).{Prisma.RST}")
         validation = self.validator.validate(llm_response, full_state)
         final_text = llm_response
         if not validation["valid"]:

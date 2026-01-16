@@ -1,5 +1,39 @@
 # CHANGELOG.md
 
+### **BONEAMANITA Patch Notes (v10.0.1)**
+
+#### **1. System Synergy (Configuration Fix)**
+
+_The "Left Hand Now Knows What the Right Hand is Doing" Patch._
+
+- **Unified Truth:** `BoneConfig` in `bone_bus.py` is now the Single Source of Truth (SSOT).
+- **Active Loading:** Added `load_from_file` to `BoneConfig` to read external JSON files, preventing the "gaslighting" where the system ignored user settings.
+- **Propagation:** Updated `bone_genesis.py` to load config immediately upon launch.
+- **Brain Alignment:** Updated `LLMInterface` in `bone_brain.py` to inherit defaults directly from `BoneConfig`, fixing the case-sensitivity bug (`BASE_URL`) in the process.
+
+#### **2. Ephemeralization (Memory Leak Fix)**
+
+_The "Marie Kondo" Patch._
+
+- **Bounded History:** `lineage_log` in `bone_spores.py` converted to a `deque` (max 50). Ancestors exceeding this limit are now politely forgotten.
+- **The Reaper:** Added `enforce_limits()` to `MycelialNetwork`. If the graph exceeds `MAX_MEMORY_CAPACITY`, it now cannibalizes the oldest/weakest nodes to survive.
+- **Routine Hygiene:** Wired the reaper into the `_maintenance_prune` loop in `bone_main.py`. The garbage truck now runs every 10 ticks.
+
+#### **3. Metacognition (Telemetry & Performance)**
+
+_The "Department of Weights and Measures" Patch._
+
+- **The Observer:** Added `TheObserver` class to `bone_bus.py` to track cycle times, memory usage, and error rates using rolling windows.
+- **Stopwatch Installed:** Instrumented `TheCortex` in `bone_brain.py` to measure exactly how long the LLM takes to think ("Brain Fog" detection).
+- **Dashboarding:** Updated `BoneAmanita.process_turn` in `bone_main.py` to report performance degradation to the user UI.
+
+#### **4. Linguistic Hygiene (Refactoring)**
+
+_The "Shadow from Outer Space" Patch._
+
+- **Variable Exorcism:** Renamed the local variable `result` to `cortex_packet` in `BoneAmanita.process_turn` (inside `bone_main.py`) to avoid shadowing the global `result` variable in the `__main__` block. The linter is now appeased.
+
+
 ## 📜 BoneAmanita v10.0
 
 **Release Codename:** _"The Good Place"_
