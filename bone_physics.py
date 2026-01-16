@@ -418,6 +418,8 @@ class GeodesicDome:
             heavy_words = counts.get("heavy", 0) + counts.get("constructive", 0) + counts.get("sacred", 0)
         structure_score = c_count + (heavy_words * 2)
         base_b = min(1.0, math.log1p(structure_score + 1) / math.log1p(length * 0.1 + 1))
+        if length < 50:
+            base_b *= (length / 50.0)
         return round(e_metric, 3), round(base_b, 3)
 
     def locate_manifold(self, e_val: float, b_val: float) -> Tuple[str, float]:

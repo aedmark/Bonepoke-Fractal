@@ -28,7 +28,7 @@ class GenesisProtocol:
             "Ollama": {
                 "base_root": "http://localhost:11434",
                 "probe_path": "/api/tags",
-                "api_endpoint": "/api/chat",
+                "api_endpoint": "/v1/chat/completions",
                 "provider_id": "ollama",
                 "default_model": "gemma3"},
             "LM Studio": {
@@ -143,9 +143,10 @@ class GenesisProtocol:
                 "model": "mock-model"}
             self._save_config()
             return True
-        default_url = "http://localhost:11434/api/chat"
+        default_url = "http://localhost:11434/v1/chat/completions"
         if provider == "openai": default_url = "https://api.openai.com/v1/chat/completions"
-        elif provider == "lm_studio": default_url = "http://localhost:1234/v1/chat/completions"
+        elif provider == "lm_studio"\
+                : default_url = "http://localhost:1234/v1/chat/completions"
         print(f"2. {Prisma.WHT}Base URL?{Prisma.RST} (Default: {default_url})")
         base_url = input(f"{Prisma.paint('>', 'O')} ").strip()
         if not base_url:
@@ -334,6 +335,15 @@ Do not break character. Do not explain the simulation rules unless asked.
         else:
             self.type_out(f"...Config Drift Detected: {msg}", color=Prisma.YEL)
         engine = BoneAmanita()
+        if engine.mind.mirror.profile.confidence < 50:
+            print(f"\n{Prisma.CYN}[IDENTITY REQUIRED]{Prisma.RST}")
+            user_id = input("Enter User Designation: ").strip()
+            if user_id:
+                engine.mind.mirror.profile.name = user_id
+                engine.mind.mirror.profile.confidence = 100
+                print(f"...Identity '{user_id}' imprinted on cortex.")
+            else:
+                print("...Proceeding as Anonymous Traveler.")
         if self.config["provider"] != "mock":
             self.type_out(f"...Connecting Neural Uplink ({self.config['provider']})...", color=Prisma.CYN)
             try:

@@ -1,4 +1,4 @@
-# BONEAMANITA 10.0.3 - "Eden's Apple (Bitten)"
+# BONEAMANITA 10.0.4 - "Eden's Apple (Bitten)"
 # Architects: SLASH, KICHO, The Courtyard, Taylor & Edmark
 
 import json, os, random, re, time, math, copy, traceback
@@ -491,6 +491,7 @@ class BoneAmanita:
         self.director = ChorusDriver()
         self.tinkerer = TownHall.Tinkerer(self.gordon, self.events)
         self.almanac = TownHall.Almanac()
+        self.cosmic = CosmicDynamics()
 
         # 4. Loops & Processors
         self.cmd = CommandProcessor(self, Prisma, self.lex, BoneConfig, TownHall.Cartographer)
@@ -604,7 +605,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.0.3', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.0.4', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 

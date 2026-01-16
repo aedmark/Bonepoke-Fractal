@@ -1,0 +1,6 @@
+{
+    "provider": "ollama",
+    "base_url": "http://localhost:11434/v1/chat/completions",
+    "api_key": "sk-dummy-key",
+    "model": "llama3"
+}

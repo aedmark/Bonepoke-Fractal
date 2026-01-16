@@ -12,37 +12,48 @@ try:
 except ImportError:
     RosettaStone = None
     print(f"{Prisma.YEL}[WARNING]: RosettaStone missing. Reverting to Pidgin Protocol.{Prisma.RST}")
+try:
+    import ollama
+    OLLAMA_AVAILABLE = True
+except ImportError:
+    OLLAMA_AVAILABLE = False
+    print(f"{Prisma.GRY}[SYSTEM]: 'ollama' library not found. Backup protocol unavailable.{Prisma.RST}")
 
 class LLMInterface:
     ERR_CONNECTION = "[CONNECTION ERROR]"
     ERR_TIMEOUT = "[TIMEOUT ERROR]"
     ERR_EMPTY = "[EMPTY RESPONSE]"
-    DEFAULT_TIMEOUT = 5.0
+    DEFAULT_TIMEOUT = 30.0
     MAX_RETRIES = 1
 
     def __init__(self, provider: str = None, base_url: str = None, api_key: str = None, model: str = None):
-        # PINKER LENS: Explicit fallback to the Single Source of Truth
         self.provider = (provider or BoneConfig.PROVIDER).lower()
         self.api_key = api_key or BoneConfig.API_KEY
         self.model = model or BoneConfig.MODEL
-
-        # Logic to determine Base URL
+        self.backup_model_id = getattr(BoneConfig, "OLLM_MODEL_ID", "llama3")
         if base_url:
             self.base_url = base_url
         elif BoneConfig.BASE_URL:
             self.base_url = BoneConfig.BASE_URL
         else:
-            # Fallback defaults based on provider (as before)
-            if self.provider == "ollama":
-                self.base_url = "http://localhost:11434/v1/chat/completions"
-                self.model = model or "llama3"
-            elif self.provider == "lm_studio":
-                self.base_url = "http://localhost:1234/v1/chat/completions"
-            elif self.provider == "openai":
-                self.base_url = "https://api.openai.com/v1/chat/completions"
-                self.model = model or "gpt-4-turbo"
-            else:
-                self.base_url = None
+            self._configure_defaults()
+
+    def _configure_defaults(self):
+        if self.provider == "ollama":
+            self.base_url = "http://localhost:11434/v1/chat/completions"
+            # If using the provider directly, we assume the user wants the same model
+            self.model = self.model or "llama3"
+        elif self.provider == "openai":
+            self.base_url = "https://api.openai.com/v1/chat/completions"
+            self.model = self.model or "gpt-4-turbo"
+
+    def _ping_backup(self):
+        if not OLLAMA_AVAILABLE: return False
+        try:
+            ollama.list()
+            return True
+        except Exception:
+            return False
 
     def generate(self, prompt: str, temperature: float = 0.7, timeout: float = None) -> str:
         if self.provider == "mock":
@@ -51,9 +62,22 @@ class LLMInterface:
         try:
             return self._http_generation_with_backoff(prompt, temperature, req_timeout)
         except Exception as e:
-            if prompt == "PING":
-                return f"{self.ERR_CONNECTION}: {str(e)}"
-            return f"{Prisma.RED}[BRAIN FOG]: {e}{Prisma.RST}"
+            if self._ping_backup():
+                print(f"{Prisma.OCHRE}[CORTEX]: Cloud failed. Routing to Local Service ({self.backup_model_id})...{Prisma.RST}")
+                return self._local_generation(prompt, temperature)
+            return f"{Prisma.RED}[BRAIN FOG]: {e} (Switched to Mock Mode){Prisma.RST} {self.mock_generation(prompt)}"
+
+    def _local_generation(self, prompt: str, temperature: float) -> str:
+        """Uses the 'ollama' library to talk to the local service."""
+        try:
+            response = ollama.chat(
+                model=self.backup_model_id,
+                messages=[{'role': 'user', 'content': prompt}],
+            )
+            return response['message']['content']
+        except Exception as e:
+            print(f"{Prisma.RED}[CORTEX]: Local Service Error: {e}{Prisma.RST}")
+            return self.mock_generation(prompt)
 
     RETRY_CODES = {408, 429, 500, 502, 503, 504}
 
@@ -71,7 +95,7 @@ class LLMInterface:
                 {"role": "user", "content": prompt}
             ],
             "temperature": temperature,
-            "max_tokens": 150,
+            "max_tokens": 2048,
             "stream": False
         }
         data = json.dumps(payload).encode("utf-8")
@@ -84,8 +108,7 @@ class LLMInterface:
                         result = json.loads(response.read().decode("utf-8"))
                         if "choices" in result and len(result["choices"]) > 0:
                             content = result["choices"][0].get("message", {}).get("content")
-                            if content:
-                                return str(content)
+                            if content: return str(content)
                         if "response" in result:
                             return str(result["response"])
                         return self.ERR_EMPTY
@@ -93,19 +116,18 @@ class LLMInterface:
                         req.full_url, response.status, "Non-200 Status", response.headers, None)
             except urllib.error.HTTPError as e:
                 if e.code not in self.RETRY_CODES:
-                    return f"[FATAL API ERROR {e.code}]: {e.reason}"
+                    raise e
                 last_error = e
             except (urllib.error.URLError, TimeoutError) as e:
                 last_error = e
             except Exception as e:
                 return f"[CRITICAL EXCEPTION]: {str(e)}"
             if attempt < retries:
-                sleep_time = min(4.0, 2 ** attempt)
-                time.sleep(sleep_time)
-        error_msg = str(last_error) if last_error else "Unknown Timeout"
-        raise Exception(f"Max retries exceeded. Final error: {error_msg}")
+                time.sleep(min(4.0, 2 ** attempt))
+        raise Exception(f"Max retries exceeded. Final error: {last_error}")
 
     def mock_generation(self, prompt: str) -> str:
+        """The Placebo Protocol."""
         query_match = re.search(r': "(.*?)"', prompt)
         query = query_match.group(1) if query_match else "..."
         placebos = [
@@ -175,7 +197,8 @@ class PromptComposer:
             f"SOCIAL CONTEXT:\n"
             f"{social_context}\n"
             f"BIOLOGICAL STATE:\n"
-            f"{mood_block}\n\n"
+            f"{mood_block}\n"
+            f"Inventory: {', '.join(inventory_list) if inventory_list else 'Empty pockets.'}\n\n"
             f"{somatic_block}\n"
             f"{ballast_instruction}\n"
             f"MEMORY CONTEXT:\n"
@@ -188,8 +211,8 @@ class PromptComposer:
             f"DIRECTIVE:\n"
             f"Respond as the persona above to the USER TRANSMISSION. "
             f"Reflect the Tone, Pacing, and Sensation described in the Somatic Translation. "
-            f"Do not break character. Keep responses concise (under 80 words)."
-            f"Inventory: {', '.join(inventory_list) if inventory_list else 'Empty pockets.'}\n")
+            f"Do not break character."
+        )
         return prompt
 
 class ResponseValidator:

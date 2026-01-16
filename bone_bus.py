@@ -66,6 +66,12 @@ class BoneConfig:
     ANTIGENS = ["basically", "actually", "literally", "utilize"]
     VERBOSE_LOGGING = True
 
+    PROVIDER = "openai" # Default provider
+    BASE_URL = None
+    API_KEY = None
+    MODEL = "gpt-4"
+    OLLAMA_MODEL_ID = "llama3"
+
     class METABOLISM:
         BASE_RATE = 2.0
         DRAG_TAX_LOW = 0.15
@@ -117,13 +123,8 @@ class BoneConfig:
 
     @classmethod
     def load_from_file(cls, filepath="bone_config.json"):
-        """
-        The Leslie Knope Binder Method.
-        Loads the configuration from a file, overriding defaults.
-        """
         if not os.path.exists(filepath):
             return False, "Config file not found. Using defaults."
-
         try:
             with open(filepath, 'r') as f:
                 data = json.load(f)
@@ -131,7 +132,7 @@ class BoneConfig:
             if "base_url" in data: cls.BASE_URL = data["base_url"]
             if "api_key" in data: cls.API_KEY = data["api_key"]
             if "model" in data: cls.MODEL = data["model"]
-
+            if "ollm_model_id" in data: cls.OLLM_MODEL_ID = data["ollm_model_id"]
             return True, "Configuration loaded successfully."
         except Exception as e:
             return False, f"Config load failed: {e}"

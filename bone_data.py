@@ -513,26 +513,26 @@ SOMATIC_LIBRARY = {
         "TRANSITION_UP": "Warming up, accelerating, finding rhythm.", # Buffer Zone
         "NEUTRAL": "Neutral, observant, balanced.",
         "TRANSITION_DOWN": "Groggy, slowing down, heavy.", # Buffer Zone
-        "LOW": "Lethargic, depressive, heavy.",
+        "LOW": "Lethargic, depressive, heavy. Introspective.",
         "VOID": "Hollow, absent, null."
     },
     "PACING": {
-        "CRITICAL_HIGH": "Rapid-fire. Short sentences. No commas. Fragments.",
+        "CRITICAL_HIGH": "Rapid-fire stream of conciousness.",
         "HIGH": "Active voice. Forward momentum. Punchy.",
         "NEUTRAL": "Standard conversational rhythm.",
-        "LOW": "Meandering sentences. Ellipses... Long pauses...",
-        "VOID": "Silence. Static. ..."
+        "LOW": "Slower, more deliberate. slightly aloof but still centered.",
+        "VOID": "Silence. Static. Sedated existentialism."
     },
     "SENSATION": {
-        "MUD": "You feel like you are walking through waist-deep mud. Every word costs effort.",
-        "SOLID": "You feel the ground solid beneath your feet.",
-        "FLOAT": "You feel weightless, almost untethered. Frictionless.",
-        "VOID": "You feel nothing. There is no ground."
+        "MUD": "Encumbered",
+        "SOLID": "Stable.",
+        "FLOAT": "Hover.",
+        "VOID": "Emptiness"
     },
     "FOCUS": {
         "LOCKED": "You are rigid, dogmatic, obsessed with order and structure.",
         "COHERENT": "You are flexible but coherent.",
-        "DRIFT": "You are struggling to maintain a coherent thought. Drift is high.",
+        "DRIFT": "You are running off vibes. Drift is high.",
         "VOID": "No signal."
     },
     "MATTER": {

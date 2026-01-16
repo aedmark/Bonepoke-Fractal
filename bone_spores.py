@@ -22,7 +22,7 @@ class BoneJSONEncoder(json.JSONEncoder):
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_10.0.3"
+        self.genome = "BONEAMANITA_10.0.4"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -72,6 +72,15 @@ class LocalFileSporeLoader(SporeInterface):
             print(f"Error saving spore: {e}")
             if os.path.exists(temp_path):
                 os.remove(temp_path)
+            return None
+
+    def load_spore(self, filepath):
+        if not os.path.exists(filepath):
+            return None
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except (IOError, json.JSONDecodeError):
             return None
 
     def list_spores(self):

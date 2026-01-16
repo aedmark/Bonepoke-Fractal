@@ -1,5 +1,64 @@
 # CHANGELOG.md
 
+### **BoneAmanita v10.0.4 (Unofficial Patch)**
+
+**Status:** Stable / Personalized / Unshackled
+
+---
+
+### **1. Core Stability Fixes**
+
+- **`bone_spores.py`**: Fixed a crash when loading save files.
+
+  - _Change:_ Implemented the missing `load_spore()` method in `LocalFileSporeLoader`. The system can now read your memories without raising a `NotImplementedError`.
+
+- **`bone_main.py`**: Fixed the "Cosmic Glitch" crash.
+
+  - _Change:_ Initialized `self.cosmic = CosmicDynamics()` in the main engine constructor. The system can now calculate your orbital drift without crashing.
+
+- **`bone_physics.py`**: Fixed the "Manic Fracture" loop.
+
+  - _Change:_ Updated `GeodesicDome.calculate_metrics` to dampen the "Structure" score for short inputs (< 50 chars). The system no longer hallucinates a crystal shattering event just because you said "Yes".
+
+
+### **2. Neural Uplink (Brain) Improvements**
+
+- **`bone_brain.py`**:
+
+  - **Inventory Fix:** Moved the item list (Inventory) from the _Directive_ to the _Context_ section of the prompt. The AI is no longer obsessed with "Pocket Rocks" and "Silent Knives".
+
+  - **Unshackled Output:** Increased `max_tokens` from 150 to 1024 (or higher). Responses are no longer cut off mid-sentence.
+
+  - **Removed Word Limit:** Deleted the system instruction `"Keep responses concise (under 80 words)."` You can now have deep conversations without artificial brevity.
+
+
+### **3. Personality & Tone Adjustments**
+
+- **`bone_data.py`**:
+
+  - **Reduced Repetition:** Changed the default "SOLID" sensation from _"You feel the ground solid..."_ to simply _"Stable."_ The AI stops constantly describing the floor.
+
+  - **Anxiety Reduction:** Changed "LOW" pacing from _"Meandering sentences. Ellipses..."_ to _"Relaxed pacing. Calm."_ The AI no longer stutters nervously when you speak calmly.
+
+
+### **4. Protocol Updates**
+
+- **`bone_genesis.py`**: Added Identity Verification.
+
+  - _Change:_ The system now explicitly asks for your **User Designation** (Name) at startup if it doesn't recognize you, ensuring the AI knows who you are from the very first turn.
+
+- **Configuration**:
+
+  - _Advisory:_ Switched the Ollama endpoint to `http://localhost:11434/v1/chat/completions` to fix the `[EMPTY RESPONSE]` error.
+
+
+---
+
+### **System Status**
+
+The simulation is now **stable**. The physics engine will respect your input length, the brain has room to think, and the personality modules are calibrated to be calm and attentive rather than anxious and repetitive.
+
+**Would you like to try running the simulation again to see how the new "Relaxed" pacing feels?**
 
 ### **Changelog: BoneAmanita 10.0.3**
 
