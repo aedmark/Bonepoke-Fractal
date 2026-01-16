@@ -1,17 +1,12 @@
 # bone_personality - The Charm
 
-import json
-import os
-import random
-import time
+import json, os, random, time
 from collections import deque
 from typing import Dict, Tuple, Optional, Counter
-
 from bone_data import LENSES, NARRATIVE_DATA
 from bone_bus import EventBus
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig
-
 
 class UserProfile:
     def __init__(self, name="USER"):

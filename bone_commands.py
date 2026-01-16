@@ -1,14 +1,8 @@
 # bone_commands.py - The Command Center
 
-import inspect
-import os
-import random
-import shlex
-import time
+import inspect, os, random, shlex, time
 from typing import Dict, Callable, List
-
 from bone_village import ParadoxSeed
-
 
 class CommandProcessor:
     def __init__(self, engine, prisma_ref, lexicon_ref, config_ref, cartographer_ref):
@@ -17,14 +11,12 @@ class CommandProcessor:
         self.Lex = lexicon_ref
         self.Config = config_ref
         self.Map = cartographer_ref
-
         self.registry: Dict[str, Callable[[List[str]], bool]] = {
             "/save": self._cmd_save,
             "/load": self._cmd_load,
             "/kip": self._cmd_kip,
             "/mode": self._cmd_mode,
             "/status": self._cmd_status,
-
             "/map": self._cmd_map,
             "/manifold": self._cmd_manifold,
             "/garden": self._cmd_garden,
@@ -32,13 +24,11 @@ class CommandProcessor:
             "/strata": self._cmd_strata,
             "/fossils": self._cmd_fossils,
             "/lineage": self._cmd_lineage,
-
             "/rummage": self._cmd_rummage,
             "/seed": self._cmd_seed,
             "/reproduce": self._cmd_reproduce,
             "/weave": self._cmd_weave,
             "/publish": self._cmd_publish,
-
             "/teach": self._cmd_teach,
             "/kill": self._cmd_kill,
             "/flag": self._cmd_flag,
@@ -47,8 +37,7 @@ class CommandProcessor:
             "/mirror": self._cmd_mirror,
             "/kintsugi": self._cmd_kintsugi,
             "/prove": self._cmd_prove,
-            "/help": self._cmd_help
-        }
+            "/help": self._cmd_help}
 
     def _log(self, text):
         self.eng.events.log(text, "CMD")
@@ -60,18 +49,15 @@ class CommandProcessor:
         except ValueError:
             self._log(f"{self.P.RED}SYNTAX ERROR: Unbalanced quotes. The Bureau rejects your form.{self.P.RST}")
             return True
-
         cmd = parts[0].lower()
         if cmd not in self.registry:
             self._log(f"{self.P.RED}Unknown command '{cmd}'. Try /help for the manifesto.{self.P.RST}")
             return True
-
         if cmd in ["/teach", "/kill", "/flag"] and not self.Config.VERBOSE_LOGGING:
             trust = self.eng.mind.mirror.profile.confidence
             if trust < 10:
                 self._log(f"{self.P.YEL}🔒 LOCKED: Trust {trust}/10 required. Submit Form 27B-6.{self.P.RST}")
                 return True
-
         try:
             return self.registry[cmd](parts)
         except Exception as e:
@@ -135,8 +121,7 @@ class CommandProcessor:
             "mitochondria": self.eng.bio.mito.adapt(self.eng.health),
             "antibodies": list(self.eng.bio.immune.active_antibodies),
             "core_graph": self.eng.mind.mem.graph,
-            "tool_adaptation": self.eng.tinkerer.save_state()
-        }
+            "tool_adaptation": self.eng.tinkerer.save_state()}
         path = self.eng.mind.mem.loader.save_spore(self.eng.mind.mem.filename, spore_data)
         self._log(f"{self.P.GRN}💾 SYSTEM SAVED: {path}{self.P.RST}")
         return True
@@ -295,21 +280,18 @@ class CommandProcessor:
 
     def _cmd_help(self, parts):
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 9.9.8 MANUAL ---{self.P.RST}",
-            f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"
-        ]
+            f"\n{self.P.CYN}--- BONEAMANITA 10.0 MANUAL ---{self.P.RST}",
+            f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"]
 
         categories = {
             "CORE": ["_cmd_status", "_cmd_save", "_cmd_load", "_cmd_help"],
             "WORLD": ["_cmd_map", "_cmd_manifold", "_cmd_garden", "_cmd_voids"],
             "ACTION": ["_cmd_rummage", "_cmd_reproduce", "_cmd_publish", "_cmd_weave"],
-            "DEBUG": ["_cmd_kip", "_cmd_teach", "_cmd_kill", "_cmd_focus"]
-        }
+            "DEBUG": ["_cmd_kip", "_cmd_teach", "_cmd_kill", "_cmd_focus"]}
 
         def get_doc(func):
             paperwork = inspect.getdoc(func)
             return paperwork if paperwork else "Undocumented protocol."
-
         for cat, methods in categories.items():
             help_lines.append(f"{self.P.WHT}{cat}:{self.P.RST}")
             for m_name in methods:
@@ -318,7 +300,6 @@ class CommandProcessor:
                     doc = get_doc(getattr(self, m_name))
                     help_lines.append(f"  {cmd_name:<12} - {doc}")
             help_lines.append("")
-
         help_lines.append(f"{self.P.GRY}Type carefully. The machine is listening.{self.P.RST}")
         self._log("\n".join(help_lines))
         return True

@@ -12,8 +12,7 @@ class EventBus:
         self.buffer.append({
             "text": text,
             "category": category,
-            "timestamp": time.time()
-        })
+            "timestamp": time.time()})
 
     def flush(self) -> List[Dict]:
         logs = list(self.buffer)
@@ -40,8 +39,7 @@ class Prisma:
         color_map = {
             "R": cls.RED, "G": cls.GRN, "Y": cls.YEL, "B": cls.BLU,
             "M": cls.MAG, "C": cls.CYN, "W": cls.WHT, "0": cls.GRY,
-            "I": cls.INDIGO, "O": cls.OCHRE, "V": cls.VIOLET
-        }
+            "I": cls.INDIGO, "O": cls.OCHRE, "V": cls.VIOLET}
         code = color_map.get(color_key.upper(), cls.WHT)
         return f"{code}{text}{cls.RST}"
 
@@ -49,7 +47,6 @@ class BoneConfig:
     GRAVITY_WELL_THRESHOLD = 15.0
     SHAPLEY_MASS_THRESHOLD = 5.0
     TRAUMA_VECTOR = {"THERMAL": 0.0, "CRYO": 0.0, "SEPTIC": 0.0, "BARIC": 0.0}
-
     MAX_HEALTH = 100.0
     MAX_STAMINA = 100.0
     MAX_ATP = 200.0
@@ -70,13 +67,11 @@ class BoneConfig:
         VOLTAGE_HIGH = 12.0
         VOLTAGE_CRITICAL = 15.0
         VOLTAGE_MAX = 20.0
-
         DRAG_FLOOR = 1.0
         DRAG_IDEAL_MAX = 3.0
         DRAG_HEAVY = 5.0
         DRAG_CRITICAL = 8.0
         DRAG_HALT = 10.0
-
         WEIGHT_HEAVY = 2.0
         WEIGHT_KINETIC = 1.5
         WEIGHT_EXPLOSIVE = 3.0
@@ -86,7 +81,6 @@ class BoneConfig:
         ATP_STARVATION = 10.0
         ROS_CRITICAL = 100.0
         STAMINA_EXHAUSTED = 20.0
-
         REWARD_SMALL = 0.05
         REWARD_MEDIUM = 0.10
         REWARD_LARGE = 0.15
@@ -97,7 +91,6 @@ class BoneConfig:
         UNCOMMON = 0.10
         COMMON = 0.20
         FREQUENT = 0.30
-
     STAMINA_REGEN = 1.0
     MAX_DRAG_LIMIT = PHYSICS.DRAG_HEAVY
     GEODESIC_STRENGTH = 10.0

@@ -28,10 +28,8 @@ class GeodesicRenderer:
                 "health": self.eng.health,
                 "stamina": self.eng.stamina,
                 "bio": bio,
-                "world": world
-            },
-            (mind.get("lens"), mind.get("thought"))
-        )
+                "world": world},
+            (mind.get("lens"), mind.get("thought")))
         colored_ui = self.vsl_chroma.modulate(raw_dashboard, physics.get("vector", {}))
         clean_ui, style_log = self.strunk_white.sanitize(colored_ui)
         if style_log:
@@ -44,30 +42,26 @@ class GeodesicRenderer:
             "ui": clean_ui,
             "logs": structured_logs,
             "metrics": self.eng.get_metrics(bio.get("atp", 0.0)),
-            "system_instruction": self._get_chorus_instruction(physics)
-        }
+            "system_instruction": self._get_chorus_instruction(physics)}
 
     def _get_title_data(self, mind, physics, clean_words):
         """Delegates to the Wise Mind for a title."""
         return self.eng.mind.wise.architect(
             {"physics": physics, "clean_words": clean_words},
             (mind.get("lens"), mind.get("thought"), mind.get("role")),
-            False
-        )
+            False)
 
     def _punish_style_crime(self, log_msg):
         """Enforces the Strunk & White Protocol via punishment."""
         self.eng.events.log(log_msg, "SYS")
         self.eng.bio.endo.dopamine -= 0.05
         self.eng.phys.nav.shimmer.spend(5.0)
-
         self.eng.mind.mem.short_term_buffer.append({
             "trigger": ["style_violation"],
             "context": "STRUNK_WHITE",
             "voltage": 0.0,
             "significance": 5.0,
-            "timestamp": time.time()
-        })
+            "timestamp": time.time()})
 
     def _inject_rupture_warning(self, ui_text):
         """Prepends a rupture warning if physics broke."""
@@ -96,7 +90,6 @@ class GeodesicRenderer:
             if is_warmup and cat in ["SYS", "BIO", "PSYCH", "OTHER"]:
                 continue
             if cat not in buckets: cat = "OTHER"
-
             text = e.get("text", "")
             if "RUPTURE" in text or "DEATH" in text or "PANIC" in text: 
                 cat = "CRITICAL"
@@ -112,8 +105,7 @@ class GeodesicRenderer:
             ("PSYCH", Prisma.VIOLET, "PSYCHOLOGY"), 
             ("BIO", Prisma.GRN, "BIOLOGY"), 
             ("SYS", Prisma.GRY, "SYSTEM"), 
-            ("OTHER", Prisma.GRY, "MISC")
-        ]
+            ("OTHER", Prisma.GRY, "MISC")]
         for cat, color, label in compressible:
             items = buckets[cat]
             if not items: continue

@@ -13,7 +13,6 @@ SOLVENT_WORDS = {'i', 'you', 'said', 'the', 'and', 'was', 'a', 'is', 'it'}
 MAX_SOLVENT_TOLERANCE = 40.0
 TEXT_LENGTH_SCALAR = 1500.0
 
-
 @dataclass
 class PhysicsPacket:
     voltage: float = 0.0
@@ -91,13 +90,10 @@ class PhysicsResolver:
         heavy = counts.get("heavy", 0)
         explosive = counts.get("explosive", 0)
         constructive = counts.get("constructive", 0)
-
         raw_charge = (
                 (heavy * config.PHYSICS.WEIGHT_HEAVY) +
                 (explosive * config.PHYSICS.WEIGHT_EXPLOSIVE) +
-                (constructive * config.PHYSICS.WEIGHT_CONSTRUCTIVE)
-        )
-
+                (constructive * config.PHYSICS.WEIGHT_CONSTRUCTIVE))
         final_voltage = raw_charge * config.KINETIC_GAIN
         return round(final_voltage, 2)
 
@@ -107,21 +103,17 @@ class PhysicsResolver:
         solvents = counts.get("solvents", 0)
         suburban = counts.get("suburban", 0)
         play = counts.get("play", 0)
-
         friction = (solvents * 1.0) + (suburban * 2.5)
         lift = play * 1.5
-
         net_drag = max(0.0, friction - lift)
         normalized_drag = (net_drag / volume) * 10.0
         final_drag = normalized_drag * config.SIGNAL_DRAG_MULTIPLIER
-
         return round(min(config.PHYSICS.DRAG_HALT, final_drag), 2)
 
     @staticmethod
     def derive_vector_matrix(counts: dict, total_vol: int, voltage: float, drag: float) -> dict:
         safe_vol = max(1, total_vol)
         def d(cat): return counts.get(cat, 0) / safe_vol
-
         return {
             "VEL": min(1.0, 0.5 + (d("explosive") * 2.0) + (d("kinetic") * 1.0) - (drag * 0.05)),
             "STR": min(1.0, 0.5 + (d("heavy") * 2.0) + (d("constructive") * 1.5)),
@@ -134,9 +126,7 @@ class PhysicsResolver:
             "XI":  min(1.0, (d("suburban") + d("buffer")) * 2.0),
             "BET": min(1.0, d("suburban") + d("buffer")),
             "E":   min(1.0, (d("solvents") * 0.4)),
-            "LQ":  min(1.0, d("passive_watch") + d("mirror"))
-        }
-
+            "LQ":  min(1.0, d("passive_watch") + d("mirror"))}
 
 class TheTensionMeter:
     def __init__(self, events):
@@ -151,69 +141,56 @@ class TheTensionMeter:
                 True,
                 f"{Prisma.CYN}✨ FLOW STATE DETECTED: You are walking on air (Streak {streak}).{Prisma.RST}\n"
                 f"   The Narrator is impressed. {Prisma.GRN}ATP +20.0.{Prisma.RST}",
-                "FLOW_BOOST"
-            )
+                "FLOW_BOOST")
         if streak == 4:
             return (
                 True,
                 f"{Prisma.VIOLET}WOBBLE: You are almost perfect. That is dangerous.{Prisma.RST}\n"
                 f"   Don't look down.",
-                None
-            )
+                None)
         if streak >= 3:
             return (
                 True,
                 f"{Prisma.CYN}MOMENTUM BUILDING: You are walking a tightrope (Streak {streak}).{Prisma.RST}\n"
                 f"   The air is thin, but clear. Keep going.",
-                None
-            )
+                None)
         return False, None, None
 
     def gaze(self, text: str, graph: Dict = None) -> Dict:
         graph = graph or {}
         clean_words = TheLexicon.clean(text)
         counts, unknowns = self._tally_categories(clean_words, text)
-
         if unknowns:
             self._trigger_neuroplasticity(unknowns, counts, text)
-
         voltage = PhysicsResolver.calculate_voltage(counts, BoneConfig)
         drag = PhysicsResolver.calculate_drag(clean_words, counts, BoneConfig)
         integrity = self._measure_integrity(clean_words, graph, counts)
         vectors = PhysicsResolver.derive_vector_matrix(counts, len(clean_words), voltage, drag)
-
         metrics = self._derive_complex_metrics(
             counts, clean_words, voltage, drag, integrity, vectors)
-
         packet = self._package_physics(text, clean_words, counts, voltage, drag, integrity, metrics)
-
         self.last_physics_packet = packet["physics"]
         return packet
 
     def _tally_categories(self, clean_words: List[str], raw_text: str) -> Tuple[Counter, List[str]]:
         counts = Counter()
         unknowns = []
-
         if TheLexicon.ANTIGEN_REGEX:
             hits = TheLexicon.ANTIGEN_REGEX.findall(raw_text)
             counts["antigen"] = len(hits)
             counts["toxin"] = len(hits)
-
         target_cats = ["heavy", "explosive", "constructive", "abstract", "photo", "aerobic",
                        "thermal", "cryo", "suburban", "play", "sacred", "buffer", "antigen"]
-
         solvents = getattr(TheLexicon.store, "SOLVENTS", {"the", "is", "a"})
         for w in clean_words:
             if w in solvents:
                 counts["solvents"] += 1
                 continue
-
             found = False
             for cat in target_cats:
                 if w in TheLexicon.get(cat):
                     counts[cat] += 1
                     found = True
-
             if not found:
                 flavor, confidence = TheLexicon.taste(w)
                 if flavor and confidence > 0.5:
@@ -231,7 +208,6 @@ class TheTensionMeter:
                     continue
                 if not self._is_structurally_sound(stranger):
                     if voltage < 15.0: continue
-
                 flavor, confidence = TheLexicon.taste(stranger)
                 if flavor and confidence > 0.6:
                     assigned_cat = flavor
@@ -239,72 +215,54 @@ class TheTensionMeter:
                 else:
                     assigned_cat = dominant_cat
                     method = "Context Association"
-
                 TheLexicon.teach(stranger, assigned_cat, 0)
                 self.events.log(
                     f"{Prisma.MAG}NEUROPLASTICITY: '{stranger}' tasted like [{assigned_cat.upper()}] ({method}).{Prisma.RST}",
-                    "MISC"
-                )
+                    "MISC")
                 counts[assigned_cat] += 1
 
     def _measure_integrity(self, words: List[str], graph: Dict, counts: Counter) -> Dict:
         if not words:
             return {"kappa": 0.0, "psi": 0.0, "mass": 0.0}
-
         anchors = [w for w in words if w in graph]
         mass = sum(sum(graph[w]["edges"].values()) for w in anchors)
-
         artificial_mass = counts["constructive"] * 0.5
-
         kappa = min(1.0, (mass + artificial_mass) / BoneConfig.SHAPLEY_MASS_THRESHOLD)
-
         total = len(words)
         abstract_count = counts["abstract"]
         heavy_count = counts["heavy"]
         psi = min(1.0, (abstract_count / total) + 0.2)
-
         if heavy_count > abstract_count:
             base_psi = (abstract_count * 0.7 + heavy_count * 0.3) / total
             psi = min(1.0, max(0.1, base_psi + 0.1))
-
         return {"kappa": round(kappa, 3), "psi": round(psi, 2), "mass": round(mass, 1)}
 
     def _derive_complex_metrics(self, counts, words, voltage, drag, integrity, vectors):
         total_vol = max(1, len(words))
         turbulence = TheLexicon.get_turbulence(words)
         flow_state = "LAMINAR" if turbulence < 0.3 else "TURBULENT"
-
         mass_words = counts["heavy"] + counts["kinetic"] + counts["thermal"] + counts["cryo"]
         cohesion_words = counts["suburban"] + counts["buffer"] + counts["antigen"] + (counts["abstract"] * 0.5)
-
         e_val = mass_words / total_vol
         b_val = cohesion_words / total_vol
-
         beta_index = vectors["BET"] * 5.0
         truth_ratio = vectors["PHI"]
-
         total_viscosity = sum(TheLexicon.measure_viscosity(w) for w in words)
         avg_viscosity = total_viscosity / total_vol
         if total_vol <= 1 and not words:
             avg_viscosity = 0.1
-
         repetition_score = round(1.0 - (len(set(words)) / total_vol), 2)
-
         bond_strength = max(0.1, integrity["kappa"] + (repetition_score * 0.5))
         voltage_load = max(0.1, voltage / 10.0)
         gamma = round((bond_strength * avg_viscosity) / (1.0 + voltage_load), 2)
         gamma = max(0.01, gamma)
-
         if truth_ratio > 0.85 and voltage > BoneConfig.PHYSICS.VOLTAGE_HIGH:
             self.perfection_streak += 1
         else:
             self.perfection_streak = 0
-
         if self.perfection_streak == 4:
             flow_state = "HUBRIS_RISK"
-
         zone, zone_color = self._determine_zone(beta_index, truth_ratio)
-
         return {
             "beta_index": round(beta_index, 2),
             "vector": vectors,
@@ -317,8 +275,7 @@ class TheTensionMeter:
             "E": round(e_val, 2),
             "B": round(b_val, 2),
             "zone": zone,
-            "zone_color": zone_color
-        }
+            "zone_color": zone_color}
 
     def _determine_zone(self, beta, truth):
         if beta > 2.0 and truth > 0.8:
@@ -360,9 +317,7 @@ class TheTensionMeter:
             "raw_text": text,
             "glass": {
                 "prosody": {"arousal": voltage},
-                "resonance": voltage
-            }
-        }
+                "resonance": voltage}}
 
     @staticmethod
     def _is_structurally_sound(word):
@@ -386,14 +341,12 @@ class EntropyVent:
     def _vent(self, physics):
         scattered = []
         targets = (w for w in physics["clean_words"] if len(w) > 4)
-
         candidates = []
         for _ in range(3):
             try:
                 candidates.append(next(targets))
             except StopIteration:
                 break
-
         for word in candidates:
             if word in self.mem.graph:
                 edges = list(self.mem.graph[word]["edges"].keys())
@@ -401,16 +354,13 @@ class EntropyVent:
                     target = random.choice(edges)
                     del self.mem.graph[word]["edges"][target]
                     scattered.append(f"{word}->{target}")
-
         self.vented_cycles += 1
         if not scattered:
             return f"{Prisma.GRY}DISSIPATIVE VENT: Pressure high, but no loose connections found.{Prisma.RST}"
-
         return (
             f"{Prisma.RED}DISSIPATIVE REFUSAL: Entropy Critical.{Prisma.RST}\n"
             f"   {Prisma.GRY}Severing synaptic bonds: {scattered}{Prisma.RST}\n"
-            f"   {Prisma.CYN}Thermodynamic hygiene maintained.{Prisma.RST}"
-        )
+            f"   {Prisma.CYN}Thermodynamic hygiene maintained.{Prisma.RST}")
 
 class TheBouncer:
     def __init__(self, engine_ref):
@@ -422,24 +372,19 @@ class TheBouncer:
     def check_entry(self, ctx: CycleContext) -> Tuple[bool, Optional[Dict]]:
         phys = ctx.physics
         clean = ctx.clean_words
-
         hn_output = self.hn.attempt_entry(phys, clean)
         if hn_output and self.hn.in_hn_state:
             return False, self._pack_refusal(ctx, "HN_SINGLETON", hn_output)
-
         passed, gate_msg = self.eng.phys.gate.weigh(phys, self.eng.stamina)
         if gate_msg: ctx.log(gate_msg)
         if not passed:
             self.eng.stamina = max(0.0, self.eng.stamina - 2.0)
             return False, self._pack_refusal(ctx, "REFUSAL")
-
         repetition_val = self.eng.phys.pulse.check_pulse(clean)
         phys["repetition"] = repetition_val
         pulse_status = self.eng.phys.pulse.get_status()
-
         toxin_type, toxin_msg = self.eng.bio.immune.assay(
-            ctx.input_text, "NARRATIVE", repetition_val, phys, pulse_status
-        )
+            ctx.input_text, "NARRATIVE", repetition_val, phys, pulse_status)
         if toxin_type:
             ctx.log(f"{Prisma.RED}{toxin_msg}{Prisma.RST}")
             if toxin_type in ["AMANITIN", "CYANIDE_POWDER"]:
@@ -448,17 +393,14 @@ class TheBouncer:
                 if scar_log: ctx.log(scar_log)
                 return False, self._pack_refusal(ctx, "TOXICITY")
             return False, self._pack_refusal(ctx, "TOXICITY")
-
         semantic_refusal = self.semantic.audit(ctx.input_text, phys)
         if semantic_refusal:
             ctx.logs.append(semantic_refusal)
             return False, self._pack_refusal(ctx, "REFUSAL")
-
         vent_msg = self.vent.check(phys)
         if vent_msg:
             ctx.logs.append(vent_msg)
             return False, self._pack_refusal(ctx, "REFUSAL")
-
         return True, None
 
     def _pack_refusal(self, ctx, type_str, specific_ui=None):
@@ -468,23 +410,20 @@ class TheBouncer:
             "type": type_str,
             "ui": ui,
             "logs": logs,
-            "metrics": self.eng.get_metrics()
-        }
+            "metrics": self.eng.get_metrics()}
 
 class Humility:
     def __init__(self):
         self.BOUNDARIES = {
             "FUTURE": ["predict", "future", "tomorrow", "will happen", "forecast"],
             "SOUL": ["soul", "spirit", "afterlife", "heaven", "hell"],
-            "ABSOLUTE": ["always", "never", "everyone", "nobody", "proven"]
-        }
+            "ABSOLUTE": ["always", "never", "everyone", "nobody", "proven"]}
         self.HUMBLE_PHRASES = [
             "Based on the available data...",
             "As I understand the current coordinates...",
             "From a structural perspective...",
             "This is a probabilistic estimation...",
-            "I could be misinterpreting the vector..."
-        ]
+            "I could be misinterpreting the vector..."]
 
     def check_boundary(self, text, voltage):
         text_lower = text.lower()
@@ -505,9 +444,7 @@ class GeodesicDome:
             "THE_FORGE":    {"E": 0.2, "B": 0.9, "Desc": "Low Fatigue, High Tension (Transformation)"},
             "THE_AERIE":    {"E": 0.1, "B": 0.1, "Desc": "Low Fatigue, Low Tension (Abstraction)"},
             "THE_GLITCH":   {"E": 0.9, "B": 0.9, "Desc": "High Fatigue, High Tension (Collapse)"},
-            "THE_GARDEN":   {"E": 0.5, "B": 0.5, "Desc": "Balanced State (Integration)"}
-        }
-
+            "THE_GARDEN":   {"E": 0.5, "B": 0.5, "Desc": "Balanced State (Integration)"}}
         self.TRIGRAM_MAP = {
             "VEL": ("☳", "ZHEN",  "Thunder",  Prisma.GRN),
             "STR": ("☶", "GEN",   "Mountain", Prisma.SLATE),
@@ -516,8 +453,7 @@ class GeodesicDome:
             "PSI": ("☰", "QIAN",  "Heaven",   Prisma.WHT),
             "BET": ("☴", "XUN",   "Wind",     Prisma.CYN),
             "E":   ("☷", "KUN",   "Earth",    Prisma.OCHRE),
-            "DEL": ("☱", "DUI",   "Lake",     Prisma.MAG)
-        }
+            "DEL": ("☱", "DUI",   "Lake",     Prisma.MAG)}
         self.TRIGRAM_MAP["TMP"] = self.TRIGRAM_MAP["PHI"]
         self.TRIGRAM_MAP["TEX"] = self.TRIGRAM_MAP["STR"]
         self.TRIGRAM_MAP["XI"]  = self.TRIGRAM_MAP["BET"]
@@ -562,8 +498,7 @@ class GeodesicDome:
             "name": name,
             "concept": concept,
             "color": color,
-            "vector": dominant_vec
-        }
+            "vector": dominant_vec}
 
 class RuptureValve:
     def __init__(self, lexicon, memory):
@@ -581,37 +516,28 @@ class RuptureValve:
         e_val, b_val = self.geodesic.calculate_metrics(physics["raw_text"], counts)
         physics["E"] = e_val
         physics["B"] = b_val
-
         manifold, dist = self.geodesic.locate_manifold(e_val, b_val)
         physics["manifold"] = manifold
-
         is_modified, new_text = self.humility.check_boundary(physics["raw_text"], physics["voltage"])
         if is_modified:
             physics["raw_text_display"] = new_text
             physics["humility_flag"] = True
-
         return self._audit_rupture(physics, e_val, b_val)
 
     def _audit_rupture(self, physics, e_val, b_val):
         truth = physics.get("truth_ratio", 0.0)
-
         if e_val > 0.85 and b_val < 0.15:
             return self._rupture(physics, "FATIGUE_FAILURE", "System diluted. Narrative coherence dissolving.")
-
         if b_val > 0.8 and e_val < 0.3:
             return self._rupture(physics, "MANIC_FRACTURE", "Crystal lattice too tight. Structure shattering.")
-
         if b_val > 0.7 and e_val > 0.6:
             if truth > 0.6:
                 physics["flow_state"] = "SUPERCONDUCTIVE"
                 return {
                     "type": "FLOW_EVENT",
                     "mode": "SUPERCONDUCTIVE",
-                    "log": f"{Prisma.CYN}🌊 VSL VALVE OPEN: High Density Input accepted. Entering Superconductive State.{Prisma.RST}"
-                }
-
+                    "log": f"{Prisma.CYN}🌊 VSL VALVE OPEN: High Density Input accepted. Entering Superconductive State.{Prisma.RST}"}
             return self._rupture(physics, "GLITCH_SINGULARITY", "High Energy + High Entropy. Semantic collapse.")
-
         return None
 
     def _rupture(self, physics, mode, reason):
@@ -621,11 +547,9 @@ class RuptureValve:
         anomaly = self.lex.harvest(target_flavor)
         if anomaly == "void":
             anomaly = "something_completely_different"
-
         physics["voltage"] = 25.0
         physics["narrative_drag"] = 0.0
         physics["system_surge_event"] = True
-
         return {
             "type": "RUPTURE",
             "mode": mode,
@@ -633,9 +557,7 @@ class RuptureValve:
             "log": (
                 f"{Prisma.VIOLET}⚡ VSL 32-VALVE RUPTURE ({mode}){Prisma.RST}\n"
                 f"   {Prisma.GRY}{reason}{Prisma.RST}\n"
-                f"   Injecting Orthogonal Concept: '{anomaly.upper()}'."
-            )
-        }
+                f"   Injecting Orthogonal Concept: '{anomaly.upper()}'.")}
 
 class CutTheShit:
     def __init__(self):
@@ -649,8 +571,7 @@ class CutTheShit:
             physics["repetition"] < 0.1,
             physics["counts"]["suburban"] == 0,
             physics["truth_ratio"] > 0.85,
-            "sorry" not in clean_words
-        ]
+            "sorry" not in clean_words]
         if all(conditions):
             self.in_hn_state = True
             self.entropy = 0.0
@@ -674,8 +595,7 @@ class ChromaScope:
         "OCHRE":  (Prisma.OCHRE,  "TMP", "E"),
         "VIOLET": (Prisma.VIOLET, "DEL", "LQ"),
         "EMERALD":(Prisma.GRN,    "XI",  "BET"),
-        "CRIMSON":(Prisma.RED,    "VEL", "ENT")
-    }
+        "CRIMSON":(Prisma.RED,    "VEL", "ENT")}
     def modulate(self, text, vector):
         sorted_vecs = sorted(vector.items(), key=lambda x: abs(x[1] - 0.5), reverse=True)
         primary_dim = sorted_vecs[0][0]
@@ -853,11 +773,9 @@ class TheTangibilityGate:
     def weigh(self, physics_packet: dict, stamina: float) -> tuple:
         if stamina < 15.0:
             return True, f"{Prisma.VIOLET}DREAM_EDGE: Starvation bypass. Tangibility ignored.{Prisma.RST}"
-
         counts = physics_packet.get("counts", {})
         clean_words = physics_packet.get("clean_words", [])
         total_vol = max(1, len(clean_words))
-
         mass_words = (
                 counts.get("heavy", 0) +
                 counts.get("kinetic", 0) +
@@ -865,34 +783,25 @@ class TheTangibilityGate:
                 counts.get("cryo", 0) +
                 counts.get("vital", 0) +
                 counts.get("play", 0))
-
         density_ratio = mass_words / total_vol
         voltage = physics_packet.get("voltage", 0.0)
         truth = physics_packet.get("truth_ratio", 0.0)
-
         required_density = BoneConfig.MIN_DENSITY_THRESHOLD
-
         modifier = 1.0
         if voltage > self.FORGIVENESS_VOLTAGE:
             modifier -= 0.2
         if truth > 0.8:
             modifier -= 0.1
-
         required_density *= modifier
-
         required_density = max(0.15, required_density)
-
         if density_ratio < required_density:
             gas_words = counts.get("abstract", 0) + counts.get("antigen", 0)
-
             examples = list(TheLexicon.get("heavy"))
             suggestion = random.sample(examples, 3) if len(examples) >= 3 else ["stone", "iron", "bone"]
-
             return False, (
                 f"{Prisma.OCHRE}TANGIBILITY VIOLATION: Density {density_ratio:.2f} < Required {required_density:.2f}.{Prisma.RST}\n"
                 f"   {Prisma.GRY}The Gatekeeper blocks the path.{Prisma.RST}\n"
                 f"   {Prisma.RED}► REJECTED. Your concepts are too airy. Anchor them.{Prisma.RST}\n"
                 f"   {Prisma.GRY}(Try adding mass: {', '.join(suggestion)}){Prisma.RST}")
-
         self.last_density = density_ratio
         return True, None

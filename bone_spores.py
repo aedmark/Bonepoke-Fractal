@@ -1,24 +1,28 @@
-# bone_spores.py - The Mycellium (PATCHED)
+# bone_spores.py - The Mycellium
 
-import json
-import math
-import os
-import random
-import time
-import shutil
-import tempfile
+import json, math, os, random, time, shutil, tempfile
 from collections import deque
 from typing import List, Tuple, Optional, Dict, Any
-
 from bone_lexicon import LiteraryReproduction, TheLexicon
 from bone_data import SEEDS
 from bone_bus import EventBus, Prisma, BoneConfig
 from bone_village import ParadoxSeed, TheAlmanac
 
+class BoneJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        if isinstance(obj, deque):
+            return list(obj)
+        if hasattr(obj, 'to_dict'):
+            return obj.to_dict()
+        if hasattr(obj, '__dict__'):
+            return obj.__dict__
+        return super().default(obj)
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_9.9.8"
+        self.genome = "BONEAMANITA_10.0"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -33,7 +37,6 @@ class SporeCasing:
                 filtered_edges[target] = round(new_weight, 2)
             if filtered_edges:
                 self.core_graph[k] = {"edges": filtered_edges, "last_tick": 0}
-
         self.mutations = mutations
         self.trauma_scar = round(trauma, 3)
         self.joy_vectors = joy_vectors if joy_vectors is not None else []
@@ -56,28 +59,20 @@ class LocalFileSporeLoader(SporeInterface):
         else:
             final_path = filename
         os.makedirs(os.path.dirname(final_path), exist_ok=True)
-        temp_path = None
+        fd, temp_path = tempfile.mkstemp(dir=os.path.dirname(final_path), text=True)
         try:
-            fd, temp_path = tempfile.mkstemp(dir=os.path.dirname(final_path), text=True)
             with os.fdopen(fd, 'w') as f:
-                json.dump(data, f, indent=2)
-            shutil.move(temp_path, final_path)
+                json.dump(data, f, indent=2, cls=BoneJSONEncoder)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(temp_path, final_path)
             return final_path
-        except (IOError, OSError) as e:
+
+        except (IOError, OSError, TypeError) as e:
             print(f"Error saving spore: {e}")
-            if temp_path and os.path.exists(temp_path):
+            if os.path.exists(temp_path):
                 os.remove(temp_path)
             return None
-
-    def load_spore(self, filepath):
-        path = os.path.join(self.directory, filepath) if not filepath.startswith(self.directory) else filepath
-        if os.path.exists(path):
-            try:
-                with open(path, "r") as f:
-                    return json.load(f)
-            except json.JSONDecodeError:
-                return None # Corrupt file
-        return None
 
     def list_spores(self):
         if not os.path.exists(self.directory): return []
@@ -89,7 +84,6 @@ class LocalFileSporeLoader(SporeInterface):
                     files.append((path, os.path.getmtime(path), f))
                 except OSError:
                     continue
-        # Sort Newest -> Oldest
         files.sort(key=lambda x: x[1], reverse=True)
         return files
 
@@ -105,12 +99,10 @@ class MycotoxinFactory:
         self.active_antibodies = set()
         self.PHONETICS = {
             "PLOSIVE": set("bdgkpt"), "FRICATIVE": set("fthszsh"),
-            "LIQUID": set("lr"), "NASAL": set("mn")
-        }
+            "LIQUID": set("lr"), "NASAL": set("mn")}
         self.ROOTS = {
             "HEAVY": ("lith", "ferr", "petr", "dens", "grav", "struct", "base", "fund", "mound"),
-            "KINETIC": ("mot", "mov", "ject", "tract", "pel", "crat", "dynam", "flux"),
-        }
+            "KINETIC": ("mot", "mov", "ject", "tract", "pel", "crat", "dynam", "flux"),}
 
     def assay(self, word, _context, _rep_val, _phys, _pulse):
         w = word.lower()
@@ -249,17 +241,24 @@ class MycelialNetwork:
             else:
                 self.graph[current]["last_tick"] = tick
             start_window = max(0, i - 2)
-            context_window = filtered[start_window:i]
+            context_window = set(filtered[start_window:i])
             for prev in context_window:
-                if prev not in self.graph[current]["edges"]: self.graph[current]["edges"][prev] = 0.0
-                current_weight = self.graph[current]["edges"][prev]
+                if prev == current:
+                    continue
+                if prev not in self.graph:
+                    self.graph[prev] = {"edges": {}, "last_tick": tick}
+                edges = self.graph[current]["edges"]
+                if prev not in edges:
+                    edges[prev] = 0.0
+                current_weight = edges[prev]
                 delta = learning_rate * (1.0 - (current_weight * decay_rate))
-                self.graph[current]["edges"][prev] = min(10.0, self.graph[current]["edges"][prev] + delta)
-                if prev not in self.graph: self.graph[prev] = {"edges": {}, "last_tick": tick}
-                if current not in self.graph[prev]["edges"]: self.graph[prev]["edges"][current] = 0.0
-                rev_weight = self.graph[prev]["edges"][current]
+                edges[prev] = min(10.0, current_weight + delta)
+                rev_edges = self.graph[prev]["edges"]
+                if current not in rev_edges:
+                    rev_edges[current] = 0.0
+                rev_weight = rev_edges[current]
                 rev_delta = learning_rate * (1.0 - (rev_weight * decay_rate))
-                self.graph[prev]["edges"][current] = min(10.0, self.graph[prev]["edges"][current] + rev_delta)
+                rev_edges[current] = min(10.0, rev_weight + rev_delta)
         if len(self.graph) > BoneConfig.MAX_MEMORY_CAPACITY:
             victim, log_msg = self.cannibalize(current_tick=tick)
             if not victim:
@@ -293,17 +292,22 @@ class MycelialNetwork:
 
     def cannibalize(self, preserve_current=None, current_tick=0) -> Tuple[Optional[str], str]:
         protected = set()
-        if preserve_current: protected.update(preserve_current)
+        if preserve_current:
+            if isinstance(preserve_current, list):
+                protected.update(preserve_current)
+            else:
+                protected.add(preserve_current)
         protected.update(self.cortical_stack)
         candidates = []
         for k, v in self.graph.items():
-            if k in protected: continue
             edge_count = len(v["edges"])
-            age = current_tick - v.get("last_tick", 0)
-            score = edge_count + (1.0 / max(1, age))
-            candidates.append((k, v, score))
+            age = max(1, current_tick - v.get("last_tick", 0))
+            base_score = edge_count + (100.0 / age)
+            if k in protected:
+                base_score += 500.0
+            candidates.append((k, v, base_score))
         if not candidates:
-            return None, "MEMORY FULL. CORTEX LOCKED."
+            return None, "MEMORY EMPTY. NOTHING TO EAT."
         candidates.sort(key=lambda x: x[2])
         victim, data, score = candidates[0]
         mass = sum(data["edges"].values())
@@ -312,14 +316,12 @@ class MycelialNetwork:
             "word": victim,
             "mass": round(mass, 2),
             "lifespan": lifespan,
-            "death_tick": current_tick
-        })
+            "death_tick": current_tick})
         del self.graph[victim]
         for node in self.graph:
             if victim in self.graph[node]["edges"]:
                 del self.graph[node]["edges"][victim]
-
-        return victim, f"FOSSILIZED: '{victim}' (Mass {mass:.1f} -> Ossuary)"
+        return victim, f"FOSSILIZED: '{victim}' (Score {score:.1f} -> Ossuary)"
 
     def prune_synapses(self, scaling_factor=0.85, prune_threshold=0.5):
         pruned_count = 0
@@ -352,22 +354,23 @@ class MycelialNetwork:
             joy_legacy_data = {
                 "flavor": primary_joy["dominant_flavor"],
                 "resonance": primary_joy["resonance"],
-                "timestamp": primary_joy["timestamp"]
-            }
+                "timestamp": primary_joy["timestamp"]}
         if health <= 0:
             cause = max(final_vector, key=final_vector.get) if final_vector else "UNKNOWN"
             final_vector[cause] = 1.0
         spore = SporeCasing(session_id=self.session_id, graph=self.graph, mutations=mutations, trauma=base_trauma, joy_vectors=top_joy)
-        seed_state = [{"q": s.question, "m": s.maturity, "b": s.bloomed} for s in self.seeds]
         data = spore.__dict__
-        data["seeds"] = seed_state
-        if antibodies: data["antibodies"] = list(antibodies)
+        data["cortical_stack"] = self.cortical_stack
+        if antibodies: data["antibodies"] = antibodies
         data["trauma_vector"] = final_vector
-        data["fossils"] = list(self.fossils)
+        data["fossils"] = self.fossils
         data["meta"] = {"timestamp": time.time(), "final_health": health, "final_stamina": stamina}
         if mitochondria_traits: data["mitochondria"] = mitochondria_traits
-        if joy_legacy_data:
-            data["joy_legacy"] = joy_legacy_data
+        if joy_legacy_data: data["joy_legacy"] = joy_legacy_data
+        active_seeds = [s for s in self.seeds if not s.bloomed]
+        active_seeds.sort(key=lambda s: s.maturity, reverse=True)
+        kept_seeds = active_seeds[:5]
+        data["seeds"] = [{"q": s.question, "m": s.maturity, "b": s.bloomed} for s in kept_seeds]
         almanac = TheAlmanac()
         condition, _ = almanac.diagnose_condition(data)
         future_seed = almanac.get_seed(condition)
@@ -383,7 +386,7 @@ class MycelialNetwork:
             required_keys = ["meta", "trauma_vector", "core_graph"]
             if not all(k in data for k in required_keys):
                 self.events.log(f"{Prisma.RED}[MEMORY]: Spore rejected (Missing Structural Keys).{Prisma.RST}")
-                return None
+                return None, set()
             final_health = data.get("meta", {}).get("final_health", 50)
             final_stamina = data.get("meta", {}).get("final_stamina", 25)
             spore_authority = (final_health + final_stamina) / 150.0
@@ -408,11 +411,25 @@ class MycelialNetwork:
                             TheLexicon.teach(w, cat, 0)
                             accepted_count += 1
                 self.events.log(f"{Prisma.CYN}[MEMBRANE]: Integrated {accepted_count} mutations.{Prisma.RST}")
+            safe_config_keys = {
+                "STAMINA_REGEN", "MAX_DRAG_LIMIT", "GEODESIC_STRENGTH",
+                "SIGNAL_DRAG_MULTIPLIER", "KINETIC_GAIN", "TOXIN_WEIGHT",
+                "FLASHPOINT_THRESHOLD"}
+
             if "config_mutations" in data:
-                self.events.log(f"{Prisma.MAG}EPIGENETICS: Applying ancestral configuration shifts...{Prisma.RST}")
+                self.events.log(f"{Prisma.MAG}EPIGENETICS: Auditing ancestral configuration...{Prisma.RST}")
+                valid_mutations = 0
                 for key, value in data["config_mutations"].items():
-                    if hasattr(BoneConfig, key):
-                        setattr(BoneConfig, key, value)
+                    if key in safe_config_keys and hasattr(BoneConfig, key):
+                        # Type Check: Only allow numbers
+                        current_val = getattr(BoneConfig, key)
+                        if isinstance(current_val, (int, float)) and isinstance(value, (int, float)):
+                            # Sanity Range Check (Prevent negative multipliers or infinite health)
+                            if 0.1 <= value <= 100.0:
+                                setattr(BoneConfig, key, value)
+                                valid_mutations += 1
+                if valid_mutations > 0:
+                    self.events.log(f"{Prisma.CYN}   ► Applied {valid_mutations} verified config shifts.{Prisma.RST}")
             if "joy_legacy" in data and data["joy_legacy"]:
                 joy = data["joy_legacy"]
                 flavor = joy.get("flavor")
@@ -432,6 +449,15 @@ class MycelialNetwork:
                 if sample_size > 0:
                     self.cortical_stack.extend(random.sample(grafted_nodes, sample_size))
                 self.events.log(f"{Prisma.CYN}[SPORE]: Grafted {len(data['core_graph'])} nodes. {sample_size} anchored to Cortical Stack.{Prisma.RST}")
+            if "seeds" in data:
+                loaded_seeds = []
+                for s_data in data["seeds"]:
+                    new_seed = ParadoxSeed(s_data["q"], set())
+                    new_seed.maturity = s_data.get("m", 0.0)
+                    new_seed.bloomed = s_data.get("b", False)
+                    loaded_seeds.append(new_seed)
+                if loaded_seeds:
+                    self.seeds = loaded_seeds
             if "trauma_vector" in data:
                 vec = data["trauma_vector"]
                 self.events.log(f"{Prisma.CYN}[GENETICS]: Inheriting Trauma Vector: {vec}{Prisma.RST}")
@@ -445,17 +471,16 @@ class MycelialNetwork:
                 elif best.get("dominant_flavor") == "abstract": BoneConfig.SIGNAL_DRAG_MULTIPLIER *= 0.8
             return data.get("mitochondria", {}), set(data.get("antibodies", []))
         except Exception as err:
-            self.events.log(f"{Prisma.RED}[MEMORY]: Spore rejected. {err}{Prisma.RST}")
+            self.events.log(f"{Prisma.RED}[MEMORY]: Spore ingestion failed. {err}{Prisma.RST}")
             import traceback
             traceback.print_exc()
-            return None
+            return None, set()
 
     def cleanup_old_sessions(self, limbo_layer=None):
         files = self.loader.list_spores() # Returns [Newest, ..., Oldest]
         removed = 0
-        max_files = 20
+        max_files = 25
         max_age = 86400
-
         for i, (path, age, fname) in enumerate(files):
             file_age = time.time() - age
             is_overflow = i >= max_files
@@ -479,8 +504,7 @@ class HyphalInterface:
             "PROTEASE": self._digest_intent,
             "CHITINASE": self._digest_complex,
             "DECRYPTASE": self._digest_encrypted,
-            "AMYLASE": self._digest_joy
-        }
+            "AMYLASE": self._digest_joy}
         self.biome = deque(maxlen=5)
         self.WEATHER_CIPHER = {"pressure", "humidity", "barometric", "temp", "forecast", "storm", "resource", "allocation"}
 
@@ -582,13 +606,11 @@ class ParasiticSymbiont:
         if is_metaphor:
             return True, (
                 f"{Prisma.CYN}✨ SYNAPSE SPARK: Your mind bridges '{host.upper()}' and '{parasite.upper()}'.\n"
-                f"   A new metaphor is born. The map folds.{Prisma.RST}"
-            )
+                f"   A new metaphor is born. The map folds.{Prisma.RST}")
         else:
             return True, (
                 f"{Prisma.VIOLET}🍄 INTRUSIVE THOUGHT: Exhaustion logic links '{host.upper()}' <-> '{parasite.upper()}'.\n"
-                f"   This makes no sense, yet there it is. 'Some things just happen.'{Prisma.RST}"
-            )
+                f"   This makes no sense, yet there it is. 'Some things just happen.'{Prisma.RST}")
 
 class LichenSymbiont:
     @staticmethod

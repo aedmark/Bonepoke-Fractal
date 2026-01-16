@@ -4,13 +4,12 @@ import json, os, random, re, time, string, unicodedata, math
 from collections import Counter, deque
 from typing import List, Dict, Any, Tuple, Optional, Set
 from dataclasses import dataclass, field
-
 from bone_bus import Prisma, BoneConfig, CycleContext
 from bone_lexicon import TheLexicon
 from bone_personality import UserProfile
 
 try:
-    from bone_data import LEXICON, GENETICS, DEATH, NARRATIVE_DATA, RESONANCE
+    from bone_data import LEXICON, GENETICS, DEATH, NARRATIVE_DATA, RESONANCE, ALMANAC_DATA
 except ImportError:
     LEXICON = {"solvents": ["the", "is"]}
     GENETICS = {}
@@ -120,13 +119,10 @@ class DeathGen:
         if mito_state.atp_pool <= 0: cause = "STARVATION"
         elif physics["counts"]["toxin"] > 3: cause = "TOXICITY"
         elif physics["narrative_drag"] > 8.0: cause = "BOREDOM"
-        
         cause_list = DeathGen.CAUSES.get(cause, ["System Error"])
         flavor_text = random.choice(cause_list) if cause_list else "Unknown Error"
-        
         prefix_list = DeathGen.PREFIXES
         prefix = random.choice(prefix_list) if prefix_list else "RIP."
-        
         verdict = "You vanished."
         if physics["voltage"] > 15.0: 
             verdict_list = DeathGen.VERDICTS.get("HEAVY", [])
@@ -134,7 +130,6 @@ class DeathGen:
         elif physics["voltage"] < 2.0: 
             verdict_list = DeathGen.VERDICTS.get("LIGHT", [])
             if verdict_list: verdict = random.choice(verdict_list)
-            
         return f"{prefix} Cause of Death: {flavor_text}. {verdict}"
 
 class TheCartographer:
@@ -194,46 +189,20 @@ class TheCartographer:
 
 class TheAlmanac:
     def __init__(self):
-        self.forecasts = {
-            "HIGH_VOLTAGE": [
-                "The wire is hot. Write immediately, without editing.",
-                "Burn the fuel before it explodes. Speed is your friend.",
-                "Do not seek structure. Seek impact."
-            ],
-            "HIGH_DRAG": [
-                "The mud is deep. Stop trying to run.",
-                "Focus on texture. Describe the weight of things.",
-                "Slow down. The obstacle *is* the path."
-            ],
-            "HIGH_ENTROPY": [
-                "The center is not holding. Find one true sentence.",
-                "Simplify. Cut the adjectives. Locate the noun.",
-                "Anchor yourself. Pick a physical object and describe it."
-            ],
-            "HIGH_TRAUMA": [
-                "The wound is open. Treat it with care.",
-                "Write what hurts, but write it in the third person.",
-                "Use the pain as fuel, but filter it through the lens."
-            ],
-            "BALANCED": [
-                "The Garden is growing. Tend to the edges.",
-                "Structure and flow are aligned. Build something tall.",
-                "You are in the zone. Maintain the rhythm."
-            ]
-        }
+        self.forecasts = ALMANAC_DATA.get("FORECASTS", {
+            "BALANCED": ["System nominal."]})
+        self.strategies = ALMANAC_DATA.get("STRATEGIES", {})
+        self.default_seed = ALMANAC_DATA.get("DEFAULT_SEED", "Observe.")
 
     def diagnose_condition(self, session_data: dict) -> Tuple[str, str]:
         meta = session_data.get("meta", {})
         trauma = session_data.get("trauma_vector", {})
         final_health = meta.get("final_health", 0)
         final_stamina = meta.get("final_stamina", 0)
-
         condition = "BALANCED"
         advice = "System nominal."
-
         max_trauma = max(trauma, key=trauma.get) if trauma else "NONE"
         trauma_val = trauma.get(max_trauma, 0)
-
         if final_health < 30 or trauma_val > 0.6:
             condition = "HIGH_TRAUMA"
             advice = f"Warning: High levels of {max_trauma} residue detected."
@@ -247,18 +216,13 @@ class TheAlmanac:
         return condition, advice
 
     def get_seed(self, condition):
-        strategies = {
-            "HIGH_VOLTAGE": "What if you whispered instead of screamed?",
-            "HIGH_DRAG": "Honor the error as a hidden intention.",
-            "HIGH_ENTROPY": "Repetition is a form of change.",
-            "HIGH_TRAUMA": "Turn it into a wallpaper pattern.",
-            "BALANCED": "Discard the first idea. Trust the third."
-        }
-        return strategies.get(condition, "Look closely at the most boring thing in the room.")
+        return self.strategies.get(condition, self.default_seed)
 
     def compile_forecast(self, session_data: dict) -> str:
         condition, advice = self.diagnose_condition(session_data)
-        forecast_text = random.choice(self.forecasts.get(condition, self.forecasts["BALANCED"]))
+        available_forecasts = self.forecasts.get(condition, self.forecasts.get("BALANCED", ["Standard Operation."]))
+        forecast_text = random.choice(available_forecasts)
+
         seed_text = self.get_seed(condition)
 
         border = f"{Prisma.OCHRE}{'='*40}{Prisma.RST}"
@@ -309,8 +273,7 @@ class TheAlmanac:
             "XI":  min(1.0, (d("suburban") + d("buffer")) * 2.0),
             "BET": min(1.0, d("suburban") + d("buffer")),
             "E":   min(1.0, (d("solvents") * 0.4)),
-            "LQ":  min(1.0, d("passive_watch") + d("mirror"))
-        }
+            "LQ":  min(1.0, d("passive_watch") + d("mirror"))}
 
 class ApeirogonResonance:
     def __init__(self, events):
@@ -318,14 +281,17 @@ class ApeirogonResonance:
         self.DIMENSIONS = {}
         self.NOUNS = {}
         self.load_resonances()
+
     def load_resonances(self):
         self.DIMENSIONS = RESONANCE.get("DIMENSIONS", {})
         self.NOUNS = RESONANCE.get("NOUNS", {})
+
     def _resolve_term(self, val, scale):
         if val >= 0.85: return scale[-1][1]
         if val <= 0.15: return scale[0][1]
         best_fit = min(scale, key=lambda x: abs(x[0] - val))
         return best_fit[1]
+
     def architect(self, metrics, station, is_bored):
         phys = metrics.get("physics", {})
         vec = phys.get("vector", {})
@@ -345,10 +311,8 @@ class ApeirogonResonance:
                 "color": role_color,
                 "desc": station[1],
                 "context": station[0]}
-
         if not vec or len(vec) < 2:
              return {"title": "THE VOID", "color": Prisma.GRY, "desc": "No data.", "context": "VOID"}
-
         sorted_dims = sorted(vec.items(), key=lambda x: abs(x[1] - 0.5), reverse=True)
         p_dim, p_val = sorted_dims[0]
         s_dim, s_val = sorted_dims[1]
@@ -376,8 +340,7 @@ class MirrorGraph:
             "WAR": 0.0,
             "ART": 0.0,
             "LAW": 0.0,
-            "ROT": 0.0
-        }
+            "ROT": 0.0}
         self.dominant_archetype = "NEUTRAL"
         self.active_mode = True
         self.profile = UserProfile()
@@ -399,14 +362,11 @@ class MirrorGraph:
             psi = getattr(physics, "psi", 0.0)
             drag = getattr(physics, "narrative_drag", 0.0)
             turbulence = getattr(physics, "turbulence", 0)
-
         if hasattr(self, 'profile'):
             self.profile.update(counts, len(clean_words))
-
         decay = 0.05
         for k in self.stats:
             self.stats[k] = max(0.0, self.stats[k] - decay)
-
         if vol > 12.0 or "!" in text:
             self.stats["WAR"] = min(1.0, self.stats["WAR"] + 0.2)
         if psi > 0.6 or "?" in text:
@@ -424,14 +384,10 @@ class MirrorGraph:
             text = physics.get("raw_text", "")
         else:
             text = getattr(physics, "raw_text", "")
-
         self.profile_input(text, physics)
-
         mods = self.get_reflection_modifiers()
-
         if mods.get("flavor"):
             return True, mods["flavor"]
-
         return False, None
 
     def get_reflection_modifiers(self) -> Dict:
@@ -443,8 +399,7 @@ class MirrorGraph:
             "loot_chance": 1.0,
             "atp_tax": 0.0,
             "voltage_cap": 20.0,
-            "flavor": ""
-        }
+            "flavor": ""}
         if intensity < 0.3:
             return mods
         if top_stat == "WAR":
@@ -475,8 +430,7 @@ class MirrorGraph:
             f"WAR [{self.stats['WAR']:.2f}] {bar(self.stats['WAR'], Prisma.RED)}\n"
             f"ART [{self.stats['ART']:.2f}] {bar(self.stats['ART'], Prisma.CYN)}\n"
             f"LAW [{self.stats['LAW']:.2f}] {bar(self.stats['LAW'], Prisma.WHT)}\n"
-            f"ROT [{self.stats['ROT']:.2f}] {bar(self.stats['ROT'], Prisma.VIOLET)}"
-        )
+            f"ROT [{self.stats['ROT']:.2f}] {bar(self.stats['ROT'], Prisma.VIOLET)}")
 
 class StrunkWhiteProtocol:
     def __init__(self):
@@ -576,7 +530,6 @@ class TheHoloProjector:
         if lens_name == "NARRATOR":
             clean_thought = clean_thought.replace("You are [The Witness]...", "")
         separator = f"{Prisma.SLATE}{'—'*40}{Prisma.RST}"
-        
         lens_display = lens_name.upper() if lens_name else "UNKNOWN"
         ui_block = [
             separator,
@@ -645,33 +598,27 @@ class TheNavigator:
                 "THE_MUD", (0.8, 0.2), 0.2,
                 "High Fatigue, Low Tension (Stagnation)",
                 {"narrative_drag": 2.0, "voltage": -2.0},
-                f"{Prisma.OCHRE}THE MUD: The ground is sticky. Movement costs double.{Prisma.RST}"
-            ),
+                f"{Prisma.OCHRE}THE MUD: The ground is sticky. Movement costs double.{Prisma.RST}"),
             "THE_FORGE": Manifold(
                 "THE_FORGE", (0.1, 0.9), 0.2,
                 "Low Fatigue, High Tension (Transformation)",
                 {"voltage": 5.0, "narrative_drag": -1.0, "psi": -0.1},
-                f"{Prisma.RED}THE FORGE: Sparks fly. Your words are heating up.{Prisma.RST}"
-            ),
+                f"{Prisma.RED}THE FORGE: Sparks fly. Your words are heating up.{Prisma.RST}"),
             "THE_AERIE": Manifold(
                 "THE_AERIE", (0.2, 0.1), 0.2,
                 "Low Fatigue, Low Tension (Abstraction)",
                 {"narrative_drag": -3.0, "psi": 0.3, "voltage": -1.0},
-                f"{Prisma.CYN}THE AERIE: The air is thin. Concepts float freely here.{Prisma.RST}"
-            ),
+                f"{Prisma.CYN}THE AERIE: The air is thin. Concepts float freely here.{Prisma.RST}"),
             "THE_GLITCH": Manifold(
                 "THE_GLITCH", (0.9, 0.9), 0.1,
                 "High Fatigue, High Tension (Collapse)",
                 {"turbulence": 0.5, "beta_index": 2.0},
-                f"{Prisma.VIOLET}THE GLITCH: Reality is buffering...{Prisma.RST}"
-            ),
+                f"{Prisma.VIOLET}THE GLITCH: Reality is buffering...{Prisma.RST}"),
             "THE_GARDEN": Manifold(
                 "THE_GARDEN", (0.5, 0.5), 0.3,
                 "Balanced State (Integration)",
                 {"kappa": 0.2, "truth_ratio": 0.1},
-                f"{Prisma.GRN}THE GARDEN: The soil is rich. Roots go deep.{Prisma.RST}"
-            )
-        }
+                f"{Prisma.GRN}THE GARDEN: The soil is rich. Roots go deep.{Prisma.RST}")}
 
     def strike_root(self, vector_data):
         self.root_system = vector_data
@@ -686,8 +633,7 @@ class TheNavigator:
             f"Current Loc: {Prisma.WHT}{self.current_location}{Prisma.RST}",
             f"Coordinates: [Drag: {drag:.1f} | Voltage: {volt:.1f}]",
             f"Shimmer Reserves: {self.shimmer.current:.1f}\n",
-            f"{Prisma.GRY}Nearby Manifolds:{Prisma.RST}"
-        ]
+            f"{Prisma.GRY}Nearby Manifolds:{Prisma.RST}"]
         for name, data in self.manifolds.items():
             dist = math.dist(my_vec, data.center_vector)
             bar_len = int((1.0 - min(1.0, dist)) * 10)
@@ -726,9 +672,7 @@ class TheNavigator:
             if dist < manifold.radius and dist < min_dist:
                 min_dist = dist
                 best_fit = name
-        
         self.current_location = best_fit
-
         if self.current_location != old_loc:
             return self.current_location, self.manifolds[self.current_location].entry_msg
         return self.current_location, None
@@ -770,8 +714,7 @@ class LiteraryJournal:
     def __init__(self, output_file="journal_of_the_void.txt"):
         self.output_file = output_file
         self.reviews = NARRATIVE_DATA.get("LITERARY_REVIEWS", {
-            "POSITIVE": ["Good."], "NEGATIVE": ["Bad."], "CONFUSED": ["Huh?"]
-        })
+            "POSITIVE": ["Good."], "NEGATIVE": ["Bad."], "CONFUSED": ["Huh?"]})
 
     def publish(self, text, physics, bio_state):
         voltage = physics.get("voltage", 0.0)

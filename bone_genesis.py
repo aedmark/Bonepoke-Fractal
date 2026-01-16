@@ -23,32 +23,26 @@ class GenesisProtocol:
             "provider": "mock",
             "base_url": None,
             "api_key": "sk-dummy-key",
-            "model": "local-model"
-        }
-
+            "model": "local-model"}
         self.DISCOVERY_TARGETS = {
             "Ollama": {
                 "base_root": "http://localhost:11434",
                 "probe_path": "/api/tags",
                 "api_endpoint": "/api/chat",
                 "provider_id": "ollama",
-                "default_model": "gemma3"
-            },
+                "default_model": "gemma3"},
             "LM Studio": {
                 "base_root": "http://localhost:1234",
                 "probe_path": "/v1/models",
                 "api_endpoint": "/v1/chat/completions",
                 "provider_id": "lm_studio",
-                "default_model": "local-model"
-            },
+                "default_model": "local-model"},
             "LocalAI": {
                 "base_root": "http://localhost:8080",
                 "probe_path": "/v1/models",
                 "api_endpoint": "/v1/chat/completions",
                 "provider_id": "openai",
-                "default_model": "gpt-3.5-turbo"
-            }
-        }
+                "default_model": "gpt-3.5-turbo"}}
 
     def type_out(self, text, speed=0.005, color=Prisma.WHT):
         sys.stdout.write(color)
@@ -83,8 +77,7 @@ class GenesisProtocol:
                     "name": name,
                     "endpoint": valid_chat_url,
                     "provider_id": target["provider_id"],
-                    "default_model": target["default_model"]
-                })
+                    "default_model": target["default_model"]})
                 self.type_out(f"   [FOUND] {name} @ {valid_chat_url}", color=Prisma.GRN)
             else:
                 self.type_out(f"   [MISSING] {name}", color=Prisma.GRY)
@@ -99,24 +92,21 @@ class GenesisProtocol:
                 provider=config["provider"],
                 base_url=config.get("base_url"),
                 api_key=config.get("api_key"),
-                model=config.get("model")
-            )
+                model=config.get("model"))
             response = test_client.generate("PING", temperature=0.0)
-
             if not response or not response.strip():
                 return False, "Brain returned empty response (Silence)."
             clean_resp_lower = response.lower()
             error_markers = [
                 "connection error",
                 "timeout error",
-                "brain fog",       # Caught from bone_brain exception handler
+                "brain fog",
                 "exception",
                 "connectcall failed",
                 "connection refused",
-                "not found",       # 404s leaking through
-                "unauthorized",    # 401s
-                "rate limit"
-            ]
+                "not found",
+                "unauthorized",
+                "rate limit"]
             is_bracketed_error = "[" in response and "error" in clean_resp_lower
             is_explicit_failure = any(marker in clean_resp_lower for marker in error_markers)
             if is_explicit_failure or is_bracketed_error:
@@ -125,6 +115,15 @@ class GenesisProtocol:
             return True, "Nominal"
         except Exception as uplink_err:
             return False, f"Exception during validation: {uplink_err}"
+
+    def _save_config(self):
+        try:
+            with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+                json.dump(self.config, f, indent=4)
+            self.type_out(f"   [SYSTEM] Configuration sealed in '{CONFIG_FILE}'.", color=Prisma.GRY)
+        except IOError as e:
+            self.type_out(f"   [ERROR] Write failure: {e}", color=Prisma.RED)
+            self.type_out(f"   (The bureaucracy rejected your form. Check file permissions.)", color=Prisma.GRY)
 
     def _manual_config_flow(self) -> bool:
         self.type_out("\n--- MANUAL CONFIGURATION ---", color=Prisma.OCHRE)
@@ -141,8 +140,7 @@ class GenesisProtocol:
                 "provider": "mock",
                 "base_url": None,
                 "api_key": "sk-dummy-key",
-                "model": "mock-model"
-            }
+                "model": "mock-model"}
             self._save_config()
             return True
         default_url = "http://localhost:11434/api/chat"
@@ -165,8 +163,7 @@ class GenesisProtocol:
             "provider": provider,
             "base_url": base_url,
             "api_key": key,
-            "model": model
-        }
+            "model": model}
         is_valid, msg = self.validate_brain_uplink(candidate_config)
         if is_valid:
             self.config = candidate_config
@@ -179,7 +176,7 @@ class GenesisProtocol:
     def wizard(self) -> bool:
         os.system('cls' if os.name == 'nt' else 'clear')
         banner = f"""
-{Prisma.CYN}   GENESIS PROTOCOL v9.9.8 (PATCHED){Prisma.RST}
+{Prisma.CYN}   GENESIS PROTOCOL v10.0{Prisma.RST}
    {Prisma.GRY}State Machine Active. Tensegrity Nominal.{Prisma.RST}
    ------------------------------------
         """
@@ -189,41 +186,27 @@ class GenesisProtocol:
         print(f"   3. {Prisma.WHT}Manual Configuration{Prisma.RST} (The Ron Swanson Option)")
         print(f"   4. {Prisma.WHT}Mock Mode{Prisma.RST} (Simulation Only)")
         print(f"   5. {Prisma.WHT}Export System Prompt{Prisma.RST}")
-
         choice = input(f"\n{Prisma.paint('>', 'C')} ").strip()
-
         if choice == "5":
             self.export_system_prompt()
             return False
-
         if choice == "4":
             return self._configure_target({"type": "mock"})
-
         if choice == "3":
             return self._manual_config_flow()
-
         if choice == "2":
             return self._configure_target({"type": "cloud"})
-
-        # Choice 1: Auto-Detect
         available_brains = self.detect_local_brains()
-
         print("\nSelect your Neural Substrate:")
         menu_options = []
-
         for b in available_brains:
             menu_options.append({"type": "local", "data": b})
             print(f"   {len(menu_options)}. {Prisma.GRN}{b['name']} @ {b['endpoint']}{Prisma.RST}")
-
         if not available_brains:
             print(f"   {Prisma.GRY}(No local brains detected. Try Manual Config?){Prisma.RST}")
-
         print(f"   X. {Prisma.WHT}Cancel{Prisma.RST}")
-
         selection = input(f"\n{Prisma.paint('Selection >', 'C')} ").strip()
-
         if selection.lower() == 'x': return False
-
         try:
             idx = int(selection) - 1
             if 0 <= idx < len(menu_options):
@@ -237,42 +220,25 @@ class GenesisProtocol:
             return False
 
     def _configure_target(self, selection) -> bool:
-        """
-        Configures the target LLM based on user selection.
-        Refactored by SLASH to support the full spectrum of Cloud providers (Azure, Groq, etc).
-        """
         candidate_config = self.config.copy()
-
-        # --- PATH 1: MOCK ---
         if selection["type"] == "mock":
             candidate_config["provider"] = "mock"
-
-        # --- PATH 2: DETECTED LOCAL ---
         elif selection["type"] == "local":
             data = selection["data"]
             candidate_config["provider"] = data["provider_id"]
-            # Fix: Explicitly use the endpoint discovered during probing
             candidate_config["base_url"] = data["endpoint"]
-
             self.type_out(f"Target Model Name (default: {data['default_model']}):")
             user_model = input(f"{Prisma.paint('>', 'C')} ").strip()
             candidate_config["model"] = user_model or data["default_model"]
-
-        # --- PATH 3: CLOUD UPLINK ---
         elif selection["type"] == "cloud":
             print(f"\n{Prisma.CYN}--- CLOUD CONFIGURATION ---{Prisma.RST}")
             print("1. Standard OpenAI (api.openai.com)")
             print("2. Custom Endpoint (Azure, Groq, OpenRouter, etc.)")
-
             sub_choice = input(f"{Prisma.paint('>', 'C')} ").strip()
-
-            # We use the 'openai' provider driver because it speaks the standard JSON dialect
             candidate_config["provider"] = "openai"
-
             if sub_choice == "2":
                 print(f"Enter Base URL (e.g., https://api.groq.com/openai/v1/chat/completions):")
                 custom_url = input(f"{Prisma.paint('>', 'C')} ").strip()
-
                 if not custom_url.startswith("http"):
                     self.type_out("Invalid URL format. Reverting to Standard OpenAI.", color=Prisma.YEL)
                     candidate_config["base_url"] = "https://api.openai.com/v1/chat/completions"
@@ -280,16 +246,12 @@ class GenesisProtocol:
                     candidate_config["base_url"] = custom_url
             else:
                 candidate_config["base_url"] = "https://api.openai.com/v1/chat/completions"
-
             self.type_out("Enter API Key (will be saved locally):")
             key = input(f"{Prisma.paint('>', 'C')} ").strip()
             candidate_config["api_key"] = key
-
             self.type_out("Target Model Name (e.g., gpt-4-turbo, llama3-70b-8192):")
             model = input(f"{Prisma.paint('>', 'C')} ").strip()
             candidate_config["model"] = model if model else "gpt-4-turbo"
-
-        # --- VALIDATION ---
         is_valid, msg = self.validate_brain_uplink(candidate_config)
         if is_valid:
             self.config = candidate_config
@@ -338,8 +300,7 @@ Do not break character. Do not explain the simulation rules unless asked.
             "provider": "mock",
             "base_url": None,
             "api_key": "sk-dummy-key",
-            "model": "local-model"
-        }
+            "model": "local-model"}
         if os.path.exists(CONFIG_FILE):
             try:
                 with open(CONFIG_FILE, "r") as f:
@@ -375,8 +336,7 @@ Do not break character. Do not explain the simulation rules unless asked.
                     provider=self.config["provider"],
                     base_url=self.config.get("base_url"),
                     api_key=self.config.get("api_key"),
-                    model=self.config.get("model")
-                )
+                    model=self.config.get("model"))
                 if hasattr(engine, 'cortex'):
                     engine.cortex.llm = client
                 else:
@@ -385,7 +345,6 @@ Do not break character. Do not explain the simulation rules unless asked.
             except Exception as e:
                 self.type_out(f"{Prisma.RED}FATAL UPLINK ERROR: {e}{Prisma.RST}")
                 self.type_out("Falling back to internal logic.", color=Prisma.GRY)
-
         self.type_out("...System Online. Good luck.\n", color=Prisma.GRN)
         with SessionGuardian(engine) as eng:
             while True:
@@ -400,15 +359,12 @@ Do not break character. Do not explain the simulation rules unless asked.
                 if result.get("system_instruction") and BoneConfig.VERBOSE_LOGGING:
                     print(f"\n{Prisma.paint('--- DIRECTIVE ---', 'M')}")
                     print(f"{Prisma.paint(result['system_instruction'], '0')}")
-
                 if result.get("ui"):
                     print(result["ui"])
-
                 if result.get("logs") and BoneConfig.VERBOSE_LOGGING:
                     print(f"{Prisma.GRY}--- LOGS ---{Prisma.RST}")
                     for log in result["logs"]:
                         print(log)
-
                 if result.get("type") == "DEATH":
                     break
 

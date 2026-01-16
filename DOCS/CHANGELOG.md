@@ -1,8 +1,99 @@
 # CHANGELOG.md
 
+## 📜 BoneAmanita v10.0
+
+**Release Codename:** _"The Good Place"_
+**Focus:** Ephemeralization, Cognitive Persistence, and Structural Decoupling.
+
+### 🧠 The Brain (Lexicon & Memory)
+
+**File:** `bone_lexicon.py`
+
+- **Feature (Hive Mind):** Implemented `cortex_hive.json` persistence. The system now remembers learned associations across sessions.
+- _Pinker Lens:_ Language acquisition is now cumulative, not transient.
+
+- **Optimization (Reverse Index):** Replaced iterative list searching with an O(1) Reverse Index (Dictionary/Set lookup).
+- _Fuller Lens:_ Reduced lookup complexity from O(N\*M) to O(1). Massive energy savings.
+
+- **Refactor (Phonetics):** Rewrote `SemanticsBioassay.assay` to perform phonetic analysis in a single pass over the string rather than five separate passes.
+
+### 💪 The Body (Physics & Mechanics)
+
+**File:** `bone_physics.py`
+
+- **Optimization:** Updated `TheTensionMeter._tally_categories` to utilize the new `Lexicon` Reverse Index.
+- _Fuller Lens:_ The physics engine now "knows" word weights instantly via set intersection rather than guessing.
+
+- **Fix:** Added explicit handling for `"kinetic"` words in the physics loop, preventing them from being ignored if not phonetically obvious.
+
+### 🧬 The Genes (Configuration & Data)
+
+**File:** `bone_genesis.py`
+
+- **Fix:** Implemented `_save_config` in `GenesisProtocol`.
+- _Schur Lens:_ The system no longer lies to you about saving your settings. The "Save" button is actually connected to wires now.
+
+- **UX:** Added user-friendly confirmation messages using `Prisma` colors.
+
+**File:** `bone_data.py`
+
+- **Refactor:** Added `ALMANAC_DATA` dictionary.
+- _Structure:_ Moved all narrative strings (Forecasts, Strategies) out of logic files and into the data repository.
+
+**File:** `bone_main.py`
+
+- **Feature:** Added startup hooks to check for `hive_loaded`.
+- _Bonus:_ Users receive a 10% Stamina Regen boost if "Ancestral Knowledge" (the Hive file) is detected.
+
+### 🏘️ The Village (Narrative Engine)
+
+**File:** `bone_village.py`
+
+- **Refactor:** Rewrote `TheAlmanac` to fetch data from `bone_data.py`.
+- _Pinker Lens:_ Separated the "Storyteller" (Logic) from the "Story" (Data).
+- _Schur Lens:_ The code is now readable; it's no longer a wall of text mixed with `if/else` statements.
+
+---
+
+### 🔍 Summary of Impact
+
+| Metric           | v9.9.8 (Old)  | v10.0 (New)     | Note                                   |
+| ---------------- | ------------- | --------------- | -------------------------------------- |
+| **Lookup Speed** | Linear (Slow) | Constant (Fast) | "Is 'rock' heavy?" is now instant.     |
+| **Memory**       | Amnesiac      | Persistent      | Remembers "fluff" = "antigen" forever. |
+| **Config**       | Broken        | Functional      | API Keys and Color settings now save.  |
+| **Code Style**   | Spaghetti     | Modular         | Logic and Data are strictly separated. |
+
+
 **v9.9.8 - The "Ron Swanson" Patch**
 
-### 1. Robust Uplink Validation (The "Pinker" Patch)
+#### **1. Network & Connectivity (The Pinker Lens)**
+
+- **Fix:** **URL Sanitation consistency.** Removed the arbitrary `rstrip('/')` in the `LLMInterface` constructor. The system now respects the user's input URL precision rather than guessing, establishing a consistent grammar for API endpoints.
+- **Fix:** **Timeouts & Retries.** Refactored `_http_generation_with_backoff` to support dynamic timeouts. Reduced `MAX_RETRIES` to 1 and implemented an exponential backoff cap (2s). This eliminates the "DMV Effect" where the system would hang for ~22 seconds on a bad connection.
+
+#### **2. Social Lobe & Security (The Fuller Lens)**
+
+- **Fix:** **Identity Injection Hardening.** Refactored `_check_social_cues` to sanitize user input.
+- Added a **Sanitization Barrier** to strip dangerous characters (`<`, `>`, `{`, `}`).
+- Implemented a **"No-Fly List"** blocking reserved names (e.g., "System", "Admin", "Root") to prevent semantic injection attacks.
+
+- **Fix:** **Name Recognition Logic.**
+- Expanded explicit regex (`"my name is..."`) to support multi-word names (e.g., "John Paul").
+- Restricted implicit regex (`"I am..."`) to **Strict Mode** (Capitalized words only) to prevent the system from naming the user "Tired" or "Ready".
+
+- **Fix:** **Confidence Saturation.** Capped the social confidence score at 100 to prevent integer runaway loops.
+
+#### **3. Metacognition & Resilience (The Schur Lens)**
+
+- **Fix:** **Ballast Protocol Logic.** Replaced the binary `solipsism_counter` with an analog `solipsism_pressure` gauge.
+- Implemented a **"Leaky Bucket" Algorithm**: Diverse outputs now slowly relieve pressure (-0.5) rather than instantly resetting it. This prevents the system from "gaming" its therapy by outputting one good sentence after ten bad ones.
+
+- **Fix:** **Mock Mode Safety.** Modified `_execute_plain_mode` to explicitly call `self.llm.mock_generation` instead of `generate`. This ensures the "Safe Mode" actually functions when the external brain is disconnected.
+- **Fix:** **Context Awareness.** Enriched the `_gather_state` payload. The `PromptComposer` now receives `time`, `location_description`, and `recent_logs`, preventing the LLM from hallucinating a sunny day when it is stuck in "The Mud" at midnight.
+
+
+### 4. Robust Uplink Validation (The "Pinker" Patch)
 
 - **The Bug:** The validation logic was hyper-specific, only catching errors that started with a bracket and shouted "ERROR" in uppercase. It was missing polite errors, lowercase errors, and errors wrapped in fancy ANSI colors.
 - **The Fix:** Refactored `validate_brain_uplink` to use **Semantic detection**.
@@ -10,7 +101,7 @@
 - We treat empty responses ("Silence") as failures.
 - We ignore ANSI color codes when parsing for failure signals.
 
-### 2. Config Hygiene Enforcement (The "Costanza Wallet" Patch)
+### 5. Config Hygiene Enforcement (The "Costanza Wallet" Patch)
 
 - **The Bug:** The system would mark a configuration as "STALE" but keep the bad data in its pocket. If the setup wizard failed or was cancelled, the system would launch using that dirty, stale data, leading to unpredictable behavior.
 - **The Fix:** Refactored `launch` to enforce **State Hygiene**.
@@ -18,7 +109,7 @@
 - If a config file is corrupt or stale, we immediately **overwrite** `self.config` with `SAFE_CONFIG` _before_ asking the user what to do.
 - If the wizard is cancelled, we forcibly reset to `SAFE_CONFIG`. No dirty data survives.
 
-### 3. Manual Config Alignment (The "Semantic" Patch)
+### 6. Manual Config Alignment (The "Semantic" Patch)
 
 - **The Bug:** The manual menu offered a "local" option that the brain didn't recognize (a ghost word) and failed to offer "mock" (a valid option). It was a menu listing items the kitchen couldn't cook.
 - **The Fix:** Refactored `_manual_config_flow`.
@@ -26,7 +117,7 @@
 - Added "mock" as a first-class citizen.
 - Added logic to skip network configuration questions (URL, API Key) if "mock" is selected, because a mock brain doesn't need Wi-Fi.
 
-### 4. Cloud Democratization (The "Synecdoche" Patch)
+### 7. Cloud Democratization (The "Synecdoche" Patch)
 
 - **The Bug:** The "Cloud Uplink" option was hardcoded to `api.openai.com`. It assumed "Cloud" meant only "OpenAI," preventing users from using Azure, Groq, or OpenRouter.
 - **The Fix:** Refactored `_configure_target`.

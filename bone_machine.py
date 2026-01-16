@@ -34,14 +34,11 @@ class TheCrucible:
         structure = physics.get("kappa", 0.0)
         lignin_signal = self._regulate_turgor(voltage)
         current_drag = physics.get("narrative_drag", 0.0)
-
         adjustment = lignin_signal * 0.5
         if current_drag < 1.0 and adjustment > 0:
             adjustment *= 0.1
-
         new_drag = max(0.0, min(10.0, current_drag + adjustment))
         physics["narrative_drag"] = round(new_drag, 2)
-
         msg = None
         if abs(adjustment) > 1.0:
             if adjustment > 0:
@@ -51,17 +48,14 @@ class TheCrucible:
                 action = "EXPANDING"
                 desc = "Turgor pressure relaxing. Membrane permeability up."
             msg = f"{Prisma.CYN}HOMEOSTASIS: {action}: {desc} (Drag {current_drag:.1f} -> {new_drag:.1f}).{Prisma.RST}"
-
         if physics.get("system_surge_event", False):
             self.active_state = "SURGE"
             return "SURGE", 0.0, f"{Prisma.CYN}CRUCIBLE: Absorbing System Surge ({voltage}v). No structural damage.{Prisma.RST}"
-
         if voltage > 18.0:
             if structure > 0.5:
                 return self._sublimate(voltage)
             else:
                 return self._meltdown(voltage)
-
         self.active_state = "REGULATED"
         return "REGULATED", 0.0, msg
 
@@ -70,7 +64,6 @@ class TheCrucible:
         self.osmotic_memory = max(-5.0, min(5.0, self.osmotic_memory + stress))
         velocity = stress - self.last_pressure_diff
         self.last_pressure_diff = stress
-
         signal = (self.sensitivity * stress) + \
                  (self.saturation * self.osmotic_memory) + \
                  (self.anticipation * velocity)
@@ -92,17 +85,14 @@ class TheForge:
         voltage = physics["voltage"]
         clean_words = physics["clean_words"]
         counts = physics["counts"]
-
         total_mass = (counts.get("heavy", 0) * 2.0) + (counts.get("kinetic", 0) * 0.5)
         avg_density = total_mass / max(1, len(clean_words))
-
         if voltage > BoneConfig.ANVIL_TRIGGER_VOLTAGE and avg_density > 0.4:
             if counts.get("heavy", 0) > 3 and physics.get("vector", {}).get("VEL", 0) < 0.3:
                 return True, f"{Prisma.OCHRE}THE ANVIL THUDS: You forged gravity itself.{Prisma.RST}", "LEAD_BOOTS"
             if counts.get("kinetic", 0) > 3 and voltage < 12.0:
                 return True, f"{Prisma.CYN}THE ANVIL CLICKS: Cold steel, safe for children.{Prisma.RST}", "SAFETY_SCISSORS"
             return True, f"{Prisma.GRY}THE ANVIL RINGS: Mass condensed into form.{Prisma.RST}", "ANCHOR_STONE"
-
         return False, None, None
 
     @staticmethod
@@ -110,7 +100,6 @@ class TheForge:
         counts = physics["counts"]
         voltage = physics["voltage"]
         gamma = physics.get("gamma", 0.0)
-
         if gamma < 0.15 and counts.get("abstract", 0) > 1:
             oil = TheLexicon.harvest("abstract")
             binder = TheLexicon.harvest("heavy")
@@ -118,7 +107,6 @@ class TheForge:
                 f"{Prisma.OCHRE}THE EMULSIFIER: The emulsion is breaking (Tension: {gamma}).{Prisma.RST}\n"
                 f"   You are pouring Oil ('{oil}') into Water without a Binder.\n"
                 f"   {Prisma.WHT}Try this: Use '{binder.upper()}' to suspend the concept.{Prisma.RST}")
-
         if voltage > 8.5:
             coolant = TheLexicon.harvest("aerobic")
             return (
@@ -138,39 +126,30 @@ class TheTheremin:
     def listen(self, physics, governor_mode="COURTYARD"):
         clean = physics["clean_words"]
         voltage = physics.get("voltage", 0.0)
-
         ancient_mass = sum(1 for w in clean if w in TheLexicon.get("heavy") or w in TheLexicon.get("thermal") or w in TheLexicon.get("cryo"))
         modern_mass = sum(1 for w in clean if w in TheLexicon.get("abstract"))
         thermal_hits = sum(1 for w in clean if w in TheLexicon.get("thermal"))
-
         solvent_active = False
         solvent_msg = ""
-
         if thermal_hits > 0 and self.resin_buildup > 5.0:
             dissolved = thermal_hits * 15.0
             self.resin_buildup = max(0.0, self.resin_buildup - dissolved)
             self.calcification_turns = 0
             solvent_active = True
             solvent_msg = f"{Prisma.OCHRE}SOLVENT APPLIED: Thermal words melted the Amber (-{dissolved:.1f} Resin).{Prisma.RST}"
-
             if self.is_stuck and self.resin_buildup < self.AMBER_THRESHOLD:
                 self.is_stuck = False
                 solvent_msg += f" {Prisma.GRN}RELEASE: You burned your way out.{Prisma.RST}"
-
         raw_mix = min(ancient_mass, modern_mass)
         resin_flow = raw_mix * 2.0
-
         if governor_mode == "LABORATORY":
             resin_flow *= 0.5
-
         if voltage > 5.0:
             resin_flow = max(0.0, resin_flow - (voltage * 0.6))
-
         rep = physics.get("repetition", 0.0)
         complexity = physics.get("truth_ratio", 0.0)
         theremin_msg = None
         critical_event = None
-
         if rep > 0.5:
             self.calcification_turns += 1
             slag = self.calcification_turns * 4.0
@@ -181,46 +160,37 @@ class TheTheremin:
             relief = 15.0
             self.resin_buildup = max(0.0, self.resin_buildup - relief)
             theremin_msg = f"{Prisma.GRN}PERCUSSIVE MAINTENANCE: Calcification Shattered. Flow restored. (-{relief} Resin){Prisma.RST}"
-
         if solvent_active:
             theremin_msg = f"{theremin_msg} | {solvent_msg}" if theremin_msg else solvent_msg
         elif resin_flow > 0.5:
             self.resin_buildup += resin_flow
             if not theremin_msg:
                 theremin_msg = f"{Prisma.OCHRE}RESIN FLOW: Hybrid complexity (+{resin_flow:.1f}). Keep it hot to prevent sticking.{Prisma.RST}"
-
         if resin_flow == 0 and self.calcification_turns == 0:
             self.resin_buildup = max(0.0, self.resin_buildup - 2.0)
-
         if self.resin_buildup > self.SHATTER_POINT:
             self.resin_buildup = 0.0
             self.calcification_turns = 0
             return False, resin_flow, f"{Prisma.RED}SHATTER EVENT: Resin overflow. System is solid amber. INITIATING AIRSTRIKE.{Prisma.RST}", "AIRSTRIKE"
-
         if self.calcification_turns > 3:
             critical_event = "CORROSION"
             theremin_msg = f"{theremin_msg} | {Prisma.YEL}FOSSILIZATION IMMINENT{Prisma.RST}"
-
         if self.resin_buildup > self.AMBER_THRESHOLD:
             self.is_stuck = True
             if not theremin_msg:
                 theremin_msg = f"{Prisma.RED}AMBER TRAP: You are stuck in the resin. Increase Voltage to melt it.{Prisma.RST}"
-
         if self.is_stuck and self.resin_buildup < 5.0:
             self.is_stuck = False
             if not solvent_active:
                 theremin_msg = f"{Prisma.GRN}LIQUEFACTION: The Amber melts. You are free.{Prisma.RST}"
-
         turb = physics.get("turbulence", 0.0)
         if turb > 0.6 and self.resin_buildup > 0:
             shatter_amt = turb * 10.0
             self.resin_buildup = max(0.0, self.resin_buildup - shatter_amt)
             theremin_msg = f"{Prisma.CYN}TURBULENCE: Jagged rhythm broke the resin (-{shatter_amt:.1f}).{Prisma.RST}"
             self.calcification_turns = 0
-
         if turb < 0.2:
             physics["narrative_drag"] = max(0.0, physics["narrative_drag"] - 1.0)
-
         return self.is_stuck, resin_flow, theremin_msg, critical_event
 
     def get_readout(self):

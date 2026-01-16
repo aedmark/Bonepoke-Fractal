@@ -1,30 +1,27 @@
 # bone_lexicon.py - The Global Dictionary
 
-import json
-import random
-import re
-import string
-import time
-import unicodedata
-from typing import Tuple, Dict
+import json, random, re, string, time, unicodedata, os
+from typing import Tuple, Dict, Set, Optional
 
 from bone_bus import BoneConfig, Prisma
 from bone_data import LEXICON, GENETICS
 
-
 class LexiconStore:
+    HIVE_FILENAME = "cortex_hive.json"
+
     def __init__(self):
         self.categories = {
             "heavy", "kinetic", "explosive", "constructive", "abstract",
             "photo", "aerobic", "thermal", "cryo", "suburban", "play",
-            "sacred", "buffer", "antigen", "diversion", "meat", "gradient_stop"
-        }
-        self.VOCAB = {}
-        self.LEARNED_VOCAB = {}
+            "sacred", "buffer", "antigen", "diversion", "meat", "gradient_stop"}
+        self.VOCAB: Dict[str, Set[str]] = {}
+        self.LEARNED_VOCAB: Dict[str, Dict[str, int]] = {}
         self.USER_FLAGGED_BIAS = set()
         self.ANTIGEN_REPLACEMENTS = {}
         self.SOLVENTS = set()
+        self.REVERSE_INDEX: Dict[str, Set[str]] = {}
         self._ENGINE = None
+        self.hive_loaded = False
 
     def load_vocabulary(self):
         data = LEXICON
@@ -32,21 +29,77 @@ class LexiconStore:
         self.ANTIGEN_REPLACEMENTS = data.get("antigen_replacements", {})
         for cat, words in data.items():
             if cat in self.categories or cat in ["refusal_guru", "cursed"]:
-                self.VOCAB[cat] = set(words)
+                word_set = set(words)
+                self.VOCAB[cat] = word_set
+                for w in word_set:
+                    self._index_word(w, cat)
         if "antigen" not in self.VOCAB and "antigen" in data:
             self.VOCAB["antigen"] = set(data["antigen"])
+            for w in self.VOCAB["antigen"]:
+                self._index_word(w, "antigen")
+        self._load_hive()
+
+    def _index_word(self, word: str, category: str):
+        """Helper to keep the Reverse Index clean."""
+        w = word.lower()
+        if w not in self.REVERSE_INDEX:
+            self.REVERSE_INDEX[w] = set()
+        self.REVERSE_INDEX[w].add(category)
+
+    def _load_hive(self):
+        """Reading the ancient texts."""
+        if not os.path.exists(self.HIVE_FILENAME):
+            return
+        try:
+            with open(self.HIVE_FILENAME, 'r', encoding='utf-8') as f:
+                hive_data = json.load(f)
+            count = 0
+            for cat, entries in hive_data.items():
+                if cat not in self.LEARNED_VOCAB:
+                    self.LEARNED_VOCAB[cat] = {}
+                for word, tick in entries.items():
+                    self.LEARNED_VOCAB[cat][word] = tick
+                    self._index_word(word, cat)
+                    count += 1
+            self.hive_loaded = True
+            print(f"{Prisma.CYN}[HIVE]: The Library is open. {count} memories restored.{Prisma.RST}")
+        except (IOError, json.JSONDecodeError) as e:
+            print(f"{Prisma.RED}[HIVE]: Memory corruption detected. Starting fresh. ({e}){Prisma.RST}")
+
+    def _save_hive(self):
+        """Saving your work because we respect your time."""
+        try:
+            with open(self.HIVE_FILENAME, 'w', encoding='utf-8') as f:
+                json.dump(self.LEARNED_VOCAB, f, indent=2)
+        except IOError:
+            pass
 
     def set_engine(self, engine_ref): self._ENGINE = engine_ref
 
     def get_raw(self, category):
         base = self.VOCAB.get(category, set())
         learned = set(self.LEARNED_VOCAB.get(category, {}).keys())
-        if category == "suburban": return (base | learned) - self.USER_FLAGGED_BIAS
-        return base | learned
+        combined = base | learned
+        if category == "suburban":
+            return combined - self.USER_FLAGGED_BIAS
+        return combined
+
+    def get_categories_for_word(self, word: str) -> Set[str]:
+        w = word.lower()
+        cats = self.REVERSE_INDEX.get(w, set()).copy()
+        for cat, words in self.LEARNED_VOCAB.items():
+            if w in words:
+                cats.add(cat)
+        return cats
 
     def teach(self, word, category, tick):
+        w = word.lower()
         if category not in self.LEARNED_VOCAB: self.LEARNED_VOCAB[category] = {}
-        self.LEARNED_VOCAB[category][word.lower()] = tick
+        if w in self.LEARNED_VOCAB[category]:
+            return False
+        self.LEARNED_VOCAB[category][w] = tick
+        self._index_word(w, category)
+        self._save_hive()
         return True
 
     def atrophy(self, current_tick, max_age=100):
@@ -54,7 +107,10 @@ class LexiconStore:
         for cat, words in self.LEARNED_VOCAB.items():
             for w in list(words.keys()):
                 if (current_tick - words[w]) > max_age:
-                    del words[w]; rotted.append(w)
+                    del words[w]
+                    rotted.append(w)
+        if rotted:
+            self._save_hive()
         return rotted
 
 class SemanticsBioassay:
@@ -64,15 +120,13 @@ class SemanticsBioassay:
         self.PHONETICS = {
             "PLOSIVE": set("bdgkpt"), "FRICATIVE": set("fthszsh"),
             "LIQUID": set("lr"), "NASAL": set("mn"),
-            "VOWELS": set("aeiouy")
-        }
+            "VOWELS": set("aeiouy")}
         self.ROOTS = {
             "HEAVY": ("lith", "ferr", "petr", "dens", "grav", "struct", "base", "fund", "mound"),
             "KINETIC": ("mot", "mov", "ject", "tract", "pel", "crat", "dynam", "flux"),
             "ABSTRACT": ("tion", "ism", "ence", "ance", "ity", "ology", "ness", "ment", "idea"),
             "SUBURBAN": ("norm", "comm", "stand", "pol", "reg", "mod"),
-            "VITAL": ("viv", "vita", "spir", "anim", "bio", "luc", "lum", "phot", "phon", "surg", "bloom")
-        }
+            "VITAL": ("viv", "vita", "spir", "anim", "bio", "luc", "lum", "phot", "phon", "surg", "bloom")}
 
     def clean(self, text):
         if not text: return []
@@ -85,19 +139,26 @@ class SemanticsBioassay:
         words = cleaned_text.split()
         return [w for w in words if w.strip() and w not in self.store.USER_FLAGGED_BIAS]
 
-    def assay(self, word):
+    def assay(self, word: str) -> Tuple[Optional[str], float]:
         w = word.lower()
         clean_len = len(w)
         if clean_len < 3: return None, 0.0
         for cat, roots in self.ROOTS.items():
             for r in roots:
                 if r in w: return cat.lower(), 0.8
-        plosive = sum(1 for c in w if c in self.PHONETICS["PLOSIVE"])
-        liquid = sum(1 for c in w if c in self.PHONETICS["LIQUID"])
-        nasal = sum(1 for c in w if c in self.PHONETICS["NASAL"])
-        vowel = sum(1 for c in w if c in self.PHONETICS["VOWELS"])
+        plosive = 0
+        liquid = 0
+        nasal = 0
+        vowel = 0
+        fricative = 0
+        for c in w:
+            if c in self.PHONETICS["PLOSIVE"]: plosive += 1
+            elif c in self.PHONETICS["LIQUID"]: liquid += 1
+            elif c in self.PHONETICS["NASAL"]: nasal += 1
+            elif c in self.PHONETICS["VOWELS"]: vowel += 1
+            elif c in self.PHONETICS["FRICATIVE"]: fricative += 1
         density_score = (plosive * 1.5) + (nasal * 0.8)
-        flow_score = liquid + sum(1 for c in w if c in self.PHONETICS["FRICATIVE"])
+        flow_score = liquid + fricative
         vitality_score = (vowel * 1.2) + (flow_score * 0.8)
         compression_mod = 1.0 if clean_len > 5 else 1.5
         final_density = (density_score / clean_len) * compression_mod
@@ -125,10 +186,11 @@ class SemanticsBioassay:
         high_entropy = {"thermal", "cryo", "explosive", "sacred", "play", "cursed"}
         for w in clean_words:
             is_noise = False
-            for cat in high_entropy:
-                if w in self.store.get_raw(cat):
-                    is_noise = True; break
-            if not is_noise or w in self.store.get_raw("heavy") or w in self.store.SOLVENTS:
+            cats = self.store.get_categories_for_word(w)
+            if cats & high_entropy:
+                is_noise = True
+
+            if not is_noise or "heavy" in cats or w in self.store.SOLVENTS:
                 structure_path.append(w)
         return " ".join(structure_path) if structure_path else "null"
 
@@ -166,13 +228,18 @@ class GlobalLexiconFacade:
         return random.choice(candidates) if candidates else "void"
     @classmethod
     def get_turbulence(cls, words): return cls._ENGINE.measure_turbulence(words)
+
     @classmethod
     def get_current_category(cls, word):
-        for cat, vocab in cls._STORE.LEARNED_VOCAB.items():
-            if word.lower() in vocab: return cat
-        for cat, vocab in cls._STORE.VOCAB.items():
-            if word.lower() in vocab: return cat
+        cats = cls._STORE.get_categories_for_word(word)
+        if cats:
+            return next(iter(cats))
         return None
+
+    @classmethod
+    def identify_categories(cls, word):
+        return cls._STORE.get_categories_for_word(word)
+
     @classmethod
     def compile_antigens(cls):
         antigens = cls._STORE.get_raw("antigen")
@@ -180,22 +247,26 @@ class GlobalLexiconFacade:
             pattern = "|".join(map(re.escape, antigens))
             cls.ANTIGEN_REGEX = re.compile(fr"\b({pattern})\b", re.IGNORECASE)
         else: cls.ANTIGEN_REGEX = None
+
     @classmethod
     def learn_antigen(cls, t, r):
         if "antigen" not in cls._STORE.VOCAB: cls._STORE.VOCAB["antigen"] = set()
         cls._STORE.VOCAB["antigen"].add(t.lower())
         if r: cls._STORE.ANTIGEN_REPLACEMENTS[t.lower()] = r
+        if t.lower() not in cls._STORE.REVERSE_INDEX: cls._STORE.REVERSE_INDEX[t.lower()] = set()
+        cls._STORE.REVERSE_INDEX[t.lower()].add("antigen")
         cls.compile_antigens()
         return True
+
     @classmethod
     def walk_gradient(cls, text): return cls._ENGINE.walk_gradient(text)
+
     @classmethod
     def atrophy(cls, tick, max_age): return cls._STORE.atrophy(tick, max_age)
 
     @property
     def store(self):
         return self._STORE
-
 
 GlobalLexiconFacade.initialize()
 TheLexicon = GlobalLexiconFacade
@@ -257,7 +328,6 @@ class LiteraryReproduction:
                 parent_b_data = json.load(f)
         except (IOError, json.JSONDecodeError):
             return None, "Dead Spore (Corrupt File)."
-
         parent_b_id = parent_b_data.get("session_id", "UNKNOWN")
         trauma_a = parent_a_bio.get("trauma_vector", {})
         trauma_b = parent_b_data.get("trauma_vector", {})
@@ -292,13 +362,11 @@ class LiteraryReproduction:
         child_id = None
         genome = {}
         log_msg = []
-
         if mode == "MITOSIS":
             bio_state = {"trauma_vector": engine_ref.trauma_accum}
             child_id, genome = self.mitosis(mem.session_id, bio_state, phys, mem)
             log_msg = [f"   ► CHILD SPAWNED: {Prisma.WHT}{child_id}{Prisma.RST}",
                        f"   ► TRAIT: {genome.get('mutations', 'None')}"]
-
         elif mode == "CROSSOVER":
             if not target_spore:
                 return f"{Prisma.RED}FERTILITY ERROR: No partner found.{Prisma.RST}", {}
@@ -307,20 +375,17 @@ class LiteraryReproduction:
             if not child_id:
                 return f"{Prisma.RED}REPRODUCTION ERROR: Mode '{mode}' yielded no offspring.{Prisma.RST}", {}
             log_msg = [f"   HYBRID SPAWNED: {Prisma.WHT}{child_id}{Prisma.RST}"]
-
         full_spore_data = {
             "session_id": child_id,
             "meta": {
                 "timestamp": time.time(),
                 "final_health": engine_ref.health,
-                "final_stamina": engine_ref.stamina
-            },
+                "final_stamina": engine_ref.stamina},
             "trauma_vector": genome.get("trauma_inheritance", {}),
             "config_mutations": genome.get("config_mutations", {}),
             "mitochondria": {"enzymes": list(genome.get("inherited_enzymes", []))},
             "core_graph": mem.graph,
-            "antibodies": list(engine_ref.bio.immune.active_antibodies)
-        }
+            "antibodies": list(engine_ref.bio.immune.active_antibodies)}
         filename = f"{child_id}.json"
         saved_path = mem.loader.save_spore(filename, full_spore_data)
         if saved_path:

@@ -1,5 +1,5 @@
-# BONEAMANITA 9.9.8 - "Baby Steps"
-# Architects: SLASH, KICHO, Taylor & Edmark
+# BONEAMANITA 10.0 - "Eden"
+# Architects: SLASH, KICHO, The Courtyard, Taylor & Edmark
 
 import json, os, random, re, time, math, copy, traceback
 from collections import Counter, deque
@@ -400,6 +400,9 @@ class BoneAmanita:
         # 1. Core Services
         self.lex = lexicon_layer if lexicon_layer else TheLexicon
         if hasattr(self.lex, 'initialize'): self.lex.initialize()
+        if hasattr(self.lex.store, 'hive_loaded') and self.lex.store.hive_loaded:
+            BoneConfig.STAMINA_REGEN *= 1.1
+            print(f"{Prisma.GRN}[GENETICS]: Ancestral knowledge detected. Stamina Regen boosted.{Prisma.RST}")
         self.lex.compile_antigens()
         TownHall.DeathGen.load_protocols()
         LiteraryReproduction.load_genetics()
@@ -527,7 +530,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 9.9.8', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.0', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
@@ -573,15 +576,13 @@ class SessionGuardian:
 if __name__ == "__main__":
     engine_instance = BoneAmanita()
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 9.9.8', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.0', 'M')}")
     print(f"{Prisma.paint('  System Initialized.', 'GRY')}")
     print("="*40 + "\n")
-
     print("The aperture opens. The void stares back.")
     print(f"Before we begin the descent... {Prisma.paint('what should I call you?', 'C')}")
     try:
         identity = input(f"{Prisma.paint('>', 'W')} ").strip()
-
         if identity:
             engine_instance.user_name = identity
             print(f"\n{Prisma.paint(f'Protocol accepted. Welcome, {identity}.', 'G')}")
@@ -589,15 +590,12 @@ if __name__ == "__main__":
         else:
             print(f"\n{Prisma.paint('Silence accepted. You shall be known as TRAVELER.', 'GRY')}")
             time.sleep(1.0)
-
     except (KeyboardInterrupt, EOFError):
         print("\nAborted.")
         exit()
-
     with SessionGuardian(engine_instance) as eng:
         first_look = eng.process_turn("LOOK")
         if first_look.get("ui"): print(first_look["ui"])
-
         while True:
             try:
                 u = input(f"{Prisma.paint(f'{eng.user_name} >', 'W')} ")
@@ -611,10 +609,8 @@ if __name__ == "__main__":
                 print(f"\n{Prisma.paint('--- SYSTEM DIRECTIVE ---', 'M')}")
                 print(f"{Prisma.paint(result['system_instruction'], '0')}")
                 print(f"{Prisma.paint('------------------------', 'M')}\n")
-
             if result.get("ui"):
                 print(result["ui"])
-
             if result.get("logs") and BoneConfig.VERBOSE_LOGGING:
                 # [Log logic...]
                 print(f"{Prisma.GRY}--- DEBUG LOGS ---{Prisma.RST}")
