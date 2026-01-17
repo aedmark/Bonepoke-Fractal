@@ -1,10 +1,70 @@
 # CHANGELOG.md
 
-### **BoneAmanita v10.0.4 (Unofficial Patch)**
+### **BONEAMANITA v10.0.5**
 
-**Status:** Stable / Personalized / Unshackled
+Codename: "W H I M S Y"
 
----
+#### **1. The Council (`bone_council.py`)**
+
+_The "Adult Supervision" Update._
+
+- **New Module:** Established **The Council Chamber**, a dedicated advisory board that sits outside the physics engine to audit systemic behavior.
+
+  - **The Strange Loop (Hofstadter):** Detects recursive meta-cognition ("Am I thinking about thinking?").
+
+  - **The Footnote (Pratchett):** Annotates dry system logs with satirical commentary.
+
+- **Feature Added:** **The Market Correction** (Meadows Logic).
+
+  - _The Trap:_ Users discovered they could achieve "Infinite Flow" by maximizing Voltage and minimizing Drag.
+
+  - _The Fix:_ `TheLeveragePoint` now tracks "Static Flow" turns. If you coast on high energy without friction for too long, the Council artificially inflates Drag to prevent a bubble.
+
+  - _Philosophy:_ A system without resistance is not flying; it is falling.
+
+
+#### **2. Physics & Hubris (`bone_physics.py`)**
+
+_The "What Goes Up" Update._
+
+- **Refactor:** **Probabilistic Hubris.**
+
+  - _Old Behavior:_ A perfect streak (5+ turns) granted free ATP.
+
+  - _New Behavior:_ A perfect streak now accumulates **Icarus Risk**.
+
+  - _Mechanism:_ Every turn spent in perfection increases the chance of wax melting by 10%.
+
+- **New Event:** **`ICARUS_CRASH`**.
+
+  - If the RNG gods frown upon your hubris, the system resets Voltage to 0.0, maximizes Drag, and applies significant Impact Trauma (Health Damage).
+
+
+#### **3. Infrastructure & Whimsy (`bone_bus.py`)**
+
+_The "Fuzzy Dice" Update._
+
+- **New Class:** **`Prisma` Tie-Dye Protocol.**
+
+  - Added `tie_dye()`, a visual utility that paints high-energy text in chaotic, randomized colors.
+
+- **Feature:** **The Judgmental Observer.**
+
+  - `TheObserver` no longer just reports latency numbers. It now passes moral judgment on the system's performance (e.g., "SUSPICIOUSLY EFFICIENT", "PONDEROUS", "ASLEEP").
+
+- **Feature:** **Honk Protocol.**
+
+  - The `EventBus` can now emit sonic warnings (`BEEP BEEP`, `AWOOGA`) when the message queue gets clogged.
+
+- **Configuration:** Added `BoneConfig.WHIMSY` namespace to define the laws of comedic physics (e.g., `MAX_SARCASM_LEVEL = 11`).
+
+
+#### **4. Main Loop Integration (`bone_main.py`)**
+
+- **Consequence:** Wired the `ICARUS_CRASH` event directly into the metabolic phase. Hubris is no longer just a narrative event; it is a biological hazard.
+- 
+
+## **BoneAmanita v10.0.4 (Unofficial Patch)**
 
 ### **1. Core Stability Fixes**
 

@@ -78,25 +78,34 @@ class TheTensionMeter:
 
     def audit_hubris(self, physics, lexicon_class):
         streak = physics.get("perfection_streak", 0)
+        if streak < 4:
+            return False, None, None
+        icarus_risk = (streak - 3) * 0.10
+        if random.random() < icarus_risk:
+            self.perfection_streak = 0
+            penalty_drag = 10.0
+            physics["narrative_drag"] += penalty_drag
+            physics["voltage"] = 0.0
+            return (
+                True,
+                f"{Prisma.RED}⚡ ICARUS EVENT: Wax Melting (Risk {int(icarus_risk*100)}%).{Prisma.RST}\n"
+                f"   {Prisma.OCHRE}The sun is too close. You plummet into the sea.{Prisma.RST}\n"
+                f"   {Prisma.GRY}(Drag +{penalty_drag} | Voltage Reset){Prisma.RST}",
+                "ICARUS_CRASH"
+            )
         if streak >= 5:
             return (
                 True,
-                f"{Prisma.CYN}✨ FLOW STATE DETECTED: You are walking on air (Streak {streak}).{Prisma.RST}\n"
-                f"   The Narrator is impressed. {Prisma.GRN}ATP +20.0.{Prisma.RST}",
-                "FLOW_BOOST")
-        if streak == 4:
-            return (
-                True,
-                f"{Prisma.VIOLET}WOBBLE: You are almost perfect. That is dangerous.{Prisma.RST}\n"
-                f"   Don't look down.",
-                None)
-        if streak >= 3:
-            return (
-                True,
-                f"{Prisma.CYN}MOMENTUM BUILDING: You are walking a tightrope (Streak {streak}).{Prisma.RST}\n"
-                f"   The air is thin, but clear. Keep going.",
-                None)
-        return False, None, None
+                f"{Prisma.CYN}✨ FLOW STATE: You are walking on air (Streak {streak}).{Prisma.RST}\n"
+                f"   {Prisma.VIOLET}Hubris Risk: {int(icarus_risk*100)}%. Don't look down.{Prisma.RST}",
+                "FLOW_BOOST"
+            )
+        return (
+            True,
+            f"{Prisma.VIOLET}WOBBLE: You are almost perfect (Streak {streak}).{Prisma.RST}\n"
+            f"   The air is getting thin.",
+            None
+        )
 
     def gaze(self, text: str, graph: Dict = None) -> Dict:
         graph = graph or {}

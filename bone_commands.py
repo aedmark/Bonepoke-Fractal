@@ -65,7 +65,6 @@ class CommandProcessor:
             return True
 
     def _cmd_manifold(self, parts):
-        """Check your coordinates in the Geodesic VSL."""
         phys = self.eng.phys.tension.last_physics_packet
         if not phys:
             self._log("NAVIGATION OFFLINE: No physics data yet.")
@@ -74,7 +73,6 @@ class CommandProcessor:
         return True
 
     def _cmd_reproduce(self, parts):
-        """Attempt Mitosis or Crossover with another spore."""
         if self.eng.health < 20:
             self._log(f"{self.P.RED}FERTILITY ERROR: Too weak to breed.{self.P.RST}")
             return True
@@ -101,7 +99,6 @@ class CommandProcessor:
         return True
 
     def _cmd_status(self, parts):
-        """Diagnostic check (Health, ATP, Enneagram)."""
         self._log(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS ---{self.P.RST}")
         self._log(f"Health:  {self.eng.health:.1f} | Stamina: {self.eng.stamina:.1f} | ATP: {self.eng.bio.mito.state.atp_pool:.1f}")
         try:
@@ -112,7 +109,6 @@ class CommandProcessor:
         return True
 
     def _cmd_save(self, parts):
-        """Cryopreserve the current timeline."""
         self.eng.mind.mirror.profile.save()
         spore_data = {
             "session_id": self.eng.mind.mem.session_id,
@@ -127,7 +123,6 @@ class CommandProcessor:
         return True
 
     def _cmd_rummage(self, parts):
-        """Dig for artifacts (Costs Stamina)."""
         phys = self.eng.phys.tension.last_physics_packet
         if not phys: return True
         success, msg, cost = self.eng.gordon.rummage(phys, self.eng.stamina)
@@ -136,7 +131,6 @@ class CommandProcessor:
         return True
 
     def _cmd_map(self, parts):
-        """Cartographic visualization of the current text."""
         phys = self.eng.phys.tension.last_physics_packet
         if not phys or "raw_text" not in phys: return True
         bio = {"cortisol": self.eng.bio.endo.cortisol, "oxytocin": self.eng.bio.endo.oxytocin}
@@ -146,7 +140,6 @@ class CommandProcessor:
         return True
 
     def _cmd_garden(self, parts):
-        """Visit the Paradox Seeds (add 'water' to tend)."""
         self._log(f"{self.P.GRN}THE PARADOX GARDEN:{self.P.RST}")
         if len(parts) > 1 and parts[1] == "water":
             msg = self.eng.mind.mem.tend_garden(["concept", "truth"])
@@ -158,28 +151,24 @@ class CommandProcessor:
         return True
 
     def _cmd_teach(self, parts):
-        """[w] [c] - Force neuroplasticity (Word -> Category)."""
         if len(parts) >= 3:
             self.Lex.teach(parts[1], parts[2].lower(), self.eng.tick_count)
             self._log(f"{self.P.CYN}NEUROPLASTICITY: '{parts[1]}' -> [{parts[2].upper()}].{self.P.RST}")
         return True
 
     def _cmd_kill(self, parts):
-        """Flag a word as an antigen."""
         if len(parts) >= 2:
             self.Lex.learn_antigen(parts[1], parts[2] if len(parts)>2 else "")
             self._log(f"{self.P.RED}IMMUNE UPDATE: '{parts[1]}' flagged.{self.P.RST}")
         return True
 
     def _cmd_flag(self, parts):
-        """Flag a word as a user bias."""
         if len(parts) > 1:
             self.Lex.USER_FLAGGED_BIAS.add(parts[1].lower())
             self._log(f"{self.P.CYN}BIAS FLAGGED: {parts[1]}{self.P.RST}")
         return True
 
     def _cmd_seed(self, parts):
-        """Plant a new Paradox Seed."""
         if len(parts) < 2: return True
         text = " ".join(parts[1:])
         self.eng.mind.mem.seeds.append(ParadoxSeed(text, set(self.Lex.clean(text))))
@@ -187,23 +176,19 @@ class CommandProcessor:
         return True
 
     def _cmd_load(self, parts):
-        """[x] - Ingest a specific spore file."""
         if len(parts) > 1: self.eng.mind.mem.ingest(parts[1] + (".json" if not parts[1].endswith(".json") else ""))
         return True
 
     def _cmd_kip(self, parts):
-        """Toggle Verbose Logging (The 'Developer Mode')."""
         self.Config.VERBOSE_LOGGING = not self.Config.VERBOSE_LOGGING
         self._log(f"VERBOSE LOGGING: {self.Config.VERBOSE_LOGGING}")
         return True
 
     def _cmd_mode(self, parts):
-        """Force the Governor into a specific mode."""
         if len(parts) > 1: self._log(self.eng.bio.governor.set_override(parts[1].upper()))
         return True
 
     def _cmd_focus(self, parts):
-        """Trace ruminative loops starting from [word]."""
         if len(parts) > 1:
             loop = self.eng.mind.tracer.inject(parts[1].lower())
             if loop:
@@ -214,64 +199,54 @@ class CommandProcessor:
         return True
 
     def _cmd_orbit(self, parts):
-        """Set a Gravity Assist target in the memory graph."""
         if len(parts) > 1 and parts[1] in self.eng.mind.mem.graph:
             self.eng.mind.mem.graph[parts[1]]["edges"]["GRAVITY_ASSIST"] = 50
             self._log(f"{self.P.VIOLET}GRAVITY ASSIST: Target '{parts[1]}'.{self.P.RST}")
         return True
 
     def _cmd_weave(self, parts):
-        """Spin a web between concepts (Requires Tools)."""
         s, m = self.Map.spin_web(self.eng.mind.mem.graph, self.eng.gordon.inventory, self.eng.gordon)
         self._log(m)
         if s: self.eng.stamina -= 5.0
         return True
 
     def _cmd_voids(self, parts):
-        """Detect semantic voids in the current thought."""
         p = self.eng.phys.tension.last_physics_packet
         if p: self._log(f"VOIDS: {self.Map.detect_voids(p) or 'None'}")
         return True
 
     def _cmd_strata(self, parts):
-        """List deep geological memory strata."""
         wells = [k for k,v in self.eng.mind.mem.graph.items() if "strata" in v]
         self._log(f"STRATA: {wells if wells else 'None'}")
         return True
 
     def _cmd_fossils(self, parts):
-        """Review the Ossuary of deleted memories."""
         self._log(f"FOSSILS: {len(self.eng.mind.mem.fossils)} items archived.")
         return True
 
     def _cmd_lineage(self, parts):
-        """Check the generational log."""
         self._log(f"LINEAGE: {len(self.eng.mind.mem.lineage_log)} generations.")
         return True
 
     def _cmd_mirror(self, parts):
-        """Toggle or check the Mirror State."""
         m = self.eng.mind.mirror
         if len(parts) > 1: m.active_mode = (parts[1].lower() == "on")
         self._log(f"MIRROR: {'ON' if m.active_mode else 'OFF'} | {m.get_status()}")
         return True
 
     def _cmd_prove(self, parts):
-        """Check the Logic Density of a specific phrase."""
         if len(parts) > 1:
             m = self.eng.phys.tension.gaze(" ".join(parts[1:]))
             self._log(f"LOGIC DENSITY: {m['physics']['truth_ratio']:.2f}")
         return True
 
     def _cmd_kintsugi(self, parts):
-        """Check the repair status of the vessel."""
         k = self.eng.kintsugi
         state = "FRACTURED" if k.active_koan else "WHOLE"
         self._log(f"KINTSUGI: {state} | Repairs: {k.repairs_count}")
         return True
 
     def _cmd_publish(self, parts):
-        """Submit the current thought to the Literary Journal."""
         phys = self.eng.phys.tension.last_physics_packet
         if phys:
             s, r, _ = self.eng.journal.publish(phys["raw_text"], phys, self.eng.bio)
@@ -280,7 +255,7 @@ class CommandProcessor:
 
     def _cmd_help(self, parts):
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 10.0.4 MANUAL ---{self.P.RST}",
+            f"\n{self.P.CYN}--- BONEAMANITA 10.0.5 MANUAL ---{self.P.RST}",
             f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"]
 
         categories = {

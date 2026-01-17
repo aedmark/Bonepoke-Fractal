@@ -36,11 +36,15 @@ class GeodesicRenderer:
             self._punish_style_crime(style_log)
         if physics.get("system_surge_event", False):
             clean_ui = self._inject_rupture_warning(clean_ui)
-        structured_logs = self.compose_logs(ctx.logs, self.eng.events.flush(), current_tick)
+        raw_logs = self.compose_logs(ctx.logs, self.eng.events.flush(), current_tick)
+        if hasattr(self.eng, 'council'):
+            structured_logs = self.eng.council.annotate_logs(raw_logs)
+        else:
+            structured_logs = raw_logs
         return {
             "type": "GEODESIC_FRAME",
             "ui": clean_ui,
-            "logs": structured_logs,
+            "logs": structured_logs, # Ensure this variable is passed here
             "metrics": self.eng.get_metrics(bio.get("atp", 0.0)),
             "system_instruction": self._get_chorus_instruction(physics)}
 

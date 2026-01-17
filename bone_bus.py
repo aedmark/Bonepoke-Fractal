@@ -1,6 +1,6 @@
 # bone_bus.py - All aboard the Magic Bone Bus!
 
-import json, os, time
+import json, os, time, random
 from collections import deque
 from dataclasses import dataclass, field, fields
 from typing import List, Dict, Any, Optional, Counter
@@ -30,11 +30,28 @@ class Prisma:
         code = color_map.get(color_key.upper(), cls.WHT)
         return f"{code}{text}{cls.RST}"
 
+    @classmethod
+    def tie_dye(cls, text):
+        colors = [cls.RED, cls.GRN, cls.YEL, cls.CYN, cls.MAG, cls.VIOLET, cls.OCHRE]
+        words = text.split()
+        painted = []
+        for w in words:
+            c = random.choice(colors)
+            painted.append(f"{c}{w}{cls.RST}")
+        return " ".join(painted)
+
 class EventBus:
     def __init__(self):
         self.buffer = []
+        self.honk_sounds = ["BEEP BEEP", "HONK", "AWOOGA", "*Grumble*", "MOVE IT"]
+
     def log(self, text: str, category: str = "SYSTEM"):
         self.buffer.append({"text": text, "category": category, "timestamp": time.time()})
+
+    def honk(self):
+        sound = random.choice(self.honk_sounds)
+        self.log(f"{Prisma.YEL}🚌 THE BUS: {sound}!{Prisma.RST}", "BUS")
+
     def flush(self) -> List[Dict]:
         logs = list(self.buffer)
         self.buffer.clear()
@@ -66,11 +83,17 @@ class BoneConfig:
     ANTIGENS = ["basically", "actually", "literally", "utilize"]
     VERBOSE_LOGGING = True
 
-    PROVIDER = "openai" # Default provider
+    PROVIDER = "openai"
     BASE_URL = None
     API_KEY = None
     MODEL = "gpt-4"
     OLLAMA_MODEL_ID = "llama3"
+
+    class WHIMSY:
+        ABSURDITY_CONSTANT = 42
+        MAX_SARCASM_LEVEL = 11
+        LUDICROUS_SPEED = True
+        DEPARTMENT_NAME = "The Ministry of Silly Hats & Semantic Vectors"
 
     class METABOLISM:
         BASE_RATE = 2.0
@@ -139,29 +162,21 @@ class BoneConfig:
 
 @dataclass
 class ErrorLog:
-    """A record of a specific system failure."""
     component: str
     error_msg: str
     timestamp: float = field(default_factory=time.time)
     severity: str = "WARNING" # WARNING, ERROR, CRITICAL
 
 class TheObserver:
-    """
-    The Department of Weights and Measures.
-    Tracks system performance and complains if things get slow.
-    """
     def __init__(self):
         self.start_time = time.time()
-        # Rolling windows for metrics
         self.cycle_times = deque(maxlen=20)
         self.llm_latencies = deque(maxlen=20)
         self.memory_snapshots = deque(maxlen=20)
         self.error_counts = Counter()
         self.user_turns = 0
-
-        # Thresholds (The "Patience Limit")
-        self.LATENCY_WARNING = 5.0  # seconds
-        self.CYCLE_WARNING = 8.0    # seconds
+        self.LATENCY_WARNING = 5.0
+        self.CYCLE_WARNING = 8.0
 
     def clock_in(self):
         return time.time()
@@ -180,23 +195,33 @@ class TheObserver:
     def record_memory(self, node_count):
         self.memory_snapshots.append(node_count)
 
+    def pass_judgment(self, avg_cycle, avg_llm):
+        if avg_cycle == 0.0 and avg_llm == 0.0:
+            return "ASLEEP (WAKE UP)"
+        if avg_cycle < 0.1 and avg_llm < 0.5:
+            return "SUSPICIOUSLY EFFICIENT (Did we skip the math?)"
+        if avg_llm > self.LATENCY_WARNING:
+            jokes = [
+                "BRAIN FOG (The neural net is buffering)",
+                "DEGRADED (Thinking... thinking...)",
+                "PONDEROUS (Is the LLM on a coffee break?)"
+            ]
+            return random.choice(jokes)
+        if avg_cycle > self.CYCLE_WARNING:
+            return "SLUGGISH (The gears need oil)"
+        return "NOMINAL (Boringly adequate)"
+
     def get_report(self):
         avg_cycle = sum(self.cycle_times) / max(1, len(self.cycle_times))
         avg_llm = sum(self.llm_latencies) / max(1, len(self.llm_latencies))
         uptime = time.time() - self.start_time
-
-        status = "NOMINAL"
-        if avg_cycle > self.CYCLE_WARNING:
-            status = "DEGRADED (SLUGGISH)"
-        if avg_llm > self.LATENCY_WARNING:
-            status = "DEGRADED (BRAIN FOG)"
-
+        status_msg = self.pass_judgment(avg_cycle, avg_llm)
         return {
             "uptime_sec": int(uptime),
             "turns": self.user_turns,
             "avg_cycle_sec": round(avg_cycle, 2),
             "avg_llm_sec": round(avg_llm, 2),
-            "status": status,
+            "status": status_msg,
             "errors": dict(self.error_counts),
             "graph_size": self.memory_snapshots[-1] if self.memory_snapshots else 0
         }

@@ -1,4 +1,4 @@
-# BONEAMANITA 10.0.4 - "Eden's Apple (Bitten)"
+# BONEAMANITA 10.0.5 - "W H I M S Y"
 # Architects: SLASH, KICHO, The Courtyard, Taylor & Edmark
 
 import json, os, random, re, time, math, copy, traceback
@@ -18,6 +18,7 @@ from bone_viewer import GeodesicRenderer
 from bone_bus import EventBus, Prisma, BoneConfig, CycleContext, PhysicsPacket, SystemHealth, TheObserver
 from bone_lexicon import TheLexicon, LiteraryReproduction
 from bone_machine import TheCrucible, TheForge, TheTheremin
+from bone_council import CouncilChamber
 
 @dataclass
 class MindSystem:
@@ -55,8 +56,6 @@ class GeodesicOrchestrator:
             self.strunk_white,
             self.vsl_32v
         )
-
-    # Inside GeodesicOrchestrator class in bone_main.py
 
     def run_turn(self, user_message: str) -> Dict[str, Any]:
         self.eng.events.flush()
@@ -231,6 +230,10 @@ class GeodesicOrchestrator:
             ctx.log(hubris_msg)
             if event_type == "FLOW_BOOST":
                 self.eng.bio.mito.state.atp_pool += 20.0
+            elif event_type == "ICARUS_CRASH":
+                damage = 15.0
+                self.eng.health -= damage
+                ctx.log(f"   {Prisma.RED}IMPACT TRAUMA: -{damage} HP.{Prisma.RST}")
         self._apply_healing_logic(ctx)
 
     def _apply_healing_logic(self, ctx: TownHall.CycleContext):
@@ -259,6 +262,9 @@ class GeodesicOrchestrator:
         self._process_intrusions(ctx)
         if self.eng.gordon.inventory:
             self.eng.tinkerer.audit_tool_use(ctx.physics, self.eng.gordon.inventory)
+        council_advice = self.eng.council.convene(ctx.input_text, ctx.physics)
+        for advice in council_advice:
+            ctx.log(advice)
 
     def _apply_reality_filters(self, ctx: TownHall.CycleContext):
         """Handle Mirror Mode and I Ching Trigrams."""
@@ -491,6 +497,7 @@ class BoneAmanita:
         self.tinkerer = TownHall.Tinkerer(self.gordon, self.events)
         self.almanac = TownHall.Almanac()
         self.cosmic = CosmicDynamics()
+        self.council = CouncilChamber()
 
         # 4. Loops & Processors
         self.cmd = CommandProcessor(self, Prisma, self.lex, BoneConfig, TownHall.Cartographer)
@@ -606,7 +613,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.0.4', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.0.5', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
