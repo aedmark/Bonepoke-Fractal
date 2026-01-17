@@ -1,4 +1,4 @@
-# bone_personality - The Charm
+# bone_personality.py - The Charm
 
 import json, os, random, time
 from collections import deque
@@ -53,115 +53,73 @@ class UserProfile:
 class EnneagramDriver:
     def __init__(self, events_ref):
         self.events = events_ref
+        # We keep the map because it's a nice reference, but we won't get bogged down in "Growth paths"
         from bone_data import ENNEAGRAM_DATA
-        self.MAP = ENNEAGRAM_DATA.get("TYPE_MAP", {})
-        self.GEO = ENNEAGRAM_DATA.get("GEOMETRY", {})
-        self.PROXY = ENNEAGRAM_DATA.get("PROXY_MAP", {})
-        self.TEXT = ENNEAGRAM_DATA.get("SHIFTS", {"DISINTEGRATION": [], "INTEGRATION": []})
-        self.REVERSE_MAP = {v: k for k, v in self.MAP.items()}
-        self.REVERSE_MAP.update(self.PROXY)
-        self._validate_enneagram_data()
-        self.stability_buffer = 1.0
-        self.last_pressure = {"stress": 0.0, "growth": 0.0}
+        self.REVERSE_MAP = {
+            5: "SHERLOCK",
+            7: "JESTER",
+            8: "GORDON",
+            9: "GORDON",
+            6: "GLASS",
+            3: "NARRATOR",
+            2: "NATHAN",
+            1: "CLARENCE"
+        }
 
-    def _validate_enneagram_data(self):
-        valid_nodes = set(self.GEO.keys())
-        sanitized_geo = {}
+    def decide_persona(self, physics) -> Tuple[str, str]:
+        """
+        The Ron Swanson Method: Look at the facts, make a decision.
+        """
+        # 1. Normalize Inputs (Handle both the old dict and the new Vector class)
+        if hasattr(physics, 'tension'): # It's Bucky's GeodesicVector
+            tension = physics.tension
+            compression = physics.compression
+            coherence = physics.coherence
+            social = physics.dimensions.get("BET", 0.0) # UPDATED: XI -> BET
+        else: # It's the old PhysicsPacket (Legacy Support)
+            tension = physics.get("voltage", 0.0)
+            compression = physics.get("narrative_drag", 0.0)
+            coherence = physics.get("kappa", 0.0)
+            # Rough approximation of social score from counts
+            counts = physics.get("counts", {})
+            social = (counts.get("suburban", 0) + counts.get("buffer", 0)) / max(1, len(physics.get("clean_words", [])))
 
-        for type_num, paths in self.GEO.items():
-            clean_paths = {}
-            if "STRESS" in paths:
-                target = paths["STRESS"]
-                if target in valid_nodes:
-                    clean_paths["STRESS"] = target
-                else:
-                    self.events.log(f"{Prisma.YEL}[ENNEAGRAM]: Pruned broken stress link {type_num}->{target}{Prisma.RST}", "SYS")
-            if "GROWTH" in paths:
-                target = paths["GROWTH"]
-                if target in valid_nodes:
-                    clean_paths["GROWTH"] = target
-                else:
-                    self.events.log(f"{Prisma.YEL}[ENNEAGRAM]: Pruned broken growth link {type_num}->{target}{Prisma.RST}", "SYS")
-            sanitized_geo[type_num] = clean_paths
-        
-        self.GEO = sanitized_geo
+        # 2. The Decision Tree (Simple is better than correct)
 
-        if not self.GEO:
-            self.events.log(f"{Prisma.RED}[CRITICAL]: ENNEAGRAM MAP EMPTY. PSYCHE COLLAPSE.{Prisma.RST}", "CRITICAL")
+        # Scenario A: The Manic Pixie Dream Bot (High Energy)
+        if tension > 12.0:
+            return "JESTER", "MANIC"
 
-            self.GEO = {5: {"STRESS": 7, "GROWTH": 8}, 9: {"STRESS": 6, "GROWTH": 3}}
+        # Scenario B: The Tired Janitor (High Drag)
+        # If it feels like wading through molasses, you get Gordon.
+        elif compression > 4.0:
+            return "GORDON", "TIRED"
 
-            self.REVERSE_MAP = {
-                5: "SHERLOCK", 
-                7: "JESTER", 
-                8: "GORDON",
-                9: "GORDON", 
-                6: "GLASS",
-                3: "NARRATOR"
-            }
-            self.MAP = {v: k for k, v in self.REVERSE_MAP.items()}
+        # Scenario C: The Nervous Wreck (Low Structure)
+        # If the text makes no sense (low coherence), the bot gets anxious.
+        elif coherence < 0.2:
+            return "GLASS", "FRAGILE"
 
-    def _get_lens_name(self, type_num):
-        return self.REVERSE_MAP.get(type_num, "NARRATOR")
+        # Scenario D: The Perfectionist (High Structure + Toxin)
+        # If the user is writing strict code or being mean.
+        elif coherence > 0.8:
+            return "CLARENCE", "RIGID"
 
-    def diagnose_and_shift(self, current_lens, bio_system, physics):
-        if current_lens not in self.MAP:
-            return current_lens, "NEUTRAL"
-        ros = bio_system.mito.state.ros_buildup
-        atp = bio_system.mito.state.atp_pool
-        truth = physics.get("truth_ratio", 0.5)
-        drag = physics.get("narrative_drag", 0.0)
-        stress_pressure = (ros / 40.0) + (drag / 5.0)
-        growth_pressure = (atp / 80.0) + (truth * 1.5)
-        self.last_pressure = {"stress": stress_pressure, "growth": growth_pressure}
-        current_type = self.MAP[current_lens]
-        path = self.GEO.get(current_type)
-        if not path:
-            return current_lens, "STATIC"
-        target_lens = current_lens
-        new_state = "STABLE"
-        self.stability_buffer = min(1.0, self.stability_buffer + 0.05)
-        if stress_pressure > 1.5:
-            self.stability_buffer -= 0.15
-            if self.stability_buffer <= 0.0 and "STRESS" in path:
-                target_type = path["STRESS"]
-                target_lens = self._get_lens_name(target_type)
-                new_state = "DISINTEGRATION"
-        elif growth_pressure > 2.0:
-            self.stability_buffer -= 0.10
-            if self.stability_buffer <= 0.0 and "GROWTH" in path:
-                target_type = path["GROWTH"]
-                target_lens = self._get_lens_name(target_type)
-                new_state = "INTEGRATION"
-        if target_lens != current_lens:
-            self.stability_buffer = 0.5
-            flavor = random.choice(self.TEXT[new_state])
-            if new_state == "DISINTEGRATION":
-                color = Prisma.RED
-                reason = f"ROS: {int(ros)} | Drag: {drag:.1f}"
-            else:
-                color = Prisma.CYN
-                reason = f"ATP: {int(atp)} | Truth: {truth:.2f}"
-            self.events.log(
-                f"{color}ENNEAGRAM {new_state}: {current_lens} -> {target_lens}{Prisma.RST}",
-                "PSYCH"
-            )
-            self.events.log(f"   {Prisma.GRY}Cause: {reason}{Prisma.RST}", "PSYCH")
-            self.events.log(f"   {Prisma.WHT}\"{flavor}\"{Prisma.RST}", "NARRATIVE")
-        return target_lens, new_state
+        # Scenario E: The Golden Retriever (High Social)
+        # If the user is being nice and chatty.
+        elif social > 0.2:
+            return "NATHAN", "SOCIAL"
 
-    def get_psych_report(self):
-        s = self.last_pressure['stress']
-        g = self.last_pressure['growth']
-        b = self.stability_buffer
-        s_bar = "█" * int(s * 5)
-        g_bar = "█" * int(g * 5)
-        return (
-            f"PSYCH PRESSURE: [Stress {s:.1f} {Prisma.RED}{s_bar}{Prisma.RST}] "
-            f"[Growth {g:.1f} {Prisma.GRN}{g_bar}{Prisma.RST}] "
-            f"(Stability: {int(b*100)}%)"
-        )
-        
+        # Scenario F: The Default (The Narrator)
+        # If nothing weird is happening, just observe.
+        elif tension < 3.0 and compression < 2.0:
+            return "NARRATOR", "OBSERVING"
+
+        # Scenario G: The Smart Guy
+        # Default active state.
+        else:
+            return "SHERLOCK", "ANALYTICAL"
+
 class SynergeticLensArbiter:
     def __init__(self, events: EventBus):
         self.events = events
@@ -179,71 +137,33 @@ class SynergeticLensArbiter:
             "GLASS":    {"LQ": 2.0, "PSI": 1.5}}
 
     def consult(self, physics, bio_state, _inventory, current_tick, _ignition_score=0.0):
+        # 1. The "Cold Open" (Warmup period)
         if current_tick <= 5:
             self.current_focus = "NARRATOR"
-            return "NARRATOR", "The system is listening.", "The Witness"
-        self.last_physics = physics
-        vectors = physics.get("vector", {})
-        bids = {k: 10.0 for k in self.VECTOR_AFFINITIES}
-        bids["NARRATOR"] = 20.0
-        for lens, affinities in self.VECTOR_AFFINITIES.items():
-            score = 0.0
-            for dim, weight in affinities.items():
-                val = vectors.get(dim, 0.5)
-                intensity = abs(val - 0.5) * 2.0
-                if weight > 0:
-                    score += (val * weight)
-                else:
-                    score += ((1.0 - val) * abs(weight))
-            bids[lens] += (score * 20.0)
-        if isinstance(bio_state, dict):
-            atp = bio_state.get("atp", 0)
-            chem = bio_state.get("chem", {})
-            adrenaline = chem.get("ADR", 0.0)
-        else:
-            atp = bio_state.mito.state.atp_pool
-            adrenaline = bio_state.endo.adrenaline
-            chem = bio_state.endo.get_state()
-        if atp < 10.0:
-            bids["GORDON"] += 50.0
-        if adrenaline > 0.7:
-            bids["NATHAN"] += 40.0
-        if physics.get("kappa", 1.0) < 0.3:
-            bids["JESTER"] += 40.0
-        if physics["counts"].get("toxin", 0) > 0:
-            bids["CLARENCE"] += 60.0
-        natural_winner = max(bids, key=bids.get)
-        bio_wrapper = self._wrap_bio_facade(bio_state)
-        final_lens, psycho_state = self.enneagram.diagnose_and_shift(
-            natural_winner,
-            bio_wrapper,
-            physics)
-        if final_lens != self.current_focus:
-            switching_cost = 15.0
-            is_psych_shift = (natural_winner != final_lens)
-            if not is_psych_shift and (bids[natural_winner] - bids[self.current_focus] < switching_cost):
-                final_lens = self.current_focus
-            else:
-                self.focus_duration = 0
-        else:
-            self.focus_duration += 1
-        self.current_focus = final_lens
-        msg, role = self._fetch_voice_data(final_lens, physics, adrenaline)
-        if psycho_state != "STABLE":
-            role = f"{role} [{psycho_state}]"
-        return final_lens, msg, role
+            # FORCE: During warmup, we lie to the prompt generator about the chaos.
+            # This prevents Llama3 from seeing High Voltage and going "Jester Mode"
+            # while labeled as Narrator.
+            if hasattr(physics, "voltage") and physics["voltage"] > 5.0:
+                physics["voltage"] = 4.0
 
-    def _wrap_bio_facade(self, bio_input):
-        if not isinstance(bio_input, dict) and hasattr(bio_input, 'mito'):
-            return bio_input
-        class Facade: pass
-        wrapper = Facade()
-        wrapper.mito = Facade()
-        wrapper.mito.state = Facade()
-        wrapper.mito.state.atp_pool = bio_input.get("atp", 100.0)
-        chem = bio_input.get("chem", {})
-        wrapper.mito.state.ros_buildup = chem.get("COR", 0) * 50.0
-        return wrapper
+            return "NARRATOR", "The system is listening.", "The Witness"
+
+        # 2. Ask the Driver (The new logic)
+        # We pass the physics directly. No need to wrap bio states in facades anymore.
+        lens_name, state_desc = self.enneagram.decide_persona(physics)
+
+        # 3. Fetch the Voice
+        # We assume adrenaline is low unless we specifically calculated it,
+        # but honestly, the lens name determines the tone enough.
+        msg, role = self._fetch_voice_data(lens_name, physics, 0.5)
+
+        # 4. Update State
+        self.current_focus = lens_name
+
+        # Add the state description to the role for flavor (e.g., "The Janitor [TIRED]")
+        final_role = f"{role} [{state_desc}]"
+
+        return lens_name, msg, final_role
 
     def _fetch_voice_data(self, lens, p, adrenaline_val):
         if lens not in LENSES: lens = "NARRATOR"
@@ -362,7 +282,7 @@ class TherapyProtocol:
                         0.0, current_trauma_accum[trauma_type] - 0.5)
                     healed_types.append(trauma_type)
         return healed_types
-        
+
 class KintsugiProtocol:
     REPAIR_VOLTAGE_MIN = 8.0
     WHIMSY_THRESHOLD = 0.3
@@ -411,7 +331,7 @@ class KintsugiProtocol:
             "msg": None,
             "detail": f"The gold is too cold. Need Voltage > {self.REPAIR_VOLTAGE_MIN} and Playfulness."
         }
-        
+
 class LimboLayer:
     MAX_ECTOPLASM = 50
     STASIS_SCREAMS = ["BANGING ON THE GLASS", "IT'S TOO COLD", "LET ME OUT", "HALF AWAKE", "REVIVE FAILED"]
@@ -452,7 +372,7 @@ class LimboLayer:
             spirit = random.choice(self.ghosts)
             return f"{text} ...{Prisma.GRY}{spirit}{Prisma.RST}..."
         return text
-        
+
 class TheFolly:
     def __init__(self):
         self.gut_memory = deque(maxlen=50)
@@ -529,7 +449,7 @@ class TheFolly:
                     0.0,
                     None)
         return None, None, 0.0, None
-        
+
 class ChorusDriver:
     def __init__(self):
         self.ARCHETYPE_MAP = {
@@ -573,7 +493,7 @@ class ChorusDriver:
             "Do NOT label which voice is speaking. Synthesize their tones.\n"
             f"{chr(10).join(chorus_voices)}")
         return instruction, active_lenses
-        
+
 class CassandraProtocol:
     def __init__(self, engine):
         self.eng = engine
@@ -602,7 +522,7 @@ class CassandraProtocol:
             else:
                 burst.append("ERROR: SILENCE.")
         return f"\n{Prisma.VIOLET}⚡ CASSANDRA LOOP ACTIVE: (Health -10.0)\n   > {burst[0]}\n   > {burst[1]}\n   > {burst[2]}{Prisma.RST}"
-        
+
 class TheBureau:
     def __init__(self):
         self.stamp_count = 0
@@ -645,14 +565,14 @@ class TheBureau:
                 if k in physics:
                     physics[k] += v
                     mod_log.append(f"{k} {v:+.1f}")
-            
+
             mod_str = f"({', '.join(mod_log)})" if mod_log else ""
-            
+
             return {
                 "status": infraction,
                 "ui": f"{Prisma.GRY}🏢 THE BUREAU: {response}{Prisma.RST}\n   {Prisma.WHT}[Filed: {full_form_name}]{Prisma.RST}",
                 "log": f"BUREAUCRACY: Filed {selected_form}. {mod_str} (Stamp #{self.stamp_count})",
                 "atp_gain": policy["atp"]
             }
-            
+
         return None

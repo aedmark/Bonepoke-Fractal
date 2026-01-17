@@ -28,49 +28,47 @@ class TemporalDynamics:
             / len(self.voltage_history),
             2,)
 
-class PhysicsResolver:
+class GeodesicEngine:
     @staticmethod
-    def calculate_voltage(counts: dict, config) -> float:
-        heavy = counts.get("heavy", 0)
-        explosive = counts.get("explosive", 0)
-        constructive = counts.get("constructive", 0)
-        raw_charge = (
-                (heavy * config.PHYSICS.WEIGHT_HEAVY) +
-                (explosive * config.PHYSICS.WEIGHT_EXPLOSIVE) +
-                (constructive * config.PHYSICS.WEIGHT_CONSTRUCTIVE))
-        final_voltage = raw_charge * config.KINETIC_GAIN
-        return round(final_voltage, 2)
-
-    @staticmethod
-    def calculate_drag(clean_words: List, counts: dict, config) -> float:
+    def collapse_wavefunction(clean_words: List[str], counts: Dict[str, int], config) -> 'GeodesicVector':
         volume = max(1, len(clean_words))
-        solvents = counts.get("solvents", 0)
-        suburban = counts.get("suburban", 0)
-        play = counts.get("play", 0)
-        friction = (solvents * 1.0) + (suburban * 2.5)
-        lift = play * 1.5
-        net_drag = max(0.0, friction - lift)
-        normalized_drag = (net_drag / volume) * 10.0
-        final_drag = normalized_drag * config.SIGNAL_DRAG_MULTIPLIER
-        return round(min(config.PHYSICS.DRAG_HALT, final_drag), 2)
+        mass_heavy = counts.get("heavy", 0)
+        mass_kinetic = counts.get("explosive", 0) + counts.get("kinetic", 0)
+        mass_constructive = counts.get("constructive", 0)
+        mass_abstract = counts.get("abstract", 0)
+        mass_social = counts.get("suburban", 0) + counts.get("solvents", 0)
+        mass_play = counts.get("play", 0)
+        raw_tension = (
+                (mass_heavy * config.PHYSICS.WEIGHT_HEAVY) +
+                (mass_kinetic * config.PHYSICS.WEIGHT_EXPLOSIVE) +
+                (mass_constructive * config.PHYSICS.WEIGHT_CONSTRUCTIVE)
+        )
+        tension = round(raw_tension * config.KINETIC_GAIN, 2)
+        friction = (counts.get("solvents", 0) * 0.2) + (counts.get("suburban", 0) * 2.0)
+        lift = (mass_play * 1.5) + (mass_kinetic * 0.5)
+        raw_compression = max(0.0, friction - lift)
+        normalized_compression = (raw_compression / volume) * 10.0
+        compression = round(min(config.PHYSICS.DRAG_HALT, normalized_compression * config.SIGNAL_DRAG_MULTIPLIER), 2)
+        structural_mass = mass_heavy + mass_constructive
+        coherence = min(1.0, structural_mass / max(1, config.SHAPLEY_MASS_THRESHOLD))
+        abstraction = min(1.0, (mass_abstract / volume) + 0.2)
+        def norm(val): return min(1.0, val / volume)
 
-    @staticmethod
-    def derive_vector_matrix(counts: dict, total_vol: int, voltage: float, drag: float) -> dict:
-        safe_vol = max(1, total_vol)
-        def d(cat): return counts.get(cat, 0) / safe_vol
-        return {
-            "VEL": min(1.0, 0.5 + (d("explosive") * 2.0) + (d("kinetic") * 1.0) - (drag * 0.05)),
-            "STR": min(1.0, 0.5 + (d("heavy") * 2.0) + (d("constructive") * 1.5)),
-            "ENT": min(1.0, 0.5 + (d("antigen") * 3.0) + (d("toxin") * 2.0)),
-            "TEX": min(1.0, 0.5 + (d("heavy") * 0.5) + (d("abstract") * 1.0)),
-            "TMP": min(1.0, 0.5 + (d("thermal") * 2.0) - (d("cryo") * 2.0) + (voltage * 0.02)),
-            "PHI": min(1.0, (d("heavy") + d("kinetic")) / max(1, d("abstract") + d("heavy"))),
-            "PSI": min(1.0, 0.5 + (d("abstract") * 2.0)),
-            "DEL": min(1.0, 0.5 + (d("play") * 2.0) + (d("unknown") * 1.5)),
-            "XI":  min(1.0, (d("suburban") + d("buffer")) * 2.0),
-            "BET": min(1.0, d("suburban") + d("buffer")),
-            "E":   min(1.0, (d("solvents") * 0.4)),
-            "LQ":  min(1.0, d("passive_watch") + d("mirror"))}
+        dimensions = {
+            "VEL": norm(mass_kinetic * 2.0 - compression),   # Velocity
+            "STR": norm(mass_heavy * 2.0 + mass_constructive), # Strength
+            "ENT": norm(counts.get("antigen", 0) * 3.0),     # Entropy
+            "PHI": norm(mass_heavy + mass_kinetic),          # Physicality
+            "PSI": abstraction,                              # Abstraction
+            "BET":  norm(mass_social * 2.0)                  # Beta/Social/Banality
+        }
+        return GeodesicVector(
+            tension=tension,
+            compression=compression,
+            coherence=round(coherence, 3),
+            abstraction=round(abstraction, 2),
+            dimensions=dimensions
+        )
 
 class TheTensionMeter:
     def __init__(self, events):
@@ -106,13 +104,21 @@ class TheTensionMeter:
         counts, unknowns = self._tally_categories(clean_words, text)
         if unknowns:
             self._trigger_neuroplasticity(unknowns, counts, text)
-        voltage = PhysicsResolver.calculate_voltage(counts, BoneConfig)
-        drag = PhysicsResolver.calculate_drag(clean_words, counts, BoneConfig)
-        integrity = self._measure_integrity(clean_words, graph, counts)
-        vectors = PhysicsResolver.derive_vector_matrix(counts, len(clean_words), voltage, drag)
+        geodesic = GeodesicEngine.collapse_wavefunction(clean_words, counts, BoneConfig)
         metrics = self._derive_complex_metrics(
-            counts, clean_words, voltage, drag, integrity, vectors)
-        packet = self._package_physics(text, clean_words, counts, voltage, drag, integrity, metrics)
+            counts, clean_words,
+            geodesic.tension,
+            geodesic.compression,
+            {"kappa": geodesic.coherence, "psi": geodesic.abstraction, "mass": 0}, # Adapter dict for backward compat
+            geodesic.dimensions
+        )
+        packet = self._package_physics(
+            text, clean_words, counts,
+            geodesic.tension,
+            geodesic.compression,
+            {"kappa": geodesic.coherence, "psi": geodesic.abstraction, "mass": 0},
+            metrics
+        )
         self.last_physics_packet = packet["physics"]
         return packet
 
@@ -189,7 +195,7 @@ class TheTensionMeter:
         cohesion_words = counts["suburban"] + counts["buffer"] + counts["antigen"] + (counts["abstract"] * 0.5)
         e_val = mass_words / total_vol
         b_val = cohesion_words / total_vol
-        beta_index = vectors["BET"] * 5.0
+        beta_index = vectors.get("BET", 0.0) * 5.0
         truth_ratio = vectors["PHI"]
         total_viscosity = sum(TheLexicon.measure_viscosity(w) for w in words)
         avg_viscosity = total_viscosity / total_vol
@@ -445,6 +451,24 @@ class GeodesicDome:
             "concept": concept,
             "color": color,
             "vector": dominant_vec}
+
+@dataclass
+class GeodesicVector:
+    # Primary Forces
+    tension: float = 0.0      # Formerly Voltage (Energy/Heat)
+    compression: float = 0.0  # Formerly Drag (Resistance/Friction)
+
+    # Structural Integrity
+    coherence: float = 0.0    # Formerly Kappa (Structural soundness)
+    abstraction: float = 0.0  # Formerly Psi (Mental density)
+
+    # The Elemental Matrix (Normalized 0.0 - 1.0)
+    # We keep the dictionary for flexibility, but the keys are now standardized.
+    dimensions: Dict[str, float] = field(default_factory=dict)
+
+    def is_stable(self) -> bool:
+        """Determines if the structure can hold its own weight."""
+        return self.coherence > 0.3 and self.tension < 20.0
 
 class RuptureValve:
     def __init__(self, lexicon, memory):

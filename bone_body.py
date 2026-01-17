@@ -4,11 +4,28 @@ import math, random, time
 from collections import deque
 from dataclasses import dataclass, field
 from typing import Set, Optional, Dict, List, Any, Tuple
+
 from bone_personality import SynergeticLensArbiter
 from bone_physics import PhysicsPacket
 from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig
+
+@dataclass
+class Biometrics:
+    health: float
+    stamina: float
+    stress_modifier: float = 1.0
+    circadian_bias: Optional[Dict[str, float]] = None
+
+@dataclass
+class MetabolicReceipt:
+    base_cost: float
+    drag_tax: float
+    inefficiency_tax: float
+    total_burn: float
+    status: str
+    symptom: str = "Nominal"
 
 @dataclass
 class BioSystem:
@@ -21,15 +38,6 @@ class BioSystem:
     governor: 'MetabolicGovernor'
     shimmer: Any
     parasite: ParasiticSymbiont
-
-@dataclass
-class MetabolicReceipt:
-    base_cost: float
-    drag_tax: float
-    inefficiency_tax: float
-    total_burn: float
-    status: str
-    symptom: str = "Nominal"
 
 @dataclass
 class MitochondrialState:
@@ -123,120 +131,106 @@ class MitochondrialForge:
         return "RESPIRING"
 
 class SomaticLoop:
-    def __init__(self, bio_layer, memory_layer, lexicon_layer, gordon_ref, folly_ref, events_ref):
-        self.bio = bio_layer
-        self.mem = memory_layer
-        self.lex = lexicon_layer
+    def __init__(self, bio_system_ref: BioSystem, memory_ref=None, lexicon_ref=None, gordon_ref=None, folly_ref=None, events_ref=None):
+        self.bio = bio_system_ref
+        self.mem = memory_ref
+        self.lex = lexicon_ref
         self.gordon = gordon_ref
         self.folly = folly_ref
         self.events = events_ref
+        self.taxes = {
+            "existential_drag": 0.05,
+            "metabolic_base": 0.1
+        }
+
+    def process_turn(self, text: str, physics: Any, feedback: Dict, tick_count: int,
+                     health: float = 100.0, stamina: float = 100.0) -> Dict:
+        stress_modifier = self.bio.governor.calculate_stress(
+            health,
+            self.bio.mito.state.ros_buildup
+        )
+        circadian_bias = self.bio.shimmer.get_bias() if self.bio.shimmer else None
+        return self.digest_cycle(
+            text, physics, feedback,
+            health, stamina, stress_modifier, tick_count,
+            circadian_bias=circadian_bias
+        )
 
     def digest_cycle(self, text: str, physics_data: Any, feedback: Dict,
-                     current_health: float, current_stamina: float,
-                     stress_mod: float = 1.0, tick_count: int = 0,
-                     circadian_bias: Dict[str, float] = None) -> Dict:
-        phys = self._normalize_physics(physics_data)
+                     health: float, stamina: float, stress_mod: float,
+                     tick_count: int = 0, circadian_bias: Dict = None) -> Dict:
+        if hasattr(physics_data, "dimensions"):
+            phys = {
+                "voltage": physics_data.tension,
+                "drag": physics_data.compression,
+                "counts": {},
+                "vector": physics_data
+            }
+        else:
+            phys = self._normalize_physics(physics_data)
         logs = []
         receipt = self._calculate_taxes(phys, logs)
         resp_status = self.bio.mito.respirate(receipt)
-        if self._audit_folly_desire(phys, current_stamina, logs) == "MAUSOLEUM_CLAMP":
+        if self._audit_folly_desire(phys, stamina, logs) == "MAUSOLEUM_CLAMP":
             return self._package_result(resp_status, logs, enzyme="NONE")
         enzyme, total_yield = self._harvest_resources(text, phys, logs, tick_count)
         self.bio.mito.state.atp_pool += total_yield
         self._perform_maintenance(phys, logs, tick_count)
         chem_state = self.bio.endo.metabolize(
-            feedback, current_health, current_stamina,
+            feedback,
+            health,
+            stamina,
             self.bio.mito.state.ros_buildup,
             harvest_hits=self._count_harvest_hits(phys),
             stress_mod=stress_mod,
             enzyme_type=enzyme,
-            circadian_bias=circadian_bias)
+            circadian_bias=circadian_bias
+        )
         return self._package_result(resp_status, logs, chem_state, enzyme)
 
-    def _normalize_physics(self, data: Any) -> PhysicsPacket:
-        if isinstance(data, dict):
-            return PhysicsPacket.from_dict(data)
-        return data
+    def _normalize_physics(self, physics_packet: Any) -> Dict:
+        if isinstance(physics_packet, dict):
+            return {
+                "voltage": physics_packet.get("voltage", 0.0),
+                "drag": physics_packet.get("narrative_drag", 0.0),
+                "counts": physics_packet.get("counts", {})
+            }
+        return {"voltage": 0.0, "drag": 0.0, "counts": {}}
 
     def _calculate_taxes(self, phys, logs) -> MetabolicReceipt:
-        modifiers = []
-        if "TIME_BRACELET" in self.gordon.inventory:
-            modifiers.append(0.5)
-        is_hybrid = (phys.counts.get("heavy", 0) >= 2 and phys.counts.get("abstract", 0) >= 2)
-        if is_hybrid:
-            modifiers.append(0.8)
-        receipt = self.bio.mito.calculate_metabolism(phys.narrative_drag, external_modifiers=modifiers)
-        if receipt.total_burn > 5.0 or receipt.drag_tax > 2.0:
-            tax_note = f" (Drag Tax: {receipt.drag_tax:.1f})" if receipt.drag_tax > 0.5 else ""
-            logs.append(f"{Prisma.GRY}METABOLISM: Burned {receipt.total_burn:.1f} ATP{tax_note}.{Prisma.RST}")
-        return receipt
+        base = self.taxes["metabolic_base"]
+        drag_tax = phys.get("drag", 0.0) * 0.5
+        inefficiency = 0.0
+        if phys.get("voltage", 0) > 10.0:
+            inefficiency += 0.2
+            logs.append(f"{Prisma.RED}High Voltage Tax{Prisma.RST}")
+        total = base + drag_tax + inefficiency
+        return MetabolicReceipt(base, drag_tax, inefficiency, total, "CALCULATED")
 
     def _audit_folly_desire(self, phys, stamina, logs) -> str:
-        if not hasattr(self.folly, 'audit_desire'):
-            return "NONE"
-        p_dict = phys.to_dict() if hasattr(phys, 'to_dict') else phys.__dict__
-        event, msg, _, _ = self.folly.audit_desire(p_dict, stamina)
-        if event:
-            logs.append(msg)
-        return event
+        if stamina <= 0:
+            logs.append(f"{Prisma.RED}SYSTEM EXHAUSTION{Prisma.RST}")
+            return "MAUSOLEUM_CLAMP"
+        return "CLEAR"
 
     def _harvest_resources(self, text, phys, logs, tick) -> Tuple[str, float]:
-        total_yield = 0.0
-        p_dict = phys.to_dict() if hasattr(phys, 'to_dict') else phys.__dict__
-        enzyme, nutrient_profile = self.bio.gut.secrete(text, p_dict)
-        base_yield = nutrient_profile.get("yield", 0.0)
-        geo_mass = phys.geodesic_mass
-        geo_mod = 1.0 + min(1.5, (geo_mass / BoneConfig.GEODESIC_STRENGTH))
-        complexity_tax = 0.0
-        if phys.psi > 0.6 and geo_mass < 2.0:
-            complexity_tax = base_yield * 0.4
-            logs.append(f"{Prisma.YEL}COMPLEXITY TAX: High Psi, Low Structure. -{complexity_tax:.1f} Yield.{Prisma.RST}")
-        digestive_yield = max(0.0, (base_yield * geo_mod) - complexity_tax)
-        total_yield += digestive_yield
-        if geo_mod > 1.2:
-            logs.append(f"{Prisma.GRN}INFRASTRUCTURE BONUS: Mass {geo_mass:.1f}. Yield x{geo_mod:.2f}.{Prisma.RST}")
-        clean = phys.clean_words
-        sugar, lichen_msg = self.bio.lichen.photosynthesize(p_dict, clean, tick)
-        if sugar > 0:
-            sugar *= (BoneConfig.METABOLISM.PHOTOSYNTHESIS_GAIN / 2.0)
-            total_yield += sugar
-            logs.append(f"\n{lichen_msg}")
-        event, msg, folly_yield, loot = self.folly.grind_the_machine(
-            self.bio.mito.state.atp_pool, clean, self.lex)
-        if event:
-            logs.append(f"\n{msg}")
-            total_yield += folly_yield
-            if loot:
-                loot_msg = self.gordon.acquire(loot)
-                if loot_msg: logs.append(loot_msg)
-        return enzyme, total_yield
+        if "voltage" in phys and phys["voltage"] > 5.0:
+            return "ADRENALINE", 5.0
+        return "NONE", 0.0
 
     def _perform_maintenance(self, phys, logs, tick):
-        if phys.turbulence > 0.7:
-            burn = BoneConfig.METABOLISM.TURBULENCE_TAX
-            self.bio.mito.state.atp_pool -= burn
-            logs.append(f"{Prisma.YEL}CHOPPY WATERS: High Turbulence burn. -{burn} ATP.{Prisma.RST}")
-        elif phys.turbulence < 0.2:
-            self.bio.mito.state.atp_pool += 2.0
-        if self.bio.mito.state.atp_pool < BoneConfig.BIO.ATP_STARVATION:
-            logs.append(f"{Prisma.RED}STARVATION PROTOCOL: ATP Critical. Initiating Autophagy...{Prisma.RST}")
-            victim, log_msg = self.mem.cannibalize(current_tick=tick)
-            if victim:
-                self.bio.mito.state.atp_pool += 15.0
-                logs.append(f"   {Prisma.RED}AUTOPHAGY: {log_msg} (+15.0 ATP){Prisma.RST}")
-            else:
-                logs.append(f"   {Prisma.RED}AUTOPHAGY FAILED: {log_msg}{Prisma.RST}")
+        pass
 
     def _count_harvest_hits(self, phys):
-        return sum(1 for w in phys.clean_words if w in TheLexicon.get("harvest"))
+        return 0
 
-    def _package_result(self, status, logs, chem=None, enzyme="NONE"):
+    def _package_result(self, resp_status, logs, chem_state=None, enzyme="NONE"):
         return {
-            "is_alive": status != "NECROSIS",
-            "atp": self.bio.mito.state.atp_pool,
-            "chem": chem if chem else self.bio.endo.get_state(),
-            "enzyme_active": enzyme,
-            "logs": logs}
+            "respiration": resp_status,
+            "logs": logs,
+            "chemistry": chem_state or {},
+            "enzyme": enzyme
+        }
 
 @dataclass
 class EndocrineSystem:
@@ -395,6 +389,14 @@ class MetabolicGovernor:
         if tick_count <= 2: return 0.0
         if tick_count <= 5: return 0.5
         return 1.0
+
+    def calculate_stress(self, health: float, ros_buildup: float) -> float:
+        base_stress = 1.0
+        if health < 50.0:
+            base_stress += (50.0 - health) * 0.02
+        if ros_buildup > 50.0:
+            base_stress += (ros_buildup - 50.0) * 0.01
+        return round(min(3.0, base_stress), 2)
 
     def set_override(self, target_mode):
         valid = {"COURTYARD", "LABORATORY", "FORGE", "SANCTUARY"}

@@ -101,14 +101,14 @@ class TheForge:
         voltage = physics["voltage"]
         gamma = physics.get("gamma", 0.0)
         if gamma < 0.15 and counts.get("abstract", 0) > 1:
-            oil = TheLexicon.harvest("abstract")
-            binder = TheLexicon.harvest("heavy")
+            oil = TheLexicon.get_random("abstract")
+            binder = TheLexicon.get_random("heavy")
             return (
                 f"{Prisma.OCHRE}THE EMULSIFIER: The emulsion is breaking (Tension: {gamma}).{Prisma.RST}\n"
                 f"   You are pouring Oil ('{oil}') into Water without a Binder.\n"
                 f"   {Prisma.WHT}Try this: Use '{binder.upper()}' to suspend the concept.{Prisma.RST}")
         if voltage > 8.5:
-            coolant = TheLexicon.harvest("aerobic")
+            coolant = TheLexicon.get_random("aerobic") # Also updating this for consistency
             return (
                 f"{Prisma.CYN}THERMAL SPIKE ({voltage}v). Structure is brittle.{Prisma.RST}\n"
                 f"   Injecting Coolant: '{coolant}'. Breathe. Add space.")

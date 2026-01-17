@@ -1,20 +1,18 @@
 # bone_lexicon.py - The Global Dictionary
 
 import json, random, re, string, time, unicodedata, os
-from typing import Tuple, Dict, Set, Optional
-
+from typing import Tuple, Dict, Set, Optional, List
 from bone_bus import BoneConfig, Prisma
 from bone_data import LEXICON, GENETICS
 
 class LexiconStore:
     HIVE_FILENAME = "cortex_hive.json"
-
     def __init__(self):
         self.categories = {
             "heavy", "kinetic", "explosive", "constructive", "abstract",
             "photo", "aerobic", "thermal", "cryo", "suburban", "play",
             "sacred", "buffer", "antigen", "diversion", "meat", "gradient_stop"}
-        self.VOCAB: Dict[str, Set[str]] = {}
+        self.VOCAB: Dict[str, Set[str]] = {k: set() for k in self.categories}
         self.LEARNED_VOCAB: Dict[str, Dict[str, int]] = {}
         self.USER_FLAGGED_BIAS = set()
         self.ANTIGEN_REPLACEMENTS = {}
@@ -40,14 +38,12 @@ class LexiconStore:
         self._load_hive()
 
     def _index_word(self, word: str, category: str):
-        """Helper to keep the Reverse Index clean."""
         w = word.lower()
         if w not in self.REVERSE_INDEX:
             self.REVERSE_INDEX[w] = set()
         self.REVERSE_INDEX[w].add(category)
 
     def _load_hive(self):
-        """Reading the ancient texts."""
         if not os.path.exists(self.HIVE_FILENAME):
             return
         try:
@@ -67,7 +63,6 @@ class LexiconStore:
             print(f"{Prisma.RED}[HIVE]: Memory corruption detected. Starting fresh. ({e}){Prisma.RST}")
 
     def _save_hive(self):
-        """Saving your work because we respect your time."""
         try:
             with open(self.HIVE_FILENAME, 'w', encoding='utf-8') as f:
                 json.dump(self.LEARNED_VOCAB, f, indent=2)
@@ -113,163 +108,194 @@ class LexiconStore:
             self._save_hive()
         return rotted
 
-class SemanticsBioassay:
+    def harvest(self, text: str) -> Dict[str, List[str]]:
+        results = {}
+        if not text: return results
+        translator = str.maketrans(string.punctuation, " " * len(string.punctuation))
+        clean_text = text.translate(translator).lower()
+        words = clean_text.split()
+        for w in words:
+            cats = self.get_categories_for_word(w)
+            for cat in cats:
+                if cat not in results:
+                    results[cat] = []
+                results[cat].append(w)
+        return results
+
+class LinguisticAnalyzer:
     def __init__(self, store_ref):
         self.store = store_ref
         self._TRANSLATOR = str.maketrans(string.punctuation, " " * len(string.punctuation))
         self.PHONETICS = {
-            "PLOSIVE": set("bdgkpt"), "FRICATIVE": set("fthszsh"),
-            "LIQUID": set("lr"), "NASAL": set("mn"),
-            "VOWELS": set("aeiouy")}
+            "PLOSIVE": set("bdgkpt"),
+            "FRICATIVE": set("fthszsh"),
+            "LIQUID": set("lr"),
+            "NASAL": set("mn"),
+            "VOWELS": set("aeiouy")
+        }
         self.ROOTS = {
             "HEAVY": ("lith", "ferr", "petr", "dens", "grav", "struct", "base", "fund", "mound"),
             "KINETIC": ("mot", "mov", "ject", "tract", "pel", "crat", "dynam", "flux"),
             "ABSTRACT": ("tion", "ism", "ence", "ance", "ity", "ology", "ness", "ment", "idea"),
             "SUBURBAN": ("norm", "comm", "stand", "pol", "reg", "mod"),
-            "VITAL": ("viv", "vita", "spir", "anim", "bio", "luc", "lum", "phot", "phon", "surg", "bloom")}
+            "VITAL": ("viv", "vita", "spir", "anim", "bio", "luc", "lum", "phot", "phon", "surg", "bloom")
+        }
 
-    def clean(self, text):
+    def measure_viscosity(self, word: str) -> float:
+        if not word: return 0.0
+        w = word.lower()
+        if w in self.store.SOLVENTS: return 0.1
+        length_score = min(1.0, len(w) / 12.0)
+        stops = sum(1 for c in w if c in self.PHONETICS["PLOSIVE"])
+        stop_score = min(1.0, stops / 4.0)
+        return (length_score * 0.6) + (stop_score * 0.4)
+
+    def get_turbulence(self, words: List[str]) -> float:
+        if len(words) < 2: return 0.0
+        lengths = [len(w) for w in words]
+        avg_len = sum(lengths) / len(lengths)
+        variance = sum((l - avg_len) ** 2 for l in lengths) / len(lengths)
+        turbulence = min(1.0, variance / 10.0)
+        return round(turbulence, 2)
+
+    def sanitize(self, text: str) -> List[str]:
         if not text: return []
         try:
             normalized = unicodedata.normalize('NFKD', text).encode('ASCII', 'ignore').decode('utf-8')
         except Exception:
             normalized = text
-
         cleaned_text = normalized.translate(self._TRANSLATOR).lower()
         words = cleaned_text.split()
         return [w for w in words if w.strip() and w not in self.store.USER_FLAGGED_BIAS]
 
-    def assay(self, word: str) -> Tuple[Optional[str], float]:
+    def classify_word(self, word: str) -> Tuple[Optional[str], float]:
         w = word.lower()
-        clean_len = len(w)
-        if clean_len < 3: return None, 0.0
-        for cat, roots in self.ROOTS.items():
-            for r in roots:
-                if r in w: return cat.lower(), 0.8
-        plosive = 0
-        liquid = 0
-        nasal = 0
-        vowel = 0
-        fricative = 0
-        for c in w:
-            if c in self.PHONETICS["PLOSIVE"]: plosive += 1
-            elif c in self.PHONETICS["LIQUID"]: liquid += 1
-            elif c in self.PHONETICS["NASAL"]: nasal += 1
-            elif c in self.PHONETICS["VOWELS"]: vowel += 1
-            elif c in self.PHONETICS["FRICATIVE"]: fricative += 1
-        density_score = (plosive * 1.5) + (nasal * 0.8)
-        flow_score = liquid + fricative
-        vitality_score = (vowel * 1.2) + (flow_score * 0.8)
-        compression_mod = 1.0 if clean_len > 5 else 1.5
-        final_density = (density_score / clean_len) * compression_mod
-        final_vitality = (vitality_score / clean_len) * compression_mod
-        if final_density > 0.55: return "heavy", round(final_density, 2)
-        if final_vitality > 0.6: return "play", round(final_vitality, 2)
-        if (flow_score / clean_len) > 0.6: return "kinetic", 0.5
+        if len(w) < 3:
+            return None, 0.0
+        for category, roots in self.ROOTS.items():
+            for root in roots:
+                if root in w:
+                    return category.lower(), 0.8
+        counts = {k: 0 for k in self.PHONETICS}
+        for char in w:
+            for sound_type, chars in self.PHONETICS.items():
+                if char in chars:
+                    counts[sound_type] += 1
+                    break
+        density_score = (counts["PLOSIVE"] * 1.5) + (counts["NASAL"] * 0.8)
+        flow_score = counts["LIQUID"] + counts["FRICATIVE"]
+        vitality_score = (counts["VOWELS"] * 1.2) + (flow_score * 0.8)
+        length_mod = 1.0 if len(w) > 5 else 1.5
+        final_density = (density_score / len(w)) * length_mod
+        final_vitality = (vitality_score / len(w)) * length_mod
+        if final_density > 0.55:
+            return "heavy", round(final_density, 2)
+        if final_vitality > 0.6:
+            return "play", round(final_vitality, 2)
+        if (flow_score / len(w)) > 0.6:
+            return "kinetic", 0.5
         return None, 0.0
 
-    def measure_viscosity(self, word):
-        if not word: return 0.0
-        consonants = sum(1 for c in word if c.lower() not in "aeiou")
-        return (consonants / len(word)) if len(word) > 0 else 0.0
-
-    def measure_turbulence(self, words):
-        if len(words) < 2: return 0.0
-        lengths = [len(w) for w in words]
-        mean = sum(lengths) / len(lengths)
-        variance = sum((x - mean) ** 2 for x in lengths) / len(lengths)
-        return min(1.0, (variance ** 0.5) / 5.0)
-
-    def walk_gradient(self, text):
-        clean_words = self.clean(text)
-        structure_path = []
-        high_entropy = {"thermal", "cryo", "explosive", "sacred", "play", "cursed"}
-        for w in clean_words:
-            is_noise = False
-            cats = self.store.get_categories_for_word(w)
-            if cats & high_entropy:
-                is_noise = True
-
-            if not is_noise or "heavy" in cats or w in self.store.SOLVENTS:
-                structure_path.append(w)
-        return " ".join(structure_path) if structure_path else "null"
-
-class GlobalLexiconFacade:
+class LexiconService:
     _INITIALIZED = False
-    _STORE = None
-    _ENGINE = None
+    store = None
+    _ANALYZER = None
     ANTIGEN_REGEX = None
     SOLVENTS = set()
+
+    @classmethod
+    def get_current_category(cls, word: str) -> Optional[str]:
+        if not cls._INITIALIZED: cls.initialize()
+        categories = cls._STORE.get_categories_for_word(word)
+        if categories:
+            return next(iter(categories))
+        return None
+
+    @classmethod
+    def measure_viscosity(cls, word: str) -> float:
+        if not cls._INITIALIZED: cls.initialize()
+        return cls._ANALYZER.measure_viscosity(word)
+
+    @classmethod
+    def get_turbulence(cls, words: List[str]) -> float:
+        if not cls._INITIALIZED: cls.initialize()
+        return cls._ANALYZER.get_turbulence(words)
 
     @classmethod
     def initialize(cls):
         if cls._INITIALIZED: return
         cls._STORE = LexiconStore()
         cls._STORE.load_vocabulary()
-        cls._ENGINE = SemanticsBioassay(cls._STORE)
-        cls._STORE.set_engine(cls._ENGINE)
+        cls._ANALYZER = LinguisticAnalyzer(cls._STORE)
+        cls._STORE.set_engine(cls._ANALYZER)
         cls.compile_antigens()
         cls.SOLVENTS = cls._STORE.SOLVENTS
         cls._INITIALIZED = True
 
     @classmethod
-    def get(cls, category): return cls._STORE.get_raw(category)
-    @classmethod
-    def teach(cls, word, category, tick): return cls._STORE.teach(word, category, tick)
-    @classmethod
-    def clean(cls, text): return cls._ENGINE.clean(text)
-    @classmethod
-    def taste(cls, word): return cls._ENGINE.assay(word)
-    @classmethod
-    def measure_viscosity(cls, word): return cls._ENGINE.measure_viscosity(word)
-    @classmethod
-    def harvest(cls, category):
-        candidates = list(cls._STORE.get_raw(category))
-        return random.choice(candidates) if candidates else "void"
-    @classmethod
-    def get_turbulence(cls, words): return cls._ENGINE.measure_turbulence(words)
-
-    @classmethod
-    def get_current_category(cls, word):
-        cats = cls._STORE.get_categories_for_word(word)
-        if cats:
-            return next(iter(cats))
-        return None
-
-    @classmethod
-    def identify_categories(cls, word):
-        return cls._STORE.get_categories_for_word(word)
-
-    @classmethod
     def compile_antigens(cls):
-        antigens = cls._STORE.get_raw("antigen")
-        if antigens:
-            pattern = "|".join(map(re.escape, antigens))
-            cls.ANTIGEN_REGEX = re.compile(fr"\b({pattern})\b", re.IGNORECASE)
-        else: cls.ANTIGEN_REGEX = None
+        replacements = cls._STORE.ANTIGEN_REPLACEMENTS
+        if not replacements:
+            cls.ANTIGEN_REGEX = None
+            return
+        patterns = sorted(replacements.keys(), key=len, reverse=True)
+        escaped = [re.escape(p) for p in patterns]
+        cls.ANTIGEN_REGEX = re.compile('|'.join(escaped), re.IGNORECASE)
 
     @classmethod
-    def learn_antigen(cls, t, r):
-        if "antigen" not in cls._STORE.VOCAB: cls._STORE.VOCAB["antigen"] = set()
-        cls._STORE.VOCAB["antigen"].add(t.lower())
-        if r: cls._STORE.ANTIGEN_REPLACEMENTS[t.lower()] = r
-        if t.lower() not in cls._STORE.REVERSE_INDEX: cls._STORE.REVERSE_INDEX[t.lower()] = set()
-        cls._STORE.REVERSE_INDEX[t.lower()].add("antigen")
-        cls.compile_antigens()
-        return True
+    def sanitize(cls, text):
+        if not cls._INITIALIZED: cls.initialize()
+        return cls._ANALYZER.sanitize(text)
 
     @classmethod
-    def walk_gradient(cls, text): return cls._ENGINE.walk_gradient(text)
+    def classify(cls, word):
+        if not cls._INITIALIZED: cls.initialize()
+        return cls._ANALYZER.classify_word(word)
 
     @classmethod
-    def atrophy(cls, tick, max_age): return cls._STORE.atrophy(tick, max_age)
+    def clean(cls, text): return cls.sanitize(text)
 
-    @property
-    def store(self):
-        return self._STORE
+    @classmethod
+    def taste(cls, word): return cls.classify(word)
 
-GlobalLexiconFacade.initialize()
-TheLexicon = GlobalLexiconFacade
+    @classmethod
+    def get(cls, category: str) -> Set[str]:
+        if not cls._INITIALIZED: cls.initialize()
+        return cls._STORE.VOCAB.get(category, set())
+
+    @classmethod
+    def get_random(cls, category: str) -> str:
+        if not cls._INITIALIZED: cls.initialize()
+        words = list(cls.get(category))
+        return random.choice(words) if words else "void"
+
+    @classmethod
+    def teach(cls, word: str, category: str, tick: int = 0):
+        if not cls._INITIALIZED: cls.initialize()
+        cls._STORE.teach(word, category, tick)
+
+    @classmethod
+    def harvest(cls, text: str) -> Dict[str, List[str]]:
+        if not cls._INITIALIZED: cls.initialize()
+        return cls._STORE.harvest(text)
+
+    @classmethod
+    def atrophy(cls, current_tick, max_age=100):
+        if not cls._INITIALIZED: cls.initialize()
+        return cls._STORE.atrophy(current_tick, max_age)
+
+    @classmethod
+    def walk_gradient(cls, text: str) -> str:
+        clean_words = cls.sanitize(text)
+        if not clean_words: return "..."
+        kept = []
+        for w in clean_words:
+            cat, _ = cls.classify(w)
+            if cat in ["heavy", "abstract", "sacred"]:
+                kept.append(w)
+        return " ".join(kept) if kept else " ".join(clean_words[:3])
+
+TheLexicon = LexiconService
 
 class LiteraryReproduction:
     MUTATIONS = {}

@@ -6,8 +6,7 @@ from collections import Counter, deque
 from typing import List, Optional, Tuple, Dict, Any
 from dataclasses import dataclass, field
 from bone_commands import CommandProcessor
-from bone_physics import TheBouncer, RuptureValve, ChromaScope, TheTensionMeter, TheTangibilityGate, \
-    TemporalDynamics, ZoneInertia, CosmicDynamics
+from bone_physics import TheBouncer, RuptureValve, ChromaScope, TheTensionMeter, TheTangibilityGate, TemporalDynamics, ZoneInertia, CosmicDynamics
 from bone_village import TownHall
 from bone_data import LENSES
 from bone_inventory import GordonKnot
@@ -515,9 +514,11 @@ class BoneAmanita:
         if not hist: return 0.0
         return sum(hist) / len(hist)
 
-    def process_turn(self, user_message: str) -> Dict[str, Any]:
+    def process_turn(self, user_message: str, *args, **kwargs) -> Dict[str, Any]:
         turn_start = self.observer.clock_in()
         self.observer.user_turns += 1
+        if not user_message:
+            user_message = ""
         cmd_response = self._phase_check_commands(user_message)
         if cmd_response:
             return cmd_response
