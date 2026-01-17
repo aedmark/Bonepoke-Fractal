@@ -12,7 +12,6 @@ try:
 except ImportError as import_error:
     print(f"\033[31mCRITICAL: Core systems missing. {import_error}\033[0m")
     sys.exit(1)
-
 CONFIG_FILE = "bone_config.json"
 heavy_words = LEXICON.get("heavy", ["stone", "lead", "iron", "gravity", "dense"])
 explosive_words = LEXICON.get("explosive", ["burst", "shatter", "spark", "pop", "snap"])
@@ -125,62 +124,71 @@ class GenesisProtocol:
             self.type_out(f"   [ERROR] Write failure: {e}", color=Prisma.RED)
             self.type_out(f"   (The bureaucracy rejected your form. Check file permissions.)", color=Prisma.GRY)
 
-    def _manual_config_flow(self) -> bool:
+    def _manual_config_flow(self) -> bool | None:
         self.type_out("\n--- MANUAL CONFIGURATION ---", color=Prisma.OCHRE)
-        valid_providers = ["ollama", "openai", "lm_studio", "mock"]
-        print(f"1. {Prisma.WHT}Provider Type?{Prisma.RST}")
-        print(f"   Options: {', '.join(valid_providers)}")
-        print(f"   (Note: Use 'openai' for generic local servers like LocalAI/vLLM)")
-        provider = input(f"{Prisma.paint('>', 'O')} ").strip().lower()
-        if provider not in valid_providers:
-            self.type_out(f"Invalid provider '{provider}'. Defaulting to 'openai'.", color=Prisma.YEL)
-            provider = "openai"
-        if provider == "mock":
-            self.config = {
-                "provider": "mock",
-                "base_url": None,
-                "api_key": "sk-dummy-key",
-                "model": "mock-model"}
-            self._save_config()
-            return True
-        default_url = "http://localhost:11434/v1/chat/completions"
-        if provider == "openai": default_url = "https://api.openai.com/v1/chat/completions"
-        elif provider == "lm_studio"\
-                : default_url = "http://localhost:1234/v1/chat/completions"
-        print(f"2. {Prisma.WHT}Base URL?{Prisma.RST} (Default: {default_url})")
-        base_url = input(f"{Prisma.paint('>', 'O')} ").strip()
-        if not base_url:
-            base_url = default_url
-        if not base_url.startswith("http"):
-            self.type_out("Error: Base URL must start with http:// or https://", color=Prisma.RED)
-            return False
-        print(f"3. {Prisma.WHT}Model Name?{Prisma.RST} (e.g., llama3, gpt-4)")
-        model = input(f"{Prisma.paint('>', 'O')} ").strip()
-        if not model: model = "local-model"
-        print(f"4. {Prisma.WHT}API Key?{Prisma.RST} (Hit enter for 'sk-dummy-key')")
-        key = input(f"{Prisma.paint('>', 'O')} ").strip()
-        if not key: key = "sk-dummy-key"
-        candidate_config = {
-            "provider": provider,
-            "base_url": base_url,
-            "api_key": key,
-            "model": model}
-        is_valid, msg = self.validate_brain_uplink(candidate_config)
-        if is_valid:
-            self.config = candidate_config
-            self._save_config()
-            return True
-        else:
-            self.type_out(f"Manual Config Failed: {msg}", color=Prisma.RED)
-            return False
+
+        while True: # <--- THE SECOND CHANCE LOOP
+            valid_providers = ["ollama", "openai", "lm_studio", "mock"]
+            print(f"1. {Prisma.WHT}Provider Type?{Prisma.RST}")
+            print(f"   Options: {', '.join(valid_providers)}")
+            print(f"   (Note: Use 'openai' for generic local servers like LocalAI/vLLM)")
+
+            provider = input(f"{Prisma.paint('>', 'O')} ").strip().lower()
+            if provider not in valid_providers:
+                self.type_out(f"Invalid provider '{provider}'. Defaulting to 'openai'.", color=Prisma.YEL)
+                provider = "openai"
+
+            if provider == "mock":
+                self.config = {
+                    "provider": "mock",
+                    "base_url": None,
+                    "api_key": "sk-dummy-key",
+                    "model": "mock-model"}
+                self._save_config()
+                return True
+
+            default_url = "http://localhost:11434/v1/chat/completions"
+            if provider == "openai": default_url = "https://api.openai.com/v1/chat/completions"
+            elif provider == "lm_studio": default_url = "http://localhost:1234/v1/chat/completions"
+
+            print(f"2. {Prisma.WHT}Base URL?{Prisma.RST} (Default: {default_url})")
+            base_url = input(f"{Prisma.paint('>', 'O')} ").strip()
+            if not base_url:
+                base_url = default_url
+            if not base_url.startswith("http"):
+                self.type_out("Error: Base URL must start with http:// or https://", color=Prisma.RED)
+                if input(f"{Prisma.paint('Try again? (Y/n)', 'Y')} ").strip().lower() == 'n':
+                    return False
+                continue
+            print(f"3. {Prisma.WHT}Model Name?{Prisma.RST} (e.g., llama3, gpt-4)")
+            model = input(f"{Prisma.paint('>', 'O')} ").strip()
+            if not model: model = "local-model"
+            print(f"4. {Prisma.WHT}API Key?{Prisma.RST} (Hit enter for 'sk-dummy-key')")
+            key = input(f"{Prisma.paint('>', 'O')} ").strip()
+            if not key: key = "sk-dummy-key"
+            candidate_config = {
+                "provider": provider,
+                "base_url": base_url,
+                "api_key": key,
+                "model": model}
+            is_valid, msg = self.validate_brain_uplink(candidate_config)
+            if is_valid:
+                self.config = candidate_config
+                self._save_config()
+                return True
+            else:
+                self.type_out(f"Manual Config Failed: {msg}", color=Prisma.RED)
+                retry = input(f"{Prisma.paint('That didn\'t work. Try again? (Y/n)', 'Y')} ").strip().lower()
+                if retry == 'n':
+                    return False
+                self.type_out("\n...Rebooting Config Form...\n", color=Prisma.GRY)
 
     def wizard(self) -> bool:
         os.system('cls' if os.name == 'nt' else 'clear')
         banner = f"""
-{Prisma.CYN}   GENESIS PROTOCOL v10.0{Prisma.RST}
-   {Prisma.GRY}State Machine Active. Tensegrity Nominal.{Prisma.RST}
-   ------------------------------------
-        """
+{Prisma.CYN}   GENESIS PROTOCOL v10.2{Prisma.RST}
+{Prisma.GRY}State Machine Active. Tensegrity Nominal.{Prisma.RST}
+------------------------------------"""
         print(banner)
         print(f"   1. {Prisma.WHT}Auto-Detect Local Brains{Prisma.RST} (Ollama, LM Studio)")
         print(f"   2. {Prisma.WHT}Cloud Uplink{Prisma.RST} (OpenAI API)")
@@ -221,51 +229,54 @@ class GenesisProtocol:
             return False
 
     def _configure_target(self, selection) -> bool:
-        candidate_config = self.config.copy()
-        if selection["type"] == "mock":
-            candidate_config["provider"] = "mock"
-        elif selection["type"] == "local":
-            data = selection["data"]
-            candidate_config["provider"] = data["provider_id"]
-            candidate_config["base_url"] = data["endpoint"]
-            self.type_out(f"Target Model Name (default: {data['default_model']}):")
-            user_model = input(f"{Prisma.paint('>', 'C')} ").strip()
-            candidate_config["model"] = user_model or data["default_model"]
-        elif selection["type"] == "cloud":
-            print(f"\n{Prisma.CYN}--- CLOUD CONFIGURATION ---{Prisma.RST}")
-            print("1. Standard OpenAI (api.openai.com)")
-            print("2. Custom Endpoint (Azure, Groq, OpenRouter, etc.)")
-            sub_choice = input(f"{Prisma.paint('>', 'C')} ").strip()
-            candidate_config["provider"] = "openai"
-            if sub_choice == "2":
-                print(f"Enter Base URL (e.g., https://api.groq.com/openai/v1/chat/completions):")
-                custom_url = input(f"{Prisma.paint('>', 'C')} ").strip()
-                if not custom_url.startswith("http"):
-                    self.type_out("Invalid URL format. Reverting to Standard OpenAI.", color=Prisma.YEL)
-                    candidate_config["base_url"] = "https://api.openai.com/v1/chat/completions"
+        while True:
+            candidate_config = self.config.copy()
+            if selection["type"] == "mock":
+                candidate_config["provider"] = "mock"
+            elif selection["type"] == "local":
+                data = selection["data"]
+                candidate_config["provider"] = data["provider_id"]
+                candidate_config["base_url"] = data["endpoint"]
+                self.type_out(f"Target Model Name (default: {data['default_model']}):")
+                user_model = input(f"{Prisma.paint('>', 'C')} ").strip()
+                candidate_config["model"] = user_model or data["default_model"]
+            elif selection["type"] == "cloud":
+                print(f"\n{Prisma.CYN}--- CLOUD CONFIGURATION ---{Prisma.RST}")
+                print("1. Standard OpenAI (api.openai.com)")
+                print("2. Custom Endpoint (Azure, Groq, OpenRouter, etc.)")
+                sub_choice = input(f"{Prisma.paint('>', 'C')} ").strip()
+                candidate_config["provider"] = "openai"
+                if sub_choice == "2":
+                    print(f"Enter Base URL (e.g., https://api.groq.com/openai/v1/chat/completions):")
+                    custom_url = input(f"{Prisma.paint('>', 'C')} ").strip()
+                    if not custom_url.startswith("http"):
+                        self.type_out("Invalid URL format. Reverting to Standard OpenAI.", color=Prisma.YEL)
+                        candidate_config["base_url"] = "https://api.openai.com/v1/chat/completions"
+                    else:
+                        candidate_config["base_url"] = custom_url
                 else:
-                    candidate_config["base_url"] = custom_url
+                    candidate_config["base_url"] = "https://api.openai.com/v1/chat/completions"
+                self.type_out("Enter API Key (will be saved locally):")
+                key = input(f"{Prisma.paint('>', 'C')} ").strip()
+                candidate_config["api_key"] = key
+                self.type_out("Target Model Name (e.g., gpt-4-turbo, llama3-70b-8192):")
+                model = input(f"{Prisma.paint('>', 'C')} ").strip()
+                candidate_config["model"] = model if model else "gpt-4-turbo"
+            is_valid, msg = self.validate_brain_uplink(candidate_config)
+            if is_valid:
+                self.config = candidate_config
+                self._save_config()
+                return True
             else:
-                candidate_config["base_url"] = "https://api.openai.com/v1/chat/completions"
-            self.type_out("Enter API Key (will be saved locally):")
-            key = input(f"{Prisma.paint('>', 'C')} ").strip()
-            candidate_config["api_key"] = key
-            self.type_out("Target Model Name (e.g., gpt-4-turbo, llama3-70b-8192):")
-            model = input(f"{Prisma.paint('>', 'C')} ").strip()
-            candidate_config["model"] = model if model else "gpt-4-turbo"
-        is_valid, msg = self.validate_brain_uplink(candidate_config)
-        if is_valid:
-            self.config = candidate_config
-            self._save_config()
-            return True
-        else:
-            self.type_out(f"Configuration failed: {msg}", color=Prisma.RED)
-            return False
+                self.type_out(f"Configuration failed: {msg}", color=Prisma.RED)
+                # The Failsafe Prompt
+                retry = input(f"{Prisma.paint('Typo? Try again? (Y/n)', 'Y')} ").strip().lower()
+                if retry == 'n':
+                    return False
+                self.type_out("\n...Retrying Uplink...\n", color=Prisma.GRY)
 
     def export_system_prompt(self):
-        """Generates a standalone artifact for use in external LLMs."""
         from bone_data import LENSES, LEXICON
-
         prompt = f"""
 *** BONEAMANITA SYSTEM INSTRUCTION ***
 
@@ -337,13 +348,18 @@ Do not break character. Do not explain the simulation rules unless asked.
         engine = BoneAmanita()
         if engine.mind.mirror.profile.confidence < 50:
             print(f"\n{Prisma.CYN}[IDENTITY REQUIRED]{Prisma.RST}")
-            user_id = input("Enter User Designation: ").strip()
-            if user_id:
-                engine.mind.mirror.profile.name = user_id
-                engine.mind.mirror.profile.confidence = 100
-                print(f"...Identity '{user_id}' imprinted on cortex.")
-            else:
-                print("...Proceeding as Anonymous Traveler.")
+            try:
+                user_id = input("Enter User Designation: ").strip()
+                if user_id:
+                    engine.mind.mirror.profile.name = user_id
+                    engine.mind.mirror.profile.confidence = 100
+                    print(f"...Identity '{user_id}' imprinted on cortex.")
+                else:
+                    print("...Proceeding as Anonymous Traveler.")
+            except KeyboardInterrupt:
+                print(f"\n{Prisma.YEL}\n[INTERRUPT DETECTED]{Prisma.RST}")
+                print(f"{Prisma.GRY}The user pulled the plug. The universe dissolves into static.{Prisma.RST}")
+                sys.exit(0)
         if self.config["provider"] != "mock":
             self.type_out(f"...Connecting Neural Uplink ({self.config['provider']})...", color=Prisma.CYN)
             try:
@@ -364,23 +380,25 @@ Do not break character. Do not explain the simulation rules unless asked.
         with SessionGuardian(engine) as eng:
             while True:
                 try:
-                    u = input(f"{Prisma.paint('>', 'W')} ")
+                    prompt_char = Prisma.paint('>', 'W')
+                    u = input(f"{prompt_char} ")
+                    if u.strip() == "<<<":
+                        print(f"{Prisma.GRY}   [MULTI-LINE MODE ACTIVE. Type '>>>' to send.]{Prisma.RST}")
+                        lines = []
+                        while True:
+                            try:
+                                line = input(f"{Prisma.paint('...', '0')} ")
+                                if line.strip() == ">>>":
+                                    break
+                                lines.append(line)
+                            except EOFError:
+                                break
+                        u = "\n".join(lines)
+                        print(f"{Prisma.GRY}   [Block received: {len(u)} chars]{Prisma.RST}")
                     if not u: continue
                 except EOFError:
                     break
                 if u.lower() in ["exit", "quit", "/exit"]:
-                    break
-                result = eng.process_turn(u)
-                if result.get("system_instruction") and BoneConfig.VERBOSE_LOGGING:
-                    print(f"\n{Prisma.paint('--- DIRECTIVE ---', 'M')}")
-                    print(f"{Prisma.paint(result['system_instruction'], '0')}")
-                if result.get("ui"):
-                    print(result["ui"])
-                if result.get("logs") and BoneConfig.VERBOSE_LOGGING:
-                    print(f"{Prisma.GRY}--- LOGS ---{Prisma.RST}")
-                    for log in result["logs"]:
-                        print(log)
-                if result.get("type") == "DEATH":
                     break
 
 if __name__ == "__main__":

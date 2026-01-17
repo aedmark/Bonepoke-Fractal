@@ -85,8 +85,3 @@ DO NOT RUSH. When a task is too big to do all at once, or you have multiple task
 ALWAYS ASSUME THE USER IS NOT A PROGRAMMER. This is why you should always provide clear instructions. 
 
 "What would Terry Pratchett and Douglas Adams do?"
-
-
-
-
-

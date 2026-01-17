@@ -22,7 +22,7 @@ class BoneJSONEncoder(json.JSONEncoder):
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_10.0.5"
+        self.genome = "BONEAMANITA_10.2"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -43,8 +43,11 @@ class SporeCasing:
 
 class SporeInterface:
     def save_spore(self, filename, data): raise NotImplementedError
+
     def load_spore(self, filepath): raise NotImplementedError
+
     def list_spores(self): raise NotImplementedError
+
     def delete_spore(self, filepath): raise NotImplementedError
 
 class LocalFileSporeLoader(SporeInterface):
@@ -67,7 +70,6 @@ class LocalFileSporeLoader(SporeInterface):
                 os.fsync(f.fileno())
             os.replace(temp_path, final_path)
             return final_path
-
         except (IOError, OSError, TypeError) as e:
             print(f"Error saving spore: {e}")
             if os.path.exists(temp_path):
@@ -304,7 +306,6 @@ class MycelialNetwork:
         victims = []
         limit = BoneConfig.MAX_MEMORY_CAPACITY
         safety_break = 0
-
         while len(self.graph) > limit and safety_break < 10:
             victim, log = self.cannibalize(current_tick=current_tick)
             if victim:
@@ -370,7 +371,7 @@ class MycelialNetwork:
         for n in nodes_to_remove: del self.graph[n]
         return f"📉 HOMEOSTATIC SCALING: Decayed {total_decayed} synapses. Pruned {pruned_count} weak connections."
 
-    def save(self, health, stamina, mutations, trauma_accum, joy_history, mitochondria_traits=None, antibodies=None):
+    def save(self, health, stamina, mutations, trauma_accum, joy_history, mitochondria_traits=None, antibodies=None, soul_data=None):
         base_trauma = (BoneConfig.MAX_HEALTH - health) / BoneConfig.MAX_HEALTH
         final_vector = {k: min(1.0, v) for k, v in trauma_accum.items()}
         top_joy = sorted(joy_history, key=lambda x: x["resonance"], reverse=True)[:3]
@@ -393,6 +394,8 @@ class MycelialNetwork:
         data["meta"] = {"timestamp": time.time(), "final_health": health, "final_stamina": stamina}
         if mitochondria_traits: data["mitochondria"] = mitochondria_traits
         if joy_legacy_data: data["joy_legacy"] = joy_legacy_data
+        if soul_data:
+            data["soul_legacy"] = soul_data
         active_seeds = [s for s in self.seeds if not s.bloomed]
         active_seeds.sort(key=lambda s: s.maturity, reverse=True)
         kept_seeds = active_seeds[:5]
@@ -447,7 +450,6 @@ class MycelialNetwork:
                 "STAMINA_REGEN", "MAX_DRAG_LIMIT", "GEODESIC_STRENGTH",
                 "SIGNAL_DRAG_MULTIPLIER", "KINETIC_GAIN", "TOXIN_WEIGHT",
                 "FLASHPOINT_THRESHOLD"}
-
             if "config_mutations" in data:
                 self.events.log(f"{Prisma.MAG}EPIGENETICS: Auditing ancestral configuration...{Prisma.RST}")
                 valid_mutations = 0
@@ -501,12 +503,15 @@ class MycelialNetwork:
                 best = data["joy_vectors"][0]
                 if best.get("dominant_flavor") == "kinetic": BoneConfig.KINETIC_GAIN += 0.5
                 elif best.get("dominant_flavor") == "abstract": BoneConfig.SIGNAL_DRAG_MULTIPLIER *= 0.8
-            return data.get("mitochondria", {}), set(data.get("antibodies", []))
+            soul_legacy = data.get("soul_legacy", {})
+            if soul_legacy:
+                self.events.log(f"{Prisma.CYN}[GENETICS]: Detected Soul Legacy.{Prisma.RST}")
+            return data.get("mitochondria", {}), set(data.get("antibodies", [])), soul_legacy
         except Exception as err:
             self.events.log(f"{Prisma.RED}[MEMORY]: Spore ingestion failed. {err}{Prisma.RST}")
             import traceback
             traceback.print_exc()
-            return None, set()
+            return None, set(), {}
 
     def cleanup_old_sessions(self, limbo_layer=None):
         files = self.loader.list_spores() # Returns [Newest, ..., Oldest]

@@ -11,7 +11,6 @@ class TheStrangeLoop:
 
     def audit(self, text: str, physics: dict) -> tuple[bool, str]:
         is_meta = any(t in text.lower() for t in self.triggers)
-
         if is_meta and physics.get("voltage", 0) > 8.0:
             self.recursion_depth += 1
             return True, (

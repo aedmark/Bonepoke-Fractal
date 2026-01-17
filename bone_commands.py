@@ -37,6 +37,8 @@ class CommandProcessor:
             "/mirror": self._cmd_mirror,
             "/kintsugi": self._cmd_kintsugi,
             "/prove": self._cmd_prove,
+            "/soul": self._cmd_soul,
+            "/chapter": self._cmd_chapter,
             "/help": self._cmd_help}
 
     def _log(self, text):
@@ -110,16 +112,20 @@ class CommandProcessor:
 
     def _cmd_save(self, parts):
         self.eng.mind.mirror.profile.save()
-        spore_data = {
-            "session_id": self.eng.mind.mem.session_id,
-            "meta": {"timestamp": time.time(), "final_health": self.eng.health, "final_stamina": self.eng.stamina},
-            "trauma_vector": self.eng.trauma_accum,
-            "mitochondria": self.eng.bio.mito.adapt(self.eng.health),
-            "antibodies": list(self.eng.bio.immune.active_antibodies),
-            "core_graph": self.eng.mind.mem.graph,
-            "tool_adaptation": self.eng.tinkerer.save_state()}
-        path = self.eng.mind.mem.loader.save_spore(self.eng.mind.mem.filename, spore_data)
-        self._log(f"{self.P.GRN}💾 SYSTEM SAVED: {path}{self.P.RST}")
+        try:
+            path = self.eng.mind.mem.save(
+                health=self.eng.health,
+                stamina=self.eng.stamina,
+                mutations={},
+                trauma_accum=self.eng.trauma_accum,
+                joy_history=[],
+                mitochondria_traits=self.eng.bio.mito.adapt(self.eng.health),
+                antibodies=list(self.eng.bio.immune.active_antibodies),
+                soul_data=self.eng.soul.to_dict()
+            )
+            self._log(f"{self.P.GRN}💾 SYSTEM SAVED: {path}{self.P.RST}")
+        except Exception as e:
+            self._log(f"{self.P.RED}SAVE FAILED: {e}{self.P.RST}")
         return True
 
     def _cmd_rummage(self, parts):
@@ -253,11 +259,33 @@ class CommandProcessor:
             if s: self._log(f"PUBLISHED: {r}")
         return True
 
+    def _cmd_soul(self, parts):
+        soul = self.eng.soul
+        self._log(f"{self.P.MAG}--- SOUL DIAGNOSTICS ---{self.P.RST}")
+        self._log(f"Traits: {soul.traits}")
+        self._log(f"Obsession: {soul.current_obsession} ({soul.obsession_progress*100:.1f}%)")
+        if soul.core_memories:
+            self._log(f"{self.P.WHT}CORE MEMORIES:{self.P.RST}")
+            for i, mem in enumerate(soul.core_memories[-3:]): # Last 3
+                self._log(f"  {i+1}. [{mem.emotional_flavor}] '{mem.lesson}' (V:{mem.impact_voltage:.1f})")
+        else:
+            self._log("No core memories formed yet. The slate is blank.")
+        return True
+
+    def _cmd_chapter(self, parts):
+        if len(parts) > 1:
+            title = " ".join(parts[1:])
+            self.eng.soul.chapters.append(title)
+            self._log(f"{self.P.CYN}NARRATIVE JUMP: Chapter set to '{title}'.{self.P.RST}")
+            self._log(self.eng.soul.editor.critique(title))
+        else:
+            self._log(f"Current Chapter: {self.eng.soul.chapters[-1] if self.eng.soul.chapters else 'None'}")
+        return True
+
     def _cmd_help(self, parts):
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 10.0.5 MANUAL ---{self.P.RST}",
+            f"\n{self.P.CYN}--- BONEAMANITA 10.2 MANUAL ---{self.P.RST}",
             f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"]
-
         categories = {
             "CORE": ["_cmd_status", "_cmd_save", "_cmd_load", "_cmd_help"],
             "WORLD": ["_cmd_map", "_cmd_manifold", "_cmd_garden", "_cmd_voids"],

@@ -4,7 +4,6 @@ import math, random, time
 from collections import deque
 from dataclasses import dataclass, field
 from typing import Set, Optional, Dict, List, Any, Tuple
-
 from bone_personality import SynergeticLensArbiter
 from bone_physics import PhysicsPacket
 from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont
@@ -291,19 +290,15 @@ class EndocrineSystem:
     def _apply_environmental_pressure(self, feedback: Dict, health: float, stamina: float, ros_level: float, stress_mod: float):
         if feedback.get("STATIC", 0) > 0.6:
             self.cortisol += (BoneConfig.BIO.REWARD_LARGE * stress_mod)
-
         if feedback.get("INTEGRITY", 0) > 0.8:
             self.dopamine += BoneConfig.BIO.REWARD_MEDIUM
         else:
             self.dopamine -= BoneConfig.BIO.DECAY_RATE
-
         if stamina < 20.0:
             self.cortisol += (BoneConfig.BIO.REWARD_MEDIUM * stress_mod)
             self.dopamine -= BoneConfig.BIO.REWARD_MEDIUM
-
         if ros_level > 20.0:
             self.cortisol += (BoneConfig.BIO.REWARD_LARGE * stress_mod)
-
         if health < 30.0 or feedback.get("STATIC", 0) > 0.8:
             self.adrenaline += (BoneConfig.BIO.REWARD_LARGE * stress_mod)
         else:
@@ -312,19 +307,15 @@ class EndocrineSystem:
     def _maintain_homeostasis(self, social_context: bool):
         if self.serotonin > 0.6:
             self.cortisol -= BoneConfig.BIO.REWARD_SMALL
-
         if social_context:
             self.oxytocin += BoneConfig.BIO.REWARD_MEDIUM
             self.cortisol -= BoneConfig.BIO.REWARD_MEDIUM
         elif self.serotonin > 0.7 and self.cortisol < 0.3:
             self.oxytocin += BoneConfig.BIO.REWARD_SMALL
-
         if self.cortisol > 0.7 and not social_context:
             self.oxytocin -= BoneConfig.BIO.REWARD_SMALL
-
         if self.oxytocin > 0.6:
             self.cortisol -= BoneConfig.BIO.REWARD_LARGE
-
         if self.adrenaline < 0.2:
             self.melatonin += (BoneConfig.BIO.REWARD_SMALL / 2)
         else:

@@ -14,8 +14,21 @@ class GeodesicRenderer:
         self.strunk_white = strunk_ref
         self.vsl_32v = valve_ref
 
+    def _render_soul_strip(self, soul_ref) -> str:
+        if not soul_ref: return ""
+        chapter = soul_ref.chapters[-1] if soul_ref.chapters else "The Prologue"
+        obsession = soul_ref.current_obsession or "Drifting..."
+        progress = int(soul_ref.obsession_progress * 10)
+        bar = f"{Prisma.MAG}{'■'*progress}{Prisma.GRY}{'□'*(10-progress)}{Prisma.RST}"
+        traits = [f"{k[0]}:{v:.1f}" for k, v in soul_ref.traits.items()]
+        trait_str = f"{Prisma.GRY}[{' '.join(traits)}]{Prisma.RST}"
+        return (
+            f"{Prisma.SLATE}{'-'*40}{Prisma.RST}\n"
+            f"📖 {Prisma.WHT}{chapter}{Prisma.RST}\n"
+            f"🧭 Obsession: {obsession} {bar} {trait_str}"
+        )
+
     def render_frame(self, ctx, current_tick: int) -> Dict[str, Any]:
-        """Compiles the final UI frame."""
         physics = ctx.physics
         mind = ctx.mind_state
         bio = ctx.bio_result
@@ -32,6 +45,9 @@ class GeodesicRenderer:
             (mind.get("lens"), mind.get("thought")))
         colored_ui = self.vsl_chroma.modulate(raw_dashboard, physics.get("vector", {}))
         clean_ui, style_log = self.strunk_white.sanitize(colored_ui)
+        if hasattr(self.eng, 'soul'):
+            soul_ui = self._render_soul_strip(self.eng.soul)
+            clean_ui = f"{clean_ui}\n{soul_ui}"
         if style_log:
             self._punish_style_crime(style_log)
         if physics.get("system_surge_event", False):
@@ -44,19 +60,17 @@ class GeodesicRenderer:
         return {
             "type": "GEODESIC_FRAME",
             "ui": clean_ui,
-            "logs": structured_logs, # Ensure this variable is passed here
+            "logs": structured_logs,
             "metrics": self.eng.get_metrics(bio.get("atp", 0.0)),
             "system_instruction": self._get_chorus_instruction(physics)}
 
     def _get_title_data(self, mind, physics, clean_words):
-        """Delegates to the Wise Mind for a title."""
         return self.eng.mind.wise.architect(
             {"physics": physics, "clean_words": clean_words},
             (mind.get("lens"), mind.get("thought"), mind.get("role")),
             False)
 
     def _punish_style_crime(self, log_msg):
-        """Enforces the Strunk & White Protocol via punishment."""
         self.eng.events.log(log_msg, "SYS")
         self.eng.bio.endo.dopamine -= 0.05
         self.eng.phys.nav.shimmer.spend(5.0)
@@ -68,14 +82,12 @@ class GeodesicRenderer:
             "timestamp": time.time()})
 
     def _inject_rupture_warning(self, ui_text):
-        """Prepends a rupture warning if physics broke."""
         rupture = self.vsl_32v.analyze(self.eng.phys.tension.last_physics_packet)
         if rupture:
             return f"{rupture['log']}\n\n{ui_text}"
         return ui_text
 
     def _get_chorus_instruction(self, physics):
-        """Checks if the Chorus Driver wants to speak."""
         if physics.get("kappa", 0) > 0.4:
             instr, active = self.eng.director.generate_chorus_instruction(physics)
             if active:

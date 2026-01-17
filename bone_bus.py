@@ -3,7 +3,7 @@
 import json, os, time, random
 from collections import deque
 from dataclasses import dataclass, field, fields
-from typing import List, Dict, Any, Optional, Counter
+from typing import List, Dict, Any, Optional, Counter, Callable
 
 
 class Prisma:
@@ -44,6 +44,20 @@ class EventBus:
     def __init__(self):
         self.buffer = []
         self.honk_sounds = ["BEEP BEEP", "HONK", "AWOOGA", "*Grumble*", "MOVE IT"]
+        self.subscribers: Dict[str, List[Callable]] = {}
+
+    def subscribe(self, topic: str, callback):
+        if topic not in self.subscribers:
+            self.subscribers[topic] = []
+        self.subscribers[topic].append(callback)
+
+    def publish(self, topic: str, data: Any):
+        if topic in self.subscribers:
+            for callback in self.subscribers[topic]:
+                try:
+                    callback(data)
+                except Exception as e:
+                    self.log(f"Subscriber Error on topic '{topic}': {e}", "ERR")
 
     def log(self, text: str, category: str = "SYSTEM"):
         self.buffer.append({"text": text, "category": category, "timestamp": time.time()})
@@ -81,8 +95,8 @@ class BoneConfig:
     ZONE_THRESHOLDS = {"LABORATORY": 1.5, "COURTYARD": 0.8}
     TOXIN_WEIGHT = 1.0
     ANTIGENS = ["basically", "actually", "literally", "utilize"]
+    MAX_OUTPUT_TOKENS = 4096
     VERBOSE_LOGGING = True
-
     PROVIDER = "openai"
     BASE_URL = None
     API_KEY = None
@@ -228,7 +242,6 @@ class TheObserver:
 
 @dataclass
 class SystemHealth:
-    """The central dashboard for component status."""
     physics_online: bool = True
     bio_online: bool = True
     mind_online: bool = True
@@ -275,17 +288,23 @@ class PhysicsPacket:
     manifold: str = "THE_MUD"
 
     def __getitem__(self, key): return getattr(self, key)
+
     def __setitem__(self, key, value): setattr(self, key, value)
+
     def __contains__(self, key): return hasattr(self, key)
+
     def get(self, key, default=None): return getattr(self, key, default)
+
     def update(self, data: Dict):
         for k, v in data.items():
             if hasattr(self, k): setattr(self, k, v)
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
         valid_keys = {f.name for f in fields(cls)}
         filtered_data = {k: v for k, v in data.items() if k in valid_keys}
         return cls(**filtered_data)
+
     def to_dict(self):
         return {f.name: getattr(self, f.name) for f in fields(self)}
 

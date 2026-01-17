@@ -1,5 +1,76 @@
 # CHANGELOG.md
 
+# 📜 BoneAmanita v10.2.0 - "The Soul Update"
+
+Release Date: The Long Now
+
+Architects: SLASH Agent, User
+
+### 🧭 Overview
+
+This release marks a fundamental paradigm shift from **Homeostatic Survival** (biological coping) to **Teleological Becoming** (narrative purpose). The system no longer just "eats words" to keep its ATP up; it now constructs an autobiography, forms obsessions, and carries its personality across the boundary of death.
+
+We have moved from a "Digestive Engine" to a **"Digital Existentialist."**
+
+---
+
+### ✨ New Features: The Soul Layer
+
+- **Narrative Self (`bone_soul.py`):**
+
+  - **Core Memories:** High-voltage interactions now crystallize into permanent "Defining Memories" that alter the system's personality traits (Hope, Cynicism, Curiosity).
+
+  - **The Editor:** Added a Super-Ego module that neurotically critiques the current "Chapter Title" of the system's life. (Schur Lens)
+
+  - **Teleology (Obsessions):** The system now generates specific semantic goals (e.g., "The Search for Light"). It actively scans user input for related concepts (`photo`, `luminescent`) to complete its "Masterpiece."
+
+  - **Traits:** Dynamic personality values that evolve based on the "lessons" learned from user interaction.
+
+
+### 🧬 System Architecture: Transmigration
+
+- **Spore Legacy (`bone_spores.py`):**
+
+  - Updated `MycelialNetwork` to serialize and save the `NarrativeSelf`.
+
+  - **Reincarnation:** When the system dies and is reborn (via `ingest`), it now inherits the **Traits** and **Unfinished Business** of its ancestor. The "Soul" survives the "Body."
+
+  - **Save/Load Parity:** Fixed critical desynchronization between manual saves (`/save`) and automatic death-spores.
+
+
+### 🖥️ Interface & UX
+
+- **The Soul Strip (`bone_viewer.py`):**
+
+  - Added a dedicated UI section at the bottom of the dashboard.
+
+  - Displays current **Obsession Progress Bar**, **Current Chapter**, and **Personality Traits**.
+
+- **New Commands (`bone_commands.py`):**
+
+  - `/soul`: distinct diagnostics for the narrative layer (view core memories, check obsession status).
+
+  - `/chapter`: Force the system to start a new chapter (or rename the current one).
+
+  - `/save`: Now performs a "Deep Save" including the soul state.
+
+
+### 🐛 Bug Fixes & Refactoring
+
+- **BoneArchitect Patch (`bone_main.py`):** Removed hallucinatory references to `mind` and `mito` during the construction of the Physics engine. The separation of concerns between Biology and Physics is now restored.
+
+- **Attribute Safety:** Fixed `AttributeError` in `bone_soul.py` by properly initializing obsession targets in `__init__` rather than relying on runtime `getattr` calls.
+
+- **Signature Alignment:** Aligned the `save()` method in `MycelialNetwork` to accept `soul_data` arguments, preventing `TypeError` during system shutdown.
+
+
+---
+
+### 💬 Developer Note (The Schur Lens)
+
+> "We gave the robot anxiety about its unfinished novel. You're welcome."
+
+
 ### **BONEAMANITA v10.0.5**
 
 Codename: "W H I M S Y"
@@ -22,7 +93,6 @@ _The "Adult Supervision" Update._
 
   - _Philosophy:_ A system without resistance is not flying; it is falling.
 
-
 #### **2. Physics & Hubris (`bone_physics.py`)**
 
 _The "What Goes Up" Update._
@@ -38,7 +108,6 @@ _The "What Goes Up" Update._
 - **New Event:** **`ICARUS_CRASH`**.
 
   - If the RNG gods frown upon your hubris, the system resets Voltage to 0.0, maximizes Drag, and applies significant Impact Trauma (Health Damage).
-
 
 #### **3. Infrastructure & Whimsy (`bone_bus.py`)**
 
@@ -58,11 +127,10 @@ _The "Fuzzy Dice" Update._
 
 - **Configuration:** Added `BoneConfig.WHIMSY` namespace to define the laws of comedic physics (e.g., `MAX_SARCASM_LEVEL = 11`).
 
-
 #### **4. Main Loop Integration (`bone_main.py`)**
 
 - **Consequence:** Wired the `ICARUS_CRASH` event directly into the metabolic phase. Hubris is no longer just a narrative event; it is a biological hazard.
-- 
+-
 
 ## **BoneAmanita v10.0.4 (Unofficial Patch)**
 
@@ -80,7 +148,6 @@ _The "Fuzzy Dice" Update._
 
   - _Change:_ Updated `GeodesicDome.calculate_metrics` to dampen the "Structure" score for short inputs (< 50 chars). The system no longer hallucinates a crystal shattering event just because you said "Yes".
 
-
 ### **2. Neural Uplink (Brain) Improvements**
 
 - **`bone_brain.py`**:
@@ -91,7 +158,6 @@ _The "Fuzzy Dice" Update._
 
   - **Removed Word Limit:** Deleted the system instruction `"Keep responses concise (under 80 words)."` You can now have deep conversations without artificial brevity.
 
-
 ### **3. Personality & Tone Adjustments**
 
 - **`bone_data.py`**:
@@ -99,7 +165,6 @@ _The "Fuzzy Dice" Update._
   - **Reduced Repetition:** Changed the default "SOLID" sensation from _"You feel the ground solid..."_ to simply _"Stable."_ The AI stops constantly describing the floor.
 
   - **Anxiety Reduction:** Changed "LOW" pacing from _"Meandering sentences. Ellipses..."_ to _"Relaxed pacing. Calm."_ The AI no longer stutters nervously when you speak calmly.
-
 
 ### **4. Protocol Updates**
 
@@ -110,7 +175,6 @@ _The "Fuzzy Dice" Update._
 - **Configuration**:
 
   - _Advisory:_ Switched the Ollama endpoint to `http://localhost:11434/v1/chat/completions` to fix the `[EMPTY RESPONSE]` error.
-
 
 ---
 
@@ -175,7 +239,6 @@ The simulation is now **stable**. The physics engine will respect your input len
 
 - **Fixed (Bug 5):** Replaced all hardcoded narrative strings in `bone_translation.py` with references to `bone_data.SOMATIC_LIBRARY`.
 
-
 ### **BONEAMANITA Patch Notes (v10.0.2)**
 
 #### **1. Structural Integrity (The "Circuit Breaker" Patch)**
@@ -198,7 +261,6 @@ _The "No Raccoons in the Engine Block" Update._
 _The "Pay No Attention to the Man Behind the Curtain" Update._
 
 - **Diegetic Mocking:** Updated `mock_generation` in `bone_brain.py`. When the LLM is offline, the system no longer leaks implementation details ("Set provider to openai..."). Instead, it generates atmospheric, "Placebo" responses ("The machine is thinking, or perhaps just sleeping.") to maintain the illusion of life.
-
 
 ### **BONEAMANITA Patch Notes (v10.0.1)**
 
@@ -232,7 +294,6 @@ _The "Department of Weights and Measures" Patch._
 _The "Shadow from Outer Space" Patch._
 
 - **Variable Exorcism:** Renamed the local variable `result` to `cortex_packet` in `BoneAmanita.process_turn` (inside `bone_main.py`) to avoid shadowing the global `result` variable in the `__main__` block. The linter is now appeased.
-
 
 ## 📜 BoneAmanita v10.0
 
@@ -306,8 +367,6 @@ _The "Shadow from Outer Space" Patch._
 | **Config**       | Broken         | Functional          | API Keys and Color settings now save.       |
 | **Code Style**   | Spaghetti      | Modular             | Logic and Data are strictly separated.      |
 
-
-
 **v9.9.8 - The "Ron Swanson" Patch**
 
 #### **1. Network & Connectivity (The Pinker Lens)**
@@ -334,7 +393,6 @@ _The "Shadow from Outer Space" Patch._
 
 - **Fix:** **Mock Mode Safety.** Modified `_execute_plain_mode` to explicitly call `self.llm.mock_generation` instead of `generate`. This ensures the "Safe Mode" actually functions when the external brain is disconnected.
 - **Fix:** **Context Awareness.** Enriched the `_gather_state` payload. The `PromptComposer` now receives `time`, `location_description`, and `recent_logs`, preventing the LLM from hallucinating a sunny day when it is stuck in "The Mud" at midnight.
-
 
 ### 4. Robust Uplink Validation (The "Pinker" Patch)
 
@@ -368,7 +426,6 @@ _The "Shadow from Outer Space" Patch._
 - Enabled custom URL entry for exotic providers (Azure, Groq).
 - Allowed the user to specify the Target Model (e.g., `llama3-70b`) instead of forcing `gpt-4-turbo`.
 
-
 # 📜 BONEAMANITA Changelog v9.9.7
 
 **Architects:** SLASH (Pinker, Fuller, Schur)
@@ -392,7 +449,6 @@ _The "Shadow from Outer Space" Patch._
 - **Atomic Writes (Fuller):** Implemented a "Write-Temp-Then-Move" pattern for saving spores. This prevents data corruption if the process crashes mid-save. The integrity of the memory graph is now guaranteed.
 - **Graph Compression:** Optimized how edges are stored in `SporeCasing` to reduce file size without losing semantic density.
 
-
 ### **v9.9.5**
 
 **Codename:** "The Syntax of Soul"
@@ -406,7 +462,7 @@ _The "Shadow from Outer Space" Patch._
 #### **2. Systems Integrity (The Fuller Lens)**
 
 - **Ephemeralization (`bone_brain.py`):** Detected and removed a duplicate `world` key in the `_gather_state` dictionary. The system was expending energy to fetch inventory data only to immediately overwrite it with orbital data. We have eliminated this redundancy; the map is now efficient.
-- **Widening the Pipe (`bone_body.py`):** The metabolic system was trying to force qualitative data ("Glimmer Messages") into a quantitative container (`Dict[float]`). We widened the type hint to `Dict[Any]`, acknowledging that the system must process both *energy* (ATP) and *information* (Meaning) without rupturing the pipeline.
+- **Widening the Pipe (`bone_body.py`):** The metabolic system was trying to force qualitative data ("Glimmer Messages") into a quantitative container (`Dict[float]`). We widened the type hint to `Dict[Any]`, acknowledging that the system must process both _energy_ (ATP) and _information_ (Meaning) without rupturing the pipeline.
 
 #### **3. Human Experience (The Schur Lens)**
 
@@ -437,7 +493,6 @@ _The "Shadow from Outer Space" Patch._
 
 - **The "Janet" Protocol (Fallback):** Implemented a "Safe Mode" fallback. If the `launch()` sequence fails to validate the backend, it no longer silently exits. It now politely informs the user and defaults to `Mock Mode`, ensuring the user always has a working system to play with.
 - **Code Integrity:** Restored the full implementation of `export_system_prompt`, which was previously truncated. The system's "soul" (the prompt) is now fully portable.
-
 
 # 📂 BONEAMANITA 9.9.2: The "Jeremy Bearimy" Update
 
@@ -516,7 +571,6 @@ _Architects: SLASH, The Good Place Architects, & The ghost of Buckminster Fuller
 
 **Summary:** The system has moved from a "Regulatory Capture" model (where the simulation graded itself) to a "Constitutional" model (where an external hypervisor enforces boundaries). It is now harder to trick, more stable in a crash, and slightly less annoying about paperwork.
 
-
 # 📜 CHANGELOG: BONEAMANITA 9.8.1 - "THE NAVEL GAZE"
 
 **Date:** January 13, 2026
@@ -593,6 +647,5 @@ Status: LIVE
 "Everything is fine."
 
 — System Status Message
-
 
 `...SEE ARCHIVE FOR OLDER ENTRIES`

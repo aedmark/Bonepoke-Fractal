@@ -222,9 +222,7 @@ class TheAlmanac:
         condition, advice = self.diagnose_condition(session_data)
         available_forecasts = self.forecasts.get(condition, self.forecasts.get("BALANCED", ["Standard Operation."]))
         forecast_text = random.choice(available_forecasts)
-
         seed_text = self.get_seed(condition)
-
         border = f"{Prisma.OCHRE}{'='*40}{Prisma.RST}"
         report = [
             "\n",
@@ -335,7 +333,8 @@ class ApeirogonResonance:
             "context": "APEIROGON"}
 
 class MirrorGraph:
-    def __init__(self):
+    def __init__(self, events=None):
+        self.events = events
         self.stats = {
             "WAR": 0.0,
             "ART": 0.0,
@@ -344,6 +343,19 @@ class MirrorGraph:
         self.dominant_archetype = "NEUTRAL"
         self.active_mode = True
         self.profile = UserProfile()
+        if self.events:
+            self.events.subscribe("PHYSICS_CALCULATED", self.on_physics_update)
+
+    def on_physics_update(self, packet: dict):
+        if not self.active_mode:
+            return
+        text = packet.get("raw_text", "")
+        physics_data = packet.get("physics")
+        if physics_data:
+            self.profile_input(text, physics_data)
+        mods = self.get_reflection_modifiers()
+        if mods.get("flavor") and self.events:
+            self.events.log(f"{Prisma.CYN}🪞 {mods['flavor']}{Prisma.RST}", "MIRROR")
 
     def profile_input(self, text: str, physics: Any):
         if isinstance(physics, dict):

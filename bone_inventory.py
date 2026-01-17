@@ -270,21 +270,17 @@ class GordonKnot:
         for item in self.inventory:
             data = self.get_item_data(item)
             trigger_key = data.get("reflex_trigger")
-            
             if trigger_key and trigger_key in self.REFLEX_MAP:
                 if self.REFLEX_MAP[trigger_key](physics_ref):
                     func = data.get("function")
-                    
                     if func == "DRIFT_KILLER":
                         self.inventory.remove(item)
                         physics_ref["narrative_drag"] = 0.0
                         return True, f"{Prisma.OCHRE}REFLEX: {data.get('usage_msg')}{Prisma.RST}"
-                        
                     elif func == "REALITY_ANCHOR":
                         success, msg = self.deploy_pizza(physics_ref, item)
                         status = Prisma.OCHRE if success else Prisma.RED
                         return True, f"{status}REFLEX: {msg}{Prisma.RST}"
-                        
                     elif func == "ENTROPY_BUFFER":
                         self.inventory.remove(item)
                         physics_ref["turbulence"] = 0.8

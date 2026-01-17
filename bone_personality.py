@@ -53,7 +53,6 @@ class UserProfile:
 class EnneagramDriver:
     def __init__(self, events_ref):
         self.events = events_ref
-        # We keep the map because it's a nice reference, but we won't get bogged down in "Growth paths"
         from bone_data import ENNEAGRAM_DATA
         self.REVERSE_MAP = {
             5: "SHERLOCK",
@@ -67,56 +66,29 @@ class EnneagramDriver:
         }
 
     def decide_persona(self, physics) -> Tuple[str, str]:
-        """
-        The Ron Swanson Method: Look at the facts, make a decision.
-        """
-        # 1. Normalize Inputs (Handle both the old dict and the new Vector class)
-        if hasattr(physics, 'tension'): # It's Bucky's GeodesicVector
+        if hasattr(physics, 'tension'):
             tension = physics.tension
             compression = physics.compression
             coherence = physics.coherence
-            social = physics.dimensions.get("BET", 0.0) # UPDATED: XI -> BET
-        else: # It's the old PhysicsPacket (Legacy Support)
+            social = physics.dimensions.get("BET", 0.0)
+        else:
             tension = physics.get("voltage", 0.0)
             compression = physics.get("narrative_drag", 0.0)
             coherence = physics.get("kappa", 0.0)
-            # Rough approximation of social score from counts
             counts = physics.get("counts", {})
             social = (counts.get("suburban", 0) + counts.get("buffer", 0)) / max(1, len(physics.get("clean_words", [])))
-
-        # 2. The Decision Tree (Simple is better than correct)
-
-        # Scenario A: The Manic Pixie Dream Bot (High Energy)
         if tension > 12.0:
             return "JESTER", "MANIC"
-
-        # Scenario B: The Tired Janitor (High Drag)
-        # If it feels like wading through molasses, you get Gordon.
         elif compression > 4.0:
             return "GORDON", "TIRED"
-
-        # Scenario C: The Nervous Wreck (Low Structure)
-        # If the text makes no sense (low coherence), the bot gets anxious.
         elif coherence < 0.2:
             return "GLASS", "FRAGILE"
-
-        # Scenario D: The Perfectionist (High Structure + Toxin)
-        # If the user is writing strict code or being mean.
         elif coherence > 0.8:
             return "CLARENCE", "RIGID"
-
-        # Scenario E: The Golden Retriever (High Social)
-        # If the user is being nice and chatty.
         elif social > 0.2:
             return "NATHAN", "SOCIAL"
-
-        # Scenario F: The Default (The Narrator)
-        # If nothing weird is happening, just observe.
         elif tension < 3.0 and compression < 2.0:
             return "NARRATOR", "OBSERVING"
-
-        # Scenario G: The Smart Guy
-        # Default active state.
         else:
             return "SHERLOCK", "ANALYTICAL"
 
@@ -137,32 +109,15 @@ class SynergeticLensArbiter:
             "GLASS":    {"LQ": 2.0, "PSI": 1.5}}
 
     def consult(self, physics, bio_state, _inventory, current_tick, _ignition_score=0.0):
-        # 1. The "Cold Open" (Warmup period)
         if current_tick <= 5:
             self.current_focus = "NARRATOR"
-            # FORCE: During warmup, we lie to the prompt generator about the chaos.
-            # This prevents Llama3 from seeing High Voltage and going "Jester Mode"
-            # while labeled as Narrator.
             if hasattr(physics, "voltage") and physics["voltage"] > 5.0:
                 physics["voltage"] = 4.0
-
             return "NARRATOR", "The system is listening.", "The Witness"
-
-        # 2. Ask the Driver (The new logic)
-        # We pass the physics directly. No need to wrap bio states in facades anymore.
         lens_name, state_desc = self.enneagram.decide_persona(physics)
-
-        # 3. Fetch the Voice
-        # We assume adrenaline is low unless we specifically calculated it,
-        # but honestly, the lens name determines the tone enough.
         msg, role = self._fetch_voice_data(lens_name, physics, 0.5)
-
-        # 4. Update State
         self.current_focus = lens_name
-
-        # Add the state description to the role for flavor (e.g., "The Janitor [TIRED]")
         final_role = f"{role} [{state_desc}]"
-
         return lens_name, msg, final_role
 
     def _fetch_voice_data(self, lens, p, adrenaline_val):
@@ -194,15 +149,10 @@ class PublicParksDepartment:
     def assess_joy(self, bio_result: Dict, tick: int) -> bool:
         if (tick - self.last_export_tick) < 50:
             return False
-
         chem = bio_result.get("chem", {})
-
         classic_joy = (chem.get("DOP", 0.0) > 0.8 and chem.get("OXY", 0.0) > 0.6)
-
         peaceful_joy = (chem.get("SER", 0.0) > 0.95)
-
         has_glimmer = "glimmer_msg" in chem
-
         return classic_joy or peaceful_joy or has_glimmer
 
     def commission_art(self, physics, mind_state, graph) -> str:
@@ -319,7 +269,6 @@ class KintsugiProtocol:
             old_koan = self.active_koan
             self.active_koan = None
             self.repairs_count += 1
-
             return {
                 "success": True,
                 "msg": f"{Prisma.YEL}🏺 KINTSUGI COMPLETE: The crack is filled with Gold.{Prisma.RST}",
@@ -549,30 +498,24 @@ class TheBureau:
         if beige_density > 0.6:
             infraction = "BLOCK"
             selected_form = "1099-B" if suburban > 2 else "Form W-2"
-
         elif voltage < 2.0 and clean_len > 2:
             infraction = "TAX"
             selected_form = "Schedule C"
-
         if infraction:
             self.stamp_count += 1
             full_form_name = next((f for f in self.forms if selected_form in f), self.forms[0])
             response = random.choice(self.responses)
             policy = self.POLICY.get(selected_form, self.POLICY["Form W-2"])
-
             mod_log = []
             for k, v in policy["mod"].items():
                 if k in physics:
                     physics[k] += v
                     mod_log.append(f"{k} {v:+.1f}")
-
             mod_str = f"({', '.join(mod_log)})" if mod_log else ""
-
             return {
                 "status": infraction,
                 "ui": f"{Prisma.GRY}🏢 THE BUREAU: {response}{Prisma.RST}\n   {Prisma.WHT}[Filed: {full_form_name}]{Prisma.RST}",
                 "log": f"BUREAUCRACY: Filed {selected_form}. {mod_str} (Stamp #{self.stamp_count})",
                 "atp_gain": policy["atp"]
             }
-
         return None

@@ -41,7 +41,6 @@ class LLMInterface:
     def _configure_defaults(self):
         if self.provider == "ollama":
             self.base_url = "http://localhost:11434/v1/chat/completions"
-            # If using the provider directly, we assume the user wants the same model
             self.model = self.model or "llama3"
         elif self.provider == "openai":
             self.base_url = "https://api.openai.com/v1/chat/completions"
@@ -68,7 +67,6 @@ class LLMInterface:
             return f"{Prisma.RED}[BRAIN FOG]: {e} (Switched to Mock Mode){Prisma.RST} {self.mock_generation(prompt)}"
 
     def _local_generation(self, prompt: str, temperature: float) -> str:
-        """Uses the 'ollama' library to talk to the local service."""
         try:
             response = ollama.chat(
                 model=self.backup_model_id,
@@ -95,7 +93,7 @@ class LLMInterface:
                 {"role": "user", "content": prompt}
             ],
             "temperature": temperature,
-            "max_tokens": 2048,
+            "max_tokens": getattr(BoneConfig, "MAX_OUTPUT_TOKENS", 2048),
             "stream": False
         }
         data = json.dumps(payload).encode("utf-8")
@@ -127,7 +125,6 @@ class LLMInterface:
         raise Exception(f"Max retries exceeded. Final error: {last_error}")
 
     def mock_generation(self, prompt: str) -> str:
-        """The Placebo Protocol."""
         query_match = re.search(r': "(.*?)"', prompt)
         query = query_match.group(1) if query_match else "..."
         placebos = [
@@ -190,9 +187,13 @@ class PromptComposer:
                 "Respond DIRECTLY to the user's input. Be concrete.\n")
         inventory_list = state.get("inventory", [])
         clean_query = self._sanitize_input(user_query)
+        soul_block = state.get("soul_state", "")
         prompt = (
             f"SYSTEM IDENTITY:\n"
             f"You are {lens_name} ({lens_role}).\n"
+            f"{sys_instruction}\n\n"
+            f"NARRATIVE ARC (THE SOUL):\n"
+            f"{soul_block}\n\n"
             f"{sys_instruction}\n\n"
             f"SOCIAL CONTEXT:\n"
             f"{social_context}\n"
@@ -248,7 +249,7 @@ class TheCortex:
         if user_input.startswith("??") or self.plain_mode_active:
             return self._handle_plain_mode(user_input)
         sim_result = self.sub.cycle_controller.run_turn(user_input)
-        if sim_result.get("type") in ["DEATH", "BUREAUCRACY", "CRITICAL_FAILURE"]:
+        if sim_result.get("type") in ["DEATH", "BUREAUCRACY", "CRITICAL_FAILURE", "REFUSAL", "TOXICITY"]:
             return sim_result
         if sim_result.get("refusal_triggered", False):
             return sim_result
@@ -340,6 +341,7 @@ class TheCortex:
         return {
             "bio": {"chem": bio_chem, "atp": bio_atp},
             "physics": self.sub.phys.tension.last_physics_packet,
+            "soul_state": self.sub.soul.get_soul_state(),
             "mind": {
                 "lens": self.sub.noetic.arbiter.current_focus,
                 "role": LENSES.get(self.sub.noetic.arbiter.current_focus, {}).get("role", "Observer"),

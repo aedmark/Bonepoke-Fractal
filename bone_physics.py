@@ -38,29 +38,30 @@ class GeodesicEngine:
         mass_abstract = counts.get("abstract", 0)
         mass_social = counts.get("suburban", 0) + counts.get("solvents", 0)
         mass_play = counts.get("play", 0)
-        raw_tension = (
+        raw_tension_mass = (
                 (mass_heavy * config.PHYSICS.WEIGHT_HEAVY) +
                 (mass_kinetic * config.PHYSICS.WEIGHT_EXPLOSIVE) +
                 (mass_constructive * config.PHYSICS.WEIGHT_CONSTRUCTIVE)
         )
-        tension = round(raw_tension * config.KINETIC_GAIN, 2)
-        friction = (counts.get("solvents", 0) * 0.2) + (counts.get("suburban", 0) * 2.0)
+        tension_density = (raw_tension_mass / volume) * 25.0
+        tension = round(tension_density * config.KINETIC_GAIN, 2)
+        raw_friction = (counts.get("solvents", 0) * 0.2) + (counts.get("suburban", 0) * 2.0)
         lift = (mass_play * 1.5) + (mass_kinetic * 0.5)
-        raw_compression = max(0.0, friction - lift)
-        normalized_compression = (raw_compression / volume) * 10.0
-        compression = round(min(config.PHYSICS.DRAG_HALT, normalized_compression * config.SIGNAL_DRAG_MULTIPLIER), 2)
+        normalized_friction = (raw_friction / volume) * 10.0
+        normalized_lift = (lift / volume) * 10.0
+        raw_compression = max(0.0, normalized_friction - normalized_lift)
+        compression = round(min(config.PHYSICS.DRAG_HALT, raw_compression * config.SIGNAL_DRAG_MULTIPLIER), 2)
         structural_mass = mass_heavy + mass_constructive
         coherence = min(1.0, structural_mass / max(1, config.SHAPLEY_MASS_THRESHOLD))
         abstraction = min(1.0, (mass_abstract / volume) + 0.2)
         def norm(val): return min(1.0, val / volume)
-
         dimensions = {
-            "VEL": norm(mass_kinetic * 2.0 - compression),   # Velocity
-            "STR": norm(mass_heavy * 2.0 + mass_constructive), # Strength
-            "ENT": norm(counts.get("antigen", 0) * 3.0),     # Entropy
-            "PHI": norm(mass_heavy + mass_kinetic),          # Physicality
-            "PSI": abstraction,                              # Abstraction
-            "BET":  norm(mass_social * 2.0)                  # Beta/Social/Banality
+            "VEL": norm(mass_kinetic * 2.0 - compression),
+            "STR": norm(mass_heavy * 2.0 + mass_constructive),
+            "ENT": norm(counts.get("antigen", 0) * 3.0),
+            "PHI": norm(mass_heavy + mass_kinetic),
+            "PSI": abstraction,
+            "BET": norm(mass_social * 2.0)
         }
         return GeodesicVector(
             tension=tension,
@@ -129,6 +130,8 @@ class TheTensionMeter:
             metrics
         )
         self.last_physics_packet = packet["physics"]
+        if hasattr(self.events, "publish"):
+            self.events.publish("PHYSICS_CALCULATED", packet)
         return packet
 
     def _tally_categories(self, clean_words: List[str], raw_text: str) -> Tuple[Counter, List[str]]:
@@ -269,7 +272,6 @@ class TheTensionMeter:
             "avg_viscosity": metrics["avg_viscosity"],
             "E": metrics["E"],
             "B": metrics["B"]}
-
         return {
             "physics": PhysicsPacket(**physics_bridge),
             "clean_words": clean_words,
@@ -292,7 +294,6 @@ class EntropyVent:
     def check(self, physics):
         is_word_salad = (physics["E"] > 0.85 and physics["kappa"] < 0.1)
         is_manic = (physics["repetition"] > 0.8 and physics["voltage"] < 5.0)
-
         if is_word_salad or is_manic:
             return self._vent(physics)
         return None
@@ -463,20 +464,13 @@ class GeodesicDome:
 
 @dataclass
 class GeodesicVector:
-    # Primary Forces
-    tension: float = 0.0      # Formerly Voltage (Energy/Heat)
-    compression: float = 0.0  # Formerly Drag (Resistance/Friction)
-
-    # Structural Integrity
-    coherence: float = 0.0    # Formerly Kappa (Structural soundness)
-    abstraction: float = 0.0  # Formerly Psi (Mental density)
-
-    # The Elemental Matrix (Normalized 0.0 - 1.0)
-    # We keep the dictionary for flexibility, but the keys are now standardized.
+    tension: float = 0.0
+    compression: float = 0.0
+    coherence: float = 0.0
+    abstraction: float = 0.0
     dimensions: Dict[str, float] = field(default_factory=dict)
 
     def is_stable(self) -> bool:
-        """Determines if the structure can hold its own weight."""
         return self.coherence > 0.3 and self.tension < 20.0
 
 class RuptureValve:
@@ -505,9 +499,10 @@ class RuptureValve:
 
     def _audit_rupture(self, physics, e_val, b_val):
         truth = physics.get("truth_ratio", 0.0)
-        if e_val > 0.85 and b_val < 0.15:
+        voltage = physics.get("voltage", 0.0)
+        if e_val > 0.85 and b_val < 0.15 and voltage > 5.0:
             return self._rupture(physics, "FATIGUE_FAILURE", "System diluted. Narrative coherence dissolving.")
-        if b_val > 0.8 and e_val < 0.3:
+        if b_val > 0.8 and e_val < 0.3 and voltage > 15.0:
             return self._rupture(physics, "MANIC_FRACTURE", "Crystal lattice too tight. Structure shattering.")
         if b_val > 0.7 and e_val > 0.6:
             if truth > 0.6:
@@ -523,7 +518,26 @@ class RuptureValve:
         counts = physics["counts"]
         dominant = max(counts, key=counts.get) if counts else "abstract"
         target_flavor = self.OPPOSITES.get(dominant, "abstract")
-        anomaly = self.lex.harvest(target_flavor)
+        anomaly_data = self.lex.harvest(target_flavor)
+        if isinstance(anomaly_data, dict):
+            candidates = []
+            for key, val in anomaly_data.items():
+                if isinstance(val, list):
+                    candidates.extend([str(w) for w in val])
+                elif isinstance(val, str):
+                    candidates.append(val)
+            if candidates:
+                anomaly = random.choice(candidates)
+            else:
+                anomaly = f"VOID_{target_flavor.upper()}"
+        else:
+            anomaly = str(anomaly_data)
+        if anomaly == "void":
+            anomaly = "something_completely_different"
+        if isinstance(anomaly_data, dict):
+            anomaly = anomaly_data.get("word", "mysterious_object")
+        else:
+            anomaly = str(anomaly_data)
         if anomaly == "void":
             anomaly = "something_completely_different"
         physics["voltage"] = 25.0
