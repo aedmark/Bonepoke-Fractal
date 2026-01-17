@@ -25,19 +25,19 @@ class GenesisProtocol:
             "model": "local-model"}
         self.DISCOVERY_TARGETS = {
             "Ollama": {
-                "base_root": "http://localhost:11434",
+                "base_root": "http://127.0.0.1:11434",
                 "probe_path": "/api/tags",
                 "api_endpoint": "/v1/chat/completions",
                 "provider_id": "ollama",
                 "default_model": "gemma3"},
             "LM Studio": {
-                "base_root": "http://localhost:1234",
+                "base_root": "http://127.0.0.1:1234",
                 "probe_path": "/v1/models",
                 "api_endpoint": "/v1/chat/completions",
                 "provider_id": "lm_studio",
                 "default_model": "local-model"},
             "LocalAI": {
-                "base_root": "http://localhost:8080",
+                "base_root": "http://127.0.0.1:8080",
                 "probe_path": "/v1/models",
                 "api_endpoint": "/v1/chat/completions",
                 "provider_id": "openai",
@@ -400,6 +400,14 @@ Do not break character. Do not explain the simulation rules unless asked.
                     break
                 if u.lower() in ["exit", "quit", "/exit"]:
                     break
+                try:
+                    if hasattr(engine, 'cortex'):
+                        result = engine.cortex.process(u)
+                        print(result.get("ui", "..."))
+                    else:
+                        print(f"{Prisma.RED}CRITICAL: Cortex not found.{Prisma.RST}")
+                except Exception as e:
+                    print(f"{Prisma.RED}RUNTIME CRASH: {e}{Prisma.RST}")
 
 if __name__ == "__main__":
     GenesisProtocol().launch()

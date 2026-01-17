@@ -1,0 +1,16 @@
+{
+  "session_id": "session_1768689565",
+  "meta": {
+    "timestamp": 1768689688.3495288,
+    "final_health": 100.0,
+    "final_stamina": 100.0,
+    "exit_cause": "INTERRUPT"
+  },
+  "core_graph": {},
+  "trauma_vector": {
+    "THERMAL": 0.0,
+    "CRYO": 0.0,
+    "SEPTIC": 0.0,
+    "BARIC": 0.0
+  }
+}
