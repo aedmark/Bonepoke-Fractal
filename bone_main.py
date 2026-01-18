@@ -1,5 +1,5 @@
-# BONEAMANITA 10.2.8 - "The Tensegrity Refactor"
-# Architects: SLASH, KICHO, The Courtyard, Taylor & Edmark
+# BONEAMANITA 10.3.0 - "The Illuminated Forge"
+# Architects: SLASH, KISHO, The Courtyard, Taylor & Edmark
 
 import time, json, traceback
 from typing import Dict, Any
@@ -27,7 +27,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.2.7', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.3.0', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
@@ -219,7 +219,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.2.8', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.3.0', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

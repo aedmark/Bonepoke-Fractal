@@ -1,8 +1,9 @@
 # bone_cycle.py
 # "The wheel turns, and ages come and pass." - Jordan
 
-import traceback, random
-from typing import Dict, Any
+import traceback, random, time
+from typing import Dict, Any, Optional
+from dataclasses import dataclass, field
 from bone_bus import Prisma, BoneConfig, CycleContext
 from bone_village import TownHall
 from bone_personality import TheBureau
@@ -10,46 +11,29 @@ from bone_physics import TheBouncer, RuptureValve, ChromaScope
 from bone_viewer import GeodesicRenderer
 from bone_architect import PanicRoom
 
-class GeodesicOrchestrator:
+# --- LAYER 1: THE ENGINE (Simulation Logic) ---
+
+class CycleSimulator:
     def __init__(self, engine_ref):
         self.eng = engine_ref
         self.bureau = TheBureau()
         self.bouncer = TheBouncer(self.eng)
-        self.parks = TownHall.PublicParksDepartment()
         self.vsl_32v = RuptureValve(self.eng.mind.lex, self.eng.mind.mem)
-        self.vsl_chroma = ChromaScope()
-        self.strunk_white = TownHall.StrunkWhite()
-        self.renderer = GeodesicRenderer(
-            self.eng,
-            self.vsl_chroma,
-            self.strunk_white,
-            self.vsl_32v
-        )
 
-    def run_turn(self, user_message: str) -> Dict[str, Any]:
-        self.eng.events.flush()
-        ctx = CycleContext(input_text=user_message)
-        ctx.user_name = self.eng.user_name
+    def run_simulation(self, ctx: CycleContext) -> CycleContext:
         try:
             if self.eng.system_health.physics_online:
                 self._phase_observe(ctx)
             else:
                 raise Exception("Physics module previously failed.")
         except Exception as e:
-            print(f"\n{Prisma.RED}!!! CRITICAL PHYSICS CRASH !!!{Prisma.RST}")
-            traceback.print_exc()
-            self.eng.system_health.report_failure("PHYSICS", e)
-            ctx.physics = PanicRoom.get_safe_physics()
-            ctx.log(f"{Prisma.RED}⚠ PHYSICS FAILURE: Switching to Newtonian Defaults.{Prisma.RST}")
+            self._handle_critical_failure(ctx, "PHYSICS", e, PanicRoom.get_safe_physics)
         if self.eng.tick_count % 10 == 0:
-            try:
-                self._maintenance_prune(ctx)
-            except Exception:
-                pass
+            self._maintenance_prune(ctx)
         if self.eng.system_health.physics_online:
             try:
                 if self._phase_gatekeep(ctx):
-                    return ctx.refusal_packet or self._package_bureaucracy(ctx)
+                    return ctx
             except Exception as e:
                 ctx.log(f"{Prisma.YEL}GATEKEEPER ASLEEP: {e}{Prisma.RST}")
         try:
@@ -58,11 +42,9 @@ class GeodesicOrchestrator:
             else:
                 raise Exception("Bio module previously failed.")
         except Exception as e:
-            self.eng.system_health.report_failure("BIO", e)
-            ctx.bio_result = PanicRoom.get_safe_bio()
-            ctx.is_alive = True
+            self._handle_critical_failure(ctx, "BIO", e, PanicRoom.get_safe_bio, is_bio=True)
         if not ctx.is_alive:
-            return self.eng.trigger_death(ctx.physics)
+            return ctx
         try:
             self._phase_simulate(ctx)
         except Exception as e:
@@ -73,17 +55,21 @@ class GeodesicOrchestrator:
             else:
                 raise Exception("Mind module previously failed.")
         except Exception as e:
-            self.eng.system_health.report_failure("MIND", e)
-            ctx.mind_state = PanicRoom.get_safe_mind()
-        try:
-            return self._phase_render(ctx)
-        except Exception as e:
-            return {
-                "type": "CRITICAL_RENDER_FAIL",
-                "ui": f"{Prisma.RED}REALITY FRACTURE.{Prisma.RST}\nRaw Output: {ctx.logs}",
-                "logs": ctx.logs,
-                "metrics": self.eng.get_metrics()
-            }
+            self._handle_critical_failure(ctx, "MIND", e, PanicRoom.get_safe_mind, is_mind=True)
+        return ctx
+
+    def _handle_critical_failure(self, ctx, component, error, panic_func, is_bio=False, is_mind=False):
+        print(f"\n{Prisma.RED}!!! CRITICAL {component} CRASH !!!{Prisma.RST}")
+        traceback.print_exc()
+        self.eng.system_health.report_failure(component, error)
+        if is_bio:
+            ctx.bio_result = panic_func()
+            ctx.is_alive = True
+        elif is_mind:
+            ctx.mind_state = panic_func()
+        else:
+            ctx.physics = panic_func()
+        ctx.log(f"{Prisma.RED}⚠ {component} FAILURE: Switching to Panic Protocol.{Prisma.RST}")
 
     def _phase_observe(self, ctx: CycleContext):
         gaze_result = self.eng.phys.tension.gaze(ctx.input_text, self.eng.mind.mem.graph)
@@ -114,6 +100,7 @@ class GeodesicOrchestrator:
             ctx.refusal_triggered = True
             ctx.refusal_packet = refusal_packet
             return True
+
         audit_result = self.bureau.audit(ctx.physics, ctx.bio_result)
         if audit_result:
             self.eng.bio.mito.state.atp_pool += audit_result.get("atp_gain", 0.0)
@@ -128,14 +115,6 @@ class GeodesicOrchestrator:
             elif status == "TAX":
                 ctx.log(f"{Prisma.GRY}   (BUREAU TAX DEDUCTED...){Prisma.RST}")
         return False
-
-    def _package_bureaucracy(self, ctx):
-        return {
-            "type": "BUREAUCRACY",
-            "ui": ctx.bureau_ui,
-            "logs": self.renderer.compose_logs(ctx.logs, self.eng.events.flush(), self.eng.tick_count),
-            "metrics": self.eng.get_metrics(ctx.bio_result.get("atp", 0.0))
-        }
 
     def _phase_metabolize(self, ctx: CycleContext):
         physics = ctx.physics
@@ -268,6 +247,13 @@ class GeodesicOrchestrator:
 
     def _operate_machinery(self, ctx: CycleContext):
         physics = ctx.physics
+        if self.eng.gordon.inventory:
+            is_craft, craft_msg, old_item, new_item = self.eng.phys.forge.attempt_crafting(physics, self.eng.gordon.inventory)
+            if is_craft:
+                ctx.log(craft_msg)
+                if old_item in self.eng.gordon.inventory:
+                    self.eng.gordon.inventory.remove(old_item)
+                ctx.log(self.eng.gordon.acquire(new_item))
         transmute_msg = self.eng.phys.forge.transmute(physics)
         if transmute_msg: ctx.log(transmute_msg)
         _, forge_msg, new_item = self.eng.phys.forge.hammer_alloy(physics)
@@ -307,6 +293,57 @@ class GeodesicOrchestrator:
             self.eng.tick_count
         )
 
-    def _phase_render(self, ctx: CycleContext) -> Dict[str, Any]:
-        captured_events = self.eng.events.flush()
-        return self.renderer.render_frame(ctx, self.eng.tick_count, captured_events)
+# --- LAYER 2: THE REPORTER (View Logic) ---
+
+class CycleReporter:
+    def __init__(self, engine_ref):
+        self.eng = engine_ref
+        self.vsl_chroma = ChromaScope()
+        self.strunk_white = TownHall.StrunkWhite()
+        self.renderer = GeodesicRenderer(
+            self.eng,
+            self.vsl_chroma,
+            self.strunk_white,
+            RuptureValve(self.eng.mind.lex, self.eng.mind.mem)
+        )
+
+    def render_snapshot(self, ctx: CycleContext) -> Dict[str, Any]:
+        try:
+            if ctx.refusal_triggered and ctx.refusal_packet:
+                return ctx.refusal_packet
+            if ctx.is_bureaucratic:
+                return self._package_bureaucracy(ctx)
+            captured_events = self.eng.events.flush()
+            return self.renderer.render_frame(ctx, self.eng.tick_count, captured_events)
+        except Exception as e:
+            return {
+                "type": "CRITICAL_RENDER_FAIL",
+                "ui": f"{Prisma.RED}REALITY FRACTURE (Renderer Crash): {e}{Prisma.RST}\nRaw Output: {ctx.logs}",
+                "logs": ctx.logs,
+                "metrics": self.eng.get_metrics()
+            }
+
+    def _package_bureaucracy(self, ctx: CycleContext):
+        return {
+            "type": "BUREAUCRACY",
+            "ui": ctx.bureau_ui,
+            "logs": self.renderer.compose_logs(ctx.logs, self.eng.events.flush(), self.eng.tick_count),
+            "metrics": self.eng.get_metrics(ctx.bio_result.get("atp", 0.0))
+        }
+
+# --- LAYER 3: THE ORCHESTRATOR (Coordinator) ---
+
+class GeodesicOrchestrator:
+    def __init__(self, engine_ref):
+        self.eng = engine_ref
+        self.simulator = CycleSimulator(engine_ref)
+        self.reporter = CycleReporter(engine_ref)
+
+    def run_turn(self, user_message: str) -> Dict[str, Any]:
+        ctx = CycleContext(input_text=user_message)
+        ctx.user_name = self.eng.user_name
+        self.eng.events.flush() # Clear bus
+        ctx = self.simulator.run_simulation(ctx)
+        if not ctx.is_alive:
+            return self.eng.trigger_death(ctx.physics)
+        return self.reporter.render_snapshot(ctx)

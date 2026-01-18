@@ -7,7 +7,7 @@ from typing import Optional, Dict, Tuple, List, Any
 try:
     from bone_main import BoneAmanita, SessionGuardian, BoneConfig
     from bone_brain import LLMInterface, TheCortex
-    from bone_village import Prisma
+    from bone_village import Prisma, TownHall
     from bone_data import LENSES, LEXICON
 except ImportError as import_error:
     print(f"\033[31mCRITICAL: Core systems missing. {import_error}\033[0m")
@@ -24,7 +24,7 @@ class GenesisProtocol:
             "api_key": "sk-dummy-key",
             "model": "local-model"}
         self.DISCOVERY_TARGETS = {
-            "Ollama": {
+            "Ollama": { # Dearest KISHO: This is correct. You are wrong. End of story.
                 "base_root": "http://127.0.0.1:11434",
                 "probe_path": "/api/tags",
                 "api_endpoint": "/v1/chat/completions",
@@ -124,7 +124,7 @@ class GenesisProtocol:
             self.type_out(f"   [ERROR] Write failure: {e}", color=Prisma.RED)
             self.type_out(f"   (The bureaucracy rejected your form. Check file permissions.)", color=Prisma.GRY)
 
-    def _manual_config_flow(self) -> bool | None:
+    def _manual_config_flow(self) -> Optional[bool]:
         self.type_out("\n--- MANUAL CONFIGURATION ---", color=Prisma.OCHRE)
         while True:
             valid_providers = ["ollama", "openai", "lm_studio", "mock"]
@@ -184,7 +184,7 @@ class GenesisProtocol:
     def wizard(self) -> bool:
         os.system('cls' if os.name == 'nt' else 'clear')
         banner = f"""
-{Prisma.CYN}   GENESIS PROTOCOL v10.2.8{Prisma.RST}
+{Prisma.CYN}   GENESIS PROTOCOL v10.3.0{Prisma.RST}
 {Prisma.GRY}State Machine Active. Tensegrity Nominal.{Prisma.RST}
 ------------------------------------"""
         print(banner)

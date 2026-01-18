@@ -1,8 +1,9 @@
 # bone_machine.py
 # "The gears turn, the pistons fire." - The Industrial District
-
+from typing import Tuple, Any, Optional
 from bone_bus import Prisma, BoneConfig
 from bone_lexicon import TheLexicon
+
 
 class TheCrucible:
     def __init__(self):
@@ -81,36 +82,67 @@ class TheCrucible:
         return "MELTDOWN", damage, f"CRUCIBLE CRACKED: Fire lacks Structure (Kappa Low). Hull Breach. -{damage:.1f} Health."
 
 class TheForge:
+    def __init__(self):
+        from bone_data import GORDON
+        self.recipes = GORDON.get("RECIPES", [])
+        self.MIN_VOLTAGE = 5.0
+        self.MIN_TRUTH = 0.3
+
     def hammer_alloy(self, physics):
-        voltage = physics["voltage"]
-        clean_words = physics["clean_words"]
-        counts = physics["counts"]
+        voltage = physics.get("voltage", 0)
+        clean_words = physics.get("clean_words", [])
+        counts = physics.get("counts", {})
         total_mass = (counts.get("heavy", 0) * 2.0) + (counts.get("kinetic", 0) * 0.5)
         avg_density = total_mass / max(1, len(clean_words))
-        if voltage > BoneConfig.ANVIL_TRIGGER_VOLTAGE and avg_density > 0.4:
+        if voltage > 12.0 and avg_density > 0.4:
             if counts.get("heavy", 0) > 3 and physics.get("vector", {}).get("VEL", 0) < 0.3:
                 return True, f"{Prisma.OCHRE}THE ANVIL THUDS: You forged gravity itself.{Prisma.RST}", "LEAD_BOOTS"
-            if counts.get("kinetic", 0) > 3 and voltage < 12.0:
+            if counts.get("kinetic", 0) > 3:
                 return True, f"{Prisma.CYN}THE ANVIL CLICKS: Cold steel, safe for children.{Prisma.RST}", "SAFETY_SCISSORS"
             return True, f"{Prisma.GRY}THE ANVIL RINGS: Mass condensed into form.{Prisma.RST}", "ANCHOR_STONE"
         return False, None, None
 
-    @staticmethod
-    def transmute(physics):
-        counts = physics["counts"]
-        voltage = physics["voltage"]
+    def attempt_crafting(self, physics, inventory_list) -> Tuple[bool, Optional[str], Optional[str], Optional[str]]:
+        clean = physics.get("clean_words", [])
+        voltage = physics.get("voltage", 0)
+        truth = physics.get("truth_ratio", 0)
+        from bone_lexicon import TheLexicon
+        for recipe in self.recipes:
+            ingredient = recipe["ingredient"]
+            if ingredient in inventory_list:
+                catalyst_cat = recipe["catalyst_category"]
+                catalyst_hits = [w for w in clean if w in TheLexicon.get(catalyst_cat)]
+                if len(catalyst_hits) >= 2:
+                    if voltage >= self.MIN_VOLTAGE and truth >= self.MIN_TRUTH:
+                        return (
+                            True,
+                            f"{Prisma.VIOLET}⚗️ ALCHEMY: '{catalyst_hits[0].upper()}' reacted with {ingredient}. {recipe['msg']}{Prisma.RST}",
+                            ingredient,
+                            recipe["result"]
+                        )
+                    else:
+                        msg = (f"{Prisma.GRY}The {ingredient} glows faintly near '{catalyst_hits[0]}', "
+                               f"but the reaction fizzles. (Voltage Low: {voltage:.1f}/{self.MIN_VOLTAGE}){Prisma.RST}")
+                        return False, msg, None, None
+        return False, None, None, None
+
+    def transmute(self, physics):
+        counts = physics.get("counts", {})
+        voltage = physics.get("voltage", 0)
         gamma = physics.get("gamma", 0.0)
+        from bone_lexicon import TheLexicon
+
         if gamma < 0.15 and counts.get("abstract", 0) > 1:
             oil = TheLexicon.get_random("abstract")
             binder = TheLexicon.get_random("heavy")
             return (
-                f"{Prisma.OCHRE}THE EMULSIFIER: The emulsion is breaking (Tension: {gamma}).{Prisma.RST}\n"
+                f"{Prisma.OCHRE}THE EMULSIFIER: The emulsion is breaking (Tension: {gamma:.2f}).{Prisma.RST}\n"
                 f"   You are pouring Oil ('{oil}') into Water without a Binder.\n"
                 f"   {Prisma.WHT}Try this: Use '{binder.upper()}' to suspend the concept.{Prisma.RST}")
         if voltage > 8.5:
-            coolant = TheLexicon.get_random("aerobic") # Also updating this for consistency
+            coolant = TheLexicon.get_random("aerobic")
             return (
-                f"{Prisma.CYN}THERMAL SPIKE ({voltage}v). Structure is brittle.{Prisma.RST}\n"
+                f"{Prisma.CYN}THERMAL SPIKE ({voltage:.1f}v). Structure is brittle.{Prisma.RST}\n"
                 f"   Injecting Coolant: '{coolant}'. Breathe. Add space.")
         return None
 

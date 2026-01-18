@@ -1,4 +1,5 @@
 # bone_lexicon.py - The Global Dictionary
+# "Words are things, I'm convinced." - Maya Angelou
 
 import json, random, re, string, time, unicodedata, os
 from typing import Tuple, Dict, Set, Optional, List
@@ -198,10 +199,26 @@ class LinguisticAnalyzer:
 
 class LexiconService:
     _INITIALIZED = False
-    store = None
+    _STORE = None
     _ANALYZER = None
     ANTIGEN_REGEX = None
     SOLVENTS = set()
+
+    @classmethod
+    def initialize(cls):
+        if cls._INITIALIZED: return
+        cls._STORE = LexiconStore()
+        cls._STORE.load_vocabulary()
+        cls._ANALYZER = LinguisticAnalyzer(cls._STORE)
+        cls._STORE.set_engine(cls._ANALYZER)
+        cls.compile_antigens()
+        cls.SOLVENTS = cls._STORE.SOLVENTS
+        cls._INITIALIZED = True
+
+    @classmethod
+    def get_categories_for_word(cls, word: str) -> Set[str]:
+        if not cls._INITIALIZED: cls.initialize()
+        return cls._STORE.get_categories_for_word(word)
 
     @classmethod
     def get_current_category(cls, word: str) -> Optional[str]:
@@ -222,18 +239,8 @@ class LexiconService:
         return cls._ANALYZER.get_turbulence(words)
 
     @classmethod
-    def initialize(cls):
-        if cls._INITIALIZED: return
-        cls._STORE = LexiconStore()
-        cls._STORE.load_vocabulary()
-        cls._ANALYZER = LinguisticAnalyzer(cls._STORE)
-        cls._STORE.set_engine(cls._ANALYZER)
-        cls.compile_antigens()
-        cls.SOLVENTS = cls._STORE.SOLVENTS
-        cls._INITIALIZED = True
-
-    @classmethod
     def compile_antigens(cls):
+        if not cls._INITIALIZED: cls.initialize()
         replacements = cls._STORE.ANTIGEN_REPLACEMENTS
         if not replacements:
             cls.ANTIGEN_REGEX = None
@@ -261,7 +268,7 @@ class LexiconService:
     @classmethod
     def get(cls, category: str) -> Set[str]:
         if not cls._INITIALIZED: cls.initialize()
-        return cls._STORE.VOCAB.get(category, set())
+        return cls._STORE.get_raw(category)
 
     @classmethod
     def get_random(cls, category: str) -> str:
@@ -294,6 +301,12 @@ class LexiconService:
             if cat in ["heavy", "abstract", "sacred"]:
                 kept.append(w)
         return " ".join(kept) if kept else " ".join(clean_words[:3])
+
+    @classmethod
+    def learn_antigen(cls, word: str, replacement: str = ""):
+        if not cls._INITIALIZED: cls.initialize()
+        cls._STORE.ANTIGEN_REPLACEMENTS[word] = replacement
+        cls.compile_antigens()
 
 TheLexicon = LexiconService
 

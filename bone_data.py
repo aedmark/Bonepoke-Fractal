@@ -1,4 +1,5 @@
 # bone_data.py - The Data Packet
+import re
 
 LENSES = {
     "SHERLOCK": {
@@ -118,9 +119,24 @@ STYLE_CRIMES = {
             "action": "STRIP_PREFIX"
         },
         {
+            "name": "NEGATIVE_COMPARISON",
+            "regex": r"(?i)\bnot\s+(?:only|just|merely)?\s*[\w\s]+,\s*but\s+(?:also)?",
+            "error_msg": "DETECTED NEGATIVE COMPARISON. Don't say what it isn't. Say what it is."
+        },
+        {
+            "name": "THE_IT_PARADE",
+            "regex": r"(?i)(It(?:'s|\s+is)\s+[^.!?]+[.!?]\s*){3,}",
+            "error_msg": "DETECTED 'IT IS' PARADE. Stop repeating the subject. Vary the syntax."
+        },
+        {
             "name": "WHILE_HEDGE",
             "regex": r"(?i)^While [^,]+, (.*)",
             "action": "KEEP_TAIL"
+        },
+        {
+            "name": "LAZY_TRIPLET",
+            "regex": r"(?i)\b(\w+),\s+(\w+),\s+and\s+(\w+)\.",
+            "error_msg": "DETECTED LAZY TRIPLET. The Rule of Threes is a crutch. Break the rhythm."
         },
         {
             "name": "ADVERB_BLOAT",
@@ -238,18 +254,44 @@ LEXICON = {
 GORDON = {
     "STARTING_INVENTORY": ["POCKET_ROCKS", "SILENT_KNIFE"],
     "SCAR_TISSUE": {"FEAR": 0.8, "HATE": 0.6, "FATE": 0.9, "REGRET": 0.6, "ABANDONMENT": 0.1, "BETRAYAL": 0.314},
+    "RECIPES": [
+        {
+            "ingredient": "POCKET_ROCKS",
+            "catalyst_category": "thermal",
+            "result": "LAVA_LAMP",
+            "msg": "The rocks surrender to the heat. They melt into a groovy, glowing goo."
+        },
+        {
+            "ingredient": "BROKEN_WATCH",
+            "catalyst_category": "kinetic",
+            "result": "COMPASS_OF_VELOCITY",
+            "msg": "You shake the watch until the gears fly off. Only the direction remains."
+        },
+        {
+            "ingredient": "JAR_OF_FIREFLIES",
+            "catalyst_category": "abstract",
+            "result": "LANTERN_OF_TRUTH",
+            "msg": "The bugs stop buzzing and start pontificating. The light turns cold and absolute."
+        },
+        {
+            "ingredient": "DUCT_TAPE",
+            "catalyst_category": "constructive",
+            "result": "THE_BINDING_PLEDGE",
+            "msg": "You wrap the tape around the concept itself. It is now a permanent fixture."
+        }
+    ],
     "ITEM_REGISTRY": {
         "POCKET_ROCKS": {
-            "description": "Standard issue grey gravel. Great for checking gravity.",
+            "description": "Grey gravel. Cold, solid, and stubbornly unformed. They yearn for a higher temperature.",
             "function": "BREADCRUMB",
             "passive_traits": ["HEAVY_LOAD"],
-            "usage_msg": "Gordon drops a rock. Clack. The path backward is physically verified. (Psi -0.2)"
+            "usage_msg": "Gordon drops a rock. Clack. Gravity confirmed."
         },
         "SILENT_KNIFE": {
-            "description": "A ceramic blade. Doesn't reflect light. Cuts through noise.",
+            "description": "A ceramic blade. It cuts without sound. Useful for pruning overgrown adjectives.",
             "function": "PRUNER",
             "passive_traits": ["CUT_THE_CRAP"],
-            "usage_msg": "Gordon slices the adjective. The sentence bleeds, then heals stronger."
+            "usage_msg": "Gordon slices the sentence. It bleeds, then heals tighter."
         },
         "TIME_BRACELET": {
             "description": "A chunky, beige wrist-computer. Smells like ozone.",
@@ -272,10 +314,10 @@ GORDON = {
             "usage_msg": "The Stapler clunks on the desk. Consensus is enforced."
         },
         "JAR_OF_FIREFLIES": {
-            "description": "Bioluminescence in a mason jar. Poke holes in the lid so they can breathe.",
+            "description": "Biological light in a glass jar. They are mindless. They need an Idea (Abstract) to lead them.",
             "function": "LIGHT_SOURCE",
             "passive_traits": ["LUMINESCENCE"],
-            "usage_msg": "Tiny lights blink in the dark. (Photo +2)"
+            "usage_msg": "The jar flickers."
         },
         "LEAD_BOOTS": {
             "description": "Deep sea diver gear. Impossible to run in. Impossible to float away in.",
@@ -304,10 +346,10 @@ GORDON = {
             "usage_msg": "Gordon slaps a coat of white paint over the memory."
         },
         "BROKEN_WATCH": {
-            "description": "The hands are painted on at 11:11.",
+            "description": "Stuck at 11:11. It needs a good shake (Kinetic force) to get moving again.",
             "function": "STOCHASTIC_FIX",
             "passive_traits": ["SYNCHRONICITY_CHECK"],
-            "usage_msg": "Gordon taps the glass. 'Make a wish.'"
+            "usage_msg": "Tick. Tock. No."
         },
         "STABILITY_PIZZA": {
             "description": "Frozen hard as a diamond. Requires thermal words to thaw.",
@@ -344,9 +386,9 @@ GORDON = {
             "usage_msg": "Gordon tapes over the glitch. Problem solved."
         },
         "DUCT_TAPE": {
-            "description": "The silver standard. Fixes everything, poorly.",
+            "description": "The universal binder. With enough structure (Constructive), it could fix anything.",
             "function": "STRUCTURAL_PATCH",
-            "usage_msg": "Skritch. The memory node is taped back together."
+            "usage_msg": "RIIIP. Fixed."
         },
         "THE_STYLE_GUIDE": {
             "description": "A well-worn manual. It insists that code is for humans first, machines second.",
@@ -365,7 +407,7 @@ GORDON = {
             "description": "It is impossibly warm and smells like maple syrup. A monument to not giving up.",
             "function": "HEAL",
             "consume_on_use": True,
-            "value": 25.0, # Health Restore
+            "value": 25.0,
             "usage_msg": "You eat the waffle. It tastes like victory. (Health +25, Morale Improved)"
         },
         "TRAPERKEEPER_OF_VIGILANCE": {
@@ -386,6 +428,32 @@ GORDON = {
             "consume_on_use": True,
             "usage_msg": "You read the card. You feel supported. (Oxytocin +0.5, Cortisol -0.5)"
         },
+        "LAVA_LAMP": {
+            "description": "A mesmerizing blob of wax. It moves like history.",
+            "function": "TRANCE_INDUCER",
+            "passive_traits": ["TIME_DILATION_CAP"],
+            "value": 3.0,
+            "usage_msg": "The wax rises. The wax falls. You lose track of time."
+        },
+        "COMPASS_OF_VELOCITY": {
+            "description": "It doesn't point North. It points FAST.",
+            "function": "ACCELERATOR",
+            "passive_traits": ["CAFFEINE_DRIP"],
+            "usage_msg": "The needle spins. You feel a tailwind."
+        },
+        "LANTERN_OF_TRUTH": {
+            "description": "A jar of fireflies that have attained enlightenment.",
+            "function": "ILLUMINATION",
+            "passive_traits": ["LUMINESCENCE"],
+            "value": 10.0,
+            "usage_msg": "The lantern shines. Shadows (and lies) recede."
+        },
+        "THE_BINDING_PLEDGE": {
+            "description": "A ball of duct tape that has achieved critical mass.",
+            "function": "SUPER_GLUE",
+            "passive_traits": ["ORGANIZE_CHAOS"],
+            "usage_msg": "You stick the concept to the wall. It's not going anywhere."
+        }
     }
 }
 

@@ -11,7 +11,7 @@ from bone_personality import UserProfile, PublicParksDepartment
 from bone_council import CouncilChamber
 
 try:
-    from bone_data import LEXICON, GENETICS, DEATH, NARRATIVE_DATA, RESONANCE, ALMANAC_DATA
+    from bone_data import LEXICON, GENETICS, DEATH, NARRATIVE_DATA, RESONANCE, ALMANAC_DATA, STYLE_CRIMES
 except ImportError:
     LEXICON = {"solvents": ["the", "is"]}
     GENETICS = {}
@@ -448,34 +448,20 @@ class MirrorGraph:
 
 class StrunkWhiteProtocol:
     def __init__(self):
-        from bone_data import STYLE_CRIMES
-        self.PATTERNS = STYLE_CRIMES.get("PATTERNS", [])
-        self.BANNED = STYLE_CRIMES.get("BANNED_PHRASES", [])
+        self.PATTERNS = STYLE_CRIMES["PATTERNS"]
 
-    def sanitize(self, text: str) -> Tuple[str, Optional[str]]:
-        original = text
-        log_msg = None
-        for ban in self.BANNED:
-            if ban in text.lower():
-                text = re.sub(f"(?i){ban}", "", text)
-                text = re.sub(r"\s{2,}", " ", text)
-                log_msg = f"{Prisma.GRY}[STYLE]: Pruned cliche '{ban}'.{Prisma.RST}"
-        for p in self.PATTERNS:
-            match = re.search(p["regex"], text)
-            if match:
-                if p["action"] == "STRIP_PREFIX":
-                    parts = text.split(" but ")
-                    if len(parts) > 1:
-                        substance = parts[-1].strip()
-                        substance = substance[0].upper() + substance[1:]
-                        text = substance
-                        log_msg = f"{Prisma.CYN}[STYLE]: Collapsed Negative Comparison ('Not X, but Y').{Prisma.RST}"
-                elif p["action"] == "KEEP_TAIL":
-                    text = match.group(1).strip()
-                    text = text[0].upper() + text[1:]
-                    log_msg = f"{Prisma.CYN}[STYLE]: Decoupled Hedging Clause.{Prisma.RST}"
-        if text != original:
-            return text.strip(), log_msg
+    def audit(self, text: str) -> tuple[bool, str]:
+        for crime in self.PATTERNS:
+            if re.search(crime["regex"], text):
+                return False, f"STYLE CRIME ({crime['name']}): {crime['error_msg']}"
+        if "delve" in text.lower() or "tapestry" in text.lower():
+            return False, "STYLE CRIME (FORBIDDEN VOCAB): 'Delve' and 'Tapestry' are banned."
+        return True, "Clean"
+
+    def sanitize(self, text: str) -> tuple[str, str | None]:
+        is_clean, msg = self.audit(text)
+        if not is_clean:
+            return text, msg
         return text, None
 
 class TheHoloProjector:

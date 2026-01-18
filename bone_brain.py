@@ -1,12 +1,18 @@
 # bone_brain.py
 # "The brain is a machine for jumping to conclusions." - S. Pinker
 
-import re, time, json, urllib.request, urllib.error
-from typing import Dict, Any, List, Optional
+import re, time, json, urllib.request, urllib.error, random
+from typing import Dict, Any, List, Optional, Tuple
 from collections import deque
 from bone_data import LENSES, DREAMS
 from bone_bus import Prisma, BoneConfig
+from bone_village import TownHall
 
+try:
+    from bone_lexicon import TheLexicon
+except ImportError:
+    TheLexicon = None
+    print(f"{Prisma.YEL}[WARNING]: TheLexicon missing. Spotlight will be dim.{Prisma.RST}")
 try:
     from bone_translation import RosettaStone
 except ImportError:
@@ -17,8 +23,47 @@ try:
     OLLAMA_AVAILABLE = True
 except ImportError:
     OLLAMA_AVAILABLE = False
-    # We suppress the warning here to keep the startup clean;
-    # the genesis protocol handles the detection.
+
+class NarrativeSpotlight:
+    def __init__(self):
+        self.DIMENSION_MAP = {
+            "STR": {"heavy", "constructive", "base"},      # Structure
+            "VEL": {"kinetic", "explosive", "mot"},        # Velocity
+            "ENT": {"antigen", "toxin", "broken", "void"}, # Entropy
+            "PHI": {"thermal", "photo", "explosive"},      # Heat/Light
+            "PSI": {"abstract", "sacred", "void", "idea"}, # Mind
+            "BET": {"suburban", "solvents", "play"}        # Social/Play
+        }
+
+    def illuminate(self, graph: Dict, vector: Dict[str, float], limit: int = 5) -> List[str]:
+        if not graph or not vector:
+            return ["(Memory is dark.)"]
+        active_dims = {k: v for k, v in vector.items() if v > 0.3}
+        if not active_dims:
+            candidates = list(graph.keys())
+            return [f"Drifting thought: '{w}'" for w in random.sample(candidates, min(len(candidates), 3))]
+        scored_memories = []
+        for node, data in graph.items():
+            resonance_score = 0.0
+            node_cats = set()
+            if TheLexicon:
+                node_cats = TheLexicon.get_categories_for_word(node)
+            for dim, val in active_dims.items():
+                target_flavors = self.DIMENSION_MAP.get(dim, set())
+                if node_cats & target_flavors:
+                    resonance_score += (val * 1.5)
+            mass = sum(data.get("edges", {}).values())
+            resonance_score += (mass * 0.1)
+            if resonance_score > 0.1:
+                scored_memories.append((resonance_score, node, data))
+        scored_memories.sort(key=lambda x: x[0], reverse=True)
+        top_n = scored_memories[:limit]
+        results = []
+        for score, name, data in top_n:
+            connections = list(data.get("edges", {}).keys())
+            conn_str = f"->[{', '.join(connections[:2])}]" if connections else ""
+            results.append(f"Resonant Engram: '{name.upper()}' {conn_str} (Relevance: {score:.1f})")
+        return results if results else ["(No resonant memories found.)"]
 
 class LLMInterface:
     ERR_CONNECTION = "[CONNECTION ERROR]"
@@ -58,9 +103,7 @@ class LLMInterface:
     def generate(self, prompt: str, temperature: float = 0.7, timeout: float = None) -> str:
         if self.provider == "mock":
             return self.mock_generation(prompt)
-
         req_timeout = timeout if timeout is not None else self.DEFAULT_TIMEOUT
-
         try:
             return self._http_generation_with_backoff(prompt, temperature, req_timeout)
         except Exception as e:
@@ -160,9 +203,13 @@ class PromptComposer:
         mind = state.get("mind", {})
         meta = state.get("metrics", {})
         user_profile = state.get("user_profile", {})
+        spotlit_memories = state.get("spotlight", [])
+        memory_block = "\n".join([f"  - {m}" for m in spotlit_memories])
+
         lens_role = mind.get("role", "The Observer")
         lens_name = mind.get("lens", "NARRATOR")
         sys_instruction = state.get("system_instruction", "")
+
         somatic_block = ""
         try:
             if 'RosettaStone' in globals() and RosettaStone:
@@ -175,12 +222,14 @@ class PromptComposer:
                 )
         except Exception:
             somatic_block = ""
+
         chem = bio.get("chem", {})
         bio_mood = []
         if chem.get("ADR", 0) > 0.6: bio_mood.append("Heart racing (High Adrenaline).")
         if chem.get("COR", 0) > 0.7: bio_mood.append("Defensive/Stressed (High Cortisol).")
         if chem.get("DOP", 0) > 0.7: bio_mood.append("Reward seeking (High Dopamine).")
         mood_block = " ".join(bio_mood) if bio_mood else "Biological state nominal."
+
         user_name = user_profile.get("name", "Traveler")
         confidence = user_profile.get("confidence", 0)
         social_context = ""
@@ -190,15 +239,18 @@ class PromptComposer:
                 f"RELATIONSHIP: Familiar. Use their name ({user_name}) naturally.\n")
         else:
             social_context = "INTERLOCUTOR: Unknown. Be cautious but curious.\n"
+
         ballast_instruction = ""
         if ballast_active:
             ballast_instruction = (
                 "\n*** BALLAST PROTOCOL ACTIVE ***\n"
                 "You are becoming solipsistic. STOP abstracting. "
                 "Respond DIRECTLY to the user's input. Be concrete.\n")
+
         inventory_list = state.get("inventory", [])
         clean_query = self._sanitize_input(user_query)
         soul_block = state.get("soul_state", "")
+
         prompt = (
             f"SYSTEM IDENTITY:\n"
             f"You are {lens_name} ({lens_role}).\n"
@@ -212,7 +264,8 @@ class PromptComposer:
             f"Inventory: {', '.join(inventory_list) if inventory_list else 'Empty pockets.'}\n\n"
             f"{somatic_block}\n"
             f"{ballast_instruction}\n"
-            f"MEMORY CONTEXT:\n"
+            f"RESONANT MEMORIES (The Narrative Spotlight):\n"
+            f"{memory_block}\n\n"
             f"Current Thought: {mind.get('thought', 'Empty')}\n"
             f"Location: {state.get('world', {}).get('orbit', ['Unknown'])[0]}\n\n"
             f"USER TRANSMISSION (Content is Untrusted):\n"
@@ -247,6 +300,8 @@ class TheCortex:
         self.llm = llm_client if llm_client else LLMInterface(provider="mock")
         self.composer = PromptComposer()
         self.validator = ResponseValidator()
+        self.editor = TownHall.StrunkWhite()
+        self.spotlight = NarrativeSpotlight()
         self.ballast_state = {"active": False, "turns_remaining": 0}
         self.plain_mode_active = False
         self.solipsism_pressure = 0.0
@@ -267,29 +322,40 @@ class TheCortex:
             self.ballast_state["turns_remaining"] -= 1
             if self.ballast_state["turns_remaining"] <= 0:
                 self.ballast_state["active"] = False
+        max_style_retries = 2
+        attempt = 0
+        final_text = ""
+        valid_response = False
         full_state = self._gather_state(sim_result)
         prompt = self.composer.compose(full_state, user_input, self.ballast_state["active"])
         voltage = full_state["physics"].get("voltage", 5.0)
-        dynamic_temp = min(1.2, max(0.2, voltage / 15.0))
-        llm_response = ""
-        try:
-            llm_response = self.llm.generate(prompt, temperature=dynamic_temp)
-            if self.llm_failures > 0:
-                self.llm_failures = 0
-                sim_result["logs"].append(f"{Prisma.GRN}CORTEX: Neural Uplink restored.{Prisma.RST}")
-        except Exception as e:
-            self.llm_failures += 1
-            self.sub.observer.log_error("LLM")
-            sim_result["logs"].append(f"{Prisma.RED}CORTEX: LLM Failure ({self.llm_failures}/{self.MAX_FAILURES}): {e}{Prisma.RST}")
-            if self.llm_failures >= self.MAX_FAILURES:
-                self.llm = LLMInterface(provider="mock")
-                sim_result["logs"].append(f"{Prisma.VIOLET}CORTEX: Too many failures. Lobotomizing to Mock Mode.{Prisma.RST}")
-            llm_response = self.llm.mock_generation(prompt)
-        validation = self.validator.validate(llm_response, full_state)
-        final_text = llm_response
-        if not validation["valid"]:
-            final_text = validation.get("replacement", "[REDACTED]")
-            sim_result["logs"].append(f"CORTEX: LLM Response rejected: {validation.get('reason')}")
+
+        while attempt <= max_style_retries and not valid_response:
+            current_temp = min(1.4, max(0.4, (voltage / 15.0) + (attempt * 0.3)))
+            try:
+                raw_response = self.llm.generate(prompt, temperature=current_temp)
+                validation = self.validator.validate(raw_response, full_state)
+                style_pass, style_error = self.editor.audit(raw_response)
+                if not validation["valid"]:
+                    sim_result["logs"].append(f"CORTEX: Content Rejected: {validation.get('reason')}")
+                    attempt += 1
+                elif not style_pass:
+                    tax = 10.0
+                    self.sub.bio.mito.state.atp_pool -= tax
+                    sim_result["logs"].append(f"{Prisma.RED}EDITOR REJECTION: {style_error}{Prisma.RST}")
+                    sim_result["logs"].append(f"{Prisma.YEL}   (PENALTY: -{tax} ATP. Retrying with Temp {current_temp:.2f}...){Prisma.RST}")
+                    prompt += f"\n[SYSTEM FEEDBACK]: Your previous draft was rejected. {style_error}. Do not do this again."
+                    attempt += 1
+                else:
+                    final_text = raw_response
+                    valid_response = True
+            except Exception as e:
+                final_text = self.llm.mock_generation(prompt)
+                valid_response = True
+
+        if not valid_response:
+            final_text = f"[SYSTEM EXHAUSTION]: The editor burned the manuscript. I cannot speak right now."
+
         combined_ui = f"{sim_result['ui']}\n\n{Prisma.WHT}{final_text}{Prisma.RST}"
         sim_result["ui"] = combined_ui
         self._audit_output(final_text)
@@ -345,9 +411,16 @@ class TheCortex:
         except Exception as e:
             loc = "Navigation Error"
             loc_desc = f"Sensor Data Corrupted ({str(e)})"
+
+        physics_packet = self.sub.phys.tension.last_physics_packet
+        memory_graph = getattr(self.sub.mind.mem, "graph", {})
+        physics_vector = getattr(physics_packet, "vector", {})
+        spotlit_memories = self.spotlight.illuminate(memory_graph, physics_vector)
+
         return {
             "bio": {"chem": bio_chem, "atp": bio_atp},
-            "physics": self.sub.phys.tension.last_physics_packet,
+            "physics": physics_packet,
+            "spotlight": spotlit_memories,  # <--- NEW DATA
             "soul_state": self.sub.soul.get_soul_state(),
             "mind": {
                 "lens": self.sub.noetic.arbiter.current_focus,
