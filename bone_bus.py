@@ -26,9 +26,11 @@ class Prisma:
         color_map = {
             "R": cls.RED, "G": cls.GRN, "Y": cls.YEL, "B": cls.BLU,
             "M": cls.MAG, "C": cls.CYN, "W": cls.WHT, "0": cls.GRY,
-            "I": cls.INDIGO, "O": cls.OCHRE, "V": cls.VIOLET}
-        code = color_map.get(color_key.upper(), cls.WHT)
-        return f"{code}{text}{cls.RST}"
+            "I": cls.INDIGO, "O": cls.OCHRE, "V": cls.VIOLET
+        }
+        code = color_map.get(str(color_key).upper(), cls.WHT)
+        safe_text = str(text).replace(cls.RST, cls.RST + code)
+        return f"{code}{safe_text}{cls.RST}"
 
     @classmethod
     def tie_dye(cls, text):
@@ -41,35 +43,33 @@ class Prisma:
         return " ".join(painted)
 
 class EventBus:
-    def __init__(self):
-        self.buffer = []
-        self.honk_sounds = ["BEEP BEEP", "HONK", "AWOOGA", "*Grumble*", "MOVE IT"]
-        self.subscribers: Dict[str, List[Callable]] = {}
+    def __init__(self, max_memory=1024):
+        self.buffer = deque(maxlen=max_memory)
+        self.subscribers = {}
 
-    def subscribe(self, topic: str, callback):
-        if topic not in self.subscribers:
-            self.subscribers[topic] = []
-        self.subscribers[topic].append(callback)
+    def subscribe(self, event_type, callback):
+        if event_type not in self.subscribers:
+            self.subscribers[event_type] = []
+        self.subscribers[event_type].append(callback)
 
-    def publish(self, topic: str, data: Any):
-        if topic in self.subscribers:
-            for callback in self.subscribers[topic]:
+    def publish(self, event_type, data=None):
+        if event_type in self.subscribers:
+            for callback in self.subscribers[event_type]:
                 try:
                     callback(data)
                 except Exception as e:
-                    self.log(f"Subscriber Error on topic '{topic}': {e}", "ERR")
+                    print(f"Event Bus Error: {e}")
 
     def log(self, text: str, category: str = "SYSTEM"):
-        self.buffer.append({"text": text, "category": category, "timestamp": time.time()})
+        entry = {
+            "text": text,
+            "category": category,
+            "timestamp": time.time()
+        }
+        self.buffer.append(entry)
 
-    def honk(self):
-        sound = random.choice(self.honk_sounds)
-        self.log(f"{Prisma.YEL}🚌 THE BUS: {sound}!{Prisma.RST}", "BUS")
-
-    def flush(self) -> List[Dict]:
-        logs = list(self.buffer)
-        self.buffer.clear()
-        return logs
+    def get_recent_logs(self, count=10):
+        return list(self.buffer)[-count:]
 
 class BoneConfig:
     GRAVITY_WELL_THRESHOLD = 15.0
@@ -177,7 +177,7 @@ class BoneConfig:
             if "base_url" in data: cls.BASE_URL = data["base_url"]
             if "api_key" in data: cls.API_KEY = data["api_key"]
             if "model" in data: cls.MODEL = data["model"]
-            if "ollm_model_id" in data: cls.OLLM_MODEL_ID = data["ollm_model_id"]
+            if "ollama_model_id" in data: cls.OLLAMA_MODEL_ID = data["ollama_model_id"]
             return True, "Configuration loaded successfully."
         except Exception as e:
             return False, f"Config load failed: {e}"
@@ -255,16 +255,21 @@ class SystemHealth:
     mind_online: bool = True
     cortex_online: bool = True
     errors: List[ErrorLog] = field(default_factory=list)
+    observer: Optional['TheObserver'] = None
+
+    def link_observer(self, observer_ref):
+        self.observer = observer_ref
 
     def report_failure(self, component: str, error: Exception, severity="ERROR"):
         msg = str(error)
         self.errors.append(ErrorLog(component, msg, severity=severity))
+        if self.observer:
+            self.observer.log_error(component)
         if component == "PHYSICS": self.physics_online = False
         elif component == "BIO": self.bio_online = False
         elif component == "MIND": self.mind_online = False
         elif component == "CORTEX": self.cortex_online = False
         return f"[{component} OFFLINE]: {msg}"
-
 
 @dataclass
 class PhysicsPacket:
@@ -294,6 +299,9 @@ class PhysicsPacket:
     system_surge_event: bool = False
     pain_signal: float = 0.0
     manifold: str = "THE_MUD"
+    audit_trail: List[str] = field(default_factory=list)
+    raw_text_display: str = ""
+    entropy: float = 0.0
 
     def __getitem__(self, key): return getattr(self, key)
 
@@ -331,6 +339,15 @@ class CycleContext:
     mind_state: Dict = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
     bureau_ui: str = ""
-    user_name: str = "TRAVELER"
+    user_profile: Dict = field(default_factory=lambda: {"name": "TRAVELER", "confidence": 0})
+
+    @property
+    def user_name(self):
+        return self.user_profile.get("name", "TRAVELER")
+
+    @user_name.setter
+    def user_name(self, value):
+        self.user_profile["name"] = value
+
     def log(self, message: str):
         self.logs.append(message)

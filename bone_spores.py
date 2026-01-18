@@ -533,6 +533,9 @@ class MycelialNetwork:
         if removed:
             self.events.log(f"{Prisma.GRY}[TIME MENDER]: Pruned {removed} dead timelines.{Prisma.RST}")
 
+    def report_status(self):
+        return len(self.graph)
+
 class HyphalInterface:
     def __init__(self):
         self.enzymes = {

@@ -442,6 +442,7 @@ class BoneAmanita:
         self.events = EventBus()
         self.system_health = SystemHealth()
         self.observer = TheObserver()
+        self.system_health.link_observer(self.observer)
 
         # 2. Architect Calls (The Delegation)
         self.mind, self.limbo = BoneArchitect.construct_mind(self.events, self.lex)
@@ -507,7 +508,7 @@ class BoneAmanita:
             self.events.log(f"{Prisma.WHT}MERCY SIGNAL: Trauma boards wiped.{Prisma.RST}", "SYS")
         cortex_packet = self.cortex.process(user_message)
         duration = self.observer.clock_out(turn_start, "cycle")
-        self.observer.record_memory(len(self.mind.mem.graph))
+        self.observer.record_memory(self.mind.mem.report_status())
         report = self.observer.get_report()
         if report["status"] != "NOMINAL":
             if cortex_packet.get("ui"):

@@ -281,7 +281,9 @@ class TheTensionMeter:
             "perfection_streak": self.perfection_streak,
             "avg_viscosity": metrics["avg_viscosity"],
             "E": metrics["E"],
-            "B": metrics["B"]}
+            "B": metrics["B"],
+            "entropy": metrics["E"]
+        }
         return {
             "physics": PhysicsPacket(**physics_bridge),
             "clean_words": clean_words,

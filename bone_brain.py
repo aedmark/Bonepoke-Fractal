@@ -24,21 +24,14 @@ class LLMInterface:
     ERR_CONNECTION = "[CONNECTION ERROR]"
     ERR_TIMEOUT = "[TIMEOUT ERROR]"
     ERR_EMPTY = "[EMPTY RESPONSE]"
-
-    # SLASH 10.2 ADJUSTMENT:
-    # Local brains can be slow to wake up (cold start).
-    # We increased this from 30.0 to 120.0 to prevent premature "give up" loops.
     DEFAULT_TIMEOUT = 120.0
-
     MAX_RETRIES = 1
 
     def __init__(self, provider: str = None, base_url: str = None, api_key: str = None, model: str = None):
         self.provider = (provider or BoneConfig.PROVIDER).lower()
         self.api_key = api_key or BoneConfig.API_KEY
         self.model = model or BoneConfig.MODEL
-        self.backup_model_id = getattr(BoneConfig, "OLLM_MODEL_ID", "llama3")
-
-        # Priority: explicit argument -> config file -> defaults
+        self.backup_model_id = getattr(BoneConfig, "OLLAMA_MODEL_ID", "llama3")
         if base_url:
             self.base_url = base_url
         elif BoneConfig.BASE_URL:
@@ -71,17 +64,13 @@ class LLMInterface:
         try:
             return self._http_generation_with_backoff(prompt, temperature, req_timeout)
         except Exception as e:
-            # If the HTTP layer fails, check if we have the local python library as backup
             if self._ping_backup():
                 print(f"{Prisma.OCHRE}[CORTEX]: Cloud/HTTP failed. Routing to Local Service ({self.backup_model_id})...{Prisma.RST}")
                 return self._local_generation(prompt, temperature)
-
-            # If all else fails, return the error to the logs and mock it so we don't crash
             print(f"{Prisma.RED}[BRAIN FOG]: {e}{Prisma.RST}")
             return f"[SYSTEM FAILURE]: {e} (Switched to Mock Mode) {self.mock_generation(prompt)}"
 
     def _local_generation(self, prompt: str, temperature: float) -> str:
-        # Fallback to the 'ollama' python library if installed
         try:
             response = ollama.chat(
                 model=self.backup_model_id,
@@ -91,18 +80,15 @@ class LLMInterface:
         except Exception as e:
             print(f"{Prisma.RED}[CORTEX]: Local Service Error: {e}{Prisma.RST}")
             return self.mock_generation(prompt)
-
     RETRY_CODES = {408, 429, 500, 502, 503, 504}
 
     def _http_generation_with_backoff(self, prompt: str, temperature: float, req_timeout: float, retries: int = MAX_RETRIES) -> str:
         if not self.base_url:
             raise ValueError("No Base URL configured for LLM.")
-
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}"
         }
-
         payload = {
             "model": self.model,
             "messages": [
@@ -113,34 +99,22 @@ class LLMInterface:
             "max_tokens": getattr(BoneConfig, "MAX_OUTPUT_TOKENS", 2048),
             "stream": False
         }
-
         data = json.dumps(payload).encode("utf-8")
         last_error = None
-
-        # SLASH VISUALIZATION: Tell the user we are actually doing something.
         if BoneConfig.VERBOSE_LOGGING:
             print(f"{Prisma.GRY}...Transmitting thought to {self.model} ({self.base_url})...{Prisma.RST}")
-
         for attempt in range(retries + 1):
             try:
                 req = urllib.request.Request(self.base_url, data=data, headers=headers)
-
-                # The blocking call happens here.
                 with urllib.request.urlopen(req, timeout=req_timeout) as response:
                     if response.status == 200:
                         result = json.loads(response.read().decode("utf-8"))
-
-                        # OpenAI/Ollama Standard Format
                         if "choices" in result and len(result["choices"]) > 0:
                             content = result["choices"][0].get("message", {}).get("content")
                             if content: return str(content)
-
-                        # Fallback for weird APIs
                         if "response" in result:
                             return str(result["response"])
-
                         return self.ERR_EMPTY
-
                     raise urllib.error.HTTPError(
                         req.full_url, response.status, "Non-200 Status", response.headers, None)
 
@@ -154,12 +128,10 @@ class LLMInterface:
                 last_error = e
             except Exception as e:
                 return f"[CRITICAL EXCEPTION]: {str(e)}"
-
             if attempt < retries:
                 sleep_time = min(4.0, 2 ** attempt)
                 print(f"{Prisma.GRY}...Retrying in {sleep_time}s...{Prisma.RST}")
                 time.sleep(sleep_time)
-
         raise Exception(f"Max retries exceeded. Final error: {last_error}")
 
     def mock_generation(self, prompt: str) -> str:
@@ -188,36 +160,29 @@ class PromptComposer:
         mind = state.get("mind", {})
         meta = state.get("metrics", {})
         user_profile = state.get("user_profile", {})
-
         lens_role = mind.get("role", "The Observer")
         lens_name = mind.get("lens", "NARRATOR")
-
         sys_instruction = state.get("system_instruction", "")
-
         somatic_block = ""
         try:
             if 'RosettaStone' in globals() and RosettaStone:
                 semantic_state = RosettaStone.translate(phys, bio)
                 somatic_block = RosettaStone.render_system_prompt_addition(semantic_state)
             else:
-                # If RosettaStone isn't loaded, don't crash, just degrade gracefully.
                 somatic_block = (
                     "\n*** SYSTEM NOTICE: TRANSLATION UPLINK OFFLINE ***\n"
                     "DEFAULT INSTRUCTION: Be helpful, be brief, and do not hallucinate.\n"
                 )
         except Exception:
             somatic_block = ""
-
         chem = bio.get("chem", {})
         bio_mood = []
         if chem.get("ADR", 0) > 0.6: bio_mood.append("Heart racing (High Adrenaline).")
         if chem.get("COR", 0) > 0.7: bio_mood.append("Defensive/Stressed (High Cortisol).")
         if chem.get("DOP", 0) > 0.7: bio_mood.append("Reward seeking (High Dopamine).")
         mood_block = " ".join(bio_mood) if bio_mood else "Biological state nominal."
-
         user_name = user_profile.get("name", "Traveler")
         confidence = user_profile.get("confidence", 0)
-
         social_context = ""
         if confidence > 10:
             social_context = (
@@ -225,18 +190,15 @@ class PromptComposer:
                 f"RELATIONSHIP: Familiar. Use their name ({user_name}) naturally.\n")
         else:
             social_context = "INTERLOCUTOR: Unknown. Be cautious but curious.\n"
-
         ballast_instruction = ""
         if ballast_active:
             ballast_instruction = (
                 "\n*** BALLAST PROTOCOL ACTIVE ***\n"
                 "You are becoming solipsistic. STOP abstracting. "
                 "Respond DIRECTLY to the user's input. Be concrete.\n")
-
         inventory_list = state.get("inventory", [])
         clean_query = self._sanitize_input(user_query)
         soul_block = state.get("soul_state", "")
-
         prompt = (
             f"SYSTEM IDENTITY:\n"
             f"You are {lens_name} ({lens_role}).\n"
@@ -294,71 +256,46 @@ class TheCortex:
 
     def process(self, user_input: str) -> Dict[str, Any]:
         self._check_social_cues(user_input)
-
         if user_input.startswith("??") or self.plain_mode_active:
             return self._handle_plain_mode(user_input)
-
-        # 1. Run the Physics/Bio Simulation
         sim_result = self.sub.cycle_controller.run_turn(user_input)
-
-        # 2. Check for Hard Stops (Death, Refusal, etc.)
         if sim_result.get("type") in ["DEATH", "BUREAUCRACY", "CRITICAL_FAILURE", "REFUSAL", "TOXICITY"]:
             return sim_result
         if sim_result.get("refusal_triggered", False):
             return sim_result
-
-        # 3. Ballast Logic
         if self.ballast_state["active"]:
             self.ballast_state["turns_remaining"] -= 1
             if self.ballast_state["turns_remaining"] <= 0:
                 self.ballast_state["active"] = False
-
-        # 4. Gather State & Compose Prompt
         full_state = self._gather_state(sim_result)
         prompt = self.composer.compose(full_state, user_input, self.ballast_state["active"])
-
-        # 5. Calculate Temperature based on Voltage
         voltage = full_state["physics"].get("voltage", 5.0)
         dynamic_temp = min(1.2, max(0.2, voltage / 15.0))
-
         start_think = self.sub.observer.clock_in()
         llm_response = ""
-
         try:
             llm_response = self.llm.generate(prompt, temperature=dynamic_temp)
-
-            # Reset failures on success
             if self.llm_failures > 0:
                 self.llm_failures = 0
                 sim_result["logs"].append(f"{Prisma.GRN}CORTEX: Neural Uplink restored.{Prisma.RST}")
-
         except Exception as e:
             self.llm_failures += 1
             self.sub.observer.log_error("LLM")
             sim_result["logs"].append(f"{Prisma.RED}CORTEX: LLM Failure ({self.llm_failures}/{self.MAX_FAILURES}): {e}{Prisma.RST}")
-
             if self.llm_failures >= self.MAX_FAILURES:
                 self.llm = LLMInterface(provider="mock")
                 sim_result["logs"].append(f"{Prisma.VIOLET}CORTEX: Too many failures. Lobotomizing to Mock Mode.{Prisma.RST}")
-
             llm_response = self.llm.mock_generation(prompt)
-
         duration = self.sub.observer.clock_out(start_think, "llm")
         if duration > 5.0:
             sim_result["logs"].append(f"{Prisma.GRY}[METRICS]: High Cognitive Latency ({duration:.2f}s).{Prisma.RST}")
-
-        # 6. Validate Response
         validation = self.validator.validate(llm_response, full_state)
         final_text = llm_response
-
         if not validation["valid"]:
             final_text = validation.get("replacement", "[REDACTED]")
             sim_result["logs"].append(f"CORTEX: LLM Response rejected: {validation.get('reason')}")
-
-        # 7. Package Output
         combined_ui = f"{sim_result['ui']}\n\n{Prisma.WHT}{final_text}{Prisma.RST}"
         sim_result["ui"] = combined_ui
-
         self._audit_output(final_text)
         return sim_result
 
@@ -404,18 +341,14 @@ class TheCortex:
             user_data = {"name": profile.name, "confidence": profile.confidence}
         except AttributeError:
             user_data = {"name": "User", "confidence": 0}
-
-        # Robust navigation state gathering
         try:
             loc = getattr(self.sub.navigator, "current_location", "Unknown")
-            # Handle potential None or missing dict
             manifolds_registry = getattr(self.sub.navigator, "manifolds", {})
             manifold_entry = manifolds_registry.get(loc) if manifolds_registry else None
             loc_desc = getattr(manifold_entry, "description", "Unknown Void")
         except Exception as e:
             loc = "Navigation Error"
             loc_desc = f"Sensor Data Corrupted ({str(e)})"
-
         return {
             "bio": {"chem": bio_chem, "atp": bio_atp},
             "physics": self.sub.phys.tension.last_physics_packet,

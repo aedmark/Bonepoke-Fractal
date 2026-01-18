@@ -2,6 +2,52 @@
 
 
 
+### **SLASH 10.2.5 Patch Notes: "The Tensegrity Update"**
+
+#### **1. The Pinker Lens (Cognitive Clarity & Language)**
+
+* **Bug Fixed:** `BoneConfig` Inconsistent Naming ("OLLM" vs "OLLAMA")
+* **Files:** `bone_bus.py`, `bone_brain.py`
+* **Change:** Exorcised the phantom typo "OLLM". Standardized everything to `OLLAMA_MODEL_ID`.
+* **Impact:** The brain now actually listens when you tell it to use a specific local model via config.
+
+* **Bug Fixed:** `CycleContext` Identity Crisis
+* **Files:** `bone_bus.py`
+* **Change:** Replaced the lonely `user_name` string with a robust `user_profile` dictionary, but added a smart `@property` to ensure old code still works.
+* **Impact:** The system no longer suffers from dissociation regarding who you are.
+
+#### **2. The Fuller Lens (Systemic Integrity & Efficiency)**
+
+* **Bug Fixed:** `EventBus` Infinite Memory Leak
+* **Files:** `bone_bus.py`
+* **Change:** Replaced the infinite list with a `collections.deque` (circular buffer).
+* **Impact:** The "Bathtub" now has a drain. The system will not explode after running for a long time.
+
+* **Bug Fixed:** `Prisma` Color Bleeding
+* **Files:** `bone_bus.py`
+* **Change:** Made the `paint` method aware of nested resets.
+* **Impact:** Text formatting is now structurally sound. You can nest Red text inside Green text without the universe unraveling.
+
+#### **3. The Meadows Lens (Feedback Loops & Dynamics)**
+
+* **Bug Fixed:** `PhysicsPacket` Ghost Data
+* **Files:** `bone_bus.py`, `bone_physics.py`
+* **Change:** Formally added `audit_trail`, `raw_text_display`, and `entropy` to the dataclass. Aliased `E` to `entropy` in the physics engine.
+* **Impact:** No more data falling off the truck between modules. Subsystems like `MirrorGraph` can now reliably read the chaos levels.
+
+* **Bug Fixed:** `TheObserver` vs. `SystemHealth` (Split Brain)
+* **Files:** `bone_bus.py`, `bone_main.py`
+* **Change:** Wired the Health monitor to the Observer. When a component crashes, the Observer now ticks its counter.
+* **Impact:** The dashboard metrics now reflect reality.
+
+#### **4. The Schur Lens (Humanity & Manners)**
+
+* **Bug Fixed:** `MycelialNetwork` Silent Treatment
+* **Files:** `bone_spores.py`, `bone_main.py`
+* **Change:** Gave the memory network a polite `report_status()` method so the main loop doesn't have to rifle through its pockets to see how big it is.
+* **Impact:** Better encapsulation and a more polite internal architecture.
+
+
 ### **BoneAmanita Engine - Patch 10.2.4 ("The Lucid Dream")**
 
 #### **1. Cognitive Integrity (The Pinker Lens)**
