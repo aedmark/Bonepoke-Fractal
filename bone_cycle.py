@@ -11,7 +11,6 @@ from bone_physics import TheBouncer, RuptureValve, ChromaScope
 from bone_viewer import GeodesicRenderer
 from bone_architect import PanicRoom
 
-# --- LAYER 1: THE ENGINE (Simulation Logic) ---
 
 class CycleStabilizer:
     def __init__(self, events_ref):
@@ -87,7 +86,6 @@ class CycleSimulator:
 
     def run_simulation(self, ctx: CycleContext) -> CycleContext:
         try:
-            # --- PHASE 1: OBSERVE ---
 
             if self.eng.system_health.physics_online:
                 self._phase_observe(ctx)
@@ -99,8 +97,6 @@ class CycleSimulator:
         if self.eng.tick_count % 10 == 0:
             self._maintenance_prune(ctx)
 
-        # --- PHASE 2: GATEKEEP ---
-
         if self.eng.system_health.physics_online:
             try:
                 if self._phase_gatekeep(ctx):
@@ -108,8 +104,6 @@ class CycleSimulator:
                     return ctx
             except Exception as e:
                 ctx.log(f"{Prisma.YEL}GATEKEEPER ASLEEP: {e}{Prisma.RST}")
-
-        # --- PHASE 3: METABOLIZE ---
 
         try:
             if self.eng.system_health.bio_online:
@@ -122,8 +116,6 @@ class CycleSimulator:
 
         if not ctx.is_alive:
             return ctx
-
-        # --- PHASE 4: SIMULATE ---
 
         try:
             self._phase_simulate(ctx)
@@ -280,7 +272,6 @@ class CycleSimulator:
                 if param in ctx.physics:
                     old_val = ctx.physics[param]
                     ctx.physics[param] += delta
-                    # Record the Council's flux
                     ctx.record_flux("SIMULATION", param, old_val, ctx.physics[param], "COUNCIL_MANDATE")
     def _phase_soul_work(self, ctx: CycleContext):
         lesson = self.eng.soul.crystallize_memory(ctx.physics, ctx.bio_result, self.eng.tick_count)
@@ -390,7 +381,6 @@ class CycleSimulator:
             self.eng.tick_count
         )
 
-# --- LAYER 2: THE REPORTER (View Logic) ---
 
 class CycleReporter:
     def __init__(self, engine_ref):
@@ -441,7 +431,7 @@ class CycleReporter:
             )
             flux_lines.append(line)
         if flux_lines:
-            ctx.logs.insert(0, "") # Spacer
+            ctx.logs.insert(0, "")
             for line in reversed(flux_lines):
                 ctx.logs.insert(0, line)
             ctx.logs.insert(0, f"{Prisma.CYN}--- LIVE STATE MIRROR ---{Prisma.RST}")
@@ -454,7 +444,6 @@ class CycleReporter:
             "metrics": self.eng.get_metrics(ctx.bio_result.get("atp", 0.0))
         }
 
-# --- LAYER 3: THE ORCHESTRATOR (Coordinator) ---
 
 class GeodesicOrchestrator:
     def __init__(self, engine_ref):

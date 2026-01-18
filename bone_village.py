@@ -745,20 +745,17 @@ class LiteraryJournal:
             return False, "The printing press is jammed.", "NONE"
 
 class TownHall:
-    # Department of Records & History
     Lexicon = TheLexicon
     Almanac = TheAlmanac
     CycleContext = CycleContext
     Journal = LiteraryJournal
 
-    # Department of Public Works (Physics & Navigation)
     Cartographer = TheCartographer
     Navigator = TheNavigator
     Manifold = Manifold
     PublicParksDepartment = PublicParksDepartment
     ZenGarden = ZenGarden
 
-    # Department of Philosophy & Psychology
     Tinkerer = TheTinkerer
     ParadoxSeed = ParadoxSeed
     DeathGen = DeathGen
@@ -766,9 +763,7 @@ class TownHall:
     Mirror = MirrorGraph
     Sorites = SoritesIntegrator
 
-    # Department of Visual Arts
     Projector = TheHoloProjector
     StrunkWhite = StrunkWhiteProtocol
 
-    # Department of Administration
     CouncilChamber = CouncilChamber

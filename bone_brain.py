@@ -28,12 +28,12 @@ except ImportError:
 class NarrativeSpotlight:
     def __init__(self):
         self.DIMENSION_MAP = {
-            "STR": {"heavy", "constructive", "base"},      # Structure
-            "VEL": {"kinetic", "explosive", "mot"},        # Velocity
-            "ENT": {"antigen", "toxin", "broken", "void"}, # Entropy
-            "PHI": {"thermal", "photo", "explosive"},      # Heat/Light
-            "PSI": {"abstract", "sacred", "void", "idea"}, # Mind
-            "BET": {"suburban", "solvents", "play"}        # Social/Play
+            "STR": {"heavy", "constructive", "base"},
+            "VEL": {"kinetic", "explosive", "mot"},
+            "ENT": {"antigen", "toxin", "broken", "void"},
+            "PHI": {"thermal", "photo", "explosive"},
+            "PSI": {"abstract", "sacred", "void", "idea"},
+            "BET": {"suburban", "solvents", "play"}
         }
 
     def illuminate(self, graph: Dict, vector: Dict[str, float], limit: int = 5) -> List[str]:
@@ -66,6 +66,54 @@ class NarrativeSpotlight:
             results.append(f"Resonant Engram: '{name.upper()}' {conn_str} (Relevance: {score:.1f})")
         return results if results else ["(No resonant memories found.)"]
 
+class NeurotransmitterModulator:
+    """
+    Meadows Lens: The Corpus Callosum.
+    Maps chemical stocks (DOP, COR, etc.) to cognitive flow rates (Temp, Top_P).
+    This ensures the LLM 'feels' the chemistry via parameter constraints.
+    """
+    @staticmethod
+    def modulate(chem_state: Dict[str, float], base_voltage: float) -> Dict[str, Any]:
+        params = {
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "frequency_penalty": 0.0,
+            "presence_penalty": 0.0,
+            "max_tokens": getattr(BoneConfig, "MAX_OUTPUT_TOKENS", 2048)
+        }
+
+        cor = chem_state.get("COR", 0.0)
+        if cor > 0.0:
+            params["temperature"] -= (cor * 0.4)
+            params["top_p"] -= (cor * 0.3)
+
+        dop = chem_state.get("DOP", 0.0)
+        if dop > 0.0:
+            params["temperature"] += (dop * 0.5)
+            params["presence_penalty"] += (dop * 0.5)
+
+        adr = chem_state.get("ADR", 0.0)
+        if adr > 0.0:
+            base_tokens = 150
+            params["max_tokens"] = int(base_tokens + (100 * (1.0 - adr)))
+            params["frequency_penalty"] += (adr * 0.5)
+
+        ser = chem_state.get("SER", 0.0)
+        if ser > 0.5:
+            diff = 0.7 - params["temperature"]
+            params["temperature"] += (diff * ser * 0.5)
+
+        if base_voltage > 15.0:
+            params["temperature"] += 0.2
+        elif base_voltage < 5.0:
+            params["temperature"] -= 0.1
+
+        params["temperature"] = max(0.1, min(1.5, params["temperature"]))
+        params["top_p"] = max(0.1, min(1.0, params["top_p"]))
+        params["max_tokens"] = max(50, params["max_tokens"])
+
+        return params
+
 class LLMInterface:
     ERR_CONNECTION = "[CONNECTION ERROR]"
     ERR_TIMEOUT = "[TIMEOUT ERROR]"
@@ -92,6 +140,15 @@ class LLMInterface:
         elif self.provider == "openai":
             self.base_url = "https://api.openai.com/v1/chat/completions"
             self.model = self.model or "gpt-4-turbo"
+        elif self.provider == "lm_studio":
+            self.base_url = "http://127.0.0.1:1234/v1/chat/completions"
+            self.model = self.model or "local-model"
+        elif self.provider == "localai":
+            self.base_url = "http://127.0.0.1:8080/v1/chat/completions"
+            self.model = self.model or "gpt-3.5-turbo"
+        else:
+            self.base_url = "https://api.openai.com/v1/chat/completions"
+            self.model = self.model or "gpt-4"
 
     def _ping_backup(self):
         if not OLLAMA_AVAILABLE: return False
@@ -101,12 +158,16 @@ class LLMInterface:
         except Exception:
             return False
 
-    def generate(self, prompt: str, temperature: float = 0.7, timeout: float = None) -> str:
+    def generate(self, prompt: str, temperature: float = 0.7, timeout: float = None, **kwargs) -> str:
+        """
+        Generates text using the configured provider.
+        Accepts **kwargs for dynamic parameter injection (somatic priming).
+        """
         if self.provider == "mock":
             return self.mock_generation(prompt)
         req_timeout = timeout if timeout is not None else self.DEFAULT_TIMEOUT
         try:
-            return self._http_generation_with_backoff(prompt, temperature, req_timeout)
+            return self._http_generation_with_backoff(prompt, temperature, req_timeout, **kwargs)
         except Exception as e:
             if self._ping_backup():
                 print(f"{Prisma.OCHRE}[CORTEX]: Cloud/HTTP failed. Routing to Local Service ({self.backup_model_id})...{Prisma.RST}")
@@ -119,20 +180,23 @@ class LLMInterface:
             response = ollama.chat(
                 model=self.backup_model_id,
                 messages=[{'role': 'user', 'content': prompt}],
+                options={'temperature': temperature}
             )
             return response['message']['content']
         except Exception as e:
             print(f"{Prisma.RED}[CORTEX]: Local Service Error: {e}{Prisma.RST}")
             return self.mock_generation(prompt)
+
     RETRY_CODES = {408, 429, 500, 502, 503, 504}
 
-    def _http_generation_with_backoff(self, prompt: str, temperature: float, req_timeout: float, retries: int = MAX_RETRIES) -> str:
+    def _http_generation_with_backoff(self, prompt: str, temperature: float, req_timeout: float, retries: int = MAX_RETRIES, **kwargs) -> str:
         if not self.base_url:
             raise ValueError("No Base URL configured for LLM.")
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}"
         }
+
         payload = {
             "model": self.model,
             "messages": [
@@ -140,13 +204,18 @@ class LLMInterface:
                 {"role": "user", "content": prompt}
             ],
             "temperature": temperature,
-            "max_tokens": getattr(BoneConfig, "MAX_OUTPUT_TOKENS", 2048),
             "stream": False
         }
+
+        payload.update(kwargs)
+
         data = json.dumps(payload).encode("utf-8")
         last_error = None
         if BoneConfig.VERBOSE_LOGGING:
-            print(f"{Prisma.GRY}...Transmitting thought to {self.model} ({self.base_url})...{Prisma.RST}")
+            params_str = f"T:{temperature:.2f}"
+            if "top_p" in kwargs: params_str += f" P:{kwargs['top_p']:.2f}"
+            print(f"{Prisma.GRY}...Transmitting ({params_str}) to {self.model}...{Prisma.RST}")
+
         for attempt in range(retries + 1):
             try:
                 req = urllib.request.Request(self.base_url, data=data, headers=headers)
@@ -202,7 +271,6 @@ class PromptComposer:
         bio = state.get("bio", {})
         phys = state.get("physics", {})
         mind = state.get("mind", {})
-        meta = state.get("metrics", {})
         user_profile = state.get("user_profile", {})
         spotlit_memories = state.get("spotlight", [])
         memory_block = "\n".join([f"  - {m}" for m in spotlit_memories])
@@ -304,6 +372,7 @@ class TheCortex:
         self.editor = TownHall.StrunkWhite()
         self.spotlight = NarrativeSpotlight()
         self.symbiosis = SymbiosisManager(self.sub.events)
+        self.modulator = NeurotransmitterModulator()
         self.ballast_state = {"active": False, "turns_remaining": 0}
         self.plain_mode_active = False
         self.solipsism_pressure = 0.0
@@ -315,42 +384,66 @@ class TheCortex:
         self._check_social_cues(user_input)
         if user_input.startswith("??") or self.plain_mode_active:
             return self._handle_plain_mode(user_input)
+
         sim_result = self.sub.cycle_controller.run_turn(user_input)
+
         if sim_result.get("type") in ["DEATH", "BUREAUCRACY", "CRITICAL_FAILURE", "REFUSAL", "TOXICITY"]:
             return sim_result
         if sim_result.get("refusal_triggered", False):
             return sim_result
+
         if self.ballast_state["active"]:
             self.ballast_state["turns_remaining"] -= 1
             if self.ballast_state["turns_remaining"] <= 0:
                 self.ballast_state["active"] = False
+
         full_state = self._gather_state(sim_result)
         voltage = full_state["physics"].get("voltage", 5.0)
+
+        chem = full_state["bio"].get("chem", {})
+        somatic_params = self.modulator.modulate(chem, voltage)
+
         modifiers = self.symbiosis.get_prompt_modifiers()
         anchor_text = self.symbiosis.generate_anchor(full_state)
         base_prompt = self.composer.compose(full_state, user_input, self.ballast_state["active"])
         final_prompt = f"{anchor_text}\n\n{base_prompt}"
         if modifiers["simplify_instruction"]:
             final_prompt += "\n[SYSTEM NOTE: Resources low. Be brief.]"
+
         max_style_retries = 2
         attempt = 0
         final_text = ""
         valid_response = False
+
         while attempt <= max_style_retries and not valid_response:
-            current_temp = min(1.4, max(0.4, (voltage / 15.0) + (attempt * 0.3)))
+            current_temp = somatic_params["temperature"]
+            if attempt > 0:
+                current_temp = min(1.5, current_temp + 0.2)
+
             start_time = time.time()
             try:
-                raw_response = self.llm.generate(final_prompt, temperature=current_temp)
+                raw_response = self.llm.generate(
+                    final_prompt,
+                    temperature=current_temp,
+                    top_p=somatic_params["top_p"],
+                    max_tokens=somatic_params["max_tokens"],
+                    frequency_penalty=somatic_params["frequency_penalty"],
+                    presence_penalty=somatic_params["presence_penalty"]
+                )
+
                 latency = time.time() - start_time
                 self.symbiosis.monitor_host(latency, raw_response)
+
                 validation = self.validator.validate(raw_response, full_state)
                 style_pass, style_error = self.editor.audit(raw_response)
+
                 if not validation["valid"]:
                     sim_result["logs"].append(f"CORTEX: Content Rejected: {validation.get('reason')}")
                     attempt += 1
                 elif not style_pass:
                     tax = 10.0
-                    self.sub.bio.mito.state.atp_pool -= tax
+                    if hasattr(self.sub.bio.mito.state, "atp_pool"):
+                        self.sub.bio.mito.state.atp_pool -= tax
                     sim_result["logs"].append(f"{Prisma.RED}EDITOR REJECTION: {style_error}{Prisma.RST}")
                     sim_result["logs"].append(f"{Prisma.YEL}   (PENALTY: -{tax} ATP. Retrying...){Prisma.RST}")
                     final_prompt += f"\n[SYSTEM FEEDBACK]: Your previous draft was rejected. {style_error}. Do not do this again."
@@ -362,8 +455,10 @@ class TheCortex:
                 sim_result["logs"].append(f"{Prisma.RED}CORTEX ERROR: {e}{Prisma.RST}")
                 final_text = self.llm.mock_generation(final_prompt)
                 valid_response = True
+
         if not valid_response:
             final_text = f"[SYSTEM EXHAUSTION]: The editor burned the manuscript. I cannot speak right now."
+
         combined_ui = f"{sim_result['ui']}\n\n{Prisma.WHT}{final_text}{Prisma.RST}"
         sim_result["ui"] = combined_ui
         self._audit_output(final_text)
@@ -371,8 +466,9 @@ class TheCortex:
 
     def _check_social_cues(self, text: str):
         explicit_patterns = [
-            r"(?i)(?:my name is|call me)\s+([a-zA-Z0-9][a-zA-Z0-9 \-]{1,29})"]
+            r"(?i)(?:my name is|call me)\s+([A-Z][a-zA-Z0-9 \-]{1,19})$"]
         implicit_pattern = r"I am ([A-Z][a-z0-9]+(?: [A-Z][a-z0-9]+){0,2})"
+
         detected_name = None
         for p in explicit_patterns:
             match = re.search(p, text)
@@ -383,15 +479,17 @@ class TheCortex:
             match = re.search(implicit_pattern, text)
             if match:
                 detected_name = match.group(1).strip()
+
         if detected_name:
             sanitized = re.sub(r"[^a-zA-Z0-9 \-]", "", detected_name)
             sanitized = re.sub(r"\s+", " ", sanitized).strip()
-            forbidden = ["system", "admin", "root", "null", "undefined", "script", "alert", "drop table"]
+            forbidden = ["system", "admin", "root", "null", "undefined", "script", "alert", "drop table", "difficult", "tired", "confused"]
+
             if any(bad in sanitized.lower() for bad in forbidden):
-                self.sub.events.log(f"{Prisma.RED}SECURITY: Identity injection rejected ('{sanitized}').{Prisma.RST}", "SYS")
                 return
             if len(sanitized) < 2:
                 return
+
             final_name = sanitized.title()
             self.sub.mind.mirror.profile.name = final_name
             current_conf = self.sub.mind.mirror.profile.confidence
@@ -427,7 +525,7 @@ class TheCortex:
         return {
             "bio": {"chem": bio_chem, "atp": bio_atp},
             "physics": physics_packet,
-            "spotlight": spotlit_memories,  # <--- NEW DATA
+            "spotlight": spotlit_memories,
             "soul_state": self.sub.soul.get_soul_state(),
             "soul_state_dict": soul_dict,
             "mind": {
@@ -471,11 +569,19 @@ class TheCortex:
     def _audit_output(self, text: str):
         words = text.lower().split()
         if not words: return
+
         diversity = len(set(words)) / len(words)
-        if diversity < 0.4:
-            self.solipsism_pressure += 1.0
+
+        self_refs = words.count("i") + words.count("me") + words.count("my")
+        self_ref_density = self_refs / len(words)
+
+        if diversity < 0.4 and self_ref_density > 0.15:
+            self.solipsism_pressure += 1.5
+        elif diversity < 0.4:
+            self.solipsism_pressure += 0.5
         else:
             self.solipsism_pressure = max(0.0, self.solipsism_pressure - 0.5)
+
         if self.solipsism_pressure >= self.SOLIPSISM_THRESHOLD:
             self._trigger_ballast()
             self.solipsism_pressure = max(0.0, self.solipsism_pressure - 2.0)
@@ -512,6 +618,9 @@ class ShimmerState:
             self.current -= amount
             return True
         return False
+
+    def get_bias(self):
+        return None
 
 class DreamEngine:
     def __init__(self, events):

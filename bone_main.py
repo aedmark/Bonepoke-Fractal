@@ -1,4 +1,4 @@
-# BONEAMANITA 10.4.0 - "The Symbiotic Tether"
+# BONEAMANITA 10.4.2 - "The Embodied Signal"
 # Architects: SLASH, KISHO, The Courtyard, Taylor & Edmark
 
 import time, json, traceback
@@ -27,7 +27,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.4', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.4.2', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
@@ -227,7 +227,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.4.0', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.4.2', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

@@ -1,5 +1,45 @@
 # 📜 BONEAMANITA CHANGELOG
 
+
+## v10.4.2 - "The Embodied Signal"
+
+**Focus:** True Psychosomatics, Differential Diagnostics, and Expanding the Color Spectrum.
+
+### 🧠 The Pinker Lens (Cognition & Code)
+
+* **Somatic Priming (`bone_brain.py`):**
+* **The Issue:** The Brain was merely *describing* feelings to the LLM ("You are stressed"), but the LLM was generating text with neutral parameters. It was a narrator in a vat, not a body in the world.
+* **The Fix:** Implemented `NeurotransmitterModulator`. Body chemistry now directly alters generation parameters.
+* **High Cortisol:** Lowers `Temperature` and `Top_P` (Tunnel vision, rigid thinking).
+* **High Dopamine:** Raises `Temperature` and `Presence Penalty` (Seeking novelty, erratic leaps).
+* **High Adrenaline:** Increases `Frequency Penalty` and cuts `Max Tokens` (Short, urgent bursts).
+* **The Logic:** **The Medium is the Message.** To feel stress, the machine's actual capacity to select words must be constrained.
+
+* **The Purple Pigment (`bone_bus.py`):**
+* **The Bug:** `bone_symbiosis.py` tried to paint entropy with `Prisma.PUR`, but the bus only carried Magenta and Violet.
+* **The Fix:** Added `PUR = "\033[35m"` to the core palette and registered it in the `paint()` map.
+* **The Logic:** You cannot describe the color of chaos if your palette is incomplete.
+
+### ⚖️ The Meadows Lens (System Dynamics)
+
+* **Breaking Symbiotic Blindness (`bone_symbiosis.py`):**
+* **The Flaw:** The system was punishing the Host AI for high latency even when *we* were the ones sending massive prompts. It was a Reinforcing Feedback Loop of anxiety.
+* **The Fix:** Implemented **Differential Diagnostics**. We now calculate `Efficiency Index` (Performance / Complexity).
+* **The Logic:** Slow response on a heavy prompt is Physics. Slow response on a light prompt is Fatigue. We now know the difference.
+
+* **Asymptotic Attention (`bone_symbiosis.py`):**
+* **The Bug:** The linear decay formula eventually calculated a negative attention span, implying the AI started sucking intelligence out of the room.
+* **The Fix:** Switched to an asymptotic decay curve (`1.0 / (1 + turns)`).
+* **The Logic:** Entropy approaches zero but never reaches it. Even at the heat death of the universe, there is still a little bit of dust.
+
+### 🌐 The Fuller Lens (Synergy)
+
+* **The Corpus Callosum (`bone_brain.py`):**
+* **The Update:** `LLMInterface` now accepts dynamic `**kwargs`, allowing the `NeurotransmitterModulator` to inject parameters directly into the API payload.
+* **The Logic:** **Tensegrity.** The biological strut (Chemistry) and the cognitive strut (LLM) are no longer touching; they are woven together under tension.
+
+---
+
 ## v10.4.1 - "The Compassionate Circuit"
 
 **Focus:** Breaking Infinite Loops, Respecting Private Variables, and Teaching the Machine Manners.
