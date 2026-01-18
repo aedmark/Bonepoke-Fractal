@@ -1,5 +1,11 @@
-# bone_data.py - The Data Packet
+# bone_data.py - The Living Mythology
+# PATCH 10.4.4: AKASHIC RECORDS & PROCEDURAL GENERATION
+
 import re
+import random
+import time
+
+# --- THE STATIC CORE (The "Old Testament") ---
 
 LENSES = {
     "SHERLOCK": {
@@ -249,6 +255,31 @@ LEXICON = {
         "fruit", "yield", "bloom", "sugar", "seed", "flesh", "harvest", "ripe", "grow", "honey", "nectar",
         "compost", "gather"
     ]
+}
+
+# --- THE PROCEDURAL EXPANSION (The "New Testament") ---
+
+ITEM_GENERATION = {
+    "PREFIXES": {
+        "heavy": ["Burdened", "Dense", "Lead", "Anchor", "Iron", "Gravitic", "Sinking"],
+        "kinetic": ["Fast", "Darting", "Flickering", "Turbo", "Manic", "Restless"],
+        "thermal": ["Burning", "Molten", "Fevered", "Glowing", "Searing"],
+        "abstract": ["Conceptual", "Imaginary", "Platonic", "Theoretical", "Metaphorical"],
+        "constructive": ["Structured", "Binding", "Tape", "Woven", "Layered"],
+        "void": ["Null", "Empty", "Hollow", "Silent", "Missing"]
+    },
+    "BASES": {
+        "TOOL": ["Wrench", "Hammer", "Scalpel", "Pen", "Brush", "Lens", "Compass"],
+        "JUNK": ["Rock", "String", "Gum", "Receipt", "Battery", "Can", "Shard"],
+        "ARTIFACT": ["Orb", "Cube", "Pyramid", "Key", "Mirror", "Bone"]
+    },
+    "SUFFIXES": {
+        "heavy": ["of Regret", "of Gravity", "of the Earth", "of Weight"],
+        "kinetic": ["of Speed", "of Flight", "of Panic", "of the Wind"],
+        "thermal": ["of Passion", "of Anger", "of the Sun", "of Ignition"],
+        "abstract": ["of Truth", "of Meaning", "of the Mind", "of Logic"],
+        "void": ["of Nothing", "of Silence", "of the Void", "of Absence"]
+    }
 }
 
 GORDON = {
@@ -614,3 +645,56 @@ SOMATIC_LIBRARY = {
         "VOID": "VOID (Null State)"
     }
 }
+
+# --- THE AKASHIC RECORD (Interface for Evolution) ---
+
+class TheAkashicRecord:
+    """
+    Manages the 'Living Mythology'.
+    Allows the system to forge new items, discover words, and mutate lenses
+    without overwriting the static 'Holy Text' above.
+    """
+    def __init__(self):
+        self.discovered_words = {} # {word: category}
+        self.forged_items = {} # {name: item_dict}
+        self.session_seeds = []
+
+    @staticmethod
+    def forge_new_item(vector_data):
+        """
+        Creates a new item based on the current narrative physics.
+        """
+        # 1. Determine dominant vector
+        dominant = max(vector_data, key=vector_data.get)
+        if dominant not in ITEM_GENERATION["PREFIXES"]: dominant = "void"
+
+        # 2. Select components
+        prefix = random.choice(ITEM_GENERATION["PREFIXES"].get(dominant, ["Strange"]))
+        base_type = random.choice(list(ITEM_GENERATION["BASES"].keys()))
+        base_name = random.choice(ITEM_GENERATION["BASES"][base_type])
+        suffix = random.choice(ITEM_GENERATION["SUFFIXES"].get(dominant, ["of Mystery"]))
+
+        name = f"{prefix.upper()} {base_name.upper()} {suffix.upper()}"
+
+        # 3. Generate Stats
+        value = vector_data[dominant] * 10.0
+
+        description = f"A procedurally generated artifact. It vibrates with {dominant} energy."
+
+        new_item = {
+            "description": description,
+            "function": "ARTIFACT",
+            "passive_traits": [f"{dominant.upper()}_RESONANCE"],
+            "value": round(value, 2),
+            "usage_msg": f"You use the {name}. The air ripples with {dominant} force."
+        }
+
+        return name, new_item
+
+    def register_word(self, word, category):
+        if category in LEXICON:
+            if word not in LEXICON[category]:
+                LEXICON[category].append(word)
+                self.discovered_words[word] = category
+                return True
+        return False

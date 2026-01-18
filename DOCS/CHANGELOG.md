@@ -1,5 +1,38 @@
 # 📜 BONEAMANITA CHANGELOG
 
+## v10.4.5 - "The Grounded Mythos"
+
+**Focus:** Symbolic Grounding, Procedural Mythology, and Closing the Feedback Loop.
+
+### 🧠 The Pinker Lens (Cognition & Code)
+
+- **Semantic Drift (`bone_village.py`):**
+- **The Issue:** The Village was a "floating signifier" economy. It used terms like "Narrative Drag" as literary metaphors, ignoring the _actual_ drag (latency) of the system. It was a simulation pretending to be a machine.
+- **The Fix:** Implemented **Symbolic Grounding**. `TheNavigator`, `TheTinkerer`, and `TheAlmanac` now ingest `HostHealth` (latency, entropy) alongside narrative metrics.
+- **The Logic:** **Metaphors must have roots.** If the server is actually lagging, the "Mud" needs to feel sticky. Words mean more when they correspond to physical reality.
+
+- **The Living Library (`bone_data.py`):**
+- **The Bug:** The system was relying on a "Fossilized Mythology." It reset to the same static `LEXICON` and `ITEM_REGISTRY` every cycle, like a dictionary that could never add new words.
+- **The Fix:** Transformed the data layer into **The Akashic Record**. Added `ITEM_GENERATION` tables (Prefixes, Bases, Suffixes) to allow for the dynamic creation of meaning.
+- **The Logic:** Language is a river, not a lake. A system that cannot name new things is not truly thinking; it is just reciting.
+
+### ⚖️ The Meadows Lens (System Dynamics)
+
+- **Closing the Loop (`bone_village.py`):**
+- **The Flaw:** `TheNavigator` was hallucinating stability. It could report "We are in The Garden" (Balanced State) even while the host LLM was timing out or looping, because there was no feedback wire from the substrate to the simulation.
+- **The Fix:** Navigation is now **Grounded**. High external latency forces a location shift to "THE_MUD". High external entropy forces a shift to "THE_GLITCH".
+- **The Logic:** **The map is not the territory.** If the territory (the server) is on fire, the map must reflect that, or the system is deluding itself.
+
+- **Stock Accumulation (`bone_village.py`):**
+- **The Flaw:** Tools had a durability cap but no evolutionary path. This created a stagnant stock where "max level" items just sat there, accumulating no further value.
+- **The Fix:** Implemented **Ascension Logic**. When `TheTinkerer` raises a tool's confidence above 2.5, it triggers `_attempt_ascension`, calling the Akashic Record to transmute the tool into a unique Artifact.
+- **The Logic:** Systems must evolve or die. A stock that cannot transform eventually becomes a bottleneck.
+
+### 🌐 The Fuller Lens (Synergy)
+
+- **Generative Tensegrity (`bone_village.py`):**
+- **The Update:** Wired `TownHall` and `TheTinkerer` directly to `TheAkashicRecord`. The static code (`Tinkerer`) now leans on the dynamic data (`Akashic`) to support the inventory system.
+- **The Logic:** **Ephemeralization.** Instead of hardcoding 1,000 items (Mass), we built a generator with 3 rules (Structure) that can create infinite variation. We are doing more with less.
 
 ## v10.4.2 - "The Embodied Signal"
 

@@ -1,5 +1,5 @@
 # bone_village.py
-# "It takes a village..."
+# "It takes a village... to raise a simulation."
 
 import json, os, random, re, time, string, unicodedata, math
 from collections import Counter, deque
@@ -11,55 +11,115 @@ from bone_personality import UserProfile, PublicParksDepartment, ZenGarden
 from bone_council import CouncilChamber
 
 try:
-    from bone_data import LEXICON, GENETICS, DEATH, NARRATIVE_DATA, RESONANCE, ALMANAC_DATA, STYLE_CRIMES
+    from bone_data import (
+        LEXICON, GENETICS, DEATH, NARRATIVE_DATA, RESONANCE,
+        ALMANAC_DATA, STYLE_CRIMES, ITEM_GENERATION, TheAkashicRecord
+    )
 except ImportError:
     LEXICON = {"solvents": ["the", "is"]}
     GENETICS = {}
     DEATH = {}
     NARRATIVE_DATA = {}
     RESONANCE = {}
+    ITEM_GENERATION = {}
+    class TheAkashicRecord:
+        def __init__(self): pass
+        @staticmethod
+        def forge_new_item(vec): return "GLITCH_ARTIFACT", {}
 
 class TheTinkerer:
+    """
+    Maintains the state of Gordon's tools.
+    [WIRED]: Now connects to TheAkashicRecord for procedural generation.
+    """
     def __init__(self, gordon_ref, events_ref):
         self.gordon = gordon_ref
         self.events = events_ref
         self.tool_confidence = {}
+        self.akashic = TheAkashicRecord()
 
-    def audit_tool_use(self, physics_packet, inventory_list):
+    def audit_tool_use(self, physics_packet, inventory_list, host_health: Any = None):
         if isinstance(physics_packet, dict):
             voltage = physics_packet.get("voltage", 0.0)
             drag = physics_packet.get("narrative_drag", 0.0)
+            vector = physics_packet.get("vector", {})
         else:
             voltage = physics_packet.voltage
             drag = physics_packet.narrative_drag
-        is_forge = (voltage > 12.0) or (drag < 2.0)
-        is_mud = (voltage < 5.0) and (drag > 6.0)
+            vector = getattr(physics_packet, "vector", {})
+
+        real_drag = 0.0
+        real_efficiency = 1.0
+        if host_health:
+            real_drag = max(0.0, host_health.latency - 2.0)
+            real_efficiency = host_health.efficiency_index
+
+        effective_drag = drag + (real_drag * 2.0)
+
+        is_forge = (voltage > 12.0 and real_efficiency > 0.9) or (effective_drag < 2.0)
+        is_mud = (voltage < 5.0) and (effective_drag > 6.0)
+
         learning_rate = 0.05
         rust_rate = 0.02
+        ascension_threshold = 2.5
+
         items_to_shed = []
+
         for item_name in inventory_list:
             if item_name not in self.tool_confidence:
                 self.tool_confidence[item_name] = 1.0
+
             current = self.tool_confidence[item_name]
+
             if is_forge:
-                self.tool_confidence[item_name] = min(2.0, current + learning_rate)
-                if random.random() < 0.1:
-                    self.events.log(f"{Prisma.CYN}[TINKER]: {item_name} is tempering in the heat (Confidence {self.tool_confidence[item_name]:.2f}).{Prisma.RST}", "SYS")
+                self.tool_confidence[item_name] = min(3.0, current + learning_rate)
+
+                if self.tool_confidence[item_name] >= ascension_threshold:
+                    self._attempt_ascension(item_name, inventory_list, vector)
+
+                elif random.random() < 0.1:
+                    self.events.log(f"{Prisma.CYN}[TINKER]: {item_name} is tempering (Eff: {real_efficiency:.2f}).{Prisma.RST}", "SYS")
+
             elif is_mud:
                 self.tool_confidence[item_name] = max(0.0, current - rust_rate)
                 if random.random() < 0.1:
-                    self.events.log(f"{Prisma.OCHRE}[TINKER]: {item_name} is rusting in the damp.{Prisma.RST}", "SYS")
+                    reason = "Damp Narrative" if drag > 4.0 else "System Lag"
+                    self.events.log(f"{Prisma.OCHRE}[TINKER]: {item_name} is rusting ({reason}).{Prisma.RST}", "SYS")
+
             if self.tool_confidence[item_name] <= 0.1:
                 items_to_shed.append(item_name)
+
         for item in items_to_shed:
             if item in inventory_list:
                 inventory_list.remove(item)
             if item in self.tool_confidence:
                 del self.tool_confidence[item]
-            self.events.log(f"{Prisma.GRY}[TINKER]: {item} has rusted away. Gordon put it in the Shed.{Prisma.RST}", "SYS")
+            self.events.log(f"{Prisma.GRY}[TINKER]: {item} disintegrated. Gordon failed to maintain it.{Prisma.RST}", "SYS")
+
         for item_name in inventory_list:
             if item_name in self.tool_confidence:
                 self._mutate_tool_stats(item_name, self.tool_confidence[item_name])
+
+    def _attempt_ascension(self, old_name, inventory_list, vector):
+        """
+        [NEW]: Transforms a standard tool into a Procedural Artifact.
+        """
+        if "OF_" in old_name and " " in old_name:
+            return
+
+        new_name, new_data = self.akashic.forge_new_item(vector)
+
+        if old_name in inventory_list:
+            inventory_list.remove(old_name)
+            inventory_list.append(new_name)
+
+        self.gordon.ITEM_REGISTRY[new_name] = new_data
+
+        self.tool_confidence[new_name] = 1.0
+        if old_name in self.tool_confidence:
+            del self.tool_confidence[old_name]
+
+        self.events.log(f"{Prisma.MAG}✨ ASCENSION: '{old_name}' has evolved into '{new_name}'!{Prisma.RST}", "AKASHIC")
 
     def _mutate_tool_stats(self, item_name, confidence):
         item_data = self.gordon.ITEM_REGISTRY.get(item_name)
@@ -70,10 +130,11 @@ class TheTinkerer:
                 item_data["base_value"] = item_data["value"]
             new_value = item_data["base_value"] * confidence
             item_data["value"] = round(new_value, 2)
+
         if confidence > 1.5 and "LUCKY" not in item_data.get("passive_traits", []):
             if "passive_traits" not in item_data: item_data["passive_traits"] = []
             item_data["passive_traits"].append("LUCKY")
-            self.events.log(f"{Prisma.CYN}✨ EVOLUTION: {item_name} gained trait [LUCKY].{Prisma.RST}", "TINKER")
+            self.events.log(f"{Prisma.CYN}✨ TRAIT GAINED: {item_name} is now [LUCKY].{Prisma.RST}", "TINKER")
 
     def save_state(self):
         return self.tool_confidence
@@ -121,10 +182,13 @@ class DeathGen:
         if mito_state.atp_pool <= 0: cause = "STARVATION"
         elif physics["counts"]["toxin"] > 3: cause = "TOXICITY"
         elif physics["narrative_drag"] > 8.0: cause = "BOREDOM"
+
         cause_list = DeathGen.CAUSES.get(cause, ["System Error"])
         flavor_text = random.choice(cause_list) if cause_list else "Unknown Error"
+
         prefix_list = DeathGen.PREFIXES
         prefix = random.choice(prefix_list) if prefix_list else "RIP."
+
         verdict = "You vanished."
         if physics["voltage"] > 15.0:
             verdict_list = DeathGen.VERDICTS.get("HEAVY", [])
@@ -132,6 +196,7 @@ class DeathGen:
         elif physics["voltage"] < 2.0:
             verdict_list = DeathGen.VERDICTS.get("LIGHT", [])
             if verdict_list: verdict = random.choice(verdict_list)
+
         return f"{prefix} Cause of Death: {flavor_text}. {verdict}"
 
 class TheCartographer:
@@ -141,28 +206,36 @@ class TheCartographer:
     def _get_tile(x, y, center, physics, vectors):
         dist_from_center = ((x - center)**2 + (y - center)**2) ** 0.5
         entropy_threshold = 3.0 - (vectors.get("ENT", 0.5) * 2.0)
+
         if dist_from_center > entropy_threshold:
             return f"{Prisma.GRY} . {Prisma.RST}"
+
         structure_noise = (x * 3 + y * 7) % 10 / 10.0
         if structure_noise < vectors.get("STR", 0.0):
             return f"{Prisma.OCHRE} ▲ {Prisma.RST}"
+
         if vectors.get("VEL", 0) > 0.6:
             if x == center or y == center:
                 return f"{Prisma.CYN} = {Prisma.RST}"
+
         if vectors.get("BET", 0) > 0.5:
             return f"{Prisma.SLATE} ∷ {Prisma.RST}"
+
         return "   "
 
     @classmethod
     def weave(cls, _text, _graph, _bio_metrics, _limbo, physics=None):
         if not physics:
             return "MAP ERROR: No Physics Data", []
+
         vectors = physics.get("vector", {})
         center = cls.GRID_SIZE // 2
         rows = []
         border = f"{Prisma.GRY}+{'-' * (cls.GRID_SIZE * 3)}+{Prisma.RST}"
+
         rows.append(border)
         anchors = []
+
         for y in range(cls.GRID_SIZE):
             row_str = f"{Prisma.GRY}|{Prisma.RST}"
             for x in range(cls.GRID_SIZE):
@@ -172,10 +245,13 @@ class TheCartographer:
                     row_str += cls._get_tile(x, y, center, physics, vectors)
             row_str += f"{Prisma.GRY}|{Prisma.RST}"
             rows.append(row_str)
+
         rows.append(border)
+
         if vectors.get("STR", 0) > 0.7: anchors.append("MOUNTAIN")
         if vectors.get("ENT", 0) > 0.7: anchors.append("VOID_EDGE")
         if vectors.get("VEL", 0) > 0.7: anchors.append("HIGHWAY")
+
         map_display = "\n".join(rows)
         return map_display, anchors
 
@@ -196,16 +272,32 @@ class TheAlmanac:
         self.strategies = ALMANAC_DATA.get("STRATEGIES", {})
         self.default_seed = ALMANAC_DATA.get("DEFAULT_SEED", "Observe.")
 
-    def diagnose_condition(self, session_data: dict) -> Tuple[str, str]:
+    def diagnose_condition(self, session_data: dict, host_health: Any = None) -> Tuple[str, str]:
         meta = session_data.get("meta", {})
         trauma = session_data.get("trauma_vector", {})
         final_health = meta.get("final_health", 0)
         final_stamina = meta.get("final_stamina", 0)
+
         condition = "BALANCED"
         advice = "System nominal."
+
+        real_latency = 0.0
+        real_entropy = 1.0
+
+        if host_health:
+            real_latency = host_health.latency
+            real_entropy = host_health.entropy
+
         max_trauma = max(trauma, key=trauma.get) if trauma else "NONE"
         trauma_val = trauma.get(max_trauma, 0)
-        if final_health < 30 or trauma_val > 0.6:
+
+        if real_latency > 5.0:
+            condition = "HIGH_DRAG"
+            advice = f"Host Latency High ({real_latency:.1f}s). Simplify syntax to reduce load."
+        elif real_entropy < 0.3:
+            condition = "HIGH_ENTROPY"
+            advice = "Loop detected. The host is stuck in a rut. Inject chaos."
+        elif final_health < 30 or trauma_val > 0.6:
             condition = "HIGH_TRAUMA"
             advice = f"Warning: High levels of {max_trauma} residue detected."
         elif final_stamina < 20:
@@ -220,11 +312,12 @@ class TheAlmanac:
     def get_seed(self, condition):
         return self.strategies.get(condition, self.default_seed)
 
-    def compile_forecast(self, session_data: dict) -> str:
-        condition, advice = self.diagnose_condition(session_data)
+    def compile_forecast(self, session_data: dict, host_health: Any = None) -> str:
+        condition, advice = self.diagnose_condition(session_data, host_health)
         available_forecasts = self.forecasts.get(condition, self.forecasts.get("BALANCED", ["Standard Operation."]))
         forecast_text = random.choice(available_forecasts)
         seed_text = self.get_seed(condition)
+
         border = f"{Prisma.OCHRE}{'='*40}{Prisma.RST}"
         report = [
             "\n",
@@ -250,11 +343,14 @@ class TheAlmanac:
         solvents = counts.get("solvents", 0)
         suburban = counts.get("suburban", 0)
         play = counts.get("play", 0)
+
         friction = (solvents * 1.0) + (suburban * 2.5)
         lift = play * 1.5
+
         net_drag = max(0.0, friction - lift)
         normalized_drag = (net_drag / volume) * 10.0
         final_drag = normalized_drag * config.SIGNAL_DRAG_MULTIPLIER
+
         return round(min(config.MAX_DRAG_LIMIT * 2, final_drag), 2)
 
     @staticmethod
@@ -655,23 +751,33 @@ class TheNavigator:
             return f"{Prisma.OCHRE}TRANSPLANT SHOCK: You are pulling away from the root ({avg_stress:.2f}). Return to the source.{Prisma.RST}"
         return None
 
-    def locate(self, physics_packet: dict) -> Tuple[str, Optional[str]]:
+    def locate(self, physics_packet: dict, host_health: Any = None) -> Tuple[str, Optional[str]]:
         old_loc = self.current_location
         if self.check_anomaly(physics_packet.get("raw_text", "")):
             self.current_location = "THE_GLITCH"
             if old_loc != "THE_GLITCH":
                 return self.current_location, self.manifolds["THE_GLITCH"].entry_msg
             return self.current_location, None
-        drag = min(10.0, max(0.0, physics_packet.get("narrative_drag", 0.0)))
+
+        narrative_drag = physics_packet.get("narrative_drag", 0.0)
+
+        if host_health:
+            real_drag = max(0.0, host_health.latency - 2.0)
+            narrative_drag += (real_drag * 1.5)
+
+        drag = min(10.0, max(0.0, narrative_drag))
         volt = min(20.0, max(0.0, physics_packet.get("voltage", 0.0)))
+
         current_vec = (round(drag / 10.0, 2), round(volt / 20.0, 2))
         best_fit = "THE_MUD"
         min_dist = 999.0
+
         for name, manifold in self.manifolds.items():
             dist = math.dist(current_vec, manifold.center_vector)
             if dist < manifold.radius and dist < min_dist:
                 min_dist = dist
                 best_fit = name
+
         self.current_location = best_fit
         if self.current_location != old_loc:
             return self.current_location, self.manifolds[self.current_location].entry_msg
@@ -749,21 +855,18 @@ class TownHall:
     Almanac = TheAlmanac
     CycleContext = CycleContext
     Journal = LiteraryJournal
-
     Cartographer = TheCartographer
     Navigator = TheNavigator
     Manifold = Manifold
     PublicParksDepartment = PublicParksDepartment
     ZenGarden = ZenGarden
-
     Tinkerer = TheTinkerer
     ParadoxSeed = ParadoxSeed
     DeathGen = DeathGen
     Apeirogon = ApeirogonResonance
     Mirror = MirrorGraph
     Sorites = SoritesIntegrator
-
+    Akashic = TheAkashicRecord
     Projector = TheHoloProjector
     StrunkWhite = StrunkWhiteProtocol
-
     CouncilChamber = CouncilChamber
