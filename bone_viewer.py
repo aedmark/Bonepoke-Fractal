@@ -28,7 +28,7 @@ class GeodesicRenderer:
             f"🧭 Obsession: {obsession} {bar} {trait_str}"
         )
 
-    def render_frame(self, ctx, current_tick: int) -> Dict[str, Any]:
+    def render_frame(self, ctx, current_tick: int, current_events: List[Dict]) -> Dict[str, Any]:
         physics = ctx.physics
         mind = ctx.mind_state
         bio = ctx.bio_result
@@ -52,7 +52,7 @@ class GeodesicRenderer:
             self._punish_style_crime(style_log)
         if physics.get("system_surge_event", False):
             clean_ui = self._inject_rupture_warning(clean_ui)
-        raw_logs = self.compose_logs(ctx.logs, self.eng.events.flush(), current_tick)
+        raw_logs = self.compose_logs(ctx.logs, current_events, current_tick)
         if hasattr(self.eng, 'council'):
             structured_logs = self.eng.council.annotate_logs(raw_logs)
         else:

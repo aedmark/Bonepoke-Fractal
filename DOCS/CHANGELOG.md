@@ -1,5 +1,40 @@
 # CHANGELOG.md
 
+### **Version 10.2.7: "The Kicho Refactor"**
+
+#### **1. The Plumbing (Event Bus & Memory Leaks)**
+
+* **Fixed Critical Bug 2 (Double-Flush):** The `GeodesicRenderer` was greedily consuming events, starving the logs.
+* **Modified `bone_viewer.py`:** `render_frame` now accepts `current_events` as an argument instead of flushing the bus itself.
+* **Modified `bone_main.py`:** `GeodesicOrchestrator._phase_render` now acts as the single source of truth for event retrieval (The "Leverage Point").
+
+#### **2. The Safety Nets (Error Recovery)**
+
+* **Fixed Critical Bug 3 (Panic Room Types):** The panic system was returning inconsistent data types (dicts vs objects), causing secondary crashes during recovery.
+* **Modified `bone_main.py`:** `PanicRoom` now returns a properly structured `PhysicsPacket` and a compliant Bio-dict.
+
+* **Fixed Critical Bug 5 (Session Guardian):** The exit handler was doing too much heavy lifting.
+* **Modified `bone_main.py`:** `SessionGuardian` was stripped down (Ephemeralization). It now delegates to a new `BoneAmanita.emergency_save()` method.
+
+#### **3. The Brain & Observability**
+
+* **Fixed Critical Bug 4 (Metrics):** The Brain (`TheCortex`) was trying to time itself, leading to inaccurate latency metrics.
+* **Modified `bone_brain.py`:** Removed `clock_in`/`clock_out` logic from `TheCortex`.
+* **Modified `bone_main.py`:** Hoisted timing logic up to the main `process_turn` loop. The Observer now watches the Brain from the outside (External Audit).
+
+#### **4. Identity & Configuration**
+
+* **Fixed Critical Bug 6 (Identity Race Condition):** The user was "Schrodinger's Traveler"—existing as `None` and `Justin` simultaneously during boot.
+* **Modified `bone_main.py`:** `BoneAmanita.__init__` now accepts `user_name` at birth. The `main` execution block captures input *before* igniting the engine.
+
+* **Fixed Critical Bug 7 (Config Validation):** Configuration loading was unconstrained (Positive Feedback Loop risk).
+* **Modified `bone_bus.py`:** Added `BoneConfig._validate_ranges()` to clamp values to sane limits.
+
+#### **5. Structural Integrity (The Linter Exorcism)**
+
+* **Fixed The "Ghost" Bug (Implicit Imports):** The system relied on a `bootstrap_systems()` function to populate global variables initialized as `None`. This confused linters and risked runtime `NoneType` errors.
+* **Modified `bone_main.py`:** Deleted `bootstrap_systems()`.
+* **Modified `bone_main.py`:** Replaced 51 `Any = None` placeholders with explicit, top-level imports. The dependency graph is now explicit and static-analysis friendly.
 
 
 ### **SLASH 10.2.5 Patch Notes: "The Tensegrity Update"**

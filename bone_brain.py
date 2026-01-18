@@ -271,7 +271,6 @@ class TheCortex:
         prompt = self.composer.compose(full_state, user_input, self.ballast_state["active"])
         voltage = full_state["physics"].get("voltage", 5.0)
         dynamic_temp = min(1.2, max(0.2, voltage / 15.0))
-        start_think = self.sub.observer.clock_in()
         llm_response = ""
         try:
             llm_response = self.llm.generate(prompt, temperature=dynamic_temp)
@@ -286,9 +285,6 @@ class TheCortex:
                 self.llm = LLMInterface(provider="mock")
                 sim_result["logs"].append(f"{Prisma.VIOLET}CORTEX: Too many failures. Lobotomizing to Mock Mode.{Prisma.RST}")
             llm_response = self.llm.mock_generation(prompt)
-        duration = self.sub.observer.clock_out(start_think, "llm")
-        if duration > 5.0:
-            sim_result["logs"].append(f"{Prisma.GRY}[METRICS]: High Cognitive Latency ({duration:.2f}s).{Prisma.RST}")
         validation = self.validator.validate(llm_response, full_state)
         final_text = llm_response
         if not validation["valid"]:

@@ -3,7 +3,7 @@
 import json, os, time, random
 from collections import deque
 from dataclasses import dataclass, field, fields
-from typing import List, Dict, Any, Optional, Counter, Callable
+from typing import List, Dict, Any, Optional, Counter, Callable, Tuple
 
 
 class Prisma:
@@ -68,8 +68,14 @@ class EventBus:
         }
         self.buffer.append(entry)
 
+    def flush(self) -> List[Dict]:
+        current_logs = list(self.buffer)
+        self.buffer.clear()
+        return current_logs
+
     def get_recent_logs(self, count=10):
         return list(self.buffer)[-count:]
+
 
 class BoneConfig:
     GRAVITY_WELL_THRESHOLD = 15.0
@@ -173,14 +179,47 @@ class BoneConfig:
         try:
             with open(filepath, 'r') as f:
                 data = json.load(f)
-            if "provider" in data: cls.PROVIDER = data["provider"]
-            if "base_url" in data: cls.BASE_URL = data["base_url"]
-            if "api_key" in data: cls.API_KEY = data["api_key"]
-            if "model" in data: cls.MODEL = data["model"]
-            if "ollama_model_id" in data: cls.OLLAMA_MODEL_ID = data["ollama_model_id"]
-            return True, "Configuration loaded successfully."
+            valid_data, log = cls._validate_ranges(data)
+            for key, value in valid_data.items():
+                if hasattr(cls, key):
+                    setattr(cls, key, value)
+            return True, f"Configuration loaded. {log}"
         except Exception as e:
             return False, f"Config load failed: {e}"
+
+    @classmethod
+    def _validate_ranges(cls, data: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
+        sanitized = {}
+        logs = []
+        constraints = {
+            "MAX_HEALTH": (1.0, 1000.0, float),
+            "MAX_STAMINA": (1.0, 1000.0, float),
+            "VOLTAGE_MAX": (10.0, 100.0, float),
+            "GRAVITY_WELL_THRESHOLD": (1.0, 100.0, float),
+            "STAMINA_REGEN": (0.1, 10.0, float),
+            "MAX_MEMORY_CAPACITY": (10, 1000, int),
+            "VERBOSE_LOGGING": (0, 1, bool) # 0/1 treated as bool
+        }
+        for key, value in data.items():
+            if key in constraints:
+                min_val, max_val, expected_type = constraints[key]
+                if expected_type == float and isinstance(value, int):
+                    value = float(value)
+                if not isinstance(value, expected_type):
+                    logs.append(f"Skipped {key}: Invalid type {type(value)}.")
+                    continue
+                if expected_type in [int, float]:
+                    if min_val <= value <= max_val:
+                        sanitized[key] = value
+                    else:
+                        clamped = max(min_val, min(max_val, value))
+                        sanitized[key] = clamped
+                        logs.append(f"Clamped {key} ({value} -> {clamped}).")
+                else:
+                    sanitized[key] = value
+            else:
+                sanitized[key] = value
+        return sanitized, "; ".join(logs) if logs else "Values Nominal."
 
 @dataclass
 class ErrorLog:

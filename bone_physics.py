@@ -728,10 +728,10 @@ class ZoneInertia:
         return self.current_zone
 
     def override_cosmic_drag(self, cosmic_drag_penalty, current_zone):
-        AERIE_FLOW_COEFFICIENT = 0.3
+        aerie_flow_coefficient = 0.3
         if current_zone == "AERIE":
             if cosmic_drag_penalty > 0:
-                return cosmic_drag_penalty * AERIE_FLOW_COEFFICIENT
+                return cosmic_drag_penalty * aerie_flow_coefficient
         return cosmic_drag_penalty
 
 class CosmicDynamics:

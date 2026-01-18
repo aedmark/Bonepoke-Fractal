@@ -284,7 +284,7 @@ class CommandProcessor:
 
     def _cmd_help(self, parts):
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 10.2 MANUAL ---{self.P.RST}",
+            f"\n{self.P.CYN}--- BONEAMANITA 10.2.7 MANUAL ---{self.P.RST}",
             f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"]
         categories = {
             "CORE": ["_cmd_status", "_cmd_save", "_cmd_load", "_cmd_help"],

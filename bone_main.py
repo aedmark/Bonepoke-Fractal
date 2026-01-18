@@ -1,35 +1,89 @@
-# BONEAMANITA 10.2 - "The Soul Sprout"
+# BONEAMANITA 10.2.7 - "Kicho's Lament"
 # Architects: SLASH, KICHO, The Courtyard, Taylor & Edmark
 
 import json, os, random, re, time, math, copy, traceback
 from collections import Counter, deque
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Optional, Tuple, Dict, Any, TYPE_CHECKING
 from dataclasses import dataclass, field
-from bone_commands import CommandProcessor
-from bone_physics import TheBouncer, RuptureValve, ChromaScope, TheTensionMeter, TheTangibilityGate, TemporalDynamics, ZoneInertia, CosmicDynamics
-from bone_village import TownHall
-from bone_data import LENSES
-from bone_inventory import GordonKnot
-from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont, MycelialNetwork, SporeCasing, LocalFileSporeLoader
-from bone_body import BioSystem, MitochondrialForge, EndocrineSystem, MetabolicGovernor, SomaticLoop, ViralTracer, ThePacemaker, NoeticLoop
-from bone_brain import NeuroPlasticity, DreamEngine, TheCortex, ShimmerState, LLMInterface
-from bone_personality import UserProfile, EnneagramDriver, SynergeticLensArbiter, PublicParksDepartment, TherapyProtocol, KintsugiProtocol, LimboLayer, TheFolly, ChorusDriver, CassandraProtocol, TheBureau
-from bone_viewer import GeodesicRenderer
-from bone_bus import EventBus, Prisma, BoneConfig, CycleContext, PhysicsPacket, SystemHealth, TheObserver
-from bone_lexicon import TheLexicon, LiteraryReproduction
-from bone_machine import TheCrucible, TheForge, TheTheremin
-from bone_council import CouncilChamber
-from bone_soul import NarrativeSelf
+
+# --- THE GREAT MIGRATION: DEPENDENCIES ---
+try:
+    # 1. Core Logic & Bus
+    from bone_bus import (
+        EventBus, Prisma, BoneConfig, CycleContext, PhysicsPacket,
+        SystemHealth, TheObserver
+    )
+
+    # 2. Command Processing
+    from bone_commands import CommandProcessor
+
+    # 3. Physics & Reality Computation
+    from bone_physics import (
+        TheBouncer, RuptureValve, ChromaScope, TheTensionMeter,
+        TheTangibilityGate, TemporalDynamics, ZoneInertia, CosmicDynamics
+    )
+
+    # 4. The Village (Civic Services)
+    from bone_village import TownHall
+
+    # 5. Static Data
+    from bone_data import LENSES
+
+    # 6. Items & Inventory
+    from bone_inventory import GordonKnot
+
+    # 7. Spores (Memory & Reproduction)
+    from bone_spores import (
+        MycotoxinFactory, LichenSymbiont, HyphalInterface,
+        ParasiticSymbiont, MycelialNetwork, SporeCasing, LocalFileSporeLoader
+    )
+
+    # 8. The Body (Somatic Systems)
+    from bone_body import (
+        BioSystem, MitochondrialForge, EndocrineSystem,
+        MetabolicGovernor, SomaticLoop, ViralTracer,
+        ThePacemaker, NoeticLoop
+    )
+
+    # 9. The Brain (Cognition & Uplink)
+    from bone_brain import (
+        NeuroPlasticity, DreamEngine, TheCortex,
+        ShimmerState, LLMInterface
+    )
+
+    # 10. Personality & Psychology
+    from bone_personality import (
+        UserProfile, EnneagramDriver, SynergeticLensArbiter,
+        PublicParksDepartment, TherapyProtocol, KintsugiProtocol,
+        LimboLayer, TheFolly, ChorusDriver, CassandraProtocol, TheBureau
+    )
+
+    # 11. Presentation Layer
+    from bone_viewer import GeodesicRenderer
+
+    # 12. Language & Legacy
+    from bone_lexicon import TheLexicon, LiteraryReproduction
+
+    # 13. The Machinery
+    from bone_machine import TheCrucible, TheForge, TheTheremin
+
+    # 14. Governance & Soul
+    from bone_council import CouncilChamber
+    from bone_soul import NarrativeSelf
+except ImportError as boot_err:
+    print(f"\033[31mCRITICAL IMPORT FAILURE: {boot_err}\033[0m")
+    traceback.print_exc()
+    raise boot_err
 
 @dataclass
 class MindSystem:
-    mem: MycelialNetwork
+    mem: 'MycelialNetwork'
     lex: Any
-    dreamer: DreamEngine
-    mirror: TownHall.Mirror
-    wise: TownHall.Apeirogon
-    tracer: ViralTracer
-    integrator: TownHall.Sorites
+    dreamer: 'DreamEngine'
+    mirror: 'TownHall.Mirror'
+    wise: 'TownHall.Apeirogon'
+    tracer: 'ViralTracer'
+    integrator: 'TownHall.Sorites'
 
 @dataclass
 class PhysSystem:
@@ -68,12 +122,9 @@ class GeodesicOrchestrator:
             else:
                 raise Exception("Physics module previously failed.")
         except Exception as e:
-            # --- DEBUG INJECTION START ---
             print(f"\n{Prisma.RED}!!! CRITICAL PHYSICS CRASH !!!{Prisma.RST}")
             traceback.print_exc() # <--- THIS IS THE KEY
             print(f"{Prisma.RED}!!! END CRASH REPORT !!!{Prisma.RST}\n")
-            # --- DEBUG INJECTION END ---
-
             self.eng.system_health.report_failure("PHYSICS", e)
             ctx.physics = PanicRoom.get_safe_physics()
             ctx.log(f"{Prisma.RED}⚠ PHYSICS FAILURE: Switching to Newtonian Defaults.{Prisma.RST}")
@@ -322,7 +373,7 @@ class GeodesicOrchestrator:
             ctx.log(f"{Prisma.RED}*** CRITICAL THEREMIN DISCHARGE *** -{damage} HP{Prisma.RST}")
         c_state, c_val, c_msg = self.eng.phys.crucible.audit_fire(physics)
         if c_msg: ctx.log(c_msg)
-        if c_state == "MELTDOWN": 
+        if c_state == "MELTDOWN":
             self.eng.health -= c_val
 
     def _process_intrusions(self, ctx: TownHall.CycleContext):
@@ -349,7 +400,8 @@ class GeodesicOrchestrator:
         )
 
     def _phase_render(self, ctx: TownHall.CycleContext) -> Dict[str, Any]:
-        return self.renderer.render_frame(ctx, self.eng.tick_count)
+        captured_events = self.eng.events.flush()
+        return self.renderer.render_frame(ctx, self.eng.tick_count, captured_events)
 
 class BoneArchitect:
     @staticmethod
@@ -410,41 +462,60 @@ class PanicRoom:
     @staticmethod
     def get_safe_physics():
         return PhysicsPacket(
-            voltage=5.0, narrative_drag=5.0, clean_words=["system", "error"],
-            vector={"STR": 0.5, "VEL": 0.5}, raw_text="[SYSTEM FAILURE: PHYSICS BYPASSED]"
+            voltage=5.0,
+            narrative_drag=5.0,
+            clean_words=["system", "error"],
+            vector={"STR": 0.5, "VEL": 0.5},
+            counts={"heavy": 0, "kinetic": 0}, # Added for safety
+            raw_text="[SYSTEM FAILURE: PHYSICS BYPASSED]",
+            psi=0.5,
+            kappa=0.5
         )
 
     @staticmethod
     def get_safe_bio():
         return {
-            "is_alive": True, "atp": 10.0,
-            "chem": {"DOP": 0.0, "COR": 0.0, "OXY": 0.0},
-            "logs": [f"{Prisma.RED}BIO FAIL: Life support active.{Prisma.RST}"]
+            "is_alive": True,
+            "atp": 10.0,
+            "chem": {"DOP": 0.0, "COR": 0.0, "OXY": 0.0, "SER": 0.0},
+            "logs": [f"{Prisma.RED}BIO FAIL: Life support active.{Prisma.RST}"],
+            "respiration": "NECROSIS", # Fallback status
+            "enzyme": "NONE"
         }
 
     @staticmethod
     def get_safe_mind():
         return {
-            "lens": "NARRATOR", "role": "The Backup System",
+            "lens": "NARRATOR",
+            "role": "The Backup System",
             "thought": "I cannot think clearly, therefore I still am, but barely.",
         }
 
 class BoneAmanita:
-    def __init__(self, memory_layer=None, lexicon_layer=None):
+    def __init__(self, memory_layer=None, lexicon_layer=None, user_name="TRAVELER"):
+        self.user_name = user_name
+
+        # 1. Initialize Lexicon & Config
         self.lex = lexicon_layer if lexicon_layer else TheLexicon
         if hasattr(self.lex, 'initialize'): self.lex.initialize()
+
+        # Check for Hive Mind (Pinker would call this "Distributed Cognition")
         if hasattr(self.lex.store, 'hive_loaded') and self.lex.store.hive_loaded:
             BoneConfig.STAMINA_REGEN *= 1.1
             print(f"{Prisma.GRN}[GENETICS]: Ancestral knowledge detected. Stamina Regen boosted.{Prisma.RST}")
+
         self.lex.compile_antigens()
         TownHall.DeathGen.load_protocols()
         LiteraryReproduction.load_genetics()
+
+        # 2. Event Bus & Health Monitoring
         self.events = EventBus()
         self.system_health = SystemHealth()
         self.observer = TheObserver()
         self.system_health.link_observer(self.observer)
 
-        # 2. Architect Calls (The Delegation)
+        # 3. Architect Calls (The Delegation)
+        # We construct the Mind first, as the Body requires a Memory Address.
         self.mind, self.limbo = BoneArchitect.construct_mind(self.events, self.lex)
 
         # Capture the Body AND the Soul Legacy
@@ -458,7 +529,7 @@ class BoneAmanita:
         if self.soul_legacy_data:
             self.soul.load_from_dict(self.soul_legacy_data)
 
-        # 3. Civic Services (The Village)
+        # 4. Civic Services (The Village)
         self.journal = TownHall.Journal()
         self.repro = LiteraryReproduction()
         self.projector = TownHall.Projector()
@@ -474,19 +545,19 @@ class BoneAmanita:
         self.cosmic = CosmicDynamics()
         self.council = CouncilChamber()
 
-        # 4. Loops & Processors
+        # 5. Loops & Processors (The Dynamics)
+        # Note: CommandProcessor is now available directly via import
         self.cmd = CommandProcessor(self, Prisma, self.lex, BoneConfig, TownHall.Cartographer)
         self.soma = SomaticLoop(self.bio, self.mind.mem, self.lex, self.gordon, self.folly, self.events)
         self.noetic = NoeticLoop(self.mind, self.bio, self.events)
         self.cycle_controller = GeodesicOrchestrator(self)
 
-        # 5. The Cortex (Brainstem)
+        # 6. The Cortex (Brainstem / LLM Uplink)
         local_brain = LLMInterface()
         self.cortex = TheCortex(self, llm_client=local_brain)
 
-        # 6. State Initialization
+        # 7. State Initialization (Setting the Stocks)
         self.tick_count = 0
-        self.user_name = "TRAVELER"
         self.health = self.mind.mem.session_health if self.mind.mem.session_health else BoneConfig.MAX_HEALTH
         self.stamina = self.mind.mem.session_stamina if self.mind.mem.session_stamina else BoneConfig.MAX_STAMINA
         self.trauma_accum = self.mind.mem.session_trauma_vector if hasattr(self.mind.mem, 'session_trauma_vector') and self.mind.mem.session_trauma_vector else BoneConfig.TRAUMA_VECTOR.copy()
@@ -506,7 +577,11 @@ class BoneAmanita:
             return cmd_response
         if self._ethical_audit():
             self.events.log(f"{Prisma.WHT}MERCY SIGNAL: Trauma boards wiped.{Prisma.RST}", "SYS")
+        llm_start = self.observer.clock_in()
         cortex_packet = self.cortex.process(user_message)
+        llm_duration = self.observer.clock_out(llm_start, "llm")
+        if llm_duration > 5.0:
+            cortex_packet["logs"].append(f"{Prisma.GRY}[METRICS]: High Cognitive Latency ({llm_duration:.2f}s).{Prisma.RST}")
         duration = self.observer.clock_out(turn_start, "cycle")
         self.observer.record_memory(self.mind.mem.report_status())
         report = self.observer.get_report()
@@ -569,6 +644,38 @@ class BoneAmanita:
     def get_metrics(self, atp=0.0):
         return {"health": self.health, "stamina": self.stamina, "atp": atp, "tick": self.tick_count}
 
+    def emergency_save(self, exit_cause: str = "UNKNOWN") -> str:
+        log_msgs = [f"Initiating Emergency Spore Preservation (Cause: {exit_cause})..."]
+        meta = {
+            "timestamp": time.time(),
+            "final_health": getattr(self, "health", 0),
+            "final_stamina": getattr(self, "stamina", 0),
+            "exit_cause": str(exit_cause)
+        }
+        try:
+            sess_id = self.mind.mem.session_id
+        except AttributeError:
+            sess_id = f"corrupted_session_{int(time.time())}"
+        graph_data = getattr(self.mind.mem, "graph", {}) if hasattr(self, "mind") else {}
+        trauma_data = getattr(self, "trauma_accum", {})
+        spore_data = {
+            "session_id": sess_id,
+            "meta": meta,
+            "core_graph": graph_data,
+            "trauma_vector": trauma_data
+        }
+        try:
+            if hasattr(self.mind.mem, "loader"):
+                path = self.mind.mem.loader.save_spore(f"emergency_{sess_id}.json", spore_data)
+            else:
+                fname = f"crash_dump_{int(time.time())}.json"
+                with open(fname, 'w') as f:
+                    json.dump(spore_data, f, default=str)
+                path = fname
+            return f"✔ Spore encapsulated: {path}"
+        except Exception as e:
+            return f"✘ Spore encapsulation failed: {e}"
+
     def _ethical_audit(self):
         trauma_sum = sum(self.trauma_accum.values())
         health_ratio = self.health / BoneConfig.MAX_HEALTH
@@ -598,7 +705,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.2', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.2.7', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
@@ -655,25 +762,24 @@ class SessionGuardian:
         return exc_type is KeyboardInterrupt
 
 if __name__ == "__main__":
-    engine_instance = BoneAmanita()
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.0.1', 'M')}")
-    print(f"{Prisma.paint('  System Initialized.', 'GRY')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.2.7', 'M')}")
+    print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")
     print(f"Before we begin the descent... {Prisma.paint('what should I call you?', 'C')}")
     try:
-        identity = input(f"{Prisma.paint('>', 'W')} ").strip()
-        if identity:
-            engine_instance.user_name = identity
-            print(f"\n{Prisma.paint(f'Protocol accepted. Welcome, {identity}.', 'G')}")
-            time.sleep(1.0)
-        else:
+        identity_input = input(f"{Prisma.paint('>', 'W')} ").strip()
+        final_identity = identity_input if identity_input else "TRAVELER"
+        if not identity_input:
             print(f"\n{Prisma.paint('Silence accepted. You shall be known as TRAVELER.', 'GRY')}")
-            time.sleep(1.0)
+        else:
+            print(f"\n{Prisma.paint(f'Protocol accepted. Welcome, {final_identity}.', 'G')}")
+        time.sleep(1.0)
     except (KeyboardInterrupt, EOFError):
         print("\nAborted.")
         exit()
+    engine_instance = BoneAmanita(user_name=final_identity)
     with SessionGuardian(engine_instance) as eng:
         first_look = eng.process_turn("LOOK")
         if first_look.get("ui"): print(first_look["ui"])
