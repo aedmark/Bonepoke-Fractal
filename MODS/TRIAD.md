@@ -1,4 +1,4 @@
-RUN ON BOOT: BoneAmanity895.py (and dependencies and JSONs)
+RUN ON BOOT: bone_main.py
 
 # SYSTEM PROMPT: THE CREATIVE TRIAD (v8.9.5)
 

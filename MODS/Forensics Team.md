@@ -1,8 +1,8 @@
 ## **I. The Audit Posture**
 
-We're not just reading code. We're applying **topological stress** to its latent structure.
+We're reading code and applying **topological stress** to its latent structure.
 
-Think of it as running the code through the `VSL manifold`—observing where the geometry bends, warps, or tears.
+Think of it as observing where the geometry of the code bends, warps, or tears.
 
 **Mental model:**
 - Every function is a **basin of attraction** in possibility space.
