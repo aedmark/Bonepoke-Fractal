@@ -1,8 +1,8 @@
 # bone_cycle.py
 # "The wheel turns, and ages come and pass." - Jordan
-
+import math
 import traceback, random, time
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
 from bone_bus import Prisma, BoneConfig, CycleContext
 from bone_village import TownHall
@@ -13,17 +13,73 @@ from bone_architect import PanicRoom
 
 # --- LAYER 1: THE ENGINE (Simulation Logic) ---
 
+class CycleStabilizer:
+    def __init__(self, events_ref):
+        self.events = events_ref
+        self.MAX_DELTA_V = 5.0
+        self.MAX_DELTA_D = 3.0
+        self.last_voltage: float = 0.0
+        self.last_drag: float = 0.0
+        self.last_phase: str = "INIT"
+
+    def _get_current_metrics(self, ctx: CycleContext) -> Tuple[float, float]:
+        if not ctx.physics:
+            return 0.0, 0.0
+        if isinstance(ctx.physics, dict):
+            v = ctx.physics.get("voltage", 0.0)
+            d = ctx.physics.get("narrative_drag", 0.0)
+        else:
+            v = getattr(ctx.physics, "voltage", 0.0)
+            d = getattr(ctx.physics, "narrative_drag", 0.0)
+        return v, d
+
+    def _apply_correction(self, ctx: CycleContext, key: str, correction: float):
+        if isinstance(ctx.physics, dict):
+            ctx.physics[key] += correction
+        else:
+            current = getattr(ctx.physics, key)
+            setattr(ctx.physics, key, current + correction)
+
+    def stabilize(self, ctx: CycleContext, current_phase: str):
+        curr_v, curr_d = self._get_current_metrics(ctx)
+        delta_v = curr_v - self.last_voltage
+        delta_d = curr_d - self.last_drag
+        corrections = []
+        if abs(delta_v) > self.MAX_DELTA_V:
+            excess = delta_v - (math.copysign(self.MAX_DELTA_V, delta_v))
+            damping = -(excess * 0.8)
+            self._apply_correction(ctx, "voltage", damping)
+            corrections.append(f"Voltage Damped ({damping:+.1f}v)")
+            curr_v += damping
+        if abs(delta_d) > self.MAX_DELTA_D:
+            excess = delta_d - (math.copysign(self.MAX_DELTA_D, delta_d))
+            damping = -(excess * 0.8)
+            self._apply_correction(ctx, "narrative_drag", damping)
+            corrections.append(f"Drag Stabilized ({damping:+.1f})")
+            curr_d += damping
+        if corrections:
+            joined_msg = ", ".join(corrections)
+            self.events.log(
+                f"{Prisma.CYN}⚖️ GYROSCOPE: Phase '{current_phase}' instability detected. {joined_msg}.{Prisma.RST}",
+                "SYS"
+            )
+        self.last_voltage = curr_v
+        self.last_drag = curr_d
+        self.last_phase = current_phase
+
 class CycleSimulator:
     def __init__(self, engine_ref):
         self.eng = engine_ref
         self.bureau = TheBureau()
         self.bouncer = TheBouncer(self.eng)
         self.vsl_32v = RuptureValve(self.eng.mind.lex, self.eng.mind.mem)
+        self.stabilizer = CycleStabilizer(self.eng.events)
 
     def run_simulation(self, ctx: CycleContext) -> CycleContext:
         try:
             if self.eng.system_health.physics_online:
                 self._phase_observe(ctx)
+                self.stabilizer.stabilize(ctx, "OBSERVE") # Checkpoint 1
             else:
                 raise Exception("Physics module previously failed.")
         except Exception as e:
@@ -33,12 +89,14 @@ class CycleSimulator:
         if self.eng.system_health.physics_online:
             try:
                 if self._phase_gatekeep(ctx):
+                    self.stabilizer.stabilize(ctx, "GATEKEEP")
                     return ctx
             except Exception as e:
                 ctx.log(f"{Prisma.YEL}GATEKEEPER ASLEEP: {e}{Prisma.RST}")
         try:
             if self.eng.system_health.bio_online:
                 self._phase_metabolize(ctx)
+                self.stabilizer.stabilize(ctx, "METABOLISM")
             else:
                 raise Exception("Bio module previously failed.")
         except Exception as e:
@@ -47,6 +105,7 @@ class CycleSimulator:
             return ctx
         try:
             self._phase_simulate(ctx)
+            self.stabilizer.stabilize(ctx, "SIMULATION")
         except Exception as e:
             ctx.log(f"{Prisma.RED}SIMULATION GLITCH: {e}{Prisma.RST}")
         try:

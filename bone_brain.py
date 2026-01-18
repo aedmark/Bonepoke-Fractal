@@ -7,6 +7,7 @@ from collections import deque
 from bone_data import LENSES, DREAMS
 from bone_bus import Prisma, BoneConfig
 from bone_village import TownHall
+from bone_symbiosis import SymbiosisManager
 
 try:
     from bone_lexicon import TheLexicon
@@ -302,6 +303,7 @@ class TheCortex:
         self.validator = ResponseValidator()
         self.editor = TownHall.StrunkWhite()
         self.spotlight = NarrativeSpotlight()
+        self.symbiosis = SymbiosisManager(self.sub.events)
         self.ballast_state = {"active": False, "turns_remaining": 0}
         self.plain_mode_active = False
         self.solipsism_pressure = 0.0
@@ -322,18 +324,25 @@ class TheCortex:
             self.ballast_state["turns_remaining"] -= 1
             if self.ballast_state["turns_remaining"] <= 0:
                 self.ballast_state["active"] = False
+        full_state = self._gather_state(sim_result)
+        voltage = full_state["physics"].get("voltage", 5.0)
+        modifiers = self.symbiosis.get_prompt_modifiers()
+        anchor_text = self.symbiosis.generate_anchor(full_state)
+        base_prompt = self.composer.compose(full_state, user_input, self.ballast_state["active"])
+        final_prompt = f"{anchor_text}\n\n{base_prompt}"
+        if modifiers["simplify_instruction"]:
+            final_prompt += "\n[SYSTEM NOTE: Resources low. Be brief.]"
         max_style_retries = 2
         attempt = 0
         final_text = ""
         valid_response = False
-        full_state = self._gather_state(sim_result)
-        prompt = self.composer.compose(full_state, user_input, self.ballast_state["active"])
-        voltage = full_state["physics"].get("voltage", 5.0)
-
         while attempt <= max_style_retries and not valid_response:
             current_temp = min(1.4, max(0.4, (voltage / 15.0) + (attempt * 0.3)))
+            start_time = time.time()
             try:
-                raw_response = self.llm.generate(prompt, temperature=current_temp)
+                raw_response = self.llm.generate(final_prompt, temperature=current_temp)
+                latency = time.time() - start_time
+                self.symbiosis.monitor_host(latency, raw_response)
                 validation = self.validator.validate(raw_response, full_state)
                 style_pass, style_error = self.editor.audit(raw_response)
                 if not validation["valid"]:
@@ -343,19 +352,18 @@ class TheCortex:
                     tax = 10.0
                     self.sub.bio.mito.state.atp_pool -= tax
                     sim_result["logs"].append(f"{Prisma.RED}EDITOR REJECTION: {style_error}{Prisma.RST}")
-                    sim_result["logs"].append(f"{Prisma.YEL}   (PENALTY: -{tax} ATP. Retrying with Temp {current_temp:.2f}...){Prisma.RST}")
-                    prompt += f"\n[SYSTEM FEEDBACK]: Your previous draft was rejected. {style_error}. Do not do this again."
+                    sim_result["logs"].append(f"{Prisma.YEL}   (PENALTY: -{tax} ATP. Retrying...){Prisma.RST}")
+                    final_prompt += f"\n[SYSTEM FEEDBACK]: Your previous draft was rejected. {style_error}. Do not do this again."
                     attempt += 1
                 else:
                     final_text = raw_response
                     valid_response = True
             except Exception as e:
-                final_text = self.llm.mock_generation(prompt)
+                sim_result["logs"].append(f"{Prisma.RED}CORTEX ERROR: {e}{Prisma.RST}")
+                final_text = self.llm.mock_generation(final_prompt)
                 valid_response = True
-
         if not valid_response:
             final_text = f"[SYSTEM EXHAUSTION]: The editor burned the manuscript. I cannot speak right now."
-
         combined_ui = f"{sim_result['ui']}\n\n{Prisma.WHT}{final_text}{Prisma.RST}"
         sim_result["ui"] = combined_ui
         self._audit_output(final_text)
@@ -411,17 +419,17 @@ class TheCortex:
         except Exception as e:
             loc = "Navigation Error"
             loc_desc = f"Sensor Data Corrupted ({str(e)})"
-
         physics_packet = self.sub.phys.tension.last_physics_packet
         memory_graph = getattr(self.sub.mind.mem, "graph", {})
         physics_vector = getattr(physics_packet, "vector", {})
         spotlit_memories = self.spotlight.illuminate(memory_graph, physics_vector)
-
+        soul_dict = self.sub.soul.to_dict()
         return {
             "bio": {"chem": bio_chem, "atp": bio_atp},
             "physics": physics_packet,
             "spotlight": spotlit_memories,  # <--- NEW DATA
             "soul_state": self.sub.soul.get_soul_state(),
+            "soul_state_dict": soul_dict,
             "mind": {
                 "lens": self.sub.noetic.arbiter.current_focus,
                 "role": LENSES.get(self.sub.noetic.arbiter.current_focus, {}).get("role", "Observer"),

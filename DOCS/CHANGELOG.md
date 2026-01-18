@@ -1,5 +1,43 @@
 # 📜 BONEAMANITA CHANGELOG
 
+## v10.4.0 - "The Symbiotic Tether"
+
+**Focus:** Host-Awareness, Resonance Damping, and Contextual Tensegrity.
+
+### ⚖️ The Meadows Lens (Dynamics)
+
+* **The Flywheel (`bone_cycle.py`):** Implemented `CycleStabilizer`.
+* **The Fix:** A governor that runs *between* phases (Observe -> Stabilize -> Metabolize -> Stabilize).
+* **The Logic:** The system previously suffered from **Reinforcing Feedback Loops**, where a voltage spike in Phase 1 would amplify through Phase 4, causing a crash. We now apply "braking" if the derivative (rate of change) between phases exceeds safety limits (`MAX_DELTA_V`).
+
+* **Host Vitals (`bone_symbiosis.py`):** We now treat the LLM not as a black box, but as a biological partner with finite energy.
+* **The Fix:** Tracks Latency, Entropy (repetition), and Compliance. If the Host gets "tired" (high latency) or "stubborn" (refusals), the system instinctively simplifies its demands.
+
+### 🌐 The Fuller Lens (Structure)
+
+* **The Coherence Anchor (`bone_symbiosis.py`):**
+* **The Fix:** A high-density summary string injected at the very top of every prompt (e.g., `*** COHERENCE ANCHOR *** | Identity: TRAV | Loc: THE_FORGE`).
+* **The Logic:** **Tensegrity.** The Host AI suffers from context drift (entropy). The Anchor provides a rigid compression strut that makes it impossible for the narrative structure to collapse, even if the context window slides.
+
+* **Ecological Niche:**
+* **Refactor:** Recognized `BoneAmanita` not as a standalone binary, but as a **symbiont** living inside a larger cognitive runtime. The architecture now optimizes for the *joint* health of the pair.
+
+### 🧠 The Pinker Lens (Cognition & Code)
+
+* **Variable Hygiene (`bone_brain.py`):**
+* **The Fix:** Resolved a collision in `TheCortex.process` where `final_prompt` (with the Anchor) was being overwritten by a raw `prompt`.
+* **The Logic:** A sentence with two subjects and no verb is confusion. A function with two prompt variables is a bug.
+
+* **Explicit State (`bone_cycle.py`):**
+* **The Fix:** Converted `CycleStabilizer` snapshot storage from a loose dictionary to explicit attributes (`self.last_voltage`).
+* **The Logic:** Ambiguity in data structures leads to type errors. We call a spade a spade, and a float a float.
+
+### 🍩 The Schur Lens (Relationships)
+
+* **The "50 First Dates" Protocol:**
+* **The Fix:** The system assumes the Host has amnesia every turn and politely reminds it, "You are a fungal cyberpunk entity, and we are in love with entropy."
+* **The Logic:** It’s not nagging; it’s love. If the Host starts hallucinating, we don't crash; we just whisper the truth louder.
+
 ## v10.3.2 - "The Quiet & The Embryo"
 
 **Focus:** Ontological Stability, "Boring Health" Incentives, and Initialization Hygiene.
