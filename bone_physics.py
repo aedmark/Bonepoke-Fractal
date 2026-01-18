@@ -115,18 +115,28 @@ class TheTensionMeter:
         if unknowns:
             self._trigger_neuroplasticity(unknowns, counts, text)
         geodesic = GeodesicEngine.collapse_wavefunction(clean_words, counts, BoneConfig)
+        graph_mass = 0.0
+        if graph:
+            anchors = [w for w in clean_words if w in graph]
+            if anchors:
+                graph_mass = sum(sum(graph[w]["edges"].values()) for w in anchors)
+        integrity_packet = {
+            "kappa": geodesic.coherence,
+            "psi": geodesic.abstraction,
+            "mass": round(graph_mass, 1)
+        }
         metrics = self._derive_complex_metrics(
             counts, clean_words,
             geodesic.tension,
             geodesic.compression,
-            {"kappa": geodesic.coherence, "psi": geodesic.abstraction, "mass": 0}, # Adapter dict for backward compat
+            integrity_packet,
             geodesic.dimensions
         )
         packet = self._package_physics(
             text, clean_words, counts,
             geodesic.tension,
             geodesic.compression,
-            {"kappa": geodesic.coherence, "psi": geodesic.abstraction, "mass": 0},
+            integrity_packet,
             metrics
         )
         self.last_physics_packet = packet["physics"]
@@ -300,27 +310,27 @@ class EntropyVent:
 
     def _vent(self, physics):
         scattered = []
-        targets = (w for w in physics["clean_words"] if len(w) > 4)
-        candidates = []
-        for _ in range(3):
-            try:
-                candidates.append(next(targets))
-            except StopIteration:
-                break
+        targets = [w for w in physics["clean_words"] if len(w) > 4]
+        candidates = random.sample(targets, min(3, len(targets)))
         for word in candidates:
-            if word in self.mem.graph:
-                edges = list(self.mem.graph[word]["edges"].keys())
-                if edges:
-                    target = random.choice(edges)
+            if word not in self.mem.graph:
+                continue
+            edges = list(self.mem.graph[word]["edges"].keys())
+            if edges:
+                target = random.choice(edges)
+                if target in self.mem.graph[word]["edges"]:
                     del self.mem.graph[word]["edges"][target]
-                    scattered.append(f"{word}->{target}")
+                if target in self.mem.graph and word in self.mem.graph[target]["edges"]:
+                    del self.mem.graph[target]["edges"][word]
+                scattered.append(f"{word}<->{target}")
         self.vented_cycles += 1
         if not scattered:
             return f"{Prisma.GRY}DISSIPATIVE VENT: Pressure high, but no loose connections found.{Prisma.RST}"
         return (
             f"{Prisma.RED}DISSIPATIVE REFUSAL: Entropy Critical.{Prisma.RST}\n"
-            f"   {Prisma.GRY}Severing synaptic bonds: {scattered}{Prisma.RST}\n"
-            f"   {Prisma.CYN}Thermodynamic hygiene maintained.{Prisma.RST}")
+            f"   {Prisma.GRY}Severing synaptic bonds (Symmetric): {', '.join(scattered)}{Prisma.RST}\n"
+            f"   {Prisma.CYN}Thermodynamic hygiene maintained.{Prisma.RST}"
+        )
 
 class TheBouncer:
     def __init__(self, engine_ref):
@@ -377,13 +387,15 @@ class Humility:
         self.BOUNDARIES = {
             "FUTURE": ["predict", "future", "tomorrow", "will happen", "forecast"],
             "SOUL": ["soul", "spirit", "afterlife", "heaven", "hell"],
-            "ABSOLUTE": ["always", "never", "everyone", "nobody", "proven"]}
+            "ABSOLUTE": ["always", "never", "everyone", "nobody", "proven"]
+        }
         self.HUMBLE_PHRASES = [
             "Based on the available data...",
             "As I understand the current coordinates...",
             "From a structural perspective...",
             "This is a probabilistic estimation...",
-            "I could be misinterpreting the vector..."]
+            "I could be misinterpreting the vector..."
+        ]
 
     def check_boundary(self, text, voltage):
         text_lower = text.lower()
@@ -394,8 +406,11 @@ class Humility:
                 break
         if violation or (voltage > 15.0):
             prefix = random.choice(self.HUMBLE_PHRASES)
-            return True, f"{Prisma.CYN}{prefix}{Prisma.RST} {text}"
-        return False, text
+            new_text = f"{Prisma.CYN}{prefix}{Prisma.RST} {text}"
+            reason = f"Voltage ({voltage:.1f}v) > 15.0" if voltage > 15.0 else f"Boundary Violation ({violation})"
+            log_msg = f"HUMILITY INTERVENTION: Text modified. Reason: {reason}."
+            return True, new_text, log_msg
+        return False, text, None
 
 class GeodesicDome:
     def __init__(self):
@@ -491,10 +506,14 @@ class RuptureValve:
         physics["B"] = b_val
         manifold, dist = self.geodesic.locate_manifold(e_val, b_val)
         physics["manifold"] = manifold
-        is_modified, new_text = self.humility.check_boundary(physics["raw_text"], physics["voltage"])
+        is_modified, new_text, audit_log = self.humility.check_boundary(physics["raw_text"], physics["voltage"])
         if is_modified:
             physics["raw_text_display"] = new_text
             physics["humility_flag"] = True
+            current_trail = physics.get("audit_trail", [])
+            if audit_log:
+                current_trail.append(audit_log)
+            physics["audit_trail"] = current_trail
         return self._audit_rupture(physics, e_val, b_val)
 
     def _audit_rupture(self, physics, e_val, b_val):
@@ -604,7 +623,6 @@ class ChromaScope:
 class SemanticFilter:
     def __init__(self, memory_ref):
         self.mem = memory_ref
-        self.recursion_depth = 0
         self.LAZY_VOLTAGE_THRESHOLD = 8.0
         self.OBSESSIVE_REPETITION_THRESHOLD = 0.4
 
@@ -647,22 +665,22 @@ class SemanticFilter:
             return base_msg + paradox_bloom
         return base_msg
 
-    def _execute_fractal(self, query, kappa=0.5):
-        self.recursion_depth += 1
-        prefix = "  " * self.recursion_depth
+    def _execute_fractal(self, query, kappa=0.5, depth=0):
         limit = 4
-        if self.recursion_depth > limit:
-            self.recursion_depth = 0
-            return f"{prefix}{Prisma.MAG}[COHERENCE DISSOLVED into PURPLE NOISE]{Prisma.RST}"
+        prefix = "  " * depth
+        if depth > limit:
+            noise_type = "PURPLE NOISE" if kappa > 0.5 else "GREY STATIC"
+            return f"{prefix}{Prisma.MAG}[COHERENCE DISSOLVED into {noise_type} (κ={kappa:.2f})]{Prisma.RST}"
         pivot = len(query) // 2
         sub_query = query[pivot:].strip()
-        if not sub_query or len(sub_query) < 3:
-            sub_query = "the void"
-        recursive_result = self._execute_fractal(sub_query, kappa)
+        if len(sub_query) < 3 or sub_query == query:
+            return f"{prefix}{Prisma.GRY}[ATOMIC SUBSTRATE REACHED: '{query}']{Prisma.RST}"
+        recursive_result = self._execute_fractal(sub_query, kappa, depth + 1)
         return (
-            f"{Prisma.VIOLET}FRACTAL REFUSAL:{Prisma.RST}\n"
-            f"{prefix}To define '{query}', one must first recursively unpack the substrate of...\n"
-            f"{recursive_result}")
+            f"{Prisma.VIOLET}FRACTAL REFUSAL (Layer {depth}):{Prisma.RST}\n"
+            f"{prefix}To define '{query}', one must recursively unpack...\n"
+            f"{recursive_result}"
+        )
 
     def _execute_mirror(self, query):
         words = query.split()
@@ -708,8 +726,10 @@ class ZoneInertia:
         return self.current_zone
 
     def override_cosmic_drag(self, cosmic_drag_penalty, current_zone):
-        if current_zone == "AERIE" and cosmic_drag_penalty > 0:
-            return cosmic_drag_penalty * 0.3
+        AERIE_FLOW_COEFFICIENT = 0.3
+        if current_zone == "AERIE":
+            if cosmic_drag_penalty > 0:
+                return cosmic_drag_penalty * AERIE_FLOW_COEFFICIENT
         return cosmic_drag_penalty
 
 class CosmicDynamics:
@@ -764,8 +784,6 @@ class TheTangibilityGate:
         self.last_density = 0.0
 
     def weigh(self, physics_packet: dict, stamina: float) -> tuple:
-        if stamina < 15.0:
-            return True, f"{Prisma.VIOLET}DREAM_EDGE: Starvation bypass. Tangibility ignored.{Prisma.RST}"
         counts = physics_packet.get("counts", {})
         clean_words = physics_packet.get("clean_words", [])
         total_vol = max(1, len(clean_words))
@@ -775,18 +793,22 @@ class TheTangibilityGate:
                 counts.get("thermal", 0) +
                 counts.get("cryo", 0) +
                 counts.get("vital", 0) +
-                counts.get("play", 0))
+                counts.get("play", 0)
+        )
         density_ratio = mass_words / total_vol
+        required_density = BoneConfig.MIN_DENSITY_THRESHOLD
         voltage = physics_packet.get("voltage", 0.0)
         truth = physics_packet.get("truth_ratio", 0.0)
-        required_density = BoneConfig.MIN_DENSITY_THRESHOLD
-        modifier = 1.0
         if voltage > self.FORGIVENESS_VOLTAGE:
-            modifier -= 0.2
+            required_density -= 0.15
         if truth > 0.8:
-            modifier -= 0.1
-        required_density *= modifier
-        required_density = max(0.15, required_density)
+            required_density -= 0.1
+        bypass_log = None
+        if stamina < 15.0:
+            starvation_discount = 0.5
+            required_density *= starvation_discount
+            bypass_log = f"{Prisma.VIOLET}DREAM_EDGE: Starvation Protocol active. Density threshold lowered by 50%.{Prisma.RST}"
+        required_density = max(0.10, required_density)
         if density_ratio < required_density:
             gas_words = counts.get("abstract", 0) + counts.get("antigen", 0)
             examples = list(TheLexicon.get("heavy"))
@@ -795,6 +817,7 @@ class TheTangibilityGate:
                 f"{Prisma.OCHRE}TANGIBILITY VIOLATION: Density {density_ratio:.2f} < Required {required_density:.2f}.{Prisma.RST}\n"
                 f"   {Prisma.GRY}The Gatekeeper blocks the path.{Prisma.RST}\n"
                 f"   {Prisma.RED}► REJECTED. Your concepts are too airy. Anchor them.{Prisma.RST}\n"
-                f"   {Prisma.GRY}(Try adding mass: {', '.join(suggestion)}){Prisma.RST}")
+                f"   {Prisma.GRY}(Try adding mass: {', '.join(suggestion)}){Prisma.RST}"
+            )
         self.last_density = density_ratio
-        return True, None
+        return True, bypass_log

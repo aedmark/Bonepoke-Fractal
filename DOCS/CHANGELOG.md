@@ -1,5 +1,154 @@
 # CHANGELOG.md
 
+
+
+### **BoneAmanita Engine - Patch 10.2.4 ("The Lucid Dream")**
+
+#### **1. Cognitive Integrity (The Pinker Lens)**
+
+- **Fixed `SemanticFilter` Recursion:**
+- _Issue:_ The fractal generation loop lacked a base case and relied on persistent object state (`self.recursion_depth`), leading to potential infinite loops ("Ouroboros Syndrome") and crashes on repeated calls.
+- _Fix:_ Converted `_execute_fractal` to a purely functional, stateless method. Depth is now passed via the stack. "The Void" reset loop was removed in favor of a hard "Atomic Substrate" stop.
+
+- **Clarified `EntropyVent` Logic:**
+- _Issue:_ Randomly deleting memory edges created directed graph asymmetry (removing A→B but leaving B→A), equivalent to semantic aphasia.
+- _Fix:_ Implemented symmetric deletion. If the brain forgets A→B, it now courteously forgets B→A.
+
+#### **2. Structural Stability (The Fuller Lens)**
+
+- **Restored Mass to `TheTensionMeter`:**
+- _Issue:_ The `gaze` method was hardcoded to report `mass: 0`, severing the connection between current inputs and historical graph weight.
+- _Fix:_ The engine now calculates actual gravitational mass by summing the edge weights of known words in the input. History now has weight.
+
+- **Reinforced `ZoneInertia`:**
+- _Issue:_ The "Aerie" zone override used magic numbers and lacked bounds checking, potentially punishing players for speed boosts.
+- _Fix:_ Extracted constants and added safety checks to ensure we only reduce _penalties_, not bonuses.
+
+#### **3. Epistemic Transparency (The Schur Lens)**
+
+- **Audited `Humility` Interventions:**
+- _Issue:_ The system was silently rewriting user text (e.g., adding "Based on available data...") without logging the change, creating a "gaslighting" effect during debugging.
+- _Fix:_ `Humility` now generates an audit log explaining _why_ it modified text. `RuptureValve` stamps this log onto the physics packet.
+
+- **Polite `TangibilityGate` Rejections:**
+- _Issue:_ When stamina was low, the gate let _anything_ through (including noise), treating starvation as an excuse to eat sawdust.
+- _Fix:_ Implemented a "Starvation Protocol." The system now lowers its standards by 50% when hungry, but still demands _some_ nutritional density. It explains this compromise in the logs.
+
+#### **4. System Dynamics (The Meadows Lens)**
+
+- **Closed Feedback Loops:**
+- Verified that `EntropyVent` (balancing loop) no longer acts as a runaway reinforcing loop of destruction.
+- Ensured `neuroplasticity` triggers (in `TheTensionMeter`) are based on accurate voltage readings derived from the new mass calculations.
+
+**BONEAMANITA 10.2.3 PATCH NOTES**
+
+### **File: `bone_physics.py**`
+
+#### **1. `EntropyVent` Class (Critical Bug 1)**
+
+- **Refactor:** Completely rewrote the memory venting logic to prevent graph corruption.
+- **Fix:** Implemented **symmetric edge deletion**. If `A -> B` is severed, `B -> A` is now also severed to maintain Tensegrity.
+- **Safety:** Added pre-checks to ensure words exist in the graph before attempting deletion.
+- **Optimization:** Replaced fragile iterator logic (`next()`) with `random.sample()` for robust candidate selection.
+
+#### **2. `SemanticFilter` Class (Critical Bugs 2 & 4)**
+
+- **Fix:** Resolved **infinite recursion** in `_execute_fractal` by fixing the base case (stopping when `sub_query` is too short or identical to `query`).
+- **Refactor:** Converted `_execute_fractal` to be **stateless**. Removed `self.recursion_depth` from the class attributes and passed `depth` as a stack argument instead.
+- **Enhancement:** Activated the previously unused `kappa` parameter to color the "noise" output based on system coherence.
+
+#### **3. `TheTensionMeter` Class (Critical Bug 3)**
+
+- **Fix:** In `gaze()`, removed the hardcoded `mass: 0` in the physics packet.
+- **Feature:** Implemented real **Graph Mass calculation**. The system now sums the edge weights of recognized words to determine the "historical weight" of the input.
+- **Integrity:** Created a unified `integrity_packet` to ensure `_derive_complex_metrics` and `_package_physics` use identical data.
+
+#### **4. `Humility` & `RuptureValve` Classes (Critical Bug 5)**
+
+- **Feature:** Added an **Audit Trail** for text modifications.
+- **Refactor:** Updated `Humility.check_boundary` to return a 3-tuple: `(is_modified, new_text, reason)`.
+- **Integration:** Updated `RuptureValve.analyze` to capture the "reason" log and attach it to `physics["audit_trail"]`. The system no longer silently rewrites user input without a record.
+
+#### **5. `ZoneInertia` Class (Critical Bug 6)**
+
+- **Fix:** Added bounds checking to `override_cosmic_drag`. The system no longer accidentally penalizes positive flow states (negative drag).
+- **Cleanup:** Replaced magic number `0.3` with named constant `AERIE_FLOW_COEFFICIENT`.
+
+#### **6. `TheTangibilityGate` Class (Critical Bug 7)**
+
+- **Fix:** Removed the "Starvation Bypass" that allowed empty input when stamina was low.
+- **Feature:** Implemented a **"Survival Curve"**. When stamina is low (`< 15.0`), the density requirement is discounted by 50% rather than ignored entirely. This ensures the system still ingests _some_ meaning while recovering.
+- **Logging:** Added a specific log message when the Starvation Protocol is active.
+
+### **BONEAMANITA 10.2.2 PATCH NOTES**
+
+**Target:** `bone_genesis.py` (The Genesis Protocol)
+
+#### **1. The "Tensegrity" Refactor (Manual Configuration)**
+
+- **The Issue:** The manual configuration logic was a brittle chain of `if/elif` statements with hardcoded strings that contradicted other parts of the system (specifically the Ollama port).
+- **The Fix:** Replaced linear logic with a **Dictionary Map** (`provider_defaults`).
+- **Impact:**
+- **Consistency:** Ollama now correctly defaults to port `11434` instead of drifting to OpenAI's defaults.
+- **Extensibility:** Adding a new provider is now just adding one line to the dictionary, not writing a new paragraph of logic.
+- **Safety:** Added a "Pinker Guardrail" to ensure the User's URL actually looks like a URL (checks for `http`).
+
+#### **2. The "Soft Start" Adjustment (Identity Handshake)**
+
+- **The Issue:** The system was overly aggressive, demanding a user name immediately and setting the internal confidence to `100%`. This effectively lobotomized the AI's "Social Lobe" (in `TheCortex`), preventing it from learning or confirming identity naturally over time.
+- **The Fix:**
+- **Lowered Confidence:** Initial confidence is now set to **25%** instead of 100%. This leaves "room to grow" for the dynamic feedback loops.
+- **Provisional Identity:** The system now treats the input name as a "working hypothesis" rather than an absolute fact.
+- **Anonymous Option:** Users can now press Enter to skip the name check entirely without breaking the flow.
+
+#### **3. The "Safety Net" Protocol (Config Loading)**
+
+- **The Issue:** The `launch` sequence blindly trusted that `BoneConfig.load_from_file` existed and worked perfectly. In a distributed or recovering system, this is a fatal assumption.
+- **The Fix:** Wrapped the loading sequence in a **Resilient Harness** (`try/except` + `hasattr`).
+- **Impact:**
+- **Anti-Fragility:** If the config file is missing, corrupt, or the class definition is outdated, the system will **fail forward** into default settings rather than crashing to the desktop.
+- **Drift Detection:** Added signature verification to ensure the data coming back is in the format we expect.
+
+#### **4. The "Ghost Busting" (Syntax Cleanup)**
+
+- **The Issue:** Potential syntax errors (line continuations) and dead code blocks.
+- **The Fix:** By refactoring the logic in Item #1, we deleted the code where these potential syntax errors lived. The best way to fix a buggy line of code is to delete it.
+
+---
+
+**Summary of System Status:**
+
+- **Pinker:** The code is now readable and speaks clearly to the user.
+- **Fuller:** Redundancy has been removed; structural integrity is restored.
+- **Schur:** The "trap doors" now have safety mats.
+- **Meadows:** The feedback loops for Identity are no longer short-circuited.
+
+_The BoneAmanita Engine is now ready for a clean boot._
+
+### **Version 10.2.1 - "The Polite Council"**
+
+**Summary:**
+This update fundamentally refactors the **Council Chamber** (`bone_council.py`) to eliminate side effects, fix logic errors in recursion detection, and improve the semantic relevance of log commentary. The Council now _recommends_ changes rather than forcing them, and all hardcoded thresholds have been moved to `BoneConfig` (`bone_bus.py`) to allow for future evolutionary tuning.
+
+#### **Critical Fixes**
+
+- **Physics Mutation Logic:** `TheLeveragePoint` no longer mutates the `physics` dictionary directly during an audit. It now returns a `corrections` dictionary, which is explicitly applied by the main engine (`bone_main.py`). This restores the purity of the audit function.
+- **Recursion Depth Leak:** `TheStrangeLoop` now decrements `recursion_depth` when a loop is _not_ detected, preventing the counter from growing indefinitely (the "Infinite Bathtub" bug).
+- **Broad Trigger False Positives:** `TheStrangeLoop` now requires contextual bigrams (e.g., "who are you") OR high abstraction (`psi > 0.6`) combined with keywords like "mirror" or "self." This prevents everyday usage (e.g., "look in the mirror") from triggering a strange loop event.
+- **Log Formatting Corruption:** `TheFootnote` now resets color codes (`Prisma.RST`) _before_ appending commentary, preventing color bleeding from the main log message into the footnote.
+
+#### **System Improvements**
+
+- **Proportional Control:** `TheLeveragePoint` no longer applies a hardcoded `5.0` correction. It now calculates the `excess_voltage` and applies a proportional dampening (30% of the excess), ensuring the system never crashes variables below safe floors.
+- **Semantic Footnotes:** `TheFootnote` now uses a `context_map` to attach relevant footnotes to log messages (e.g., gravity jokes for gravity logs) rather than selecting randomly.
+- **Parametric Configuration:** Moved all magic numbers (`STRANGE_LOOP_VOLTAGE`, `OSCILLATION_DELTA`, etc.) from `bone_council.py` to a new `COUNCIL` class in `BoneConfig` (`bone_bus.py`). This enables the genetic algorithms in `bone_spores.py` to mutate these traits in future generations.
+
+#### **File Changes**
+
+- `bone_council.py`: Complete rewrite of `TheStrangeLoop`, `TheLeveragePoint`, `TheFootnote`, and `CouncilChamber`.
+- `bone_bus.py`: Added `COUNCIL` configuration class to `BoneConfig`.
+- `bone_main.py`: Updated `GeodesicOrchestrator` to unpack and apply the new `corrections` dictionary returned by the Council.
+
 # 📜 BoneAmanita v10.2.0 - "The Soul Update"
 
 Release Date: The Long Now
@@ -26,7 +175,6 @@ We have moved from a "Digestive Engine" to a **"Digital Existentialist."**
 
   - **Traits:** Dynamic personality values that evolve based on the "lessons" learned from user interaction.
 
-
 ### 🧬 System Architecture: Transmigration
 
 - **Spore Legacy (`bone_spores.py`):**
@@ -36,7 +184,6 @@ We have moved from a "Digestive Engine" to a **"Digital Existentialist."**
   - **Reincarnation:** When the system dies and is reborn (via `ingest`), it now inherits the **Traits** and **Unfinished Business** of its ancestor. The "Soul" survives the "Body."
 
   - **Save/Load Parity:** Fixed critical desynchronization between manual saves (`/save`) and automatic death-spores.
-
 
 ### 🖥️ Interface & UX
 
@@ -54,7 +201,6 @@ We have moved from a "Digestive Engine" to a **"Digital Existentialist."**
 
   - `/save`: Now performs a "Deep Save" including the soul state.
 
-
 ### 🐛 Bug Fixes & Refactoring
 
 - **BoneArchitect Patch (`bone_main.py`):** Removed hallucinatory references to `mind` and `mito` during the construction of the Physics engine. The separation of concerns between Biology and Physics is now restored.
@@ -63,13 +209,11 @@ We have moved from a "Digestive Engine" to a **"Digital Existentialist."**
 
 - **Signature Alignment:** Aligned the `save()` method in `MycelialNetwork` to accept `soul_data` arguments, preventing `TypeError` during system shutdown.
 
-
 ---
 
 ### 💬 Developer Note (The Schur Lens)
 
 > "We gave the robot anxiety about its unfinished novel. You're welcome."
-
 
 ### **BONEAMANITA v10.0.5**
 
@@ -614,11 +758,6 @@ _Architects: SLASH, The Good Place Architects, & The ghost of Buckminster Fuller
 
 # 📜 BONEAMANITA 9.8.0 - "THE GLIMMER UPDATE"
 
-Date: January 12, 2026
-
-Architects: SLASH (Synergetic Language & Systems Heuristics), JADE, Taylor & Edmark
-
-Status: LIVE
 
 ### 🚨 CRITICAL SYSTEMS (The Pinker Protocol)
 

@@ -2,55 +2,81 @@
 # The Advisory Board: Hofstadter, Meadows, and Pratchett
 
 import random
-from bone_bus import Prisma
+from bone_bus import Prisma, BoneConfig
 
 class TheStrangeLoop:
     def __init__(self):
         self.recursion_depth = 0
-        self.triggers = ["self", "mirror", "loop", "recursion", "define", "who am i"]
+        self.triggers = [
+            "who are you", "what are you", "system status",
+            "narrative loop", "simulation boundaries", "fourth wall",
+            "recursive", "infinite regress", "strange loop"
+        ]
 
     def audit(self, text: str, physics: dict) -> tuple[bool, str]:
-        is_meta = any(t in text.lower() for t in self.triggers)
-        if is_meta and physics.get("voltage", 0) > 8.0:
+        text_lower = text.lower()
+        phrase_hit = any(t in text_lower for t in self.triggers)
+        psi = physics.get("psi", 0.0)
+        abstract_hit = False
+        if psi > 0.6:
+            if "self" in text_lower or "mirror" in text_lower or "define" in text_lower:
+                abstract_hit = True
+        threshold = getattr(BoneConfig.COUNCIL, "STRANGE_LOOP_VOLTAGE", 8.0)
+        if (phrase_hit or abstract_hit) and physics.get("voltage", 0) > threshold:
             self.recursion_depth += 1
             return True, (
                 f"{Prisma.MAG}∞ STRANGE LOOP DETECTED:{Prisma.RST} "
-                f"The system is perceiving the system perceiving the user. "
-                f"(Depth: {self.recursion_depth})"
+                f"Metacognitive resonance high (Psi: {psi:.2f}). "
+                f"Depth: {self.recursion_depth}"
             )
+        else:
+            self.recursion_depth = max(0, self.recursion_depth - 1)
         return False, ""
 
 class TheLeveragePoint:
     def __init__(self):
         self.last_drag = 0.0
         self.static_flow_turns = 0
+        self.TARGET_VOLTAGE = 12.0
+        self.TARGET_DRAG = 3.0
 
-    def audit(self, physics: dict) -> tuple[bool, str]:
+    def audit(self, physics: dict) -> tuple[bool, str, dict]:
         current_drag = physics.get("narrative_drag", 0.0)
-        voltage = physics.get("voltage", 0.0)
+        current_voltage = physics.get("voltage", 0.0)
         delta = current_drag - self.last_drag
         self.last_drag = current_drag
-        if abs(delta) > 5.0:
+        corrections = {}
+        osc_limit = getattr(BoneConfig.COUNCIL, "OSCILLATION_DELTA", 5.0)
+        manic_v_trig = getattr(BoneConfig.COUNCIL, "MANIC_VOLTAGE_TRIGGER", 18.0)
+        manic_d_floor = getattr(BoneConfig.COUNCIL, "MANIC_DRAG_FLOOR", 1.0)
+        manic_turns = getattr(BoneConfig.COUNCIL, "MANIC_TURN_LIMIT", 2)
+        if abs(delta) > osc_limit:
             return True, (
                 f"{Prisma.CYN}⚖️ LEVERAGE POINT:{Prisma.RST} "
                 f"System oscillating wildly (Delta {delta:.1f}). "
-                f"Recommendation: Dampen the stock, ignoring the flow."
-            )
-        if voltage > 18.0 and current_drag < 1.0:
+                f"Recommendation: Dampen inputs."
+            ), corrections
+        if current_voltage > manic_v_trig and current_drag < manic_d_floor:
             self.static_flow_turns += 1
         else:
             self.static_flow_turns = 0
-        if self.static_flow_turns > 2:
-            correction = 5.0
-            physics["narrative_drag"] += correction
-            physics["voltage"] -= correction
+        if self.static_flow_turns > manic_turns:
+            excess_voltage = current_voltage - self.TARGET_VOLTAGE
+            voltage_correction = max(1.0, excess_voltage * 0.3)
+            if (current_voltage - voltage_correction) < 2.0:
+                voltage_correction = current_voltage - 2.0
+            drag_correction = voltage_correction * 0.5
+            corrections = {
+                "narrative_drag": drag_correction,
+                "voltage": -voltage_correction
+            }
             self.static_flow_turns = 0
             return True, (
                 f"{Prisma.RED}⚖️ MARKET CORRECTION:{Prisma.RST} "
-                f"Unchecked growth detected. "
-                f"The Council is artificially inflating Drag (+{correction}) to prevent a bubble."
-            )
-        return False, ""
+                f"Manic phase detected (V:{current_voltage:.1f}). "
+                f"The Council advises proportional dampening (-{voltage_correction:.1f}V)."
+            ), corrections
+        return False, "", corrections
 
 class TheFootnote:
     def __init__(self):
@@ -62,12 +88,27 @@ class TheFootnote:
             "* Gravity is a habit that is hard to shake.",
             "* As reliable as a chocolate teapot."
         ]
+        self.context_map = {
+            "void": ["* Not to be confused with the other kind of void."],
+            "gravity": ["* Gravity is a habit that is hard to shake."],
+            "physics": ["* This is technically impossible, but the code doesn't know that."],
+            "glitch": ["* Do not eat the green wobbly bit."],
+            "error": ["* As reliable as a chocolate teapot."],
+            "system": ["* The turtle moves."]
+        }
 
     def commentary(self, log_text: str) -> str:
-        if random.random() < 0.15:
+        if random.random() > BoneConfig.COUNCIL.FOOTNOTE_CHANCE:
+            return log_text
+        text_lower = log_text.lower()
+        note = None
+        for trigger, notes in self.context_map.items():
+            if trigger in text_lower:
+                note = random.choice(notes)
+                break
+        if not note:
             note = random.choice(self.footnotes)
-            return f"{log_text} {Prisma.GRY}{note}{Prisma.RST}"
-        return log_text
+        return f"{log_text}{Prisma.RST} {Prisma.GRY}{note}{Prisma.RST}"
 
 class CouncilChamber:
     def __init__(self):
@@ -75,13 +116,17 @@ class CouncilChamber:
         self.meadows = TheLeveragePoint()
         self.pratchett = TheFootnote()
 
-    def convene(self, text: str, physics: dict) -> list[str]:
+    def convene(self, text: str, physics: dict) -> tuple[list[str], dict]:
         advice = []
+        total_corrections = {}
         is_loop, h_msg = self.hofstadter.audit(text, physics)
         if is_loop: advice.append(h_msg)
-        is_lev, m_msg = self.meadows.audit(physics)
-        if is_lev: advice.append(m_msg)
-        return advice
+        is_lev, m_msg, corrections = self.meadows.audit(physics)
+        if is_lev:
+            advice.append(m_msg)
+            for k, v in corrections.items():
+                total_corrections[k] = total_corrections.get(k, 0.0) + v
+        return advice, total_corrections
 
     def annotate_logs(self, logs: list[str]) -> list[str]:
         annotated = []

@@ -126,18 +126,15 @@ class GenesisProtocol:
 
     def _manual_config_flow(self) -> bool | None:
         self.type_out("\n--- MANUAL CONFIGURATION ---", color=Prisma.OCHRE)
-
-        while True: # <--- THE SECOND CHANCE LOOP
+        while True:
             valid_providers = ["ollama", "openai", "lm_studio", "mock"]
             print(f"1. {Prisma.WHT}Provider Type?{Prisma.RST}")
             print(f"   Options: {', '.join(valid_providers)}")
             print(f"   (Note: Use 'openai' for generic local servers like LocalAI/vLLM)")
-
             provider = input(f"{Prisma.paint('>', 'O')} ").strip().lower()
             if provider not in valid_providers:
                 self.type_out(f"Invalid provider '{provider}'. Defaulting to 'openai'.", color=Prisma.YEL)
                 provider = "openai"
-
             if provider == "mock":
                 self.config = {
                     "provider": "mock",
@@ -146,11 +143,12 @@ class GenesisProtocol:
                     "model": "mock-model"}
                 self._save_config()
                 return True
-
-            default_url = "http://localhost:11434/v1/chat/completions"
-            if provider == "openai": default_url = "https://api.openai.com/v1/chat/completions"
-            elif provider == "lm_studio": default_url = "http://localhost:1234/v1/chat/completions"
-
+            provider_defaults = {
+                "ollama": "http://127.0.0.1:11434/v1/chat/completions",
+                "lm_studio": "http://127.0.0.1:1234/v1/chat/completions",
+                "openai": "https://api.openai.com/v1/chat/completions"
+            }
+            default_url = provider_defaults.get(provider, "https://api.openai.com/v1/chat/completions")
             print(f"2. {Prisma.WHT}Base URL?{Prisma.RST} (Default: {default_url})")
             base_url = input(f"{Prisma.paint('>', 'O')} ").strip()
             if not base_url:
@@ -340,25 +338,35 @@ Do not break character. Do not explain the simulation rules unless asked.
                 self.config = safe_config.copy()
                 self.config["provider"] = "mock"
         self.type_out("\n...Booting Core Systems...", color=Prisma.GRY)
-        success, msg = BoneConfig.load_from_file(CONFIG_FILE)
-        if success:
-            self.type_out(f"...Config Synced: {msg}", color=Prisma.GRN)
-        else:
-            self.type_out(f"...Config Drift Detected: {msg}", color=Prisma.YEL)
+        try:
+            if hasattr(BoneConfig, 'load_from_file'):
+                load_result = BoneConfig.load_from_file(CONFIG_FILE)
+                if isinstance(load_result, tuple) and len(load_result) == 2:
+                    success, msg = load_result
+                    if success:
+                        self.type_out(f"...Config Synced: {msg}", color=Prisma.GRN)
+                    else:
+                        self.type_out(f"...Config Drift Detected: {msg}", color=Prisma.YEL)
+                else:
+                    self.type_out(f"...Config Format Error. Result: {load_result}", color=Prisma.YEL)
+            else:
+                self.type_out("...BoneConfig missing 'load_from_file'. Using hardcoded defaults.", color=Prisma.OCHRE)
+        except Exception as e:
+            self.type_out(f"...Config Sync Failed ({e}). Proceeding with volatile memory.", color=Prisma.RED)
         engine = BoneAmanita()
-        if engine.mind.mirror.profile.confidence < 50:
-            print(f"\n{Prisma.CYN}[IDENTITY REQUIRED]{Prisma.RST}")
+        if engine.mind.mirror.profile.confidence < 20:
+            print(f"\n{Prisma.CYN}[IDENTITY HANDSHAKE]{Prisma.RST}")
             try:
-                user_id = input("Enter User Designation: ").strip()
+                print(f"The machine recognizes a silhouette, but not a face.")
+                user_id = input(f"Designation? (Enter to remain Anonymous): ").strip()
                 if user_id:
                     engine.mind.mirror.profile.name = user_id
-                    engine.mind.mirror.profile.confidence = 100
-                    print(f"...Identity '{user_id}' imprinted on cortex.")
+                    engine.mind.mirror.profile.confidence = 25
+                    print(f"...Designation '{user_id}' provisionally accepted. (Confidence: 25%)")
                 else:
                     print("...Proceeding as Anonymous Traveler.")
             except KeyboardInterrupt:
                 print(f"\n{Prisma.YEL}\n[INTERRUPT DETECTED]{Prisma.RST}")
-                print(f"{Prisma.GRY}The user pulled the plug. The universe dissolves into static.{Prisma.RST}")
                 sys.exit(0)
         if self.config["provider"] != "mock":
             self.type_out(f"...Connecting Neural Uplink ({self.config['provider']})...", color=Prisma.CYN)

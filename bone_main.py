@@ -243,9 +243,14 @@ class GeodesicOrchestrator:
         self._phase_soul_work(ctx)
         if self.eng.gordon.inventory:
             self.eng.tinkerer.audit_tool_use(ctx.physics, self.eng.gordon.inventory)
-        council_advice = self.eng.council.convene(ctx.input_text, ctx.physics)
+        council_advice, adjustments = self.eng.council.convene(ctx.input_text, ctx.physics)
         for advice in council_advice:
             ctx.log(advice)
+        if adjustments:
+            for param, delta in adjustments.items():
+                if param in ctx.physics:
+                    old_val = ctx.physics[param]
+                    ctx.physics[param] += delta
 
     def _phase_soul_work(self, ctx: CycleContext):
         lesson = self.eng.soul.crystallize_memory(ctx.physics, ctx.bio_result, self.eng.tick_count)

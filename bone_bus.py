@@ -135,6 +135,14 @@ class BoneConfig:
         WEIGHT_EXPLOSIVE = 3.0
         WEIGHT_CONSTRUCTIVE = 1.5
 
+    class COUNCIL:
+        STRANGE_LOOP_VOLTAGE = 8.0
+        OSCILLATION_DELTA = 5.0
+        MANIC_VOLTAGE_TRIGGER = 18.0
+        MANIC_DRAG_FLOOR = 1.0
+        MANIC_TURN_LIMIT = 2
+        FOOTNOTE_CHANCE = 0.15
+
     class BIO:
         ATP_STARVATION = 10.0
         ROS_CRITICAL = 100.0
