@@ -1,4 +1,5 @@
-# bone_village.py - "It takes a village..."
+# bone_village.py
+# "It takes a village..."
 
 import json, os, random, re, time, string, unicodedata, math
 from collections import Counter, deque
@@ -6,7 +7,8 @@ from typing import List, Dict, Any, Tuple, Optional, Set
 from dataclasses import dataclass, field
 from bone_bus import Prisma, BoneConfig, CycleContext
 from bone_lexicon import TheLexicon
-from bone_personality import UserProfile
+from bone_personality import UserProfile, PublicParksDepartment
+from bone_council import CouncilChamber
 
 try:
     from bone_data import LEXICON, GENETICS, DEATH, NARRATIVE_DATA, RESONANCE, ALMANAC_DATA
@@ -124,10 +126,10 @@ class DeathGen:
         prefix_list = DeathGen.PREFIXES
         prefix = random.choice(prefix_list) if prefix_list else "RIP."
         verdict = "You vanished."
-        if physics["voltage"] > 15.0: 
+        if physics["voltage"] > 15.0:
             verdict_list = DeathGen.VERDICTS.get("HEAVY", [])
             if verdict_list: verdict = random.choice(verdict_list)
-        elif physics["voltage"] < 2.0: 
+        elif physics["voltage"] < 2.0:
             verdict_list = DeathGen.VERDICTS.get("LIGHT", [])
             if verdict_list: verdict = random.choice(verdict_list)
         return f"{prefix} Cause of Death: {flavor_text}. {verdict}"
@@ -310,7 +312,7 @@ class ApeirogonResonance:
                 "desc": station[1],
                 "context": station[0]}
         if not vec or len(vec) < 2:
-             return {"title": "THE VOID", "color": Prisma.GRY, "desc": "No data.", "context": "VOID"}
+            return {"title": "THE VOID", "color": Prisma.GRY, "desc": "No data.", "context": "VOID"}
         sorted_dims = sorted(vec.items(), key=lambda x: abs(x[1] - 0.5), reverse=True)
         p_dim, p_val = sorted_dims[0]
         s_dim, s_val = sorted_dims[1]
@@ -767,6 +769,7 @@ class TownHall:
     Cartographer = TheCartographer
     Navigator = TheNavigator
     Manifold = Manifold
+    PublicParksDepartment = PublicParksDepartment
 
     # Department of Philosophy & Psychology
     Tinkerer = TheTinkerer
@@ -779,3 +782,6 @@ class TownHall:
     # Department of Visual Arts
     Projector = TheHoloProjector
     StrunkWhite = StrunkWhiteProtocol
+
+    # Department of Administration
+    CouncilChamber = CouncilChamber

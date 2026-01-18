@@ -1,535 +1,75 @@
-# BONEAMANITA 10.2.7 - "Kicho's Lament"
+# BONEAMANITA 10.2.8 - "The Tensegrity Refactor"
 # Architects: SLASH, KICHO, The Courtyard, Taylor & Edmark
 
-import json, os, random, re, time, math, copy, traceback
-from collections import Counter, deque
-from typing import List, Optional, Tuple, Dict, Any, TYPE_CHECKING
-from dataclasses import dataclass, field
+import time, json, traceback
+from typing import Dict, Any
+from bone_bus import EventBus, Prisma, BoneConfig, SystemHealth, TheObserver
+from bone_commands import CommandProcessor
+from bone_village import TownHall
+from bone_lexicon import TheLexicon, LiteraryReproduction
+from bone_inventory import GordonKnot
+from bone_personality import (
+    TheFolly, CassandraProtocol, ChorusDriver, KintsugiProtocol, TherapyProtocol
+)
+from bone_physics import CosmicDynamics, ZoneInertia
+from bone_body import SomaticLoop, NoeticLoop
+from bone_brain import TheCortex, LLMInterface
+from bone_soul import NarrativeSelf
+from bone_architect import BoneArchitect
+from bone_cycle import GeodesicOrchestrator
 
-# --- THE GREAT MIGRATION: DEPENDENCIES ---
-try:
-    # 1. Core Logic & Bus
-    from bone_bus import (
-        EventBus, Prisma, BoneConfig, CycleContext, PhysicsPacket,
-        SystemHealth, TheObserver
-    )
+def bootstrap_systems():
+    print(f"{Prisma.GRY}...Bootstrapping Sub-Systems...{Prisma.RST}")
+    pass
 
-    # 2. Command Processing
-    from bone_commands import CommandProcessor
-
-    # 3. Physics & Reality Computation
-    from bone_physics import (
-        TheBouncer, RuptureValve, ChromaScope, TheTensionMeter,
-        TheTangibilityGate, TemporalDynamics, ZoneInertia, CosmicDynamics
-    )
-
-    # 4. The Village (Civic Services)
-    from bone_village import TownHall
-
-    # 5. Static Data
-    from bone_data import LENSES
-
-    # 6. Items & Inventory
-    from bone_inventory import GordonKnot
-
-    # 7. Spores (Memory & Reproduction)
-    from bone_spores import (
-        MycotoxinFactory, LichenSymbiont, HyphalInterface,
-        ParasiticSymbiont, MycelialNetwork, SporeCasing, LocalFileSporeLoader
-    )
-
-    # 8. The Body (Somatic Systems)
-    from bone_body import (
-        BioSystem, MitochondrialForge, EndocrineSystem,
-        MetabolicGovernor, SomaticLoop, ViralTracer,
-        ThePacemaker, NoeticLoop
-    )
-
-    # 9. The Brain (Cognition & Uplink)
-    from bone_brain import (
-        NeuroPlasticity, DreamEngine, TheCortex,
-        ShimmerState, LLMInterface
-    )
-
-    # 10. Personality & Psychology
-    from bone_personality import (
-        UserProfile, EnneagramDriver, SynergeticLensArbiter,
-        PublicParksDepartment, TherapyProtocol, KintsugiProtocol,
-        LimboLayer, TheFolly, ChorusDriver, CassandraProtocol, TheBureau
-    )
-
-    # 11. Presentation Layer
-    from bone_viewer import GeodesicRenderer
-
-    # 12. Language & Legacy
-    from bone_lexicon import TheLexicon, LiteraryReproduction
-
-    # 13. The Machinery
-    from bone_machine import TheCrucible, TheForge, TheTheremin
-
-    # 14. Governance & Soul
-    from bone_council import CouncilChamber
-    from bone_soul import NarrativeSelf
-except ImportError as boot_err:
-    print(f"\033[31mCRITICAL IMPORT FAILURE: {boot_err}\033[0m")
-    traceback.print_exc()
-    raise boot_err
-
-@dataclass
-class MindSystem:
-    mem: 'MycelialNetwork'
-    lex: Any
-    dreamer: 'DreamEngine'
-    mirror: 'TownHall.Mirror'
-    wise: 'TownHall.Apeirogon'
-    tracer: 'ViralTracer'
-    integrator: 'TownHall.Sorites'
-
-@dataclass
-class PhysSystem:
-    tension: 'TheTensionMeter'
-    forge: 'TheForge'
-    crucible: 'TheCrucible'
-    theremin: 'TheTheremin'
-    pulse: 'ThePacemaker'
-    gate: 'TheTangibilityGate'
-    dynamics: 'TemporalDynamics'
-    nav: 'TownHall.Navigator'
-
-class GeodesicOrchestrator:
+class SessionGuardian:
     def __init__(self, engine_ref):
         self.eng = engine_ref
-        self.bureau = TheBureau()
-        self.bouncer = TheBouncer(self.eng)
-        self.parks = PublicParksDepartment()
-        self.vsl_32v = RuptureValve(self.eng.mind.lex, self.eng.mind.mem)
-        self.vsl_chroma = ChromaScope()
-        self.strunk_white = TownHall.StrunkWhite()
-        self.renderer = GeodesicRenderer(
-            self.eng,
-            self.vsl_chroma,
-            self.strunk_white,
-            self.vsl_32v
-        )
 
-    def run_turn(self, user_message: str) -> Dict[str, Any]:
-        self.eng.events.flush()
-        ctx = CycleContext(input_text=user_message)
-        ctx.user_name = self.eng.user_name
+    def __enter__(self):
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.2.7', 'G')}")
+        print(f"{Prisma.paint('System: LISTENING', '0')}")
+        return self.eng
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print(f"\n{Prisma.paint('--- SYSTEM HALT ---', 'R')}")
+        if exc_type:
+            print(f"{Prisma.paint(f'CRITICAL FAILURE: {exc_val}', 'R')}")
+            if hasattr(self.eng, "events"):
+                self.eng.events.log(f"CRASH: {exc_val}", "SYS")
         try:
-            if self.eng.system_health.physics_online:
-                self._phase_observe(ctx)
-            else:
-                raise Exception("Physics module previously failed.")
+            print(f"{Prisma.paint('Initiating Emergency Spore Preservation...', 'Y')}")
+            result_msg = self.eng.emergency_save(exit_cause="INTERRUPT" if exc_type else "MANUAL")
+            print(f"{Prisma.paint(result_msg, 'C' if '✔' in result_msg else 'R')}")
         except Exception as e:
-            print(f"\n{Prisma.RED}!!! CRITICAL PHYSICS CRASH !!!{Prisma.RST}")
-            traceback.print_exc() # <--- THIS IS THE KEY
-            print(f"{Prisma.RED}!!! END CRASH REPORT !!!{Prisma.RST}\n")
-            self.eng.system_health.report_failure("PHYSICS", e)
-            ctx.physics = PanicRoom.get_safe_physics()
-            ctx.log(f"{Prisma.RED}⚠ PHYSICS FAILURE: Switching to Newtonian Defaults.{Prisma.RST}")
-        if self.eng.tick_count % 10 == 0:
-            try:
-                self._maintenance_prune(ctx)
-            except Exception:
-                pass
-        if self.eng.system_health.physics_online:
-            try:
-                if self._phase_gatekeep(ctx):
-                    return ctx.refusal_packet or self._package_bureaucracy(ctx)
-            except Exception as e:
-                ctx.log(f"{Prisma.YEL}GATEKEEPER ASLEEP: {e}{Prisma.RST}")
-        try:
-            if self.eng.system_health.bio_online:
-                self._phase_metabolize(ctx)
-            else:
-                raise Exception("Bio module previously failed.")
-        except Exception as e:
-            self.eng.system_health.report_failure("BIO", e)
-            ctx.bio_result = PanicRoom.get_safe_bio()
-            ctx.is_alive = True # Keep them alive, just barely.
-        if not ctx.is_alive:
-            return self.eng.trigger_death(ctx.physics)
-        try:
-            self._phase_simulate(ctx)
-        except Exception as e:
-            ctx.log(f"{Prisma.RED}SIMULATION GLITCH: {e}{Prisma.RST}")
-        try:
-            if self.eng.system_health.mind_online:
-                self._phase_cognate(ctx)
-            else:
-                raise Exception("Mind module previously failed.")
-        except Exception as e:
-            self.eng.system_health.report_failure("MIND", e)
-            ctx.mind_state = PanicRoom.get_safe_mind()
-        try:
-            return self._phase_render(ctx)
-        except Exception as e:
-            return {
-                "type": "CRITICAL_RENDER_FAIL",
-                "ui": f"{Prisma.RED}REALITY FRACTURE.{Prisma.RST}\nRaw Output: {ctx.logs}",
-                "logs": ctx.logs,
-                "metrics": self.eng.get_metrics()
-            }
+            print(f"{Prisma.paint(f'FATAL: State corruption during shutdown. {e}', 'R')}")
 
-    def _phase_observe(self, ctx: TownHall.CycleContext):
-        gaze_result = self.eng.phys.tension.gaze(ctx.input_text, self.eng.mind.mem.graph)
-        ctx.physics = gaze_result["physics"]
-        ctx.clean_words = gaze_result["clean_words"]
-        self.eng.phys.tension.last_physics_packet = ctx.physics
-        self.eng.tick_count += 1
-        rupture = self.vsl_32v.analyze(ctx.physics)
-        if rupture:
-            ctx.log(rupture["log"])
-
-    def _maintenance_prune(self, ctx: TownHall.CycleContext):
-        try:
-            rotted = self.eng.lex.atrophy(self.eng.tick_count, 100)
-            if rotted:
-                for w in rotted:
-                    self.eng.limbo.ghosts.append(f"👻{w.upper()}_ECHO")
-                example = rotted[0]
-                ctx.log(f"{Prisma.GRY}NEURO-PRUNING: {len(rotted)} concepts decayed (e.g., '{example}').{Prisma.RST}")
-            gc_msg = self.eng.mind.mem.enforce_limits(self.eng.tick_count)
-        except Exception as e:
-            if BoneConfig.VERBOSE_LOGGING:
-                print(f"Maintenance Error: {e}")
-
-    def _phase_gatekeep(self, ctx: TownHall.CycleContext) -> bool:
-        is_allowed_entry, refusal_packet = self.bouncer.check_entry(ctx)
-        if not is_allowed_entry:
-            ctx.refusal_triggered = True
-            ctx.refusal_packet = refusal_packet
-            return True
-        audit_result = self.bureau.audit(ctx.physics, ctx.bio_result)
-        if audit_result:
-            self.eng.bio.mito.state.atp_pool += audit_result.get("atp_gain", 0.0)
-            ctx.log(audit_result["log"])
-            status = audit_result.get("status")
-            if status == "BLOCK":
-                ctx.is_bureaucratic = True
-                ctx.physics["narrative_drag"] = 10.0
-                ctx.physics["voltage"] = 0.0
-                ctx.bureau_ui = audit_result["ui"]
-                return True
-            elif status == "TAX":
-                ctx.log(f"{Prisma.GRY}   (BUREAU TAX DEDUCTED: The machine grumbles but proceeds...){Prisma.RST}")
-        return False
-
-    def _package_bureaucracy(self, ctx):
-        return {
-            "type": "BUREAUCRACY",
-            "ui": ctx.bureau_ui,
-            "logs": self.renderer.compose_logs(
-                ctx.logs,
-                self.eng.events.flush(),
-                self.eng.tick_count
-            ),
-            "metrics": self.eng.get_metrics(ctx.bio_result.get("atp", 0.0))
-        }
-
-    def _phase_metabolize(self, ctx: TownHall.CycleContext):
-        physics = ctx.physics
-        gov_msg = self.eng.bio.governor.shift(
-            physics,
-            self.eng.phys.dynamics.voltage_history,
-            self.eng.tick_count
-        )
-        if gov_msg: self.eng.events.log(gov_msg, "GOV")
-        bio_feedback = {
-            "INTEGRITY": physics.get("truth_ratio", 0.0),
-            "STATIC": physics.get("repetition", 0.0),
-            "FORCE": physics.get("voltage", 0.0) / 20.0,
-            "BETA": physics.get("beta_index", 1.0)
-        }
-        stress_mod = self.eng.bio.governor.get_stress_modifier(self.eng.tick_count)
-        circadian_bias = None
-        if self.eng.tick_count % 10 == 0:
-            circadian_bias, circadian_msg = self.eng.bio.endo.calculate_circadian_bias()
-            if circadian_msg:
-                self.eng.events.log(f"{Prisma.CYN}🕒 {circadian_msg}{Prisma.RST}", "BIO")
-        ctx.bio_result = self.eng.soma.digest_cycle(
-            ctx.input_text, physics, bio_feedback,
-            self.eng.health, self.eng.stamina, stress_mod, self.eng.tick_count,
-            circadian_bias=circadian_bias
-        )
-        ctx.is_alive = ctx.bio_result["is_alive"]
-        for bio_item in ctx.bio_result["logs"]:
-            if any(x in str(bio_item) for x in ["CRITICAL", "TAX", "Poison"]):
-                ctx.log(bio_item)
-        hubris_hit, hubris_msg, event_type = self.eng.phys.tension.audit_hubris(physics, self.eng.lex)
-        if hubris_hit:
-            ctx.log(hubris_msg)
-            if event_type == "FLOW_BOOST":
-                self.eng.bio.mito.state.atp_pool += 20.0
-            elif event_type == "ICARUS_CRASH":
-                damage = 15.0
-                self.eng.health -= damage
-                ctx.log(f"   {Prisma.RED}IMPACT TRAUMA: -{damage} HP.{Prisma.RST}")
-        self._apply_healing_logic(ctx)
-
-    def _apply_healing_logic(self, ctx: TownHall.CycleContext):
-        is_cracked, koan = self.eng.kintsugi.check_integrity(self.eng.stamina)
-        if is_cracked:
-            ctx.log(f"{Prisma.YEL}🏺 KINTSUGI ACTIVATED: Vessel cracking.{Prisma.RST}")
-            ctx.log(f"   {Prisma.WHT}KOAN: {koan}{Prisma.RST}")
-        if self.eng.kintsugi.active_koan:
-            repair = self.eng.kintsugi.attempt_repair(ctx.physics, self.eng.trauma_accum)
-            if repair and repair["success"]:
-                ctx.log(repair["msg"])
-                self.eng.stamina = min(BoneConfig.MAX_STAMINA, self.eng.stamina + 20.0)
-                ctx.log(f"   {Prisma.GRN}STAMINA RESTORED (+20.0){Prisma.RST}")
-        healed = self.eng.therapy.check_progress(ctx.physics, self.eng.stamina, self.eng.trauma_accum)
-        if healed:
-            joined = ", ".join(healed)
-            ctx.log(f"{Prisma.GRN}❤️ THERAPY STREAK: Healing [{joined}]. Health +5.{Prisma.RST}")
-            self.eng.health = min(BoneConfig.MAX_HEALTH, self.eng.health + 5.0)
-
-    def _phase_simulate(self, ctx: TownHall.CycleContext):
-        self._apply_reality_filters(ctx)
-        self._process_navigation(ctx)
-        self._process_cosmic_state(ctx)
-        self._operate_machinery(ctx)
-        self._process_intrusions(ctx)
-        self._phase_soul_work(ctx)
-        if self.eng.gordon.inventory:
-            self.eng.tinkerer.audit_tool_use(ctx.physics, self.eng.gordon.inventory)
-        council_advice, adjustments = self.eng.council.convene(ctx.input_text, ctx.physics)
-        for advice in council_advice:
-            ctx.log(advice)
-        if adjustments:
-            for param, delta in adjustments.items():
-                if param in ctx.physics:
-                    old_val = ctx.physics[param]
-                    ctx.physics[param] += delta
-
-    def _phase_soul_work(self, ctx: CycleContext):
-        lesson = self.eng.soul.crystallize_memory(ctx.physics, ctx.bio_result, self.eng.tick_count)
-        if not self.eng.soul.current_obsession:
-            self.eng.soul.find_obsession(self.eng.lex)
-        self.eng.soul.pursue_obsession(ctx.physics)
-
-    def _apply_reality_filters(self, ctx: TownHall.CycleContext):
-        reflection = self.eng.mind.mirror.get_reflection_modifiers()
-        ctx.physics["narrative_drag"] *= reflection["drag_mult"]
-        if reflection.get("atp_tax", 0) > 0:
-            tax = reflection["atp_tax"]
-            self.eng.bio.mito.state.atp_pool -= tax
-            if random.random() < 0.2:
-                ctx.log(f"{Prisma.RED}MIRROR TAX: -{tax:.1f} ATP applied.{Prisma.RST}")
-        cap = reflection.get("voltage_cap", 999.0)
-        if ctx.physics["voltage"] > cap:
-            ctx.physics["voltage"] = cap
-            ctx.log(f"{Prisma.GRY}MIRROR: Voltage capped at {cap}.{Prisma.RST}")
-        trigram_data = self.vsl_32v.geodesic.resolve_trigram(ctx.physics.get("vector", {}))
-        ctx.world_state["trigram"] = trigram_data
-        if random.random() < 0.05:
-            t_sym, t_name = trigram_data["symbol"], trigram_data["name"]
-            ctx.log(f"{trigram_data['color']}I CHING: {t_sym} {t_name} is in the ascendant.{Prisma.RST}")
-
-    def _process_navigation(self, ctx: TownHall.CycleContext):
-        physics = ctx.physics
-        if self.eng.tick_count == 3:
-            ctx.log(self.eng.navigator.strike_root(physics.get("vector", {})))
-        shock = self.eng.navigator.check_transplant_shock(physics.get("vector", {}))
-        if shock:
-            physics["narrative_drag"] += 1.0
-            ctx.log(shock)
-        new_drag, grav_log = self.eng.gordon.check_gravity(physics.get("narrative_drag", 0), physics.get("psi", 0))
-        if grav_log: ctx.log(grav_log)
-        physics["narrative_drag"] = new_drag
-        did_flinch, flinch_msg, panic = self.eng.gordon.flinch(ctx.clean_words, self.eng.tick_count)
-        if did_flinch:
-            ctx.log(flinch_msg)
-            if panic: physics.update(panic)
-        current_loc, entry_msg = self.eng.navigator.locate(physics)
-        if entry_msg: ctx.log(entry_msg)
-        env_logs = self.eng.navigator.apply_environment(physics)
-        for e_log in env_logs: ctx.log(e_log)
-
-    def _process_cosmic_state(self, ctx: TownHall.CycleContext):
-        physics = ctx.physics
-        orbit_state, drag_pen, orbit_msg = self.eng.cosmic.analyze_orbit(self.eng.mind.mem, ctx.clean_words)
-        raw_zone = physics.get("zone", "COURTYARD")
-        stabilized_zone = self.eng.stabilizer.stabilize(raw_zone, physics, (orbit_state, drag_pen))
-        adjusted_drag = self.eng.stabilizer.override_cosmic_drag(drag_pen, stabilized_zone)
-        physics["zone"] = stabilized_zone
-        self.eng.apply_cosmic_physics(physics, orbit_state, adjusted_drag)
-        ctx.world_state["orbit"] = orbit_state
-        if orbit_msg: ctx.log(orbit_msg)
-
-    def _operate_machinery(self, ctx: TownHall.CycleContext):
-        physics = ctx.physics
-        transmute_msg = self.eng.phys.forge.transmute(physics)
-        if transmute_msg: ctx.log(transmute_msg)
-        _, forge_msg, new_item = self.eng.phys.forge.hammer_alloy(physics)
-        if forge_msg: ctx.log(forge_msg)
-        if new_item: ctx.log(self.eng.gordon.acquire(new_item))
-        _, _, theremin_msg, t_crit = self.eng.phys.theremin.listen(physics, self.eng.bio.governor.mode)
-        if theremin_msg: ctx.log(theremin_msg)
-        if t_crit == "AIRSTRIKE":
-            damage = 25.0
-            self.eng.health -= damage
-            ctx.log(f"{Prisma.RED}*** CRITICAL THEREMIN DISCHARGE *** -{damage} HP{Prisma.RST}")
-        c_state, c_val, c_msg = self.eng.phys.crucible.audit_fire(physics)
-        if c_msg: ctx.log(c_msg)
-        if c_state == "MELTDOWN":
-            self.eng.health -= c_val
-
-    def _process_intrusions(self, ctx: TownHall.CycleContext):
-        p_active, p_log = self.eng.bio.parasite.infect(ctx.physics, self.eng.stamina)
-        if p_active: ctx.log(p_log)
-        if self.eng.limbo.ghosts:
-            if ctx.logs:
-                ctx.logs[-1] = self.eng.limbo.haunt(ctx.logs[-1])
-            else:
-                ctx.log(self.eng.limbo.haunt("The air is heavy."))
-        is_p, p_msg = self.eng.check_pareidolia(ctx.clean_words)
-        if is_p:
-            ctx.log(p_msg)
-            ctx.physics["psi"] = min(1.0, ctx.physics["psi"] + 0.3)
-
-    def _phase_cognate(self, ctx: TownHall.CycleContext):
-        self.eng.mind.mem.encode(ctx.clean_words, ctx.physics, "GEODESIC")
-        ctx.mind_state = self.eng.noetic.think(
-            ctx.physics,
-            ctx.bio_result,
-            self.eng.gordon.inventory,
-            self.eng.phys.dynamics.voltage_history,
-            self.eng.tick_count
-        )
-
-    def _phase_render(self, ctx: TownHall.CycleContext) -> Dict[str, Any]:
-        captured_events = self.eng.events.flush()
-        return self.renderer.render_frame(ctx, self.eng.tick_count, captured_events)
-
-class BoneArchitect:
-    @staticmethod
-    def construct_mind(events, lex) -> Tuple[MindSystem, LimboLayer]:
-        _mem = MycelialNetwork(events)
-        limbo = LimboLayer()
-        _mem.cleanup_old_sessions(limbo)
-        return MindSystem(
-            mem=_mem,
-            lex=lex,
-            dreamer=DreamEngine(events),
-            mirror=TownHall.Mirror(events),
-            wise=TownHall.Apeirogon(events),
-            tracer=ViralTracer(_mem),
-            integrator=TownHall.Sorites(_mem)
-        ), limbo
-
-    @staticmethod
-    def construct_body(mind, events, lex) -> Tuple[BioSystem, Dict]:
-        load_result = mind.mem.autoload_last_spore()
-        if load_result and len(load_result) == 3:
-            inherited_traits, inherited_antibodies, soul_legacy = load_result
-        elif load_result:
-            inherited_traits = load_result[0]
-            inherited_antibodies = load_result[1]
-            soul_legacy = {}
-        else:
-            inherited_traits, inherited_antibodies, soul_legacy = {}, set(), {}
-        immune_system = MycotoxinFactory()
-        immune_system.active_antibodies = inherited_antibodies
-        bio = BioSystem(
-            mito=MitochondrialForge(mind.mem.session_id, events, inherited_traits),
-            endo=EndocrineSystem(),
-            immune=immune_system,
-            lichen=LichenSymbiont(),
-            gut=HyphalInterface(),
-            plasticity=NeuroPlasticity(),
-            governor=MetabolicGovernor(),
-            shimmer=ShimmerState(),
-            parasite=ParasiticSymbiont(mind.mem, lex)
-        )
-        return bio, soul_legacy
-
-    @staticmethod
-    def construct_physics(events, shimmer_ref) -> PhysSystem:
-        return PhysSystem(
-            tension=TheTensionMeter(events),
-            forge=TheForge(),
-            crucible=TheCrucible(),
-            theremin=TheTheremin(),
-            pulse=ThePacemaker(),
-            gate=TheTangibilityGate(),
-            dynamics=TemporalDynamics(),
-            nav=TownHall.Navigator(shimmer_ref)
-        )
-
-class PanicRoom:
-    @staticmethod
-    def get_safe_physics():
-        return PhysicsPacket(
-            voltage=5.0,
-            narrative_drag=5.0,
-            clean_words=["system", "error"],
-            vector={"STR": 0.5, "VEL": 0.5},
-            counts={"heavy": 0, "kinetic": 0}, # Added for safety
-            raw_text="[SYSTEM FAILURE: PHYSICS BYPASSED]",
-            psi=0.5,
-            kappa=0.5
-        )
-
-    @staticmethod
-    def get_safe_bio():
-        return {
-            "is_alive": True,
-            "atp": 10.0,
-            "chem": {"DOP": 0.0, "COR": 0.0, "OXY": 0.0, "SER": 0.0},
-            "logs": [f"{Prisma.RED}BIO FAIL: Life support active.{Prisma.RST}"],
-            "respiration": "NECROSIS", # Fallback status
-            "enzyme": "NONE"
-        }
-
-    @staticmethod
-    def get_safe_mind():
-        return {
-            "lens": "NARRATOR",
-            "role": "The Backup System",
-            "thought": "I cannot think clearly, therefore I still am, but barely.",
-        }
+        print(f"{Prisma.paint('Disconnected.', '0')}")
+        return exc_type is KeyboardInterrupt
 
 class BoneAmanita:
     def __init__(self, memory_layer=None, lexicon_layer=None, user_name="TRAVELER"):
         self.user_name = user_name
-
-        # 1. Initialize Lexicon & Config
         self.lex = lexicon_layer if lexicon_layer else TheLexicon
         if hasattr(self.lex, 'initialize'): self.lex.initialize()
-
-        # Check for Hive Mind (Pinker would call this "Distributed Cognition")
         if hasattr(self.lex.store, 'hive_loaded') and self.lex.store.hive_loaded:
             BoneConfig.STAMINA_REGEN *= 1.1
             print(f"{Prisma.GRN}[GENETICS]: Ancestral knowledge detected. Stamina Regen boosted.{Prisma.RST}")
-
         self.lex.compile_antigens()
         TownHall.DeathGen.load_protocols()
         LiteraryReproduction.load_genetics()
-
-        # 2. Event Bus & Health Monitoring
         self.events = EventBus()
         self.system_health = SystemHealth()
         self.observer = TheObserver()
         self.system_health.link_observer(self.observer)
-
-        # 3. Architect Calls (The Delegation)
-        # We construct the Mind first, as the Body requires a Memory Address.
         self.mind, self.limbo = BoneArchitect.construct_mind(self.events, self.lex)
-
-        # Capture the Body AND the Soul Legacy
         self.bio, self.soul_legacy_data = BoneArchitect.construct_body(self.mind, self.events, self.lex)
         self.shimmer_state = self.bio.shimmer
         self.phys = BoneArchitect.construct_physics(self.events, self.shimmer_state)
         self.navigator = self.phys.nav
-
-        # Initialize Soul and Inject Legacy Data
         self.soul = NarrativeSelf(self.events)
         if self.soul_legacy_data:
             self.soul.load_from_dict(self.soul_legacy_data)
-
-        # 4. Civic Services (The Village)
         self.journal = TownHall.Journal()
         self.repro = LiteraryReproduction()
         self.projector = TownHall.Projector()
@@ -543,20 +83,13 @@ class BoneAmanita:
         self.tinkerer = TownHall.Tinkerer(self.gordon, self.events)
         self.almanac = TownHall.Almanac()
         self.cosmic = CosmicDynamics()
-        self.council = CouncilChamber()
-
-        # 5. Loops & Processors (The Dynamics)
-        # Note: CommandProcessor is now available directly via import
+        self.council = TownHall.CouncilChamber()
         self.cmd = CommandProcessor(self, Prisma, self.lex, BoneConfig, TownHall.Cartographer)
         self.soma = SomaticLoop(self.bio, self.mind.mem, self.lex, self.gordon, self.folly, self.events)
         self.noetic = NoeticLoop(self.mind, self.bio, self.events)
         self.cycle_controller = GeodesicOrchestrator(self)
-
-        # 6. The Cortex (Brainstem / LLM Uplink)
         local_brain = LLMInterface()
         self.cortex = TheCortex(self, llm_client=local_brain)
-
-        # 7. State Initialization (Setting the Stocks)
         self.tick_count = 0
         self.health = self.mind.mem.session_health if self.mind.mem.session_health else BoneConfig.MAX_HEALTH
         self.stamina = self.mind.mem.session_stamina if self.mind.mem.session_stamina else BoneConfig.MAX_STAMINA
@@ -570,11 +103,9 @@ class BoneAmanita:
     def process_turn(self, user_message: str, *args, **kwargs) -> Dict[str, Any]:
         turn_start = self.observer.clock_in()
         self.observer.user_turns += 1
-        if not user_message:
-            user_message = ""
+        if not user_message: user_message = ""
         cmd_response = self._phase_check_commands(user_message)
-        if cmd_response:
-            return cmd_response
+        if cmd_response: return cmd_response
         if self._ethical_audit():
             self.events.log(f"{Prisma.WHT}MERCY SIGNAL: Trauma boards wiped.{Prisma.RST}", "SYS")
         llm_start = self.observer.clock_in()
@@ -621,7 +152,7 @@ class BoneAmanita:
                 stamina=self.stamina,
                 mutations=self.repro.attempt_reproduction(self, "MITOSIS")[1],
                 trauma_accum=self.trauma_accum,
-                joy_history=[], # Simplify
+                joy_history=[],
                 mitochondria_traits=self.bio.mito.adapt(0),
                 antibodies=list(self.bio.immune.active_antibodies),
                 soul_data=self.soul.to_dict()
@@ -631,38 +162,24 @@ class BoneAmanita:
             death_log.append(f"Save Failed: {e}")
         return {"type": "DEATH", "ui": "\n".join(death_log), "logs": death_log, "metrics": self.get_metrics(0.0)}
 
-    def _package_turn(self, type_str, logs, context):
-        event_data = self.events.flush()
-        event_texts = [e['text'] for e in event_data]
-        logs.extend(event_texts)
-        return {
-            "type": type_str,
-            "ui": "\n".join(logs),
-            "logs": logs,
-            "metrics": self.get_metrics()}
-
     def get_metrics(self, atp=0.0):
         return {"health": self.health, "stamina": self.stamina, "atp": atp, "tick": self.tick_count}
 
     def emergency_save(self, exit_cause: str = "UNKNOWN") -> str:
-        log_msgs = [f"Initiating Emergency Spore Preservation (Cause: {exit_cause})..."]
-        meta = {
-            "timestamp": time.time(),
-            "final_health": getattr(self, "health", 0),
-            "final_stamina": getattr(self, "stamina", 0),
-            "exit_cause": str(exit_cause)
-        }
         try:
             sess_id = self.mind.mem.session_id
         except AttributeError:
             sess_id = f"corrupted_session_{int(time.time())}"
-        graph_data = getattr(self.mind.mem, "graph", {}) if hasattr(self, "mind") else {}
-        trauma_data = getattr(self, "trauma_accum", {})
         spore_data = {
             "session_id": sess_id,
-            "meta": meta,
-            "core_graph": graph_data,
-            "trauma_vector": trauma_data
+            "meta": {
+                "timestamp": time.time(),
+                "final_health": getattr(self, "health", 0),
+                "final_stamina": getattr(self, "stamina", 0),
+                "exit_cause": str(exit_cause)
+            },
+            "core_graph": getattr(self.mind.mem, "graph", {}) if hasattr(self, "mind") else {},
+            "trauma_vector": getattr(self, "trauma_accum", {})
         }
         try:
             if hasattr(self.mind.mem, "loader"):
@@ -700,70 +217,9 @@ class BoneAmanita:
     def check_pareidolia(words):
         return BoneConfig.check_pareidolia(words)
 
-class SessionGuardian:
-    def __init__(self, engine_ref):
-        self.eng = engine_ref
-
-    def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.2.7', 'G')}")
-        print(f"{Prisma.paint('System: LISTENING', '0')}")
-        return self.eng
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        print(f"\n{Prisma.paint('--- SYSTEM HALT ---', 'R')}")
-        if exc_type:
-            print(f"{Prisma.paint(f'CRITICAL FAILURE: {exc_val}', 'R')}")
-            if hasattr(self.eng, "events"):
-                self.eng.events.log(f"CRASH: {exc_val}", "SYS")
-        try:
-            print(f"{Prisma.paint('Initiating Emergency Spore Preservation...', 'Y')}")
-            spore_data = {}
-            try:
-                spore_data["session_id"] = self.eng.mind.mem.session_id
-            except AttributeError:
-                spore_data["session_id"] = f"corrupted_session_{int(time.time())}"
-            try:
-                spore_data["meta"] = {
-                    "timestamp": time.time(),
-                    "final_health": getattr(self.eng, "health", 0),
-                    "final_stamina": getattr(self.eng, "stamina", 0),
-                    "exit_cause": "INTERRUPT" if exc_type else "MANUAL"
-                }
-            except Exception:
-                spore_data["meta"] = {"timestamp": time.time(), "error": "Meta gather failed"}
-            try:
-                spore_data["core_graph"] = self.eng.mind.mem.graph
-            except AttributeError:
-                spore_data["core_graph"] = {}
-                print(f"{Prisma.paint('⚠ MEMORY LOSS: Graph inaccessible.', 'R')}")
-            try:
-                spore_data["trauma_vector"] = self.eng.trauma_accum
-            except AttributeError:
-                spore_data["trauma_vector"] = {}
-            saved_path = None
-            try:
-                saved_path = self.eng.mind.mem.loader.save_spore(
-                    f"emergency_{spore_data['session_id']}.json",
-                    spore_data
-                )
-            except Exception:
-                import json
-                fname = f"crash_dump_{int(time.time())}.json"
-                with open(fname, 'w') as f:
-                    json.dump(spore_data, f, default=str)
-                saved_path = fname
-            if saved_path:
-                print(f"{Prisma.paint(f'✔ Spore encapsulated: {saved_path}', 'C')}")
-            else:
-                print(f"{Prisma.paint('✘ Spore encapsulation failed completely.', 'R')}")
-        except Exception as e:
-            print(f"{Prisma.paint(f'FATAL: State corruption during shutdown. {e}', 'R')}")
-        print(f"{Prisma.paint('Disconnected.', '0')}")
-        return exc_type is KeyboardInterrupt
-
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.2.7', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.2.8', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")
@@ -779,6 +235,7 @@ if __name__ == "__main__":
     except (KeyboardInterrupt, EOFError):
         print("\nAborted.")
         exit()
+
     engine_instance = BoneAmanita(user_name=final_identity)
     with SessionGuardian(engine_instance) as eng:
         first_look = eng.process_turn("LOOK")

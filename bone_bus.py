@@ -390,3 +390,24 @@ class CycleContext:
 
     def log(self, message: str):
         self.logs.append(message)
+
+@dataclass
+class MindSystem:
+    mem: Any
+    lex: Any
+    dreamer: Any
+    mirror: Any
+    wise: Any
+    tracer: Any
+    integrator: Any
+
+@dataclass
+class PhysSystem:
+    tension: Any
+    forge: Any
+    crucible: Any
+    theremin: Any
+    pulse: Any
+    gate: Any
+    dynamics: Any
+    nav: Any

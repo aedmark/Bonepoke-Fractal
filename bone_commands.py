@@ -1,11 +1,16 @@
-# bone_commands.py - The Command Center
+# bone_commands.py - CORRECTION PATCH
+# Breaking the Ouroboros
 
 import inspect, os, random, shlex, time
-from typing import Dict, Callable, List
+from typing import Dict, Callable, List, TYPE_CHECKING
 from bone_village import ParadoxSeed
 
+# [CORRECTION: Prevent circular import]
+if TYPE_CHECKING:
+    from bone_main import BoneAmanita
+
 class CommandProcessor:
-    def __init__(self, engine, prisma_ref, lexicon_ref, config_ref, cartographer_ref):
+    def __init__(self, engine: 'BoneAmanita', prisma_ref, lexicon_ref, config_ref, cartographer_ref):
         self.eng = engine
         self.P = prisma_ref
         self.Lex = lexicon_ref
@@ -284,7 +289,7 @@ class CommandProcessor:
 
     def _cmd_help(self, parts):
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 10.2.7 MANUAL ---{self.P.RST}",
+            f"\n{self.P.CYN}--- BONEAMANITA 10.2.8 MANUAL ---{self.P.RST}",
             f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"]
         categories = {
             "CORE": ["_cmd_status", "_cmd_save", "_cmd_load", "_cmd_help"],
