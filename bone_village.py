@@ -7,7 +7,7 @@ from typing import List, Dict, Any, Tuple, Optional, Set
 from dataclasses import dataclass, field
 from bone_bus import Prisma, BoneConfig, CycleContext
 from bone_lexicon import TheLexicon
-from bone_personality import UserProfile, PublicParksDepartment
+from bone_personality import UserProfile, PublicParksDepartment, ZenGarden
 from bone_council import CouncilChamber
 
 try:
@@ -756,6 +756,7 @@ class TownHall:
     Navigator = TheNavigator
     Manifold = Manifold
     PublicParksDepartment = PublicParksDepartment
+    ZenGarden = ZenGarden
 
     # Department of Philosophy & Psychology
     Tinkerer = TheTinkerer

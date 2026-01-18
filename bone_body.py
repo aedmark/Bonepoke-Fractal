@@ -63,7 +63,7 @@ class MitochondrialForge:
         if inherited_traits:
             self._apply_inheritance(inherited_traits)
 
-    def _apply_inheritance(self, traits: Dict):
+    def apply_inheritance(self, traits: Dict):
         self.state.efficiency_mod = traits.get("efficiency_mod", 1.0)
         self.state.ros_resistance = traits.get("ros_resistance", 1.0)
         if "enzymes" in traits:

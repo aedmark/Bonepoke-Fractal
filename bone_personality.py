@@ -139,6 +139,52 @@ class SynergeticLensArbiter:
             msg = template
         return msg, role
 
+class ZenGarden:
+    def __init__(self, events_ref):
+        self.events = events_ref
+        self.stillness_streak = 0
+        self.max_streak = 0
+        self.pebbles_collected = 0
+        self.koans = [
+            "The code that is not written has no bugs.",
+            "To optimize the loop, one must first exit it.",
+            "Silence is also a form of input.",
+            "The server hums. It is enough.",
+            "Optimize for the space between the logs."
+        ]
+
+    def raking_the_sand(self, physics: Dict, bio: Dict) -> Tuple[float, Optional[str]]:
+        voltage = physics.get("voltage", 0.0)
+        drag = physics.get("narrative_drag", 0.0)
+        toxin = physics.get("counts", {}).get("toxin", 0)
+        cortisol = bio.get("chem", {}).get("COR", 0.0)
+        is_stable = (2.0 <= voltage <= 12.0) and (drag <= 4.0) and (toxin == 0) and (cortisol < 0.4)
+        if is_stable:
+            self.stillness_streak += 1
+            if self.stillness_streak > self.max_streak:
+                self.max_streak = self.stillness_streak
+            efficiency_boost = min(0.5, self.stillness_streak * 0.05)
+            msg = None
+            if self.stillness_streak % 5 == 0:
+                pebble = "⚪"
+                self.pebbles_collected += 1
+                msg = f"{Prisma.CYN}⛩️ ZEN GARDEN: {self.stillness_streak} ticks of poise. The sand is raked. (Efficiency +{int(efficiency_boost*100)}%){Prisma.RST}"
+            elif self.stillness_streak == 1:
+                msg = f"{Prisma.GRY}ZEN GARDEN: Entering the quiet zone.{Prisma.RST}"
+            if self.stillness_streak == 20:
+                koan = random.choice(self.koans)
+                msg = (
+                    f"{Prisma.GRN}🍵 SATORI ACHIEVED: Perfect Equilibrium.{Prisma.RST}\n"
+                    f"   {Prisma.WHT}Legacy Awarded: 'The Smooth Stone'.{Prisma.RST}\n"
+                    f"   {Prisma.GRY}Koan: {koan}{Prisma.RST}"
+                )
+            return efficiency_boost, msg
+        else:
+            if self.stillness_streak > 5:
+                self.events.log(f"{Prisma.GRY}ZEN GARDEN: A leaf falls. Stillness broken at {self.stillness_streak}.{Prisma.RST}", "SYS")
+            self.stillness_streak = 0
+            return 0.0, None
+
 class PublicParksDepartment:
     def __init__(self, output_dir="exports"):
         self.output_dir = output_dir

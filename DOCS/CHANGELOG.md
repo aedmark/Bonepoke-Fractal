@@ -1,7 +1,101 @@
 # 📜 BONEAMANITA CHANGELOG
 
-**Current Version:** 10.2.8
-**Maintainer:** SLASH, KICHO, James, Andrew
+## v10.3.2 - "The Quiet & The Embryo"
+
+**Focus:** Ontological Stability, "Boring Health" Incentives, and Initialization Hygiene.
+
+### ⚖️ The Meadows Lens (Dynamics)
+
+* **The Zen Garden (`bone_village.py`):** Implemented a "Boring Health" protocol to counter the system's addiction to crisis.
+* **The Fix:** Added a `ZenGarden` module that monitors for **Stillness** (Moderate Voltage, Low Drag, No Toxin).
+* **The Logic:** Previously, the system was a "Drama Engine," incentivizing trauma (`Kintsugi`, `Therapy`) to trigger rewards. We introduced a **Balancing Loop**: maintaining poise now grants an `Efficiency` buff (lower ATP cost), making peace profitable.
+
+### 🌐 The Fuller Lens (Structure)
+
+* **Developmental Airlock (`bone_architect.py`):** Refactored the boot sequence into two distinct phases: `Incubate` (Structure) and `Awaken` (Function).
+* **The Fix:** We now construct a `SystemEmbryo` (inert organs) before injecting ancestral data.
+* **The Logic:** This prevents an **Ontological Race Condition** where the `ParasiticSymbiont` would observe the Mind *while* it was being built. The sculpture must set before the critics are allowed in the room.
+
+### 🧠 The Pinker Lens (Code Contracts)
+
+* **Explicit Interfaces (`bone_body.py`):** Promoted `_apply_inheritance` to `apply_inheritance`.
+* **The Fix:** Removed the protected underscore to formalize the contract between the `Architect` and the `Body`.
+* **The Logic:** If the Architect is required to call it during the `Awaken` phase, it is a public interface. We do not sneak into our own code through the back door.
+
+### 🍩 The Schur Lens (Vibe)
+
+* **Raking the Sand:** The Zen Garden actively counts "ticks of poise" and collects "pebbles."
+* **The Fix:** Doing nothing is now a recognized gameplay mechanic.
+* **The Logic:** Sometimes the most heroic thing a machine can do is sit quietly and not explode.
+* 
+
+## v10.3.1 - "The Synergetic Governor"
+
+**Focus:** Input Hygiene, Causality Repair, and Graceful Exits.
+
+### ⚖️ The Meadows Lens (Limits to Growth)
+
+- **The Input Governor (`bone_genesis.py`):** Installed a **Balancing Loop** on the user input stream.
+    - **The Fix:** Implemented `MAX_LINES` (50) and `MAX_CHARS` (20,000).
+    - **The Logic:** Previously, the system allowed infinite inflow (Reinforcing Loop), which creates a "Runaway Stock" that eventually bursts the RAM container. We now politely shout `[STOP]` instead of crashing.
+
+### 🌐 The Fuller Lens (Structural Integrity)
+
+- **Causality Repair:** Moved `perform_identity_handshake` **upstream** in the boot timeline.
+    - **The Fix:** We now verify the user's identity *before* initializing the Cortex.
+    - **The Logic:** You cannot have a conversation with a ghost. The "Mind" strut must be load-bearing before the "Language" strut is attached.
+- **The Missing Strut:** Added `localai` to the manual configuration menu. The dome now supports all local substrates equally.
+
+### 🧠 The Pinker Lens (Cognition & Contracts)
+
+- **Strict Config Sync:** Replaced vague "drift detection" with **Strict Contract Enforcement**.
+    - **The Fix:** If `BoneConfig.load_from_file` returns garbage, we don't just log a yellow warning; we revert to Safe Mode.
+    - **The Logic:** A contract is a contract. Ambiguity in initialization leads to cognitive dissonance downstream.
+
+### 🍩 The Schur Lens (Manners)
+
+- **The Fire Alarm (`KeyboardInterrupt`):** Added a `try/except` block for `Ctrl+C` in the main loop.
+    - **The Fix:** You can now interrupt the machine without it vomiting a stack trace.
+    - **The Logic:** Sometimes you just need to leave the party. We now hold the door open for you.
+- Based on our work today—refactoring the cycle architecture, implementing the Narrative Spotlight, and igniting the Alchemical Forge—here is the updated changelog entry.
+
+I have bumped the version to **v10.3.0** given the introduction of major gameplay mechanics (Crafting) and the structural overhaul.
+
+## v10.3.0 - "The Illuminated Forge"
+
+**Focus:** Alchemical Transmutation, Contextual Efficiency, and Anti-Fragile Architecture.
+
+### ⚗️ The Schur Lens (Whimsy & Mechanics)
+
+* **The Alchemical Forge (`bone_machine.py`):** Implemented a crafting engine. `TheForge` now detects interactions between Inventory Items (Ingredients) and User Input (Catalysts).
+* **Transmutation Recipes:** Added `RECIPES` to `bone_data.py`.
+* *Example:* `POCKET_ROCKS` + `THERMAL` words = `LAVA_LAMP`.
+
+
+* **The Fizzle Mechanic:** The Forge now demands **Voltage** and **Truth**. Weak sentences will trigger a "Fizzle" warning, teaching the user to write with more conviction.
+* **Affordances:** Updated item descriptions to hint at their reactive properties (e.g., Rocks are "cold," imply need for heat).
+
+### 🧠 The Pinker Lens (Cognition)
+
+* **The Narrative Spotlight (`bone_brain.py`):** Stopped dumping the entire memory graph into the LLM context window.
+* **Vector Search:** The system now scans memory for nodes that resonate with the current **Geodesic Vector** (e.g., High Velocity illuminates `KINETIC` memories).
+* **Token Hygiene:** reduced cognitive load by serving only relevant "Engrams."
+
+* **Lexicon Service:** Patched `bone_lexicon.py` to expose `get_categories_for_word` via the static facade.
+
+### 🏛️ The Fuller Lens (System Integrity)
+
+* **Spaceship Earth Refactor (`bone_cycle.py`):** Complete dismantle of the "God Object" Orchestrator.
+* **Decoupling:** Split logic into `CycleSimulator` (State Mutation) and `CycleReporter` (Read-Only Rendering).
+* **Resilience:** A rendering crash no longer kills the simulation; the organism can survive a UI failure.
+* **The Strunk & White Protocol:**
+* **Initialization Fix:** Properly wired the Style Editor into `TheCortex`.
+* **Active Policing:** The system now rejects "lazy" rhetoric (Rule of Threes, "It is" parades) and taxes ATP for boring prose.
+
+### 🐛 Bug Fixes
+
+* **Ghost in the Machine:** Fixed `NameError` regarding `TownHall` imports in `bone_brain.py`.
+* **Strict Typing:** Corrected `bone_machine.py` return signatures to allow `Optional[str]`, appeasing the Bureau of Linters.
 
 ---
 

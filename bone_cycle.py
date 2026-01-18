@@ -58,6 +58,14 @@ class CycleSimulator:
             self._handle_critical_failure(ctx, "MIND", e, PanicRoom.get_safe_mind, is_mind=True)
         return ctx
 
+    def _tend_garden(self, ctx: CycleContext):
+        eff_boost, zen_msg = self.eng.zen.raking_the_sand(ctx.physics, ctx.bio_result)
+        if zen_msg:
+            ctx.log(zen_msg)
+        if eff_boost > 0:
+            current_eff = self.eng.bio.mito.state.efficiency_mod
+            self.eng.bio.mito.state.efficiency_mod = min(2.0, current_eff + (eff_boost * 0.1))
+
     def _handle_critical_failure(self, ctx, component, error, panic_func, is_bio=False, is_mind=False):
         print(f"\n{Prisma.RED}!!! CRITICAL {component} CRASH !!!{Prisma.RST}")
         traceback.print_exc()
@@ -177,6 +185,7 @@ class CycleSimulator:
         self._apply_reality_filters(ctx)
         self._process_navigation(ctx)
         self._process_cosmic_state(ctx)
+        self._tend_garden(ctx)
         self._operate_machinery(ctx)
         self._process_intrusions(ctx)
         self._phase_soul_work(ctx)

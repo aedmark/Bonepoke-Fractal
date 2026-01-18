@@ -1,4 +1,4 @@
-# BONEAMANITA 10.3.0 - "The Illuminated Forge"
+# BONEAMANITA 10.3.2 - "The Quiet and the Embryo"
 # Architects: SLASH, KISHO, The Courtyard, Taylor & Edmark
 
 import time, json, traceback
@@ -27,7 +27,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.3.0', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.3.2', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
@@ -62,10 +62,14 @@ class BoneAmanita:
         self.system_health = SystemHealth()
         self.observer = TheObserver()
         self.system_health.link_observer(self.observer)
-        self.mind, self.limbo = BoneArchitect.construct_mind(self.events, self.lex)
-        self.bio, self.soul_legacy_data = BoneArchitect.construct_body(self.mind, self.events, self.lex)
-        self.shimmer_state = self.bio.shimmer
-        self.phys = BoneArchitect.construct_physics(self.events, self.shimmer_state)
+        self.embryo = BoneArchitect.incubate(self.events, self.lex)
+        self.embryo = BoneArchitect.awaken(self.embryo)
+        self.mind = self.embryo.mind
+        self.limbo = self.embryo.limbo
+        self.bio = self.embryo.bio
+        self.phys = self.embryo.physics
+        self.shimmer_state = self.embryo.shimmer
+        self.soul_legacy_data = self.embryo.soul_legacy
         self.navigator = self.phys.nav
         self.soul = NarrativeSelf(self.events)
         if self.soul_legacy_data:
@@ -85,6 +89,7 @@ class BoneAmanita:
         self.cosmic = CosmicDynamics()
         self.council = TownHall.CouncilChamber()
         self.cmd = CommandProcessor(self, Prisma, self.lex, BoneConfig, TownHall.Cartographer)
+        self.zen = TownHall.ZenGarden(self.events)
         self.soma = SomaticLoop(self.bio, self.mind.mem, self.lex, self.gordon, self.folly, self.events)
         self.noetic = NoeticLoop(self.mind, self.bio, self.events)
         self.cycle_controller = GeodesicOrchestrator(self)
@@ -219,7 +224,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.3.0', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.3.2', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

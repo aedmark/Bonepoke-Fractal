@@ -127,10 +127,10 @@ class GenesisProtocol:
     def _manual_config_flow(self) -> Optional[bool]:
         self.type_out("\n--- MANUAL CONFIGURATION ---", color=Prisma.OCHRE)
         while True:
-            valid_providers = ["ollama", "openai", "lm_studio", "mock"]
+            valid_providers = ["ollama", "openai", "lm_studio", "localai", "mock"]
             print(f"1. {Prisma.WHT}Provider Type?{Prisma.RST}")
             print(f"   Options: {', '.join(valid_providers)}")
-            print(f"   (Note: Use 'openai' for generic local servers like LocalAI/vLLM)")
+            print(f"   (Note: Use 'openai' for generic local servers like vLLM)")
             provider = input(f"{Prisma.paint('>', 'O')} ").strip().lower()
             if provider not in valid_providers:
                 self.type_out(f"Invalid provider '{provider}'. Defaulting to 'openai'.", color=Prisma.YEL)
@@ -146,6 +146,7 @@ class GenesisProtocol:
             provider_defaults = {
                 "ollama": "http://127.0.0.1:11434/v1/chat/completions",
                 "lm_studio": "http://127.0.0.1:1234/v1/chat/completions",
+                "localai": "http://127.0.0.1:8080/v1/chat/completions",
                 "openai": "https://api.openai.com/v1/chat/completions"
             }
             default_url = provider_defaults.get(provider, "https://api.openai.com/v1/chat/completions")
@@ -184,7 +185,7 @@ class GenesisProtocol:
     def wizard(self) -> bool:
         os.system('cls' if os.name == 'nt' else 'clear')
         banner = f"""
-{Prisma.CYN}   GENESIS PROTOCOL v10.3.0{Prisma.RST}
+{Prisma.CYN}   GENESIS PROTOCOL v10.3.2{Prisma.RST}
 {Prisma.GRY}State Machine Active. Tensegrity Nominal.{Prisma.RST}
 ------------------------------------"""
         print(banner)
@@ -304,6 +305,47 @@ Do not break character. Do not explain the simulation rules unless asked.
             f.write(prompt)
         self.type_out(f"\n[EXPORT COMPLETE] 'SYSTEM_PROMPT.txt' created.", color=Prisma.CYN)
 
+    def perform_identity_handshake(self, engine):
+        if not hasattr(engine, 'mind'):
+            self.type_out(f"{Prisma.GRY}[HANDSHAKE SKIPPED]: Mind system offline.{Prisma.RST}")
+            return
+        if not hasattr(engine.mind, 'mirror'):
+            self.type_out(f"{Prisma.GRY}[HANDSHAKE SKIPPED]: Mirror system offline.{Prisma.RST}")
+            return
+        if engine.mind.mirror.profile.confidence >= 20:
+            return
+        print(f"\n{Prisma.CYN}[IDENTITY HANDSHAKE]{Prisma.RST}")
+        try:
+            print(f"The machine recognizes a silhouette, but not a face.")
+            user_id = input(f"Designation? (Enter to remain Anonymous): ").strip()
+            if user_id:
+                engine.mind.mirror.profile.name = user_id
+                engine.mind.mirror.profile.confidence = 25
+                self.type_out(f"...Designation '{user_id}' provisionally accepted. (Confidence: 25%)", color=Prisma.GRN)
+            else:
+                self.type_out("...Proceeding as Anonymous Traveler.", color=Prisma.GRY)
+        except KeyboardInterrupt:
+            print(f"\n{Prisma.YEL}\n[INTERRUPT DETECTED]{Prisma.RST}")
+            sys.exit(0)
+
+    def _sync_configuration(self):
+        if not hasattr(BoneConfig, 'load_from_file'):
+            self.type_out("...BoneConfig missing 'load_from_file'. Using hardcoded defaults.", color=Prisma.OCHRE)
+            return
+        try:
+            load_result = BoneConfig.load_from_file(CONFIG_FILE)
+            if not isinstance(load_result, tuple) or len(load_result) != 2:
+                raise ValueError(f"Invalid return signature from loader: {type(load_result)}")
+            success, msg = load_result
+            if success:
+                self.type_out(f"...Config Synced: {msg}", color=Prisma.GRN)
+            else:
+                self.type_out(f"...Config Sync Failed: {msg}", color=Prisma.RED)
+                self.type_out("   > Critical variance detected. Reverting to Safe Mode defaults.", color=Prisma.GRY)
+        except Exception as e:
+            self.type_out(f"...Config Sync CRITICAL FAILURE ({e}).", color=Prisma.RED)
+            self.type_out("   > System integrity compromised. Proceeding with volatile memory.", color=Prisma.YEL)
+
     def launch(self):
         config_status = "MISSING"
         safe_config = {
@@ -338,22 +380,9 @@ Do not break character. Do not explain the simulation rules unless asked.
                 self.config = safe_config.copy()
                 self.config["provider"] = "mock"
         self.type_out("\n...Booting Core Systems...", color=Prisma.GRY)
-        try:
-            if hasattr(BoneConfig, 'load_from_file'):
-                load_result = BoneConfig.load_from_file(CONFIG_FILE)
-                if isinstance(load_result, tuple) and len(load_result) == 2:
-                    success, msg = load_result
-                    if success:
-                        self.type_out(f"...Config Synced: {msg}", color=Prisma.GRN)
-                    else:
-                        self.type_out(f"...Config Drift Detected: {msg}", color=Prisma.YEL)
-                else:
-                    self.type_out(f"...Config Format Error. Result: {load_result}", color=Prisma.YEL)
-            else:
-                self.type_out("...BoneConfig missing 'load_from_file'. Using hardcoded defaults.", color=Prisma.OCHRE)
-        except Exception as e:
-            self.type_out(f"...Config Sync Failed ({e}). Proceeding with volatile memory.", color=Prisma.RED)
+        self._sync_configuration()
         engine = BoneAmanita()
+        self.perform_identity_handshake(engine)
         if engine.mind.mirror.profile.confidence < 20:
             print(f"\n{Prisma.CYN}[IDENTITY HANDSHAKE]{Prisma.RST}")
             try:
@@ -392,19 +421,37 @@ Do not break character. Do not explain the simulation rules unless asked.
                     u = input(f"{prompt_char} ")
                     if u.strip() == "<<<":
                         print(f"{Prisma.GRY}   [MULTI-LINE MODE ACTIVE. Type '>>>' to send.]{Prisma.RST}")
+                        MAX_LINES = 50
+                        MAX_TOTAL_CHARS = 20000
                         lines = []
+                        total_chars = 0
+                        buffer_full = False
                         while True:
                             try:
                                 line = input(f"{Prisma.paint('...', '0')} ")
                                 if line.strip() == ">>>":
                                     break
+                                line_len = len(line)
+                                if len(lines) >= MAX_LINES:
+                                    print(f"{Prisma.paint('   [STOP]: Maximum line count (50) reached. Truncating input.', 'Y')}")
+                                    buffer_full = True
+                                    break
+                                if (total_chars + line_len) > MAX_TOTAL_CHARS:
+                                    print(f"{Prisma.paint('   [STOP]: Character limit (20k) reached. The buffer is full.', 'Y')}")
+                                    buffer_full = True
+                                    break
                                 lines.append(line)
+                                total_chars += line_len
                             except EOFError:
                                 break
                         u = "\n".join(lines)
-                        print(f"{Prisma.GRY}   [Block received: {len(u)} chars]{Prisma.RST}")
+                        status_color = 'Y' if buffer_full else '0'
+                        print(f"{Prisma.paint(f'   [Block received: {len(u)} chars]', status_color)}")
                     if not u: continue
                 except EOFError:
+                    break
+                except KeyboardInterrupt:
+                    print(f"\n{Prisma.paint('...Interrupted.', 'Y')}")
                     break
                 if u.lower() in ["exit", "quit", "/exit"]:
                     break

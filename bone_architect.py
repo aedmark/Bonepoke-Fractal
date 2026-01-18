@@ -3,6 +3,7 @@
 
 import time
 from typing import Tuple, Dict, Any, Optional
+from dataclasses import dataclass
 from bone_bus import Prisma, BoneConfig, MindSystem, PhysSystem
 from bone_data import LENSES
 from bone_village import TownHall
@@ -23,6 +24,15 @@ from bone_physics import (
     TheTensionMeter, TheTangibilityGate, TemporalDynamics
 )
 from bone_machine import TheCrucible, TheForge, TheTheremin
+
+@dataclass
+class SystemEmbryo:
+    mind: MindSystem
+    limbo: LimboLayer
+    bio: BioSystem
+    physics: PhysSystem
+    shimmer: Any
+    soul_legacy: Optional[Dict] = None
 
 class PanicRoom:
     @staticmethod
@@ -60,12 +70,11 @@ class PanicRoom:
 
 class BoneArchitect:
     @staticmethod
-    def construct_mind(events, lex) -> Tuple[MindSystem, LimboLayer]:
+    def incubate(events, lex) -> SystemEmbryo:
         _mem = MycelialNetwork(events)
         limbo = LimboLayer()
         _mem.cleanup_old_sessions(limbo)
-
-        return MindSystem(
+        mind = MindSystem(
             mem=_mem,
             lex=lex,
             dreamer=DreamEngine(events),
@@ -73,28 +82,10 @@ class BoneArchitect:
             wise=TownHall.Apeirogon(events),
             tracer=ViralTracer(_mem),
             integrator=TownHall.Sorites(_mem)
-        ), limbo
-
-    @staticmethod
-    def construct_body(mind, events, lex) -> Tuple[BioSystem, Dict]:
-        # Attempt to load ancestral data (The Spore)
-        load_result = mind.mem.autoload_last_spore()
-
-        if load_result and len(load_result) == 3:
-            inherited_traits, inherited_antibodies, soul_legacy = load_result
-        elif load_result:
-            inherited_traits = load_result[0]
-            inherited_antibodies = load_result[1]
-            soul_legacy = {}
-        else:
-            inherited_traits, inherited_antibodies, soul_legacy = {}, set(), {}
-
-        # The Immune System
+        )
         immune_system = MycotoxinFactory()
-        immune_system.active_antibodies = inherited_antibodies
-
         bio = BioSystem(
-            mito=MitochondrialForge(mind.mem.session_id, events, inherited_traits),
+            mito=MitochondrialForge("PENDING_ACTIVATION", events),
             endo=EndocrineSystem(),
             immune=immune_system,
             lichen=LichenSymbiont(),
@@ -104,11 +95,7 @@ class BoneArchitect:
             shimmer=ShimmerState(),
             parasite=ParasiticSymbiont(mind.mem, lex)
         )
-        return bio, soul_legacy
-
-    @staticmethod
-    def construct_physics(events, shimmer_ref) -> PhysSystem:
-        return PhysSystem(
+        physics = PhysSystem(
             tension=TheTensionMeter(events),
             forge=TheForge(),
             crucible=TheCrucible(),
@@ -116,5 +103,25 @@ class BoneArchitect:
             pulse=ThePacemaker(),
             gate=TheTangibilityGate(),
             dynamics=TemporalDynamics(),
-            nav=TownHall.Navigator(shimmer_ref)
+            nav=TownHall.Navigator(bio.shimmer)
         )
+        return SystemEmbryo(mind, limbo, bio, physics, bio.shimmer)
+
+    @staticmethod
+    def awaken(embryo: SystemEmbryo) -> SystemEmbryo:
+        # 1. Load Ancestral Spore
+        load_result = embryo.mind.mem.autoload_last_spore()
+        inherited_traits = {}
+        inherited_antibodies = set()
+        soul_legacy = {}
+        if load_result:
+            if len(load_result) == 3:
+                inherited_traits, inherited_antibodies, soul_legacy = load_result
+            else:
+                inherited_traits = load_result[0]
+                inherited_antibodies = load_result[1]
+        embryo.bio.mito.state.mother_hash = embryo.mind.mem.session_id
+        embryo.bio.mito.apply_inheritance(inherited_traits)
+        embryo.bio.immune.active_antibodies = inherited_antibodies
+        embryo.soul_legacy = soul_legacy
+        return embryo
