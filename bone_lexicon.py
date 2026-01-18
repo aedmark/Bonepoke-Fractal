@@ -205,15 +205,28 @@ class LexiconService:
     SOLVENTS = set()
 
     @classmethod
+    def get_store(cls):
+        if not cls._INITIALIZED:
+            cls.initialize()
+        return cls._STORE
+
+    @classmethod
     def initialize(cls):
-        if cls._INITIALIZED: return
-        cls._STORE = LexiconStore()
-        cls._STORE.load_vocabulary()
-        cls._ANALYZER = LinguisticAnalyzer(cls._STORE)
-        cls._STORE.set_engine(cls._ANALYZER)
-        cls.compile_antigens()
-        cls.SOLVENTS = cls._STORE.SOLVENTS
+        if cls._INITIALIZED:
+            return
         cls._INITIALIZED = True
+        try:
+            cls._STORE = LexiconStore()
+            cls._STORE.load_vocabulary()
+            cls._ANALYZER = LinguisticAnalyzer(cls._STORE)
+            cls._STORE.set_engine(cls._ANALYZER)
+            cls.compile_antigens()
+            cls.SOLVENTS = cls._STORE.SOLVENTS
+            print(f"{Prisma.GRN}[LEXICON]: Systems Nominal. Vocabulary Loaded.{Prisma.RST}")
+        except Exception as e:
+            cls._INITIALIZED = False
+            print(f"{Prisma.RED}[LEXICON]: Initialization Failed: {e}{Prisma.RST}")
+            raise e
 
     @classmethod
     def get_categories_for_word(cls, word: str) -> Set[str]:
@@ -240,7 +253,9 @@ class LexiconService:
 
     @classmethod
     def compile_antigens(cls):
-        if not cls._INITIALIZED: cls.initialize()
+        if not cls._INITIALIZED:
+            cls.initialize()
+            return
         replacements = cls._STORE.ANTIGEN_REPLACEMENTS
         if not replacements:
             cls.ANTIGEN_REGEX = None

@@ -20,13 +20,15 @@ class Prisma:
     OCHRE = "\033[33;2m"
     VIOLET = "\033[35;2m"
     SLATE = "\033[30;1m"
+    PUR = "\033[35m"
 
     @classmethod
     def paint(cls, text, color_key="0"):
         color_map = {
             "R": cls.RED, "G": cls.GRN, "Y": cls.YEL, "B": cls.BLU,
             "M": cls.MAG, "C": cls.CYN, "W": cls.WHT, "0": cls.GRY,
-            "I": cls.INDIGO, "O": cls.OCHRE, "V": cls.VIOLET
+            "I": cls.INDIGO, "O": cls.OCHRE, "V": cls.VIOLET,
+            "P": cls.PUR
         }
         code = color_map.get(str(color_key).upper(), cls.WHT)
         safe_text = str(text).replace(cls.RST, cls.RST + code)
@@ -34,7 +36,7 @@ class Prisma:
 
     @classmethod
     def tie_dye(cls, text):
-        colors = [cls.RED, cls.GRN, cls.YEL, cls.CYN, cls.MAG, cls.VIOLET, cls.OCHRE]
+        colors = [cls.RED, cls.GRN, cls.YEL, cls.CYN, cls.MAG, cls.VIOLET, cls.OCHRE, cls.PUR]
         words = text.split()
         painted = []
         for w in words:
@@ -369,6 +371,10 @@ class CycleContext:
     clean_words: List[str] = field(default_factory=list)
     physics: Any = field(default_factory=dict)
     logs: List[str] = field(default_factory=list)
+    # [SLASH MODIFICATION: START] - The Bidirectional State Mirror
+    # Tracks the delta of values (Before -> After) during the cycle
+    flux_log: List[Dict[str, Any]] = field(default_factory=list)
+    # [SLASH MODIFICATION: END]
     is_alive: bool = True
     refusal_triggered: bool = False
     refusal_packet: Optional[Dict] = None
@@ -390,6 +396,18 @@ class CycleContext:
 
     def log(self, message: str):
         self.logs.append(message)
+    def record_flux(self, phase: str, metric: str, initial: float, final: float, reason: str = ""):
+        delta = final - initial
+        if abs(delta) > 0.001:
+            self.flux_log.append({
+                "phase": phase,
+                "metric": metric,
+                "initial": initial,
+                "final": final,
+                "delta": delta,
+                "reason": reason,
+                "timestamp": time.time()
+            })
 
 @dataclass
 class MindSystem:

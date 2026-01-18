@@ -1,4 +1,4 @@
-# BONEAMANITA 10.4 - "The Symbiotic Tether"
+# BONEAMANITA 10.4.0 - "The Symbiotic Tether"
 # Architects: SLASH, KISHO, The Courtyard, Taylor & Edmark
 
 import time, json, traceback
@@ -51,10 +51,13 @@ class BoneAmanita:
     def __init__(self, memory_layer=None, lexicon_layer=None, user_name="TRAVELER"):
         self.user_name = user_name
         self.lex = lexicon_layer if lexicon_layer else TheLexicon
-        if hasattr(self.lex, 'initialize'): self.lex.initialize()
-        if hasattr(self.lex.store, 'hive_loaded') and self.lex.store.hive_loaded:
-            BoneConfig.STAMINA_REGEN *= 1.1
-            print(f"{Prisma.GRN}[GENETICS]: Ancestral knowledge detected. Stamina Regen boosted.{Prisma.RST}")
+        if hasattr(self.lex, 'initialize'):
+            self.lex.initialize()
+        if hasattr(self.lex, 'get_store'):
+            store = self.lex.get_store()
+            if store and getattr(store, 'hive_loaded', False):
+                BoneConfig.STAMINA_REGEN *= 1.1
+                print(f"{Prisma.GRN}[GENETICS]: Ancestral knowledge detected. Stamina Regen boosted.{Prisma.RST}")
         self.lex.compile_antigens()
         TownHall.DeathGen.load_protocols()
         LiteraryReproduction.load_genetics()
@@ -224,7 +227,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.4', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.4.0', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

@@ -1,8 +1,8 @@
 # bone_cycle.py
 # "The wheel turns, and ages come and pass." - Jordan
-import math
-import traceback, random, time
-from typing import Dict, Any, Optional, Tuple
+
+import traceback, random, time, math
+from typing import Dict, Any, Optional, Tuple, List
 from dataclasses import dataclass, field
 from bone_bus import Prisma, BoneConfig, CycleContext
 from bone_village import TownHall
@@ -42,27 +42,37 @@ class CycleStabilizer:
 
     def stabilize(self, ctx: CycleContext, current_phase: str):
         curr_v, curr_d = self._get_current_metrics(ctx)
-        delta_v = curr_v - self.last_voltage
-        delta_d = curr_d - self.last_drag
-        corrections = []
-        if abs(delta_v) > self.MAX_DELTA_V:
-            excess = delta_v - (math.copysign(self.MAX_DELTA_V, delta_v))
+        delta_v_interphase = curr_v - self.last_voltage
+        delta_d_interphase = curr_d - self.last_drag
+        corrections_made = False
+        if abs(delta_v_interphase) > self.MAX_DELTA_V:
+            excess = delta_v_interphase - (math.copysign(self.MAX_DELTA_V, delta_v_interphase))
             damping = -(excess * 0.8)
             self._apply_correction(ctx, "voltage", damping)
-            corrections.append(f"Voltage Damped ({damping:+.1f}v)")
+            ctx.record_flux(
+                phase=current_phase,
+                metric="voltage",
+                initial=curr_v,
+                final=curr_v + damping,
+                reason="OSCILLATION_DAMPING"
+            )
             curr_v += damping
-        if abs(delta_d) > self.MAX_DELTA_D:
-            excess = delta_d - (math.copysign(self.MAX_DELTA_D, delta_d))
+            corrections_made = True
+        if abs(delta_d_interphase) > self.MAX_DELTA_D:
+            excess = delta_d_interphase - (math.copysign(self.MAX_DELTA_D, delta_d_interphase))
             damping = -(excess * 0.8)
             self._apply_correction(ctx, "narrative_drag", damping)
-            corrections.append(f"Drag Stabilized ({damping:+.1f})")
-            curr_d += damping
-        if corrections:
-            joined_msg = ", ".join(corrections)
-            self.events.log(
-                f"{Prisma.CYN}⚖️ GYROSCOPE: Phase '{current_phase}' instability detected. {joined_msg}.{Prisma.RST}",
-                "SYS"
+            ctx.record_flux(
+                phase=current_phase,
+                metric="narrative_drag",
+                initial=curr_d,
+                final=curr_d + damping,
+                reason="DRAG_STABILIZER"
             )
+            curr_d += damping
+            corrections_made = True
+        if corrections_made:
+            pass
         self.last_voltage = curr_v
         self.last_drag = curr_d
         self.last_phase = current_phase
@@ -77,15 +87,20 @@ class CycleSimulator:
 
     def run_simulation(self, ctx: CycleContext) -> CycleContext:
         try:
+            # --- PHASE 1: OBSERVE ---
+
             if self.eng.system_health.physics_online:
                 self._phase_observe(ctx)
-                self.stabilizer.stabilize(ctx, "OBSERVE") # Checkpoint 1
+                self.stabilizer.stabilize(ctx, "OBSERVE")
             else:
                 raise Exception("Physics module previously failed.")
         except Exception as e:
             self._handle_critical_failure(ctx, "PHYSICS", e, PanicRoom.get_safe_physics)
         if self.eng.tick_count % 10 == 0:
             self._maintenance_prune(ctx)
+
+        # --- PHASE 2: GATEKEEP ---
+
         if self.eng.system_health.physics_online:
             try:
                 if self._phase_gatekeep(ctx):
@@ -93,6 +108,9 @@ class CycleSimulator:
                     return ctx
             except Exception as e:
                 ctx.log(f"{Prisma.YEL}GATEKEEPER ASLEEP: {e}{Prisma.RST}")
+
+        # --- PHASE 3: METABOLIZE ---
+
         try:
             if self.eng.system_health.bio_online:
                 self._phase_metabolize(ctx)
@@ -101,13 +119,18 @@ class CycleSimulator:
                 raise Exception("Bio module previously failed.")
         except Exception as e:
             self._handle_critical_failure(ctx, "BIO", e, PanicRoom.get_safe_bio, is_bio=True)
+
         if not ctx.is_alive:
             return ctx
+
+        # --- PHASE 4: SIMULATE ---
+
         try:
             self._phase_simulate(ctx)
             self.stabilizer.stabilize(ctx, "SIMULATION")
         except Exception as e:
             ctx.log(f"{Prisma.RED}SIMULATION GLITCH: {e}{Prisma.RST}")
+            traceback.print_exc()
         try:
             if self.eng.system_health.mind_online:
                 self._phase_cognate(ctx)
@@ -167,7 +190,6 @@ class CycleSimulator:
             ctx.refusal_triggered = True
             ctx.refusal_packet = refusal_packet
             return True
-
         audit_result = self.bureau.audit(ctx.physics, ctx.bio_result)
         if audit_result:
             self.eng.bio.mito.state.atp_pool += audit_result.get("atp_gain", 0.0)
@@ -256,8 +278,10 @@ class CycleSimulator:
         if adjustments:
             for param, delta in adjustments.items():
                 if param in ctx.physics:
+                    old_val = ctx.physics[param]
                     ctx.physics[param] += delta
-
+                    # Record the Council's flux
+                    ctx.record_flux("SIMULATION", param, old_val, ctx.physics[param], "COUNCIL_MANDATE")
     def _phase_soul_work(self, ctx: CycleContext):
         lesson = self.eng.soul.crystallize_memory(ctx.physics, ctx.bio_result, self.eng.tick_count)
         if not self.eng.soul.current_obsession:
@@ -266,7 +290,10 @@ class CycleSimulator:
 
     def _apply_reality_filters(self, ctx: CycleContext):
         reflection = self.eng.mind.mirror.get_reflection_modifiers()
+        old_drag = ctx.physics["narrative_drag"]
         ctx.physics["narrative_drag"] *= reflection["drag_mult"]
+        if old_drag != ctx.physics["narrative_drag"]:
+            ctx.record_flux("SIMULATION", "narrative_drag", old_drag, ctx.physics["narrative_drag"], "MIRROR_DISTORTION")
         if reflection.get("atp_tax", 0) > 0:
             tax = reflection["atp_tax"]
             self.eng.bio.mito.state.atp_pool -= tax
@@ -274,7 +301,9 @@ class CycleSimulator:
                 ctx.log(f"{Prisma.RED}MIRROR TAX: -{tax:.1f} ATP applied.{Prisma.RST}")
         cap = reflection.get("voltage_cap", 999.0)
         if ctx.physics["voltage"] > cap:
+            old_v = ctx.physics["voltage"]
             ctx.physics["voltage"] = cap
+            ctx.record_flux("SIMULATION", "voltage", old_v, cap, "MIRROR_CAP")
             ctx.log(f"{Prisma.GRY}MIRROR: Voltage capped at {cap}.{Prisma.RST}")
         trigram_data = self.vsl_32v.geodesic.resolve_trigram(ctx.physics.get("vector", {}))
         ctx.world_state["trigram"] = trigram_data
@@ -381,6 +410,7 @@ class CycleReporter:
                 return ctx.refusal_packet
             if ctx.is_bureaucratic:
                 return self._package_bureaucracy(ctx)
+            self._inject_flux_readout(ctx)
             captured_events = self.eng.events.flush()
             return self.renderer.render_frame(ctx, self.eng.tick_count, captured_events)
         except Exception as e:
@@ -390,6 +420,31 @@ class CycleReporter:
                 "logs": ctx.logs,
                 "metrics": self.eng.get_metrics()
             }
+
+    def _inject_flux_readout(self, ctx: CycleContext):
+        if not ctx.flux_log:
+            return
+        flux_lines = []
+        for entry in ctx.flux_log[-5:]:
+            m = entry['metric'].upper()
+            d = entry['delta']
+            r = entry['reason']
+            icon = "⚡" if m == "VOLTAGE" else "⚓"
+            color = Prisma.GRN if d > 0 else Prisma.RED
+            arrow = "▲" if d > 0 else "▼"
+            line = (
+                f"{Prisma.GRY}[FLUX]{Prisma.RST} "
+                f"{icon} {m[:3]} {entry['initial']:.1f} "
+                f"{color}{arrow} {abs(d):.1f}{Prisma.RST} -> "
+                f"{Prisma.WHT}{entry['final']:.1f}{Prisma.RST} "
+                f"({r})"
+            )
+            flux_lines.append(line)
+        if flux_lines:
+            ctx.logs.insert(0, "") # Spacer
+            for line in reversed(flux_lines):
+                ctx.logs.insert(0, line)
+            ctx.logs.insert(0, f"{Prisma.CYN}--- LIVE STATE MIRROR ---{Prisma.RST}")
 
     def _package_bureaucracy(self, ctx: CycleContext):
         return {
@@ -410,7 +465,7 @@ class GeodesicOrchestrator:
     def run_turn(self, user_message: str) -> Dict[str, Any]:
         ctx = CycleContext(input_text=user_message)
         ctx.user_name = self.eng.user_name
-        self.eng.events.flush() # Clear bus
+        self.eng.events.flush()
         ctx = self.simulator.run_simulation(ctx)
         if not ctx.is_alive:
             return self.eng.trigger_death(ctx.physics)

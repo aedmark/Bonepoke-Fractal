@@ -224,8 +224,10 @@ class SomaticLoop:
         return 0
 
     def _package_result(self, resp_status, logs, chem_state=None, enzyme="NONE"):
+        is_alive = (resp_status == "RESPIRING")
         return {
             "respiration": resp_status,
+            "is_alive": is_alive,
             "logs": logs,
             "chemistry": chem_state or {},
             "enzyme": enzyme

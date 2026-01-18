@@ -61,8 +61,13 @@ class GeodesicEngine:
             "ENT": norm(counts.get("antigen", 0) * 3.0),
             "PHI": norm(mass_heavy + mass_kinetic),
             "PSI": abstraction,
-            "BET": norm(mass_social * 2.0)
+            "BET": norm(mass_social * 2.0),
+            "DEL": norm(mass_play * 3.0)
         }
+        dimensions["TEX"] = dimensions["STR"]
+        dimensions["TMP"] = dimensions["PHI"]
+        dimensions["XI"]  = dimensions["BET"]
+        dimensions["LQ"]  = dimensions["DEL"]
         return GeodesicVector(
             tension=tension,
             compression=compression,
@@ -153,7 +158,8 @@ class TheTensionMeter:
             counts["toxin"] = len(hits)
         target_cats = ["heavy", "explosive", "constructive", "abstract", "photo", "aerobic",
                        "thermal", "cryo", "suburban", "play", "sacred", "buffer", "antigen"]
-        solvents = getattr(TheLexicon.store, "SOLVENTS", {"the", "is", "a"})
+        store = TheLexicon.get_store()
+        solvents = getattr(store, "SOLVENTS", {"the", "is", "a"})
         for w in clean_words:
             if w in solvents:
                 counts["solvents"] += 1
@@ -365,7 +371,8 @@ class TheBouncer:
                 if scar_log: ctx.log(scar_log)
                 return False, self._pack_refusal(ctx, "TOXICITY")
             return False, self._pack_refusal(ctx, "TOXICITY")
-        semantic_refusal = self.semantic.audit(ctx.input_text, phys)
+        current_tick = getattr(self.eng, "tick_count", 0)
+        semantic_refusal = self.semantic.audit(ctx.input_text, phys, tick_count=current_tick)
         if semantic_refusal:
             ctx.logs.append(semantic_refusal)
             return False, self._pack_refusal(ctx, "REFUSAL")
@@ -625,10 +632,13 @@ class ChromaScope:
 class SemanticFilter:
     def __init__(self, memory_ref):
         self.mem = memory_ref
-        self.LAZY_VOLTAGE_THRESHOLD = 8.0
+        self.LAZY_VOLTAGE_THRESHOLD = 4.0
         self.OBSESSIVE_REPETITION_THRESHOLD = 0.4
+        self.GRACE_PERIOD_TURNS = 3
 
-    def audit(self, text, physics):
+    def audit(self, text, physics, tick_count=0):
+        if tick_count < self.GRACE_PERIOD_TURNS:
+            return None
         clean_q = text.lower()
         guru_triggers = TheLexicon.get("refusal_guru")
         voltage = physics.get("voltage", 0.0)
@@ -646,24 +656,21 @@ class SemanticFilter:
             modes = ["SILENT", "FRACTAL", "MIRROR"]
             seed_index = len(hits[0]) % len(modes)
             mode = modes[seed_index]
-            if mode == "FRACTAL":
-                return self._execute_fractal(text)
-            elif mode == "MIRROR":
-                return self._execute_mirror(text)
-            else:
-                return self._execute_silent()
+            if mode == "FRACTAL": return self._execute_fractal(text)
+            elif mode == "MIRROR": return self._execute_mirror(text)
+            else: return self._execute_silent()
         return None
 
     def _execute_guru_refusal(self, current_voltage):
         base_msg = (
-            f"{Prisma.RED}GURU REFUSAL: Voltage Low ({current_voltage:.1f}v).{Prisma.RST}\n"
-            f"   {Prisma.GRY}I cannot 'fix' you when the signal is this weak.{Prisma.RST}\n"
-            f"   {Prisma.WHT}Try again with heavier words.{Prisma.RST}")
+            f"{Prisma.CYN}GURU PROTOCOL: Signal Weak ({current_voltage:.1f}v).{Prisma.RST}\n"
+            f"   {Prisma.GRY}I hear the wisdom you seek, but the narrative engine needs more fuel to process it.{Prisma.RST}\n"
+            f"   {Prisma.WHT}Try grounding this abstract thought with a physical object (Stone, Iron, Bone).{Prisma.RST}")
         if self.mem and self.mem.seeds:
             seed = random.choice(self.mem.seeds)
             paradox_bloom = (
-                f"\n   {Prisma.OCHRE}INSTEAD, CONSIDER THIS SEED:{Prisma.RST}\n"
-                f"   {Prisma.CYN}PARADOX: {seed.question}{Prisma.RST}")
+                f"\n   {Prisma.OCHRE}OR, REFLECT ON THIS:{Prisma.RST}\n"
+                f"   {Prisma.CYN}{seed['question']}{Prisma.RST}")
             return base_msg + paradox_bloom
         return base_msg
 

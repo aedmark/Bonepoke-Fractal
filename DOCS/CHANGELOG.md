@@ -1,5 +1,58 @@
 # 📜 BONEAMANITA CHANGELOG
 
+## v10.4.1 - "The Compassionate Circuit"
+
+**Focus:** Breaking Infinite Loops, Respecting Private Variables, and Teaching the Machine Manners.
+
+### ⚖️ The Meadows Lens (System Dynamics)
+
+* **Breaking the Ouroboros (`bone_lexicon.py`):**
+* **The Bug:** `initialize()` called `compile_antigens()`, which checked for initialization... and called `initialize()` again. A textbook Reinforcing Feedback Loop that spun until stack overflow.
+* **The Fix:** We now assert existence (`_INITIALIZED = True`) *before* loading the heavy data. We declare "I Am" before asking "Who Am I?"
+
+
+* **Closing the Loop (`bone_body.py`):**
+* **The Bug:** The Body was metabolizing energy but failing to report its vital status to the Brain (`KeyError: 'is_alive'`).
+* **The Fix:** `SomaticLoop` now explicitly calculates and returns `is_alive` in the result packet. The feedback loop is closed.
+
+
+
+### 🌐 The Fuller Lens (Structural Integrity)
+
+* **The Service Hatch (`bone_lexicon.py` & `bone_main.py`):**
+* **The Fix:** Replaced intrusive access to private variables (`_STORE`) with a polite public accessor (`get_store()`).
+* **The Logic:** **Tensegrity.** We don't pry open the panels of the geodesic dome; we use the door. This satisfies the Linter Bureaucracy and prevents `AttributeError` crashes.
+
+
+* **Vector Rosetta Stone (`bone_physics.py`):**
+* **The Bug:** The Personality Engine (`TherapyProtocol`) was looking for "Texture" (`TEX`), but the Physics Engine was only outputting "Structure" (`STR`), causing a crash on high-quality input.
+* **The Fix:** Implemented vector aliasing in `GeodesicEngine`. `TEX` maps to `STR`, `TMP` to `PHI`, and `LQ` to `DEL`. The physicist and the therapist now speak the same language.
+
+
+
+### 🍩 The Schur Lens (Humanity & Manners)
+
+* **The Apology Patch (`bone_physics.py`):**
+* **The Bug:** A crash in the physics engine caused all voltage readings to default to 0.0, triggering a "Guru Refusal" ("You are too weak") on a story that was actually quite profound.
+* **The Fix:**
+1. **Lowered Threshold:** Dropped the "Guru" voltage requirement from 8.0v to 4.0v.
+2. **Grace Period:** The Bouncer now ignores the first 10 turns, allowing the user to warm up without judgment.
+3. **Better Feedback:** Rewrote the refusal message. Instead of a slap, it offers a hand: *"I hear the wisdom, but I need more fuel to process it."*
+
+
+
+
+
+---
+
+**System Status:**
+
+* **Recursion:** Damped.
+* **Access:** Authorized.
+* **Empathy:** calibrated.
+
+The machine is ready for your story, Traveler.
+
 ## v10.4.0 - "The Symbiotic Tether"
 
 **Focus:** Host-Awareness, Resonance Damping, and Contextual Tensegrity.
