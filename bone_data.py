@@ -1,11 +1,39 @@
 # bone_data.py - The Living Mythology
-# PATCH 10.4.4: AKASHIC RECORDS & PROCEDURAL GENERATION
 
 import re
 import random
 import time
 
-# --- THE STATIC CORE (The "Old Testament") ---
+BIO_NARRATIVE = {
+    "MITO": {
+        "NOMINAL": "Humming along.",
+        "NECROSIS": "The engine is stalling. Requires {cost:.1f} ATP (Available: {pool:.1f}).",
+        "APOPTOSIS": "Cellular suicide initiated. Too much noise.",
+        "GRINDING": "The gears are grinding. Heavy metabolic load."
+    },
+    "CIRCADIAN": {
+        "DAWN": "Dawn Protocol: Cortisol rising.",
+        "SOLAR": "Solar Cycle: Serotonin dominant.",
+        "TWILIGHT": "Twilight Protocol: Melatonin rising.",
+        "LUNAR": "Lunar Cycle: Melatonin max."
+    },
+    "GLIMMER": {
+        "INTEGRITY": "GLIMMER: Perfect structural integrity detected. A moment of zen.",
+        "ENTHUSIASM": "GLIMMER: Infectious enthusiasm detected. The work is good."
+    },
+    "GOVERNOR": {
+        "OVERRIDE": "MANUAL OVERRIDE: System locked to {mode}.",
+        "INVALID": "INVALID MODE.",
+        "SANCTUARY": "{color}GOVERNOR: VSL Critical (β: {beta:.2f}). Entering SANCTUARY.{reset}",
+        "FORGE": "{color}GOVERNOR: High Voltage ({volts:.1f}v). Locking to FORGE.{reset}",
+        "LAB": "{color}GOVERNOR: High Drag detected. Restricting to LABORATORY.{reset}",
+        "CLEAR": "{color}GOVERNOR: All Clear. Relaxing to COURTYARD.{reset}"
+    },
+    "TAX": {
+        "HIGH_VOLTAGE": "{color}High Voltage Tax{reset}",
+        "EXHAUSTION": "{color}SYSTEM EXHAUSTION{reset}"
+    }
+}
 
 LENSES = {
     "SHERLOCK": {
@@ -44,15 +72,15 @@ ENNEAGRAM_DATA = {
         "GLASS": 4, "CLARENCE": 1, "NARRATOR": 3
     },
     "GEOMETRY": {
-        1: {"STRESS": 4, "GROWTH": 7}, # Clarence
-        2: {"STRESS": 8, "GROWTH": 4}, # Nathan
-        3: {"STRESS": 9, "GROWTH": 6}, # Narrator
-        4: {"STRESS": 2, "GROWTH": 1}, # Glass
-        5: {"STRESS": 7, "GROWTH": 8}, # Sherlock
-        6: {"STRESS": 3, "GROWTH": 9}, # (Virtual)
-        7: {"STRESS": 1, "GROWTH": 5}, # Jester
-        8: {"STRESS": 5, "GROWTH": 2}, # (Virtual)
-        9: {"STRESS": 6, "GROWTH": 3}, # Gordon
+        1: {"STRESS": 4, "GROWTH": 7},
+        2: {"STRESS": 8, "GROWTH": 4},
+        3: {"STRESS": 9, "GROWTH": 6},
+        4: {"STRESS": 2, "GROWTH": 1},
+        5: {"STRESS": 7, "GROWTH": 8},
+        6: {"STRESS": 3, "GROWTH": 9},
+        7: {"STRESS": 1, "GROWTH": 5},
+        8: {"STRESS": 5, "GROWTH": 2},
+        9: {"STRESS": 6, "GROWTH": 3},
     },
     "PROXY_MAP": {
         8: "GORDON", 6: "GLASS"
@@ -135,20 +163,20 @@ NARRATIVE_DATA = {
                     "Please, be kind."
                 ]
             },
-            "THE_CYNIC": {
-                "name": "Diogenes (The Skeptic)",
-                "desc": "Distrusts happiness. Seeks raw, bitter truth.",
-                "preferences": {
-                    "valence": -2.0,
-                    "truth_ratio": 1.0,
-                    "counts_social": -1.0
-                },
-                "reviews": {
-                    "high": ["Yes. Life is pain.", "Finally, no sugar-coating.", "Bleak. Perfect."],
-                    "low": ["Too happy.", "Delusional optimism.", "Grossly sentimental."]
-                }
-            }
         },
+        "THE_CYNIC": {
+            "name": "Diogenes (The Skeptic)",
+            "desc": "Distrusts happiness. Seeks raw, bitter truth.",
+            "preferences": {
+                "valence": -2.0,
+                "truth_ratio": 1.0,
+                "counts_social": -1.0
+            },
+            "reviews": {
+                "high": ["Yes. Life is pain.", "Finally, no sugar-coating.", "Bleak. Perfect."],
+                "low": ["Too happy.", "Delusional optimism.", "Grossly sentimental."]
+            }
+        }
     },
     "CASSANDRA_SCREAMS": [
         "THE WALLS ARE PAPER.",
@@ -328,8 +356,6 @@ LEXICON = {
         "compost", "gather"
     ]
 }
-
-# --- THE PROCEDURAL EXPANSION (The "New Testament") ---
 
 ITEM_GENERATION = {
     "PREFIXES": {
@@ -560,6 +586,35 @@ GORDON = {
     }
 }
 
+GORDON_LOGS = {
+    "FUMBLE": [
+        "FUMBLE: The narrative turbulence knocked '{item}' from your pocket!",
+        "OOPS: Gravity inverted momentarily. You dropped '{item}'.",
+        "BUTTERFINGERS: The syntax got slippery. '{item}' is gone.",
+        "LOST: Gordon got distracted by a shiny plot hole and dropped '{item}'.",
+        "THEFT: The Entropy Goblin stole '{item}' while you weren't looking."
+    ],
+    "RUMMAGE": {
+        "EMPTY": [
+            "Gordon dug through the trash. Just lint and old receipts.",
+            "Nothing but dust bunnies and rejected adjectives.",
+            "Empty. The void stares back from the bottom of the pocket."
+        ],
+        "TOO_TIRED": [
+            "Gordon: 'Too tired to dig. Eat something first.'",
+            "Gordon leans on the shovel. 'Union break. Need stamina.'",
+            "Gordon refuses. 'My back hurts. Feed me ATP.'"
+        ]
+    },
+    "CONDUCTIVE_HAZARD": "CONDUCTIVE HAZARD: {item} acts as a lightning rod! -{damage:.1f} HP.",
+    "HEAVY_LOAD": "HEAVY LOAD: The {item} are dragging you down.",
+    "TIME_DILATION": "TIME DILATION: {item} hums. Drag capped at {cap}.",
+    "BUREAUCRATIC_ANCHOR": "{item}: Policy enforced. (Beta +0.2, Drag +0.5)",
+    "GROUNDING_GEAR": "{item}: Gravity re-asserted. You sink out of the {zone} into the Mud.",
+    "SAFETY_SCISSORS": "{item}: Gordon snips the red tape. {count} suburban words discarded.",
+    "CAFFEINE_JITTERS": "CAFFEINE JITTERS: Velocity UP, Stability DOWN."
+}
+
 DEATH = {
     "PREFIXES": ["Alas,", "Tragic.", "System Halt.", "CRITICAL FAILURE:", "Well, that happened.", "Oh dear.", "As prophesied,"],
     "CAUSES": {
@@ -681,9 +736,9 @@ SOMATIC_LIBRARY = {
     "TONE": {
         "CRITICAL_HIGH": "Manic, high-frequency, bordering on incoherent.",
         "HIGH": "Energetic, engaged, productive.",
-        "TRANSITION_UP": "Warming up, accelerating, finding rhythm.", # Buffer Zone
+        "TRANSITION_UP": "Warming up, accelerating, finding rhythm.",
         "NEUTRAL": "Neutral, observant, balanced.",
-        "TRANSITION_DOWN": "Groggy, slowing down, heavy.", # Buffer Zone
+        "TRANSITION_DOWN": "Groggy, slowing down, heavy.",
         "LOW": "Lethargic, depressive, heavy. Introspective.",
         "VOID": "Hollow, absent, null."
     },
@@ -718,7 +773,6 @@ SOMATIC_LIBRARY = {
     }
 }
 
-# --- THE AKASHIC RECORD (Interface for Evolution) ---
 
 class TheAkashicRecord:
     """
@@ -727,8 +781,8 @@ class TheAkashicRecord:
     without overwriting the static 'Holy Text' above.
     """
     def __init__(self):
-        self.discovered_words = {} # {word: category}
-        self.forged_items = {} # {name: item_dict}
+        self.discovered_words = {}
+        self.forged_items = {}
         self.session_seeds = []
 
     @staticmethod
@@ -736,11 +790,9 @@ class TheAkashicRecord:
         """
         Creates a new item based on the current narrative physics.
         """
-        # 1. Determine dominant vector
         dominant = max(vector_data, key=vector_data.get)
         if dominant not in ITEM_GENERATION["PREFIXES"]: dominant = "void"
 
-        # 2. Select components
         prefix = random.choice(ITEM_GENERATION["PREFIXES"].get(dominant, ["Strange"]))
         base_type = random.choice(list(ITEM_GENERATION["BASES"].keys()))
         base_name = random.choice(ITEM_GENERATION["BASES"][base_type])
@@ -748,7 +800,6 @@ class TheAkashicRecord:
 
         name = f"{prefix.upper()} {base_name.upper()} {suffix.upper()}"
 
-        # 3. Generate Stats
         value = vector_data[dominant] * 10.0
 
         description = f"A procedurally generated artifact. It vibrates with {dominant} energy."

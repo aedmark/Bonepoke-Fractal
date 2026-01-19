@@ -8,21 +8,11 @@ from bone_bus import Prisma, BoneConfig, MindSystem, PhysSystem
 from bone_data import LENSES
 from bone_village import TownHall
 from bone_inventory import GordonKnot
-from bone_spores import (
-    MycotoxinFactory, LichenSymbiont, HyphalInterface,
-    ParasiticSymbiont, MycelialNetwork, LocalFileSporeLoader
-)
-from bone_body import (
-    BioSystem, MitochondrialForge, EndocrineSystem,
-    MetabolicGovernor, ViralTracer, ThePacemaker
-)
-from bone_brain import (
-    DreamEngine, ShimmerState, LLMInterface, NeuroPlasticity
-)
+from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont, MycelialNetwork, LocalFileSporeLoader
+from bone_body import BioSystem, MitochondrialForge, EndocrineSystem, MetabolicGovernor, ViralTracer, ThePacemaker
+from bone_brain import DreamEngine, ShimmerState, LLMInterface, NeuroPlasticity
 from bone_personality import LimboLayer
-from bone_physics import (
-    TheTensionMeter, TheTangibilityGate, TemporalDynamics
-)
+from bone_physics import TheTensionMeter, TheTangibilityGate, TemporalDynamics
 from bone_machine import TheCrucible, TheForge, TheTheremin
 
 @dataclass

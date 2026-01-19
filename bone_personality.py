@@ -10,9 +10,7 @@ from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig
 
 class UserProfile:
-    """
-    Maintains the long-term psychological profile of the user.
-    """
+    """Maintains the long-term psychological profile of the user."""
     def __init__(self, name="USER"):
         self.name = name
         self.affinities = {"heavy": 0.0, "kinetic": 0.0, "abstract": 0.0, "photo": 0.0, "aerobic": 0.0, "thermal": 0.0,
@@ -71,7 +69,6 @@ class EnneagramDriver:
             compression = physics.compression
             coherence = physics.coherence
             social = physics.dimensions.get("BET", 0.0)
-            # Legacy shim
             counts = {}
             clean_len = 1
         else:
@@ -82,7 +79,6 @@ class EnneagramDriver:
             clean_len = max(1, len(physics.get("clean_words", [])))
             social = (counts.get("suburban", 0) + counts.get("buffer", 0)) / clean_len
 
-        # Explicit Logic Tree for Transparency
         if tension > 12.0:
             return "JESTER", "MANIC", f"High Voltage ({tension:.1f} > 12.0)"
         elif compression > 4.0:
@@ -116,13 +112,11 @@ class SynergeticLensArbiter:
                 physics["voltage"] = 4.0
             return "NARRATOR", "The system is listening.", "The Witness [Init]"
 
-        # New: Unpack the reason
         lens_name, state_desc, reason = self.enneagram.decide_persona(physics)
 
         msg, role = self._fetch_voice_data(lens_name, physics, 0.5)
         self.current_focus = lens_name
 
-        # Append reason to role for visibility
         final_role = f"{role} [{state_desc}]"
         self.last_reason = reason
 
@@ -167,7 +161,6 @@ class ZenGarden:
         toxin = physics.get("counts", {}).get("toxin", 0)
         cortisol = bio.get("chem", {}).get("COR", 0.0)
 
-        # Explicit criteria for the user to learn
         is_stable = (2.0 <= voltage <= 12.0) and (drag <= 4.0) and (toxin == 0) and (cortisol < 0.4)
 
         if is_stable:
@@ -185,7 +178,6 @@ class ZenGarden:
             return efficiency_boost, msg
         else:
             if self.stillness_streak > 5:
-                # Tell them WHY the streak broke
                 reason = []
                 if not (2.0 <= voltage <= 12.0): reason.append(f"Voltage({voltage:.1f})")
                 if drag > 4.0: reason.append(f"Drag({drag:.1f})")
@@ -195,10 +187,6 @@ class ZenGarden:
             return 0.0, None
 
 class TheBureau:
-    """
-    The Administrative State.
-    Refactored to be 'Fair': It now lists the 'Infracting Words' so the user can learn.
-    """
     def __init__(self):
         self.stamp_count = 0
         self.forms = NARRATIVE_DATA["BUREAU_FORMS"]
@@ -214,8 +202,6 @@ class TheBureau:
         voltage = physics.get("voltage", 0.0)
         clean_words = physics.get("clean_words", [])
 
-        # Identify the specific words that trigger the "Suburban" definition
-        # Use existing Lexicon check or raw heuristic
         from bone_lexicon import TheLexicon
         suburban_words = [w for w in clean_words if w in TheLexicon.get("suburban") or w in TheLexicon.get("buffer")]
 
@@ -231,7 +217,6 @@ class TheBureau:
         infraction = None
         selected_form = None
 
-        # Thresholds
         if beige_density > 0.6:
             infraction = "BLOCK"
             selected_form = "1099-B" if suburban_count > 2 else "Form W-2"
@@ -245,7 +230,6 @@ class TheBureau:
             response = random.choice(self.responses)
             policy = self.POLICY.get(selected_form, self.POLICY["Form W-2"])
 
-            # Apply mods
             mod_log = []
             for k, v in policy["mod"].items():
                 if k in physics:
@@ -253,7 +237,6 @@ class TheBureau:
                     mod_log.append(f"{k} {v:+.1f}")
             mod_str = f"({', '.join(mod_log)})" if mod_log else ""
 
-            # THE FIX: Transparency
             evidence = ""
             if suburban_words:
                 unique_offenders = list(set(suburban_words))[:3]
@@ -267,7 +250,7 @@ class TheBureau:
             }
         return None
 
-# --- Unchanged Classes (but included for completeness/import safety) ---
+
 class CassandraProtocol:
     def __init__(self, engine):
         self.eng = engine
@@ -345,9 +328,9 @@ class TherapyProtocol:
         self.HEALING_THRESHOLD = 5
     def check_progress(self, phys, stamina, current_trauma_accum):
         healed_types = []
-        if phys["counts"]["toxin"] == 0 and phys["vector"]["TEX"] > 0.3: self.streaks["SEPTIC"] += 1
+        if phys["counts"].get("toxin", 0) == 0 and phys["vector"]["TEX"] > 0.3: self.streaks["SEPTIC"] += 1
         else: self.streaks["SEPTIC"] = 0
-        if stamina > 40 and phys["counts"]["photo"] > 0: self.streaks["CRYO"] += 1
+        if stamina > 40 and phys["counts"].get("photo", 0) > 0: self.streaks["CRYO"] += 1
         else: self.streaks["CRYO"] = 0
         if 2.0 <= phys["voltage"] <= 7.0: self.streaks["THERMAL"] += 1
         else: self.streaks["THERMAL"] = 0

@@ -24,6 +24,11 @@ try:
     OLLAMA_AVAILABLE = True
 except ImportError:
     OLLAMA_AVAILABLE = False
+try:
+    from bone_telemetry import TelemetryService
+except ImportError:
+    TelemetryService = None
+    print("Telemetry module not found. Flying blind.")
 
 class NarrativeSpotlight:
     def __init__(self):
@@ -384,32 +389,55 @@ class TheCortex:
         self._check_social_cues(user_input)
         if user_input.startswith("??") or self.plain_mode_active:
             return self._handle_plain_mode(user_input)
-
         sim_result = self.sub.cycle_controller.run_turn(user_input)
-
-        if sim_result.get("type") in ["DEATH", "BUREAUCRACY", "CRITICAL_FAILURE", "REFUSAL", "TOXICITY"]:
+        if sim_result.get("type") in ["DEATH", "BUREAUCRATIC", "CRITICAL_FAILURE", "REFUSAL", "TOXICITY"]:
             return sim_result
         if sim_result.get("refusal_triggered", False):
             return sim_result
-
         if self.ballast_state["active"]:
             self.ballast_state["turns_remaining"] -= 1
             if self.ballast_state["turns_remaining"] <= 0:
                 self.ballast_state["active"] = False
-
         full_state = self._gather_state(sim_result)
+        if TelemetryService:
+            logger = TelemetryService.get_instance()
+            logger.capture_decision(
+                component="Cortex",
+                decision_type="State_Snapshot",
+                inputs={
+                    "voltage": full_state["physics"].get("voltage"),
+                    "drag": full_state["physics"].get("narrative_drag"),
+                    "health": self.sub.health,
+                    "atp": full_state["bio"].get("atp")
+                },
+                reasoning="Cycle Update",
+                outcome="State Gathered"
+            )
         voltage = full_state["physics"].get("voltage", 5.0)
-
         chem = full_state["bio"].get("chem", {})
         somatic_params = self.modulator.modulate(chem, voltage)
-
+        if TelemetryService:
+            TelemetryService.get_instance().capture_decision(
+                component="NeuroModulator",
+                decision_type="Parameter_Shift",
+                inputs=chem,
+                reasoning=f"Voltage: {voltage}",
+                outcome=f"Temp: {somatic_params['temperature']:.2f}, MaxTokens: {somatic_params['max_tokens']}"
+            )
         modifiers = self.symbiosis.get_prompt_modifiers()
+        if TelemetryService and (modifiers.get("simplify_instruction") or modifiers.get("inject_chaos")):
+            TelemetryService.get_instance().capture_decision(
+                component="SymbiosisManager",
+                decision_type="Prompt_Engineering",
+                inputs={"diagnosis": self.symbiosis.current_health.diagnosis},
+                reasoning="Host Vital Signs Deviated",
+                outcome=str(modifiers)
+            )
         anchor_text = self.symbiosis.generate_anchor(full_state)
         base_prompt = self.composer.compose(full_state, user_input, self.ballast_state["active"])
         final_prompt = f"{anchor_text}\n\n{base_prompt}"
         if modifiers["simplify_instruction"]:
             final_prompt += "\n[SYSTEM NOTE: Resources low. Be brief.]"
-
         max_style_retries = 2
         attempt = 0
         final_text = ""

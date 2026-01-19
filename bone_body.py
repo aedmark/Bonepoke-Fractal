@@ -1,4 +1,5 @@
 # bone_body.py - The Body
+# "The machinery of being."
 
 import math, random, time
 from collections import deque
@@ -9,9 +10,11 @@ from bone_physics import PhysicsPacket
 from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig
+from bone_data import BIO_NARRATIVE
 
 @dataclass
 class Biometrics:
+    """Snapshot of the organism's physical state."""
     health: float
     stamina: float
     stress_modifier: float = 1.0
@@ -19,6 +22,7 @@ class Biometrics:
 
 @dataclass
 class MetabolicReceipt:
+    """The invoice presented to the mitochondria after a cycle of effort."""
     base_cost: float
     drag_tax: float
     inefficiency_tax: float
@@ -28,6 +32,7 @@ class MetabolicReceipt:
 
 @dataclass
 class BioSystem:
+    """Container for all biological subsystems."""
     mito: 'MitochondrialForge'
     endo: 'EndocrineSystem'
     immune: MycotoxinFactory
@@ -40,6 +45,7 @@ class BioSystem:
 
 @dataclass
 class MitochondrialState:
+    """State vector for the cellular engine."""
     atp_pool: float = 100.0
     ros_buildup: float = 0.0
     membrane_potential: float = -150.0
@@ -49,6 +55,11 @@ class MitochondrialState:
     enzymes: Set[str] = field(default_factory=set)
 
 class MitochondrialForge:
+    """
+    The Powerhouse of the Cell.
+    Manages ATP production, 'respiration' (burning energy for action),
+    and the accumulation of oxidative stress (ROS).
+    """
     APOPTOSIS_TRIGGER = "CYTOCHROME_C_RELEASE"
 
     def __init__(self, lineage_seed: str, events, inherited_traits: Optional[Dict] = None):
@@ -64,6 +75,7 @@ class MitochondrialForge:
             self._apply_inheritance(inherited_traits)
 
     def apply_inheritance(self, traits: Dict):
+        """Loads genetic traits from a previous spore/session."""
         self.state.efficiency_mod = traits.get("efficiency_mod", 1.0)
         self.state.ros_resistance = traits.get("ros_resistance", 1.0)
         if "enzymes" in traits:
@@ -71,6 +83,7 @@ class MitochondrialForge:
             self.events.log(f"{Prisma.CYN}[MITO]: Inherited Enzymes: {list(self.state.enzymes)}.{Prisma.RST}")
 
     def adapt(self, final_health: float) -> Dict:
+        """Evolutionary Logic: Generates new traits based on survival stress."""
         traits = {
             "efficiency_mod": self.state.efficiency_mod,
             "ros_resistance": self.state.ros_resistance,
@@ -80,34 +93,45 @@ class MitochondrialForge:
         return traits
 
     def calculate_metabolism(self, drag: float, external_modifiers: Optional[List[float]] = None) -> MetabolicReceipt:
+        """
+        Calculates the ATP cost of the current narrative cycle.
+        High 'Drag' (complexity/confusion) increases the metabolic tax.
+        """
         limit = BoneConfig.MAX_DRAG_LIMIT
         safe_drag = max(0.0, drag)
         taxable_drag = max(0.0, safe_drag - self.GRACE)
+
         if taxable_drag <= (limit - self.GRACE):
             drag_tax = taxable_drag * self.TAX_LOW
         else:
             base_tax = (limit - self.GRACE) * self.TAX_LOW
             excess_drag = taxable_drag - (limit - self.GRACE)
             drag_tax = base_tax + (excess_drag * self.TAX_HIGH)
+
         if external_modifiers:
             for mod in external_modifiers:
                 drag_tax *= mod
+
         raw_cost = self.BMR + drag_tax
         safe_efficiency = max(0.1, self.state.efficiency_mod)
         final_cost = raw_cost / safe_efficiency
+
         inefficiency_tax = 0.0
         if safe_efficiency < 1.0:
             inefficiency_tax = final_cost - raw_cost
+
         status = "RESPIRING"
-        symptom = "Humming along."
+        symptom = BIO_NARRATIVE["MITO"]["NOMINAL"]
+
         if final_cost > self.state.atp_pool:
             status = "NECROSIS"
-            symptom = f"The engine is stalling. Requires {final_cost:.1f} ATP (Available: {self.state.atp_pool:.1f})."
+            symptom = BIO_NARRATIVE["MITO"]["NECROSIS"].format(cost=final_cost, pool=self.state.atp_pool)
         elif self.state.ros_buildup > BoneConfig.CRITICAL_ROS_LIMIT:
             status = self.APOPTOSIS_TRIGGER
-            symptom = "Cellular suicide initiated. Too much noise."
+            symptom = BIO_NARRATIVE["MITO"]["APOPTOSIS"]
         elif drag_tax > 3.0:
-            symptom = "The gears are grinding. Heavy metabolic load."
+            symptom = BIO_NARRATIVE["MITO"]["GRINDING"]
+
         return MetabolicReceipt(
             base_cost=round(self.BMR, 2),
             drag_tax=round(drag_tax, 2),
@@ -117,6 +141,7 @@ class MitochondrialForge:
             symptom=symptom)
 
     def respirate(self, receipt: MetabolicReceipt) -> str:
+        """Executes the burn, depleting ATP and generating Reactive Oxygen Species (ROS)."""
         if receipt.status == "NECROSIS":
             self.state.atp_pool = 0.0
             return "NECROSIS"
@@ -130,6 +155,10 @@ class MitochondrialForge:
         return "RESPIRING"
 
 class SomaticLoop:
+    """
+    The Central Biological Loop.
+    Orchestrates the interplay between Physics input and Biological consequence.
+    """
     def __init__(self, bio_system_ref: BioSystem, memory_ref=None, lexicon_ref=None, gordon_ref=None, folly_ref=None, events_ref=None):
         self.bio = bio_system_ref
         self.mem = memory_ref
@@ -142,22 +171,16 @@ class SomaticLoop:
             "metabolic_base": 0.1
         }
 
-    def process_turn(self, text: str, physics: Any, feedback: Dict, tick_count: int,
-                     health: float = 100.0, stamina: float = 100.0) -> Dict:
-        stress_modifier = self.bio.governor.calculate_stress(
-            health,
-            self.bio.mito.state.ros_buildup
-        )
-        circadian_bias = self.bio.shimmer.get_bias() if self.bio.shimmer else None
-        return self.digest_cycle(
-            text, physics, feedback,
-            health, stamina, stress_modifier, tick_count,
-            circadian_bias=circadian_bias
-        )
-
     def digest_cycle(self, text: str, physics_data: Any, feedback: Dict,
                      health: float, stamina: float, stress_mod: float,
                      tick_count: int = 0, circadian_bias: Dict = None) -> Dict:
+        """
+        The main processing tick for the body.
+        1. Normalizes physics data.
+        2. Calculates metabolic taxes.
+        3. Harvests resources from the text (Enzymes).
+        4. Updates Endocrine state (Chemistry).
+        """
         if hasattr(physics_data, "dimensions"):
             phys = {
                 "voltage": physics_data.tension,
@@ -167,14 +190,19 @@ class SomaticLoop:
             }
         else:
             phys = self._normalize_physics(physics_data)
+
         logs = []
+
         receipt = self._calculate_taxes(phys, logs)
         resp_status = self.bio.mito.respirate(receipt)
+
         if self._audit_folly_desire(phys, stamina, logs) == "MAUSOLEUM_CLAMP":
             return self._package_result(resp_status, logs, enzyme="NONE")
+
         enzyme, total_yield = self._harvest_resources(text, phys, logs, tick_count)
         self.bio.mito.state.atp_pool += total_yield
         self._perform_maintenance(phys, logs, tick_count)
+
         chem_state = self.bio.endo.metabolize(
             feedback,
             health,
@@ -202,13 +230,13 @@ class SomaticLoop:
         inefficiency = 0.0
         if phys.get("voltage", 0) > 10.0:
             inefficiency += 0.2
-            logs.append(f"{Prisma.RED}High Voltage Tax{Prisma.RST}")
+            logs.append(BIO_NARRATIVE["TAX"]["HIGH_VOLTAGE"].format(color=Prisma.RED, reset=Prisma.RST))
         total = base + drag_tax + inefficiency
         return MetabolicReceipt(base, drag_tax, inefficiency, total, "CALCULATED")
 
     def _audit_folly_desire(self, phys, stamina, logs) -> str:
         if stamina <= 0:
-            logs.append(f"{Prisma.RED}SYSTEM EXHAUSTION{Prisma.RST}")
+            logs.append(BIO_NARRATIVE["TAX"]["EXHAUSTION"].format(color=Prisma.RED, reset=Prisma.RST))
             return "MAUSOLEUM_CLAMP"
         return "CLEAR"
 
@@ -235,6 +263,10 @@ class SomaticLoop:
 
 @dataclass
 class EndocrineSystem:
+    """
+    Simulates the chemical mood of the system.
+    Neurotransmitters decay or accumulate based on narrative events.
+    """
     dopamine: float = 0.5
     oxytocin: float = 0.1
     cortisol: float = 0.0
@@ -247,25 +279,29 @@ class EndocrineSystem:
         return max(0.0, min(1.0, val))
 
     def calculate_circadian_bias(self) -> Tuple[Dict[str, float], Optional[str]]:
+        """Determines chemical biases based on real-world system clock."""
         hour = time.localtime().tm_hour
         bias = {"COR": 0.0, "SER": 0.0, "MEL": 0.0}
         msg = None
+
         if 6 <= hour < 10:
             bias["COR"] = 0.1
-            msg = "Dawn Protocol: Cortisol rising."
+            msg = BIO_NARRATIVE["CIRCADIAN"]["DAWN"]
         elif 10 <= hour < 18:
             bias["SER"] = 0.1
-            msg = "Solar Cycle: Serotonin dominant."
+            msg = BIO_NARRATIVE["CIRCADIAN"]["SOLAR"]
         elif 18 <= hour < 23:
             bias["MEL"] = 0.1
-            msg = "Twilight Protocol: Melatonin rising."
+            msg = BIO_NARRATIVE["CIRCADIAN"]["TWILIGHT"]
         else:
             bias["MEL"] = 0.3
             bias["COR"] = -0.1
-            msg = "Lunar Cycle: Melatonin max."
+            msg = BIO_NARRATIVE["CIRCADIAN"]["LUNAR"]
+
         return bias, msg
 
     def _apply_enzyme_reaction(self, enzyme_type: str, harvest_hits: int):
+        """Chemical reactions triggered by harvested keywords."""
         if harvest_hits > 0:
             satiety_dampener = max(0.1, 1.0 - self.dopamine)
             base_reward = math.log(harvest_hits + 1) * 0.15
@@ -307,6 +343,7 @@ class EndocrineSystem:
             self.adrenaline -= (BoneConfig.BIO.DECAY_RATE * 5)
 
     def _maintain_homeostasis(self, social_context: bool):
+        """Attempts to balance the hormones to prevent runaway loops."""
         if self.serotonin > 0.6:
             self.cortisol -= BoneConfig.BIO.REWARD_SMALL
         if social_context:
@@ -324,34 +361,40 @@ class EndocrineSystem:
             self.melatonin = 0.0
 
     def check_for_glimmer(self, feedback: Dict, harvest_hits: int) -> Optional[str]:
+        """Checks for 'Glimmers' - moments of biological resonance or flow."""
         if feedback.get("INTEGRITY", 0) > 0.9 and feedback.get("STATIC", 0) < 0.2:
             self.glimmers += 1
             self.serotonin += 0.2
-            return "GLIMMER: Perfect structural integrity detected. A moment of zen."
+            return BIO_NARRATIVE["GLIMMER"]["INTEGRITY"]
         if harvest_hits > 2 and self.dopamine > 0.8:
             self.glimmers += 1
             self.oxytocin += 0.2
-            return "GLIMMER: Infectious enthusiasm detected. The work is good."
+            return BIO_NARRATIVE["GLIMMER"]["ENTHUSIASM"]
         return None
 
     def metabolize(self, feedback: Dict, health: float, stamina: float, ros_level: float = 0.0,
                    social_context: bool = False, enzyme_type: Optional[str] = None,
                    harvest_hits: int = 0, stress_mod: float = 1.0,
                    circadian_bias: Dict[str, float] = None) -> Dict[str, Any]:
+        """Main update loop for the endocrine system."""
         self._apply_enzyme_reaction(enzyme_type, harvest_hits)
         self._apply_environmental_pressure(feedback, health, stamina, ros_level, stress_mod)
         self._maintain_homeostasis(social_context)
+
         if circadian_bias:
             self.cortisol += circadian_bias.get("COR", 0.0)
             self.serotonin += circadian_bias.get("SER", 0.0)
             self.melatonin += circadian_bias.get("MEL", 0.0)
+
         glimmer_msg = self.check_for_glimmer(feedback, harvest_hits)
+
         self.dopamine = self._clamp(self.dopamine)
         self.oxytocin = self._clamp(self.oxytocin)
         self.cortisol = self._clamp(self.cortisol)
         self.serotonin = self._clamp(self.serotonin)
         self.adrenaline = self._clamp(self.adrenaline)
         self.melatonin = self._clamp(self.melatonin)
+
         state: Dict[str, Any] = self.get_state()
         if glimmer_msg:
             state["glimmer_msg"] = glimmer_msg
@@ -369,6 +412,11 @@ class EndocrineSystem:
 
 @dataclass
 class MetabolicGovernor:
+    """
+    The Safety Valve.
+    Forces the system into specific 'modes' based on Voltage (Intensity)
+    and Drag (Confusion) to prevent crash/burnout.
+    """
     mode: str = "COURTYARD"
     GRACE_PERIOD: int = 5
     psi_mod: float = 0.2
@@ -379,6 +427,7 @@ class MetabolicGovernor:
 
     @staticmethod
     def get_stress_modifier(tick_count):
+        """Calculates global stress multiplier based on session length."""
         if tick_count <= 2: return 0.0
         if tick_count <= 5: return 0.5
         return 1.0
@@ -396,10 +445,13 @@ class MetabolicGovernor:
         if target_mode in valid:
             self.mode = target_mode
             self.manual_override = True
-            return f"MANUAL OVERRIDE: System locked to {target_mode}."
-        return "INVALID MODE."
+            return BIO_NARRATIVE["GOVERNOR"]["OVERRIDE"].format(mode=target_mode)
+        return BIO_NARRATIVE["GOVERNOR"]["INVALID"]
 
     def shift(self, physics: Dict, _voltage_history: List[float], current_tick: int = 0) -> Optional[str]:
+        """
+        Evaluates current physics parameters and shifts the system mode if necessary.
+        """
         if current_tick <= 5:
             physics["voltage"] = min(physics.get("voltage", 0.0), 8.0)
             physics["narrative_drag"] = min(physics.get("narrative_drag", 0.0), 3.0)
@@ -407,29 +459,46 @@ class MetabolicGovernor:
             if self.mode != "COURTYARD":
                 self.mode = "COURTYARD"
             return None
+
         current_voltage = physics.get("voltage", 0.0)
         drag = physics.get("narrative_drag", 0.0)
         beta = physics.get("beta_index", 0.0)
+
         if current_voltage > 15.0 and beta > 1.5:
             if self.mode != "SANCTUARY":
                 self.mode = "SANCTUARY"
                 physics["narrative_drag"] = 0.0
-                return f"{Prisma.GRN}GOVERNOR: VSL Critical (β: {beta:.2f}). Entering SANCTUARY.{Prisma.RST}"
+                return BIO_NARRATIVE["GOVERNOR"]["SANCTUARY"].format(
+                    color=Prisma.GRN, beta=beta, reset=Prisma.RST
+                )
+
         if current_voltage > 10.0:
             if self.mode != "FORGE":
                 self.mode = "FORGE"
-                return f"{Prisma.RED}GOVERNOR: High Voltage ({current_voltage:.1f}v). Locking to FORGE.{Prisma.RST}"
+                return BIO_NARRATIVE["GOVERNOR"]["FORGE"].format(
+                    color=Prisma.RED, volts=current_voltage, reset=Prisma.RST
+                )
+
         if drag > 4.0 > current_voltage:
             if self.mode != "LABORATORY":
                 self.mode = "LABORATORY"
-                return f"{Prisma.CYN}GOVERNOR: High Drag detected. Restricting to LABORATORY.{Prisma.RST}"
+                return BIO_NARRATIVE["GOVERNOR"]["LAB"].format(
+                    color=Prisma.CYN, reset=Prisma.RST
+                )
+
         if self.mode != "COURTYARD":
             if current_voltage < 5.0 and drag < 2.0:
                 self.mode = "COURTYARD"
-                return f"{Prisma.GRN}GOVERNOR: All Clear. Relaxing to COURTYARD.{Prisma.RST}"
+                return BIO_NARRATIVE["GOVERNOR"]["CLEAR"].format(
+                    color=Prisma.GRN, reset=Prisma.RST
+                )
         return None
 
 class ViralTracer:
+    """
+    Tracing tool for ruminative thought loops (loops in the graph).
+    Used to diagnose obsession or repetitive thought patterns.
+    """
     def __init__(self, mem):
         self.mem = mem
         self.max_depth = 4
@@ -465,28 +534,43 @@ class ViralTracer:
         return None
 
     def psilocybin_rewire(self, loop_path):
+        """
+        Break a ruminative loop by grafting a sensory/action bridge
+        between the stuck nodes.
+        """
         if len(loop_path) < 2:
             return None
         node_a = loop_path[0]
         node_b = loop_path[1]
+
         if node_b in self.mem.graph[node_a]["edges"]:
             self.mem.graph[node_a]["edges"][node_b] = 0
+
         sensory = TheLexicon.harvest("photo")
         action = TheLexicon.harvest("kinetic")
+
         if sensory == "void" or action == "void":
             return "GRAFT FAILED: Missing Lexicon Data."
+
         if node_a not in self.mem.graph:
             self.mem.graph[node_a] = {"edges": {}, "last_tick": 0}
         self.mem.graph[node_a]["edges"][sensory] = 5
+
         if sensory not in self.mem.graph:
             self.mem.graph[sensory] = {"edges": {}, "last_tick": 0}
         self.mem.graph[sensory]["edges"][action] = 5
+
         if action not in self.mem.graph:
             self.mem.graph[action] = {"edges": {}, "last_tick": 0}
         self.mem.graph[action]["edges"][node_b] = 5
+
         return f"PSILOCYBIN REWIRE: Broken Loop '{node_a}↔{node_b}'. Grafted '{sensory}'(S) -> '{action}'(A)."
 
 class ThePacemaker:
+    """
+    Monitors repetition and boredom.
+    Calculates a 'Repetition Score' based on recent word history.
+    """
     def __init__(self):
         self.history = deque(maxlen=5)
         self.repetition_score = 0.0
@@ -524,14 +608,24 @@ class ThePacemaker:
         return self.boredom_level > BoneConfig.BOREDOM_THRESHOLD
 
 class NoeticLoop:
+    """
+    The Thinking Loop.
+    Integrates memory, physics, and biology to generate 'Thought'.
+    """
     def __init__(self, mind_layer, bio_layer, events):
         self.mind = mind_layer
         self.bio = bio_layer
         self.arbiter = SynergeticLensArbiter(events)
 
     def think(self, physics_packet, bio_result_dict, inventory, voltage_history, tick_count):
+        """
+        Determines the 'Lens' (personality aspect) that should filter the current moment.
+        If Voltage/Drag are low, it defaults to a simple 'Gradient Walker' (Associative thinking).
+        If Ignition is high, it consults the Arbiter for a specific Lens.
+        """
         volts = physics_packet.get("voltage", 0.0)
         drag = physics_packet.get("narrative_drag", 0.0)
+
         if volts < 1.5 and drag < 1.5:
             stripped_thought = TheLexicon.walk_gradient(physics_packet["raw_text"])
             return {
@@ -541,20 +635,25 @@ class NoeticLoop:
                 "role": "The Reducer",
                 "ignition": 0.0,
                 "hebbian_msg": None}
+
         ignition_score, _, _ = self.mind.integrator.measure_ignition(
             physics_packet["clean_words"],
             voltage_history)
+
         lens_name, lens_msg, lens_role = self.arbiter.consult(
             physics_packet,
             self.bio,
             inventory,
             tick_count,
             ignition_score)
+
         hebbian_msg = None
+
         if physics_packet["voltage"] > 12.0 and len(physics_packet["clean_words"]) >= 2:
             if random.random() < 0.15:
                 w1, w2 = random.sample(physics_packet["clean_words"], 2)
                 hebbian_msg = self.bio.plasticity.force_hebbian_link(self.mind.mem.graph, w1, w2)
+
         return {
             "mode": "COGNITIVE",
             "lens": lens_name,

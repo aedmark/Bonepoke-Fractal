@@ -1,21 +1,45 @@
-# bone_commands.py - CORRECTION PATCH
-# Breaking the Ouroboros
+# bone_commands.py
+# "The snake spits out its tail. The circle becomes a line."
 
 import inspect, os, random, shlex, time
-from typing import Dict, Callable, List, TYPE_CHECKING
-from bone_village import ParadoxSeed
+from typing import Dict, Callable, List, Any, Protocol, runtime_checkable
 
-# [CORRECTION: Prevent circular import]
-if TYPE_CHECKING:
-    from bone_main import BoneAmanita
+@runtime_checkable
+class EngineProtocol(Protocol):
+    """
+    The structural interface of the BoneAmanita Engine.
+    Required by the CommandProcessor to execute orders.
+    """
+    events: Any
+    mind: Any
+    phys: Any
+    bio: Any
+    soul: Any
+    limbo: Any
+    navigator: Any
+    gordon: Any
+    kintsugi: Any
+    tinkerer: Any
+    journal: Any
+    repro: Any
+
+    health: float
+    stamina: float
+    tick_count: int
+    trauma_accum: Dict[str, float]
+    user_name: str
+
+    def trigger_death(self, last_phys) -> Dict: ...
+    def get_metrics(self, atp=0.0) -> Dict: ...
 
 class CommandProcessor:
-    def __init__(self, engine: 'BoneAmanita', prisma_ref, lexicon_ref, config_ref, cartographer_ref):
+    def __init__(self, engine: EngineProtocol, prisma_ref, lexicon_ref, config_ref, cartographer_ref):
         self.eng = engine
         self.P = prisma_ref
         self.Lex = lexicon_ref
         self.Config = config_ref
         self.Map = cartographer_ref
+
         self.registry: Dict[str, Callable[[List[str]], bool]] = {
             "/save": self._cmd_save,
             "/load": self._cmd_load,
@@ -44,7 +68,8 @@ class CommandProcessor:
             "/prove": self._cmd_prove,
             "/soul": self._cmd_soul,
             "/chapter": self._cmd_chapter,
-            "/help": self._cmd_help}
+            "/help": self._cmd_help
+        }
 
     def _log(self, text):
         self.eng.events.log(text, "CMD")
@@ -56,19 +81,27 @@ class CommandProcessor:
         except ValueError:
             self._log(f"{self.P.RED}SYNTAX ERROR: Unbalanced quotes. The Bureau rejects your form.{self.P.RST}")
             return True
+
         cmd = parts[0].lower()
         if cmd not in self.registry:
             self._log(f"{self.P.RED}Unknown command '{cmd}'. Try /help for the manifesto.{self.P.RST}")
             return True
+
         if cmd in ["/teach", "/kill", "/flag"] and not self.Config.VERBOSE_LOGGING:
-            trust = self.eng.mind.mirror.profile.confidence
-            if trust < 10:
-                self._log(f"{self.P.YEL}🔒 LOCKED: Trust {trust}/10 required. Submit Form 27B-6.{self.P.RST}")
-                return True
+            try:
+                trust = self.eng.mind.mirror.profile.confidence
+                if trust < 10:
+                    self._log(f"{self.P.YEL}🔒 LOCKED: Trust {trust}/10 required. Submit Form 27B-6.{self.P.RST}")
+                    return True
+            except AttributeError:
+                pass
+
         try:
             return self.registry[cmd](parts)
         except Exception as e:
             self._log(f"{self.P.RED}COMMAND CRASH: {e}{self.P.RST}")
+            import traceback
+            traceback.print_exc()
             return True
 
     def _cmd_manifold(self, parts):
@@ -83,18 +116,26 @@ class CommandProcessor:
         if self.eng.health < 20:
             self._log(f"{self.P.RED}FERTILITY ERROR: Too weak to breed.{self.P.RST}")
             return True
+
         mode = "MITOSIS"
         target = None
+
         if len(parts) > 1 and parts[1] == "cross":
-            others = [f for f in os.listdir("memories") if f.endswith(".json") and self.eng.mind.mem.session_id not in f]
-            if others:
-                target = os.path.join("memories", random.choice(others))
-                mode = "CROSSOVER"
-            else:
-                self._log(f"{self.P.YEL}ISOLATION: No partners found. Mitosis fallback.{self.P.RST}")
+            try:
+                if not os.path.exists("memories"): os.makedirs("memories")
+                others = [f for f in os.listdir("memories") if f.endswith(".json") and self.eng.mind.mem.session_id not in f]
+                if others:
+                    target = os.path.join("memories", random.choice(others))
+                    mode = "CROSSOVER"
+                else:
+                    self._log(f"{self.P.YEL}ISOLATION: No partners found. Mitosis fallback.{self.P.RST}")
+            except OSError:
+                pass
+
         self._log(f"{self.P.MAG}INITIATING {mode}...{self.P.RST}")
         log_text, child_mutations = self.eng.repro.attempt_reproduction(self.eng, mode, target)
         self._log(log_text)
+
         if child_mutations:
             self._log(f"{self.P.CYN}↺ CIRCULATION: The parent learns from the child.{self.P.RST}")
             for key, val in child_mutations.items():
@@ -108,16 +149,17 @@ class CommandProcessor:
     def _cmd_status(self, parts):
         self._log(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS ---{self.P.RST}")
         self._log(f"Health:  {self.eng.health:.1f} | Stamina: {self.eng.stamina:.1f} | ATP: {self.eng.bio.mito.state.atp_pool:.1f}")
+
         try:
             enneagram = self.eng.noetic.arbiter.enneagram
-            self._log(enneagram.get_psych_report())
         except AttributeError:
             pass
         return True
 
     def _cmd_save(self, parts):
-        self.eng.mind.mirror.profile.save()
         try:
+            self.eng.mind.mirror.profile.save()
+
             path = self.eng.mind.mem.save(
                 health=self.eng.health,
                 stamina=self.eng.stamina,
@@ -136,6 +178,7 @@ class CommandProcessor:
     def _cmd_rummage(self, parts):
         phys = self.eng.phys.tension.last_physics_packet
         if not phys: return True
+
         success, msg, cost = self.eng.gordon.rummage(phys, self.eng.stamina)
         self.eng.stamina = max(0.0, self.eng.stamina - cost)
         self._log(msg)
@@ -144,14 +187,18 @@ class CommandProcessor:
     def _cmd_map(self, parts):
         phys = self.eng.phys.tension.last_physics_packet
         if not phys or "raw_text" not in phys: return True
+
         bio = {"cortisol": self.eng.bio.endo.cortisol, "oxytocin": self.eng.bio.endo.oxytocin}
         result, anchors = self.Map.weave(phys["raw_text"], self.eng.mind.mem.graph, bio, self.eng.limbo, physics=phys)
+
         self._log(f"{self.P.OCHRE}CARTOGRAPHY REPORT:{self.P.RST}\n{result}")
         if anchors: self._log(f"LANDMARKS: {', '.join(anchors)}")
         return True
 
     def _cmd_garden(self, parts):
+        from bone_village import ParadoxSeed
         self._log(f"{self.P.GRN}THE PARADOX GARDEN:{self.P.RST}")
+
         if len(parts) > 1 and parts[1] == "water":
             msg = self.eng.mind.mem.tend_garden(["concept", "truth"])
             self._log(f"   {msg}" if msg else "   The soil is damp.")
@@ -180,6 +227,7 @@ class CommandProcessor:
         return True
 
     def _cmd_seed(self, parts):
+        from bone_village import ParadoxSeed
         if len(parts) < 2: return True
         text = " ".join(parts[1:])
         self.eng.mind.mem.seeds.append(ParadoxSeed(text, set(self.Lex.clean(text))))
@@ -262,29 +310,37 @@ class CommandProcessor:
         if not phys:
             self._log(f"{self.P.RED}CANNOT PUBLISH: No physics data generated yet.{self.P.RST}")
             return True
+
         result = self.eng.journal.publish(phys["raw_text"], phys, self.eng.bio)
+
         self._log(f"{self.P.OCHRE}--- LITERARY REVIEW ---{self.P.RST}")
         self._log(f"Critic: {self.P.WHT}{result.critic_name}{self.P.RST}")
         self._log(f"Score:  {self.P.CYN}{result.score:.1f}/100{self.P.RST}")
         self._log(f"Review: {self.P.GRY}\"{result.verdict}\"{self.P.RST}")
+
         if self.Config.VERBOSE_LOGGING:
             self._log(f"{self.P.GRY}   [Scoring Logic]: {', '.join(result.breakdown)}{self.P.RST}")
+
         if result.reward_type == "ATP_BOOST":
             current_atp = self.eng.bio.mito.state.atp_pool
             max_atp = getattr(self.Config, "MAX_ATP", 200.0)
             self.eng.bio.mito.state.atp_pool = min(max_atp, current_atp + result.reward_amount)
             self._log(f"{self.P.GRN}   [REWARD]: +{result.reward_amount} ATP (Royalties){self.P.RST}")
+
             if result.score > 90:
                 max_health = getattr(self.Config, "MAX_HEALTH", 100.0)
                 self.eng.health = min(max_health, self.eng.health + 5)
                 self._log(f"{self.P.GRN}   [CRITICAL ACCLAIM]: +5 Health.{self.P.RST}")
+
         elif result.reward_type == "STAMINA_REGEN":
             max_stamina = getattr(self.Config, "MAX_STAMINA", 100.0)
             self.eng.stamina = min(max_stamina, self.eng.stamina + result.reward_amount)
             self._log(f"{self.P.GRN}   [REWARD]: +{result.reward_amount} Stamina (Validation){self.P.RST}")
+
         elif result.reward_type == "CORTISOL_SPIKE":
             self.eng.bio.endo.cortisol = min(1.0, self.eng.bio.endo.cortisol + (result.reward_amount * 0.05))
             self._log(f"{self.P.RED}   [PENALTY]: Rejection hurts. Cortisol rising.{self.P.RST}")
+
         return True
 
     def _cmd_soul(self, parts):
@@ -292,9 +348,10 @@ class CommandProcessor:
         self._log(f"{self.P.MAG}--- SOUL DIAGNOSTICS ---{self.P.RST}")
         self._log(f"Traits: {soul.traits}")
         self._log(f"Obsession: {soul.current_obsession} ({soul.obsession_progress*100:.1f}%)")
+
         if soul.core_memories:
             self._log(f"{self.P.WHT}CORE MEMORIES:{self.P.RST}")
-            for i, mem in enumerate(soul.core_memories[-3:]): # Last 3
+            for i, mem in enumerate(soul.core_memories[-3:]):
                 self._log(f"  {i+1}. [{mem.emotional_flavor}] '{mem.lesson}' (V:{mem.impact_voltage:.1f})")
         else:
             self._log("No core memories formed yet. The slate is blank.")
@@ -312,17 +369,20 @@ class CommandProcessor:
 
     def _cmd_help(self, parts):
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 10.4.7 MANUAL ---{self.P.RST}",
-            f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"]
+            f"\n{self.P.CYN}--- BONEAMANITA 10.5.0 MANUAL ---{self.P.RST}",
+            f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"
+        ]
         categories = {
             "CORE": ["_cmd_status", "_cmd_save", "_cmd_load", "_cmd_help"],
             "WORLD": ["_cmd_map", "_cmd_manifold", "_cmd_garden", "_cmd_voids"],
             "ACTION": ["_cmd_rummage", "_cmd_reproduce", "_cmd_publish", "_cmd_weave"],
-            "DEBUG": ["_cmd_kip", "_cmd_teach", "_cmd_kill", "_cmd_focus"]}
+            "DEBUG": ["_cmd_kip", "_cmd_teach", "_cmd_kill", "_cmd_focus"]
+        }
 
         def get_doc(func):
             paperwork = inspect.getdoc(func)
             return paperwork if paperwork else "Undocumented protocol."
+
         for cat, methods in categories.items():
             help_lines.append(f"{self.P.WHT}{cat}:{self.P.RST}")
             for m_name in methods:
@@ -331,6 +391,7 @@ class CommandProcessor:
                     doc = get_doc(getattr(self, m_name))
                     help_lines.append(f"  {cmd_name:<12} - {doc}")
             help_lines.append("")
+
         help_lines.append(f"{self.P.GRY}Type carefully. The machine is listening.{self.P.RST}")
         self._log("\n".join(help_lines))
         return True

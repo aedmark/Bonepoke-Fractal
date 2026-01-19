@@ -151,7 +151,7 @@ class DeathGen:
     def eulogy(physics, mito_state):
         cause = "UNKNOWN"
         if mito_state.atp_pool <= 0: cause = "STARVATION"
-        elif physics["counts"]["toxin"] > 3: cause = "TOXICITY"
+        elif physics["counts"].get("toxin", 0) > 3: cause = "TOXICITY"
         elif physics["narrative_drag"] > 8.0: cause = "BOREDOM"
         cause_list = DeathGen.CAUSES.get(cause, ["System Error"])
         flavor_text = random.choice(cause_list) if cause_list else "Unknown Error"
@@ -422,9 +422,13 @@ class MirrorGraph:
 
     def get_reflection_modifiers(self) -> Dict:
         top_stat = self.dominant_archetype
-        intensity = self.stats[top_stat]
         mods = {"drag_mult": 1.0, "plasticity": 1.0, "loot_chance": 1.0, "atp_tax": 0.0, "voltage_cap": 20.0, "flavor": ""}
+        if top_stat == "NEUTRAL":
+            return mods
+
+        intensity = self.stats[top_stat]
         if intensity < 0.3: return mods
+
         if top_stat == "WAR":
             mods["drag_mult"] = 1.5
             mods["loot_chance"] = 2.0
@@ -498,6 +502,34 @@ class TheHoloProjector:
         idx = int(ratio * (len(self.BAR_CHARS) - 1))
         return self.BAR_CHARS[idx] * width
 
+    def _draw_belt(self, inventory: List[str], tool_confidence: Dict[str, float]) -> str:
+        if not inventory:
+            return f"{Prisma.GRY}   [BELT EMPTY]{Prisma.RST}"
+        icons = []
+        for item in inventory:
+            conf = tool_confidence.get(item, 1.0)
+            if conf < 0.5:
+                color = Prisma.OCHRE
+                status = "▼"
+            elif conf > 2.5:
+                color = Prisma.MAG
+                status = "▲"
+            elif conf > 1.5:
+                color = Prisma.CYN
+                status = "♦"
+            else:
+                color = Prisma.GRY
+                status = "•"
+            short_name = item.replace("_", " ").title()
+            if len(short_name) > 10:
+                parts = short_name.split()
+                if len(parts) > 1:
+                    short_name = f"{parts[0][0]}.{parts[1]}"
+                else:
+                    short_name = short_name[:10]
+            icons.append(f"{color}{status} {short_name}{Prisma.RST}")
+        return "   " + " | ".join(icons)
+
     def _draw_vector_compass(self, vector_data):
         pairs = [
             ("VEL", vector_data.get("VEL", 0), "STR", vector_data.get("STR", 0)),
@@ -515,19 +547,13 @@ class TheHoloProjector:
         bio = signals.get("bio", {})
         chem = bio.get("chem", {})
         atp = bio.get("atp", 0.0)
+        inventory = signals.get("inventory", [])
+        tool_conf = signals.get("tool_confidence", {})
         voltage = p.get("voltage", 0.0)
         drag = p.get("narrative_drag", 0.0)
         lens_name = lens_data[0]
         lens_thought = lens_data[1]
         header_color = Prisma.GRY
-        world = signals.get("world", {})
-        trigram = world.get("trigram", {})
-        t_display = ""
-        if trigram:
-            sym = trigram.get("symbol", "")
-            name = trigram.get("name", "")
-            col = trigram.get("color", Prisma.WHT)
-            t_display = f"{col}{sym} {name}{Prisma.RST} "
         if voltage > 15.0: header_color = Prisma.RED
         elif voltage < 5.0: header_color = Prisma.CYN
         health_bar = self._draw_bar(signals.get("health", 0), 100.0, 5)
@@ -540,17 +566,11 @@ class TheHoloProjector:
         elif p.get("perfection_streak", 0) >= 5:
             hubris_indicator = f" {Prisma.CYN}[∞ FLOW STATE]{Prisma.RST}"
         dashboard_top = (
-            f"{t_display}"
             f"{Prisma.GRY}[HP: {health_bar}] [STM: {stamina_bar}] "
             f"[ATP: {atp_indicator}] [V:{voltage:.1f}⚡] [D:{drag:.1f}⚓]{Prisma.RST}"
             f"{hubris_indicator}")
-        dop = chem.get("DOP", 0)
-        cor = chem.get("COR", 0)
-        chem_readout = (
-            f"   {Prisma.GRN}DOP:{dop:.2f}{Prisma.RST} "
-            f"{Prisma.RED}COR:{cor:.2f}{Prisma.RST} "
-            f"{Prisma.CYN}OXY:{chem.get('OXY',0):.2f}{Prisma.RST}")
         vectors = self._draw_vector_compass(p.get("vector", {}))
+        belt_display = self._draw_belt(inventory, tool_conf)
         clean_thought = lens_thought or "..."
         if lens_name == "NARRATOR":
             clean_thought = clean_thought.replace("You are [The Witness]...", "")
@@ -560,6 +580,8 @@ class TheHoloProjector:
             separator,
             f"{header_color}♦ {lens_display}{Prisma.RST}  {dashboard_top}",
             f"{vectors}",
+            separator,
+            f"{belt_display}",
             separator,
             f"{Prisma.WHT}{clean_thought}{Prisma.RST}",
             ""]
@@ -787,7 +809,7 @@ class LiteraryJournal:
             val = metrics.get(trait, 0)
             impact = 0.0
             if trait == "narrative_drag":
-                if weight < 0: # Critic hates drag
+                if weight < 0:
                     if val < 2.0: impact = 15.0
                     elif val > 5.0: impact = -15.0
                 else:

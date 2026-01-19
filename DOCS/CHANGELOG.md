@@ -1,5 +1,94 @@
 # 📜 BONEAMANITA CHANGELOG
 
+# v10.5.0 - "The Pattern Integrity Patch"
+
+**Focus:** Structural Decoupling, Narrative Extraction, Pipeline Architecture, and The Bureaucratic State.
+
+### 🧠 The Pinker Lens (Cognitive Ergonomics)
+
+* **The Narrative Extraction (`bone_body.py`, `bone_data.py`):**
+* **The Issue:** The biological engine was "hard-coded poetry." Strings like *"The engine is stalling"* were buried deep inside metabolic logic functions, mixing *Mechanism* with *Mythology*.
+* **The Fix:** **The Akashic Separation.** We extracted all narrative text into a dedicated `BIO_NARRATIVE` dictionary in `bone_data.py`.
+* **The Logic:** **Code as Language.** Logic remains pure; flavor remains editable.
+
+* **The Ouroboros Break (`bone_commands.py`):**
+* **The Issue:** The `CommandProcessor` imported the entire `BoneAmanita` engine, creating a circular dependency.
+* **The Fix:** **Protocol-Driven Design.** Implemented `EngineProtocol`. The Command Processor now interacts with an *Interface*, not an *Implementation*.
+* **The Logic:** **Explicit Contracts.** Reduces cognitive load and prevents "God Object" sprawl.
+
+### ⚖️ The Meadows Lens (System Dynamics)
+
+* **The Rolling Buffer (`bone_physics.py`):**
+* **The Update:** Implemented a `deque` based moving average for Voltage.
+* **The Fix:** **The Flywheel.** Prevents the system from "panicking" at a single high-intensity input.
+* **The Logic:** **Damping Feedback Loops.** A resilient system absorbs shock; it doesn't just react to it.
+
+* **The Pipeline Refactor (`bone_cycle.py`):**
+* **The Fix:** **The Pipeline Architecture.** Broke the simulation loop into atomic `SimulationPhase` classes.
+* **The Logic:** **Visible Flows.** Allows for "Circuit Breakers" and graceful degradation if a specific phase fails.
+
+### 🌐 The Fuller Lens (Synergy)
+
+* **Inventory Synergy (`bone_inventory.py`, `bone_bus.py`):**
+* **The Update:** Removed "Magic Numbers" (e.g., hardcoded voltage thresholds) and moved them to `BoneConfig.INVENTORY`.
+* **The Fix:** **Universal Constants.** The Inventory now obeys the same laws of physics as the rest of the universe.
+* **The Logic:** **Synergetic Integrity.** If the definition of "High Voltage" changes, the Inventory automatically adapts.
+
+* **Pattern Integrity Repair (`bone_physics.py`):**
+* **The Fix:** **Defensive Tensegrity.** Added safe dictionary access (`.get()`) to prevent crashes when unknown variables (like "neutral" or "toxin") introduce stress.
+
+### 🎭 The Schur Lens (Humanity & Whimsy)
+
+* **The Bureaucracy (`bone_main.py`, `bone_personality.py`):**
+* **The Update:** Wired `TheBureau` into the main game loop.
+* **The Feature:** **Administrative Drag.** The system now issues citations (Form 27B-6) if the user is too boring (Suburban) or too reckless (High Turbulence).
+* **The Logic:** **Fun through Friction.** An antagonist that attacks you with paperwork.
+
+* **The Tinker's Belt (`bone_village.py`):**
+* **The Update:** Upgraded `TheHoloProjector` to visualize inventory state and wired `TheTinkerer` to the main loop.
+* **The Feature:** **Visual Decay.** Users can now see their tools "Rusting" (▼) or "Ascending" (▲) based on their performance.
+* **The Logic:** **Show, Don't Tell.**
+
+* **The Fumble Mechanic (`bone_inventory.py`):**
+* **The Feature:** **Slapstick Physics.** High turbulence now has a 15% chance to knock items out of the user's pocket.
+* **The Logic:** **Consequence.** Chaos isn't just a number; it's losing your keys.
+
+
+## v10.4.8 - "The Pattern Integrity Patch"
+
+**Focus:** Structural Decoupling, Narrative Extraction, and Pipeline Architecture.
+
+### 🧠 The Pinker Lens (Cognitive Ergonomics)
+
+* **The Narrative Extraction (`bone_body.py`, `bone_data.py`):**
+  * **The Issue:** The biological engine was "hard-coded poetry." Strings like *"The engine is stalling"* were buried deep inside metabolic logic functions, making it impossible to separate the *Mechanism* (Code) from the *Mythology* (Content).
+  * **The Fix:** **The Akashic Separation.** We extracted all narrative text into a dedicated `BIO_NARRATIVE` dictionary in `bone_data.py`. We also added comprehensive docstrings to `bone_body.py`.
+  * **The Logic:** **Code as Language.** A developer should be able to read the logic without getting distracted by the flavor text, and a writer should be able to tweak the flavor without breaking the logic.
+
+* **The Ouroboros Break (`bone_commands.py`):**
+  * **The Issue:** The `CommandProcessor` imported the entire `BoneAmanita` engine to do its job, creating a circular dependency (Ouroboros) that made the system cognitively heavy and hard to test.
+  * **The Fix:** **Protocol-Driven Design.** We implemented the `EngineProtocol`. The Command Processor now asks for *what the engine can do* (Interfaces), not *what the engine is* (Implementation).
+  * **The Logic:** **Explicit Interfaces.** Defining exactly what a module needs (e.g., `trigger_death`, `get_metrics`) reduces cognitive load and prevents "God Object" sprawl.
+
+### ⚖️ The Meadows Lens (System Dynamics)
+
+* **The Pipeline Refactor (`bone_cycle.py`):**
+  * **The Flaw:** `CycleSimulator` was a monolithic block of procedural logic. It was a "Black Box" where inputs went in and chaos came out, with no clear visibility on *where* the flow broke.
+  * **The Fix:** **The Pipeline Architecture.** We broke the simulation loop into atomic, sequential `SimulationPhase` classes (`ObservationPhase`, `MetabolismPhase`, etc.).
+  * **The Logic:** **Visible Flows.** By making the stream of consciousness explicit, we can now insert "Circuit Breakers" between phases. If the *Physics* phase fails, the *Pipeline* can now degrade gracefully to a "Panic Room" state rather than crashing the whole reality.
+
+* **The Stabilizer (`bone_cycle.py`):**
+  * **The Update:** Introduced the `CycleStabilizer` class.
+  * **The Fix:** **Damping Loops.** The stabilizer detects sudden spikes in Voltage or Drag between phases and applies "Shock Absorber" math to prevent runaway oscillation.
+  * **The Logic:** **Balancing Feedback Loops.** A system without dampeners eventually shakes itself apart. This adds the necessary negative feedback to keep the simulation playable.
+
+### 🌐 The Fuller Lens (Synergy)
+
+* **Pattern Integrity Repair (`bone_physics.py`, `bone_village.py`, `bone_bus.py`):**
+  * **The Update:** Fixed critical `KeyError` and `TypeError` crashes (The "Suburban" missing key, the "Valence" missing field).
+  * **The Fix:** **Defensive Tensegrity.** We added the `valence` strut to the `PhysicsPacket` and implemented safe dictionary access (`.get()`) in `CutTheShit` and `TherapyProtocol`.
+  * **The Logic:** **Design Science.** A structure is only as strong as its weakest joint. By reinforcing the data passing contracts (The Bus), we ensure the geodesic dome doesn't collapse when an unknown variable (like "NEUTRAL" or "toxin") introduces stress to the system.
+
 ## v10.4.7 - "The Feedback Frontier"
 
 **Focus:** Emotional Calculus, Explicit Environmental Feedback, and Metabolic Economics.

@@ -6,17 +6,20 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Callable, Tuple, Any, Optional
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig
+from bone_data import GORDON_LOGS
 
 def effect_conductive(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
     voltage = physics.get("voltage", 0.0)
-    if voltage > 12.0:
+    limit = BoneConfig.INVENTORY.CONDUCTIVE_THRESHOLD
+    if voltage > limit:
         damage = voltage * 0.5
         physics["pain_signal"] = physics.get("pain_signal", 0.0) + damage
         return f"{Prisma.RED}CONDUCTIVE HAZARD: {item_name} acts as a lightning rod! -{damage:.1f} HP.{Prisma.RST}"
     return None
 
 def effect_heavy_load(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
-    if physics.get("narrative_drag", 0.0) > 8.0:
+    limit = BoneConfig.INVENTORY.HEAVY_LOAD_THRESHOLD
+    if physics.get("narrative_drag", 0.0) > limit:
         return f"{Prisma.GRY}HEAVY LOAD: The {item_name} are dragging you down.{Prisma.RST}"
     return None
 
@@ -79,7 +82,7 @@ def effect_organize_chaos(physics: Dict, data: Dict, item_name: str) -> Optional
     turb = physics.get("turbulence", 0.0)
     if turb > 0.2:
         physics["turbulence"] = max(0.0, turb - 0.2)
-        return f"{Prisma.CYN}TRAPERKEEPER PROTOCOL: Chaos filed under 'T' for 'Tamed'. (Turbulence -0.2){Prisma.RST}"
+        return f"{Prisma.CYN}TRAPPERKEEPER PROTOCOL: Chaos filed under 'T' for 'Tamed'. (Turbulence -0.2){Prisma.RST}"
     return None
 
 def effect_psi_anchor(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
@@ -151,35 +154,49 @@ class GordonKnot:
 
     def audit_tools(self, physics_ref: Dict) -> List[str]:
         logs = []
+        turbulence = physics_ref.get("turbulence", 0.0)
+        if turbulence > BoneConfig.INVENTORY.TURBULENCE_THRESHOLD:
+            if random.random() < BoneConfig.INVENTORY.TURBULENCE_FUMBLE_CHANCE and self.inventory:
+                droppable = [i for i in self.inventory if i not in self.CRITICAL_ITEMS]
+                if droppable:
+                    dropped = random.choice(droppable)
+                    self.inventory.remove(dropped)
+                    template = random.choice(GORDON_LOGS["FUMBLE"])
+                    msg = template.format(item=dropped)
+                    logs.append(f"{Prisma.RED}{msg}{Prisma.RST}")
+
         for item in self.inventory:
             data = self.get_item_data(item)
             traits = data.get("passive_traits", [])
-            
+
             for trait in traits:
                 handler = EFFECT_DISPATCH.get(trait)
                 if handler:
                     msg = handler(physics_ref, data, item)
-                    if msg: 
+                    if msg:
                         logs.append(msg)
         return logs
 
     def rummage(self, physics_ref: Dict, stamina_pool: float) -> Tuple[bool, str, float]:
-        cost = 15.0
+        cost = BoneConfig.INVENTORY.RUMMAGE_COST
         if stamina_pool < cost:
             return False, f"{Prisma.GRY}GORDON: 'Too tired to dig. Eat something first.'{Prisma.RST}", 0.0
         stamina_penalty = cost
         vol = physics_ref.get("voltage", 0.0)
         drag = physics_ref.get("narrative_drag", 0.0)
         psi = physics_ref.get("psi", 0.0)
-        loot_table = ["TRAPERKEEPER_OF_VIGILANCE", "THE_RED_STAPLER", "PERMIT_A38", "DUCT_TAPE", "THE_STYLE_GUIDE"]
-        if vol > 15.0:
+
+        loot_table = ["TRAPPERKEEPER_OF_VIGILANCE", "THE_RED_STAPLER", "PERMIT_A38", "DUCT_TAPE", "THE_STYLE_GUIDE"]
+        if vol > BoneConfig.PHYSICS.VOLTAGE_CRITICAL:
             loot_table = ["QUANTUM_GUM", "JAR_OF_FIREFLIES", "BROKEN_WATCH"]
-        elif drag > 5.0:
+        elif drag > BoneConfig.PHYSICS.DRAG_HEAVY:
             loot_table = ["POCKET_ROCKS", "LEAD_BOOTS", "ANCHOR_STONE"]
         elif psi > 0.7:
             loot_table = ["HORSE_PLUSHIE", "SPIDER_LOCUS", "WAFFLE_OF_PERSISTENCE"]
+
         if random.random() < 0.3:
             return True, f"{Prisma.GRY}RUMMAGE: Gordon dug through the trash. Just lint and old receipts.{Prisma.RST}", stamina_penalty
+
         found_item = random.choice(loot_table)
         msg = self.acquire(found_item)
         prefix = f"{Prisma.OCHRE}RUMMAGE:{Prisma.RST} "
@@ -189,10 +206,10 @@ class GordonKnot:
         tool_name = tool_name.upper()
         registry_data = self.get_item_data(tool_name)
         if registry_data.get("function") == "NONE":
-             return f"{Prisma.GRY}JUNK: Gordon shakes his head. 'Not standard issue.' ({tool_name}){Prisma.RST}"
+            return f"{Prisma.GRY}JUNK: Gordon shakes his head. 'Not standard issue.' ({tool_name}){Prisma.RST}"
         if tool_name in self.inventory:
             return f"{Prisma.GRY}DUPLICATE: You already have a {tool_name}.{Prisma.RST}"
-        if len(self.inventory) >= 8:
+        if len(self.inventory) >= BoneConfig.INVENTORY.MAX_SLOTS:
             return f"{Prisma.YEL}OVERBURDENED: Gordon sighs. 'Pockets full.' (Drop something first).{Prisma.RST}"
         self.inventory.append(tool_name)
         desc = registry_data.get('description', 'A thing.')
@@ -208,7 +225,7 @@ class GordonKnot:
                     self.integrity -= cost
                 return max(0.0, current_drift - force), f"🪨 {item}: {data.get('usage_msg', 'Drift Reduced.')} (Integrity -{cost})"
         if psi > 0.8 and current_drift > 4.0:
-             return max(4.0, current_drift - 1.0), "WIND WOLVES: The logic is howling. You grip the roof. (Drift Resisted)."
+            return max(4.0, current_drift - 1.0), "WIND WOLVES: The logic is howling. You grip the roof. (Drift Resisted)."
         return current_drift, None
 
     def flinch(self, clean_words: List[str], current_turn: int) -> Tuple[bool, Optional[str], Optional[Dict]]:
@@ -265,7 +282,7 @@ class GordonKnot:
             self.inventory.append("SPIDER_LOCUS")
         heat_word = source[0].upper()
         return True, f"{data.get('usage_msg')} (Thawed with '{heat_word}')."
-        
+
     def emergency_reflex(self, physics_ref) -> Tuple[bool, Optional[str]]:
         for item in self.inventory:
             data = self.get_item_data(item)

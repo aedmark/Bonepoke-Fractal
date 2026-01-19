@@ -3,7 +3,7 @@
 
 import math, re, random
 from typing import Dict, List, Any, Tuple, Optional
-from collections import Counter
+from collections import Counter, deque
 from dataclasses import dataclass, field, fields
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig, PhysicsPacket, CycleContext
@@ -82,6 +82,7 @@ class TheTensionMeter:
         self.events = events
         self.perfection_streak = 0
         self.last_physics_packet = {}
+        self.voltage_buffer = deque(maxlen=5)
 
     def audit_hubris(self, physics, lexicon_class):
         streak = physics.get("perfection_streak", 0)
@@ -121,7 +122,18 @@ class TheTensionMeter:
         counts, unknowns = self._tally_categories(clean_words, text)
         if unknowns:
             self._trigger_neuroplasticity(unknowns, counts, text)
+
         geodesic = GeodesicEngine.collapse_wavefunction(clean_words, counts, BoneConfig)
+
+        self.voltage_buffer.append(geodesic.tension)
+
+        if self.voltage_buffer:
+            smoothed_voltage = sum(self.voltage_buffer) / len(self.voltage_buffer)
+        else:
+            smoothed_voltage = geodesic.tension
+
+        smoothed_voltage = round(smoothed_voltage, 2)
+
         graph_mass = 0.0
         if graph:
             anchors = [w for w in clean_words if w in graph]
@@ -132,17 +144,19 @@ class TheTensionMeter:
             "psi": geodesic.abstraction,
             "mass": round(graph_mass, 1)
         }
+
         metrics = self._derive_complex_metrics(
             counts, clean_words,
-            geodesic.tension,
+            smoothed_voltage,
             geodesic.compression,
             integrity_packet,
             geodesic.dimensions
         )
         metrics["valence"] = valence
+
         packet = self._package_physics(
             text, clean_words, counts,
-            geodesic.tension,
+            smoothed_voltage,
             geodesic.compression,
             integrity_packet,
             metrics
@@ -632,7 +646,7 @@ class CutTheShit:
             physics["voltage"] > 8.0,
             physics["narrative_drag"] < 1.0,
             physics["repetition"] < 0.1,
-            physics["counts"]["suburban"] == 0,
+            physics["counts"].get("suburban", 0) == 0,
             physics["truth_ratio"] > 0.85,
             "sorry" not in clean_words]
         if all(conditions):
@@ -640,7 +654,7 @@ class CutTheShit:
             self.entropy = 0.0
             return "I am here. You are here. The wire is cold."
         if self.in_hn_state:
-            if physics["narrative_drag"] > 2.0 or physics["counts"]["suburban"] > 0:
+            if physics["narrative_drag"] > 2.0 or physics["counts"].get("suburban", 0) > 0:
                 self.entropy += 1.0
             if self.entropy > 2.0:
                 self.in_hn_state = False

@@ -1,15 +1,17 @@
-# BONEAMANITA 10.4.7 - "The Feedback Frontier"
+# BONEAMANITA 10.5.0 - "The Fun Zone"
 # Architects: SLASH, KISHO, The Courtyard, Taylor & Edmark
 
 import time, json, traceback
+from dataclasses import dataclass
 from typing import Dict, Any
 from bone_bus import EventBus, Prisma, BoneConfig, SystemHealth, TheObserver
 from bone_commands import CommandProcessor
 from bone_village import TownHall
 from bone_lexicon import TheLexicon, LiteraryReproduction
 from bone_inventory import GordonKnot
+from bone_telemetry import TelemetryService
 from bone_personality import (
-    TheFolly, CassandraProtocol, ChorusDriver, KintsugiProtocol, TherapyProtocol
+    TheFolly, CassandraProtocol, ChorusDriver, KintsugiProtocol, TherapyProtocol, TheBureau
 )
 from bone_physics import CosmicDynamics, ZoneInertia
 from bone_body import SomaticLoop, NoeticLoop
@@ -27,7 +29,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.4.7', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.5.0', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
@@ -62,6 +64,8 @@ class BoneAmanita:
         TownHall.DeathGen.load_protocols()
         LiteraryReproduction.load_genetics()
         self.events = EventBus()
+        self.telemetry = TelemetryService.initialize(f"session_{int(time.time())}")
+        self.events.log(f"{Prisma.CYN}[SLASH]: Telemetry Uplink Established.{Prisma.RST}", "BOOT")
         self.system_health = SystemHealth()
         self.observer = TheObserver()
         self.system_health.link_observer(self.observer)
@@ -88,6 +92,7 @@ class BoneAmanita:
         self.cassandra = CassandraProtocol(self)
         self.director = ChorusDriver()
         self.tinkerer = TownHall.Tinkerer(self.gordon, self.events)
+        self.bureau = TheBureau()
         self.almanac = TownHall.Almanac()
         self.cosmic = CosmicDynamics()
         self.council = TownHall.CouncilChamber()
@@ -116,6 +121,30 @@ class BoneAmanita:
         if cmd_response: return cmd_response
         if self._ethical_audit():
             self.events.log(f"{Prisma.WHT}MERCY SIGNAL: Trauma boards wiped.{Prisma.RST}", "SYS")
+        if self.phys.tension.last_physics_packet:
+            bureau_result = self.bureau.audit(self.phys.tension.last_physics_packet, self.bio.mito.state)
+            if bureau_result:
+                if bureau_result.get("log"):
+                    self.events.log(bureau_result["log"], "BUREAU")
+                if bureau_result.get("ui"):
+                    self.events.log(bureau_result["ui"], "UI_INTERRUPT")
+                if bureau_result.get("atp_gain", 0) > 0:
+                    self.bio.mito.state.atp_pool += bureau_result["atp_gain"]
+        if self.phys.tension.last_physics_packet:
+            perf_metrics = self.observer.get_report()
+            @dataclass
+            class HostStats:
+                latency: float
+                efficiency_index: float
+            host_stats = HostStats(
+                latency=perf_metrics.get("avg_llm_sec", 0.0),
+                efficiency_index=1.0
+            )
+            self.tinkerer.audit_tool_use(
+                self.phys.tension.last_physics_packet,
+                self.gordon.inventory,
+                host_stats
+            )
         llm_start = self.observer.clock_in()
         cortex_packet = self.cortex.process(user_message)
         llm_duration = self.observer.clock_out(llm_start, "llm")
@@ -227,7 +256,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.4.7', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.5.0', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

@@ -87,7 +87,7 @@ class BoneConfig:
     MAX_STAMINA = 100.0
     MAX_ATP = 200.0
     STAMINA_REGEN = 1.0
-    MAX_DRAG_LIMIT = 5.0  # Defaulting to DRAG_HEAVY
+    MAX_DRAG_LIMIT = 5.0
     GEODESIC_STRENGTH = 10.0
     BASE_IGNITION_THRESHOLD = 0.5
     MAX_REPETITION_LIMIT = 0.8
@@ -142,6 +142,14 @@ class BoneConfig:
         WEIGHT_KINETIC = 1.5
         WEIGHT_EXPLOSIVE = 3.0
         WEIGHT_CONSTRUCTIVE = 1.5
+
+    class INVENTORY:
+        CONDUCTIVE_THRESHOLD = 12.0
+        HEAVY_LOAD_THRESHOLD = 8.0
+        TURBULENCE_FUMBLE_CHANCE = 0.15
+        TURBULENCE_THRESHOLD = 0.6
+        MAX_SLOTS = 8
+        RUMMAGE_COST = 15.0
 
     class COUNCIL:
         STRANGE_LOOP_VOLTAGE = 8.0
@@ -200,7 +208,7 @@ class BoneConfig:
             "GRAVITY_WELL_THRESHOLD": (1.0, 100.0, float),
             "STAMINA_REGEN": (0.1, 10.0, float),
             "MAX_MEMORY_CAPACITY": (10, 1000, int),
-            "VERBOSE_LOGGING": (0, 1, bool) # 0/1 treated as bool
+            "VERBOSE_LOGGING": (0, 1, bool)
         }
         for key, value in data.items():
             if key in constraints:
@@ -228,7 +236,8 @@ class ErrorLog:
     component: str
     error_msg: str
     timestamp: float = field(default_factory=time.time)
-    severity: str = "WARNING" # WARNING, ERROR, CRITICAL
+    severity: str = "WARNING"
+
 
 class TheObserver:
     def __init__(self):
@@ -316,6 +325,7 @@ class SystemHealth:
 class PhysicsPacket:
     voltage: float = 0.0
     narrative_drag: float = 0.0
+    valence: float = 0.0
     repetition: float = 0.0
     clean_words: List[str] = field(default_factory=list)
     counts: Dict[str, int] = field(default_factory=dict)
@@ -371,10 +381,7 @@ class CycleContext:
     clean_words: List[str] = field(default_factory=list)
     physics: Any = field(default_factory=dict)
     logs: List[str] = field(default_factory=list)
-    # [SLASH MODIFICATION: START] - The Bidirectional State Mirror
-    # Tracks the delta of values (Before -> After) during the cycle
     flux_log: List[Dict[str, Any]] = field(default_factory=list)
-    # [SLASH MODIFICATION: END]
     is_alive: bool = True
     refusal_triggered: bool = False
     refusal_packet: Optional[Dict] = None
