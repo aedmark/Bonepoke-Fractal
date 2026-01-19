@@ -1,4 +1,4 @@
-# BONEAMANITA 10.5.0 - "The Fun Zone"
+# BONEAMANITA 10.5.1 - "The Fun Zone"
 # Architects: SLASH, KISHO, The Courtyard, Taylor & Edmark
 
 import time, json, traceback
@@ -29,7 +29,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.5.0', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.5.1', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
@@ -256,7 +256,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.5.0', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.5.1', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

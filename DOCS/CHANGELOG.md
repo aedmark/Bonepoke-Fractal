@@ -1,5 +1,9 @@
 # 📜 BONEAMANITA CHANGELOG
 
+# v10.5.01 - "The Wire Connect"
+
+* Bug fixes to get the machine running again.
+
 # v10.5.0 - "The Pattern Integrity Patch"
 
 **Focus:** Structural Decoupling, Narrative Extraction, Pipeline Architecture, and The Bureaucratic State.

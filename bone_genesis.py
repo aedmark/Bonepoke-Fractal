@@ -188,7 +188,7 @@ class GenesisProtocol:
     def wizard(self) -> bool:
         os.system('cls' if os.name == 'nt' else 'clear')
         banner = f"""
-{Prisma.CYN}   GENESIS PROTOCOL v10.5.0{Prisma.RST}
+{Prisma.CYN}   GENESIS PROTOCOL v10.5.1{Prisma.RST}
 {Prisma.GRY}State Machine Active. Tensegrity Nominal.{Prisma.RST}
 ------------------------------------"""
         print(banner)
