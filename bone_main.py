@@ -101,7 +101,7 @@ class BoneAmanita:
         self.soma = SomaticLoop(self.bio, self.mind.mem, self.lex, self.gordon, self.folly, self.events)
         self.noetic = NoeticLoop(self.mind, self.bio, self.events)
         self.cycle_controller = GeodesicOrchestrator(self)
-        local_brain = LLMInterface()
+        local_brain = LLMInterface(events_ref=self.events)
         self.cortex = TheCortex(self, llm_client=local_brain)
         self.tick_count = 0
         self.health = self.mind.mem.session_health if self.mind.mem.session_health else BoneConfig.MAX_HEALTH

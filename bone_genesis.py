@@ -2,6 +2,7 @@
 # "The beginning is a very delicate time." - Herbert
 
 import sys, os, json, time, shutil, urllib.request, urllib.error
+import traceback
 from typing import Optional, Dict, Tuple, List, Any
 
 try:
@@ -92,7 +93,9 @@ class GenesisProtocol:
                 base_url=config.get("base_url"),
                 api_key=config.get("api_key"),
                 model=config.get("model"))
-            response = test_client.generate("PING", temperature=0.0)
+
+            response = test_client.generate("PING", {"temperature": 0.0})
+
             if not response or not response.strip():
                 return False, "Brain returned empty response (Silence)."
             clean_resp_lower = response.lower()
@@ -353,6 +356,8 @@ Do not break character. Do not explain the simulation rules unless asked.
             "base_url": None,
             "api_key": "sk-dummy-key",
             "model": "local-model"}
+
+        # 1. Load Configuration
         if os.path.exists(CONFIG_FILE):
             try:
                 with open(CONFIG_FILE, "r") as f:
@@ -362,6 +367,8 @@ Do not break character. Do not explain the simulation rules unless asked.
                 self.type_out("Config file corrupted. Reverting to Safe Defaults.", color=Prisma.YEL)
                 self.config = safe_config.copy()
                 config_status = "CORRUPT"
+
+        # 2. Verify Configuration
         if config_status == "LOADED":
             self.type_out("...Verifying saved configuration...", color=Prisma.GRY)
             is_valid, msg = self.validate_brain_uplink(self.config)
@@ -372,53 +379,63 @@ Do not break character. Do not explain the simulation rules unless asked.
                 config_status = "STALE"
             else:
                 config_status = "VALID"
+
+        # 3. Wizard (if needed)
         if config_status != "VALID":
             self.type_out("Entering Setup Wizard...", color=Prisma.CYN)
-            success = self.wizard()
+            try:
+                # [THE FIX]: Wrap the wizard in a Kinetic Shield
+                success = self.wizard()
+            except KeyboardInterrupt:
+                print(f"\n{Prisma.paint('...Signal Lost. Sequence Aborted.', 'R')}")
+                sys.exit(0)
+
             if not success:
                 self.type_out(f"\n{Prisma.YEL}Setup failed or cancelled. Initializing Mock Mode (Safe Mode).{Prisma.RST}")
                 self.config = safe_config.copy()
                 self.config["provider"] = "mock"
+
+        # 4. Boot Engine
         self.type_out("\n...Booting Core Systems...", color=Prisma.GRY)
         self._sync_configuration()
+
+        # [THE TRANSITION]: Initialize Engine (Creates EventBus)
         engine = BoneAmanita()
+
         self.perform_identity_handshake(engine)
-        if engine.mind.mirror.profile.confidence < 20:
-            print(f"\n{Prisma.CYN}[IDENTITY HANDSHAKE]{Prisma.RST}")
-            try:
-                print(f"The machine recognizes a silhouette, but not a face.")
-                user_id = input(f"Designation? (Enter to remain Anonymous): ").strip()
-                if user_id:
-                    engine.mind.mirror.profile.name = user_id
-                    engine.mind.mirror.profile.confidence = 25
-                    print(f"...Designation '{user_id}' provisionally accepted. (Confidence: 25%)")
-                else:
-                    print("...Proceeding as Anonymous Traveler.")
-            except KeyboardInterrupt:
-                print(f"\n{Prisma.YEL}\n[INTERRUPT DETECTED]{Prisma.RST}")
-                sys.exit(0)
+
+        # 5. Uplink Brain
         if self.config["provider"] != "mock":
             self.type_out(f"...Connecting Neural Uplink ({self.config['provider']})...", color=Prisma.CYN)
             try:
+                # [THE FIX]: Inject engine.events into the interface
                 client = LLMInterface(
+                    events_ref=engine.events,
                     provider=self.config["provider"],
                     base_url=self.config.get("base_url"),
                     api_key=self.config.get("api_key"),
                     model=self.config.get("model"))
+
                 if hasattr(engine, 'cortex'):
                     engine.cortex.llm = client
+                    self.type_out("   [CORTEX]: Uplink Established via EventBus.", color=Prisma.GRN)
                 else:
                     self.type_out("...Grafting new Cortex onto Brainstem...", color=Prisma.OCHRE)
                     engine.cortex = TheCortex(engine, llm_client=client)
             except Exception as e:
                 self.type_out(f"{Prisma.RED}FATAL UPLINK ERROR: {e}{Prisma.RST}")
                 self.type_out("Falling back to internal logic.", color=Prisma.GRY)
+
         self.type_out("...System Online. Good luck.\n", color=Prisma.GRN)
+
+        # 6. Enter Loop
         with SessionGuardian(engine) as eng:
             while True:
                 try:
                     prompt_char = Prisma.paint('>', 'W')
                     u = input(f"{prompt_char} ")
+
+                    # Multi-line input handling
                     if u.strip() == "<<<":
                         print(f"{Prisma.GRY}   [MULTI-LINE MODE ACTIVE. Type '>>>' to send.]{Prisma.RST}")
                         MAX_LINES = 50
@@ -429,40 +446,46 @@ Do not break character. Do not explain the simulation rules unless asked.
                         while True:
                             try:
                                 line = input(f"{Prisma.paint('...', '0')} ")
-                                if line.strip() == ">>>":
-                                    break
+                                if line.strip() == ">>>": break
                                 line_len = len(line)
                                 if len(lines) >= MAX_LINES:
-                                    print(f"{Prisma.paint('   [STOP]: Maximum line count (50) reached. Truncating input.', 'Y')}")
+                                    print(f"{Prisma.paint('   [STOP]: Maximum line count (50) reached.', 'Y')}")
                                     buffer_full = True
                                     break
                                 if (total_chars + line_len) > MAX_TOTAL_CHARS:
-                                    print(f"{Prisma.paint('   [STOP]: Character limit (20k) reached. The buffer is full.', 'Y')}")
+                                    print(f"{Prisma.paint('   [STOP]: Character limit (20k) reached.', 'Y')}")
                                     buffer_full = True
                                     break
                                 lines.append(line)
                                 total_chars += line_len
-                            except EOFError:
-                                break
+                            except EOFError: break
                         u = "\n".join(lines)
                         status_color = 'Y' if buffer_full else '0'
                         print(f"{Prisma.paint(f'   [Block received: {len(u)} chars]', status_color)}")
+
                     if not u: continue
-                except EOFError:
-                    break
+                except EOFError: break
                 except KeyboardInterrupt:
                     print(f"\n{Prisma.paint('...Interrupted.', 'Y')}")
                     break
+
                 if u.lower() in ["exit", "quit", "/exit"]:
                     break
+
                 try:
-                    if hasattr(engine, 'cortex'):
+                    if hasattr(engine, 'process_turn'):
+                        # Route through the full engine cycle
+                        result = engine.process_turn(u)
+                        if result.get("ui"): print(result["ui"])
+                    elif hasattr(engine, 'cortex'):
+                        # Fallback for lobotomized engines
                         result = engine.cortex.process(u)
                         print(result.get("ui", "..."))
                     else:
                         print(f"{Prisma.RED}CRITICAL: Cortex not found.{Prisma.RST}")
                 except Exception as e:
                     print(f"{Prisma.RED}RUNTIME CRASH: {e}{Prisma.RST}")
+                    traceback.print_exc()
 
 if __name__ == "__main__":
     GenesisProtocol().launch()

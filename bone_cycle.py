@@ -1,7 +1,7 @@
 # bone_cycle.py
 # "The wheel turns, and ages come and pass." - Jordan
 
-import traceback, random, time, math
+import traceback, random, math
 from typing import Dict, Any, Optional, Tuple, List, Callable
 from dataclasses import dataclass, field
 from bone_bus import Prisma, BoneConfig, CycleContext
@@ -19,23 +19,19 @@ class PIDController:
         self.setpoint = setpoint
         self.prev_error = 0.0
         self.integral = 0.0
-        self.last_time = time.time()
 
-    def update(self, current_value: float) -> float:
-        current_time = time.time()
-        dt = max(0.01, current_time - self.last_time)
+    def update(self, current_value: float, dt: float = 0.1) -> float:
+        safe_dt = max(0.001, dt)
         error = self.setpoint - current_value
-        self.integral += error * dt
-        derivative = (error - self.prev_error) / dt
+        self.integral += error * safe_dt
+        derivative = (error - self.prev_error) / safe_dt
         output = (self.kp * error) + (self.ki * self.integral) + (self.kd * derivative)
         self.prev_error = error
-        self.last_time = current_time
         return output
 
     def reset(self):
         self.prev_error = 0.0
         self.integral = 0.0
-        self.last_time = time.time()
 
 class CycleStabilizer:
     def __init__(self, events_ref):
@@ -66,13 +62,9 @@ class CycleStabilizer:
         return clamped_correction
 
     def stabilize(self, ctx: CycleContext, current_phase: str):
-        """
-        Uses PID logic to gently nudge the system toward homeostasis.
-        Instead of a 'shock absorber' (reactive), this is a 'thermostat' (adaptive).
-        """
         curr_v, curr_d = self._get_current_metrics(ctx)
-        v_force = self.voltage_pid.update(curr_v)
-        d_force = self.drag_pid.update(curr_d)
+        v_force = self.voltage_pid.update(curr_v, dt=0.1)
+        d_force = self.drag_pid.update(curr_d, dt=0.1)
         corrections_made = False
         if abs(curr_v - self.voltage_pid.setpoint) > 5.0:
             applied_v = self._apply_correction(ctx, "voltage", v_force)
@@ -86,7 +78,6 @@ class CycleStabilizer:
                 corrections_made = True
         self.last_phase = current_phase
         return corrections_made
-
 
 class SimulationPhase:
     """Base class for any step in the cycle."""
@@ -277,7 +268,7 @@ class NavigationPhase(SimulationPhase):
         for e_log in env_logs: ctx.log(e_log)
         orbit_state, drag_pen, orbit_msg = self.eng.cosmic.analyze_orbit(self.eng.mind.mem, ctx.clean_words)
         raw_zone = physics.get("zone", "COURTYARD")
-        stabilized_zone = self.eng.stabilizer.stabilize(raw_zone, physics, (orbit_state, drag_pen)) # Note: Stabilizer here is ZoneInertia from physics, distinct from CycleStabilizer
+        stabilized_zone = self.eng.stabilizer.stabilize(raw_zone, physics, (orbit_state, drag_pen))
         adjusted_drag = self.eng.stabilizer.override_cosmic_drag(drag_pen, stabilized_zone)
         physics["zone"] = stabilized_zone
         self.eng.apply_cosmic_physics(physics, orbit_state, adjusted_drag)

@@ -253,12 +253,14 @@ class SomaticLoop:
 
     def _package_result(self, resp_status, logs, chem_state=None, enzyme="NONE"):
         is_alive = (resp_status == "RESPIRING")
+        current_atp = self.bio.mito.state.atp_pool
         return {
             "respiration": resp_status,
             "is_alive": is_alive,
             "logs": logs,
             "chemistry": chem_state or {},
-            "enzyme": enzyme
+            "enzyme": enzyme,
+            "atp": current_atp
         }
 
 @dataclass
