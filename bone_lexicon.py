@@ -197,6 +197,27 @@ class LinguisticAnalyzer:
             return "kinetic", 0.5
         return None, 0.0
 
+    def measure_valence(self, words: List[str]) -> float:
+        if not words: return 0.0
+        pos_set = self.store.get_raw("sentiment_pos")
+        neg_set = self.store.get_raw("sentiment_neg")
+        negators = self.store.get_raw("sentiment_negators")
+        score = 0.0
+        for i, word in enumerate(words):
+            is_negated = False
+            if i > 0 and words[i-1] in negators:
+                is_negated = True
+            val = 0.0
+            if word in pos_set:
+                val = 1.0
+            elif word in neg_set:
+                val = -1.0
+            if is_negated:
+                val *= -0.5
+            score += val
+        normalized = score / max(1.0, len(words) * 0.5)
+        return max(-1.0, min(1.0, normalized))
+
 class LexiconService:
     _INITIALIZED = False
     _STORE = None
@@ -227,6 +248,11 @@ class LexiconService:
             cls._INITIALIZED = False
             print(f"{Prisma.RED}[LEXICON]: Initialization Failed: {e}{Prisma.RST}")
             raise e
+
+    @classmethod
+    def get_valence(cls, words: List[str]) -> float:
+        if not cls._INITIALIZED: cls.initialize()
+        return cls._ANALYZER.measure_valence(words)
 
     @classmethod
     def get_categories_for_word(cls, word: str) -> Set[str]:

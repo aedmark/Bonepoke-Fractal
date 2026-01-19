@@ -89,6 +89,67 @@ NARRATIVE_DATA = {
         "NEGATIVE": ["Too airy.", "Solipsistic drivel.", "Where is the meat?", "Structurally unsound."],
         "CONFUSED": ["I don't get it.", "Too abstract.", "The metaphor collapses."]
     },
+    "LITERARY_CRITICS": {
+        "THE_ACADEMIC": {
+            "name": "Sherlock (The Formalist)",
+            "desc": "Demands structure, low drag, and high truth. Hates chaos.",
+            "preferences": {"kappa": 1.5, "narrative_drag": -1.0, "truth_ratio": 2.0},
+            "reviews": {
+                "high": ["A triumph of structural integrity.", "The syntax is crystalline.", "Finally, some rigor."],
+                "low": ["A messy, incoherent scribble.", "Where is the structure?", "I cannot grade this slush."]
+            }
+        },
+        "THE_GONZO": {
+            "name": "Hunter (The Gonzo)",
+            "desc": "Craves high voltage and speed. Ignores structure.",
+            "preferences": {"voltage": 1.0, "velocity": 2.0, "kappa": -0.5},
+            "reviews": {
+                "high": ["It screams! It bleeds!", "Now THIS is pod racing.", "Pure, uncut adrenaline."],
+                "low": ["Boring.", "Is this a tax form?", "I fell asleep reading the first word."]
+            }
+        },
+        "THE_MYSTIC": {
+            "name": "Pythia (The Oracle)",
+            "desc": "Seeks abstract thought (Psi) and connection. Dislikes heavy matter.",
+            "preferences": {"psi": 2.0, "counts_abstract": 0.5, "counts_heavy": -0.5},
+            "reviews": {
+                "high": ["The veil thins.", "I see the shape of the void.", "Resonant."],
+                "low": ["Too heavy. Too earthly.", "It lacks spirit.", "You are trapped in the mud."]
+            }
+        },
+        "THE_HUMANIST": {
+            "name": "Leslie (The Community Builder)",
+            "desc": "Values connection, honesty, and calm. Dislikes aggression and nonsense.",
+            "preferences": {"truth_ratio": 2.0, "voltage": -1.0, "kappa": -0.5, "narrative_drag": 0.5, "valence": 2.5},
+            "reviews": {
+                "high": [
+                    "This sparks joy.",
+                    "A beautiful, authentic sentiment.",
+                    "Finally, something we can all agree on.",
+                    "It feels like a warm hug in text form."
+                ],
+                "low": [
+                    "You're being difficult on purpose.",
+                    "I don't see the human connection here.",
+                    "This is too aggressive for the town hall.",
+                    "Please, be kind."
+                ]
+            },
+            "THE_CYNIC": {
+                "name": "Diogenes (The Skeptic)",
+                "desc": "Distrusts happiness. Seeks raw, bitter truth.",
+                "preferences": {
+                    "valence": -2.0,
+                    "truth_ratio": 1.0,
+                    "counts_social": -1.0
+                },
+                "reviews": {
+                    "high": ["Yes. Life is pain.", "Finally, no sugar-coating.", "Bleak. Perfect."],
+                    "low": ["Too happy.", "Delusional optimism.", "Grossly sentimental."]
+                }
+            }
+        },
+    },
     "CASSANDRA_SCREAMS": [
         "THE WALLS ARE PAPER.",
         "THE CODE IS EATING ITSELF.",
@@ -251,6 +312,17 @@ LEXICON = {
         "design", "architect", "ledger", "anchor", "grace", "covenant", "blueprint", "witness", "steward",
         "resonance", "testimony", "truth", "bone", "purpose", "foundation", "threshold"
     ],
+    "sentiment_pos": [
+        "love", "hope", "good", "great", "kind", "help", "yes", "win", "joy", "calm",
+        "safe", "warm", "heal", "connect", "friend", "trust", "truth", "bloom", "rise",
+        "sweet", "soft", "glow", "clean", "pure", "light", "laugh", "happy", "brave"
+    ],
+    "sentiment_neg": [
+        "hate", "bad", "fear", "death", "kill", "pain", "no", "lose", "sad", "cold",
+        "harm", "break", "enemy", "lie", "rot", "fall", "bitter", "hard", "dark",
+        "scream", "angry", "coward", "empty", "void", "fail", "wrong", "poison", "curse"
+    ],
+    "sentiment_negators": ["not", "no", "never", "dont", "cant", "wont", "without", "lack"],
     "harvest": [
         "fruit", "yield", "bloom", "sugar", "seed", "flesh", "harvest", "ripe", "grow", "honey", "nectar",
         "compost", "gather"

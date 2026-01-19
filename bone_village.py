@@ -28,10 +28,6 @@ except ImportError:
         def forge_new_item(vec): return "GLITCH_ARTIFACT", {}
 
 class TheTinkerer:
-    """
-    Maintains the state of Gordon's tools.
-    [WIRED]: Now connects to TheAkashicRecord for procedural generation.
-    """
     def __init__(self, gordon_ref, events_ref):
         self.gordon = gordon_ref
         self.events = events_ref
@@ -47,97 +43,72 @@ class TheTinkerer:
             voltage = physics_packet.voltage
             drag = physics_packet.narrative_drag
             vector = getattr(physics_packet, "vector", {})
-
         real_drag = 0.0
         real_efficiency = 1.0
         if host_health:
             real_drag = max(0.0, host_health.latency - 2.0)
             real_efficiency = host_health.efficiency_index
-
         effective_drag = drag + (real_drag * 2.0)
-
         is_forge = (voltage > 12.0 and real_efficiency > 0.9) or (effective_drag < 2.0)
         is_mud = (voltage < 5.0) and (effective_drag > 6.0)
-
         learning_rate = 0.05
         rust_rate = 0.02
         ascension_threshold = 2.5
-
         items_to_shed = []
-
         for item_name in inventory_list:
             if item_name not in self.tool_confidence:
                 self.tool_confidence[item_name] = 1.0
-
             current = self.tool_confidence[item_name]
-
             if is_forge:
                 self.tool_confidence[item_name] = min(3.0, current + learning_rate)
-
                 if self.tool_confidence[item_name] >= ascension_threshold:
                     self._attempt_ascension(item_name, inventory_list, vector)
-
                 elif random.random() < 0.1:
                     self.events.log(f"{Prisma.CYN}[TINKER]: {item_name} is tempering (Eff: {real_efficiency:.2f}).{Prisma.RST}", "SYS")
-
             elif is_mud:
                 self.tool_confidence[item_name] = max(0.0, current - rust_rate)
                 if random.random() < 0.1:
                     reason = "Damp Narrative" if drag > 4.0 else "System Lag"
                     self.events.log(f"{Prisma.OCHRE}[TINKER]: {item_name} is rusting ({reason}).{Prisma.RST}", "SYS")
-
             if self.tool_confidence[item_name] <= 0.1:
                 items_to_shed.append(item_name)
-
         for item in items_to_shed:
             if item in inventory_list:
                 inventory_list.remove(item)
             if item in self.tool_confidence:
                 del self.tool_confidence[item]
             self.events.log(f"{Prisma.GRY}[TINKER]: {item} disintegrated. Gordon failed to maintain it.{Prisma.RST}", "SYS")
-
         for item_name in inventory_list:
             if item_name in self.tool_confidence:
                 self._mutate_tool_stats(item_name, self.tool_confidence[item_name])
 
     def _attempt_ascension(self, old_name, inventory_list, vector):
-        """
-        [NEW]: Transforms a standard tool into a Procedural Artifact.
-        """
         if "OF_" in old_name and " " in old_name:
             return
-
         new_name, new_data = self.akashic.forge_new_item(vector)
-
         if old_name in inventory_list:
             inventory_list.remove(old_name)
             inventory_list.append(new_name)
-
         self.gordon.ITEM_REGISTRY[new_name] = new_data
-
         self.tool_confidence[new_name] = 1.0
         if old_name in self.tool_confidence:
             del self.tool_confidence[old_name]
-
         self.events.log(f"{Prisma.MAG}✨ ASCENSION: '{old_name}' has evolved into '{new_name}'!{Prisma.RST}", "AKASHIC")
 
     def _mutate_tool_stats(self, item_name, confidence):
         item_data = self.gordon.ITEM_REGISTRY.get(item_name)
-        if not item_data:
-            return
+        if not item_data: return
         if "value" in item_data:
             if "base_value" not in item_data:
                 item_data["base_value"] = item_data["value"]
             new_value = item_data["base_value"] * confidence
             item_data["value"] = round(new_value, 2)
-
         if confidence > 1.5 and "LUCKY" not in item_data.get("passive_traits", []):
             if "passive_traits" not in item_data: item_data["passive_traits"] = []
             item_data["passive_traits"].append("LUCKY")
             self.events.log(f"{Prisma.CYN}✨ TRAIT GAINED: {item_name} is now [LUCKY].{Prisma.RST}", "TINKER")
 
-    def save_state(self):
-        return self.tool_confidence
+    def save_state(self): return self.tool_confidence
 
     def load_state(self, data):
         if data:
@@ -182,10 +153,8 @@ class DeathGen:
         if mito_state.atp_pool <= 0: cause = "STARVATION"
         elif physics["counts"]["toxin"] > 3: cause = "TOXICITY"
         elif physics["narrative_drag"] > 8.0: cause = "BOREDOM"
-
         cause_list = DeathGen.CAUSES.get(cause, ["System Error"])
         flavor_text = random.choice(cause_list) if cause_list else "Unknown Error"
-
         prefix_list = DeathGen.PREFIXES
         prefix = random.choice(prefix_list) if prefix_list else "RIP."
 
@@ -206,36 +175,27 @@ class TheCartographer:
     def _get_tile(x, y, center, physics, vectors):
         dist_from_center = ((x - center)**2 + (y - center)**2) ** 0.5
         entropy_threshold = 3.0 - (vectors.get("ENT", 0.5) * 2.0)
-
         if dist_from_center > entropy_threshold:
             return f"{Prisma.GRY} . {Prisma.RST}"
-
         structure_noise = (x * 3 + y * 7) % 10 / 10.0
         if structure_noise < vectors.get("STR", 0.0):
             return f"{Prisma.OCHRE} ▲ {Prisma.RST}"
-
         if vectors.get("VEL", 0) > 0.6:
             if x == center or y == center:
                 return f"{Prisma.CYN} = {Prisma.RST}"
-
         if vectors.get("BET", 0) > 0.5:
             return f"{Prisma.SLATE} ∷ {Prisma.RST}"
-
         return "   "
 
     @classmethod
     def weave(cls, _text, _graph, _bio_metrics, _limbo, physics=None):
-        if not physics:
-            return "MAP ERROR: No Physics Data", []
-
+        if not physics: return "MAP ERROR: No Physics Data", []
         vectors = physics.get("vector", {})
         center = cls.GRID_SIZE // 2
         rows = []
         border = f"{Prisma.GRY}+{'-' * (cls.GRID_SIZE * 3)}+{Prisma.RST}"
-
         rows.append(border)
         anchors = []
-
         for y in range(cls.GRID_SIZE):
             row_str = f"{Prisma.GRY}|{Prisma.RST}"
             for x in range(cls.GRID_SIZE):
@@ -245,13 +205,10 @@ class TheCartographer:
                     row_str += cls._get_tile(x, y, center, physics, vectors)
             row_str += f"{Prisma.GRY}|{Prisma.RST}"
             rows.append(row_str)
-
         rows.append(border)
-
         if vectors.get("STR", 0) > 0.7: anchors.append("MOUNTAIN")
         if vectors.get("ENT", 0) > 0.7: anchors.append("VOID_EDGE")
         if vectors.get("VEL", 0) > 0.7: anchors.append("HIGHWAY")
-
         map_display = "\n".join(rows)
         return map_display, anchors
 
@@ -267,8 +224,7 @@ class TheCartographer:
 
 class TheAlmanac:
     def __init__(self):
-        self.forecasts = ALMANAC_DATA.get("FORECASTS", {
-            "BALANCED": ["System nominal."]})
+        self.forecasts = ALMANAC_DATA.get("FORECASTS", {"BALANCED": ["System nominal."]})
         self.strategies = ALMANAC_DATA.get("STRATEGIES", {})
         self.default_seed = ALMANAC_DATA.get("DEFAULT_SEED", "Observe.")
 
@@ -277,17 +233,13 @@ class TheAlmanac:
         trauma = session_data.get("trauma_vector", {})
         final_health = meta.get("final_health", 0)
         final_stamina = meta.get("final_stamina", 0)
-
         condition = "BALANCED"
         advice = "System nominal."
-
         real_latency = 0.0
         real_entropy = 1.0
-
         if host_health:
             real_latency = host_health.latency
             real_entropy = host_health.entropy
-
         max_trauma = max(trauma, key=trauma.get) if trauma else "NONE"
         trauma_val = trauma.get(max_trauma, 0)
 
@@ -306,7 +258,6 @@ class TheAlmanac:
         elif meta.get("avg_voltage", 0) > 12.0:
             condition = "HIGH_VOLTAGE"
             advice = "The capacitor is overcharged."
-
         return condition, advice
 
     def get_seed(self, condition):
@@ -317,11 +268,9 @@ class TheAlmanac:
         available_forecasts = self.forecasts.get(condition, self.forecasts.get("BALANCED", ["Standard Operation."]))
         forecast_text = random.choice(available_forecasts)
         seed_text = self.get_seed(condition)
-
         border = f"{Prisma.OCHRE}{'='*40}{Prisma.RST}"
         report = [
-            "\n",
-            border,
+            "\n", border,
             f"{Prisma.CYN}   THE ALMANAC: CREATIVE WEATHER REPORT{Prisma.RST}",
             border,
             f"Condition: {Prisma.WHT}{condition}{Prisma.RST}",
@@ -332,8 +281,7 @@ class TheAlmanac:
             "",
             f"{Prisma.GRN}Seed for Next Session:{Prisma.RST}",
             f"   {seed_text}",
-            border,
-            "\n"
+            border, "\n"
         ]
         return "\n".join(report)
 
@@ -343,14 +291,11 @@ class TheAlmanac:
         solvents = counts.get("solvents", 0)
         suburban = counts.get("suburban", 0)
         play = counts.get("play", 0)
-
         friction = (solvents * 1.0) + (suburban * 2.5)
         lift = play * 1.5
-
         net_drag = max(0.0, friction - lift)
         normalized_drag = (net_drag / volume) * 10.0
         final_drag = normalized_drag * config.SIGNAL_DRAG_MULTIPLIER
-
         return round(min(config.MAX_DRAG_LIMIT * 2, final_drag), 2)
 
     @staticmethod
@@ -392,21 +337,13 @@ class ApeirogonResonance:
         phys = metrics.get("physics", {})
         vec = phys.get("vector", {})
         if is_bored:
-            return {
-                "title": "THE FRACTAL BLOOM",
-                "color": Prisma.VIOLET,
-                "desc": "Boredom Threshold exceeded. Entropy is high.",
-                "context": "CHAOS"}
+            return {"title": "THE FRACTAL BLOOM", "color": Prisma.VIOLET, "desc": "Boredom Threshold exceeded. Entropy is high.", "context": "CHAOS"}
         if station:
             role_color = Prisma.CYN
             if station[0] == "GORDON": role_color = Prisma.OCHRE
             elif station[0] == "SHERLOCK": role_color = Prisma.INDIGO
             elif station[0] == "JESTER": role_color = Prisma.VIOLET
-            return {
-                "title": station[2].upper().replace('THE ', 'THE '),
-                "color": role_color,
-                "desc": station[1],
-                "context": station[0]}
+            return {"title": station[2].upper().replace('THE ', 'THE '), "color": role_color, "desc": station[1], "context": station[0]}
         if not vec or len(vec) < 2:
             return {"title": "THE VOID", "color": Prisma.GRY, "desc": "No data.", "context": "VOID"}
         sorted_dims = sorted(vec.items(), key=lambda x: abs(x[1] - 0.5), reverse=True)
@@ -433,11 +370,7 @@ class ApeirogonResonance:
 class MirrorGraph:
     def __init__(self, events=None):
         self.events = events
-        self.stats = {
-            "WAR": 0.0,
-            "ART": 0.0,
-            "LAW": 0.0,
-            "ROT": 0.0}
+        self.stats = {"WAR": 0.0, "ART": 0.0, "LAW": 0.0, "ROT": 0.0}
         self.dominant_archetype = "NEUTRAL"
         self.active_mode = True
         self.profile = UserProfile()
@@ -445,12 +378,10 @@ class MirrorGraph:
             self.events.subscribe("PHYSICS_CALCULATED", self.on_physics_update)
 
     def on_physics_update(self, packet: dict):
-        if not self.active_mode:
-            return
+        if not self.active_mode: return
         text = packet.get("raw_text", "")
         physics_data = packet.get("physics")
-        if physics_data:
-            self.profile_input(text, physics_data)
+        if physics_data: self.profile_input(text, physics_data)
         mods = self.get_reflection_modifiers()
         if mods.get("flavor") and self.events:
             self.events.log(f"{Prisma.CYN}🪞 {mods['flavor']}{Prisma.RST}", "MIRROR")
@@ -460,78 +391,60 @@ class MirrorGraph:
             counts = physics.get("counts", {})
             clean_words = physics.get("clean_words", [])
             vol = physics.get("voltage", 0.0)
-            ent = physics.get("entropy", 0.0)
-            psi = physics.get("psi", 0.0)
             drag = physics.get("narrative_drag", 0.0)
             turbulence = physics.get("turbulence", 0)
+            psi = physics.get("psi", 0.0)
         else:
             counts = getattr(physics, "counts", {})
             clean_words = getattr(physics, "clean_words", [])
             vol = getattr(physics, "voltage", 0.0)
-            ent = getattr(physics, "entropy", 0.0)
-            psi = getattr(physics, "psi", 0.0)
             drag = getattr(physics, "narrative_drag", 0.0)
             turbulence = getattr(physics, "turbulence", 0)
+            psi = getattr(physics, "psi", 0.0)
         if hasattr(self, 'profile'):
             self.profile.update(counts, len(clean_words))
         decay = 0.05
-        for k in self.stats:
-            self.stats[k] = max(0.0, self.stats[k] - decay)
-        if vol > 12.0 or "!" in text:
-            self.stats["WAR"] = min(1.0, self.stats["WAR"] + 0.2)
-        if psi > 0.6 or "?" in text:
-            self.stats["ART"] = min(1.0, self.stats["ART"] + 0.2)
-        if drag < 2.0 and vol < 5.0:
-            self.stats["LAW"] = min(1.0, self.stats["LAW"] + 0.2)
-        if text.startswith("/"):
-            self.stats["LAW"] = min(1.0, self.stats["LAW"] + 0.1)
-        if turbulence > 0.5:
-            self.stats["ROT"] = min(1.0, self.stats["ROT"] + 0.2)
+        for k in self.stats: self.stats[k] = max(0.0, self.stats[k] - decay)
+        if vol > 12.0 or "!" in text: self.stats["WAR"] = min(1.0, self.stats["WAR"] + 0.2)
+        if psi > 0.6 or "?" in text: self.stats["ART"] = min(1.0, self.stats["ART"] + 0.2)
+        if drag < 2.0 and vol < 5.0: self.stats["LAW"] = min(1.0, self.stats["LAW"] + 0.2)
+        if text.startswith("/"): self.stats["LAW"] = min(1.0, self.stats["LAW"] + 0.1)
+        if turbulence > 0.5: self.stats["ROT"] = min(1.0, self.stats["ROT"] + 0.2)
         self.dominant_archetype = max(self.stats, key=self.stats.get)
 
     def reflect(self, physics: Any) -> Tuple[bool, Optional[str]]:
-        if isinstance(physics, dict):
-            text = physics.get("raw_text", "")
-        else:
-            text = getattr(physics, "raw_text", "")
+        if isinstance(physics, dict): text = physics.get("raw_text", "")
+        else: text = getattr(physics, "raw_text", "")
         self.profile_input(text, physics)
         mods = self.get_reflection_modifiers()
-        if mods.get("flavor"):
-            return True, mods["flavor"]
+        if mods.get("flavor"): return True, mods["flavor"]
         return False, None
 
     def get_reflection_modifiers(self) -> Dict:
         top_stat = self.dominant_archetype
         intensity = self.stats[top_stat]
-        mods = {
-            "drag_mult": 1.0,
-            "plasticity": 1.0,
-            "loot_chance": 1.0,
-            "atp_tax": 0.0,
-            "voltage_cap": 20.0,
-            "flavor": ""}
-        if intensity < 0.3:
-            return mods
+        mods = {"drag_mult": 1.0, "plasticity": 1.0, "loot_chance": 1.0, "atp_tax": 0.0, "voltage_cap": 20.0, "flavor": ""}
+        if intensity < 0.3: return mods
         if top_stat == "WAR":
             mods["drag_mult"] = 1.5
             mods["loot_chance"] = 2.0
             mods["atp_tax"] = 5.0
-            mods["flavor"] = f"{Prisma.RED}[MIRROR]: Aggression detected. The simulation hardens its shell. (Drag UP, Loot UP){Prisma.RST}"
+            mods["flavor"] = f"{Prisma.RED}[MIRROR]: Aggression detected (High Voltage). (Drag UP, Loot UP){Prisma.RST}"
         elif top_stat == "ART":
             mods["plasticity"] = 2.0
             mods["drag_mult"] = 0.5
             mods["voltage_cap"] = 10.0
-            mods["flavor"] = f"{Prisma.CYN}[MIRROR]: Abstract thought dominant. Physics are permeable. (Plasticity UP, Voltage Capped){Prisma.RST}"
+            mods["flavor"] = f"{Prisma.CYN}[MIRROR]: Abstract thought detected (Questions/Psi). (Plasticity UP, Voltage Capped){Prisma.RST}"
         elif top_stat == "LAW":
             mods["drag_mult"] = 0.8
             mods["loot_chance"] = 0.0
             mods["plasticity"] = 0.2
-            mods["flavor"] = f"{Prisma.GRY}[MIRROR]: Forms filed in triplicate. Deviation is prohibited. (Stability UP, Loot ZERO){Prisma.RST}"
+            mods["flavor"] = f"{Prisma.GRY}[MIRROR]: Order detected (Low Drag). Deviation is prohibited. (Stability UP, Loot ZERO){Prisma.RST}"
         elif top_stat == "ROT":
             mods["plasticity"] = 0.5
             mods["drag_mult"] = 1.2
             mods["atp_tax"] = 2.0
-            mods["flavor"] = f"{Prisma.VIOLET}[MIRROR]: Entropy rising. Logic integrity failing. (Chaos UP){Prisma.RST}"
+            mods["flavor"] = f"{Prisma.VIOLET}[MIRROR]: Entropy rising (Turbulence). Logic integrity failing. (Chaos UP){Prisma.RST}"
         return mods
 
     def render_report(self):
@@ -543,19 +456,35 @@ class MirrorGraph:
             f"ROT [{self.stats['ROT']:.2f}] {bar(self.stats['ROT'], Prisma.VIOLET)}")
 
 class StrunkWhiteProtocol:
+    """
+    Polices the style of the narrative.
+    Refactored to distinguish between User (Advisory) and System (Mandatory).
+    """
     def __init__(self):
         self.PATTERNS = STYLE_CRIMES["PATTERNS"]
 
-    def audit(self, text: str) -> tuple[bool, str]:
+    def audit(self, text: str, is_system_output: bool = True) -> tuple[bool, str]:
+        """
+        Check for 'Style Crimes'.
+        If is_system_output is True, returns False on detection (Strict).
+        If is_system_output is False, returns True on detection but adds a warning (Advisory).
+        """
+        if "delve" in text.lower() or "tapestry" in text.lower():
+            if is_system_output:
+                return False, f"{Prisma.RED}FORBIDDEN VOCAB: 'Delve' and 'Tapestry' are banned artifacts.{Prisma.RST}"
+            else:
+                return True, f"{Prisma.YEL}STYLE OBSERVATION: 'Delve' and 'Tapestry' are forbidden artifacts. Try 'Explore' or 'Weave'.{Prisma.RST}"
         for crime in self.PATTERNS:
             if re.search(crime["regex"], text):
-                return False, f"STYLE CRIME ({crime['name']}): {crime['error_msg']}"
-        if "delve" in text.lower() or "tapestry" in text.lower():
-            return False, "STYLE CRIME (FORBIDDEN VOCAB): 'Delve' and 'Tapestry' are banned."
+                msg = crime['error_msg']
+                if is_system_output:
+                    return False, f"STYLE CRIME ({crime['name']}): {msg}"
+                else:
+                    return True, f"{Prisma.GRY}STYLE NOTE ({crime['name']}): {msg} (Proceeding...){Prisma.RST}"
         return True, "Clean"
 
     def sanitize(self, text: str) -> tuple[str, str | None]:
-        is_clean, msg = self.audit(text)
+        is_clean, msg = self.audit(text, is_system_output=True)
         if not is_clean:
             return text, msg
         return text, None
@@ -669,9 +598,7 @@ class SoritesIntegrator:
     @staticmethod
     def get_readout(score, threshold):
         if score > threshold:
-            return (
-                "IGNITED",
-                f"HEAP IGNITION ({int(score*100)}%): The Ancestors are speaking.",)
+            return "IGNITED", f"HEAP IGNITION ({int(score * 100)}%): The Ancestors are speaking.",
         return "INERT", f"⏳ INERT SAND ({int(score*100)}%): Building mass..."
 
 @dataclass
@@ -816,39 +743,102 @@ class TheNavigator:
             return [f"COURSE PLOTTED to {target_name}. Warning: Low Shimmer."], 0.0
         return [f"COURSE PLOTTED to {target_name}."], 0.0
 
+@dataclass
+class ReviewResult:
+    critic_name: str
+    score: float
+    verdict: str
+    reward_type: str
+    reward_amount: float
+    breakdown: List[str]
+
 class LiteraryJournal:
     def __init__(self, output_file="journal_of_the_void.txt"):
         self.output_file = output_file
-        self.reviews = NARRATIVE_DATA.get("LITERARY_REVIEWS", {
-            "POSITIVE": ["Good."], "NEGATIVE": ["Bad."], "CONFUSED": ["Huh?"]})
+        try:
+            from bone_data import NARRATIVE_DATA
+            self.critics = NARRATIVE_DATA.get("LITERARY_CRITICS", {})
+        except ImportError:
+            self.critics = {}
+        if not self.critics:
+            self.critics = {
+                "DEFAULT": {
+                    "name": "The Void",
+                    "preferences": {"voltage": 1.0},
+                    "reviews": {"high": ["Acceptable."], "low": ["Silence."]}
+                }
+            }
 
-    def publish(self, text, physics, bio_state):
-        voltage = physics.get("voltage", 0.0)
-        drag = physics.get("narrative_drag", 0.0)
-        truth = physics.get("truth_ratio", 0.0)
-        if voltage > 8.0 and drag < 3.0:
-            verdict = "POSITIVE"
-            reward = "SEROTONIN_BOOST"
-        elif drag > 5.0 or truth < 0.2:
-            verdict = "NEGATIVE"
-            reward = "CORTISOL_SPIKE"
+    def _calculate_score(self, physics: Dict, preferences: Dict) -> Tuple[float, List[str]]:
+        score = 50.0
+        breakdown = []
+        metrics = {
+            "voltage": physics.get("voltage", 0),
+            "narrative_drag": physics.get("narrative_drag", 0),
+            "kappa": physics.get("kappa", 0),
+            "psi": physics.get("psi", 0),
+            "truth_ratio": physics.get("truth_ratio", 0),
+            "velocity": physics.get("vector", {}).get("VEL", 0)
+        }
+        counts = physics.get("counts", {})
+        for k, v in counts.items():
+            metrics[f"counts_{k}"] = v
+        for trait, weight in preferences.items():
+            val = metrics.get(trait, 0)
+            impact = 0.0
+            if trait == "narrative_drag":
+                if weight < 0: # Critic hates drag
+                    if val < 2.0: impact = 15.0
+                    elif val > 5.0: impact = -15.0
+                else:
+                    impact = (val * weight) * 2
+            else:
+                impact = (val * weight) * 5.0
+            score += impact
+            sign = "+" if impact >= 0 else ""
+            breakdown.append(f"{trait}({val:.1f}) x {weight} = {sign}{impact:.1f}")
+        return max(0.0, min(100.0, score)), breakdown
+
+    def publish(self, text, physics, bio_state) -> ReviewResult:
+        critic_key = random.choice(list(self.critics.keys()))
+        critic = self.critics[critic_key]
+        score, breakdown = self._calculate_score(physics, critic["preferences"])
+        reward_type = "NONE"
+        reward_amount = 0.0
+        review_text = ""
+        if score >= 80:
+            review_text = random.choice(critic["reviews"]["high"])
+            reward_type = "ATP_BOOST"
+            reward_amount = 25.0
+        elif score >= 50:
+            review_text = "It has potential, but lacks conviction."
+            reward_type = "STAMINA_REGEN"
+            reward_amount = 10.0
         else:
-            verdict = "CONFUSED"
-            reward = "NONE"
-        review = random.choice(self.reviews.get(verdict, ["Interesting."]))
+            review_text = random.choice(critic["reviews"]["low"])
+            reward_type = "CORTISOL_SPIKE"
+            reward_amount = 5.0
         timestamp = time.ctime()
         entry = (
-            f"\n--- ENTRY: {timestamp} ---\n"
+            f"\n--- REVIEW: {timestamp} ---\n"
+            f"CRITIC: {critic['name']}\n"
             f"TEXT: {text}\n"
-            f"METRICS: V:{voltage:.1f} | D:{drag:.1f} | Truth:{truth:.2f}\n"
-            f"REVIEW: '{review}'\n"
+            f"SCORE: {score:.1f}/100\n"
+            f"VERDICT: '{review_text}'\n"
             f"---------------------------\n")
         try:
             with open(self.output_file, "a", encoding="utf-8") as f:
                 f.write(entry)
-            return True, review, reward
         except IOError:
-            return False, "The printing press is jammed.", "NONE"
+            pass
+        return ReviewResult(
+            critic_name=critic['name'],
+            score=score,
+            verdict=review_text,
+            reward_type=reward_type,
+            reward_amount=reward_amount,
+            breakdown=breakdown
+        )
 
 class TownHall:
     Lexicon = TheLexicon

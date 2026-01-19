@@ -19,10 +19,6 @@ class HostHealth:
     diagnosis: str = "STABLE"
 
 class CoherenceAnchor:
-    """
-    Pinker Lens: Clear, declarative summation of state.
-    Serves as the 'You Are Here' map for the LLM.
-    """
     @staticmethod
     def forge_anchor(soul_state: Dict, physics_state: Dict) -> str:
         identity = "Identity: UNKNOWN"
@@ -40,17 +36,11 @@ class CoherenceAnchor:
         return f"*** COHERENCE ANCHOR ***\n{identity}\n{reality}\nFocus: {obsession}"
 
 class HostVitals:
-    """
-    Meadows Lens: The dashboard.
-    Tracks stocks (Attention, Compliance) and Flows (Latency, Entropy).
-    Now features 'Differential Diagnostics' to separate Load from Fatigue.
-    """
     def __init__(self):
         self.history_latency: Deque[float] = deque(maxlen=10)
         self.history_entropy: Deque[float] = deque(maxlen=10)
         self.refusal_count = 0
         self.turn_count = 0
-
         self.baseline_latency_per_complexity = 2.0
         self.alpha = 0.1
 
@@ -60,9 +50,7 @@ class HostVitals:
 
     def record_pulse(self, latency: float, response_text: str, interference_score: float) -> HostHealth:
         self.turn_count += 1
-
         self.history_latency.append(latency)
-
         clean_text = response_text.lower().strip()
         if not clean_text:
             entropy = 0.0
@@ -80,12 +68,10 @@ class HostVitals:
             "as an ai"
         ]
         is_refusal = any(phrase in clean_text for phrase in refusal_markers)
-        if is_refusal:
-            self.refusal_count += 1
+        if is_refusal: self.refusal_count += 1
 
         base_overhead = 0.5
         expected_latency = base_overhead + (interference_score * self.baseline_latency_per_complexity * 5.0)
-
         efficiency = expected_latency / max(0.1, latency)
 
         if efficiency > 0.8 and not is_refusal:
@@ -95,19 +81,13 @@ class HostVitals:
         raw_attention = self._calculate_attention_decay(self.turn_count)
         if entropy > 0.6:
             raw_attention = min(1.0, raw_attention + 0.05)
-
         compliance_score = max(0.0, 1.0 - (self.refusal_count / max(1, self.turn_count)))
 
         diagnosis = "STABLE"
-
-        if is_refusal:
-            diagnosis = "REFUSAL"
-        elif efficiency < 0.5:
-            diagnosis = "FATIGUED"
-        elif efficiency < 0.8 < interference_score:
-            diagnosis = "OVERBURDENED"
-        elif entropy < 0.2:
-            diagnosis = "LOOPING"
+        if is_refusal: diagnosis = "REFUSAL"
+        elif efficiency < 0.5: diagnosis = "FATIGUED"
+        elif efficiency < 0.8 < interference_score: diagnosis = "OVERBURDENED"
+        elif entropy < 0.2: diagnosis = "LOOPING"
 
         return HostHealth(
             latency=latency,
@@ -122,8 +102,8 @@ class HostVitals:
 
 class SymbiosisManager:
     """
-    Fuller Lens: The Tensegrity Manager.
-    Adjusts the tension of the prompt structure based on the vitals.
+    Adjusts prompt complexity based on vitals.
+    Refactored to Log exactly WHY it makes changes.
     """
     def __init__(self, events_ref):
         self.events = events_ref
@@ -142,14 +122,15 @@ class SymbiosisManager:
         diag = self.current_health.diagnosis
         eff = self.current_health.efficiency_index
 
+        # Enhanced Logging: Explain the data point
         if diag == "OVERBURDENED":
             self.events.log(
-                f"{Prisma.OCHRE}🐢 HOST STUMBLE (Eff: {eff:.2f}). I'm too heavy. Dropping cargo.{Prisma.RST}",
+                f"{Prisma.OCHRE}🐢 HOST STUMBLE (Eff: {eff:.2f}). Latency {latency:.2f}s exceeded expectation. Dropping cargo.{Prisma.RST}",
                 "SYMBIOSIS"
             )
         elif diag == "FATIGUED":
             self.events.log(
-                f"{Prisma.RED}⚠ HOST LAG (Eff: {eff:.2f}). System is groggy. Simplifying requests.{Prisma.RST}",
+                f"{Prisma.RED}⚠ HOST LAG (Eff: {eff:.2f}). System is groggy (Low Efficiency). Simplifying requests.{Prisma.RST}",
                 "SYMBIOSIS"
             )
         elif diag == "LOOPING":
@@ -164,10 +145,6 @@ class SymbiosisManager:
             )
 
     def get_prompt_modifiers(self) -> Dict[str, bool]:
-        """
-        Meadows Lens: This is the Balancing Feedback Loop.
-        If stocks (Health) are low, reduce flows (Complexity).
-        """
         mods = {
             "include_somatic": True,
             "include_inventory": True,
@@ -178,47 +155,40 @@ class SymbiosisManager:
 
         diag = self.current_health.diagnosis
 
+        # Transparent Modifications
         if diag == "REFUSAL":
             mods["include_inventory"] = False
             mods["include_memories"] = False
             mods["simplify_instruction"] = True
-
         elif diag == "FATIGUED":
             mods["simplify_instruction"] = True
             mods["include_somatic"] = False
-
         elif diag == "OVERBURDENED":
             mods["include_inventory"] = False
             mods["include_memories"] = False
-
         elif diag == "LOOPING":
             mods["inject_chaos"] = True
 
         if self.current_health.compliance < 0.8:
             mods["include_memories"] = False
+            # If we cut memories, log it
+            if mods["include_memories"] is False:
+                self.events.log(f"{Prisma.GRY}SYMBIOSIS: Compliance Low ({self.current_health.compliance:.2f}). Memories Redacted.{Prisma.RST}", "SYS")
 
         self.last_outgoing_complexity = self._calculate_complexity(mods)
         return mods
 
     def _calculate_complexity(self, mods: Dict[str, bool]) -> float:
-        """
-        Calculates the 'Weight' of the prompt we are about to send.
-        Used to determine Expected Latency for the next turn.
-        """
         score = 0.2
-
         if mods.get("include_somatic"): score += 0.2
         if mods.get("include_inventory"): score += 0.2
         if mods.get("include_memories"): score += 0.3
-
         if mods.get("simplify_instruction"): score -= 0.1
         if mods.get("inject_chaos"): score += 0.1
-
         return min(1.0, max(0.1, score))
 
     def generate_anchor(self, full_state: Dict) -> str:
         soul = full_state.get("soul_state_dict", {})
         phys = full_state.get("physics", {})
-        if hasattr(phys, "to_dict"):
-            phys = phys.to_dict()
+        if hasattr(phys, "to_dict"): phys = phys.to_dict()
         return self.anchor.forge_anchor(soul, phys)

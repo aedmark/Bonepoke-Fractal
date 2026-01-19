@@ -259,9 +259,32 @@ class CommandProcessor:
 
     def _cmd_publish(self, parts):
         phys = self.eng.phys.tension.last_physics_packet
-        if phys:
-            s, r, _ = self.eng.journal.publish(phys["raw_text"], phys, self.eng.bio)
-            if s: self._log(f"PUBLISHED: {r}")
+        if not phys:
+            self._log(f"{self.P.RED}CANNOT PUBLISH: No physics data generated yet.{self.P.RST}")
+            return True
+        result = self.eng.journal.publish(phys["raw_text"], phys, self.eng.bio)
+        self._log(f"{self.P.OCHRE}--- LITERARY REVIEW ---{self.P.RST}")
+        self._log(f"Critic: {self.P.WHT}{result.critic_name}{self.P.RST}")
+        self._log(f"Score:  {self.P.CYN}{result.score:.1f}/100{self.P.RST}")
+        self._log(f"Review: {self.P.GRY}\"{result.verdict}\"{self.P.RST}")
+        if self.Config.VERBOSE_LOGGING:
+            self._log(f"{self.P.GRY}   [Scoring Logic]: {', '.join(result.breakdown)}{self.P.RST}")
+        if result.reward_type == "ATP_BOOST":
+            current_atp = self.eng.bio.mito.state.atp_pool
+            max_atp = getattr(self.Config, "MAX_ATP", 200.0)
+            self.eng.bio.mito.state.atp_pool = min(max_atp, current_atp + result.reward_amount)
+            self._log(f"{self.P.GRN}   [REWARD]: +{result.reward_amount} ATP (Royalties){self.P.RST}")
+            if result.score > 90:
+                max_health = getattr(self.Config, "MAX_HEALTH", 100.0)
+                self.eng.health = min(max_health, self.eng.health + 5)
+                self._log(f"{self.P.GRN}   [CRITICAL ACCLAIM]: +5 Health.{self.P.RST}")
+        elif result.reward_type == "STAMINA_REGEN":
+            max_stamina = getattr(self.Config, "MAX_STAMINA", 100.0)
+            self.eng.stamina = min(max_stamina, self.eng.stamina + result.reward_amount)
+            self._log(f"{self.P.GRN}   [REWARD]: +{result.reward_amount} Stamina (Validation){self.P.RST}")
+        elif result.reward_type == "CORTISOL_SPIKE":
+            self.eng.bio.endo.cortisol = min(1.0, self.eng.bio.endo.cortisol + (result.reward_amount * 0.05))
+            self._log(f"{self.P.RED}   [PENALTY]: Rejection hurts. Cortisol rising.{self.P.RST}")
         return True
 
     def _cmd_soul(self, parts):
@@ -289,7 +312,7 @@ class CommandProcessor:
 
     def _cmd_help(self, parts):
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 10.4.5 MANUAL ---{self.P.RST}",
+            f"\n{self.P.CYN}--- BONEAMANITA 10.4.7 MANUAL ---{self.P.RST}",
             f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"]
         categories = {
             "CORE": ["_cmd_status", "_cmd_save", "_cmd_load", "_cmd_help"],

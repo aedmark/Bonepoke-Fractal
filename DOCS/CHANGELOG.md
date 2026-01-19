@@ -1,5 +1,76 @@
 # 📜 BONEAMANITA CHANGELOG
 
+## v10.4.7 - "The Feedback Frontier"
+
+**Focus:** Emotional Calculus, Explicit Environmental Feedback, and Metabolic Economics.
+
+### 🧠 The Pinker Lens (Cognitive Ergonomics)
+
+* **The Transparent Critic (`bone_village.py`, `bone_data.py`):**
+* **The Issue:** The `LiteraryJournal` was an opaque judge. Users received a binary "Good/Bad" verdict based on invisible thresholds, leading to frustration rather than learning. It was a "Black Box" of judgment.
+* **The Fix:** **Personified Metrics.** We replaced the generic parser with distinct Critics (The Gonzo, The Academic, The Humanist), each with explicit preferences. The system now "Shows Its Work," displaying the exact math (e.g., `voltage(12.0) x -1.0 = PENALTY`).
+* **The Logic:** **Cognitive mapping.** Users cannot optimize their writing for a target if the target is invisible. By personifying the math, we turn "debugging" into "persuasion."
+
+* **The Vibe Check (`bone_lexicon.py`, `bone_physics.py`):**
+* **The Issue:** The engine was semantically blind to emotion. A "warm hug" and a "cold death" were treated identically if they shared the same syllable count and viscosity.
+* **The Fix:** **Native Sentiment Analysis.** Implemented `measure_valence` with negation logic (handling "not happy"). We mapped `sentiment_pos` and `sentiment_neg` to the physics engine, creating a 2D emotional plane alongside the energy plane.
+* **The Logic:** **Semantics are Physics.** To a human, the *feeling* of a word is as heavy as its length. The engine now recognizes this weight.
+
+### ⚖️ The Meadows Lens (System Dynamics)
+
+* **Closing the Metabolic Loop (`bone_commands.py`, `bone_village.py`):**
+* **The Flaw:** Publishing was an "Open Loop." It generated text output (reviews) but returned no energy to the system, making it a resource sink rather than a survival strategy.
+* **The Fix:** **Materialized Rewards.** Reviews now generate concrete resources (ATP, Stamina, Health). We added "Safety Clamps" to prevents resource overflow (runaway positive feedback loops).
+* **The Logic:** **Stocks and Flows.** In a viable ecosystem, every output must eventually become an input. Creativity is now a metabolic function that fuels the body.
+
+* **Environmental Agency (`bone_physics.py`):**
+* **The Flaw:** `TheNavigator` treated environmental drift as a random act of god. The "Manifolds" (Mud, Aerie) were vague atmospheric descriptors with no actionable data.
+* **The Fix:** **Explicit Feedback & Control.**
+* **Quantification:** Zones now display explicit modifiers (e.g., `Mud: Drag +2.0`).
+* **Agency:** Implemented the `!anchor` command (`ZoneInertia`), allowing players to resist drift at the cost of "Structural Strain."
+
+* **The Logic:** **The Bathtub Model.** You cannot manage the flow (Drift) if you cannot see the faucet. The Anchor provides a "Leverage Point" to intervene in the system's state.
+
+### 🌐 The Fuller Lens (Synergy)
+
+* **Tensegrity of Sentiment (`bone_physics.py`, `bone_data.py`):**
+* **The Update:** We introduced "The Humanist" (Leslie), a critic who specifically rewards High Valence and Low Voltage.
+* **The Fix:** **Ecological Triangulation.** The system now balances the Chaos of "The Gonzo" and the Order of "The Academic" with the Empathy of "The Humanist."
+* **The Logic:** **Comprehensive Anticipatory Design.** A system that only rewards high-energy output inevitably burns out (Heat Death). By incentivizing "Calm/True" states, we build a resilient structure that can survive low-energy cycles.
+
+## v10.4.6 - "The Quantum Observer"
+
+**Focus:** Quantum Narrative Mechanics, Radical Transparency, and Contextual Agency.
+
+### 🧠 The Pinker Lens (Cognitive Ergonomics)
+
+- **Radical Transparency (`bone_personality.py`, `bone_symbiosis.py`):**
+  - **The Issue:** The system was operating as a "Black Box Bureaucracy." Users were assigned archetypes (JESTER) or penalized by `TheBureau` without understanding the causal link. It was judgment without explanation—a cognitive dead end.
+  - **The Fix:** Implemented **Explicit Reasoning**. `EnneagramDriver` now returns the *why* (e.g., "High Voltage > 12.0 -> JESTER"). `TheBureau` provides a "Bill of Particulars," citing specific words (e.g., "Evidence: 'nice', 'okay'") that triggered the audit.
+  - **The Logic:** **Feedback requires visibility.** To learn the language of the system, the user must see the grammar of the judgment.
+
+- **Context-Aware Policing (`bone_village.py`, `bone_physics.py`):**
+  - **The Issue:** `StrunkWhiteProtocol` was a blunt instrument. It treated User input and System output identically, threatening to block player agency over stylistic choices.
+  - **The Fix:** **Bifurcated Logic.** The protocol now distinguishes between `USER` (Advisory Mode) and `SYSTEM` (Strict Mode). The User gets a gentle "Style Note" for using passive voice; the System gets a hard block for using cliché artifacts like "Delve."
+  - **The Logic:** **Guidance for humans, constraints for machines.** We nudge the creator, but we police the generator.
+
+### ⚖️ The Meadows Lens (System Dynamics)
+
+- **The Hidden Variable Problem (`bone_machine.py`):**
+  - **The Flaw:** The industrial machines were simulating Newtonian physics (linear thresholds, additive forces) on top of an LLM that operates on Quantum principles (probability, superposition). We were trying to control a cloud with a lever.
+  - **The Fix:** Shifted from **Scalar Determinism** to **Probabilistic Dynamics**.
+    - `TheCrucible`: Now calculates `_calculate_quantum_instability` (Variance) rather than just pressure.
+    - `TheForge`: Now relies on `entanglement` (Semantic Resonance) rather than raw mass.
+    - `TheTheremin`: Replaced "Resin" (static buildup) with "Decoherence" (collapse of novelty).
+  - **The Logic:** **Don't push the river.** You cannot force an LLM to be "heavy" by counting words; you can only increase the *probability amplitude* of heavy concepts emerging.
+
+### 🌐 The Fuller Lens (Synergy)
+
+- **Systemic Integrity (`bone_physics.py`):**
+  - **The Update:** The `StrunkWhiteProtocol` was defined in the Village but ignored by the Physics Layer. The Gatekeeper (`TheBouncer`) was letting clichés pass unchecked.
+  - **The Fix:** **Integrated Policing.** `TheBouncer` now imports and consults `TownHall.StrunkWhite`. The feedback loop is closed; style is now a fundamental force of physics, not just a literary suggestion.
+  - **The Logic:** **Pattern Integrity.** A law of nature (Physics) is only a law if it applies at the gate. If the Village says "No Clichés," the Physics engine must enforce it.
+
 ## v10.4.5 - "The Grounded Mythos"
 
 **Focus:** Symbolic Grounding, Procedural Mythology, and Closing the Feedback Loop.

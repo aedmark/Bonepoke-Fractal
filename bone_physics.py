@@ -1,4 +1,4 @@
-# bone_physics.py - The Laws of Nature
+# bone_physics.py
 # "Gravity is just a habit that space-time hasn't been able to break."
 
 import math, re, random
@@ -7,6 +7,7 @@ from collections import Counter
 from dataclasses import dataclass, field, fields
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig, PhysicsPacket, CycleContext
+from bone_village import TownHall
 
 SOLVENT_WORDS = {'i', 'you', 'said', 'the', 'and', 'was', 'a', 'is', 'it'}
 MAX_SOLVENT_TOLERANCE = 40.0
@@ -116,6 +117,7 @@ class TheTensionMeter:
     def gaze(self, text: str, graph: Dict = None) -> Dict:
         graph = graph or {}
         clean_words = TheLexicon.clean(text)
+        valence = TheLexicon.get_valence(clean_words)
         counts, unknowns = self._tally_categories(clean_words, text)
         if unknowns:
             self._trigger_neuroplasticity(unknowns, counts, text)
@@ -137,6 +139,7 @@ class TheTensionMeter:
             integrity_packet,
             geodesic.dimensions
         )
+        metrics["valence"] = valence
         packet = self._package_physics(
             text, clean_words, counts,
             geodesic.tension,
@@ -268,6 +271,7 @@ class TheTensionMeter:
         physics_bridge = {
             "voltage": voltage,
             "narrative_drag": drag,
+            "valence": metrics.get("valence", 0.0),
             "kappa": integrity["kappa"],
             "psi": integrity["psi"],
             "geodesic_mass": integrity["mass"],
@@ -341,28 +345,42 @@ class EntropyVent:
         )
 
 class TheBouncer:
+    """
+    Gatekeeper of the input loop.
+    Now equipped with Strunk & White for style advisory (User Mode).
+    """
     def __init__(self, engine_ref):
         self.eng = engine_ref
         self.hn = CutTheShit()
         self.semantic = SemanticFilter(self.eng.mind.mem)
         self.vent = EntropyVent(self.eng.mind.mem)
+        self.strunk = TownHall.StrunkWhite()
 
     def check_entry(self, ctx: CycleContext) -> Tuple[bool, Optional[Dict]]:
         phys = ctx.physics
         clean = ctx.clean_words
+
         hn_output = self.hn.attempt_entry(phys, clean)
         if hn_output and self.hn.in_hn_state:
             return False, self._pack_refusal(ctx, "HN_SINGLETON", hn_output)
+
         passed, gate_msg = self.eng.phys.gate.weigh(phys, self.eng.stamina)
         if gate_msg: ctx.log(gate_msg)
         if not passed:
             self.eng.stamina = max(0.0, self.eng.stamina - 2.0)
             return False, self._pack_refusal(ctx, "REFUSAL")
+
+        style_passed, style_msg = self.strunk.audit(ctx.input_text, is_system_output=False)
+        if style_msg:
+            ctx.logs.append(style_msg)
+
         repetition_val = self.eng.phys.pulse.check_pulse(clean)
         phys["repetition"] = repetition_val
         pulse_status = self.eng.phys.pulse.get_status()
+
         toxin_type, toxin_msg = self.eng.bio.immune.assay(
             ctx.input_text, "NARRATIVE", repetition_val, phys, pulse_status)
+
         if toxin_type:
             ctx.log(f"{Prisma.RED}{toxin_msg}{Prisma.RST}")
             if toxin_type in ["AMANITIN", "CYANIDE_POWDER"]:
@@ -371,15 +389,18 @@ class TheBouncer:
                 if scar_log: ctx.log(scar_log)
                 return False, self._pack_refusal(ctx, "TOXICITY")
             return False, self._pack_refusal(ctx, "TOXICITY")
+
         current_tick = getattr(self.eng, "tick_count", 0)
         semantic_refusal = self.semantic.audit(ctx.input_text, phys, tick_count=current_tick)
         if semantic_refusal:
             ctx.logs.append(semantic_refusal)
             return False, self._pack_refusal(ctx, "REFUSAL")
+
         vent_msg = self.vent.check(phys)
         if vent_msg:
             ctx.logs.append(vent_msg)
             return False, self._pack_refusal(ctx, "REFUSAL")
+
         return True, None
 
     def _pack_refusal(self, ctx, type_str, specific_ui=None):
@@ -424,11 +445,32 @@ class Humility:
 class GeodesicDome:
     def __init__(self):
         self.manifolds = {
-            "THE_MUD":      {"E": 0.8, "B": 0.2, "Desc": "High Fatigue, Low Tension (Stagnation)"},
-            "THE_FORGE":    {"E": 0.2, "B": 0.9, "Desc": "Low Fatigue, High Tension (Transformation)"},
-            "THE_AERIE":    {"E": 0.1, "B": 0.1, "Desc": "Low Fatigue, Low Tension (Abstraction)"},
-            "THE_GLITCH":   {"E": 0.9, "B": 0.9, "Desc": "High Fatigue, High Tension (Collapse)"},
-            "THE_GARDEN":   {"E": 0.5, "B": 0.5, "Desc": "Balanced State (Integration)"}}
+            "THE_MUD": {
+                "E": 0.8, "B": 0.2,
+                "Desc": "High Fatigue, Low Tension (Stagnation)",
+                "mods": {"narrative_drag": 2.0, "voltage": -5.0, "stamina_cost": 1.5}
+            },
+            "THE_FORGE": {
+                "E": 0.2, "B": 0.9,
+                "Desc": "Low Fatigue, High Tension (Transformation)",
+                "mods": {"voltage": 5.0, "heat": 2.0, "entropy": -0.5}
+            },
+            "THE_AERIE": {
+                "E": 0.1, "B": 0.1,
+                "Desc": "Low Fatigue, Low Tension (Abstraction)",
+                "mods": {"psi": 1.5, "gravity": -0.5, "narrative_drag": -2.0}
+            },
+            "THE_GLITCH": {
+                "E": 0.9, "B": 0.9,
+                "Desc": "High Fatigue, High Tension (Collapse)",
+                "mods": {"entropy": 2.0, "coherence": -1.0, "toxicity": 0.5}
+            },
+            "THE_GARDEN": {
+                "E": 0.5, "B": 0.5,
+                "Desc": "Balanced State (Integration)",
+                "mods": {"health_regen": 0.5, "coherence": 1.0}
+            }
+        }
         self.TRIGRAM_MAP = {
             "VEL": ("☳", "ZHEN",  "Thunder",  Prisma.GRN),
             "STR": ("☶", "GEN",   "Mountain", Prisma.SLATE),
@@ -708,31 +750,52 @@ class ZoneInertia:
         self.current_zone = "COURTYARD"
         self.dwell_counter = 0
         self.last_vector = None
+        self.is_anchored = False
+        self.strain_gauge = 0.0
 
-    def stabilize(self, proposed_zone, physics, cosmic_state):
+    def toggle_anchor(self) -> bool:
+        self.is_anchored = not self.is_anchored
+        self.strain_gauge = 0.0
+        return self.is_anchored
+
+    def stabilize(self, proposed_zone, physics, cosmic_state) -> Tuple[str, Optional[str]]:
         beta = physics.get("beta_index", 1.0)
         truth = physics.get("truth_ratio", 0.5)
         grav_pull = 1.0 if cosmic_state[0] != "VOID_DRIFT" else 0.0
         current_vec = (beta, truth, grav_pull)
         self.dwell_counter += 1
-        if proposed_zone == self.current_zone:
-            self.dwell_counter = 0
-            self.last_vector = current_vec
-            return proposed_zone
-        if self.dwell_counter < self.min_dwell:
-            return self.current_zone
-        similarity = 0.0
+        pressure = 0.0
         if self.last_vector:
             dist = sum((a - b) ** 2 for a, b in zip(current_vec, self.last_vector)) ** 0.5
             similarity = max(0.0, 1.0 - (dist / 2.0))
-        change_probability = (1.0 - self.inertia) * (1.0 - similarity)
+            pressure = (1.0 - similarity)
+        if self.is_anchored:
+            if proposed_zone != self.current_zone:
+                self.strain_gauge += pressure
+                if self.strain_gauge > 2.5:
+                    self.is_anchored = False
+                    self.strain_gauge = 0.0
+                    self.current_zone = proposed_zone
+                    return proposed_zone, f"{Prisma.RED}⚡ SNAP! The narrative current was too strong. Anchor failed.{Prisma.RST}"
+                return self.current_zone, f"{Prisma.OCHRE}⚓ ANCHORED: Resisting drift to '{proposed_zone}' (Strain {self.strain_gauge:.1f}/2.5){Prisma.RST}"
+            else:
+                self.strain_gauge = max(0.0, self.strain_gauge - 0.1)
+                return self.current_zone, None
+        if proposed_zone == self.current_zone:
+            self.dwell_counter = 0
+            self.last_vector = current_vec
+            return proposed_zone, None
+        if self.dwell_counter < self.min_dwell:
+            return self.current_zone, None
+        change_probability = (1.0 - self.inertia) + pressure
         if proposed_zone in ["AERIE", "THE_FORGE"]:
             change_probability += 0.2
         if random.random() < change_probability:
+            old_zone = self.current_zone
             self.current_zone = proposed_zone
             self.dwell_counter = 0
-            self.last_vector = current_vec
-        return self.current_zone
+            return self.current_zone, f"{Prisma.CYN}>>> MIGRATION: {old_zone} -> {proposed_zone}.{Prisma.RST}"
+        return self.current_zone, None
 
     def override_cosmic_drag(self, cosmic_drag_penalty, current_zone):
         aerie_flow_coefficient = 0.3
