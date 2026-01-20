@@ -1,5 +1,28 @@
 # 📜 BONEAMANITA CHANGELOG
 
+## **10.5.7: The "Constitutional Economics" Update**
+
+### **Features & Enhancements**
+
+* **Diegetic Command Economy:** Implemented a new fiscal policy in `bone_commands.py`. Admin commands are no longer "cheat codes" but diegetic interventions that require system resources.
+  * `/reproduce` now initiates "Mitosis," requiring heavy ATP and Health investment.
+  * `/teach` requires "Neuroplasticity" costs (ATP) and a minimum "Trust" threshold.
+  * `/map` incurs a "Cartography" tax (Stamina/ATP).
+* **The Executive Council:** Upgraded the `CouncilChamber` from an advisory board to a regulatory body with executive power. The Council now issues **Mandates** alongside advice.
+* **Constitutional Fail-Safes:** Added automatic, binding interventions for critical system states:
+  * **Hofstadter’s Emergency Grounding:** If recursion depth exceeds safety limits (>3), the Council forces a hard shift to `MAINTENANCE` mode to dissolve the abstraction.
+  * **Meadows’ Circuit Breaker:** If a "Manic" oscillation persists (>2 turns), the Council forcibly dumps voltage and applies maximum narrative drag to prevent system burnout.
+
+### **Refactoring & Optimization**
+
+* **Fiscal Centralization:** Introduced the `_levy_tax` method in `CommandProcessor` to standardize resource checks (Health, Stamina, ATP, Trust) across all commands, satisfying the "Don't Repeat Yourself" (DRY) principle.
+* **Closed-Loop Governance:** Rewired `SoulPhase` in `bone_cycle.py` to listen for and immediately execute Council mandates, effectively closing the feedback loop between meta-cognition (`bone_council.py`) and physical reality (`bone_cycle.py`).
+
+### **Bug Fixes**
+
+* **Fixed:** The "Metaphysical Paradox" where users could alter reality via commands without paying the thermodynamic cost, leading to resource imbalances.
+* **Fixed:** The "Paper Tiger" bug where the Council would detect dangerous states (like Infinite Regress) but lacked the authority to stop them, leading to avoidable crashes.
+* **Fixed:** Logic gap in `TheLeveragePoint` where oscillation dampening was suggested but never enforced.
 
 ## **10.5.6: The "Surgical Tensegrity" Update**
 
@@ -23,12 +46,6 @@
 * **Fixed:** Argument mismatch in `TheTensionMeter.gaze` calling `_trigger_neuroplasticity` with an extra `text` argument.
 * **Fixed:** Variable shadowing in `RuptureValve.analyze` (renamed `data` -> `physics` to match internal references).
 
----
-
-**Next Steps:**
-
-* The "Brain" (Cognition) is currently the only major subsystem not fully leveraging the new snapshot capabilities.
-* Consider adding a `diff()` method to `PhysicsPacket` to visualize exactly *what* changed between snapshots for deeper debugging.
 
 ### **v10.5.5 - The "Synaptic Bridge" Update**
 

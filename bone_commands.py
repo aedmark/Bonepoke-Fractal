@@ -110,8 +110,9 @@ class CommandProcessor:
         return True
 
     def _cmd_reproduce(self, parts):
-        if self.eng.health < 20:
-            self._log(f"{self.P.RED}FERTILITY ERROR: Too weak to breed.{self.P.RST}")
+        if not self._levy_tax("MITOSIS",
+                              costs={"atp": 50.0, "stamina": 30.0},
+                              checks={"health": 80.0}):
             return True
 
         mode = "MITOSIS"
@@ -177,6 +178,8 @@ class CommandProcessor:
         return True
 
     def _cmd_map(self, _parts):
+        if not self._levy_tax("CARTOGRAPHY", costs={"atp": 5.0, "stamina": 2.0}):
+            return True
         phys = self.eng.phys.tension.last_physics_packet
         if not phys or "raw_text" not in phys: return True
 
@@ -200,9 +203,13 @@ class CommandProcessor:
         return True
 
     def _cmd_teach(self, parts):
-        if len(parts) >= 3:
-            self.Lex.teach(parts[1], parts[2].lower(), self.eng.tick_count)
-            self._log(f"{self.P.CYN}NEUROPLASTICITY: '{parts[1]}' -> [{parts[2].upper()}].{self.P.RST}")
+        if len(parts) < 3: return True
+        if not self._levy_tax("NEUROPLASTICITY",
+                              costs={"atp": 10.0},
+                              checks={"trust": 15.0}):
+            return True
+        self.Lex.teach(parts[1], parts[2].lower(), self.eng.tick_count)
+        self._log(f"{self.P.CYN}NEUROPLASTICITY: '{parts[1]}' -> [{parts[2].upper()}].{self.P.RST}")
         return True
 
     def _cmd_kill(self, parts):
@@ -235,7 +242,14 @@ class CommandProcessor:
         return True
 
     def _cmd_mode(self, parts):
-        if len(parts) > 1: self._log(self.eng.bio.governor.set_override(parts[1].upper()))
+        if len(parts) < 2: return True
+        if not self._levy_tax("GOVERNOR_OVERRIDE", costs={"stamina": 25.0}):
+            return True
+        target_mode = parts[1].upper()
+        result_msg = self.eng.bio.governor.set_override(target_mode)
+        self._log(result_msg)
+        if "INVALID" in result_msg:
+            self._log(f"{self.P.GRY}(Stamina wasted filling out the wrong form. Good job.){self.P.RST}")
         return True
 
     def _cmd_focus(self, parts):
@@ -375,6 +389,35 @@ class CommandProcessor:
             score = getattr(cortex, 'last_alignment_score', 0.0)
             color = self.P.GRN if score > 0.7 else (self.P.YEL if score > 0.4 else self.P.RED)
             self._log(f"Last Alignment Score: {color}{score:.3f}{self.P.RST}")
+        return True
+
+    def _levy_tax(self, context: str, costs: Dict[str, float], checks: Dict[str, Any] = None) -> bool:
+        if checks:
+            for metric, threshold in checks.items():
+                current_val = 0.0
+                if metric == "voltage": current_val = self.eng.phys.tension.last_physics_packet.get("voltage", 0)
+                elif metric == "trust": current_val = self.eng.mind.mirror.profile.confidence
+                elif metric == "health": current_val = self.eng.health
+
+                if current_val < threshold:
+                    self._log(f"{self.P.OCHRE}🛑 DENIED ({context}): {metric.title()} too low ({current_val:.1f} < {threshold}).{self.P.RST}")
+                    return False
+
+        stamina_cost = costs.get("stamina", 0.0)
+        atp_cost = costs.get("atp", 0.0)
+
+        if self.eng.stamina < stamina_cost:
+            self._log(f"{self.P.RED}🛑 EXHAUSTED: This command requires {stamina_cost} Stamina.{self.P.RST}")
+            return False
+
+        current_atp = self.eng.bio.mito.state.atp_pool
+        if current_atp < atp_cost:
+            self._log(f"{self.P.RED}🛑 STARVING: This command requires {atp_cost} ATP (Have: {current_atp:.1f}).{self.P.RST}")
+            return False
+
+        if stamina_cost > 0: self.eng.stamina -= stamina_cost
+        if atp_cost > 0: self.eng.bio.mito.state.atp_pool -= atp_cost
+
         return True
 
     def _cmd_help(self, _parts):

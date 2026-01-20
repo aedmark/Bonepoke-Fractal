@@ -374,9 +374,21 @@ class SoulPhase(SimulationPhase):
         self.eng.soul.pursue_obsession(ctx.physics)
         if self.eng.gordon.inventory:
             self.eng.tinkerer.audit_tool_use(ctx.physics, self.eng.gordon.inventory)
-        council_advice, adjustments = self.eng.council.convene(ctx.input_text, ctx.physics)
+        council_advice, adjustments, mandates = self.eng.council.convene(ctx.input_text, ctx.physics)
         for advice in council_advice:
             ctx.log(advice)
+        for mandate in mandates:
+            action = mandate.get("action")
+            if action == "FORCE_MODE":
+                target = mandate["value"]
+                self.eng.bio.governor.set_override(target)
+                ctx.log(f"{Prisma.RED}⚖️ COUNCIL ORDER: Emergency Shift to {target}.{Prisma.RST}")
+
+            elif action == "CIRCUIT_BREAKER":
+                ctx.physics["voltage"] = 0.0
+                ctx.physics["narrative_drag"] = 20.0 # Heavy brakes
+                ctx.log(f"{Prisma.RED}⚖️ COUNCIL ORDER: Circuit Breaker Tripped. Voltage dump.{Prisma.RST}")
+
         if adjustments:
             for param, delta in adjustments.items():
                 if hasattr(ctx.physics, "__getitem__") or isinstance(ctx.physics, dict):
@@ -438,9 +450,13 @@ class CycleSimulator:
                 self.stabilizer.stabilize(ctx, phase.name)
             except Exception as e:
                 print(f"{Prisma.YEL}>>> ROLLING BACK TIME ({phase.name} Failed){Prisma.RST}")
+                if hasattr(ctx.physics, 'diff_view'):
+                    print(f"{Prisma.YEL}>>> STATE DRIFT DETECTED:{Prisma.RST}")
+                    print(ctx.physics.diff_view(current_checkpoint))
                 ctx.physics = current_checkpoint
                 self._handle_phase_crash(ctx, phase.name, e)
                 break
+
         return ctx
 
     def _check_circuit_breaker(self, phase_name: str) -> bool:
@@ -461,8 +477,6 @@ class CycleSimulator:
         }
         comp = component_map.get(phase_name, "SIMULATION")
         self.eng.system_health.report_failure(comp, error)
-        print(f"{Prisma.YEL}>>> STATE DRIFT DETECTED:{Prisma.RST}")
-        print(ctx.physics.diff_view(current_checkpoint))
         if comp == "PHYSICS":
             ctx.physics = PanicRoom.get_safe_physics()
         elif comp == "BIO":

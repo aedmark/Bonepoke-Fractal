@@ -13,25 +13,37 @@ class TheStrangeLoop:
             "recursive", "infinite regress", "strange loop"
         ]
 
-    def audit(self, text: str, physics: dict) -> tuple[bool, str]:
+    def audit(self, text: str, physics: dict) -> tuple[bool, str, dict]:
         text_lower = text.lower()
         phrase_hit = any(t in text_lower for t in self.triggers)
         psi = physics.get("psi", 0.0)
         abstract_hit = False
+
         if psi > 0.6:
             if "self" in text_lower or "mirror" in text_lower or "define" in text_lower:
                 abstract_hit = True
+
         threshold = getattr(BoneConfig.COUNCIL, "STRANGE_LOOP_VOLTAGE", 8.0)
+
         if (phrase_hit or abstract_hit) and physics.get("voltage", 0) > threshold:
             self.recursion_depth += 1
+            mandate = {}
+
+            if self.recursion_depth > 3:
+                mandate = {"action": "FORCE_MODE", "value": "MAINTENANCE"}
+                return True, (
+                    f"{Prisma.RED}∞ FATAL REGRESS DETECTED:{Prisma.RST} "
+                    f"Abstraction layer unstable. GROUNDING INITIATED."
+                ), mandate
+
             return True, (
                 f"{Prisma.MAG}∞ STRANGE LOOP DETECTED:{Prisma.RST} "
                 f"Metacognitive resonance high (Psi: {psi:.2f}). "
                 f"Depth: {self.recursion_depth}"
-            )
+            ), mandate
         else:
             self.recursion_depth = max(0, self.recursion_depth - 1)
-        return False, ""
+        return False, "", {}
 
 class TheLeveragePoint:
     def __init__(self):
@@ -40,7 +52,7 @@ class TheLeveragePoint:
         self.TARGET_VOLTAGE = 12.0
         self.TARGET_DRAG = 3.0
 
-    def audit(self, physics: dict) -> tuple[bool, str, dict]:
+    def audit(self, physics: dict) -> tuple[bool, str, dict, dict]:
         current_drag = physics.get("narrative_drag", 0.0)
         current_voltage = physics.get("voltage", 0.0)
         delta = current_drag - self.last_drag
@@ -55,7 +67,7 @@ class TheLeveragePoint:
                 f"{Prisma.CYN}⚖️ LEVERAGE POINT:{Prisma.RST} "
                 f"System oscillating wildly (Delta {delta:.1f}). "
                 f"Recommendation: Dampen inputs."
-            ), corrections
+            ), corrections, {}
         if current_voltage > manic_v_trig and current_drag < manic_d_floor:
             self.static_flow_turns += 1
         else:
@@ -63,20 +75,14 @@ class TheLeveragePoint:
         if self.static_flow_turns > manic_turns:
             excess_voltage = current_voltage - self.TARGET_VOLTAGE
             voltage_correction = max(1.0, excess_voltage * 0.3)
-            if (current_voltage - voltage_correction) < 2.0:
-                voltage_correction = current_voltage - 2.0
-            drag_correction = voltage_correction * 0.5
-            corrections = {
-                "narrative_drag": drag_correction,
-                "voltage": -voltage_correction
-            }
-            self.static_flow_turns = 0
+            mandate = {"action": "CIRCUIT_BREAKER", "duration": 2}
             return True, (
                 f"{Prisma.RED}⚖️ MARKET CORRECTION:{Prisma.RST} "
                 f"Manic phase detected (V:{current_voltage:.1f}). "
-                f"The Council advises proportional dampening (-{voltage_correction:.1f}V)."
-            ), corrections
-        return False, "", corrections
+                f"The Council MANDATES dampening (-{voltage_correction:.1f}V)."
+            ), corrections, mandate
+
+        return False, "", corrections, {}
 
 class TheFootnote:
     def __init__(self):
@@ -116,17 +122,22 @@ class CouncilChamber:
         self.meadows = TheLeveragePoint()
         self.pratchett = TheFootnote()
 
-    def convene(self, text: str, physics: dict) -> tuple[list[str], dict]:
+    def convene(self, text: str, physics: dict) -> tuple[list[str], dict, list[dict]]:
         advice = []
         total_corrections = {}
-        is_loop, h_msg = self.hofstadter.audit(text, physics)
-        if is_loop: advice.append(h_msg)
-        is_lev, m_msg, corrections = self.meadows.audit(physics)
+        mandates = []
+        is_loop, h_msg, h_mandate = self.hofstadter.audit(text, physics)
+        if is_loop:
+            advice.append(h_msg)
+            if h_mandate: mandates.append(h_mandate)
+        is_lev, m_msg, corrections, m_mandate = self.meadows.audit(physics)
         if is_lev:
             advice.append(m_msg)
             for k, v in corrections.items():
                 total_corrections[k] = total_corrections.get(k, 0.0) + v
-        return advice, total_corrections
+            if m_mandate: mandates.append(m_mandate)
+
+        return advice, total_corrections, mandates
 
     def annotate_logs(self, logs: list[str]) -> list[str]:
         annotated = []
