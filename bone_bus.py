@@ -211,38 +211,58 @@ class BoneConfig:
             return False, f"Config load failed: {e}"
 
     @classmethod
-    def _validate_ranges(cls, data: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
+    def _validate_ranges(cls, data: Dict[str, Any], parent_key: str = "") -> Tuple[Dict[str, Any], str]:
+        """
+        Recursively validates configuration dictionaries against defined constraints.
+        Now drills down into nested class structures (METABOLISM, PHYSICS, etc).
+        """
         sanitized = {}
         logs = []
+
+        # Define constraints map (could be moved to a static dict for cleanliness)
         constraints = {
             "MAX_HEALTH": (1.0, 1000.0, float),
             "MAX_STAMINA": (1.0, 1000.0, float),
             "VOLTAGE_MAX": (10.0, 100.0, float),
-            "GRAVITY_WELL_THRESHOLD": (1.0, 100.0, float),
             "STAMINA_REGEN": (0.1, 10.0, float),
             "MAX_MEMORY_CAPACITY": (10, 1000, int),
-            "VERBOSE_LOGGING": (0, 1, bool)
+            "VERBOSE_LOGGING": (0, 1, bool),
         }
+
         for key, value in data.items():
+            full_key = f"{parent_key}.{key}" if parent_key else key
+
+            # Recursion for nested dictionaries (matching nested Config classes)
+            if isinstance(value, dict):
+                sub_sanitized, sub_log = cls._validate_ranges(value, full_key)
+                sanitized[key] = sub_sanitized
+                if sub_log: logs.append(sub_log)
+                continue
+
             if key in constraints:
                 min_val, max_val, expected_type = constraints[key]
+
+                # Type coercion (int -> float)
                 if expected_type == float and isinstance(value, int):
                     value = float(value)
+
                 if not isinstance(value, expected_type):
-                    logs.append(f"Skipped {key}: Invalid type {type(value)}.")
+                    logs.append(f"Skipped {full_key}: Invalid type {type(value)}.")
                     continue
+
                 if expected_type in [int, float]:
                     if min_val <= value <= max_val:
                         sanitized[key] = value
                     else:
                         clamped = max(min_val, min(max_val, value))
                         sanitized[key] = clamped
-                        logs.append(f"Clamped {key} ({value} -> {clamped}).")
+                        logs.append(f"Clamped {full_key} ({value} -> {clamped}).")
                 else:
                     sanitized[key] = value
             else:
                 sanitized[key] = value
-        return sanitized, "; ".join(logs) if logs else "Values Nominal."
+
+        return sanitized, "; ".join(logs) if logs else ""
 
 @dataclass
 class ErrorLog:
@@ -379,6 +399,74 @@ class PhysicsPacket:
         for k, v in data.items():
             if hasattr(self, k): setattr(self, k, v)
 
+    def snapshot(self) -> 'PhysicsPacket':
+        data = self.to_dict()
+        # Deep copy mutable containers to prevent quantum entanglement
+        data['clean_words'] = list(self.clean_words)
+        data['counts'] = dict(self.counts)
+        data['vector'] = dict(self.vector)
+        data['audit_trail'] = list(self.audit_trail)
+        return PhysicsPacket(**data)
+
+    def diff(self, other: 'PhysicsPacket') -> Dict[str, Tuple[Any, Any]]:
+        """
+        Calculates the delta between this packet (Current) and another (Previous).
+        Returns: {field_name: (old_value, new_value)}
+        """
+        deltas = {}
+        for f in fields(self):
+            key = f.name
+            curr = getattr(self, key)
+
+            # Handle case where 'other' might be None or a dict (safety check)
+            if isinstance(other, dict):
+                prev = other.get(key)
+            elif hasattr(other, key):
+                prev = getattr(other, key)
+            else:
+                prev = None
+
+            if curr != prev:
+                if isinstance(curr, float) and isinstance(prev, float):
+                    if abs(curr - prev) < 0.001:
+                        continue
+
+                deltas[key] = (prev, curr)
+        return deltas
+
+    def diff_view(self, other: 'PhysicsPacket', indent: int = 3) -> str:
+        """
+        Returns a color-coded string visualization of the state drift.
+        Usage: print(ctx.physics.diff_view(last_stable_physics))
+        """
+        deltas = self.diff(other)
+        if not deltas:
+            return f"{' ' * indent}{Prisma.GRY}(No State Drift){Prisma.RST}"
+
+        lines = []
+        for key, (old, new) in deltas.items():
+            # Green for growth, Red for reduction (if numeric), or just Cyan/Magenta for change.
+            color = Prisma.CYN
+            arrow = "->"
+
+            if isinstance(new, (int, float)) and isinstance(old, (int, float)):
+                if new > old:
+                    color = Prisma.GRN
+                    arrow = "▲"
+                elif new < old:
+                    color = Prisma.RED
+                    arrow = "▼"
+
+            # Truncate long strings/lists for display sanity
+            str_old = str(old)
+            str_new = str(new)
+            if len(str_old) > 20: str_old = str_old[:17] + "..."
+            if len(str_new) > 20: str_new = str_new[:17] + "..."
+
+            lines.append(f"{' ' * indent}{Prisma.GRY}{key}:{Prisma.RST} {str_old} {color}{arrow}{Prisma.RST} {str_new}")
+
+        return "\n".join(lines)
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
         valid_keys = {f.name for f in fields(cls)}
@@ -392,7 +480,7 @@ class PhysicsPacket:
 class CycleContext:
     input_text: str
     clean_words: List[str] = field(default_factory=list)
-    physics: Any = field(default_factory=dict)
+    physics: PhysicsPacket = field(default_factory=PhysicsPacket)
     logs: List[str] = field(default_factory=list)
     flux_log: List[Dict[str, Any]] = field(default_factory=list)
     is_alive: bool = True

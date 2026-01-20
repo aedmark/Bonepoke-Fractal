@@ -113,7 +113,6 @@ class ObservationPhase(SimulationPhase):
         gaze_result = self.eng.phys.tension.gaze(ctx.input_text, self.eng.mind.mem.graph)
         ctx.physics = gaze_result["physics"]
         ctx.clean_words = gaze_result["clean_words"]
-        self.eng.phys.tension.last_physics_packet = ctx.physics
         self.eng.tick_count += 1
         rupture = self.vsl_32v.analyze(ctx.physics)
         if rupture: ctx.log(rupture["log"])
@@ -214,7 +213,7 @@ class MetabolismPhase(SimulationPhase):
 
     def _audit_hubris(self, ctx, physics):
         """Checks if the user is flying too close to the sun."""
-        hubris_hit, hubris_msg, event_type = self.eng.phys.tension.audit_hubris(physics, self.eng.lex)
+        hubris_hit, hubris_msg, event_type = self.eng.phys.tension.audit_hubris(physics)
         if hubris_hit:
             ctx.log(hubris_msg)
             if event_type == "FLOW_BOOST":
@@ -426,7 +425,6 @@ class CycleSimulator:
         ]
 
     def run_simulation(self, ctx: CycleContext) -> CycleContext:
-        """Executes the pipeline steps in order. Handles critical failures for each phase independently."""
         for phase in self.pipeline:
             if not self._check_circuit_breaker(phase.name):
                 continue
@@ -434,11 +432,15 @@ class CycleSimulator:
                 break
             if not ctx.is_alive:
                 break
+            current_checkpoint = ctx.physics.snapshot()
             try:
                 ctx = phase.run(ctx)
                 self.stabilizer.stabilize(ctx, phase.name)
             except Exception as e:
+                print(f"{Prisma.YEL}>>> ROLLING BACK TIME ({phase.name} Failed){Prisma.RST}")
+                ctx.physics = current_checkpoint
                 self._handle_phase_crash(ctx, phase.name, e)
+                break
         return ctx
 
     def _check_circuit_breaker(self, phase_name: str) -> bool:
@@ -459,6 +461,8 @@ class CycleSimulator:
         }
         comp = component_map.get(phase_name, "SIMULATION")
         self.eng.system_health.report_failure(comp, error)
+        print(f"{Prisma.YEL}>>> STATE DRIFT DETECTED:{Prisma.RST}")
+        print(ctx.physics.diff_view(current_checkpoint))
         if comp == "PHYSICS":
             ctx.physics = PanicRoom.get_safe_physics()
         elif comp == "BIO":
@@ -467,7 +471,6 @@ class CycleSimulator:
         elif comp == "MIND":
             ctx.mind_state = PanicRoom.get_safe_mind()
         ctx.log(f"{Prisma.RED}⚠ {phase_name} FAILURE: Switching to Panic Protocol.{Prisma.RST}")
-
 
 class CycleReporter:
     def __init__(self, engine_ref):

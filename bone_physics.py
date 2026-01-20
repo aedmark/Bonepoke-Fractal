@@ -2,9 +2,9 @@
 # "Gravity is just a habit that space-time hasn't been able to break."
 
 import math, re, random
-from typing import Dict, List, Any, Tuple, Optional
+from typing import Dict, List, Any, Tuple, Optional, Union
 from collections import Counter, deque
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig, PhysicsPacket, CycleContext
 from bone_village import TownHall
@@ -84,7 +84,7 @@ class TheTensionMeter:
         self.last_physics_packet = {}
         self.voltage_buffer = deque(maxlen=5)
 
-    def audit_hubris(self, physics, lexicon_class):
+    def audit_hubris(self, physics):
         streak = physics.get("perfection_streak", 0)
         if streak < 4:
             return False, None, None
@@ -121,19 +121,14 @@ class TheTensionMeter:
         valence = TheLexicon.get_valence(clean_words)
         counts, unknowns = self._tally_categories(clean_words, text)
         if unknowns:
-            self._trigger_neuroplasticity(unknowns, counts, text)
-
+            self._trigger_neuroplasticity(unknowns, counts)
         geodesic = GeodesicEngine.collapse_wavefunction(clean_words, counts, BoneConfig)
-
         self.voltage_buffer.append(geodesic.tension)
-
         if self.voltage_buffer:
             smoothed_voltage = sum(self.voltage_buffer) / len(self.voltage_buffer)
         else:
             smoothed_voltage = geodesic.tension
-
         smoothed_voltage = round(smoothed_voltage, 2)
-
         graph_mass = 0.0
         if graph:
             anchors = [w for w in clean_words if w in graph]
@@ -148,7 +143,6 @@ class TheTensionMeter:
         metrics = self._derive_complex_metrics(
             counts, clean_words,
             smoothed_voltage,
-            geodesic.compression,
             integrity_packet,
             geodesic.dimensions
         )
@@ -166,7 +160,8 @@ class TheTensionMeter:
             self.events.publish("PHYSICS_CALCULATED", packet)
         return packet
 
-    def _tally_categories(self, clean_words: List[str], raw_text: str) -> Tuple[Counter, List[str]]:
+    @staticmethod
+    def _tally_categories(clean_words: List[str], raw_text: str) -> Tuple[Counter, List[str]]:
         counts = Counter()
         unknowns = []
         if TheLexicon.ANTIGEN_REGEX:
@@ -194,7 +189,7 @@ class TheTensionMeter:
                     unknowns.append(w)
         return counts, unknowns
 
-    def _trigger_neuroplasticity(self, unknowns: List[str], counts: Counter, raw_text: str):
+    def _trigger_neuroplasticity(self, unknowns: List[str], counts: Counter):
         voltage = (counts["heavy"] * 2.0) + (counts["kinetic"] * 1.5)
         if voltage > 5.0 and unknowns:
             dominant_cat = max(counts, key=counts.get) if counts else "kinetic"
@@ -216,7 +211,8 @@ class TheTensionMeter:
                     "MISC")
                 counts[assigned_cat] += 1
 
-    def _measure_integrity(self, words: List[str], graph: Dict, counts: Counter) -> Dict:
+    @staticmethod
+    def _measure_integrity(words: List[str], graph: Dict, counts: Counter) -> Dict:
         if not words:
             return {"kappa": 0.0, "psi": 0.0, "mass": 0.0}
         anchors = [w for w in words if w in graph]
@@ -232,7 +228,7 @@ class TheTensionMeter:
             psi = min(1.0, max(0.1, base_psi + 0.1))
         return {"kappa": round(kappa, 3), "psi": round(psi, 2), "mass": round(mass, 1)}
 
-    def _derive_complex_metrics(self, counts, words, voltage, drag, integrity, vectors):
+    def _derive_complex_metrics(self, counts, words, voltage, integrity, vectors):
         total_vol = max(1, len(words))
         turbulence = TheLexicon.get_turbulence(words)
         flow_state = "LAMINAR" if turbulence < 0.3 else "TURBULENT"
@@ -272,7 +268,8 @@ class TheTensionMeter:
             "zone": zone,
             "zone_color": zone_color}
 
-    def _determine_zone(self, beta, truth):
+    @staticmethod
+    def _determine_zone(beta, truth):
         if beta > 2.0 and truth > 0.8:
             return "AERIE", "WHT"
         elif beta > BoneConfig.ZONE_THRESHOLDS["LABORATORY"]:
@@ -499,7 +496,8 @@ class GeodesicDome:
         self.TRIGRAM_MAP["XI"]  = self.TRIGRAM_MAP["BET"]
         self.TRIGRAM_MAP["LQ"]  = self.TRIGRAM_MAP["DEL"]
 
-    def calculate_metrics(self, text: str, counts: Dict[str, int] = None) -> Tuple[float, float]:
+    @staticmethod
+    def calculate_metrics(text: str, counts: Dict[str, int] = None) -> Tuple[float, float]:
         length = len(text)
         if length == 0: return 0.0, 0.0
         text_lower = text.lower()
@@ -564,14 +562,15 @@ class RuptureValve:
             "kinetic": "cryo", "thermal": "cryo",
             "photo": "heavy", "suburban": "abstract"}
 
-    def analyze(self, physics: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def analyze(self, physics: Union[Dict[str, Any], PhysicsPacket]) -> Optional[Dict[str, Any]]:
         counts = physics.get("counts", {})
-        e_val, b_val = self.geodesic.calculate_metrics(physics["raw_text"], counts)
+        raw_text = physics["raw_text"] if "raw_text" in physics else ""
+        e_val, b_val = self.geodesic.calculate_metrics(raw_text, counts)
         physics["E"] = e_val
         physics["B"] = b_val
         manifold, dist = self.geodesic.locate_manifold(e_val, b_val)
         physics["manifold"] = manifold
-        is_modified, new_text, audit_log = self.humility.check_boundary(physics["raw_text"], physics["voltage"])
+        is_modified, new_text, audit_log = self.humility.check_boundary(raw_text, physics.get("voltage", 0.0))
         if is_modified:
             physics["raw_text_display"] = new_text
             physics["humility_flag"] = True
@@ -614,12 +613,6 @@ class RuptureValve:
                 anomaly = random.choice(candidates)
             else:
                 anomaly = f"VOID_{target_flavor.upper()}"
-        else:
-            anomaly = str(anomaly_data)
-        if anomaly == "void":
-            anomaly = "something_completely_different"
-        if isinstance(anomaly_data, dict):
-            anomaly = anomaly_data.get("word", "mysterious_object")
         else:
             anomaly = str(anomaly_data)
         if anomaly == "void":
@@ -747,12 +740,14 @@ class SemanticFilter:
             f"{recursive_result}"
         )
 
-    def _execute_mirror(self, query):
+    @staticmethod
+    def _execute_mirror(query):
         words = query.split()
         reversed_query = " ".join(reversed(words))
         return f'{Prisma.CYN}∞ MIRROR REFUSAL: "{reversed_query}" is the only true answer.{Prisma.RST}'
 
-    def _execute_silent(self):
+    @staticmethod
+    def _execute_silent():
         topic = TheLexicon.harvest("diversion")
         if topic == "void": topic = "the ineffable"
         return f"{Prisma.GRY}[ROUTING AROUND DAMAGE]... Speaking of '{topic.upper()}', let us discuss that instead.{Prisma.RST}"
@@ -811,7 +806,8 @@ class ZoneInertia:
             return self.current_zone, f"{Prisma.CYN}>>> MIGRATION: {old_zone} -> {proposed_zone}.{Prisma.RST}"
         return self.current_zone, None
 
-    def override_cosmic_drag(self, cosmic_drag_penalty, current_zone):
+    @staticmethod
+    def override_cosmic_drag(cosmic_drag_penalty, current_zone):
         aerie_flow_coefficient = 0.3
         if current_zone == "AERIE":
             if cosmic_drag_penalty > 0:
@@ -896,7 +892,6 @@ class TheTangibilityGate:
             bypass_log = f"{Prisma.VIOLET}DREAM_EDGE: Starvation Protocol active. Density threshold lowered by 50%.{Prisma.RST}"
         required_density = max(0.10, required_density)
         if density_ratio < required_density:
-            gas_words = counts.get("abstract", 0) + counts.get("antigen", 0)
             examples = list(TheLexicon.get("heavy"))
             suggestion = random.sample(examples, 3) if len(examples) >= 3 else ["stone", "iron", "bone"]
             return False, (

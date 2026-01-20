@@ -1,15 +1,11 @@
 # bone_commands.py
 # "The snake spits out its tail. The circle becomes a line."
 
-import inspect, os, random, shlex, time
+import inspect, os, random, shlex
 from typing import Dict, Callable, List, Any, Protocol, runtime_checkable
 
 @runtime_checkable
 class EngineProtocol(Protocol):
-    """
-    The structural interface of the BoneAmanita Engine.
-    Required by the CommandProcessor to execute orders.
-    """
     events: Any
     mind: Any
     phys: Any
@@ -22,7 +18,7 @@ class EngineProtocol(Protocol):
     tinkerer: Any
     journal: Any
     repro: Any
-
+    noetic: Any
     health: float
     stamina: float
     tick_count: int
@@ -68,7 +64,8 @@ class CommandProcessor:
             "/prove": self._cmd_prove,
             "/soul": self._cmd_soul,
             "/chapter": self._cmd_chapter,
-            "/help": self._cmd_help
+            "/help": self._cmd_help,
+            "/synapse": self._cmd_synapse
         }
 
     def _log(self, text):
@@ -104,7 +101,7 @@ class CommandProcessor:
             traceback.print_exc()
             return True
 
-    def _cmd_manifold(self, parts):
+    def _cmd_manifold(self, _parts):
         phys = self.eng.phys.tension.last_physics_packet
         if not phys:
             self._log("NAVIGATION OFFLINE: No physics data yet.")
@@ -146,17 +143,12 @@ class CommandProcessor:
                     self._log(f"   [MUTATION ADOPTED]: {key} {old_val:.2f} -> {new_val:.2f}")
         return True
 
-    def _cmd_status(self, parts):
+    def _cmd_status(self, _parts):
         self._log(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS ---{self.P.RST}")
         self._log(f"Health:  {self.eng.health:.1f} | Stamina: {self.eng.stamina:.1f} | ATP: {self.eng.bio.mito.state.atp_pool:.1f}")
-
-        try:
-            enneagram = self.eng.noetic.arbiter.enneagram
-        except AttributeError:
-            pass
         return True
 
-    def _cmd_save(self, parts):
+    def _cmd_save(self, _parts):
         try:
             self.eng.mind.mirror.profile.save()
 
@@ -175,7 +167,7 @@ class CommandProcessor:
             self._log(f"{self.P.RED}SAVE FAILED: {e}{self.P.RST}")
         return True
 
-    def _cmd_rummage(self, parts):
+    def _cmd_rummage(self, _parts):
         phys = self.eng.phys.tension.last_physics_packet
         if not phys: return True
 
@@ -184,7 +176,7 @@ class CommandProcessor:
         self._log(msg)
         return True
 
-    def _cmd_map(self, parts):
+    def _cmd_map(self, _parts):
         phys = self.eng.phys.tension.last_physics_packet
         if not phys or "raw_text" not in phys: return True
 
@@ -196,7 +188,6 @@ class CommandProcessor:
         return True
 
     def _cmd_garden(self, parts):
-        from bone_village import ParadoxSeed
         self._log(f"{self.P.GRN}THE PARADOX GARDEN:{self.P.RST}")
 
         if len(parts) > 1 and parts[1] == "water":
@@ -238,7 +229,7 @@ class CommandProcessor:
         if len(parts) > 1: self.eng.mind.mem.ingest(parts[1] + (".json" if not parts[1].endswith(".json") else ""))
         return True
 
-    def _cmd_kip(self, parts):
+    def _cmd_kip(self, _parts):
         self.Config.VERBOSE_LOGGING = not self.Config.VERBOSE_LOGGING
         self._log(f"VERBOSE LOGGING: {self.Config.VERBOSE_LOGGING}")
         return True
@@ -263,27 +254,27 @@ class CommandProcessor:
             self._log(f"{self.P.VIOLET}GRAVITY ASSIST: Target '{parts[1]}'.{self.P.RST}")
         return True
 
-    def _cmd_weave(self, parts):
+    def _cmd_weave(self, _parts):
         s, m = self.Map.spin_web(self.eng.mind.mem.graph, self.eng.gordon.inventory, self.eng.gordon)
         self._log(m)
         if s: self.eng.stamina -= 5.0
         return True
 
-    def _cmd_voids(self, parts):
+    def _cmd_voids(self, _parts):
         p = self.eng.phys.tension.last_physics_packet
         if p: self._log(f"VOIDS: {self.Map.detect_voids(p) or 'None'}")
         return True
 
-    def _cmd_strata(self, parts):
+    def _cmd_strata(self, _parts):
         wells = [k for k,v in self.eng.mind.mem.graph.items() if "strata" in v]
         self._log(f"STRATA: {wells if wells else 'None'}")
         return True
 
-    def _cmd_fossils(self, parts):
+    def _cmd_fossils(self, _parts):
         self._log(f"FOSSILS: {len(self.eng.mind.mem.fossils)} items archived.")
         return True
 
-    def _cmd_lineage(self, parts):
+    def _cmd_lineage(self, _parts):
         self._log(f"LINEAGE: {len(self.eng.mind.mem.lineage_log)} generations.")
         return True
 
@@ -299,13 +290,13 @@ class CommandProcessor:
             self._log(f"LOGIC DENSITY: {m['physics']['truth_ratio']:.2f}")
         return True
 
-    def _cmd_kintsugi(self, parts):
+    def _cmd_kintsugi(self, _parts):
         k = self.eng.kintsugi
         state = "FRACTURED" if k.active_koan else "WHOLE"
         self._log(f"KINTSUGI: {state} | Repairs: {k.repairs_count}")
         return True
 
-    def _cmd_publish(self, parts):
+    def _cmd_publish(self, _parts):
         phys = self.eng.phys.tension.last_physics_packet
         if not phys:
             self._log(f"{self.P.RED}CANNOT PUBLISH: No physics data generated yet.{self.P.RST}")
@@ -343,7 +334,7 @@ class CommandProcessor:
 
         return True
 
-    def _cmd_soul(self, parts):
+    def _cmd_soul(self, _parts):
         soul = self.eng.soul
         self._log(f"{self.P.MAG}--- SOUL DIAGNOSTICS ---{self.P.RST}")
         self._log(f"Traits: {soul.traits}")
@@ -367,9 +358,28 @@ class CommandProcessor:
             self._log(f"Current Chapter: {self.eng.soul.chapters[-1] if self.eng.soul.chapters else 'None'}")
         return True
 
-    def _cmd_help(self, parts):
+    def _cmd_synapse(self, _parts):
+        """Displays the alignment between System Vector and simulated LLM Vector."""
+        phys = self.eng.phys.tension.last_physics_packet
+        if not phys:
+            self._log("SYNAPSE OFFLINE: No physics data.")
+            return True
+        sys_vec = phys.get("vector", {})
+        self._log(f"{self.P.MAG}--- NEURAL BRIDGE DIAGNOSTICS ---{self.P.RST}")
+        self._log(f"System State Vector (The Body):")
+        for k, v in sys_vec.items():
+            bar = "█" * int(v * 10)
+            self._log(f"  {k}: {bar} {v:.2f}")
+        cortex = getattr(self.eng, 'cortex', None)
+        if cortex:
+            score = getattr(cortex, 'last_alignment_score', 0.0)
+            color = self.P.GRN if score > 0.7 else (self.P.YEL if score > 0.4 else self.P.RED)
+            self._log(f"Last Alignment Score: {color}{score:.3f}{self.P.RST}")
+        return True
+
+    def _cmd_help(self, _parts):
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 10.5.3 MANUAL ---{self.P.RST}",
+            f"\n{self.P.CYN}--- BONEAMANITA 10.5.6 MANUAL ---{self.P.RST}",
             f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"
         ]
         categories = {

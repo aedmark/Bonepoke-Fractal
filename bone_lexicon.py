@@ -1,7 +1,7 @@
 # bone_lexicon.py - The Global Dictionary
 # "Words are things, I'm convinced." - Maya Angelou
 
-import json, random, re, string, time, unicodedata, os
+import json, random, re, string, time, unicodedata, os, math
 from typing import Tuple, Dict, Set, Optional, List
 from bone_bus import BoneConfig, Prisma
 from bone_data import LEXICON, GENETICS
@@ -158,6 +158,23 @@ class LinguisticAnalyzer:
         variance = sum((l - avg_len) ** 2 for l in lengths) / len(lengths)
         turbulence = min(1.0, variance / 10.0)
         return round(turbulence, 2)
+
+    def vectorize(self, text: str) -> Dict[str, float]:
+        words = self.sanitize(text)
+        if not words: return {}
+        dims = {"VEL": 0.0, "STR": 0.0, "ENT": 0.0, "PHI": 0.0, "PSI": 0.0, "BET": 0.0, "DEL": 0.0}
+        for w in words:
+            cats = self.store.get_categories_for_word(w)
+            for cat in cats:
+                if cat == "kinetic" or cat == "explosive": dims["VEL"] += 1.0
+                elif cat == "heavy" or cat == "constructive": dims["STR"] += 1.0
+                elif cat == "antigen" or cat == "toxin": dims["ENT"] += 1.0
+                elif cat == "thermal" or cat == "photo": dims["PHI"] += 1.0
+                elif cat == "abstract" or cat == "sacred": dims["PSI"] += 1.0
+                elif cat == "suburban" or cat == "buffer": dims["BET"] += 1.0
+                elif cat == "play" or cat == "aerobic": dims["DEL"] += 1.0
+        total = max(1.0, sum(dims.values()))
+        return {k: round(v / total, 3) for k, v in dims.items()}
 
     def sanitize(self, text: str) -> List[str]:
         if not text: return []

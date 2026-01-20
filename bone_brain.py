@@ -3,11 +3,10 @@
 
 import re, time, json, urllib.request, urllib.error, random, math
 from typing import Dict, Any, List, Optional
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from bone_data import LENSES, DREAMS
 from bone_bus import Prisma, BoneConfig, EventBus
 from bone_symbiosis import SymbiosisManager
-
 try:
     from bone_lexicon import TheLexicon
 except ImportError:
@@ -18,20 +17,29 @@ try:
 except ImportError:
     RosettaStone = None
     print(f"{Prisma.YEL}[WARNING]: RosettaStone missing. Reverting to Pidgin Protocol.{Prisma.RST}")
-
-# [SLASH FIX]: Robust Import Logic
 try:
     import ollama
     OLLAMA_AVAILABLE = True
 except ImportError:
     ollama = None
     OLLAMA_AVAILABLE = False
-
 try:
     from bone_telemetry import TelemetryService
 except ImportError:
     TelemetryService = None
     print("Telemetry module not found. Flying blind.")
+
+def cosine_similarity(vec_a: Dict[str, float], vec_b: Dict[str, float]) -> float:
+    """Calculates alignment between two semantic vectors."""
+    intersection = set(vec_a.keys()) & set(vec_b.keys())
+    numerator = sum(vec_a[k] * vec_b[k] for k in intersection)
+
+    sum1 = sum(vec_a[k]**2 for k in vec_a.keys())
+    sum2 = sum(vec_b[k]**2 for k in vec_b.keys())
+    denominator = math.sqrt(sum1) * math.sqrt(sum2)
+
+    if not denominator: return 0.0
+    return numerator / denominator
 
 @dataclass
 class ChemicalState:
@@ -211,7 +219,8 @@ class LLMInterface:
         self.model = model or BoneConfig.MODEL
         self.base_url = base_url or self._get_default_url(self.provider)
 
-    def _get_default_url(self, provider):
+    @staticmethod
+    def _get_default_url(provider):
         defaults = {
             "ollama": "http://127.0.0.1:11434/v1/chat/completions",
             "openai": "https://api.openai.com/v1/chat/completions",
@@ -263,7 +272,7 @@ class LLMInterface:
 
             return self.mock_generation(prompt)
 
-    def _local_fallback(self, prompt: str, params: Dict, ollama=None) -> str:
+    def _local_fallback(self, prompt: str, params: Dict) -> str:
         try:
             response = ollama.chat(
                 model=getattr(BoneConfig, "OLLAMA_MODEL_ID", "llama3"),
@@ -275,7 +284,8 @@ class LLMInterface:
             self._log(f"FALLBACK FAILED: {e}", "CRIT")
             return self.mock_generation(prompt)
 
-    def mock_generation(self, prompt: str) -> str:
+    @staticmethod
+    def mock_generation(prompt: str) -> str:
         """Schur Lens: When the brain breaks, make it poetic."""
         phrases = [
             "The wire hums, but carries no voice.",
@@ -290,7 +300,8 @@ class PromptComposer:
     Constructs the System Prompt using Geodesic Layering.
     Now responsive to Symbiosis Modifiers (Meadows Lens).
     """
-    def _sanitize(self, text: str) -> str:
+    @staticmethod
+    def _sanitize(text: str) -> str:
         safe = text.replace('"""', "'''").replace('```', "'''")
         return re.sub(r"(?i)^SYSTEM:", "User-System:", safe, flags=re.MULTILINE)
 
@@ -424,14 +435,10 @@ class ResponseValidator:
         return {"valid": True, "content": response}
 
 class TheCortex:
-    """
-    The Orchestrator of Cognition.
-    Connects the Body (Cycle) to the Mind (LLM).
-    """
+    """The Orchestrator of Cognition. Connects the Body (Cycle) to the Mind (LLM)."""
     def __init__(self, engine_ref, llm_client=None):
         self.sub = engine_ref
         self.events = engine_ref.events
-
         self.llm = llm_client if llm_client else LLMInterface(self.events, provider="mock")
         self.composer = PromptComposer()
         self.modulator = NeurotransmitterModulator()
@@ -440,53 +447,50 @@ class TheCortex:
         self.validator = ResponseValidator()
         self.ballast_active = False
         self.ballast_counter = 0
+        self.last_alignment_score = 1.0
 
     def process(self, user_input: str) -> Dict[str, Any]:
         sim_result = self.sub.cycle_controller.run_turn(user_input)
-
         if sim_result.get("type") not in ["SNAPSHOT", None]:
             if sim_result.get("ui") and not sim_result.get("logs"):
                 return sim_result
-
         full_state = self._gather_state(sim_result)
-
         voltage = full_state["physics"].get("voltage", 5.0)
         chem = full_state["bio"].get("chem", {})
-
-        # [SLASH FIX]: Retrieve current Lens for Contextual Modulation
         current_lens = full_state["mind"].get("lens", "NARRATOR")
-
         llm_params = self.modulator.modulate(chem, voltage, lens_name=current_lens)
-
         modifiers = self.symbiosis.get_prompt_modifiers()
-
+        if self.last_alignment_score < 0.4:
+            modifiers["simplify_instruction"] = True
+            self.events.log(f"{Prisma.VIOLET}NEURAL DRIFT: Alignment {self.last_alignment_score:.2f}. Engaging Ballast.{Prisma.RST}", "CORTEX")
         if self.ballast_active:
             self.ballast_counter -= 1
             if self.ballast_counter <= 0: self.ballast_active = False
-
         final_prompt = self.composer.compose(
             full_state,
             user_input,
             ballast=self.ballast_active,
             modifiers=modifiers
         )
-
         start_time = time.time()
         raw_response_text = self.llm.generate(final_prompt, llm_params)
         latency = time.time() - start_time
-
+        system_vector = full_state["physics"].get("vector", {})
+        response_vector = self.sub.lex.vectorize(raw_response_text)
+        self.last_alignment_score = cosine_similarity(system_vector, response_vector)
+        if self.last_alignment_score > 0.8:
+            sim_result["physics"]["kappa"] = min(1.0, sim_result["physics"].get("kappa", 0) + 0.05)
+        elif self.last_alignment_score < 0.3:
+            sim_result["physics"]["voltage"] += 2.0
+        self.events.log(f"{Prisma.CYN}SYNAPTIC ALIGNMENT: {self.last_alignment_score:.2f}{Prisma.RST}", "CORTEX")
         validation_result = self.validator.validate(raw_response_text, full_state)
         if validation_result["valid"]:
             final_response_text = validation_result["content"]
         else:
             self.events.log(f"VALIDATOR REFUSAL: {validation_result['reason']}", "SYS")
             final_response_text = validation_result["replacement"]
-
         self.symbiosis.monitor_host(latency, final_response_text)
-
-        # [SLASH FIX]: Context-Aware Solipsism Audit
         self._audit_solipsism(final_response_text, lens_name=current_lens)
-
         sim_result["ui"] = f"{sim_result.get('ui', '')}\n\n{Prisma.WHT}{final_response_text}{Prisma.RST}"
         return sim_result
 
@@ -546,7 +550,8 @@ class NeuroPlasticity:
     def __init__(self):
         self.plasticity_mod = 1.0
 
-    def force_hebbian_link(self, graph, word_a, word_b):
+    @staticmethod
+    def force_hebbian_link(graph, word_a, word_b):
         """
         Creates a strong edge between two concepts in the graph.
         """

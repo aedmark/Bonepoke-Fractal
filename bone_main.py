@@ -1,4 +1,4 @@
-# BONEAMANITA 10.5.3 - "The Gyroscope & The Blueprint"
+# BONEAMANITA 10.5.6 - "The Surgical Tensegrity"
 # Architects: SLASH, KISHO, The Courtyard, Taylor & Edmark
 
 import time, json
@@ -29,7 +29,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.5.3', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.5.6', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
@@ -256,7 +256,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.5.3', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.5.6', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

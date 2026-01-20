@@ -1,5 +1,70 @@
 # 📜 BONEAMANITA CHANGELOG
 
+
+## **10.5.6: The "Surgical Tensegrity" Update**
+
+### **Features & Enhancements**
+
+* **Temporal Checkpoints (Time Travel):** Implemented a "Save & Reload" mechanism in `CycleSimulator`. The system now takes a `snapshot()` of the physics state before every processing phase. If a phase crashes (throws an Exception), the timeline automatically rolls back to the clean snapshot, preventing corrupted state from poisoning the rest of the simulation.
+* **Hybrid Physics Packet:** Upgraded `PhysicsPacket` to behave as both a rigid Dataclass (for structure) and a Dictionary (for flexibility). It now supports `__getitem__`, `__setitem__`, and a deep-copy `snapshot()` method to support the new immutable state flow.
+* **Recursive Configuration Validation:** `BoneConfig` now correctly validates nested configuration classes (`METABOLISM`, `PHYSICS`, etc.), ensuring no illegal values slip past the border guards.
+
+### **Refactoring & Optimization**
+
+* **Type Truth:** Fixed `CycleContext` to explicitly declare `physics` as a `PhysicsPacket` rather than `Any`, resolving multiple ambiguity warnings.
+* **Parameter Purge:** Removed unused arguments (`lexicon_class`, `drag`, `raw_text`) from `audit_hubris`, `_derive_complex_metrics`, and `_trigger_neuroplasticity`. The functions now only ask for what they actually eat.
+* **Redundancy Removal:** Deleted the redundant `last_physics_packet` assignment in `ObservationPhase`, as `TheTensionMeter` now handles its own history.
+* **Logic Consolidation:** Merged duplicate logic branches in `RuptureValve._rupture`, ensuring the "Anomaly" calculation is deterministic and readable.
+
+### **Bug Fixes**
+
+* **Fixed:** `ObservationPhase` type mismatch where `CycleContext` expected a `dict` but got a `PhysicsPacket`.
+* **Fixed:** `UnboundLocalError` in `CycleSimulator` where `current_checkpoint` could be referenced before assignment.
+* **Fixed:** Argument mismatch in `TheTensionMeter.gaze` calling `_trigger_neuroplasticity` with an extra `text` argument.
+* **Fixed:** Variable shadowing in `RuptureValve.analyze` (renamed `data` -> `physics` to match internal references).
+
+---
+
+**Next Steps:**
+
+* The "Brain" (Cognition) is currently the only major subsystem not fully leveraging the new snapshot capabilities.
+* Consider adding a `diff()` method to `PhysicsPacket` to visualize exactly *what* changed between snapshots for deeper debugging.
+
+### **v10.5.5 - The "Synaptic Bridge" Update**
+
+#### **I. Architecture: Neural Integration (The Cybernetic Loop)**
+
+*Goal: Close the epistemological gap between the System (Physics) and the LLM (Text).*
+
+* **`bone_lexicon.py`**
+* **Added `vectorize(text)`:** The Lexicon can now project raw text onto the engine's 7-dimensional semantic axis (VEL, STR, ENT, etc.), creating a "Semantic Fingerprint" independent of the LLM.
+
+* **`bone_brain.py`**
+* **Added `cosine_similarity`:** A helper to measure the angle between two semantic vectors.
+* **Updated `TheCortex`:**
+* Now calculates **Alignment** between the System's internal state (Physics Vector) and the LLM's output (Response Vector).
+* **Feedback Loops Implemented:**
+* *High Alignment (>0.8):* Increases Coherence (`kappa`). The system flows.
+* *Low Alignment (<0.3):* Increases Voltage (`heat`). The system detects friction.
+* *Drift Check:* If alignment drops below 0.4, the "Ballast" is auto-engaged to simplify prompts.
+
+* **`bone_commands.py`**
+* **Added `/synapse`:** A diagnostic command that visualizes the Neural Bridge, showing the System Vector bars and the calculated Alignment Score in real-time.
+
+---
+
+#### **II. Code Hygiene: The Linter Scrub**
+
+*Goal: Ephemeralization. Removing unused resources and cognitive noise.*
+* **`bone_commands.py`**
+* **Protocol Update:** Updated `EngineProtocol` to explicitly define `noetic`, `cortex`, and `lex`, satisfying type-checkers.
+* **Dead Code Removal:**
+* Removed unused `math` import (it was unused *before* the neural update, though we might need it now for cosine math—but in `bone_commands` specifically, it was idle).
+* Removed unused `enneagram` variable in `_cmd_status`.
+* Removed unused `ParadoxSeed` import in `_cmd_garden`.
+* **Argument Cleaning:** Renamed unused `parts` arguments to `_` in 10+ command functions (`_cmd_manifold`, `_cmd_rummage`, etc.) to signal intent and silence the linter.
+
+
 ### **Changelog: (v10.5.4) - The Gestational Lock & The Genesis Patch**
 
 #### **🔌 The Nervous System: Flow Control (bone_bus.py)**
