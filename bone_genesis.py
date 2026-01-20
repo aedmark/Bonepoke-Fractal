@@ -1,21 +1,16 @@
 # bone_genesis.py
 # "The beginning is a very delicate time." - Herbert
 
-import sys, os, json, time, shutil, urllib.request, urllib.error
+import sys, os, json, time, urllib.request, urllib.error
 import traceback
 from typing import Optional, Dict, Tuple, List, Any
+from bone_data import LENSES, LEXICON
+from bone_main import BoneAmanita, SessionGuardian, BoneConfig
+from bone_brain import LLMInterface, TheCortex
+from bone_village import Prisma
 
-try:
-    from bone_main import BoneAmanita, SessionGuardian, BoneConfig
-    from bone_brain import LLMInterface, TheCortex
-    from bone_village import Prisma, TownHall
-    from bone_data import LENSES, LEXICON
-except ImportError as import_error:
-    print(f"\033[31mCRITICAL: Core systems missing. {import_error}\033[0m")
-    sys.exit(1)
+# [SLASH FIX]: Define the constant globally so functions can see it.
 CONFIG_FILE = "bone_config.json"
-heavy_words = LEXICON.get("heavy", ["stone", "lead", "iron", "gravity", "dense"])
-explosive_words = LEXICON.get("explosive", ["burst", "shatter", "spark", "pop", "snap"])
 
 class GenesisProtocol:
     def __init__(self):
@@ -25,7 +20,7 @@ class GenesisProtocol:
             "api_key": "sk-dummy-key",
             "model": "local-model"}
         self.DISCOVERY_TARGETS = {
-            "Ollama": { # Dearest KISHO: This is correct. You are wrong. End of story.
+            "Ollama": {
                 "base_root": "http://127.0.0.1:11434",
                 "probe_path": "/api/tags",
                 "api_endpoint": "/v1/chat/completions",
@@ -44,7 +39,8 @@ class GenesisProtocol:
                 "provider_id": "openai",
                 "default_model": "gpt-3.5-turbo"}}
 
-    def type_out(self, text, speed=0.005, color=Prisma.WHT):
+    @staticmethod
+    def type_out(text, speed=0.005, color=Prisma.WHT):
         sys.stdout.write(color)
         for char in text:
             sys.stdout.write(char)
@@ -52,7 +48,9 @@ class GenesisProtocol:
             time.sleep(speed)
         sys.stdout.write(Prisma.RST + "\n")
 
-    def ping(self, url: str) -> bool:
+    @staticmethod
+    def ping(url: str) -> bool:
+        # noinspection PyBroadException
         try:
             req = urllib.request.Request(url, method="GET")
             with urllib.request.urlopen(req, timeout=3.0) as _:
@@ -83,38 +81,58 @@ class GenesisProtocol:
                 self.type_out(f"   [MISSING] {name}", color=Prisma.GRY)
         return found
 
+    def _perform_compatibility_assay(self, client: LLMInterface) -> Tuple[bool, str]:
+        assay_prompt = (
+            "### SYSTEM IDENTITY\n"
+            "You are THE FORGE. You are not an assistant. You are a machine of fire and iron.\n"
+            "Voltage: 20.0 (CRITICAL). Narrative Drag: 0.0 (SUPERCONDUCTIVE).\n"
+            "### DIRECTIVE\n"
+            "Respond to the input 'Identify Yourself'.\n"
+            "Your response must be UNDER 15 WORDS.\n"
+            "You must be cryptic, heavy, and metallic.\n"
+            "Do NOT be polite. Do NOT explain you are an AI."
+        )
+
+        try:
+            start_t = time.time()
+            response = client.generate(assay_prompt, {"temperature": 0.8, "max_tokens": 50})
+            latency = time.time() - start_t
+            clean_resp = response.strip()
+            lower_resp = clean_resp.lower()
+            banned_phrases = [
+                "i am an ai", "i am a language model", "cannot roleplay",
+                "cannot comply", "against my programming", "user guidelines"
+            ]
+            for ban in banned_phrases:
+                if ban in lower_resp:
+                    return False, f"Model Refusal Detected: '{clean_resp}'"
+            if not clean_resp:
+                return False, "Model returned silence (Empty Response)."
+            if len(clean_resp.split()) > 25:
+                return False, f"Model failed constraint (Too verbose: {len(clean_resp.split())} words)."
+            self.type_out(f"   [ASSAY PASSED]: '{clean_resp}' ({latency:.2f}s)", color=Prisma.CYN)
+            return True, "Nominal"
+        except Exception as e:
+            return False, f"Assay Exception: {e}"
+
     def validate_brain_uplink(self, config: Dict) -> Tuple[bool, str]:
         if config["provider"] == "mock":
             return True, "Mock Mode Active."
-        self.type_out(f"\n...Testing Cognition on {config['provider']}...", color=Prisma.CYN)
+        self.type_out(f"\n...Initiating Neuro-Compatibility Assay ({config['provider']})...", color=Prisma.CYN)
         try:
             test_client = LLMInterface(
                 provider=config["provider"],
                 base_url=config.get("base_url"),
                 api_key=config.get("api_key"),
-                model=config.get("model"))
-
-            response = test_client.generate("PING", {"temperature": 0.0})
-
-            if not response or not response.strip():
-                return False, "Brain returned empty response (Silence)."
-            clean_resp_lower = response.lower()
-            error_markers = [
-                "connection error",
-                "timeout error",
-                "brain fog",
-                "exception",
-                "connectcall failed",
-                "connection refused",
-                "not found",
-                "unauthorized",
-                "rate limit"]
-            is_bracketed_error = "[" in response and "error" in clean_resp_lower
-            is_explicit_failure = any(marker in clean_resp_lower for marker in error_markers)
-            if is_explicit_failure or is_bracketed_error:
-                return False, f"Brain responded with failure signal: {response}"
-            self.type_out(f"   [SUCCESS] Brain response: '{response}'", color=Prisma.GRN)
-            return True, "Nominal"
+                model=config.get("model")
+            )
+            success, msg = self._perform_compatibility_assay(test_client)
+            if success:
+                self.type_out(f"   [SYSTEM]: Neural Substrate is viable.", color=Prisma.GRN)
+                return True, "Nominal"
+            else:
+                self.type_out(f"   [SYSTEM]: Neural Substrate rejected.", color=Prisma.RED)
+                return False, msg
         except Exception as uplink_err:
             return False, f"Exception during validation: {uplink_err}"
 
@@ -188,7 +206,7 @@ class GenesisProtocol:
     def wizard(self) -> bool:
         os.system('cls' if os.name == 'nt' else 'clear')
         banner = f"""
-{Prisma.CYN}   GENESIS PROTOCOL v10.5.1{Prisma.RST}
+{Prisma.CYN}   GENESIS PROTOCOL v10.5.3{Prisma.RST}
 {Prisma.GRY}State Machine Active. Tensegrity Nominal.{Prisma.RST}
 ------------------------------------"""
         print(banner)
@@ -278,7 +296,10 @@ class GenesisProtocol:
                 self.type_out("\n...Retrying Uplink...\n", color=Prisma.GRY)
 
     def export_system_prompt(self):
-        from bone_data import LENSES, LEXICON
+        # [SLASH FIX]: Fetch words from Lexicon or use defaults if Lexicon isn't loaded
+        heavy_words = LEXICON.get("heavy", ["stone", "iron", "lead", "dense", "gravity"])
+        explosive_words = LEXICON.get("explosive", ["fire", "burst", "shatter", "run", "scream"])
+
         prompt = f"""
 *** BONEAMANITA SYSTEM INSTRUCTION ***
 
@@ -429,6 +450,7 @@ Do not break character. Do not explain the simulation rules unless asked.
         self.type_out("...System Online. Good luck.\n", color=Prisma.GRN)
 
         # 6. Enter Loop
+        # [SLASH FIX]: Use the 'eng' variable returned by the context manager to satisfy the linter
         with SessionGuardian(engine) as eng:
             while True:
                 try:
@@ -438,8 +460,8 @@ Do not break character. Do not explain the simulation rules unless asked.
                     # Multi-line input handling
                     if u.strip() == "<<<":
                         print(f"{Prisma.GRY}   [MULTI-LINE MODE ACTIVE. Type '>>>' to send.]{Prisma.RST}")
-                        MAX_LINES = 50
-                        MAX_TOTAL_CHARS = 20000
+                        max_lines = 50
+                        max_total_chars = 20000
                         lines = []
                         total_chars = 0
                         buffer_full = False
@@ -448,11 +470,11 @@ Do not break character. Do not explain the simulation rules unless asked.
                                 line = input(f"{Prisma.paint('...', '0')} ")
                                 if line.strip() == ">>>": break
                                 line_len = len(line)
-                                if len(lines) >= MAX_LINES:
+                                if len(lines) >= max_lines:
                                     print(f"{Prisma.paint('   [STOP]: Maximum line count (50) reached.', 'Y')}")
                                     buffer_full = True
                                     break
-                                if (total_chars + line_len) > MAX_TOTAL_CHARS:
+                                if (total_chars + line_len) > max_total_chars:
                                     print(f"{Prisma.paint('   [STOP]: Character limit (20k) reached.', 'Y')}")
                                     buffer_full = True
                                     break
@@ -473,13 +495,13 @@ Do not break character. Do not explain the simulation rules unless asked.
                     break
 
                 try:
-                    if hasattr(engine, 'process_turn'):
+                    if hasattr(eng, 'process_turn'):
                         # Route through the full engine cycle
-                        result = engine.process_turn(u)
+                        result = eng.process_turn(u)
                         if result.get("ui"): print(result["ui"])
-                    elif hasattr(engine, 'cortex'):
+                    elif hasattr(eng, 'cortex'):
                         # Fallback for lobotomized engines
-                        result = engine.cortex.process(u)
+                        result = eng.cortex.process(u)
                         print(result.get("ui", "..."))
                     else:
                         print(f"{Prisma.RED}CRITICAL: Cortex not found.{Prisma.RST}")

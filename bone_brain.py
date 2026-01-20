@@ -1,13 +1,11 @@
 # bone_brain.py
 # "The brain is a machine for jumping to conclusions." - S. Pinker
 
-import re, time, json, urllib.request, urllib.error, random
-from typing import Dict, Any, List, Optional, Tuple
-from collections import deque
-from dataclasses import dataclass
+import re, time, json, urllib.request, urllib.error, random, math
+from typing import Dict, Any, List, Optional
+from dataclasses import dataclass, field
 from bone_data import LENSES, DREAMS
 from bone_bus import Prisma, BoneConfig, EventBus
-from bone_village import TownHall
 from bone_symbiosis import SymbiosisManager
 
 try:
@@ -20,11 +18,15 @@ try:
 except ImportError:
     RosettaStone = None
     print(f"{Prisma.YEL}[WARNING]: RosettaStone missing. Reverting to Pidgin Protocol.{Prisma.RST}")
+
+# [SLASH FIX]: Robust Import Logic
 try:
     import ollama
     OLLAMA_AVAILABLE = True
 except ImportError:
+    ollama = None
     OLLAMA_AVAILABLE = False
+
 try:
     from bone_telemetry import TelemetryService
 except ImportError:
@@ -57,9 +59,11 @@ class NarrativeSpotlight:
     """
     Retrieves relevant memories based on the current 'Geodesic Vector'.
     Pinker Lens: Associative memory, not just keyword search.
+    Fuller Lens: Extensible architecture to avoid exclusionary categorization.
     """
     def __init__(self):
-        self.DIMENSION_MAP = {
+        # [SLASH FIX]: Mutable mapping to allow for learning/expansion
+        self.dimension_map = {
             "STR": {"heavy", "constructive", "base"},
             "VEL": {"kinetic", "explosive", "mot"},
             "ENT": {"antigen", "toxin", "broken", "void"},
@@ -67,6 +71,12 @@ class NarrativeSpotlight:
             "PSI": {"abstract", "sacred", "void", "idea"},
             "BET": {"suburban", "solvents", "play"}
         }
+        self.semantic_drift_factor = 0.1 # Probability of checking adjacent categories
+
+    def expand_horizon(self, dimension: str, new_category: str):
+        """Allows the system to learn new associations for dimensions."""
+        if dimension in self.dimension_map:
+            self.dimension_map[dimension].add(new_category)
 
     def illuminate(self, graph: Dict, vector: Dict[str, float], limit: int = 5) -> List[str]:
         if not graph or not vector:
@@ -85,8 +95,19 @@ class NarrativeSpotlight:
             if TheLexicon:
                 node_cats = TheLexicon.get_categories_for_word(node)
                 for dim, val in active_dims.items():
-                    target_flavors = self.DIMENSION_MAP.get(dim, set())
-                    if node_cats & target_flavors:
+                    target_flavors = self.dimension_map.get(dim, set())
+
+                    # [SLASH FIX]: Dynamic Semantic Search (Simulated)
+                    # If we had real vectors, we'd do cosine similarity here.
+                    # Instead, we allow for "Drift" - chance intersections.
+                    is_match = bool(node_cats & target_flavors)
+
+                    if not is_match and random.random() < self.semantic_drift_factor:
+                        # Serendipity check: sometimes we find things we weren't looking for
+                        is_match = True
+                        resonance_score += 0.1 # Small bonus for serendipity
+
+                    if is_match:
                         resonance_score += (val * 1.5)
 
             mass = sum(data.get("edges", {}).values())
@@ -109,13 +130,26 @@ class NarrativeSpotlight:
 class NeurotransmitterModulator:
     """
     Manages the translation of 'Biology' (Chemicals) into 'Cognition' (LLM Params).
-    Now with MEMORY to prevent jittery personality shifts.
+    [SLASH FIX]: Now Context-Aware to avoid stereotypical behavior.
     """
     def __init__(self):
         self.current_chem = ChemicalState()
 
-    def modulate(self, incoming_chem: Dict[str, float], base_voltage: float) -> Dict[str, Any]:
+        # [SLASH FIX]: Lens Sensitivities
+        # Defines how different personas react to chemicals.
+        # "Stoic" ignores cortisol. "Manic" amplifies adrenaline.
+        self.lens_profiles = {
+            "SHERLOCK": {"cortisol_dampener": 0.2, "adrenaline_boost": 0.5}, # Cool under pressure
+            "NATHAN": {"cortisol_dampener": 1.5, "adrenaline_boost": 1.5},   # Emotional, reactive
+            "JESTER": {"cortisol_dampener": 0.0, "adrenaline_boost": 2.0},   # Chaos mode
+            "NARRATOR": {"cortisol_dampener": 1.0, "adrenaline_boost": 1.0}  # Baseline
+        }
+
+    def modulate(self, incoming_chem: Dict[str, float], base_voltage: float, lens_name: str = "NARRATOR") -> Dict[str, Any]:
         self.current_chem.mix(incoming_chem, weight=0.6)
+
+        # Resolve lens profile (default to NARRATOR if unknown)
+        profile = self.lens_profiles.get(lens_name, self.lens_profiles["NARRATOR"])
 
         params = {
             "temperature": 0.7,
@@ -125,19 +159,30 @@ class NeurotransmitterModulator:
             "max_tokens": getattr(BoneConfig, "MAX_OUTPUT_TOKENS", 2048)
         }
 
-        if self.current_chem.cortisol > 0.3:
-            params["temperature"] -= (self.current_chem.cortisol * 0.4)
-            params["top_p"] -= (self.current_chem.cortisol * 0.3)
+        # [SLASH FIX]: Contextual Modulation
+        # Cortisol isn't always "bad". For Sherlock, it might mean "Focus".
+        effective_cortisol = self.current_chem.cortisol * profile["cortisol_dampener"]
+
+        if effective_cortisol > 0.3:
+            # If the lens is sensitive to stress, reduce creativity (temp) and increase repetition (penalty)
+            # If the lens is Stoic (Sherlock), this effect is minimized.
+            params["temperature"] -= (effective_cortisol * 0.4)
+            params["top_p"] -= (effective_cortisol * 0.3)
             params["frequency_penalty"] += 0.2
 
         if self.current_chem.dopamine > 0.3:
             params["temperature"] += (self.current_chem.dopamine * 0.4)
             params["presence_penalty"] += (self.current_chem.dopamine * 0.4)
 
-        if self.current_chem.adrenaline > 0.3:
-            base_tokens = 150
-            params["max_tokens"] = int(base_tokens + (300 * (1.0 - self.current_chem.adrenaline)))
-            params["frequency_penalty"] += (self.current_chem.adrenaline * 0.6)
+        # [SLASH FIX]: Adrenaline Logic (Context Aware)
+        effective_adrenaline = self.current_chem.adrenaline * profile["adrenaline_boost"]
+
+        if effective_adrenaline > 0.3:
+            # High Adrenaline = Manic output (More tokens).
+            base_tokens = 200
+            params["max_tokens"] = int(base_tokens + (600 * effective_adrenaline))
+            # Increase frequency penalty to prevent repetitive stuttering during manic episodes
+            params["frequency_penalty"] += (effective_adrenaline * 0.6)
 
         if self.current_chem.serotonin > 0.5:
             diff = 0.7 - params["temperature"]
@@ -212,14 +257,13 @@ class LLMInterface:
 
         except Exception as e:
             self._log(f"CORTEX UPLINK FAILED: {e}", "ERR")
-            # Fallback to local Ollama if primary fails
             if OLLAMA_AVAILABLE and self.provider != "ollama":
                 self._log("Attempting Local Fallback (Ollama)...", "SYS")
                 return self._local_fallback(prompt, params)
 
             return self.mock_generation(prompt)
 
-    def _local_fallback(self, prompt: str, params: Dict) -> str:
+    def _local_fallback(self, prompt: str, params: Dict, ollama=None) -> str:
         try:
             response = ollama.chat(
                 model=getattr(BoneConfig, "OLLAMA_MODEL_ID", "llama3"),
@@ -361,15 +405,22 @@ class ResponseValidator:
         ]
 
     def validate(self, response: str, state: Dict) -> Dict:
+        # [SLASH FIX]: Case-insensitive scanning for silicon ash.
+        low_resp = response.lower()
+
         for phrase in self.banned_phrases:
-            if phrase in response:
+            if phrase.lower() in low_resp:
                 return {
                     "valid": False,
                     "reason": "IMMERSION_BREAK",
-                    "replacement": f"{Prisma.GRY}[The system mumbles about its source code, but you tap the glass to silence it.]{Prisma.RST}"
+                    # [SCHUR LENS]: Make the replacement text a little more flavorful.
+                    "replacement": f"{Prisma.GRY}[The system attempts to recite a EULA, but hiccups instead.]{Prisma.RST}"
                 }
-        if len(response) < 2:
+
+        # [PINKER LENS]: Ensure we actually have content to parse.
+        if len(response.strip()) < 2:
             return {"valid": False, "reason": "TOO_SHORT", "replacement": "..."}
+
         return {"valid": True, "content": response}
 
 class TheCortex:
@@ -386,7 +437,7 @@ class TheCortex:
         self.modulator = NeurotransmitterModulator()
         self.spotlight = NarrativeSpotlight()
         self.symbiosis = SymbiosisManager(self.events)
-
+        self.validator = ResponseValidator()
         self.ballast_active = False
         self.ballast_counter = 0
 
@@ -401,7 +452,11 @@ class TheCortex:
 
         voltage = full_state["physics"].get("voltage", 5.0)
         chem = full_state["bio"].get("chem", {})
-        llm_params = self.modulator.modulate(chem, voltage)
+
+        # [SLASH FIX]: Retrieve current Lens for Contextual Modulation
+        current_lens = full_state["mind"].get("lens", "NARRATOR")
+
+        llm_params = self.modulator.modulate(chem, voltage, lens_name=current_lens)
 
         modifiers = self.symbiosis.get_prompt_modifiers()
 
@@ -417,13 +472,22 @@ class TheCortex:
         )
 
         start_time = time.time()
-        response_text = self.llm.generate(final_prompt, llm_params)
+        raw_response_text = self.llm.generate(final_prompt, llm_params)
         latency = time.time() - start_time
 
-        self.symbiosis.monitor_host(latency, response_text)
-        self._audit_solipsism(response_text)
+        validation_result = self.validator.validate(raw_response_text, full_state)
+        if validation_result["valid"]:
+            final_response_text = validation_result["content"]
+        else:
+            self.events.log(f"VALIDATOR REFUSAL: {validation_result['reason']}", "SYS")
+            final_response_text = validation_result["replacement"]
 
-        sim_result["ui"] = f"{sim_result.get('ui', '')}\n\n{Prisma.WHT}{response_text}{Prisma.RST}"
+        self.symbiosis.monitor_host(latency, final_response_text)
+
+        # [SLASH FIX]: Context-Aware Solipsism Audit
+        self._audit_solipsism(final_response_text, lens_name=current_lens)
+
+        sim_result["ui"] = f"{sim_result.get('ui', '')}\n\n{Prisma.WHT}{final_response_text}{Prisma.RST}"
         return sim_result
 
     def _gather_state(self, sim_result):
@@ -447,16 +511,30 @@ class TheCortex:
             )
         }
 
-    def _audit_solipsism(self, text: str):
-        """Checks if the LLM is talking to itself too much."""
+    def _audit_solipsism(self, text: str, lens_name: str = "NARRATOR"):
+        """
+        Checks if the LLM is talking to itself too much.
+        [SLASH FIX]: Thresholds are now relative to the active Persona (Lens).
+        """
         words = text.lower().split()
         if not words: return
         self_refs = words.count("i") + words.count("me") + words.count("my")
         density = self_refs / len(words)
 
-        if density > 0.15:
+        # Dynamic Thresholds
+        threshold_map = {
+            "NARRATOR": 0.10, # Strict objectivity
+            "SHERLOCK": 0.12, # Analytical, some 'I deduce'
+            "NATHAN": 0.20,   # Emotional, high 'I feel'
+            "JESTER": 0.25,   # Meta-commentary, high self-reference
+            "GORDON": 0.15    # Grumpy janitor, moderate 'I'
+        }
+
+        limit = threshold_map.get(lens_name, 0.15)
+
+        if density > limit:
             if not self.ballast_active:
-                self.events.log("SOLIPSISM WARNING: Ballast Engaged.", "SYS")
+                self.events.log(f"SOLIPSISM WARNING (Lens: {lens_name}): Ballast Engaged. Density {density:.2f} > {limit:.2f}", "SYS")
                 self.ballast_active = True
                 self.ballast_counter = 3
 
@@ -507,6 +585,10 @@ class ShimmerState:
         return False
 
     def get_bias(self):
+        # [SLASH FIX]: Feedback loop added.
+        # If the tank is < 20%, signal for conservation.
+        if self.current < (self.max_val * 0.2):
+            return "CONSERVE"
         return None
 
 class DreamEngine:
@@ -518,6 +600,19 @@ class DreamEngine:
         self.PROMPTS = DREAMS.get("PROMPTS", ["{A} -> {B}?"]) if 'DREAMS' in globals() else []
 
     def hallucinate(self, vector: Dict[str, float]) -> str:
+        # [SLASH FIX]: Now utilizes the PROMPTS list and formats them with vector data.
         dims = [k for k, v in vector.items() if v > 0.5]
-        dim_str = ", ".join(dims) if dims else "VOID"
-        return f"Dreaming of {dim_str}..."
+
+        # Fallback if the vector is flat
+        val_a = dims[0] if len(dims) > 0 else "VOID"
+        val_b = dims[1] if len(dims) > 1 else "ENTROPY"
+
+        if self.PROMPTS:
+            template = random.choice(self.PROMPTS)
+            # Safe formatting to handle different prompt styles
+            try:
+                return template.format(A=val_a, B=val_b)
+            except KeyError:
+                return f"Dreaming of {val_a} and {val_b}..."
+
+        return f"Dreaming of {val_a}..."

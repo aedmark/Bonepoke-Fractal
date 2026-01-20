@@ -3,8 +3,7 @@
 import json, os, time, random
 from collections import deque
 from dataclasses import dataclass, field, fields
-from typing import List, Dict, Any, Optional, Counter, Callable, Tuple
-
+from typing import List, Dict, Any, Optional, Counter, Tuple
 
 class Prisma:
     RST = "\033[0m"
@@ -48,6 +47,16 @@ class EventBus:
     def __init__(self, max_memory=1024):
         self.buffer = deque(maxlen=max_memory)
         self.subscribers = {}
+        self.dormant = False
+        self.gestation_queue = []
+
+    def set_dormancy(self, active: bool):
+        self.dormant = active
+        if not active and self.gestation_queue:
+            print(f"{Prisma.GRY}[BUS]: Waking up. Processing {len(self.gestation_queue)} buffered events...{Prisma.RST}")
+            for event_type, data in self.gestation_queue:
+                self.publish(event_type, data)
+            self.gestation_queue.clear()
 
     def subscribe(self, event_type, callback):
         if event_type not in self.subscribers:
@@ -55,6 +64,10 @@ class EventBus:
         self.subscribers[event_type].append(callback)
 
     def publish(self, event_type, data=None):
+        """If we are dormant, we queue the impulse rather than acting on it. This preserves the integrity of the embryonic state."""
+        if self.dormant:
+            self.gestation_queue.append((event_type, data))
+            return
         if event_type in self.subscribers:
             for callback in self.subscribers[event_type]:
                 try:
@@ -238,7 +251,6 @@ class ErrorLog:
     timestamp: float = field(default_factory=time.time)
     severity: str = "WARNING"
 
-
 class TheObserver:
     def __init__(self):
         self.start_time = time.time()
@@ -250,7 +262,8 @@ class TheObserver:
         self.LATENCY_WARNING = 5.0
         self.CYCLE_WARNING = 8.0
 
-    def clock_in(self):
+    @staticmethod
+    def clock_in():
         return time.time()
 
     def clock_out(self, start_time, metric_type="cycle"):

@@ -1,6 +1,118 @@
 # 📜 BONEAMANITA CHANGELOG
 
-# v10.5.01 - "The Wire Connect"
+### **Changelog: (v10.5.4) - The Gestational Lock & The Genesis Patch**
+
+#### **🔌 The Nervous System: Flow Control (bone_bus.py)**
+
+* **The Gestation Queue (The Meadows Lens):**
+  * **Change:** Implemented a `dormant` state and a `gestation_queue` within the `EventBus`.
+  * **Effect:** Creates a temporary "stock" for information. The system now buffers signals during initialization rather than letting them flow immediately. This prevents the "Feedback Screech" of components reacting to their own creation.
+
+* **Traffic Control (The Fuller Lens):**
+  * **Change:** Added `set_dormancy(bool)` to explicitly toggle the flow of events.
+  * **Effect:** We now have a master switch for the system's reflexes. We can perform "open-heart surgery" on the code without the patient kicking us in the face.
+
+#### **🏗️ The Architect: Ontological Boundaries (bone_architect.py)**
+
+* **Embryonic Dormancy (The Pinker Lens):**
+  * **Change:** The `incubate` phase now explicitly locks the EventBus, and the `awaken` phase unlocks it only *after* memory injection.
+  * **Effect:** Solves the "Running Embryo" paradox. The system now knows the difference between *existing* (construction) and *living* (activation). It prevents the system from trying to form memories before it has a hippocampus.
+
+* **Safe Inheritance:**
+  * **Change:** The `SystemEmbryo` tracks its `is_gestating` state.
+  * **Effect:** A clear cognitive boundary. We ensure that the `ParasiticSymbiont` and `Mitochondria` are fully attached before they are allowed to draw power.
+
+#### **🚀 Genesis: The Launchpad (bone_genesis.py)**
+
+* **Linguistic Definitions (The Pinker Lens):**
+  * **Change:** Globally defined `CONFIG_FILE` and properly imported `LEXICON` for `heavy_words` and `explosive_words`.
+  * **Effect:** No more "Unresolved Reference" hallucinations. The code now defines its terms before using them in a sentence.
+
+* **Linter Appeasement (The Schur Lens):**
+  * **Change:** Utilized the `eng` variable in the main `SessionGuardian` loop instead of ignoring it.
+  * **Effect:** We made peace with the linter. It stopped being passive-aggressive about "unused local variables," and the code is no longer rude to the context manager that birthed it.
+
+* **Kinetic Shielding:**
+  * **Change:** Wrapped the `wizard` and prompt export logic in better exception handling.
+  * **Effect:** The launch sequence is less brittle. If the user mashes keys during the setup wizard, the system exits gracefully rather than vomiting a stack trace.
+
+### **Changelog: (v10.5.3) - The Gyroscope & The Blueprint**
+
+#### **⚖️ The Cycle: Stability & Dynamics (bone_cycle.py)**
+
+* **Industrial Control Theory Implementation (The Meadows Lens):**
+  * **Change:** Upgraded `PIDController` with **Integral Windup Protection** and `dt` safety checks.
+  * **Effect:** Prevents the "Memory" of past errors from accumulating to infinity during long user pauses. The narrative engine no longer "slingshots" violently after a period of confusion.
+
+* **Narrative Dampeners (The Schur Lens):**
+  * **Change:** `CycleStabilizer` now logs specific, flavorful reasons when it intervenes (e.g., "Grease applied," "Voltage corrected").
+  * **Effect:** The system doesn't just silently fix numbers; it complains like a mechanic working on a finicky engine. The user now *sees* the feedback loops in action.
+
+* **Metabolic Decomposition (The Pinker Lens):**
+  * **Change:** Smashed the `MetabolismPhase` "God Object" into three distinct pipeline stages: **Regulation** (Governor), **Digestion** (Soma), and **Consequence** (Hubris/Healing).
+  * **Effect:** Drastically reduced cognitive load. We can now trace the flow of text -> ATP without getting lost in spaghetti logic.
+
+* **Kintsugi Therapy:**
+  * **Change:** Integrated "Kintsugi" (repairing with gold) logic into the healing phase.
+  * **Effect:** Trauma isn't just erased; it's highlighted. If the system breaks and repairs itself, it creates a narrative "echo" rather than a silent reset.
+
+#### **🏗️ The Architect: Structural Integrity (bone_architect.py)**
+
+* **Tensegrity Construction (The Fuller Lens):**
+  * **Change:** Decomposed the monolithic `incubate` method into `_construct_mind`, `_construct_bio`, and `_construct_physics`.
+  * **Effect:** Explicit dependency management. We now ensure the *Mind* exists before the *Parasite* tries to attach to it. The codebase represents a clear hierarchy of needs.
+
+* **Anticipatory Design:**
+  * **Change:** Hardened the `awaken` method against "Legacy Spores."
+  * **Effect:** The system no longer crashes if the save file format (The Spore) changes size or shape. It gracefully unpacks what it can and invents the rest.
+
+* **The Panic Room 2.0:**
+  * **Change:** Updated `PanicRoom.get_safe_physics()` to return a fully valid `PhysicsPacket` dataclass.
+  * **Effect:** The safety net now actually catches the acrobat. Previously, falling into the Panic Room might have caused a secondary crash due to missing attributes.
+
+#### **🧹 Ephemeralization (General Cleanup)**
+
+* **Silicon Ash Removal:**
+  * **Change:** Removed unused variables (`old_val` in Stabilizer) and connected dangling logic (`lesson` in SoulPhase).
+  * **Effect:** Code is tighter and less wasteful. The `SoulPhase` now verbally acknowledges when a lesson is learned, closing a cognitive loop for the user.
+
+### **Changelog: (v10.5.2)**
+
+#### **🔧 Critical System Repairs (The Fuller Lens)**
+
+* **Fixed "Schrödinger's Import":** The `ollama` dependency check is now robust. It no longer crashes the simulation if the local LLM server is missing; it gracefully sets a flag and prepares for fallback.
+* **The "Adrenaline" Inversion:** Corrected a logic error in `NeurotransmitterModulator`. Previously, high Adrenaline *reduced* max tokens (acting like a governor). It now correctly *increases* max tokens and energy, simulating a "Fight or Flight" manic state.
+* **Immune System Activation:** The `ResponseValidator`, previously a vestigial organ, has been instantiated in `TheCortex` and wired into the `process` loop. The brain can now reject "Silicon Ash" (e.g., "As an AI language model...") before it reaches the user.
+* **Dream Engine Ignition:** The `hallucinate` method now correctly utilizes the `DREAMS` list from `bone_data.py` and formats prompts based on the active vector, rather than returning a hardcoded placeholder.
+* **Fuel Gauge Feedback:** `ShimmerState.get_bias` now returns `"CONSERVE"` when fuel is low (<20%), creating a negative feedback loop to warn the navigation systems.
+
+#### **🧠 Cognitive & Ethical Upgrades (The Meadows & Pinker Lens)**
+
+* **Contextual Neuro-Modulation:**
+* **Change:** Introduced `lens_profiles` to `NeurotransmitterModulator`.
+* **Effect:** Chemicals no longer have a "one size fits all" effect. Cortisol (Stress) dampens the creativity of the `NARRATOR` but focuses the `SHERLOCK` persona. This removes the "Stereotypical Behavior" bias.
+
+* **Dynamic Narrative Spotlight:**
+* **Change:** Added `semantic_drift` and `expand_horizon` to memory retrieval.
+* **Effect:** The system no longer relies solely on hardcoded categories. It introduces a randomness factor ("Serendipity") to memory retrieval, preventing "Echo Chamber" memory loops.
+
+* **Adaptive Solipsism Audit:**
+* **Change:** `_audit_solipsism` thresholds are now relative to the active Persona.
+* **Effect:** The "Ballast" (anti-ego mechanism) is lenient with high-ego personas (`JESTER`, `NATHAN`) and strict with objective ones (`NARRATOR`). This fixes the "Overcorrection" bias that stifled personality.
+
+* **Case-Insensitive Validation:**
+* **Change:** `ResponseValidator` now converts text to lowercase before scanning.
+* **Effect:** Prevents "i am an ai" from slipping through just because it wasn't capitalized.
+
+#### **✨ Quality of Life (The Schur Lens)**
+
+* **Flavorful Rejections:** Validator rejection messages now describe the system "hiccuping" or "failing to recite a EULA" rather than just throwing a generic error.
+* **Mock Generator Poetry:** The fallback text generator now produces cryptic, atmospheric status messages instead of static error codes.
+
+**System Status:** The Cortex is now a **Resilient, Adaptive System**. It doesn't just process input; it interprets it through a dynamic, chemically-regulated lens that respects the unique personality of the active observer.
+
+
+# v10.5.1 - "The Wire Connect"
 
 * Bug fixes to get the machine running again.
 

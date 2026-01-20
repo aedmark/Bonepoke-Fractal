@@ -1,9 +1,8 @@
 # bone_cycle.py
 # "The wheel turns, and ages come and pass." - Jordan
 
-import traceback, random, math
-from typing import Dict, Any, Optional, Tuple, List, Callable
-from dataclasses import dataclass, field
+import traceback, random, time
+from typing import Dict, Any, Tuple, List
 from bone_bus import Prisma, BoneConfig, CycleContext
 from bone_village import TownHall
 from bone_personality import TheBureau
@@ -12,69 +11,85 @@ from bone_viewer import GeodesicRenderer
 from bone_architect import PanicRoom
 
 class PIDController:
-    def __init__(self, kp: float, ki: float, kd: float, setpoint: float = 0.0):
+    """A Proportional-Integral-Derivative controller w/Integral Windup Protection."""
+    def __init__(self, kp: float, ki: float, kd: float, setpoint: float = 0.0, output_limits: Tuple[float, float] = (-5.0, 5.0)):
         self.kp = kp
         self.ki = ki
         self.kd = kd
         self.setpoint = setpoint
+        self.output_min, self.output_max = output_limits
         self.prev_error = 0.0
         self.integral = 0.0
+        self.last_time = time.time()
 
-    def update(self, current_value: float, dt: float = 0.1) -> float:
-        safe_dt = max(0.001, dt)
+    def update(self, current_value: float, dt: float = None) -> float:
+        now = time.time()
+        if dt is None:
+            dt = now - self.last_time
+        self.last_time = now
+        safe_dt = max(0.001, min(1.0, dt))
         error = self.setpoint - current_value
         self.integral += error * safe_dt
+        self.integral = max(self.output_min, min(self.output_max, self.integral))
         derivative = (error - self.prev_error) / safe_dt
         output = (self.kp * error) + (self.ki * self.integral) + (self.kd * derivative)
+        output = max(self.output_min, min(self.output_max, output))
         self.prev_error = error
         return output
 
     def reset(self):
         self.prev_error = 0.0
         self.integral = 0.0
+        self.last_time = time.time()
 
 class CycleStabilizer:
+    """The Gyroscope. Keeps the narrative vehicle from flipping over. Now with 20% more sass."""
     def __init__(self, events_ref):
         self.events = events_ref
-        self.voltage_pid = PIDController(kp=0.2, ki=0.01, kd=0.1, setpoint=10.0)
-        self.drag_pid = PIDController(kp=0.3, ki=0.05, kd=0.1, setpoint=1.5)
+        self.voltage_pid = PIDController(kp=0.25, ki=0.05, kd=0.1, setpoint=10.0, output_limits=(-4.0, 4.0))
+        self.drag_pid = PIDController(kp=0.4, ki=0.1, kd=0.05, setpoint=1.5, output_limits=(-3.0, 3.0))
         self.last_phase: str = "INIT"
 
-    def _get_current_metrics(self, ctx: CycleContext) -> Tuple[float, float]:
-        if not ctx.physics:
-            return 0.0, 0.0
-        if isinstance(ctx.physics, dict):
-            v = ctx.physics.get("voltage", 0.0)
-            d = ctx.physics.get("narrative_drag", 0.0)
-        else:
-            v = getattr(ctx.physics, "voltage", 0.0)
-            d = getattr(ctx.physics, "narrative_drag", 0.0)
-        return v, d
+    @staticmethod
+    def _get_current_metrics(ctx: CycleContext) -> Tuple[float, float]:
+        p = ctx.physics
+        if isinstance(p, dict):
+            return p.get("voltage", 0.0), p.get("narrative_drag", 0.0)
+        return getattr(p, "voltage", 0.0), getattr(p, "narrative_drag", 0.0)
 
-    def _apply_correction(self, ctx: CycleContext, key: str, correction: float):
-        clamped_correction = max(-3.0, min(3.0, correction))
-        if isinstance(ctx.physics, dict):
-            ctx.physics[key] += clamped_correction
+    @staticmethod
+    def _apply_correction(ctx: CycleContext, key: str, correction: float):
+        if abs(correction) < 0.05: return 0.0
+        p = ctx.physics
+        is_dict = isinstance(p, dict)
+        if is_dict:
+            old_val = p.get(key, 0.0)
+            p[key] = max(0.0, old_val + correction)
         else:
-            current = getattr(ctx.physics, key)
-            setattr(ctx.physics, key, current + clamped_correction)
-
-        return clamped_correction
+            old_val = getattr(p, key, 0.0)
+            setattr(p, key, max(0.0, old_val + correction))
+        return correction
 
     def stabilize(self, ctx: CycleContext, current_phase: str):
         curr_v, curr_d = self._get_current_metrics(ctx)
-        v_force = self.voltage_pid.update(curr_v, dt=0.1)
-        d_force = self.drag_pid.update(curr_d, dt=0.1)
+        v_force = self.voltage_pid.update(curr_v)
+        d_force = self.drag_pid.update(curr_d)
         corrections_made = False
-        if abs(curr_v - self.voltage_pid.setpoint) > 5.0:
+        if abs(curr_v - self.voltage_pid.setpoint) > 6.0:
             applied_v = self._apply_correction(ctx, "voltage", v_force)
             if abs(applied_v) > 0.1:
-                ctx.record_flux(current_phase, "voltage", curr_v, curr_v + applied_v, "PID_HOMEOSTASIS")
+                reason = "PID_DAMPENER" if applied_v < 0 else "PID_EXCITATION"
+                ctx.record_flux(current_phase, "voltage", curr_v, curr_v + applied_v, reason)
+                if abs(applied_v) > 1.0:
+                    self.events.log(f"{Prisma.GRY}⚖️ STABILIZER: Voltage corrected ({applied_v:+.1f}v). Steady...{Prisma.RST}", "SYS")
                 corrections_made = True
-        if abs(curr_d - self.drag_pid.setpoint) > 3.0:
+        if abs(curr_d - self.drag_pid.setpoint) > 2.5:
             applied_d = self._apply_correction(ctx, "narrative_drag", d_force)
             if abs(applied_d) > 0.1:
-                ctx.record_flux(current_phase, "narrative_drag", curr_d, curr_d + applied_d, "PID_TRACTION")
+                reason = "PID_LUBRICATION" if applied_d < 0 else "PID_BRAKING"
+                ctx.record_flux(current_phase, "narrative_drag", curr_d, curr_d + applied_d, reason)
+                if applied_d < -1.0:
+                    self.events.log(f"{Prisma.GRY}🛢️ STABILIZER: Grease applied. Drag reduced ({applied_d:+.1f}).{Prisma.RST}", "SYS")
                 corrections_made = True
         self.last_phase = current_phase
         return corrections_made
@@ -157,23 +172,14 @@ class MetabolismPhase(SimulationPhase):
 
     def run(self, ctx: CycleContext):
         physics = ctx.physics
-
         gov_msg = self.eng.bio.governor.shift(
             physics, self.eng.phys.dynamics.voltage_history, self.eng.tick_count
         )
-        if gov_msg: self.eng.events.log(gov_msg, "GOV")
-        bio_feedback = {
-            "INTEGRITY": physics.get("truth_ratio", 0.0),
-            "STATIC": physics.get("repetition", 0.0),
-            "FORCE": physics.get("voltage", 0.0) / 20.0,
-            "BETA": physics.get("beta_index", 1.0)
-        }
+        if gov_msg:
+            self.eng.events.log(gov_msg, "GOV")
+        bio_feedback = self._generate_feedback(physics)
         stress_mod = self.eng.bio.governor.get_stress_modifier(self.eng.tick_count)
-        circadian_bias = None
-        if self.eng.tick_count % 10 == 0:
-            circadian_bias, circadian_msg = self.eng.bio.endo.calculate_circadian_bias()
-            if circadian_msg:
-                self.eng.events.log(f"{Prisma.CYN}🕒 {circadian_msg}{Prisma.RST}", "BIO")
+        circadian_bias = self._check_circadian_rhythm()
         ctx.bio_result = self.eng.soma.digest_cycle(
             ctx.input_text, physics, bio_feedback,
             self.eng.health, self.eng.stamina, stress_mod, self.eng.tick_count,
@@ -181,8 +187,33 @@ class MetabolismPhase(SimulationPhase):
         )
         ctx.is_alive = ctx.bio_result["is_alive"]
         for bio_item in ctx.bio_result["logs"]:
-            if any(x in str(bio_item) for x in ["CRITICAL", "TAX", "Poison"]):
+            if any(x in str(bio_item) for x in ["CRITICAL", "TAX", "Poison", "NECROSIS"]):
                 ctx.log(bio_item)
+        self._audit_hubris(ctx, physics)
+        self._apply_healing(ctx)
+        return ctx
+
+    @staticmethod
+    def _generate_feedback(physics):
+        """Standardizes physics data for the bio-engine."""
+        return {
+            "INTEGRITY": physics.get("truth_ratio", 0.0),
+            "STATIC": physics.get("repetition", 0.0),
+            "FORCE": physics.get("voltage", 0.0) / 20.0,
+            "BETA": physics.get("beta_index", 1.0)
+        }
+
+    def _check_circadian_rhythm(self):
+        """Only checks the clock occasionally to save cycles."""
+        if self.eng.tick_count % 10 == 0:
+            bias, msg = self.eng.bio.endo.calculate_circadian_bias()
+            if msg:
+                self.eng.events.log(f"{Prisma.CYN}🕒 {msg}{Prisma.RST}", "BIO")
+            return bias
+        return None
+
+    def _audit_hubris(self, ctx, physics):
+        """Checks if the user is flying too close to the sun."""
         hubris_hit, hubris_msg, event_type = self.eng.phys.tension.audit_hubris(physics, self.eng.lex)
         if hubris_hit:
             ctx.log(hubris_msg)
@@ -192,10 +223,9 @@ class MetabolismPhase(SimulationPhase):
                 damage = 15.0
                 self.eng.health -= damage
                 ctx.log(f"   {Prisma.RED}IMPACT TRAUMA: -{damage} HP.{Prisma.RST}")
-        self._apply_healing(ctx)
-        return ctx
 
     def _apply_healing(self, ctx):
+        """Orchestrates Kintsugi (Repairing breaks with gold) and Therapy (Healing trauma vectors)."""
         is_cracked, koan = self.eng.kintsugi.check_integrity(self.eng.stamina)
         if is_cracked:
             ctx.log(f"{Prisma.YEL}🏺 KINTSUGI ACTIVATED: Vessel cracking.{Prisma.RST}")
@@ -338,6 +368,8 @@ class SoulPhase(SimulationPhase):
 
     def run(self, ctx: CycleContext):
         lesson = self.eng.soul.crystallize_memory(ctx.physics, ctx.bio_result, self.eng.tick_count)
+        if lesson:
+            ctx.log(f"{Prisma.VIOLET}   (The lesson '{lesson}' echoes in the chamber.){Prisma.RST}")
         if not self.eng.soul.current_obsession:
             self.eng.soul.find_obsession(self.eng.lex)
         self.eng.soul.pursue_obsession(ctx.physics)
@@ -348,10 +380,15 @@ class SoulPhase(SimulationPhase):
             ctx.log(advice)
         if adjustments:
             for param, delta in adjustments.items():
-                if param in ctx.physics:
-                    old_val = ctx.physics[param]
-                    ctx.physics[param] += delta
-                    ctx.record_flux("SIMULATION", param, old_val, ctx.physics[param], "COUNCIL_MANDATE")
+                if hasattr(ctx.physics, "__getitem__") or isinstance(ctx.physics, dict):
+                    if param in ctx.physics:
+                        old_val = ctx.physics[param]
+                        ctx.physics[param] += delta
+                        ctx.record_flux("SIMULATION", param, old_val, ctx.physics[param], "COUNCIL_MANDATE")
+                elif hasattr(ctx.physics, param):
+                    old_val = getattr(ctx.physics, param)
+                    setattr(ctx.physics, param, old_val + delta)
+                    ctx.record_flux("SIMULATION", param, old_val, old_val + delta, "COUNCIL_MANDATE")
         return ctx
 
 class CognitionPhase(SimulationPhase):
@@ -389,10 +426,7 @@ class CycleSimulator:
         ]
 
     def run_simulation(self, ctx: CycleContext) -> CycleContext:
-        """
-        Executes the pipeline steps in order.
-        Handles critical failures for each phase independently.
-        """
+        """Executes the pipeline steps in order. Handles critical failures for each phase independently."""
         for phase in self.pipeline:
             if not self._check_circuit_breaker(phase.name):
                 continue
@@ -464,7 +498,8 @@ class CycleReporter:
                 "metrics": self.eng.get_metrics()
             }
 
-    def _inject_flux_readout(self, ctx: CycleContext):
+    @staticmethod
+    def _inject_flux_readout(ctx: CycleContext):
         if not ctx.flux_log:
             return
         flux_lines = []

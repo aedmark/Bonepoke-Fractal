@@ -2,11 +2,10 @@
 # "The machinery of being."
 
 import math, random, time
-from collections import deque
+from collections import deque, Counter
 from dataclasses import dataclass, field
 from typing import Set, Optional, Dict, List, Any, Tuple
 from bone_personality import SynergeticLensArbiter
-from bone_physics import PhysicsPacket
 from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig
@@ -29,6 +28,14 @@ class MetabolicReceipt:
     total_burn: float
     status: str
     symptom: str = "Nominal"
+
+@dataclass
+class SemanticSignal:
+    """The chemical translation of meaning."""
+    novelty: float = 0.0
+    resonance: float = 0.0
+    valence: float = 0.0
+    coherence: float = 0.0
 
 @dataclass
 class BioSystem:
@@ -55,11 +62,7 @@ class MitochondrialState:
     enzymes: Set[str] = field(default_factory=set)
 
 class MitochondrialForge:
-    """
-    The Powerhouse of the Cell.
-    Manages ATP production, 'respiration' (burning energy for action),
-    and the accumulation of oxidative stress (ROS).
-    """
+    """Manages ATP production, 'respiration' (burning energy for action), and the accumulation of oxidative stress (ROS)."""
     APOPTOSIS_TRIGGER = "CYTOCHROME_C_RELEASE"
 
     def __init__(self, lineage_seed: str, events, inherited_traits: Optional[Dict] = None):
@@ -72,7 +75,7 @@ class MitochondrialForge:
         self.GRACE = BoneConfig.METABOLISM.DRAG_GRACE_BUFFER
         self.ROS_FACTOR = BoneConfig.METABOLISM.ROS_GENERATION_FACTOR
         if inherited_traits:
-            self._apply_inheritance(inherited_traits)
+            self.apply_inheritance(inherited_traits)
 
     def apply_inheritance(self, traits: Dict):
         """Loads genetic traits from a previous spore/session."""
@@ -154,11 +157,42 @@ class MitochondrialForge:
         self.state.ros_buildup += ros_generation
         return "RESPIRING"
 
+class SemanticEndocrinologist:
+    """This component measures the 'Quality' of information to regulate biology."""
+    def __init__(self, memory_ref, lexicon_ref):
+        self.mem = memory_ref
+        self.lex = lexicon_ref
+        self.last_topics = deque(maxlen=3)
+
+    def assess(self, clean_words: List[str], physics: Dict) -> SemanticSignal:
+        if not clean_words:
+            return SemanticSignal()
+
+        novel_count = 0
+        cortical = set(self.mem.cortical_stack)
+        for w in clean_words:
+            if w not in cortical and len(w) > 4:
+                novel_count += 1
+        novelty_score = min(1.0, novel_count / max(1, len(clean_words)))
+
+        resonance_score = 0.0
+        if self.mem.graph:
+            hits = sum(1 for w in clean_words if w in self.mem.graph)
+            resonance_score = min(1.0, hits / max(1, len(clean_words)))
+
+        valence_score = self.lex.get_valence(clean_words)
+
+        coherence_score = physics.get("kappa", 0.5)
+
+        return SemanticSignal(
+            novelty=novelty_score,
+            resonance=resonance_score,
+            valence=valence_score,
+            coherence=coherence_score
+        )
+
 class SomaticLoop:
-    """
-    The Central Biological Loop.
-    Orchestrates the interplay between Physics input and Biological consequence.
-    """
+    """Orchestrates the interplay between Physics input and Biological consequence."""
     def __init__(self, bio_system_ref: BioSystem, memory_ref=None, lexicon_ref=None, gordon_ref=None, folly_ref=None, events_ref=None):
         self.bio = bio_system_ref
         self.mem = memory_ref
@@ -166,6 +200,7 @@ class SomaticLoop:
         self.gordon = gordon_ref
         self.folly = folly_ref
         self.events = events_ref
+        self.semantic_doctor = SemanticEndocrinologist(memory_ref, lexicon_ref)
         self.taxes = {
             "existential_drag": 0.05,
             "metabolic_base": 0.1
@@ -174,13 +209,6 @@ class SomaticLoop:
     def digest_cycle(self, text: str, physics_data: Any, feedback: Dict,
                      health: float, stamina: float, stress_mod: float,
                      tick_count: int = 0, circadian_bias: Dict = None) -> Dict:
-        """
-        The main processing tick for the body.
-        1. Normalizes physics data.
-        2. Calculates metabolic taxes.
-        3. Harvests resources from the text (Enzymes).
-        4. Updates Endocrine state (Chemistry).
-        """
         if hasattr(physics_data, "dimensions"):
             phys = {
                 "voltage": physics_data.tension,
@@ -203,6 +231,9 @@ class SomaticLoop:
         self.bio.mito.state.atp_pool += total_yield
         self._perform_maintenance(phys, logs, tick_count)
 
+        clean_words = phys.get("clean_words", [])
+        semantic_sig = self.semantic_doctor.assess(clean_words, phys)
+
         chem_state = self.bio.endo.metabolize(
             feedback,
             health,
@@ -211,18 +242,22 @@ class SomaticLoop:
             harvest_hits=self._count_harvest_hits(phys),
             stress_mod=stress_mod,
             enzyme_type=enzyme,
-            circadian_bias=circadian_bias
+            circadian_bias=circadian_bias,
+            semantic_signal=semantic_sig
         )
         return self._package_result(resp_status, logs, chem_state, enzyme)
 
-    def _normalize_physics(self, physics_packet: Any) -> Dict:
+    @staticmethod
+    def _normalize_physics(physics_packet: Any) -> Dict:
         if isinstance(physics_packet, dict):
             return {
                 "voltage": physics_packet.get("voltage", 0.0),
                 "drag": physics_packet.get("narrative_drag", 0.0),
-                "counts": physics_packet.get("counts", {})
+                "counts": physics_packet.get("counts", {}),
+                "clean_words": physics_packet.get("clean_words", []),
+                "kappa": physics_packet.get("kappa", 0.5)
             }
-        return {"voltage": 0.0, "drag": 0.0, "counts": {}}
+        return {"voltage": 0.0, "drag": 0.0, "counts": {}, "clean_words": [], "kappa": 0.5}
 
     def _calculate_taxes(self, phys, logs) -> MetabolicReceipt:
         base = self.taxes["metabolic_base"]
@@ -234,21 +269,64 @@ class SomaticLoop:
         total = base + drag_tax + inefficiency
         return MetabolicReceipt(base, drag_tax, inefficiency, total, "CALCULATED")
 
-    def _audit_folly_desire(self, phys, stamina, logs) -> str:
+    @staticmethod
+    def _audit_folly_desire(phys, stamina, logs) -> str:
         if stamina <= 0:
             logs.append(BIO_NARRATIVE["TAX"]["EXHAUSTION"].format(color=Prisma.RED, reset=Prisma.RST))
             return "MAUSOLEUM_CLAMP"
         return "CLEAR"
 
     def _harvest_resources(self, text, phys, logs, tick) -> Tuple[str, float]:
-        if "voltage" in phys and phys["voltage"] > 5.0:
-            return "ADRENALINE", 5.0
-        return "NONE", 0.0
+        """
+        Full Implementation:
+        Scans input words against TheLexicon to find metabolic resources.
+        Different word categories yield different 'Enzymes' and ATP amounts.
+        """
+        clean_words = phys.get("clean_words", [])
+        if not clean_words:
+            return "NONE", 0.0
+
+        found_enzymes = []
+        total_atp_yield = 0.0
+        total_atp_yield += 1.0
+
+        for word in clean_words:
+            if len(word) < 4: continue
+            category = TheLexicon.harvest(word)
+            if category and category != "void":
+                enzyme = self._map_category_to_enzyme(category)
+                found_enzymes.append(enzyme)
+                word_yield = 2.0 if len(word) > 7 else 1.0
+                total_atp_yield += word_yield
+                if len(found_enzymes) <= 3:
+                    logs.append(f"{Prisma.GRN}[BIO]: Digested '{word}' -> {enzyme} (+{word_yield} ATP){Prisma.RST}")
+        if phys.get("voltage", 0.0) > 8.0:
+            found_enzymes.append("PROTEASE")
+            total_atp_yield += 5.0
+        if not found_enzymes:
+            return "NONE", total_atp_yield
+        dominant_enzyme = Counter(found_enzymes).most_common(1)[0][0]
+        return dominant_enzyme, total_atp_yield
+
+    @staticmethod
+    def _map_category_to_enzyme(category: str) -> str:
+        """Maps Lexicon categories to fungal/biological enzymes."""
+        mapping = {
+            "kinetic": "PROTEASE",
+            "static": "CELLULASE",
+            "abstract": "DECRYPTASE",
+            "natural": "LIGNASE",
+            "synthetic": "CHITINASE",
+            "social": "AMYLASE",
+            "antigen": "OXIDASE"
+        }
+        return mapping.get(category, "AMYLASE") # Default to Amylase (easy energy)
 
     def _perform_maintenance(self, phys, logs, tick):
         pass
 
-    def _count_harvest_hits(self, phys):
+    @staticmethod
+    def _count_harvest_hits(phys):
         return 0
 
     def _package_result(self, resp_status, logs, chem_state=None, enzyme="NONE"):
@@ -265,10 +343,7 @@ class SomaticLoop:
 
 @dataclass
 class EndocrineSystem:
-    """
-    Simulates the chemical mood of the system.
-    Neurotransmitters decay or accumulate based on narrative events.
-    """
+    """Simulates the chemical mood of the system."""
     dopamine: float = 0.5
     oxytocin: float = 0.1
     cortisol: float = 0.0
@@ -277,10 +352,12 @@ class EndocrineSystem:
     melatonin: float = 0.0
     glimmers: int = 0
 
-    def _clamp(self, val: float) -> float:
+    @staticmethod
+    def _clamp(val: float) -> float:
         return max(0.0, min(1.0, val))
 
-    def calculate_circadian_bias(self) -> Tuple[Dict[str, float], Optional[str]]:
+    @staticmethod
+    def calculate_circadian_bias() -> Tuple[Dict[str, float], Optional[str]]:
         """Determines chemical biases based on real-world system clock."""
         hour = time.localtime().tm_hour
         bias = {"COR": 0.0, "SER": 0.0, "MEL": 0.0}
@@ -344,6 +421,24 @@ class EndocrineSystem:
         else:
             self.adrenaline -= (BoneConfig.BIO.DECAY_RATE * 5)
 
+    def _apply_semantic_pressure(self, signal: SemanticSignal):
+        """ Adjusts hormones based on the *meaning* of the input."""
+        if signal.novelty > 0.3:
+            self.dopamine += (signal.novelty * 0.3)
+
+        if signal.resonance > 0.2:
+            self.oxytocin += (signal.resonance * 0.4)
+            self.cortisol -= (signal.resonance * 0.2)
+
+        if signal.valence > 0.3:
+            self.serotonin += (signal.valence * 0.3)
+        elif signal.valence < -0.3:
+            self.cortisol += (abs(signal.valence) * 0.2)
+
+        if signal.coherence > 0.7:
+            self.adrenaline -= 0.1
+            self.cortisol -= 0.1
+
     def _maintain_homeostasis(self, social_context: bool):
         """Attempts to balance the hormones to prevent runaway loops."""
         if self.serotonin > 0.6:
@@ -377,10 +472,15 @@ class EndocrineSystem:
     def metabolize(self, feedback: Dict, health: float, stamina: float, ros_level: float = 0.0,
                    social_context: bool = False, enzyme_type: Optional[str] = None,
                    harvest_hits: int = 0, stress_mod: float = 1.0,
-                   circadian_bias: Dict[str, float] = None) -> Dict[str, Any]:
+                   circadian_bias: Dict[str, float] = None,
+                   semantic_signal: Optional[SemanticSignal] = None) -> Dict[str, Any]:
         """Main update loop for the endocrine system."""
         self._apply_enzyme_reaction(enzyme_type, harvest_hits)
         self._apply_environmental_pressure(feedback, health, stamina, ros_level, stress_mod)
+
+        if semantic_signal:
+            self._apply_semantic_pressure(semantic_signal)
+
         self._maintain_homeostasis(social_context)
 
         if circadian_bias:
@@ -414,11 +514,6 @@ class EndocrineSystem:
 
 @dataclass
 class MetabolicGovernor:
-    """
-    The Safety Valve.
-    Forces the system into specific 'modes' based on Voltage (Intensity)
-    and Drag (Confusion) to prevent crash/burnout.
-    """
     mode: str = "COURTYARD"
     GRACE_PERIOD: int = 5
     psi_mod: float = 0.2
@@ -434,7 +529,8 @@ class MetabolicGovernor:
         if tick_count <= 5: return 0.5
         return 1.0
 
-    def calculate_stress(self, health: float, ros_buildup: float) -> float:
+    @staticmethod
+    def calculate_stress(health: float, ros_buildup: float) -> float:
         base_stress = 1.0
         if health < 50.0:
             base_stress += (50.0 - health) * 0.02
@@ -451,9 +547,7 @@ class MetabolicGovernor:
         return BIO_NARRATIVE["GOVERNOR"]["INVALID"]
 
     def shift(self, physics: Dict, _voltage_history: List[float], current_tick: int = 0) -> Optional[str]:
-        """
-        Evaluates current physics parameters and shifts the system mode if necessary.
-        """
+        """Evaluates current physics parameters and shifts the system mode if necessary."""
         if current_tick <= 5:
             physics["voltage"] = min(physics.get("voltage", 0.0), 8.0)
             physics["narrative_drag"] = min(physics.get("narrative_drag", 0.0), 3.0)
@@ -497,10 +591,6 @@ class MetabolicGovernor:
         return None
 
 class ViralTracer:
-    """
-    Tracing tool for ruminative thought loops (loops in the graph).
-    Used to diagnose obsession or repetitive thought patterns.
-    """
     def __init__(self, mem):
         self.mem = mem
         self.max_depth = 4
@@ -536,10 +626,7 @@ class ViralTracer:
         return None
 
     def psilocybin_rewire(self, loop_path):
-        """
-        Break a ruminative loop by grafting a sensory/action bridge
-        between the stuck nodes.
-        """
+        """Break a ruminative loop by grafting a sensory/action bridge between the stuck nodes."""
         if len(loop_path) < 2:
             return None
         node_a = loop_path[0]
@@ -550,6 +637,10 @@ class ViralTracer:
 
         sensory = TheLexicon.harvest("photo")
         action = TheLexicon.harvest("kinetic")
+
+        if isinstance(sensory, dict) or isinstance(action, dict):
+            sensory = "light"
+            action = "move"
 
         if sensory == "void" or action == "void":
             return "GRAFT FAILED: Missing Lexicon Data."
@@ -569,10 +660,7 @@ class ViralTracer:
         return f"PSILOCYBIN REWIRE: Broken Loop '{node_a}↔{node_b}'. Grafted '{sensory}'(S) -> '{action}'(A)."
 
 class ThePacemaker:
-    """
-    Monitors repetition and boredom.
-    Calculates a 'Repetition Score' based on recent word history.
-    """
+    """ Monitors repetition and boredom."""
     def __init__(self):
         self.history = deque(maxlen=5)
         self.repetition_score = 0.0
@@ -610,26 +698,20 @@ class ThePacemaker:
         return self.boredom_level > BoneConfig.BOREDOM_THRESHOLD
 
 class NoeticLoop:
-    """
-    The Thinking Loop.
-    Integrates memory, physics, and biology to generate 'Thought'.
-    """
+    """The Thinking Loop. Integrates memory, physics, and biology to generate 'Thought'."""
     def __init__(self, mind_layer, bio_layer, events):
         self.mind = mind_layer
         self.bio = bio_layer
         self.arbiter = SynergeticLensArbiter(events)
 
-    def think(self, physics_packet, bio_result_dict, inventory, voltage_history, tick_count):
-        """
-        Determines the 'Lens' (personality aspect) that should filter the current moment.
-        If Voltage/Drag are low, it defaults to a simple 'Gradient Walker' (Associative thinking).
-        If Ignition is high, it consults the Arbiter for a specific Lens.
-        """
+    def think(self, physics_packet, _bio_result_dict, inventory, voltage_history, tick_count):
+        """ Determines the 'Lens' (personality aspect) that should filter the current moment."""
         volts = physics_packet.get("voltage", 0.0)
         drag = physics_packet.get("narrative_drag", 0.0)
 
         if volts < 1.5 and drag < 1.5:
-            stripped_thought = TheLexicon.walk_gradient(physics_packet["raw_text"])
+            raw_text = physics_packet.get("raw_text", "")
+            stripped_thought = TheLexicon.walk_gradient(raw_text)
             return {
                 "mode": "COGNITIVE",
                 "lens": "GRADIENT_WALKER",

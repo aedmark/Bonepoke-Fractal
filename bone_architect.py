@@ -1,16 +1,13 @@
 # bone_architect.py
 # "We shape our buildings; thereafter they shape us." - Churchill
 
-import time
 from typing import Tuple, Dict, Any, Optional
 from dataclasses import dataclass
-from bone_bus import Prisma, BoneConfig, MindSystem, PhysSystem
-from bone_data import LENSES
+from bone_bus import Prisma, MindSystem, PhysSystem, PhysicsPacket
 from bone_village import TownHall
-from bone_inventory import GordonKnot
-from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont, MycelialNetwork, LocalFileSporeLoader
+from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont, MycelialNetwork
 from bone_body import BioSystem, MitochondrialForge, EndocrineSystem, MetabolicGovernor, ViralTracer, ThePacemaker
-from bone_brain import DreamEngine, ShimmerState, LLMInterface, NeuroPlasticity
+from bone_brain import DreamEngine, ShimmerState, NeuroPlasticity
 from bone_personality import LimboLayer
 from bone_physics import TheTensionMeter, TheTangibilityGate, TemporalDynamics
 from bone_machine import TheCrucible, TheForge, TheTheremin
@@ -22,21 +19,24 @@ class SystemEmbryo:
     bio: BioSystem
     physics: PhysSystem
     shimmer: Any
+    is_gestating: bool = True
     soul_legacy: Optional[Dict] = None
 
 class PanicRoom:
+    """The Fail-Safe. When the simulation breaks, we retreat here to prevent a full crash. """
     @staticmethod
     def get_safe_physics():
-        from bone_bus import PhysicsPacket
         return PhysicsPacket(
             voltage=5.0,
             narrative_drag=5.0,
-            clean_words=["system", "error"],
-            vector={"STR": 0.5, "VEL": 0.5},
+            clean_words=["system", "error", "recovery"],
+            vector={"STR": 0.5, "VEL": 0.5, "ENT": 0.0},
             counts={"heavy": 0, "kinetic": 0},
             raw_text="[SYSTEM FAILURE: PHYSICS BYPASSED]",
             psi=0.5,
-            kappa=0.5
+            kappa=0.5,
+            flow_state="SAFE_MODE",
+            zone="PANIC_ROOM"
         )
 
     @staticmethod
@@ -59,8 +59,9 @@ class PanicRoom:
         }
 
 class BoneArchitect:
+    """The Builder. Constructs the Mind, Body, and Physics systems in the correct dependency order."""
     @staticmethod
-    def incubate(events, lex) -> SystemEmbryo:
+    def _construct_mind(events, lex) -> Tuple[MindSystem, LimboLayer]:
         _mem = MycelialNetwork(events)
         limbo = LimboLayer()
         _mem.cleanup_old_sessions(limbo)
@@ -73,11 +74,14 @@ class BoneArchitect:
             tracer=ViralTracer(_mem),
             integrator=TownHall.Sorites(_mem)
         )
-        immune_system = MycotoxinFactory()
-        bio = BioSystem(
+        return mind, limbo
+
+    @staticmethod
+    def _construct_bio(events, mind, lex) -> BioSystem:
+        return BioSystem(
             mito=MitochondrialForge("PENDING_ACTIVATION", events),
             endo=EndocrineSystem(),
-            immune=immune_system,
+            immune=MycotoxinFactory(),
             lichen=LichenSymbiont(),
             gut=HyphalInterface(),
             plasticity=NeuroPlasticity(),
@@ -85,7 +89,10 @@ class BoneArchitect:
             shimmer=ShimmerState(),
             parasite=ParasiticSymbiont(mind.mem, lex)
         )
-        physics = PhysSystem(
+
+    @staticmethod
+    def _construct_physics(events, bio) -> PhysSystem:
+        return PhysSystem(
             tension=TheTensionMeter(events),
             forge=TheForge(),
             crucible=TheCrucible(),
@@ -95,23 +102,58 @@ class BoneArchitect:
             dynamics=TemporalDynamics(),
             nav=TownHall.Navigator(bio.shimmer)
         )
-        return SystemEmbryo(mind, limbo, bio, physics, bio.shimmer)
+
+    @staticmethod
+    def incubate(events, lex) -> SystemEmbryo:
+        """Builds the systems but keeps the EventBus in a 'Dormant' state. This prevents components from reacting to their own creation."""
+
+        if hasattr(events, "set_dormancy"):
+            events.set_dormancy(True)
+
+        events.log(f"{Prisma.GRY}[ARCHITECT]: Laying foundations (Dormancy Active)...{Prisma.RST}", "SYS")
+
+        mind, limbo = BoneArchitect._construct_mind(events, lex)
+        bio = BoneArchitect._construct_bio(events, mind, lex)
+        physics = BoneArchitect._construct_physics(events, bio)
+
+        return SystemEmbryo(
+            mind=mind,
+            limbo=limbo,
+            bio=bio,
+            physics=physics,
+            shimmer=bio.shimmer,
+            is_gestating=True
+        )
 
     @staticmethod
     def awaken(embryo: SystemEmbryo) -> SystemEmbryo:
-        # 1. Load Ancestral Spore
+        """Loads ancestral data, applies traits, and finally releases the EventBus lock."""
+        events = embryo.bio.mito.events
+
         load_result = embryo.mind.mem.autoload_last_spore()
         inherited_traits = {}
         inherited_antibodies = set()
         soul_legacy = {}
+
         if load_result:
-            if len(load_result) == 3:
-                inherited_traits, inherited_antibodies, soul_legacy = load_result
-            else:
-                inherited_traits = load_result[0]
-                inherited_antibodies = load_result[1]
+            if isinstance(load_result, tuple):
+                if len(load_result) >= 1: inherited_traits = load_result[0]
+                if len(load_result) >= 2: inherited_antibodies = load_result[1]
+                if len(load_result) >= 3: soul_legacy = load_result[2]
+
+            events.log(f"{Prisma.CYN}[ARCHITECT]: Ancestral Spirit detected.{Prisma.RST}", "SYS")
+        else:
+            events.log(f"{Prisma.WHT}[ARCHITECT]: No ancestors found. A new lineage begins.{Prisma.RST}", "SYS")
+
         embryo.bio.mito.state.mother_hash = embryo.mind.mem.session_id
         embryo.bio.mito.apply_inheritance(inherited_traits)
         embryo.bio.immune.active_antibodies = inherited_antibodies
         embryo.soul_legacy = soul_legacy
+
+        embryo.is_gestating = False
+        events.log(f"{Prisma.GRN}[ARCHITECT]: Embryo viable. Breaking the shell...{Prisma.RST}", "SYS")
+
+        if hasattr(events, "set_dormancy"):
+            events.set_dormancy(False)
+
         return embryo
