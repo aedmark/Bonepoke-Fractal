@@ -1,8 +1,6 @@
 # bone_data.py - The Living Mythology
 
-import re
 import random
-import time
 
 BIO_NARRATIVE = {
     "MITO": {
@@ -773,21 +771,113 @@ SOMATIC_LIBRARY = {
     }
 }
 
-
 class TheAkashicRecord:
     """
-    Manages the 'Living Mythology'.
-    Allows the system to forge new items, discover words, and mutate lenses
-    without overwriting the static 'Holy Text' above.
+    The Mythology Engine.
+    Not just a registry, but a mechanism for structural evolution.
+    It tracks patterns (Stocks) and, when thresholds are met, rewrites the rules (Structure).
     """
     def __init__(self):
         self.discovered_words = {}
         self.forged_items = {}
-        self.session_seeds = []
+
+        # MEADOWS' BUFFERS: Stocks to track accumulation of behavior
+        self.recipe_candidates = {}  # {(ing1, ing2): {result: count}}
+        self.lens_cooccurrence = {}  # {(lens_a, lens_b): count}
+        self.style_drift = {"chaos_score": 0.0, "rigidity_score": 0.0}
+
+        # Thresholds for Structural Mutation
+        self.RECIPE_THRESHOLD = 3
+        self.HYBRID_LENS_THRESHOLD = 5
+        self.NEW_CATEGORY_THRESHOLD = 10
+
+    def record_interaction(self, lenses_active: list, ingredients_used: list = None):
+        """Input flow for usage data."""
+        # Track Lens Co-activation (Fuller's Synergetics)
+        if len(lenses_active) >= 2:
+            key = tuple(sorted(lenses_active[:2]))
+            self.lens_cooccurrence[key] = self.lens_cooccurrence.get(key, 0) + 1
+            if self.lens_cooccurrence[key] >= self.HYBRID_LENS_THRESHOLD:
+                self._hybridize_lenses(key[0], key[1])
+
+    def track_successful_forge(self, ingredient_name, catalyst_type, result_item):
+        """
+        If users keep trying to forge the same random junk and it works,
+        we should make it a canonical recipe.
+        """
+        key = (ingredient_name, catalyst_type)
+        if key not in self.recipe_candidates:
+            self.recipe_candidates[key] = {}
+
+        result_name = result_item["description"] if isinstance(result_item, dict) else "Artifact"
+        self.recipe_candidates[key][result_name] = self.recipe_candidates[key].get(result_name, 0) + 1
+
+        if self.recipe_candidates[key][result_name] >= self.RECIPE_THRESHOLD:
+            self._crystallize_recipe(ingredient_name, catalyst_type, result_item)
+
+    def _hybridize_lenses(self, lens_a, lens_b):
+        """
+        Structural Mutation: Merges two lenses into a new permanent lens.
+        """
+        new_key = f"{lens_a}_{lens_b}_HYBRID"
+        if new_key in LENSES: return
+
+        # Pinker: Linguistic synthesis of the two roles
+        role_a = LENSES.get(lens_a, {}).get("role", "Observer")
+        role_b = LENSES.get(lens_b, {}).get("role", "Participant")
+
+        new_lens = {
+            "role": f"The {role_a} / {role_b} Synthesis",
+            "msg": f"Perspective shift: {lens_a} and {lens_b} are aligning. The dialectic is resolved.",
+            "derived_from": [lens_a, lens_b]
+        }
+
+        # Mutate the global constant (Runtime Evolution)
+        LENSES[new_key] = new_lens
+
+        # Reset the buffer
+        self.lens_cooccurrence[(lens_a, lens_b)] = 0
+        print(f"✨ MYTHOLOGY ENGINE: A new lens has formed: {new_key}")
+
+    @staticmethod
+    def _crystallize_recipe(ingredient, catalyst, result_item):
+        """
+        Structural Mutation: Adds a new Recipe to GORDON['RECIPES'].
+        """
+        new_recipe = {
+            "ingredient": ingredient,
+            "catalyst_category": catalyst,
+            "result": "CUSTOM_ARTIFACT", # Placeholder logic
+            "msg": "The universe remembers this combination. It is now Law.",
+            "dynamic_result": result_item
+        }
+
+        # Check if already exists to avoid duplicates
+        for r in GORDON["RECIPES"]:
+            if r["ingredient"] == ingredient and r["catalyst_category"] == catalyst:
+                return
+
+        GORDON["RECIPES"].append(new_recipe)
+        print(f"✨ MYTHOLOGY ENGINE: A new recipe has been codified: {ingredient} + {catalyst}")
+
+    def propose_new_category(self, word_list, category_name):
+        """
+        Allows the system to invent new lexicon categories dynamically.
+        """
+        if category_name not in LEXICON:
+            LEXICON[category_name] = []
+
+        for w in word_list:
+            if w not in LEXICON[category_name]:
+                LEXICON[category_name].append(w)
+                self.discovered_words[w] = category_name
+
+        print(f"✨ MYTHOLOGY ENGINE: The Lexicon expands. New Category: '{category_name.upper()}'")
 
     @staticmethod
     def forge_new_item(vector_data):
         """
+        (Retained logic for procedural generation)
         Creates a new item based on the current narrative physics.
         """
         dominant = max(vector_data, key=vector_data.get)
@@ -799,9 +889,7 @@ class TheAkashicRecord:
         suffix = random.choice(ITEM_GENERATION["SUFFIXES"].get(dominant, ["of Mystery"]))
 
         name = f"{prefix.upper()} {base_name.upper()} {suffix.upper()}"
-
         value = vector_data[dominant] * 10.0
-
         description = f"A procedurally generated artifact. It vibrates with {dominant} energy."
 
         new_item = {
@@ -815,9 +903,16 @@ class TheAkashicRecord:
         return name, new_item
 
     def register_word(self, word, category):
+        """
+        Now triggers a structural review if a category gets too big.
+        """
         if category in LEXICON:
             if word not in LEXICON[category]:
                 LEXICON[category].append(word)
                 self.discovered_words[word] = category
+
+                # Check for category bloat (Meadows' Reinforcing Loop)
+                if len(LEXICON[category]) > 50 and category != "heavy":
+                    print(f"⚠️ MYTHOLOGY ENGINE: Category '{category}' is bloating. Suggest fission.")
                 return True
         return False

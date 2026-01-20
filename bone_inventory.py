@@ -3,12 +3,22 @@
 
 import random, copy
 from dataclasses import dataclass, field
-from typing import List, Dict, Callable, Tuple, Any, Optional
-from bone_lexicon import TheLexicon
+from typing import List, Dict, Tuple, Optional
 from bone_bus import Prisma, BoneConfig
 from bone_data import GORDON_LOGS
 
-def effect_conductive(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
+SEMANTIC_INJECTIONS = {
+    "CUT_THE_CRAP": "CONSTRAINT: Prune all adjectives. Write in sparse, staccato sentences.",
+    "ILLUMINATION": "FOCUS: Reveal hidden truths. Ignore surface appearances. Highlight subtext.",
+    "TIME_DILATION_CAP": "STYLE: Describe events in slow motion, focusing on minute sensory details.",
+    "PSI_ANCHOR": "TONE: Warm, comforting, and hopeful. Remind the user they are safe.",
+    "LUMINESCENCE": "VISUAL: The scene is lit by a cold, unwavering light.",
+    "HEAVY_LOAD": "SENSATION: You feel an immense physical weight dragging on your thoughts.",
+    "CONDUCTIVE_HAZARD": "SENSATION: Your nerves are crackling with static electricity.",
+    "BUREAUCRATIC_ANCHOR": "STYLE: Use formal, procedural language. Cite non-existent regulations."
+}
+
+def effect_conductive(physics: Dict, _data: Dict, item_name: str) -> Optional[str]:
     voltage = physics.get("voltage", 0.0)
     limit = BoneConfig.INVENTORY.CONDUCTIVE_THRESHOLD
     if voltage > limit:
@@ -17,7 +27,7 @@ def effect_conductive(physics: Dict, data: Dict, item_name: str) -> Optional[str
         return f"{Prisma.RED}CONDUCTIVE HAZARD: {item_name} acts as a lightning rod! -{damage:.1f} HP.{Prisma.RST}"
     return None
 
-def effect_heavy_load(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
+def effect_heavy_load(physics: Dict, _data: Dict, item_name: str) -> Optional[str]:
     limit = BoneConfig.INVENTORY.HEAVY_LOAD_THRESHOLD
     if physics.get("narrative_drag", 0.0) > limit:
         return f"{Prisma.GRY}HEAVY LOAD: The {item_name} are dragging you down.{Prisma.RST}"
@@ -31,14 +41,14 @@ def effect_time_cap(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
         return f"{Prisma.CYN}TIME DILATION: {item_name} hums. Drag capped at {cap}.{Prisma.RST}"
     return None
 
-def effect_bureaucratic_anchor(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
+def effect_bureaucratic_anchor(physics: Dict, _data: Dict, item_name: str) -> Optional[str]:
     if physics.get("beta_index", 0) < 1.0:
         physics["beta_index"] = min(2.0, physics.get("beta_index", 0) + 0.2)
         physics["narrative_drag"] += 0.5
         return f"{Prisma.GRY}{item_name}: Policy enforced. (Beta +0.2, Drag +0.5){Prisma.RST}"
     return None
 
-def effect_grounding_gear(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
+def effect_grounding_gear(physics: Dict, _data: Dict, item_name: str) -> Optional[str]:
     zone = physics.get("zone", "COURTYARD")
     if zone in ["AERIE", "VOID_DRIFT"]:
         physics["zone"] = "THE_MUD"
@@ -47,7 +57,7 @@ def effect_grounding_gear(physics: Dict, data: Dict, item_name: str) -> Optional
         return f"{Prisma.OCHRE}{item_name}: Gravity re-asserted. You sink out of the {zone} into the Mud.{Prisma.RST}"
     return None
 
-def effect_safety_scissors(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
+def effect_safety_scissors(physics: Dict, _data: Dict, item_name: str) -> Optional[str]:
     counts = physics.get("counts", {})
     suburban = counts.get("suburban", 0)
     if suburban > 2:
@@ -55,7 +65,7 @@ def effect_safety_scissors(physics: Dict, data: Dict, item_name: str) -> Optiona
         return f"{Prisma.CYN}{item_name}: Gordon snips the red tape. {suburban} suburban words discarded.{Prisma.RST}"
     return None
 
-def effect_caffeine_drip(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
+def effect_caffeine_drip(physics: Dict, _data: Dict, _item_name: str) -> Optional[str]:
     vectors = physics.get("vector", {})
     vectors["VEL"] = min(1.0, vectors.get("VEL", 0) + 0.1)
     if random.random() < 0.2:
@@ -63,13 +73,13 @@ def effect_caffeine_drip(physics: Dict, data: Dict, item_name: str) -> Optional[
         return f"{Prisma.CYN}CAFFEINE JITTERS: Velocity UP, Stability DOWN.{Prisma.RST}"
     return None
 
-def effect_apology_eraser(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
+def effect_apology_eraser(physics: Dict, _data: Dict, item_name: str) -> Optional[str]:
     clean = physics.get("clean_words", [])
     if "sorry" in clean or "apologize" in clean:
         return f"{Prisma.GRY}{item_name}: Gordon paints over the apology. 'Don't be sorry. Be better.'{Prisma.RST}"
     return None
 
-def effect_sync_check(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
+def effect_sync_check(physics: Dict, _data: Dict, item_name: str) -> Optional[str]:
     tick = physics.get("tick_count", 0)
     voltage = physics.get("voltage", 0.0)
     if str(tick).endswith("11") or abs(voltage - 11.1) < 0.1:
@@ -78,14 +88,14 @@ def effect_sync_check(physics: Dict, data: Dict, item_name: str) -> Optional[str
         return f"{Prisma.CYN}{item_name}: The hands align. 11:11. Synchronicity achieved.{Prisma.RST}"
     return None
 
-def effect_organize_chaos(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
+def effect_organize_chaos(physics: Dict, _data: Dict, _item_name: str) -> Optional[str]:
     turb = physics.get("turbulence", 0.0)
     if turb > 0.2:
         physics["turbulence"] = max(0.0, turb - 0.2)
         return f"{Prisma.CYN}TRAPPERKEEPER PROTOCOL: Chaos filed under 'T' for 'Tamed'. (Turbulence -0.2){Prisma.RST}"
     return None
 
-def effect_psi_anchor(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
+def effect_psi_anchor(physics: Dict, _data: Dict, _item_name: str) -> Optional[str]:
     current_psi = physics.get("psi", 0.0)
     dist_from_mean = abs(current_psi - 0.5)
     if dist_from_mean > 0.3:
@@ -94,7 +104,7 @@ def effect_psi_anchor(physics: Dict, data: Dict, item_name: str) -> Optional[str
         return f"{Prisma.MAG}TINY HORSE: You catch a glimpse of the plushie. You feel grounded. (Psi {correction:+.1f}){Prisma.RST}"
     return None
 
-def effect_luminescence(physics: Dict, data: Dict, item_name: str) -> Optional[str]:
+def effect_luminescence(physics: Dict, _data: Dict, _item_name: str) -> Optional[str]:
     counts = physics.get("counts", {})
     counts["photo"] = counts.get("photo", 0) + 2
     return None
@@ -237,8 +247,6 @@ class GordonKnot:
         self.last_flinch_turn = current_turn
         trigger = hits[0].upper()
         sensitivity = self.scar_tissue.get(trigger, 0.5)
-        panic_response = {}
-        msg = ""
         if sensitivity > 0.8:
             self.scar_tissue[trigger] = min(1.0, sensitivity + 0.1)
             panic_response = {"narrative_drag": 5.0, "voltage": 15.0}
@@ -256,7 +264,7 @@ class GordonKnot:
 
     def learn_scar(self, toxic_words: List[str], damage: float):
         if damage < 10.0 or not toxic_words: return None
-        culprit = max(toxic_words, key=len).upper()
+        culprit = random.choice(toxic_words).upper()
         if culprit not in self.scar_tissue:
             self.scar_tissue[culprit] = 0.5
             self.pain_memory.add(culprit)
@@ -264,6 +272,20 @@ class GordonKnot:
         else:
             self.scar_tissue[culprit] = min(1.0, self.scar_tissue[culprit] + 0.3)
             return f"{Prisma.VIOLET}TRAUMA DEEPENED: The scar on '{culprit}' is worse.{Prisma.RST}"
+
+    def get_semantic_operators(self) -> List[str]:
+        """ Retrieves narrative constraints based on held items. """
+        operators = []
+        for item in self.inventory:
+            data = self.get_item_data(item)
+
+            for trait in data.get("passive_traits", []):
+                if trait in SEMANTIC_INJECTIONS:
+                    operators.append(SEMANTIC_INJECTIONS[trait])
+            if item == "SILENT_KNIFE":
+                operators.append("CONSTRAINT: Do not use the verb 'to be'.")
+
+        return list(set(operators)) # Dedupe to avoid shouting
 
     def deploy_pizza(self, physics_ref, item_name="STABILITY_PIZZA") -> Tuple[bool, str]:
         data = self.get_item_data(item_name)
@@ -278,8 +300,6 @@ class GordonKnot:
         physics_ref["narrative_drag"] = 0.1
         physics_ref["psi"] = 0.90
         physics_ref["counts"]["toxin"] = physics_ref["counts"].get("toxin", 0) + 3
-        if "SPIDER_LOCUS" not in self.inventory:
-            self.inventory.append("SPIDER_LOCUS")
         heat_word = source[0].upper()
         return True, f"{data.get('usage_msg')} (Thawed with '{heat_word}')."
 

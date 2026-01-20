@@ -1,31 +1,15 @@
 # bone_village.py
 # "It takes a village... to raise a simulation."
 
-import json, os, random, re, time, string, unicodedata, math
-from collections import Counter, deque
-from typing import List, Dict, Any, Tuple, Optional, Set
+import random, re, time, math
+from typing import List, Dict, Any, Tuple, Optional
 from dataclasses import dataclass, field
 from bone_bus import Prisma, BoneConfig, CycleContext
 from bone_lexicon import TheLexicon
 from bone_personality import UserProfile, PublicParksDepartment, ZenGarden
 from bone_council import CouncilChamber
+from bone_data import DEATH, RESONANCE, ALMANAC_DATA, STYLE_CRIMES, TheAkashicRecord, NARRATIVE_DATA
 
-try:
-    from bone_data import (
-        LEXICON, GENETICS, DEATH, NARRATIVE_DATA, RESONANCE,
-        ALMANAC_DATA, STYLE_CRIMES, ITEM_GENERATION, TheAkashicRecord
-    )
-except ImportError:
-    LEXICON = {"solvents": ["the", "is"]}
-    GENETICS = {}
-    DEATH = {}
-    NARRATIVE_DATA = {}
-    RESONANCE = {}
-    ITEM_GENERATION = {}
-    class TheAkashicRecord:
-        def __init__(self): pass
-        @staticmethod
-        def forge_new_item(vec): return "GLITCH_ARTIFACT", {}
 
 class TheTinkerer:
     def __init__(self, gordon_ref, events_ref):
@@ -228,7 +212,8 @@ class TheAlmanac:
         self.strategies = ALMANAC_DATA.get("STRATEGIES", {})
         self.default_seed = ALMANAC_DATA.get("DEFAULT_SEED", "Observe.")
 
-    def diagnose_condition(self, session_data: dict, host_health: Any = None) -> Tuple[str, str]:
+    @staticmethod
+    def diagnose_condition(session_data: dict, host_health: Any = None) -> Tuple[str, str]:
         meta = session_data.get("meta", {})
         trauma = session_data.get("trauma_vector", {})
         final_health = meta.get("final_health", 0)
@@ -327,7 +312,8 @@ class ApeirogonResonance:
         self.DIMENSIONS = RESONANCE.get("DIMENSIONS", {})
         self.NOUNS = RESONANCE.get("NOUNS", {})
 
-    def _resolve_term(self, val, scale):
+    @staticmethod
+    def _resolve_term(val, scale):
         if val >= 0.85: return scale[-1][1]
         if val <= 0.15: return scale[0][1]
         best_fit = min(scale, key=lambda x: abs(x[0] - val))
@@ -502,7 +488,8 @@ class TheHoloProjector:
         idx = int(ratio * (len(self.BAR_CHARS) - 1))
         return self.BAR_CHARS[idx] * width
 
-    def _draw_belt(self, inventory: List[str], tool_confidence: Dict[str, float]) -> str:
+    @staticmethod
+    def _draw_belt(inventory: List[str], tool_confidence: Dict[str, float]) -> str:
         if not inventory:
             return f"{Prisma.GRY}   [BELT EMPTY]{Prisma.RST}"
         icons = []
@@ -748,7 +735,8 @@ class TheNavigator:
             logs.append(f"{Prisma.RED}   (Environment: Voltage +5.0){Prisma.RST}")
         return logs
 
-    def check_anomaly(self, text: str) -> bool:
+    @staticmethod
+    def check_anomaly(text: str) -> bool:
         triggers = ["glitch", "timeline", "reset", "reboot", "admin"]
         if any(t in text.lower() for t in triggers):
             return True
@@ -778,7 +766,6 @@ class LiteraryJournal:
     def __init__(self, output_file="journal_of_the_void.txt"):
         self.output_file = output_file
         try:
-            from bone_data import NARRATIVE_DATA
             self.critics = NARRATIVE_DATA.get("LITERARY_CRITICS", {})
         except ImportError:
             self.critics = {}
@@ -791,7 +778,8 @@ class LiteraryJournal:
                 }
             }
 
-    def _calculate_score(self, physics: Dict, preferences: Dict) -> Tuple[float, List[str]]:
+    @staticmethod
+    def _calculate_score(physics: Dict, preferences: Dict) -> Tuple[float, List[str]]:
         score = 50.0
         breakdown = []
         metrics = {

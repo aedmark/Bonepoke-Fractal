@@ -387,9 +387,19 @@ class PromptComposer:
 
         clean_q = self._sanitize(user_query)
 
+        semantic_ops = state.get("semantic_operators", [])
+        ops_block = ""
+        if semantic_ops:
+            ops_list = "\n".join([f"> {op}" for op in semantic_ops])
+            ops_block = (
+                f"### NARRATIVE CONSTRAINTS (ACTIVE ARTIFACTS)\n"
+                f"{ops_list}\n"
+            )
+
         final_prompt = (
             f"{identity_block}\n"
             f"{somatic_block}\n"
+            f"{ops_block}\n"
             f"{context_block}\n"
             f"{social_block}\n"
             f"### NARRATIVE ARC\n"
@@ -416,7 +426,6 @@ class ResponseValidator:
         ]
 
     def validate(self, response: str, state: Dict) -> Dict:
-        # [SLASH FIX]: Case-insensitive scanning for silicon ash.
         low_resp = response.lower()
 
         for phrase in self.banned_phrases:
@@ -424,11 +433,9 @@ class ResponseValidator:
                 return {
                     "valid": False,
                     "reason": "IMMERSION_BREAK",
-                    # [SCHUR LENS]: Make the replacement text a little more flavorful.
                     "replacement": f"{Prisma.GRY}[The system attempts to recite a EULA, but hiccups instead.]{Prisma.RST}"
                 }
 
-        # [PINKER LENS]: Ensure we actually have content to parse.
         if len(response.strip()) < 2:
             return {"valid": False, "reason": "TOO_SHORT", "replacement": "..."}
 
@@ -508,6 +515,7 @@ class TheCortex:
             "user_profile": self.sub.mind.mirror.profile.__dict__,
             "world": {"orbit": sim_result.get("world_state", {}).get("orbit", ["Void"])},
             "inventory": self.sub.gordon.inventory,
+            "semantic_operators": self.sub.gordon.get_semantic_operators(),
             "soul_state": self.sub.soul.get_soul_state(),
             "spotlight": self.spotlight.illuminate(
                 self.sub.mind.mem.graph,

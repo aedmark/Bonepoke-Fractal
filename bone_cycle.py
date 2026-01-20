@@ -321,6 +321,9 @@ class MachineryPhase(SimulationPhase):
             is_craft, craft_msg, old_item, new_item = self.eng.phys.forge.attempt_crafting(physics, self.eng.gordon.inventory)
             if is_craft:
                 ctx.log(craft_msg)
+                if hasattr(self.eng, 'akashic'):
+                    catalyst_cat = max(physics.vector, key=physics.vector.get) if physics.vector else "void"
+                    self.eng.akashic.track_successful_forge(old_item, catalyst_cat, new_item)
                 if old_item in self.eng.gordon.inventory:
                     self.eng.gordon.inventory.remove(old_item)
                 ctx.log(self.eng.gordon.acquire(new_item))
@@ -418,6 +421,68 @@ class CognitionPhase(SimulationPhase):
         )
         return ctx
 
+class StateReconciler:
+    @staticmethod
+    def fork(ctx: CycleContext) -> CycleContext:
+        """Creates a mutable sandbox (Deep Copy) of the current context."""
+        new_ctx = CycleContext(input_text=ctx.input_text)
+
+        new_ctx.user_profile = ctx.user_profile
+        new_ctx.is_alive = ctx.is_alive
+        new_ctx.refusal_triggered = ctx.refusal_triggered
+        new_ctx.is_bureaucratic = ctx.is_bureaucratic
+        new_ctx.timestamp = ctx.timestamp
+        new_ctx.bureau_ui = ctx.bureau_ui
+        new_ctx.physics = ctx.physics.snapshot()
+        new_ctx.clean_words = list(ctx.clean_words)
+        new_ctx.logs = list(ctx.logs)
+        new_ctx.flux_log = list(ctx.flux_log)
+        new_ctx.bio_result = ctx.bio_result.copy()
+        new_ctx.world_state = ctx.world_state.copy()
+        new_ctx.mind_state = ctx.mind_state.copy()
+        return new_ctx
+
+    @staticmethod
+    def _scan_for_mythology(eng, logs):
+        if not hasattr(eng, 'akashic'): return
+
+        for line in logs:
+            if "NEUROPLASTICITY" not in line:
+                continue
+
+            try:
+                parts = line.split("'")
+                if len(parts) < 3:
+                    continue
+                word = parts[1]
+
+                if "[" not in line or "]" not in line:
+                    continue
+
+                category_segment = line.split("[")[1]
+                category = category_segment.split("]")[0].lower()
+                eng.akashic.register_word(word, category)
+
+            except (IndexError, ValueError):
+                pass
+
+    @staticmethod
+    def reconcile(canonical: CycleContext, sandbox: CycleContext, engine_ref=None):
+        canonical.physics = sandbox.physics
+        new_logs = sandbox.logs[len(canonical.logs):]
+        if engine_ref and new_logs:
+            StateReconciler._scan_for_mythology(engine_ref, new_logs)
+        new_flux = sandbox.flux_log[len(canonical.flux_log):]
+        if new_flux:
+            canonical.flux_log.extend(new_flux)
+        canonical.is_alive = sandbox.is_alive
+        canonical.refusal_triggered = sandbox.refusal_triggered
+        canonical.is_bureaucratic = sandbox.is_bureaucratic
+        canonical.bureau_ui = sandbox.bureau_ui
+        canonical.bio_result = sandbox.bio_result
+        canonical.world_state = sandbox.world_state
+        canonical.mind_state = sandbox.mind_state
+        canonical.clean_words = sandbox.clean_words
 
 class CycleSimulator:
     def __init__(self, engine_ref):
@@ -437,23 +502,41 @@ class CycleSimulator:
         ]
 
     def run_simulation(self, ctx: CycleContext) -> CycleContext:
+        reconciler = StateReconciler()
+
         for phase in self.pipeline:
+            # 1. Circuit Breaker Check
             if not self._check_circuit_breaker(phase.name):
                 continue
+
+            # 2. Pre-flight Checks
             if ctx.refusal_triggered or (ctx.is_bureaucratic and phase.name not in ["OBSERVE", "GATEKEEP"]):
                 break
             if not ctx.is_alive:
                 break
-            current_checkpoint = ctx.physics.snapshot()
+
+            # 3. FORK: Create the Transactional Sandbox
+            sandbox = reconciler.fork(ctx)
+
             try:
-                ctx = phase.run(ctx)
-                self.stabilizer.stabilize(ctx, phase.name)
+                # 4. RUN: Execute logic in the sandbox
+                sandbox = phase.run(sandbox)
+
+                # 5. STABILIZE: Fix the physics *inside* the sandbox
+                # This ensures we don't commit unstable physics to the main timeline.
+                self.stabilizer.stabilize(sandbox, phase.name)
+
+                # 6. JOIN: Commit the transaction
+                reconciler.reconcile(ctx, sandbox)
+
             except Exception as e:
                 print(f"{Prisma.YEL}>>> ROLLING BACK TIME ({phase.name} Failed){Prisma.RST}")
-                if hasattr(ctx.physics, 'diff_view'):
-                    print(f"{Prisma.YEL}>>> STATE DRIFT DETECTED:{Prisma.RST}")
-                    print(ctx.physics.diff_view(current_checkpoint))
-                ctx.physics = current_checkpoint
+                if hasattr(sandbox.physics, 'diff_view'):
+                    # Compare the broken sandbox against the clean canonical state
+                    print(f"{Prisma.YEL}>>> STATE DRIFT AT CRASH:{Prisma.RST}")
+                    print(sandbox.physics.diff_view(ctx.physics))
+
+                # 7. ROLLBACK: We effectively discard 'sandbox' and keep 'ctx' as is.
                 self._handle_phase_crash(ctx, phase.name, e)
                 break
 

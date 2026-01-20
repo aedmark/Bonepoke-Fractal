@@ -1,5 +1,33 @@
 # 📜 BONEAMANITA CHANGELOG
 
+## **10.6.0: The "Living Architecture" Update**
+
+### **Features & Enhancements**
+
+* **Transactional Phase Execution:** Implemented the `StateReconciler` in `bone_cycle.py`. The simulation loop now operates on a **Fork/Join** model.
+  * **The Sandbox:** Each phase receives a deep-copied snapshot of the state.
+  * **The Commit:** Changes are only "reconciled" (merged) into the canonical timeline if the phase completes successfully.
+  * **The Rollback:** Failures in a phase result in a clean discard of the sandbox, preventing "state corruption" from polluting the main timeline.
+* **The Akashic Record:** Upgraded `bone_data.py` from a static registry to an **Evolutionary Mythology Engine**.
+  * **Structural Mutation:** The system now tracks usage patterns (Stocks) and, upon hitting thresholds, rewrites its own constants (Structure). It can now hybridize Lenses, codify new Crafting Recipes, and invent Lexicon Categories.
+  * **Neuroplasticity Hook:** Wired the `StateReconciler` to scan narrative logs for "NEUROPLASTICITY" events, feeding new words directly into the living record.
+* **Semantic Itemization:** Transformed Inventory items in `bone_inventory.py` from passive stat-modifiers into active **Semantic Operators**.
+  * **Narrative Injection:** Items now broadcast specific constraints (e.g., "Prune adjectives," "Use formal language") which are injected directly into the `TheCortex` system prompt via `bone_brain.py`.
+  * **Ludonarrative Harmony:** The *mechanical* effect of an item now matches its *poetic* description.
+
+### **Refactoring & Optimization**
+
+* **Phase Isolation:** Decoupled the simulation phases. A crash in `ObservationPhase` no longer leaves the `CycleContext` in a "half-mutated" state for `CognitionPhase`.
+* **Systemic Wiring:** Integrated `TheAkashicRecord` into `bone_main.py` and `bone_cycle.py` as a persistent singleton, ensuring that "memories" and "evolutions" survive the lifecycle of a single turn.
+* **Strict Error Trapping:** Replaced broad `except: pass` blocks in the log scanner with surgical `IndexError/ValueError` traps to maintain system hygiene without silencing critical failures.
+
+### **Bug Fixes**
+
+* **Fixed:** "Temporal Entanglement," where a phase could accidentally modify the physics state for *subsequent* phases before it had finished its own validation.
+* **Fixed:** "Zombie Data," where the system could generate new items or learn words, but those changes vanished or lacked structural impact on the simulation's rules.
+* **Fixed:** "Ludonarrative Dissonance" in `bone_inventory.py`, where items like the `SILENT_KNIFE` claimed to cut prose but only adjusted a hidden integer variable.
+* **Fixed:** Hardcoded side-effects (e.g., the `SPIDER_LOCUS` spawn) were removed from `bone_inventory.py` in favor of a data-driven approach.
+
 ## **10.5.7: The "Constitutional Economics" Update**
 
 ### **Features & Enhancements**

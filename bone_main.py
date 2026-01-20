@@ -1,4 +1,4 @@
-# BONEAMANITA 10.5.6 - "The Surgical Tensegrity"
+# BONEAMANITA 10.6.0 - "The Living Architecture"
 # Architects: SLASH, KISHO, The Courtyard, Taylor & Edmark
 
 import time, json
@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Dict, Any
 from bone_bus import EventBus, Prisma, BoneConfig, SystemHealth, TheObserver
 from bone_commands import CommandProcessor
+from bone_data import TheAkashicRecord
 from bone_village import TownHall
 from bone_lexicon import TheLexicon, LiteraryReproduction
 from bone_inventory import GordonKnot
@@ -29,7 +30,7 @@ class SessionGuardian:
         self.eng = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.5.6', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.6.0', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.eng
 
@@ -63,6 +64,8 @@ class BoneAmanita:
         self.lex.compile_antigens()
         TownHall.DeathGen.load_protocols()
         LiteraryReproduction.load_genetics()
+        self.akashic = TheAkashicRecord()
+        print(f"{Prisma.CYN}[SLASH]: The Akashic Record is open for writing.{Prisma.RST}")
         self.events = EventBus()
         self.telemetry = TelemetryService.initialize(f"session_{int(time.time())}")
         self.events.log(f"{Prisma.CYN}[SLASH]: Telemetry Uplink Established.{Prisma.RST}", "BOOT")
@@ -256,7 +259,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.5.6', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.6.0', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")
