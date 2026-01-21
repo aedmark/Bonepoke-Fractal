@@ -4,7 +4,7 @@
 import json, random, re, string, time, unicodedata, os
 from typing import Tuple, Dict, Set, Optional, List
 from bone_bus import BoneConfig, Prisma
-from bone_data import LEXICON, GENETICS
+from bone_data import TheLore
 from functools import lru_cache
 
 class LexiconStore:
@@ -24,7 +24,7 @@ class LexiconStore:
         self.hive_loaded = False
 
     def load_vocabulary(self):
-        data = LEXICON
+        data = TheLore.get("LEXICON")
         self.SOLVENTS = set(data.get("solvents", []))
         self.ANTIGEN_REPLACEMENTS = data.get("antigen_replacements", {})
         for cat, words in data.items():
@@ -345,6 +345,11 @@ class LexiconService:
         return cls._ANALYZER.get_turbulence(words)
 
     @classmethod
+    def vectorize(cls, text: str) -> Dict[str, float]:
+        if not cls._INITIALIZED: cls.initialize()
+        return cls._ANALYZER.vectorize(text)
+
+    @classmethod
     def compile_antigens(cls):
         if not cls._INITIALIZED:
             cls.initialize()
@@ -430,9 +435,10 @@ class LiteraryReproduction:
     @classmethod
     def load_genetics(cls):
         try:
-            cls.MUTATIONS = GENETICS.get("MUTATIONS", {})
-            cls.JOY_CLADE = GENETICS.get("JOY_CLADE", {})
-        except ImportError:
+            genetics = TheLore.get("GENETICS") #
+            cls.MUTATIONS = genetics.get("MUTATIONS", {})
+            cls.JOY_CLADE = genetics.get("JOY_CLADE", {})
+        except Exception:
             cls.MUTATIONS = {}
             cls.JOY_CLADE = {}
 

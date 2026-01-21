@@ -344,6 +344,7 @@ class PhysicsPacket:
     narrative_drag: float = 0.0
     valence: float = 0.0
     repetition: float = 0.0
+    atmosphere: str = "VOID"
     clean_words: List[str] = field(default_factory=list)
     counts: Dict[str, int] = field(default_factory=dict)
     vector: Dict[str, float] = field(default_factory=dict)

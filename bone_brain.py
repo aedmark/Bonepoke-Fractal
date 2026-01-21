@@ -310,6 +310,18 @@ class PromptComposer:
                 "include_memories": True, "simplify_instruction": False,
                 "inject_chaos": False
             }
+        if ballast:
+            modifiers["include_somatic"] = False   # Sever the connection to internal feelings
+            modifiers["include_memories"] = False  # Stop ruminating on the past
+            modifiers["include_inventory"] = True  # FORCE attention to physical tools
+            original_lens = state["mind"]["lens"]
+            state["mind"]["lens"] = "GORDON"
+            state["mind"]["role"] = "The Janitor (Grounded, Physical, Utilitarian)"
+            state["system_instruction"] = (
+                f"EMERGENCY GROUNDING: You were drifting into solipsism ({original_lens}). "
+                "Ignore internal state. Describe ONLY the physical texture of the Inventory "
+                "or the immediate geometry of the World. Be concrete."
+            )
         mind = state.get("mind", {})
         bio = state.get("bio", {})
         phys = state.get("physics", {})

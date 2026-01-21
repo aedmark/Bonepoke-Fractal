@@ -8,7 +8,7 @@ from bone_bus import Prisma, BoneConfig, CycleContext
 from bone_lexicon import TheLexicon
 from bone_personality import UserProfile, PublicParksDepartment, ZenGarden
 from bone_council import CouncilChamber
-from bone_data import DEATH, RESONANCE, ALMANAC_DATA, STYLE_CRIMES, TheAkashicRecord, NARRATIVE_DATA
+from bone_data import TheAkashicRecord, TheLore
 
 class TheTinkerer:
     def __init__(self, gordon_ref, events_ref):
@@ -29,8 +29,10 @@ class TheTinkerer:
         real_drag = max(0.0, host_health.latency - 2.0) if host_health else 0.0
         real_efficiency = host_health.efficiency_index if host_health else 1.0
         effective_drag = drag + (real_drag * 2.0)
-        is_forge = (voltage > 12.0 and real_efficiency > 0.9) or (effective_drag < 1.5)
-        is_mud = (voltage < 5.0) and (effective_drag > 5.0)
+        high_voltage = getattr(BoneConfig.PHYSICS, "VOLTAGE_HIGH", 12.0)
+        low_voltage = getattr(BoneConfig.PHYSICS, "VOLTAGE_LOW", 5.0)
+        is_forge = (voltage > high_voltage and real_efficiency > 0.9) or (effective_drag < 1.5)
+        is_mud = (voltage < low_voltage) and (effective_drag > 5.0)
         learning_rate = 0.05
         rust_rate = 0.02
         ascension_threshold = 2.5
@@ -123,9 +125,10 @@ class DeathGen:
 
     @classmethod
     def load_protocols(cls):
-        cls.PREFIXES = DEATH.get("PREFIXES", ["System Halt."])
-        cls.CAUSES = DEATH.get("CAUSES", {})
-        cls.VERDICTS = DEATH.get("VERDICTS", {})
+        death_data = TheLore.get("DEATH") #
+        cls.PREFIXES = death_data.get("PREFIXES", ["System Halt."])
+        cls.CAUSES = death_data.get("CAUSES", {})
+        cls.VERDICTS = death_data.get("VERDICTS", {})
 
     @staticmethod
     def eulogy(physics, mito_state):
@@ -209,9 +212,10 @@ class TheCartographer:
 
 class TheAlmanac:
     def __init__(self):
-        self.forecasts = ALMANAC_DATA.get("FORECASTS", {"BALANCED": ["System nominal."]})
-        self.strategies = ALMANAC_DATA.get("STRATEGIES", {})
-        self.default_seed = ALMANAC_DATA.get("DEFAULT_SEED", "Observe.")
+        data = TheLore.get("ALMANAC_DATA")
+        self.forecasts = data.get("FORECASTS", {"BALANCED": ["System nominal."]})
+        self.strategies = data.get("STRATEGIES", {})
+        self.default_seed = data.get("DEFAULT_SEED", "Observe.")
 
     @staticmethod
     def diagnose_condition(session_data: dict, host_health: Any = None) -> Tuple[str, str]:
@@ -310,8 +314,9 @@ class ApeirogonResonance:
         self.load_resonances()
 
     def load_resonances(self):
-        self.DIMENSIONS = RESONANCE.get("DIMENSIONS", {})
-        self.NOUNS = RESONANCE.get("NOUNS", {})
+        res_data = TheLore.get("RESONANCE")
+        self.DIMENSIONS = res_data.get("DIMENSIONS", {})
+        self.NOUNS = res_data.get("NOUNS", {})
 
     @staticmethod
     def _resolve_term(val, scale):
@@ -446,7 +451,7 @@ class MirrorGraph:
 
 class StrunkWhiteProtocol:
     def __init__(self):
-        self.PATTERNS = STYLE_CRIMES["PATTERNS"]
+        self.PATTERNS = TheLore.get("STYLE_CRIMES", "PATTERNS")
 
     def audit(self, text: str, is_system_output: bool = True) -> tuple[bool, str]:
         bad_words = ["delve", "tapestry", "leverage", "synergy"]
@@ -622,10 +627,16 @@ class Manifold:
 class TheNavigator:
     def __init__(self, shimmer_ref):
         self.shimmer = shimmer_ref
-        self.current_location = "THE_MUD"
+        self.current_location = "THE_CONSTRUCT"
         self.root_system = None
         self.root_tolerance = 0.4
         self.manifolds = {
+            "THE_CONSTRUCT": Manifold(
+                "THE_CONSTRUCT", (0.05, 0.1), 0.25,
+                "Neutral Territory (The Loading Zone)",
+                {"plasticity": 0.5, "narrative_drag": -5.0},
+                f"{Prisma.WHT}THE CONSTRUCT: A boundless white void. The air smells of static and potential. We need prose. Lots of prose.{Prisma.RST}"
+            ),
             "THE_MUD": Manifold(
                 "THE_MUD", (0.8, 0.2), 0.2,
                 "High Fatigue, Low Tension (Stagnation)",
@@ -701,7 +712,7 @@ class TheNavigator:
         drag = min(10.0, max(0.0, narrative_drag))
         volt = min(20.0, max(0.0, physics_packet.get("voltage", 0.0)))
         current_vec = (round(drag / 10.0, 2), round(volt / 20.0, 2))
-        best_fit = "THE_MUD"
+        best_fit = "THE_CONSTRUCT"
         min_dist = 999.0
         for name, manifold in self.manifolds.items():
             dist = math.dist(current_vec, manifold.center_vector)
@@ -762,7 +773,7 @@ class LiteraryJournal:
     def __init__(self, output_file="journal_of_the_void.txt"):
         self.output_file = output_file
         try:
-            self.critics = NARRATIVE_DATA.get("LITERARY_CRITICS", {})
+            self.critics = TheLore.get("NARRATIVE_DATA", "LITERARY_CRITICS")
         except ImportError:
             self.critics = {}
         if not self.critics:

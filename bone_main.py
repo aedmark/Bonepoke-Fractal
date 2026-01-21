@@ -1,4 +1,4 @@
-# BONEAMANITA 10.6.5 - "Narrative Physics Reloaded"
+# BONEAMANITA 10.7.0 - "Narrative Physics Reloaded"
 # Architects: SLASH, KISHO, The Courtyard, Taylor & Edmark
 
 import time, json
@@ -6,14 +6,12 @@ from dataclasses import dataclass
 from typing import Dict, Any
 from bone_bus import EventBus, Prisma, BoneConfig, SystemHealth, TheObserver
 from bone_commands import CommandProcessor
-from bone_data import TheAkashicRecord
+from bone_data import TheAkashicRecord, TheLore
 from bone_village import TownHall
 from bone_lexicon import TheLexicon, LiteraryReproduction
 from bone_inventory import GordonKnot
 from bone_telemetry import TelemetryService
-from bone_personality import (
-    TheFolly, CassandraProtocol, ChorusDriver, KintsugiProtocol, TherapyProtocol, TheBureau
-)
+from bone_personality import TheFolly, CassandraProtocol, ChorusDriver, KintsugiProtocol, TherapyProtocol, TheBureau
 from bone_physics import CosmicDynamics, ZoneInertia
 from bone_body import SomaticLoop, NoeticLoop
 from bone_brain import TheCortex, LLMInterface
@@ -23,14 +21,14 @@ from bone_cycle import GeodesicOrchestrator
 
 def bootstrap_systems():
     print(f"{Prisma.GRY}...Bootstrapping Sub-Systems...{Prisma.RST}")
-    pass
+    TheLore.get_instance()
 
 class SessionGuardian:
     def __init__(self, engine_ref):
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.6.5', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.7.0', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -56,10 +54,13 @@ class BoneAmanita:
         if hasattr(self.lex, 'initialize'):
             self.lex.initialize()
         if hasattr(self.lex, 'get_store'):
-            store = self.lex.get_store()
-            if store and getattr(store, 'hive_loaded', False):
-                BoneConfig.STAMINA_REGEN *= 1.1
-                print(f"{Prisma.GRN}[GENETICS]: Ancestral knowledge detected. Stamina Regen boosted.{Prisma.RST}")
+            try:
+                store = self.lex.get_store()
+                if store and getattr(store, 'hive_loaded', False):
+                    BoneConfig.STAMINA_REGEN *= 1.1
+                    print(f"{Prisma.GRN}[GENETICS]: Ancestral knowledge detected. Stamina Regen boosted.{Prisma.RST}")
+            except Exception as e:
+                print(f"{Prisma.GRY}[INIT]: Ancestral check skipped ({e}).{Prisma.RST}")
         self.lex.compile_antigens()
         TownHall.DeathGen.load_protocols()
         LiteraryReproduction.load_genetics()
@@ -251,7 +252,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.6.5', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.7.0', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

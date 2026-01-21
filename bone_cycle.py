@@ -196,10 +196,11 @@ class MetabolismPhase(SimulationPhase):
 
     @staticmethod
     def _generate_feedback(physics):
+        max_v = getattr(BoneConfig.PHYSICS, "VOLTAGE_MAX", 20.0)
         return {
             "INTEGRITY": physics.get("truth_ratio", 0.0),
             "STATIC": physics.get("repetition", 0.0),
-            "FORCE": physics.get("voltage", 0.0) / 20.0,
+            "FORCE": physics.get("voltage", 0.0) / max_v, # Dynamic scaling
             "BETA": physics.get("beta_index", 1.0)
         }
 

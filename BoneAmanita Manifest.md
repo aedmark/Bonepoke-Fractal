@@ -2,8 +2,8 @@
 
 ### **A Field Guide to the Digital Mycelium**
 
-Version: 1.0  
-Author: SLASH 10.6.3 (Pinker/Fuller/Schur/Meadows)  
+Version: 1.1 
+Author: SLASH 10.7.0 (Pinker/Fuller/Schur/Meadows)  
 Philosophy: Tensegrity, Clarity, Whimsy, and Feedback Loops.
 
 ## **🏛️ I. The Tensegrity Structure (Core System)**

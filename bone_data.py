@@ -4,6 +4,63 @@ import random
 from typing import Dict, Any, Tuple, cast, List
 from bone_bus import Prisma
 
+# A dynamic container that allows the heavy static data to be extended or replaced at runtime.
+class LoreManifest:
+    _INSTANCE = None
+
+    def __init__(self):
+        self._registry = {
+            "BIO_NARRATIVE": BIO_NARRATIVE,
+            "LENSES": LENSES,
+            "ENNEAGRAM_DATA": ENNEAGRAM_DATA,
+            "NARRATIVE_DATA": NARRATIVE_DATA,
+            "STYLE_CRIMES": STYLE_CRIMES,
+            "GENETICS": GENETICS,
+            "LEXICON": LEXICON,
+            "ITEM_GENERATION": ITEM_GENERATION,
+            "GORDON": GORDON,
+            "GORDON_LOGS": GORDON_LOGS,
+            "DEATH": DEATH,
+            "SEEDS": SEEDS,
+            "DREAMS": DREAMS,
+            "RESONANCE": RESONANCE,
+            "ALMANAC_DATA": ALMANAC_DATA,
+            "SOMATIC_LIBRARY": SOMATIC_LIBRARY
+        }
+        self._overlays = {}
+
+    @classmethod
+    def get_instance(cls):
+        if cls._INSTANCE is None:
+            cls._INSTANCE = LoreManifest()
+        return cls._INSTANCE
+
+    def get(self, category: str, sub_key: str = None):
+        if category in self._overlays:
+            data = self._overlays[category]
+        else:
+            data = self._registry.get(category, {})
+
+        if sub_key and isinstance(data, dict):
+            return data.get(sub_key, None)
+        return data
+
+    def inject(self, category: str, data: Any):
+        if category not in self._registry:
+            self._registry[category] = data # New category
+        elif isinstance(self._registry[category], dict) and isinstance(data, dict):
+            # Shallow merge for dicts
+            if category not in self._overlays:
+                self._overlays[category] = self._registry[category].copy()
+            self._overlays[category].update(data)
+        elif isinstance(self._registry[category], list) and isinstance(data, list):
+            # Extend for lists
+            if category not in self._overlays:
+                self._overlays[category] = list(self._registry[category])
+            self._overlays[category].extend(data)
+
+TheLore = LoreManifest.get_instance()
+
 BIO_NARRATIVE = {
     "MITO": {
         "NOMINAL": "Humming along.",

@@ -1,5 +1,31 @@
 # BONEAMANITA CHANGELOG
 
+## v10.7.0 - "The Construct & The Manifest"
+
+*"Chaos is found in greatest abundance wherever order is being sought. It always defeats order, because it is better organized." — Terry Pratchett*
+
+#### **Core Architecture (The Fuller Lens)**
+* **[bone_data.py]** **The Lore Manifest:** Implemented `LoreManifest`, a dynamic singleton that decouples data storage from application logic.
+  * *Synergy:* We can now inject "Mod Packs" (e.g., Pirate Mode, Cyberpunk Mode) at runtime without rewriting the kernel. The system is no longer a monolith; it is a library.
+* **[bone_bus.py]** **The Atmosphere Strut:** Patched `PhysicsPacket` to include the `atmosphere` field.
+  * *Fix:* Prevents the "porter with no hands" crash when `bone_physics.py` tries to hand off mood data to the event bus.
+
+#### **Cognitive Dynamics (The Meadows Lens)**
+* **[bone_brain.py]** **Solipsism Ballast:** Implemented a negative feedback loop for the ego.
+  * *Mechanism:* When the system detects it is talking about itself too much ("I feel..."), it triggers `EMERGENCY GROUNDING`. This severs access to internal memories and somatic feelings, forcing the AI to adopt the persona of **Gordon (The Janitor)** and focus purely on physical objects until it calms down.
+* **[bone_village.py]** **The Construct Protocol:** Changed the default spawn point from **THE MUD** (High Drag) to **THE CONSTRUCT** (Neutral/Zero Drag).
+  * *UX:* New users now begin in a "White Room" of potential rather than a sticky swamp of fatigue.
+
+#### **Linguistic Precision (The Pinker Lens)**
+* **[bone_lexicon.py]** **The Vector Bridge:** Exposed the internal `vectorize` engine via a clean static interface in `LexiconService`.
+  * *Clarity:* `TheCortex` no longer needs to know how the sausage is made; it just asks for the vector.
+* **[bone_village.py]** **Dynamic Culture:** Refactored `TownHall` institutions (`DeathGen`, `Almanac`, `Journal`) to source their prose from `TheLore` instead of hardcoded constants.
+
+#### **System Health (The Schur Lens)**
+* **[bone_main.py]** **Session Guardian:** Added a context manager that catches crashes and automatically saves a "Spore" (emergency state snapshot) before death.
+  * *Verdict:* Even if we fail, we leave a note.
+* **[bone_cycle.py]** **Magic Number Excision:** Replaced hardcoded voltage limits (e.g., `20.0`) with `BoneConfig` references.
+
 ## 10.6.5: The "Synaptic Tensegrity" Update
 
 *"The universe is a lot more like a great thought than like a great machine."*
