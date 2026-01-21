@@ -2,8 +2,8 @@
 # "Translate the math of the spheres into the words of the earth." - SLASH
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
-from bone_bus import Prisma, BoneConfig
+from typing import Any
+from bone_bus import BoneConfig
 from bone_data import SOMATIC_LIBRARY
 
 @dataclass

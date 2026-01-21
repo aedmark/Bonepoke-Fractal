@@ -9,7 +9,6 @@ from bone_main import BoneAmanita, SessionGuardian, BoneConfig
 from bone_brain import LLMInterface, TheCortex
 from bone_village import Prisma
 
-# [SLASH FIX]: Define the constant globally so functions can see it.
 CONFIG_FILE = "bone_config.json"
 
 class GenesisProtocol:
@@ -206,7 +205,7 @@ class GenesisProtocol:
     def wizard(self) -> bool:
         os.system('cls' if os.name == 'nt' else 'clear')
         banner = f"""
-{Prisma.CYN}   GENESIS PROTOCOL v10.6.0{Prisma.RST}
+{Prisma.CYN}   GENESIS PROTOCOL v10.6.1{Prisma.RST}
 {Prisma.GRY}State Machine Active. Tensegrity Nominal.{Prisma.RST}
 ------------------------------------"""
         print(banner)
@@ -449,16 +448,12 @@ Do not break character. Do not explain the simulation rules unless asked.
 
         self.type_out("...System Online. Good luck.\n", color=Prisma.GRN)
 
-        # 6. Enter Loop
-        # [SLASH FIX]: Use the 'eng' variable returned by the context manager to satisfy the linter
-        with SessionGuardian(engine) as eng:
+        with SessionGuardian(engine) as session_engine:
             while True:
                 try:
                     prompt_char = Prisma.paint('>', 'W')
-                    u = input(f"{prompt_char} ")
-
-                    # Multi-line input handling
-                    if u.strip() == "<<<":
+                    user_input = input(f"{prompt_char} ")
+                    if user_input.strip() == "<<<":
                         print(f"{Prisma.GRY}   [MULTI-LINE MODE ACTIVE. Type '>>>' to send.]{Prisma.RST}")
                         max_lines = 50
                         max_total_chars = 20000
@@ -481,27 +476,22 @@ Do not break character. Do not explain the simulation rules unless asked.
                                 lines.append(line)
                                 total_chars += line_len
                             except EOFError: break
-                        u = "\n".join(lines)
+                        user_input = "\n".join(lines)
                         status_color = 'Y' if buffer_full else '0'
-                        print(f"{Prisma.paint(f'   [Block received: {len(u)} chars]', status_color)}")
-
-                    if not u: continue
+                        print(f"{Prisma.paint(f'   [Block received: {len(user_input)} chars]', status_color)}")
+                    if not user_input: continue
                 except EOFError: break
                 except KeyboardInterrupt:
                     print(f"\n{Prisma.paint('...Interrupted.', 'Y')}")
                     break
-
-                if u.lower() in ["exit", "quit", "/exit"]:
+                if user_input.lower() in ["exit", "quit", "/exit"]:
                     break
-
                 try:
-                    if hasattr(eng, 'process_turn'):
-                        # Route through the full engine cycle
-                        result = eng.process_turn(u)
+                    if hasattr(session_engine, 'process_turn'):
+                        result = session_engine.process_turn(user_input)
                         if result.get("ui"): print(result["ui"])
-                    elif hasattr(eng, 'cortex'):
-                        # Fallback for lobotomized engines
-                        result = eng.cortex.process(u)
+                    elif hasattr(session_engine, 'cortex'):
+                        result = session_engine.cortex.process(user_input)
                         print(result.get("ui", "..."))
                     else:
                         print(f"{Prisma.RED}CRITICAL: Cortex not found.{Prisma.RST}")

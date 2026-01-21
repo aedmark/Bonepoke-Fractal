@@ -1,8 +1,8 @@
 # bone_spores.py - The Mycellium
 
-import json, math, os, random, time, shutil, tempfile
+import json, math, os, random, time, tempfile
 from collections import deque
-from typing import List, Tuple, Optional, Dict, Any
+from typing import List, Tuple, Optional
 from bone_lexicon import LiteraryReproduction, TheLexicon
 from bone_data import SEEDS
 from bone_bus import EventBus, Prisma, BoneConfig
@@ -22,7 +22,7 @@ class BoneJSONEncoder(json.JSONEncoder):
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_10.6.0"
+        self.genome = "BONEAMANITA_10.6.1"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -514,7 +514,7 @@ class MycelialNetwork:
             return None, set(), {}
 
     def cleanup_old_sessions(self, limbo_layer=None):
-        files = self.loader.list_spores() # Returns [Newest, ..., Oldest]
+        files = self.loader.list_spores()
         removed = 0
         max_files = 25
         max_age = 86400
@@ -528,7 +528,7 @@ class MycelialNetwork:
                         limbo_layer.absorb_dead_timeline(path)
                     if self.loader.delete_spore(path):
                         removed += 1
-                except Exception:
+                except (OSError, AttributeError):
                     pass
         if removed:
             self.events.log(f"{Prisma.GRY}[TIME MENDER]: Pruned {removed} dead timelines.{Prisma.RST}")

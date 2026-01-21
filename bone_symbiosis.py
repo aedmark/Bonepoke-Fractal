@@ -1,11 +1,10 @@
 # bone_symbiosis.py
 # "We are not alone. We are a part of the machine."
 
-import time, math
 from dataclasses import dataclass
-from typing import List, Dict, Optional, Tuple, Deque
+from typing import Dict, Deque
 from collections import deque
-from bone_bus import Prisma, BoneConfig
+from bone_bus import Prisma
 
 @dataclass
 class HostHealth:
@@ -44,7 +43,8 @@ class HostVitals:
         self.baseline_latency_per_complexity = 2.0
         self.alpha = 0.1
 
-    def _calculate_attention_decay(self, turn_count: int) -> float:
+    @staticmethod
+    def _calculate_attention_decay(turn_count: int) -> float:
         decay_rate = 0.002
         return 1.0 / (1.0 + (decay_rate * turn_count))
 
@@ -172,13 +172,14 @@ class SymbiosisManager:
         if self.current_health.compliance < 0.8:
             mods["include_memories"] = False
             # If we cut memories, log it
-            if mods["include_memories"] is False:
+            if not mods["include_memories"]:
                 self.events.log(f"{Prisma.GRY}SYMBIOSIS: Compliance Low ({self.current_health.compliance:.2f}). Memories Redacted.{Prisma.RST}", "SYS")
 
         self.last_outgoing_complexity = self._calculate_complexity(mods)
         return mods
 
-    def _calculate_complexity(self, mods: Dict[str, bool]) -> float:
+    @staticmethod
+    def _calculate_complexity(mods: Dict[str, bool]) -> float:
         score = 0.2
         if mods.get("include_somatic"): score += 0.2
         if mods.get("include_inventory"): score += 0.2

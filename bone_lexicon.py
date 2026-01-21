@@ -181,7 +181,7 @@ class LinguisticAnalyzer:
         if not text: return []
         try:
             normalized = unicodedata.normalize('NFKD', text).encode('ASCII', 'ignore').decode('utf-8')
-        except Exception:
+        except (TypeError, AttributeError):
             normalized = text
         cleaned_text = normalized.translate(self._TRANSLATOR).lower()
         words = cleaned_text.split()
@@ -400,7 +400,7 @@ class LiteraryReproduction:
         return mutations
 
     @staticmethod
-    def mitosis(parent_id, bio_state, physics, memory):
+    def mitosis(parent_id, bio_state, physics):
         counts = LiteraryReproduction._extract_counts(physics)
         dominant = max(counts, key=counts.get) if counts else "VOID"
         mutation_data = LiteraryReproduction.MUTATIONS.get(
@@ -462,7 +462,7 @@ class LiteraryReproduction:
         log_msg = []
         if mode == "MITOSIS":
             bio_state = {"trauma_vector": engine_ref.trauma_accum}
-            child_id, genome = self.mitosis(mem.session_id, bio_state, phys, mem)
+            child_id, genome = self.mitosis(mem.session_id, bio_state, phys)
             log_msg = [f"   ► CHILD SPAWNED: {Prisma.WHT}{child_id}{Prisma.RST}",
                        f"   ► TRAIT: {genome.get('mutations', 'None')}"]
         elif mode == "CROSSOVER":

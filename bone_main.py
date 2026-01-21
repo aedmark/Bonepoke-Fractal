@@ -1,4 +1,4 @@
-# BONEAMANITA 10.6.0 - "The Living Architecture"
+# BONEAMANITA 10.6.1 - "Surgical Clarity"
 # Architects: SLASH, KISHO, The Courtyard, Taylor & Edmark
 
 import time, json
@@ -27,31 +27,31 @@ def bootstrap_systems():
 
 class SessionGuardian:
     def __init__(self, engine_ref):
-        self.eng = engine_ref
+        # [SLASH PATCH]: Clarity update.
+        self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.6.0', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.6.1', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
-        return self.eng
+        return self.engine_instance
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         print(f"\n{Prisma.paint('--- SYSTEM HALT ---', 'R')}")
         if exc_type:
             print(f"{Prisma.paint(f'CRITICAL FAILURE: {exc_val}', 'R')}")
-            if hasattr(self.eng, "events"):
-                self.eng.events.log(f"CRASH: {exc_val}", "SYS")
+            if hasattr(self.engine_instance, "events"):
+                self.engine_instance.events.log(f"CRASH: {exc_val}", "SYS")
         try:
             print(f"{Prisma.paint('Initiating Emergency Spore Preservation...', 'Y')}")
-            result_msg = self.eng.emergency_save(exit_cause="INTERRUPT" if exc_type else "MANUAL")
+            result_msg = self.engine_instance.emergency_save(exit_cause="INTERRUPT" if exc_type else "MANUAL")
             print(f"{Prisma.paint(result_msg, 'C' if '✔' in result_msg else 'R')}")
         except Exception as e:
             print(f"{Prisma.paint(f'FATAL: State corruption during shutdown. {e}', 'R')}")
-
         print(f"{Prisma.paint('Disconnected.', '0')}")
         return exc_type is KeyboardInterrupt
 
 class BoneAmanita:
-    def __init__(self, memory_layer=None, lexicon_layer=None, user_name="TRAVELER"):
+    def __init__(self, lexicon_layer=None, user_name="TRAVELER"):
         self.user_name = user_name
         self.lex = lexicon_layer if lexicon_layer else TheLexicon
         if hasattr(self.lex, 'initialize'):
@@ -116,7 +116,7 @@ class BoneAmanita:
         if not hist: return 0.0
         return sum(hist) / len(hist)
 
-    def process_turn(self, user_message: str, *args, **kwargs) -> Dict[str, Any]:
+    def process_turn(self, user_message: str) -> Dict[str, Any]:
         turn_start = self.observer.clock_in()
         self.observer.user_turns += 1
         if not user_message: user_message = ""
@@ -178,15 +178,6 @@ class BoneAmanita:
         eulogy = TownHall.DeathGen.eulogy(last_phys, self.bio.mito.state)
         death_log = [f"\n{Prisma.RED}SYSTEM HALT: {eulogy}{Prisma.RST}"]
         try:
-            spore_data = {
-                "session_id": self.mind.mem.session_id,
-                "meta": {"timestamp": time.time(), "final_health": 0, "final_stamina": self.stamina},
-                "trauma_vector": self.trauma_accum,
-                "mitochondria": self.bio.mito.adapt(0),
-                "antibodies": list(self.bio.immune.active_antibodies),
-                "soul_data": self.soul.to_dict(),
-                "core_graph": self.mind.mem.graph,
-                "tool_adaptation": self.tinkerer.save_state()}
             path = self.mind.mem.save(
                 health=0,
                 stamina=self.stamina,
@@ -259,7 +250,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.6.0', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.6.1', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")
@@ -275,20 +266,19 @@ if __name__ == "__main__":
     except (KeyboardInterrupt, EOFError):
         print("\nAborted.")
         exit()
-
     engine_instance = BoneAmanita(user_name=final_identity)
-    with SessionGuardian(engine_instance) as eng:
-        first_look = eng.process_turn("LOOK")
+    with SessionGuardian(engine_instance) as session_engine:
+        first_look = session_engine.process_turn("LOOK")
         if first_look.get("ui"): print(first_look["ui"])
         while True:
             try:
-                u = input(f"{Prisma.paint(f'{eng.user_name} >', 'W')} ")
-                if not u: continue
+                user_input = input(f"{Prisma.paint(f'{session_engine.user_name} >', 'W')} ")
+                if not user_input: continue
             except EOFError:
                 break
-            if u.lower() in ["exit", "quit", "/exit"]:
+            if user_input.lower() in ["exit", "quit", "/exit"]:
                 break
-            result = eng.process_turn(u)
+            result = session_engine.process_turn(user_input)
             if result.get("system_instruction"):
                 print(f"\n{Prisma.paint('--- SYSTEM DIRECTIVE ---', 'M')}")
                 print(f"{Prisma.paint(result['system_instruction'], '0')}")

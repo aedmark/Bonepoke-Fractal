@@ -1,5 +1,28 @@
 # 📜 BONEAMANITA CHANGELOG
 
+## **10.6.1: The "Surgical Clarity" Update**
+
+### **Features & Enhancements**
+
+* **Narrative Feedback Integration:** Updated `audit_fire` in `bone_machine.py` to honor **Chekhov’s Gun**.
+* **The Missing Link:** The variable `desc` (e.g., "Structure hardening...") is now correctly passed to the user output, ensuring that the *Crucible's* state changes are communicated with the intended qualitative color, rather than just a dry status code.
+* **Explicit Type Sovereignty:** resolved a **Logical Paradox** in `bone_data.py`.
+* **Annotation vs. Cast:** Replaced a redundant `cast` (which triggered linter warnings) with **Explicit Variable Annotation**. This satisfies the linter's need for strict typing on the `GORDON["RECIPES"]` dictionary without resorting to function-call stuttering.
+
+### **Refactoring & Optimization**
+
+* **Interface Ephemeralization:** Applied the **Fuller Lens** to `bone_main.py`.
+* **Noise Reduction:** Removed the vestigial `memory_layer` argument and the "universal buffer" (`*args`, `**kwargs`) from the core loop. The interface now strictly defines its actual inputs, reducing cognitive load and structural redundancy.
+* **Entropy Reduction:** Eliminated the construction of the massive `spore_data` dictionary in `trigger_death`, which was being built only to be immediately discarded.
+* **Pipeline Streamlining:** Refactored `bone_lexicon.py` to remove "Leaking Taps."
+* **Dead Pipes:** Removed the `memory` parameter from the `mitosis` function. It was occupying stack space but driving no logic. The reproduction pipeline now flows directly from `bio_state` to `genome`.
+
+### **Bug Fixes**
+
+* **Fixed:** "Defensive Denial" in `bone_lexicon.py` and `bone_spores.py`. Replaced broad `except Exception` clauses (which mask logic errors) with surgical `except (TypeError, AttributeError, OSError)` blocks. We now catch specific failures rather than suppressing reality.
+* **Fixed:** "The Ghost in the Machine" in `bone_machine.py`, where the description of the `active_state` was instantiated but never observed.
+* **Fixed:** "Inference Hallucinations" in `bone_data.py`, where the linter conflated dictionaries with strings in the absence of explicit guidance.
+
 ## **10.6.1: The "Synergetic Tensegrity" Update**
 
 ### **Features & Enhancements**

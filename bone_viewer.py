@@ -3,7 +3,6 @@
 
 import time
 from typing import Dict, List, Any
-from dataclasses import dataclass
 from bone_bus import Prisma, BoneConfig
 
 class GeodesicRenderer:
@@ -14,7 +13,8 @@ class GeodesicRenderer:
         self.strunk_white = strunk_ref
         self.vsl_32v = valve_ref
 
-    def _render_soul_strip(self, soul_ref) -> str:
+    @staticmethod
+    def _render_soul_strip(soul_ref) -> str:
         if not soul_ref: return ""
         chapter = soul_ref.chapters[-1] if soul_ref.chapters else "The Prologue"
         obsession = soul_ref.current_obsession or "Drifting..."
@@ -95,7 +95,8 @@ class GeodesicRenderer:
                 return instr
         return ""
 
-    def compose_logs(self, cycle_logs: List[str], bus_events: List[Dict], current_tick: int) -> List[str]:
+    @staticmethod
+    def compose_logs(cycle_logs: List[str], bus_events: List[Dict], current_tick: int) -> List[str]:
         is_warmup = current_tick <= 5
         all_events = [{"text": l, "category": "NARRATIVE"} for l in cycle_logs]
         all_events.extend(bus_events)
