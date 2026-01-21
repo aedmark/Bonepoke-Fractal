@@ -206,6 +206,10 @@ class SomaticLoop:
             return self._package_result(resp_status, logs, enzyme="NONE")
         enzyme, total_yield = self._harvest_resources(phys, logs)
         self.bio.mito.state.atp_pool += total_yield
+        if self.bio.mito.state.atp_pool > BoneConfig.MAX_ATP:
+            excess = self.bio.mito.state.atp_pool - BoneConfig.MAX_ATP
+            self.bio.mito.state.atp_pool = BoneConfig.MAX_ATP
+            logs.append(f"{Prisma.GRY}[BIO]: Venting excess energy ({excess:.1f} ATP).{Prisma.RST}")
         self._perform_maintenance(text, phys, logs, tick_count)
         clean_words = phys.get("clean_words", [])
         semantic_sig = self.semantic_doctor.assess(clean_words, phys)
@@ -282,16 +286,23 @@ class SomaticLoop:
         found_enzymes = []
         total_atp_yield = 0.0
         total_atp_yield += 1.0
+        word_counts = Counter(clean_words)
+        processed_words = set()
+
         for word in clean_words:
             if len(word) < 4: continue
+            if word in processed_words: continue
+            processed_words.add(word)
             category = TheLexicon.get_current_category(word)
             if category and category != "void":
                 enzyme = self._map_category_to_enzyme(category)
                 found_enzymes.append(enzyme)
-                word_yield = 2.0 if len(word) > 7 else 1.0
-                total_atp_yield += word_yield
+                base_word_yield = 2.0 if len(word) > 7 else 1.0
+                count = word_counts[word]
+                damped_multiplier = 1.0 + math.log(count)
+                total_atp_yield += (base_word_yield * damped_multiplier)
                 if len(found_enzymes) <= 3:
-                    logs.append(f"{Prisma.GRN}[BIO]: Digested '{word}' -> {enzyme} (+{word_yield} ATP){Prisma.RST}")
+                    logs.append(f"{Prisma.GRN}[BIO]: Digested '{word}' (x{count}) -> {enzyme} (+{(base_word_yield * damped_multiplier):.1f} ATP){Prisma.RST}")
         if phys.get("voltage", 0.0) > 8.0:
             found_enzymes.append("PROTEASE")
             total_atp_yield += 5.0

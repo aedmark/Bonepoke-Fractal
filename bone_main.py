@@ -1,5 +1,5 @@
-# BONEAMANITA 10.7.0 - "Narrative Physics Reloaded"
-# Architects: SLASH, KISHO, The Courtyard, Taylor & Edmark
+# BONEAMANITA 10.7.1 - "The Lucid Dream"
+# Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark
 
 import time, json
 from dataclasses import dataclass
@@ -28,7 +28,7 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.7.0', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.7.1', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -252,7 +252,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.7.0', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.7.1', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

@@ -140,8 +140,13 @@ class NeurotransmitterModulator:
         self.last_tick = current_time
 
         # Dynamic Decay
-        decay_steps = elapsed / 60.0
-        decay_amount = min(0.9, decay_steps * BrainConfig.BASE_DECAY_RATE)
+        minutes_passed = elapsed / 60.0
+        if minutes_passed > 10.0:
+            effective_decay_time = 10.0 + math.log(minutes_passed - 9.0)
+        else:
+            effective_decay_time = minutes_passed
+
+        decay_amount = min(0.5, effective_decay_time * BrainConfig.BASE_DECAY_RATE)
         if decay_amount > 0:
             self.current_chem.decay(rate=decay_amount)
 
@@ -210,12 +215,13 @@ class NeurotransmitterModulator:
         return params
 
 class LLMInterface:
-    def __init__(self, events_ref: Optional[EventBus] = None, provider: str = None, base_url: str = None, api_key: str = None, model: str = None):
+    def __init__(self, events_ref: Optional[EventBus] = None, provider: str = None, base_url: str = None, api_key: str = None, model: str = None, dreamer: Any = None):
         self.events = events_ref
         self.provider = (provider or BoneConfig.PROVIDER).lower()
         self.api_key = api_key or BoneConfig.API_KEY
         self.model = model or BoneConfig.MODEL
         self.base_url = base_url or self._get_default_url(self.provider)
+        self.dreamer = dreamer
 
     @staticmethod
     def _get_default_url(provider):
@@ -286,8 +292,11 @@ class LLMInterface:
             self._log(f"FALLBACK FAILED (Raw HTTP): {e}", "CRIT")
             return self.mock_generation(prompt)
 
-    @staticmethod
-    def mock_generation(prompt: str) -> str:
+    def mock_generation(self, prompt: str) -> str:
+        if self.dreamer:
+            seed_vector = {"ENTROPY": len(prompt) % 10, "VOID": 5.0}
+            hallucination, _ = self.dreamer.hallucinate(seed_vector, trauma_level=2.0)
+            return f"[INTERNAL SIMULATION]: {hallucination}"
         _ = prompt
         phrases = [
             "The wire hums, but carries no voice.",
@@ -311,9 +320,9 @@ class PromptComposer:
                 "inject_chaos": False
             }
         if ballast:
-            modifiers["include_somatic"] = False   # Sever the connection to internal feelings
-            modifiers["include_memories"] = False  # Stop ruminating on the past
-            modifiers["include_inventory"] = True  # FORCE attention to physical tools
+            modifiers["include_somatic"] = False
+            modifiers["include_memories"] = False
+            modifiers["include_inventory"] = True
             original_lens = state["mind"]["lens"]
             state["mind"]["lens"] = "GORDON"
             state["mind"]["role"] = "The Janitor (Grounded, Physical, Utilitarian)"
@@ -436,6 +445,13 @@ class TheCortex:
     def __init__(self, engine_ref, llm_client=None):
         self.sub = engine_ref
         self.events = engine_ref.events
+        self.dreamer = DreamEngine(self.events)
+        if llm_client:
+            self.llm = llm_client
+            if not hasattr(self.llm, 'dreamer'):
+                self.llm.dreamer = self.dreamer
+        else:
+            self.llm = LLMInterface(self.events, provider="mock", dreamer=self.dreamer)
         self.llm = llm_client if llm_client else LLMInterface(self.events, provider="mock")
         self.composer = PromptComposer()
         self.modulator = NeurotransmitterModulator()

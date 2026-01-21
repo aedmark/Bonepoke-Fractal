@@ -1,6 +1,24 @@
 # BONEAMANITA CHANGELOG
 
-## v10.7.0 - "The Construct & The Manifest"
+## v10.7.1 - "The Lucid Dream"
+
+*"The best bridge between despair and hope is a good night's sleep." — E. Joseph Cossman*
+
+#### **Cognitive Dynamics (The Meadows Lens)**
+* **[bone_brain.py]** **Metabolic Stasis:** Implemented a decay cap on neurochemistry to prevent "system shock."
+  * *Stability:* The brain no longer lobotomizes itself (chemicals crashing to 0.0) during user inactivity. If more than 10 minutes pass, decay switches to a logarithmic scale, simulating a "sleep state" rather than death.
+
+#### **The Somatic Loop (The Pinker Lens)**
+* **[bone_body.py]** **The Cheeseburger Law:** Enforced diminishing marginal utility on word digestion.
+  * *Cognitive Ergonomics:* Spamming the same word (e.g., "run run run") now yields logarithmically diminishing ATP returns. The system demands novelty for nutrition.
+* **[bone_body.py]** **Gluttony Cap:** Enforced `MAX_ATP` limits on the mitochondrial forge.
+  * *Balance:* Excess energy is now "vented" (with a log message) rather than hoarded, ensuring scarcity mechanics remain relevant in the late game.
+
+#### **System Whimsy (The Schur Lens)**
+* **[bone_brain.py]** **Dream-Stream Integration:** Wired the previously dormant `DreamEngine` into the `LLMInterface`.
+  * *Feature:* When the Neural Uplink is offline (Mock Mode), the system no longer returns static error messages. It now procedurally "hallucinates" surreal imagery based on the entropy of the user's input.
+
+## v10.7.0 - "NEO WAKES UP"
 
 *"Chaos is found in greatest abundance wherever order is being sought. It always defeats order, because it is better organized." — Terry Pratchett*
 
