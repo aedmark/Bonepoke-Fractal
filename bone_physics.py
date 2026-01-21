@@ -50,8 +50,8 @@ class GeodesicEngine:
         lift = (mass_play * 1.5) + (mass_kinetic * 0.5)
         normalized_friction = (raw_friction / volume) * 10.0
         normalized_lift = (lift / volume) * 10.0
-        raw_compression = max(0.0, normalized_friction - normalized_lift)
-        compression = round(min(config.PHYSICS.DRAG_HALT, raw_compression * config.SIGNAL_DRAG_MULTIPLIER), 2)
+        raw_compression = normalized_friction - normalized_lift
+        compression = round(max(-5.0, min(config.PHYSICS.DRAG_HALT, raw_compression * config.SIGNAL_DRAG_MULTIPLIER)), 2)
         structural_mass = mass_heavy + mass_constructive
         coherence = min(1.0, structural_mass / max(1, config.SHAPLEY_MASS_THRESHOLD))
         abstraction = min(1.0, (mass_abstract / volume) + 0.2)
@@ -375,28 +375,22 @@ class TheBouncer:
     def check_entry(self, ctx: CycleContext) -> Tuple[bool, Optional[Dict]]:
         phys = ctx.physics
         clean = ctx.clean_words
-
         hn_output = self.hn.attempt_entry(phys, clean)
         if hn_output and self.hn.in_hn_state:
             return False, self._pack_refusal(ctx, "HN_SINGLETON", hn_output)
-
         passed, gate_msg = self.eng.phys.gate.weigh(phys, self.eng.stamina)
         if gate_msg: ctx.log(gate_msg)
         if not passed:
             self.eng.stamina = max(0.0, self.eng.stamina - 2.0)
             return False, self._pack_refusal(ctx, "REFUSAL")
-
         style_passed, style_msg = self.strunk.audit(ctx.input_text, is_system_output=False)
         if style_msg:
             ctx.logs.append(style_msg)
-
         repetition_val = self.eng.phys.pulse.check_pulse(clean)
         phys["repetition"] = repetition_val
         pulse_status = self.eng.phys.pulse.get_status()
-
         toxin_type, toxin_msg = self.eng.bio.immune.assay(
             ctx.input_text, "NARRATIVE", repetition_val, phys, pulse_status)
-
         if toxin_type:
             ctx.log(f"{Prisma.RED}{toxin_msg}{Prisma.RST}")
             if toxin_type in ["AMANITIN", "CYANIDE_POWDER"]:
@@ -405,18 +399,15 @@ class TheBouncer:
                 if scar_log: ctx.log(scar_log)
                 return False, self._pack_refusal(ctx, "TOXICITY")
             return False, self._pack_refusal(ctx, "TOXICITY")
-
         current_tick = getattr(self.eng, "tick_count", 0)
         semantic_refusal = self.semantic.audit(ctx.input_text, phys, tick_count=current_tick)
         if semantic_refusal:
             ctx.logs.append(semantic_refusal)
             return False, self._pack_refusal(ctx, "REFUSAL")
-
         vent_msg = self.vent.check(phys)
         if vent_msg:
             ctx.logs.append(vent_msg)
             return False, self._pack_refusal(ctx, "REFUSAL")
-
         return True, None
 
     def _pack_refusal(self, ctx, type_str, specific_ui=None):

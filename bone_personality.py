@@ -191,13 +191,16 @@ class TheBureau:
     def __init__(self):
         self.stamp_count = 0
         self.forms = NARRATIVE_DATA["BUREAU_FORMS"]
+        self.forms.append("Form 404: Void-Fill Application")
         self.responses = NARRATIVE_DATA["BUREAU_RESPONSES"]
         self.POLICY = {
             "27B-6": {"effect": "ESCALATE", "mod": {"narrative_drag": -3.0, "kappa": -0.2}, "atp": 0.0},
             "1099-B": {"effect": "STAGNATE", "mod": {"narrative_drag": 5.0, "voltage": -5.0}, "atp": 15.0},
             "Schedule C": {"effect": "TAX", "mod": {"voltage": -10.0}, "atp": 8.0},
-            "Form W-2": {"effect": "NORMALIZE", "mod": {"beta_index": 1.0, "turbulence": 0.0}, "atp": 5.0}
+            "Form W-2": {"effect": "NORMALIZE", "mod": {"beta_index": 1.0, "turbulence": 0.0}, "atp": 5.0},
+            "Form 404": {"effect": "NULLIFY", "mod": {"voltage": -20.0, "kappa": 1.0}, "atp": -5.0}
         }
+        self.BUZZWORDS = {"synergy", "paradigm", "leverage", "utilize", "holistic", "bandwidth", "circle back"}
 
     def audit(self, physics, bio_state, context=None):
         current_health = bio_state.get("health", 100.0)
@@ -212,6 +215,22 @@ class TheBureau:
                 beige_threshold = 0.3
         voltage = physics.get("voltage", 0.0)
         clean_words = physics.get("clean_words", [])
+        buzz_hits = [w for w in clean_words if w in self.BUZZWORDS]
+        if len(buzz_hits) > 0:
+            self.stamp_count += 1
+            full_form_name = "Form 404: Void-Fill Application (Reason: Excessive Synergy)"
+            policy = self.POLICY["Form 404"]
+            mod_log = []
+            for k, v in policy["mod"].items():
+                if k in physics:
+                    physics[k] += v
+                    mod_log.append(f"{k} {v:+.1f}")
+            return {
+                "status": "NULLIFY",
+                "ui": f"{Prisma.GRY}🏢 THE BUREAU: We have detected unauthorized Paradigms.{Prisma.RST}\n   {Prisma.RED}[Filed: {full_form_name}]{Prisma.RST}\n   {Prisma.GRY}Evidence: {', '.join(buzz_hits)}{Prisma.RST}",
+                "log": f"BUREAUCRACY: Filed Form 404. Modifiers: {mod_log}.",
+                "atp_gain": policy["atp"]
+            }
         suburban_words = [w for w in clean_words if w in TheLexicon.get("suburban") or w in TheLexicon.get("buffer")]
         toxin = physics.get("counts", {}).get("toxin", 0)
         clean_len = len(clean_words)

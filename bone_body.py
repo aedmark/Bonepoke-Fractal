@@ -1,4 +1,4 @@
-
+# bone_body.py
 
 import math, random, time
 from collections import deque, Counter
@@ -12,7 +12,6 @@ from bone_data import BIO_NARRATIVE
 
 @dataclass
 class Biometrics:
-    """Snapshot of the organism's physical state."""
     health: float
     stamina: float
     stress_modifier: float = 1.0
@@ -20,7 +19,6 @@ class Biometrics:
 
 @dataclass
 class MetabolicReceipt:
-    """The invoice presented to the mitochondria after a cycle of effort."""
     base_cost: float
     drag_tax: float
     inefficiency_tax: float
@@ -30,7 +28,6 @@ class MetabolicReceipt:
 
 @dataclass
 class SemanticSignal:
-    """The chemical translation of meaning."""
     novelty: float = 0.0
     resonance: float = 0.0
     valence: float = 0.0
@@ -38,7 +35,6 @@ class SemanticSignal:
 
 @dataclass
 class BioSystem:
-    """Container for all biological subsystems."""
     mito: 'MitochondrialForge'
     endo: 'EndocrineSystem'
     immune: MycotoxinFactory
@@ -51,7 +47,6 @@ class BioSystem:
 
 @dataclass
 class MitochondrialState:
-    """State vector for the cellular engine."""
     atp_pool: float = 100.0
     ros_buildup: float = 0.0
     membrane_potential: float = -150.0
@@ -61,7 +56,6 @@ class MitochondrialState:
     enzymes: Set[str] = field(default_factory=set)
 
 class MitochondrialForge:
-    """Manages ATP production, 'respiration' (burning energy for action), and the accumulation of oxidative stress (ROS)."""
     APOPTOSIS_TRIGGER = "CYTOCHROME_C_RELEASE"
 
     def __init__(self, lineage_seed: str, events, inherited_traits: Optional[Dict] = None):
@@ -77,7 +71,6 @@ class MitochondrialForge:
             self.apply_inheritance(inherited_traits)
 
     def apply_inheritance(self, traits: Dict):
-        """Loads genetic traits from a previous spore/session."""
         self.state.efficiency_mod = traits.get("efficiency_mod", 1.0)
         self.state.ros_resistance = traits.get("ros_resistance", 1.0)
         if "enzymes" in traits:
@@ -85,7 +78,6 @@ class MitochondrialForge:
             self.events.log(f"{Prisma.CYN}[MITO]: Inherited Enzymes: {list(self.state.enzymes)}.{Prisma.RST}")
 
     def adapt(self, final_health: float) -> Dict:
-        """Evolutionary Logic: Generates new traits based on survival stress."""
         traits = {
             "efficiency_mod": self.state.efficiency_mod,
             "ros_resistance": self.state.ros_resistance,
@@ -95,36 +87,31 @@ class MitochondrialForge:
         return traits
 
     def calculate_metabolism(self, drag: float, external_modifiers: Optional[List[float]] = None) -> MetabolicReceipt:
-        """
-        Calculates the ATP cost of the current narrative cycle.
-        High 'Drag' (complexity/confusion) increases the metabolic tax.
-        """
         limit = BoneConfig.MAX_DRAG_LIMIT
-        safe_drag = max(0.0, drag)
-        taxable_drag = max(0.0, safe_drag - self.GRACE)
-
-        if taxable_drag <= (limit - self.GRACE):
-            drag_tax = taxable_drag * self.TAX_LOW
+        if drag < 0:
+            drag_tax = drag * 0.1
         else:
-            base_tax = (limit - self.GRACE) * self.TAX_LOW
-            excess_drag = taxable_drag - (limit - self.GRACE)
-            drag_tax = base_tax + (excess_drag * self.TAX_HIGH)
-
+            safe_drag = max(0.0, drag)
+            taxable_drag = max(0.0, safe_drag - self.GRACE)
+            if taxable_drag <= (limit - self.GRACE):
+                drag_tax = taxable_drag * self.TAX_LOW
+            else:
+                base_tax = (limit - self.GRACE) * self.TAX_LOW
+                excess_drag = taxable_drag - (limit - self.GRACE)
+                drag_tax = base_tax + (excess_drag * self.TAX_HIGH)
         if external_modifiers:
             for mod in external_modifiers:
                 drag_tax *= mod
-
-        raw_cost = self.BMR + drag_tax
+        raw_cost = max(0.1, self.BMR + drag_tax)
         safe_efficiency = max(0.1, self.state.efficiency_mod)
         final_cost = raw_cost / safe_efficiency
-
         inefficiency_tax = 0.0
         if safe_efficiency < 1.0:
             inefficiency_tax = final_cost - raw_cost
-
         status = "RESPIRING"
         symptom = BIO_NARRATIVE["MITO"]["NOMINAL"]
-
+        if drag < -1.0:
+            symptom = f"{Prisma.CYN}GLIDING (Drag {drag}){Prisma.RST}"
         if final_cost > self.state.atp_pool:
             status = "NECROSIS"
             symptom = BIO_NARRATIVE["MITO"]["NECROSIS"].format(cost=final_cost, pool=self.state.atp_pool)

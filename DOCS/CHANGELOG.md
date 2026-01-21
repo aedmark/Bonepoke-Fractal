@@ -1,5 +1,22 @@
 # 📜 BONEAMANITA CHANGELOG
 
+## **10.6.4: The "Narrative Levitation" Update**
+
+#### **Optimizations (The Fuller Lens)**
+
+* **[bone_physics.py]** **The Knack (Negative Drag):** Modified `GeodesicEngine.collapse_wavefunction` to remove the zero-clamp on compression.
+* *Impact:* Allows "Lift" (Play/Kinetic energy) to exceed "Friction" (Bureaucracy), creating a negative drag value. The system no longer just overcomes resistance; it achieves propulsion. We are now flying by throwing ourselves at the ground and missing.
+
+#### **New Features (The Pinker/Meadows Lens)**
+
+* **[bone_body.py]** **Metabolic Gliding (Virtuous Cycle):** Updated `MitochondrialForge.calculate_metabolism` to recognize negative drag.
+* *Behavior:* When the system enters a flight state (Drag < 0), the metabolic tax becomes a rebate (cost reduction). This creates a reinforcing feedback loop where joy conserves energy, allowing for sustained periods of "Flow" without burnout.
+
+#### **Resilience & Bug Fixes (The Schur Lens)**
+
+* **[bone_personality.py]** **The Bureau of Absurdity:** Updated `TheBureau` to include a specific audit for `BUZZWORDS` like "synergy" and "paradigm".
+* *Fix:* Implemented "Form 404: Void-Fill Application." Instead of a generic tax, corporate speak now triggers an immediate "NULLIFY" event, crashing the system's Voltage and Kappa to simulate the existential dread of a pointless meeting.
+
 ## **10.6.3: The "Semantic Fluidity" Update**
 
 #### **Optimizations (The Fuller Lens)**

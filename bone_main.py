@@ -1,4 +1,4 @@
-# BONEAMANITA 10.6.4 - "Semantic Fluidity"
+# BONEAMANITA 10.6.4 - "Narrative Levitation"
 # Architects: SLASH, KISHO, The Courtyard, Taylor & Edmark
 
 import time, json
