@@ -83,6 +83,7 @@ class TheTensionMeter:
         self.perfection_streak = 0
         self.last_physics_packet = {}
         self.voltage_buffer = deque(maxlen=5)
+        self.semantic_field = TheLexicon.create_field()
 
     def audit_hubris(self, physics):
         streak = physics.get("perfection_streak", 0)
@@ -119,15 +120,20 @@ class TheTensionMeter:
         graph = graph or {}
         clean_words = TheLexicon.clean(text)
         valence = TheLexicon.get_valence(clean_words)
+        field_vector = self.semantic_field.update(text)
+        semantic_flux = self.semantic_field.momentum
+        atmosphere = self.semantic_field.get_atmosphere()
         counts, unknowns = self._tally_categories(clean_words, text)
         if unknowns:
             self._trigger_neuroplasticity(unknowns, counts)
         geodesic = GeodesicEngine.collapse_wavefunction(clean_words, counts, BoneConfig)
-        self.voltage_buffer.append(geodesic.tension)
+        raw_voltage = geodesic.tension
+        dynamic_voltage = raw_voltage + (semantic_flux * 5.0)
+        self.voltage_buffer.append(dynamic_voltage)
         if self.voltage_buffer:
             smoothed_voltage = sum(self.voltage_buffer) / len(self.voltage_buffer)
         else:
-            smoothed_voltage = geodesic.tension
+            smoothed_voltage = dynamic_voltage
         smoothed_voltage = round(smoothed_voltage, 2)
         graph_mass = 0.0
         if graph:
@@ -139,15 +145,15 @@ class TheTensionMeter:
             "psi": geodesic.abstraction,
             "mass": round(graph_mass, 1)
         }
-
         metrics = self._derive_complex_metrics(
             counts, clean_words,
             smoothed_voltage,
             integrity_packet,
-            geodesic.dimensions
+            geodesic.dimensions,
+            flux=semantic_flux
         )
         metrics["valence"] = valence
-
+        metrics["atmosphere"] = atmosphere
         packet = self._package_physics(
             text, clean_words, counts,
             smoothed_voltage,
@@ -228,9 +234,11 @@ class TheTensionMeter:
             psi = min(1.0, max(0.1, base_psi + 0.1))
         return {"kappa": round(kappa, 3), "psi": round(psi, 2), "mass": round(mass, 1)}
 
-    def _derive_complex_metrics(self, counts, words, voltage, integrity, vectors):
+    def _derive_complex_metrics(self, counts, words, voltage, integrity, vectors, flux=0.0):
         total_vol = max(1, len(words))
-        turbulence = TheLexicon.get_turbulence(words)
+        static_turbulence = TheLexicon.get_turbulence(words)
+        turbulence = (static_turbulence * 0.4) + (flux * 0.6)
+        turbulence = round(min(1.0, turbulence), 2)
         flow_state = "LAMINAR" if turbulence < 0.3 else "TURBULENT"
         mass_words = counts["heavy"] + counts["kinetic"] + counts["thermal"] + counts["cryo"]
         cohesion_words = counts["suburban"] + counts["buffer"] + counts["antigen"] + (counts["abstract"] * 0.5)
@@ -283,6 +291,7 @@ class TheTensionMeter:
             "voltage": voltage,
             "narrative_drag": drag,
             "valence": metrics.get("valence", 0.0),
+            "atmosphere": metrics.get("atmosphere", "VOID"),
             "kappa": integrity["kappa"],
             "psi": integrity["psi"],
             "geodesic_mass": integrity["mass"],

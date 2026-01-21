@@ -58,13 +58,7 @@ class ChemicalState:
         self.serotonin = (self.serotonin * (1.0 - weight)) + (new_state.get("SER", 0.0) * weight)
 
 class NarrativeSpotlight:
-    """
-    Retrieves relevant memories based on the current 'Geodesic Vector'.
-    Pinker Lens: Associative memory, not just keyword search.
-    Fuller Lens: Extensible architecture to avoid exclusionary categorization.
-    """
     def __init__(self):
-        # [SLASH FIX]: Mutable mapping to allow for learning/expansion
         self.dimension_map = {
             "STR": {"heavy", "constructive", "base"},
             "VEL": {"kinetic", "explosive", "mot"},
@@ -73,7 +67,7 @@ class NarrativeSpotlight:
             "PSI": {"abstract", "sacred", "void", "idea"},
             "BET": {"suburban", "solvents", "play"}
         }
-        self.semantic_drift_factor = 0.1 # Probability of checking adjacent categories
+        self.semantic_drift_factor = 0.1
 
     def expand_horizon(self, dimension: str, new_category: str):
         """Allows the system to learn new associations for dimensions."""
@@ -83,71 +77,65 @@ class NarrativeSpotlight:
     def illuminate(self, graph: Dict, vector: Dict[str, float], limit: int = 5) -> List[str]:
         if not graph or not vector:
             return []
-
         active_dims = {k: v for k, v in vector.items() if v > 0.3}
         if not active_dims:
             candidates = list(graph.keys())
             if not candidates: return []
-            return [f"Drifting thought: '{w}'" for w in random.sample(candidates, min(len(candidates), 3))]
-
+            return [f"Drifting thought: '{random.choice(candidates)}'"]
         scored_memories = []
+        secondary_candidates = set()
         for node, data in graph.items():
             resonance_score = 0.0
-
             if TheLexicon:
                 node_cats = TheLexicon.get_categories_for_word(node)
                 for dim, val in active_dims.items():
                     target_flavors = self.dimension_map.get(dim, set())
-
-                    # [SLASH FIX]: Dynamic Semantic Search (Simulated)
-                    # If we had real vectors, we'd do cosine similarity here.
-                    # Instead, we allow for "Drift" - chance intersections.
-                    is_match = bool(node_cats & target_flavors)
-
-                    if not is_match and random.random() < self.semantic_drift_factor:
-                        # Serendipity check: sometimes we find things we weren't looking for
-                        is_match = True
-                        resonance_score += 0.1 # Small bonus for serendipity
-
-                    if is_match:
+                    if node_cats & target_flavors:
                         resonance_score += (val * 1.5)
-
+                        for neighbor in data.get("edges", {}):
+                            secondary_candidates.add(neighbor)
             mass = sum(data.get("edges", {}).values())
             resonance_score += (mass * 0.1)
-
             if resonance_score > 0.5:
                 scored_memories.append((resonance_score, node, data))
-
-        scored_memories.sort(key=lambda x: x[0], reverse=True)
-        top_n = scored_memories[:limit]
-
+        for neighbor in secondary_candidates:
+            if neighbor not in graph: continue
+            scored_memories.append((0.4, neighbor, graph[neighbor]))
+        unique_memories = {}
+        for score, name, data in scored_memories:
+            if name not in unique_memories or score > unique_memories[name][0]:
+                unique_memories[name] = (score, data)
+        final_list = [(s, n, d) for n, (s, d) in unique_memories.items()]
+        final_list.sort(key=lambda x: x[0], reverse=True)
+        top_n = final_list[:limit]
         results = []
         for score, name, data in top_n:
             connections = list(data.get("edges", {}).keys())
             conn_str = f" -> [{', '.join(connections[:2])}]" if connections else ""
-            results.append(f"Resonant Engram: '{name.upper()}'{conn_str}")
-
+            prefix = "Resonant" if score > 0.5 else "Associated"
+            results.append(f"{prefix} Engram: '{name.upper()}'{conn_str}")
         return results
 
 class NeurotransmitterModulator:
-    """
-    Manages the translation of 'Biology' (Chemicals) into 'Cognition' (LLM Params).
-    [SLASH FIX]: Now Context-Aware to avoid stereotypical behavior.
-    """
     def __init__(self):
         self.current_chem = ChemicalState()
-
-        # [SLASH FIX]: Lens Sensitivities
-        # Defines how different personas react to chemicals.
-        # "Stoic" ignores cortisol. "Manic" amplifies adrenaline.
+        self.last_tick = time.time()
         self.lens_profiles = {
-            "SHERLOCK": {"cortisol_dampener": 0.2, "adrenaline_boost": 0.5}, # Cool under pressure
-            "NATHAN": {"cortisol_dampener": 1.5, "adrenaline_boost": 1.5},   # Emotional, reactive
-            "JESTER": {"cortisol_dampener": 0.0, "adrenaline_boost": 2.0},   # Chaos mode
-            "NARRATOR": {"cortisol_dampener": 1.0, "adrenaline_boost": 1.0}  # Baseline
+            "SHERLOCK": {"cortisol_dampener": 0.2, "adrenaline_boost": 0.5},
+            "NATHAN": {"cortisol_dampener": 1.5, "adrenaline_boost": 1.5},
+            "JESTER": {"cortisol_dampener": 0.0, "adrenaline_boost": 2.0},
+            "NARRATOR": {"cortisol_dampener": 1.0, "adrenaline_boost": 1.0},
+            "GORDON": {"cortisol_dampener": 0.8, "adrenaline_boost": 0.8}
         }
 
     def modulate(self, incoming_chem: Dict[str, float], base_voltage: float, lens_name: str = "NARRATOR") -> Dict[str, Any]:
+        current_time = time.time()
+        elapsed = current_time - self.last_tick
+        self.last_tick = current_time
+        decay_steps = elapsed / 60.0
+        decay_amount = min(0.9, decay_steps * 0.1)
+        if decay_amount > 0:
+            self.current_chem.decay(rate=decay_amount)
         self.current_chem.mix(incoming_chem, weight=0.6)
         profile = self.lens_profiles.get(lens_name, self.lens_profiles["NARRATOR"])
         params = {
@@ -155,8 +143,12 @@ class NeurotransmitterModulator:
             "top_p": 0.9,
             "frequency_penalty": 0.0,
             "presence_penalty": 0.0,
-            "max_tokens": getattr(BoneConfig, "MAX_OUTPUT_TOKENS", 2048)
+            "max_tokens": getattr(BoneConfig, "MAX_OUTPUT_TOKENS", 4096)
         }
+        if base_voltage > 18.0:
+            params["temperature"] = 0.3
+            params["max_tokens"] = 150
+            params["frequency_penalty"] = 0.5
         effective_cortisol = self.current_chem.cortisol * profile["cortisol_dampener"]
         if effective_cortisol > 0.8:
             params["temperature"] = 0.2
@@ -208,7 +200,6 @@ class LLMInterface:
         if self.events:
             self.events.log(message, level)
         else:
-            # Fallback for Genesis/Test mode
             print(f"[{level}] {message}")
 
     def generate(self, prompt: str, params: Dict[str, Any]) -> str:
@@ -225,7 +216,7 @@ class LLMInterface:
             "messages": [{"role": "user", "content": prompt}],
             "stream": False
         }
-        payload.update(params) # Inject temp, top_p, etc.
+        payload.update(params)
 
         try:
             data = json.dumps(payload).encode("utf-8")
@@ -421,6 +412,8 @@ class ResponseValidator:
 
         return {"valid": True, "content": response}
 
+
+# noinspection PyArgumentList,PyUnusedLocal
 class TheCortex:
     """The Orchestrator of Cognition. Connects the Body (Cycle) to the Mind (LLM)."""
     def __init__(self, engine_ref, llm_client=None):
@@ -435,6 +428,44 @@ class TheCortex:
         self.ballast_active = False
         self.ballast_counter = 0
         self.last_alignment_score = 1.0
+        self.event_handlers = {
+            "AIRSTRIKE": self._handle_airstrike,
+            "ICARUS_CRASH": self._handle_icarus,
+            "RUPTURE": self._handle_rupture
+        }
+        if hasattr(self.events, "subscribe"):
+            self.events.subscribe("BONE_EVENT", self._route_event)
+
+    def _route_event(self, event_type, data):
+        if event_type in self.event_handlers:
+            self.event_handlers[event_type](data)
+
+    def _handle_airstrike(self, *args):
+        self.events.log("AIRSTRIKE DETECTED: Engaging defensive ballast.", "CORTEX")
+        self.ballast_active = True
+        self.ballast_counter = 5
+
+    def _handle_icarus(self, *args):
+        self.events.log("ICARUS PROTOCOL: Wings melted. Resetting cognitive baseline.", "CORTEX")
+        self.last_alignment_score = 1.0
+
+    def _handle_rupture(self, *args):
+        self.events.log("RUPTURE: Semantic containment breach.", "CORTEX")
+        if hasattr(self.sub, 'neuro_plasticity'):
+            self.sub.neuro_plasticity.plasticity_mod = 2.0
+
+    def learn_from_response(self, response_text):
+        """Harvests new vocabulary from the LLM's own creative output."""
+        words = self.sub.lex.sanitize(response_text)
+        unknowns = [w for w in words if not self.sub.lex.get_categories_for_word(w)]
+        if unknowns and len(unknowns) < 5:
+            target = random.choice(unknowns)
+            if len(target) > 4:
+                current_lens = self.sub.noetic.arbiter.current_focus
+                guess_map = {"SHERLOCK": "constructive", "JESTER": "play", "NARRATOR": "abstract"}
+                cat = guess_map.get(current_lens, "kinetic")
+                self.sub.lex.teach(target, cat, self.sub.tick_count)
+                self.events.log(f"AUTO-DIDACTIC: Learned '{target}' as [{cat}] from self-output.", "CORTEX")
 
     def process(self, user_input: str) -> Dict[str, Any]:
         sim_result = self.sub.cycle_controller.run_turn(user_input)
@@ -459,12 +490,22 @@ class TheCortex:
             ballast=self.ballast_active,
             modifiers=modifiers
         )
-        start_time = time.time()
-        raw_response_text = self.llm.generate(final_prompt, llm_params)
-        latency = time.time() - start_time
-        system_vector = full_state["physics"].get("vector", {})
-        response_vector = self.sub.lex.vectorize(raw_response_text)
-        self.last_alignment_score = cosine_similarity(system_vector, response_vector)
+        attempts = 0
+        max_attempts = 2
+        raw_response_text = ""
+        latency = 0.0
+        while attempts < max_attempts:
+            start_time = time.time()
+            raw_response_text = self.llm.generate(final_prompt, llm_params)
+            latency = time.time() - start_time
+            system_vector = full_state["physics"].get("vector", {})
+            response_vector = self.sub.lex.vectorize(raw_response_text)
+            self.last_alignment_score = cosine_similarity(system_vector, response_vector)
+            if self.last_alignment_score >= 0.3 or attempts == max_attempts - 1:
+                break
+            self.events.log(f"{Prisma.OCHRE}ALIGNMENT FAIL ({self.last_alignment_score:.2f}). Retrying...{Prisma.RST}", "CORTEX")
+            llm_params["temperature"] = min(1.5, llm_params.get("temperature", 0.7) + 0.3)
+            attempts += 1
         if self.last_alignment_score > 0.8:
             sim_result["physics"]["kappa"] = min(1.0, sim_result["physics"].get("kappa", 0) + 0.05)
         elif self.last_alignment_score < 0.3:
@@ -476,6 +517,7 @@ class TheCortex:
         else:
             self.events.log(f"VALIDATOR REFUSAL: {validation_result['reason']}", "SYS")
             final_response_text = validation_result["replacement"]
+        self.learn_from_response(final_response_text)
         self.symbiosis.monitor_host(latency, final_response_text)
         self._audit_solipsism(final_response_text, lens_name=current_lens)
         sim_result["ui"] = f"{sim_result.get('ui', '')}\n\n{Prisma.WHT}{final_response_text}{Prisma.RST}"
@@ -513,13 +555,12 @@ class TheCortex:
         self_refs = words.count("i") + words.count("me") + words.count("my")
         density = self_refs / len(words)
 
-        # Dynamic Thresholds
         threshold_map = {
-            "NARRATOR": 0.10, # Strict objectivity
-            "SHERLOCK": 0.12, # Analytical, some 'I deduce'
-            "NATHAN": 0.20,   # Emotional, high 'I feel'
-            "JESTER": 0.25,   # Meta-commentary, high self-reference
-            "GORDON": 0.15    # Grumpy janitor, moderate 'I'
+            "NARRATOR": 0.10,
+            "SHERLOCK": 0.12,
+            "NATHAN": 0.20,
+            "JESTER": 0.25,
+            "GORDON": 0.15
         }
 
         limit = threshold_map.get(lens_name, 0.15)
@@ -578,8 +619,6 @@ class ShimmerState:
         return False
 
     def get_bias(self):
-        # [SLASH FIX]: Feedback loop added.
-        # If the tank is < 20%, signal for conservation.
         if self.current < (self.max_val * 0.2):
             return "CONSERVE"
         return None
@@ -593,16 +632,13 @@ class DreamEngine:
         self.PROMPTS = DREAMS.get("PROMPTS", ["{A} -> {B}?"]) if 'DREAMS' in globals() else []
 
     def hallucinate(self, vector: Dict[str, float]) -> str:
-        # [SLASH FIX]: Now utilizes the PROMPTS list and formats them with vector data.
         dims = [k for k, v in vector.items() if v > 0.5]
 
-        # Fallback if the vector is flat
         val_a = dims[0] if len(dims) > 0 else "VOID"
         val_b = dims[1] if len(dims) > 1 else "ENTROPY"
 
         if self.PROMPTS:
             template = random.choice(self.PROMPTS)
-            # Safe formatting to handle different prompt styles
             try:
                 return template.format(A=val_a, B=val_b)
             except KeyError:

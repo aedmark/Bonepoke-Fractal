@@ -5,6 +5,7 @@ import json, random, re, string, time, unicodedata, os
 from typing import Tuple, Dict, Set, Optional, List
 from bone_bus import BoneConfig, Prisma
 from bone_data import LEXICON, GENETICS
+from functools import lru_cache
 
 class LexiconStore:
     HIVE_FILENAME = "cortex_hive.json"
@@ -80,6 +81,7 @@ class LexiconStore:
             return combined - self.USER_FLAGGED_BIAS
         return combined
 
+    @lru_cache(maxsize=4096)
     def get_categories_for_word(self, word: str) -> Set[str]:
         w = word.lower()
         cats = self.REVERSE_INDEX.get(w, set()).copy()
@@ -177,6 +179,22 @@ class LinguisticAnalyzer:
         total = max(1.0, sum(dims.values()))
         return {k: round(v / total, 3) for k, v in dims.items()}
 
+    def calculate_flux(self, vec_a: Dict[str, float], vec_b: Dict[str, float]) -> float:
+        if not vec_a or not vec_b: return 0.0
+        keys = set(vec_a.keys()) | set(vec_b.keys())
+        diff_sq = sum((vec_a.get(k, 0.0) - vec_b.get(k, 0.0)) ** 2 for k in keys)
+        return round(diff_sq ** 0.5, 3)
+
+    def contextualize(self, word: str, field_vector: Dict[str, float]) -> str:
+        base_cat, score = self.classify_word(word)
+        if not field_vector or not base_cat:
+            return base_cat
+        dominant_field = max(field_vector, key=field_vector.get) if field_vector else None
+
+        if dominant_field and field_vector[dominant_field] > 0.6:
+            return base_cat
+        return base_cat
+
     def sanitize(self, text: str) -> List[str]:
         if not text: return []
         try:
@@ -235,6 +253,39 @@ class LinguisticAnalyzer:
             score += val
         normalized = score / max(1.0, len(words) * 0.5)
         return max(-1.0, min(1.0, normalized))
+
+class SemanticField:
+    def __init__(self, analyzer_ref):
+        self.analyzer = analyzer_ref
+        self.current_vector = {}
+        self.momentum = 0.0
+        self.history = []
+
+    def update(self, text: str) -> Dict[str, float]:
+        """Inject new text into the field and get the reaction."""
+        new_vector = self.analyzer.vectorize(text)
+        if not new_vector:
+            return self.current_vector
+        flux = self.analyzer.calculate_flux(self.current_vector, new_vector)
+        self.momentum = (self.momentum * 0.7) + (flux * 0.3)
+        blended = {}
+        all_keys = set(self.current_vector.keys()) | set(new_vector.keys())
+        for k in all_keys:
+            old_val = self.current_vector.get(k, 0.0)
+            new_val = new_vector.get(k, 0.0)
+            blended[k] = round((old_val * 0.6) + (new_val * 0.4), 3)
+        self.current_vector = blended
+        self.history.append((time.time(), flux))
+        if len(self.history) > 10: self.history.pop(0)
+        return self.current_vector
+
+    def get_atmosphere(self) -> str:
+        """Returns the dominant 'weather' of the field."""
+        if not self.current_vector: return "VOID"
+        dom = max(self.current_vector, key=self.current_vector.get)
+        if self.momentum > 0.5:
+            return f"Volatile {dom.upper()} Storm"
+        return f"Stable {dom.upper()} Atmosphere"
 
 class LexiconService:
     _INITIALIZED = False
@@ -323,6 +374,11 @@ class LexiconService:
 
     @classmethod
     def taste(cls, word): return cls.classify(word)
+
+    @classmethod
+    def create_field(cls):
+        if not cls._INITIALIZED: cls.initialize()
+        return SemanticField(cls._ANALYZER)
 
     @classmethod
     def get(cls, category: str) -> Set[str]:

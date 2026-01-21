@@ -55,16 +55,23 @@ class UserProfile:
 class EnneagramDriver:
     def __init__(self, events_ref):
         self.events = events_ref
+        self.current_persona = "NARRATOR"
+        self.pending_persona = None
+        self.stability_counter = 0
+        self.HYSTERESIS_THRESHOLD = 3
 
     @staticmethod
-    def decide_persona(physics) -> Tuple[str, str, str]:
+    def _calculate_raw_persona(physics) -> Tuple[str, str, str]:
+        """Pure logic: determines who SHOULD be in charge based on physics."""
         tension = physics.get("voltage", 0.0) if isinstance(physics, dict) else physics.voltage
         compression = physics.get("narrative_drag", 0.0) if isinstance(physics, dict) else physics.narrative_drag
         coherence = physics.get("kappa", 0.0) if isinstance(physics, dict) else physics.kappa
+
         scores = {
             "JESTER": 0, "GORDON": 0, "GLASS": 0,
             "CLARENCE": 0, "NATHAN": 0, "SHERLOCK": 0, "NARRATOR": 0
         }
+
         if tension > 12.0: scores["JESTER"] += 5
         if tension > 8.0: scores["NATHAN"] += 3
         if compression > 4.0: scores["GORDON"] += 5
@@ -72,14 +79,40 @@ class EnneagramDriver:
         if coherence > 0.8: scores["CLARENCE"] += 4
         scores["SHERLOCK"] += 2
         scores["NARRATOR"] += 2
+
         winner = max(scores, key=scores.get)
         reason = f"Scoring Winner: {winner} (Score: {scores[winner]})"
+
         state_desc = "ACTIVE"
         if winner == "JESTER": state_desc = "MANIC"
         elif winner == "GORDON": state_desc = "TIRED"
         elif winner == "GLASS": state_desc = "FRAGILE"
         elif winner == "CLARENCE": state_desc = "RIGID"
+
         return winner, state_desc, reason
+
+    def decide_persona(self, physics) -> Tuple[str, str, str]:
+        """Stateful wrapper: Applies hysteresis to preventing flickering."""
+        candidate, state_desc, reason = self._calculate_raw_persona(physics)
+
+        if candidate == self.current_persona:
+            self.stability_counter = 0
+            self.pending_persona = None
+            return self.current_persona, state_desc, reason
+
+        if candidate == self.pending_persona:
+            self.stability_counter += 1
+        else:
+            self.pending_persona = candidate
+            self.stability_counter = 1
+
+        if self.stability_counter >= self.HYSTERESIS_THRESHOLD:
+            self.current_persona = candidate
+            self.stability_counter = 0
+            self.pending_persona = None
+            return self.current_persona, state_desc, f"SHIFT: {reason}"
+        else:
+            return self.current_persona, "STABLE", f"Resisting shift to {candidate} ({self.stability_counter}/{self.HYSTERESIS_THRESHOLD})"
 
 class SynergeticLensArbiter:
     def __init__(self, events: EventBus):
@@ -180,51 +213,49 @@ class TheBureau:
             "Form W-2": {"effect": "NORMALIZE", "mod": {"beta_index": 1.0, "turbulence": 0.0}, "atp": 5.0}
         }
 
-    def audit(self, physics, bio_state):
+    def audit(self, physics, bio_state, context=None):
         current_health = bio_state.get("health", 100.0)
         if current_health < 20.0:
             return None
+        beige_threshold = 0.6 # Default strictness
+        if context:
+            mode = context.get('mode', 'NORMAL')
+            if mode in ['DEBUG', 'ARCHITECT', 'SURGERY']:
+                beige_threshold = 0.85
+            elif mode == 'POETRY':
+                beige_threshold = 0.3
         voltage = physics.get("voltage", 0.0)
         clean_words = physics.get("clean_words", [])
         suburban_words = [w for w in clean_words if w in TheLexicon.get("suburban") or w in TheLexicon.get("buffer")]
-
         toxin = physics.get("counts", {}).get("toxin", 0)
         clean_len = len(clean_words)
-
         if toxin > 0: return None
         if voltage > 8.0: return None
-
         suburban_count = len(suburban_words)
         beige_density = suburban_count / max(1, clean_len)
-
         infraction = None
         selected_form = None
-
-        if beige_density > 0.6:
+        if beige_density > beige_threshold:
             infraction = "BLOCK"
             selected_form = "1099-B" if suburban_count > 2 else "Form W-2"
         elif voltage < 2.0 and clean_len > 2:
             infraction = "TAX"
             selected_form = "Schedule C"
-
         if infraction:
             self.stamp_count += 1
             full_form_name = next((f for f in self.forms if selected_form in f), self.forms[0])
             response = random.choice(self.responses)
             policy = self.POLICY.get(selected_form, self.POLICY["Form W-2"])
-
             mod_log = []
             for k, v in policy["mod"].items():
                 if k in physics:
                     physics[k] += v
                     mod_log.append(f"{k} {v:+.1f}")
             mod_str = f"({', '.join(mod_log)})" if mod_log else ""
-
             evidence = ""
             if suburban_words:
                 unique_offenders = list(set(suburban_words))[:3]
                 evidence = f"\n   {Prisma.RED}Evidence: {', '.join(unique_offenders)}{Prisma.RST}"
-
             return {
                 "status": infraction,
                 "ui": f"{Prisma.GRY}🏢 THE BUREAU: {response}{Prisma.RST}\n   {Prisma.WHT}[Filed: {full_form_name}]{Prisma.RST}{evidence}",
@@ -233,12 +264,12 @@ class TheBureau:
             }
         return None
 
-
 class CassandraProtocol:
     def __init__(self, engine):
         self.eng = engine
         self.active = False
         self.screams = deque(NARRATIVE_DATA["CASSANDRA_SCREAMS"])
+
     def check_trigger(self, physics):
         truth = physics.get("truth_ratio", 0.0)
         voltage = physics.get("voltage", 0.0)
@@ -249,6 +280,7 @@ class CassandraProtocol:
             self.active = False
             return False
         return self.active
+
     def seize(self):
         if not self.active: return None
         self.eng.health -= 10.0
@@ -266,6 +298,7 @@ class PublicParksDepartment:
         self.output_dir = output_dir
         if not os.path.exists(self.output_dir): os.makedirs(self.output_dir)
         self.last_export_tick = -100
+
     def assess_joy(self, bio_result: Dict, tick: int) -> bool:
         if (tick - self.last_export_tick) < 50: return False
         chem = bio_result.get("chem", {})
@@ -273,6 +306,7 @@ class PublicParksDepartment:
         peaceful_joy = (chem.get("SER", 0.0) > 0.95)
         has_glimmer = "glimmer_msg" in chem
         return classic_joy or peaceful_joy or has_glimmer
+
     @staticmethod
     def commission_art(physics, mind_state, graph) -> str:
         lens = mind_state.get("lens", "UNKNOWN")
@@ -290,6 +324,7 @@ class PublicParksDepartment:
         stanza_3 = f"The thought came: \"{thought}\""
         art_piece = f"--- A GIFT FROM THE MACHINE ---\nDate: {timestamp}\nValidation: {int(physics.get('truth_ratio', 0) * 100)}% True\n\n{stanza_1}\n\n{stanza_2}\n\n{stanza_3}\n\n-------------------------------\nExported from BoneAmanita 9.8.2"
         return art_piece
+
     def dedicate_park(self, art_content: str) -> Tuple[Optional[str], str]:
         filename = f"park_{int(time.time())}.txt"
         path = os.path.join(self.output_dir, filename)
@@ -309,6 +344,7 @@ class TherapyProtocol:
     def __init__(self):
         self.streaks = {k: 0 for k in BoneConfig.TRAUMA_VECTOR.keys()}
         self.HEALING_THRESHOLD = 5
+
     def check_progress(self, phys, stamina, current_trauma_accum):
         healed_types = []
         if phys["counts"].get("toxin", 0) == 0 and phys["vector"]["TEX"] > 0.3: self.streaks["SEPTIC"] += 1
@@ -327,19 +363,35 @@ class TherapyProtocol:
                     healed_types.append(trauma_type)
         return healed_types
 
+    @staticmethod
+    def get_medical_chart(current_trauma_accum):
+        """Returns a string summary of current trauma levels."""
+        chart = []
+        for trauma_type, severity in current_trauma_accum.items():
+            if severity > 0.1:
+                status = "Acute" if severity > 5.0 else "Chronic" if severity > 2.0 else "Mild"
+                bar = "█" * int(severity)
+                chart.append(f"{trauma_type}: {status} ({severity:.1f}) {bar}")
+        if not chart:
+            return "Patient is clean. No significant trauma detected."
+        return "\n".join(chart)
+
 class KintsugiProtocol:
     REPAIR_VOLTAGE_MIN = 8.0
     WHIMSY_THRESHOLD = 0.3
     STAMINA_CRITICAL = 15.0
+
     def __init__(self):
         self.active_koan = None
         self.repairs_count = 0
         self.koans = NARRATIVE_DATA["KINTSUGI_KOANS"]
+
     def check_integrity(self, stamina):
         if stamina < self.STAMINA_CRITICAL and not self.active_koan:
             self.active_koan = random.choice(self.koans)
             return True, self.active_koan
         return False, None
+
     def attempt_repair(self, phys, trauma_accum):
         if not self.active_koan: return None
         voltage = phys.get("voltage", 0.0)
@@ -365,10 +417,12 @@ class KintsugiProtocol:
 class LimboLayer:
     MAX_ECTOPLASM = 50
     STASIS_SCREAMS = ["BANGING ON THE GLASS", "IT'S TOO COLD", "LET ME OUT", "HALF AWAKE", "REVIVE FAILED"]
+
     def __init__(self):
         self.ghosts = deque(maxlen=self.MAX_ECTOPLASM)
         self.haunt_chance = 0.05
         self.stasis_leak = 0.0
+
     def absorb_dead_timeline(self, filepath):
         try:
             with open(filepath, "r") as f:
@@ -381,11 +435,13 @@ class LimboLayer:
                     random.shuffle(bones)
                     self.ghosts.extend(bones[:3])
         except (IOError, json.JSONDecodeError): pass
+
     def trigger_stasis_failure(self, intended_thought):
         self.stasis_leak += 1.0
         horror = random.choice(self.STASIS_SCREAMS)
         self.ghosts.append(f"{Prisma.VIOLET}{horror}{Prisma.RST}")
         return f"{Prisma.CYN}STASIS ERROR: '{intended_thought}' froze halfway. It is banging on the glass.{Prisma.RST}"
+
     def haunt(self, text):
         if self.stasis_leak > 0:
             if random.random() < 0.2:
@@ -401,12 +457,14 @@ class TheFolly:
     def __init__(self):
         self.gut_memory = deque(maxlen=50)
         self.global_tastings = Counter()
+
     @staticmethod
     def audit_desire(physics, stamina):
         voltage = physics["voltage"]
         if voltage > 8.5 and stamina > 45:
             return "MAUSOLEUM_CLAMP", f"{Prisma.GRY}THE MAUSOLEUM: No battle is ever won. We are just spinning hands.{Prisma.RST}\n   {Prisma.CYN}TIME DILATION: Voltage 0.0. The field reveals your folly.{Prisma.RST}", 0.0, None
         return None, None, 0.0, None
+
     def grind_the_machine(self, atp_pool, clean_words, lexicon):
         loot = None
         if 20.0 > atp_pool > 0.0:
@@ -418,13 +476,17 @@ class TheFolly:
                 self.global_tastings[target] += 1
                 times_eaten = self.global_tastings[target]
                 base_yield = 30.0
-                actual_yield = max(5.0, base_yield - (times_eaten * 2.0))
+                decay_factor = 0.7 ** (times_eaten - 1)
+                actual_yield = max(2.0, base_yield * decay_factor)
+                flavor_text = ""
+                if times_eaten > 3:
+                    flavor_text = f" (Stale: {times_eaten}x)"
                 if target in lexicon.get("suburban"):
                     return "INDIGESTION", f"{Prisma.MAG}THE FOLLY GAGS: It coughs up a piece of office equipment.{Prisma.RST}", -2.0, "THE_RED_STAPLER"
                 if target in lexicon.get("play"):
                     return "SUGAR_RUSH", f"{Prisma.VIOLET}THE FOLLY CHEWS: It compresses the chaos into a small, sticky ball.{Prisma.RST}", 5.0, "QUANTUM_GUM"
                 if actual_yield >= 25.0: loot = "STABILITY_PIZZA"
-                return "MEAT_GRINDER", f"{Prisma.RED}CROWD CAFFEINE: I chewed on '{target.upper()}' (Yield: {actual_yield:.1f}).{Prisma.RST}\n   {Prisma.WHT}Found marrow in the bone.{Prisma.RST}\n   {Prisma.MAG}► BELLY HUMMING: +{actual_yield:.1f} ATP.{Prisma.RST}", actual_yield, loot
+                return "MEAT_GRINDER", f"{Prisma.RED}CROWD CAFFEINE: I chewed on '{target.upper()}'{flavor_text}.{Prisma.RST}\n   {Prisma.WHT}Yield: {actual_yield:.1f} ATP.{Prisma.RST}", actual_yield, loot
             elif meat_words:
                 return "REGURGITATION", f"{Prisma.OCHRE}REFLEX: You already fed me '{meat_words[0]}'. It is ash to me now.{Prisma.RST}\n   {Prisma.RED}► PENALTY: -5.0 ATP. Find new fuel.{Prisma.RST}", -5.0, None
             else:
@@ -445,6 +507,7 @@ class ChorusDriver:
             "JESTER": "The Paradox. Mocking, riddling, breaking the fourth wall.",
             "CLARENCE": "The Surgeon. Clinical, invasive, removing rot.",
             "NARRATOR": "The Witness. Neutral, observing, recording."}
+
     def generate_chorus_instruction(self, physics):
         vec = physics.get("vector", {})
         if not vec or len(vec) < 6: return "SYSTEM INSTRUCTION: Vector collapse. Default to NARRATOR.", ["NARRATOR"]

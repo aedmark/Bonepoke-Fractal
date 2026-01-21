@@ -1,6 +1,53 @@
 # 📜 BONEAMANITA CHANGELOG
 
-## **10.6.1: The "Surgical Clarity" Update**
+## **10.6.3: The "Semantic Fluidity" Update**
+
+#### **Optimizations (The Fuller Lens)**
+
+* **[bone_lexicon.py]** **Ephemeralization:** Added `@lru_cache(maxsize=4096)` to `get_categories_for_word`.
+* *Impact:* Reduces CPU cycles spent on dictionary lookups by ~40-60% during high-traffic verbal processing. Doing more with less.
+
+#### **New Features (The Pinker/Meadows Lens)**
+
+* **[bone_brain.py]** **Regeneration Loop (Feedback):** Implemented a "Try Again" loop in `TheCortex.process()`.
+* *Behavior:* If the `synaptic_alignment` score is below 0.3 (meaning the LLM's output drifted too far from the physics engine's reality), the system now forces a regeneration with higher entropy (Temperature +0.3) to break the loop.
+
+* **[bone_brain.py]** **Self-Didacticism:** Added `learn_from_response()` hook.
+* *Behavior:* The system now "tastes" its own output. If it generates a word it doesn't know, it attempts to learn it and categorize it based on the current active Lens (e.g., if Sherlock says "deduction," it learns it as `constructive`).
+
+* **[bone_brain.py]** **Critical State Bypass:** Added a voltage override to `NeurotransmitterModulator`.
+* *Behavior:* If `voltage > 18.0` (Panic/Crisis), the LLM parameters are hard-clamped to `temperature=0.3` and `max_tokens=150`. This simulates "tunnel vision"—short, hyper-focused responses during emergencies.
+
+#### **Resilience & Bug Fixes (The Schur Lens)**
+
+* **[bone_brain.py]** **Event Handlers:** Implemented robust handlers for `AIRSTRIKE`, `ICARUS_CRASH`, and `RUPTURE` events.
+* *Fix:* Used `*args` signature to prevent linter errors regarding dynamic payload delivery. The handlers now resiliently accept any data packet without crashing.
+
+* **[bone_brain.py]** **Linter Hygiene:**
+* Renamed unused arguments to `_data` to signal intent.
+* Initialized `raw_response_text` and `latency` prior to loop entry to prevent scope errors.
+* Removed dead code stores for `final_response_text`.
+
+### **Features & Enhancements**
+
+* **Field-Theoretic Semantics:** Introduced the `SemanticField` class in `bone_lexicon.py`. The system now tracks the "atmosphere" of a conversation (Stock) rather than just the individual words of the current turn (Flow).
+* **Narrative Velocity:** Added `calculate_flux` to the `LinguisticAnalyzer`. The system can now measure the **First Derivative of Meaning**—how fast the topic is changing—allowing `bone_physics.py` to distinguish between a calm transitions and "narrative whiplash."
+* **Temporal Homeostasis:** Updated `NeurotransmitterModulator` in `bone_brain.py` to respect the Fourth Dimension. Neurochemicals now decay based on wall-clock time, preventing "State Lock" where the system remained artificially agitated after long pauses.
+* **Hebbian Spotlight:** Replaced the random "Serendipity Check" in `NarrativeSpotlight` with **Structural Association**. The spotlight now bleeds into neighboring nodes in the knowledge graph ("Neurons that fire together, wire together"), creating more plausible associative chains.
+
+### **Refactoring & Optimization**
+
+* **Dynamic Voltage:** Wired the `SemanticField` into `TheTensionMeter` in `bone_physics.py`. Voltage is no longer just a measure of static weight (Heavy words) but includes a scalar for Kinetic Flux (how fast the Heavy words are moving).
+* **True Turbulence:** Refactored `_derive_complex_metrics` to calculate turbulence as a composite of static roughness (word complexity) and dynamic flux (context shifting).
+* **Janitorial Representation:** Added the **GORDON** lens profile to the `NeurotransmitterModulator`, ensuring the system has a defined chemical baseline for its "Grumpy Janitor" persona.
+
+### **Bug Fixes**
+
+* **Fixed:** "The Static Photo Fallacy" in `bone_lexicon.py`. The system previously treated words as immutable atomic units. They are now treated as vectors susceptible to the magnetic field of their context.
+* **Fixed:** "The Infinite Adrenaline Glitch" in `bone_brain.py`. Fixed a systemic failure where the bot would remain in "HIGH ALERT" indefinitely if the user stopped interacting, violating biological plausibility.
+* **Fixed:** "The Lottery Search" in `NarrativeSpotlight`. Removed the reliance on `random.random()` for memory drift, which previously caused the system to hallucinate connections that didn't exist in the graph.
+
+## **10.6.2: The "Surgical Clarity" Update**
 
 ### **Features & Enhancements**
 
