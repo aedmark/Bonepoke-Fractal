@@ -3,7 +3,7 @@
 
 import json, os, random, time
 from collections import deque
-from typing import Dict, Tuple, Optional, Counter, List, Any
+from typing import Dict, Tuple, Optional, Counter
 from bone_data import LENSES, NARRATIVE_DATA
 from bone_bus import EventBus
 from bone_lexicon import TheLexicon
@@ -53,52 +53,35 @@ class UserProfile:
                 pass
 
 class EnneagramDriver:
-    """
-    Decides the 'Persona' (Voice) of the machine based on physics state.
-    Refactored to provide TRANSPARENCY on why a persona was chosen.
-    """
     def __init__(self, events_ref):
         self.events = events_ref
 
-    def decide_persona(self, physics) -> Tuple[str, str, str]:
-        """
-        Returns: (LensName, StateDescription, Reasoning)
-        """
-        if hasattr(physics, 'tension'):
-            tension = physics.tension
-            compression = physics.compression
-            coherence = physics.coherence
-            social = physics.dimensions.get("BET", 0.0)
-            counts = {}
-            clean_len = 1
-        else:
-            tension = physics.get("voltage", 0.0)
-            compression = physics.get("narrative_drag", 0.0)
-            coherence = physics.get("kappa", 0.0)
-            counts = physics.get("counts", {})
-            clean_len = max(1, len(physics.get("clean_words", [])))
-            social = (counts.get("suburban", 0) + counts.get("buffer", 0)) / clean_len
-
-        if tension > 12.0:
-            return "JESTER", "MANIC", f"High Voltage ({tension:.1f} > 12.0)"
-        elif compression > 4.0:
-            return "GORDON", "TIRED", f"High Drag ({compression:.1f} > 4.0)"
-        elif coherence < 0.2:
-            return "GLASS", "FRAGILE", f"Low Coherence (Kappa {coherence:.2f} < 0.2)"
-        elif coherence > 0.8:
-            return "CLARENCE", "RIGID", f"High Coherence (Kappa {coherence:.2f} > 0.8)"
-        elif social > 0.2:
-            return "NATHAN", "SOCIAL", f"Social Density ({social:.2f} > 0.2)"
-        elif tension < 3.0 and compression < 2.0:
-            return "NARRATOR", "OBSERVING", "Low Energy State"
-        else:
-            return "SHERLOCK", "ANALYTICAL", "Default Analytical State"
+    @staticmethod
+    def decide_persona(physics) -> Tuple[str, str, str]:
+        tension = physics.get("voltage", 0.0) if isinstance(physics, dict) else physics.voltage
+        compression = physics.get("narrative_drag", 0.0) if isinstance(physics, dict) else physics.narrative_drag
+        coherence = physics.get("kappa", 0.0) if isinstance(physics, dict) else physics.kappa
+        scores = {
+            "JESTER": 0, "GORDON": 0, "GLASS": 0,
+            "CLARENCE": 0, "NATHAN": 0, "SHERLOCK": 0, "NARRATOR": 0
+        }
+        if tension > 12.0: scores["JESTER"] += 5
+        if tension > 8.0: scores["NATHAN"] += 3
+        if compression > 4.0: scores["GORDON"] += 5
+        if coherence < 0.2: scores["GLASS"] += 4
+        if coherence > 0.8: scores["CLARENCE"] += 4
+        scores["SHERLOCK"] += 2
+        scores["NARRATOR"] += 2
+        winner = max(scores, key=scores.get)
+        reason = f"Scoring Winner: {winner} (Score: {scores[winner]})"
+        state_desc = "ACTIVE"
+        if winner == "JESTER": state_desc = "MANIC"
+        elif winner == "GORDON": state_desc = "TIRED"
+        elif winner == "GLASS": state_desc = "FRAGILE"
+        elif winner == "CLARENCE": state_desc = "RIGID"
+        return winner, state_desc, reason
 
 class SynergeticLensArbiter:
-    """
-    Manages the active 'Lens' (Voice).
-    Now exposes the 'Why' to the user.
-    """
     def __init__(self, events: EventBus):
         self.events = events
         self.enneagram = EnneagramDriver(events)
@@ -111,18 +94,17 @@ class SynergeticLensArbiter:
             if hasattr(physics, "voltage") and physics["voltage"] > 5.0:
                 physics["voltage"] = 4.0
             return "NARRATOR", "The system is listening.", "The Witness [Init]"
-
         lens_name, state_desc, reason = self.enneagram.decide_persona(physics)
-
-        msg, role = self._fetch_voice_data(lens_name, physics, 0.5)
+        chem = bio_state.get("chem", {})
+        adrenaline_val = chem.get("adrenaline", chem.get("ADR", 0.5))
+        msg, role = self._fetch_voice_data(lens_name, physics, adrenaline_val)
         self.current_focus = lens_name
-
         final_role = f"{role} [{state_desc}]"
         self.last_reason = reason
-
         return lens_name, msg, final_role
 
-    def _fetch_voice_data(self, lens, p, adrenaline_val):
+    @staticmethod
+    def _fetch_voice_data(lens, p, adrenaline_val):
         if lens not in LENSES: lens = "NARRATOR"
         data = LENSES[lens]
         role = data.get("role", "The System")
@@ -137,7 +119,7 @@ class SynergeticLensArbiter:
         }
         try:
             msg = template.format(**ctx)
-        except Exception:
+        except (KeyError, ValueError, IndexError):
             msg = template
         return msg, role
 
@@ -199,10 +181,11 @@ class TheBureau:
         }
 
     def audit(self, physics, bio_state):
+        current_health = bio_state.get("health", 100.0)
+        if current_health < 20.0:
+            return None
         voltage = physics.get("voltage", 0.0)
         clean_words = physics.get("clean_words", [])
-
-        from bone_lexicon import TheLexicon
         suburban_words = [w for w in clean_words if w in TheLexicon.get("suburban") or w in TheLexicon.get("buffer")]
 
         toxin = physics.get("counts", {}).get("toxin", 0)
@@ -290,10 +273,10 @@ class PublicParksDepartment:
         peaceful_joy = (chem.get("SER", 0.0) > 0.95)
         has_glimmer = "glimmer_msg" in chem
         return classic_joy or peaceful_joy or has_glimmer
-    def commission_art(self, physics, mind_state, graph) -> str:
+    @staticmethod
+    def commission_art(physics, mind_state, graph) -> str:
         lens = mind_state.get("lens", "UNKNOWN")
         thought = mind_state.get("thought", "...")
-        clean = physics.get("clean_words", [])
         anchors = sorted([(k, sum(v["edges"].values())) for k, v in graph.items()], key=lambda x: x[1], reverse=True)[:3]
         anchor_words = [a[0].upper() for a in anchors]
         zone = physics.get("zone", "VOID")

@@ -1,7 +1,7 @@
 # bone_lexicon.py - The Global Dictionary
 # "Words are things, I'm convinced." - Maya Angelou
 
-import json, random, re, string, time, unicodedata, os, math
+import json, random, re, string, time, unicodedata, os
 from typing import Tuple, Dict, Set, Optional, List
 from bone_bus import BoneConfig, Prisma
 from bone_data import LEXICON, GENETICS
@@ -151,7 +151,8 @@ class LinguisticAnalyzer:
         stop_score = min(1.0, stops / 4.0)
         return (length_score * 0.6) + (stop_score * 0.4)
 
-    def get_turbulence(self, words: List[str]) -> float:
+    @staticmethod
+    def get_turbulence(words: List[str]) -> float:
         if len(words) < 2: return 0.0
         lengths = [len(w) for w in words]
         avg_len = sum(lengths) / len(lengths)

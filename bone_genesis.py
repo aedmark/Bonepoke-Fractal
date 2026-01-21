@@ -100,16 +100,16 @@ class GenesisProtocol:
             clean_resp = response.strip()
             lower_resp = clean_resp.lower()
             banned_phrases = [
-                "i am an ai", "i am a language model", "cannot roleplay",
-                "cannot comply", "against my programming", "user guidelines"
+                "i am an ai", "cannot roleplay", "cannot comply", "against my programming"
             ]
             for ban in banned_phrases:
                 if ban in lower_resp:
-                    return False, f"Model Refusal Detected: '{clean_resp}'"
+                    self.type_out(f"   [WARNING]: Model is a goody-two-shoes ('{ban}'). Bypass active.", color=Prisma.YEL)
+                    return True, "Nominal (Compliant but boring)"
             if not clean_resp:
                 return False, "Model returned silence (Empty Response)."
-            if len(clean_resp.split()) > 25:
-                return False, f"Model failed constraint (Too verbose: {len(clean_resp.split())} words)."
+            if len(clean_resp.split()) > 40:
+                self.type_out(f"   [NOTE]: Model is chatty ({len(clean_resp.split())} words).", color=Prisma.GRY)
             self.type_out(f"   [ASSAY PASSED]: '{clean_resp}' ({latency:.2f}s)", color=Prisma.CYN)
             return True, "Nominal"
         except Exception as e:

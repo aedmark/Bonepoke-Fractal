@@ -20,16 +20,16 @@ class Prisma:
     VIOLET = "\033[35;2m"
     SLATE = "\033[30;1m"
     PUR = "\033[35m"
+    _COLOR_MAP = {
+        "R": RED, "G": GRN, "Y": YEL, "B": BLU,
+        "M": MAG, "C": CYN, "W": WHT, "0": GRY,
+        "I": INDIGO, "O": OCHRE, "V": VIOLET,
+        "P": PUR
+    }
 
     @classmethod
     def paint(cls, text, color_key="0"):
-        color_map = {
-            "R": cls.RED, "G": cls.GRN, "Y": cls.YEL, "B": cls.BLU,
-            "M": cls.MAG, "C": cls.CYN, "W": cls.WHT, "0": cls.GRY,
-            "I": cls.INDIGO, "O": cls.OCHRE, "V": cls.VIOLET,
-            "P": cls.PUR
-        }
-        code = color_map.get(str(color_key).upper(), cls.WHT)
+        code = cls._COLOR_MAP.get(str(color_key).upper(), cls.WHT)
         safe_text = str(text).replace(cls.RST, cls.RST + code)
         return f"{code}{safe_text}{cls.RST}"
 

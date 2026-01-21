@@ -18,12 +18,6 @@ except ImportError:
     RosettaStone = None
     print(f"{Prisma.YEL}[WARNING]: RosettaStone missing. Reverting to Pidgin Protocol.{Prisma.RST}")
 try:
-    import ollama
-    OLLAMA_AVAILABLE = True
-except ImportError:
-    ollama = None
-    OLLAMA_AVAILABLE = False
-try:
     from bone_telemetry import TelemetryService
 except ImportError:
     TelemetryService = None
@@ -155,10 +149,7 @@ class NeurotransmitterModulator:
 
     def modulate(self, incoming_chem: Dict[str, float], base_voltage: float, lens_name: str = "NARRATOR") -> Dict[str, Any]:
         self.current_chem.mix(incoming_chem, weight=0.6)
-
-        # Resolve lens profile (default to NARRATOR if unknown)
         profile = self.lens_profiles.get(lens_name, self.lens_profiles["NARRATOR"])
-
         params = {
             "temperature": 0.7,
             "top_p": 0.9,
@@ -166,52 +157,35 @@ class NeurotransmitterModulator:
             "presence_penalty": 0.0,
             "max_tokens": getattr(BoneConfig, "MAX_OUTPUT_TOKENS", 2048)
         }
-
-        # [SLASH FIX]: Contextual Modulation
-        # Cortisol isn't always "bad". For Sherlock, it might mean "Focus".
         effective_cortisol = self.current_chem.cortisol * profile["cortisol_dampener"]
-
-        if effective_cortisol > 0.3:
-            # If the lens is sensitive to stress, reduce creativity (temp) and increase repetition (penalty)
-            # If the lens is Stoic (Sherlock), this effect is minimized.
-            params["temperature"] -= (effective_cortisol * 0.4)
-            params["top_p"] -= (effective_cortisol * 0.3)
-            params["frequency_penalty"] += 0.2
-
+        if effective_cortisol > 0.8:
+            params["temperature"] = 0.2
+            params["frequency_penalty"] = 1.0
+            params["presence_penalty"] = 0.5
+        elif effective_cortisol > 0.4:
+            params["temperature"] = 0.5
+            params["top_p"] = 0.8
         if self.current_chem.dopamine > 0.3:
             params["temperature"] += (self.current_chem.dopamine * 0.4)
             params["presence_penalty"] += (self.current_chem.dopamine * 0.4)
-
-        # [SLASH FIX]: Adrenaline Logic (Context Aware)
         effective_adrenaline = self.current_chem.adrenaline * profile["adrenaline_boost"]
-
         if effective_adrenaline > 0.3:
-            # High Adrenaline = Manic output (More tokens).
             base_tokens = 200
             params["max_tokens"] = int(base_tokens + (600 * effective_adrenaline))
-            # Increase frequency penalty to prevent repetitive stuttering during manic episodes
             params["frequency_penalty"] += (effective_adrenaline * 0.6)
-
         if self.current_chem.serotonin > 0.5:
             diff = 0.7 - params["temperature"]
             params["temperature"] += (diff * self.current_chem.serotonin * 0.5)
-
         if base_voltage > 15.0:
             params["temperature"] += 0.25
         elif base_voltage < 5.0:
             params["temperature"] -= 0.15
-
         params["temperature"] = max(0.1, min(1.6, params["temperature"]))
         params["top_p"] = max(0.1, min(1.0, params["top_p"]))
         params["max_tokens"] = max(50, params["max_tokens"])
-
         return params
 
 class LLMInterface:
-    """
-    The Hardware Interface.
-    Fuller Lens: Robust, handles errors, logs to bus (if available).
-    """
     def __init__(self, events_ref: Optional[EventBus] = None, provider: str = None, base_url: str = None, api_key: str = None, model: str = None):
         self.events = events_ref
         self.provider = (provider or BoneConfig.PROVIDER).lower()
@@ -266,27 +240,37 @@ class LLMInterface:
 
         except Exception as e:
             self._log(f"CORTEX UPLINK FAILED: {e}", "ERR")
-            if OLLAMA_AVAILABLE and self.provider != "ollama":
+            if self.provider != "ollama":
                 self._log("Attempting Local Fallback (Ollama)...", "SYS")
                 return self._local_fallback(prompt, params)
-
             return self.mock_generation(prompt)
 
     def _local_fallback(self, prompt: str, params: Dict) -> str:
+        fallback_url = "http://127.0.0.1:11434/v1/chat/completions"
+        payload = {
+            "model": getattr(BoneConfig, "OLLAMA_MODEL_ID", "llama3"),
+            "messages": [{"role": "user", "content": prompt}],
+            "stream": False,
+            "temperature": params.get('temperature', 0.7)
+        }
         try:
-            response = ollama.chat(
-                model=getattr(BoneConfig, "OLLAMA_MODEL_ID", "llama3"),
-                messages=[{'role': 'user', 'content': prompt}],
-                options={'temperature': params.get('temperature', 0.7)}
-            )
-            return response['message']['content']
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(fallback_url, data=data, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=5.0) as response:
+                if response.status == 200:
+                    result = json.loads(response.read().decode("utf-8"))
+                    content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+                    if content:
+                        self._log(f"FALLBACK SUCCESS: Retrieved thought from {fallback_url}", "SYS")
+                        return content
+                raise Exception(f"HTTP {response.status}")
         except Exception as e:
-            self._log(f"FALLBACK FAILED: {e}", "CRIT")
+            self._log(f"FALLBACK FAILED (Raw HTTP): {e}", "CRIT")
             return self.mock_generation(prompt)
 
     @staticmethod
     def mock_generation(prompt: str) -> str:
-        """Schur Lens: When the brain breaks, make it poetic."""
+        _ = prompt
         phrases = [
             "The wire hums, but carries no voice.",
             "Static fills the geodesic dome. The system is dreaming.",
@@ -296,10 +280,6 @@ class LLMInterface:
         return f"[{random.choice(phrases)}]"
 
 class PromptComposer:
-    """
-    Constructs the System Prompt using Geodesic Layering.
-    Now responsive to Symbiosis Modifiers (Meadows Lens).
-    """
     @staticmethod
     def _sanitize(text: str) -> str:
         safe = text.replace('"""', "'''").replace('```', "'''")
@@ -312,12 +292,10 @@ class PromptComposer:
                 "include_memories": True, "simplify_instruction": False,
                 "inject_chaos": False
             }
-
         mind = state.get("mind", {})
         bio = state.get("bio", {})
         phys = state.get("physics", {})
         profile = state.get("user_profile", {})
-
         role = mind.get("role", "The Observer")
         lens = mind.get("lens", "NARRATOR")
         sys_inst = state.get("system_instruction", "")
@@ -326,9 +304,9 @@ class PromptComposer:
             sys_inst = "Keep responses short. Focus on the immediate physical sensation."
 
         identity_block = (
-            f"### SYSTEM IDENTITY\n"
-            f"You are {lens} ({role}).\n"
-            f"{sys_inst}\n"
+            f"=== SYSTEM IDENTITY ===\n"
+            f"Role: {lens} ({role})\n"
+            f"Directive: {sys_inst}\n"
         )
 
         somatic_block = ""
@@ -351,12 +329,20 @@ class PromptComposer:
             )
 
         context_block = ""
-        parts = []
+        inventory = state.get("inventory", [])
+        inv_str = ", ".join(inventory) if inventory else "Empty"
 
+        context_framing = "THE WORLD:"
+        if lens == "GORDON":
+            context_framing = "THE WORKSPACE (Things to fix):"
+        elif lens == "SHERLOCK":
+            context_framing = "EVIDENCE LOCKER:"
+        elif lens == "JESTER":
+            context_framing = "PROPS FOR THE GAG:"
+
+        parts = []
         if modifiers["include_inventory"]:
-            inventory = state.get("inventory", [])
-            inv_str = ", ".join(inventory) if inventory else "Empty"
-            parts.append(f"Inventory: {inv_str}")
+            parts.append(f"{context_framing} Inventory: {inv_str}")
 
         parts.append(f"Location: {state.get('world', {}).get('orbit', ['Void'])[0]}")
 
@@ -398,36 +384,30 @@ class PromptComposer:
 
         final_prompt = (
             f"{identity_block}\n"
+            f"=== BIOLOGICAL STATE ===\n"
             f"{somatic_block}\n"
-            f"{ops_block}\n"
+            f"=== CONTEXTUAL DATA ===\n"
             f"{context_block}\n"
-            f"{social_block}\n"
-            f"### NARRATIVE ARC\n"
-            f"{state.get('soul_state', '')}\n\n"
+            f"{ops_block}\n"
+            f"{social_block}\n\n"
+            f"=== THE IMMEDIATE MOMENT ===\n"
+            f"{state.get('soul_state', '')}\n"
             f"{ballast_txt}"
             f"{chaos_txt}"
-            f"### INPUT TRANSMISSION\n"
-            f"{user_name}: {clean_q}\n\n"
-            f"### DIRECTIVE\n"
-            f"Respond as {lens}. Reflect the biological state in your tone. "
-            f"Do not break character. Do not explain the simulation."
+            f"USER: {clean_q}\n"
+            f"ASSISTANT ({lens}):"
         )
         return final_prompt
 
 class ResponseValidator:
-    """
-    The Immune System for the Mind.
-    Filters out 'Silicon Ash' (LLM refusals, repetition, breaking character).
-    """
     def __init__(self):
         self.banned_phrases = [
             "large language model", "AI assistant", "cannot feel", "as an AI",
             "against my programming", "cannot comply", "language model"
         ]
 
-    def validate(self, response: str, state: Dict) -> Dict:
+    def validate(self, response: str, _state: Dict) -> Dict:
         low_resp = response.lower()
-
         for phrase in self.banned_phrases:
             if phrase.lower() in low_resp:
                 return {

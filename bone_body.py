@@ -192,6 +192,15 @@ class SemanticEndocrinologist:
 
 class SomaticLoop:
     """Orchestrates the interplay between Physics input and Biological consequence."""
+    _ENZYME_MAP = {
+        "kinetic": "PROTEASE",
+        "static": "CELLULASE",
+        "abstract": "DECRYPTASE",
+        "natural": "LIGNASE",
+        "synthetic": "CHITINASE",
+        "social": "AMYLASE",
+        "antigen": "OXIDASE"
+    }
     def __init__(self, bio_system_ref: BioSystem, memory_ref=None, lexicon_ref=None, gordon_ref=None, folly_ref=None, events_ref=None):
         self.bio = bio_system_ref
         self.mem = memory_ref
@@ -219,23 +228,15 @@ class SomaticLoop:
             phys = self._normalize_physics(physics_data)
 
         logs = []
-
         receipt = self._calculate_taxes(phys, logs)
         resp_status = self.bio.mito.respirate(receipt)
-
         if self._audit_folly_desire(phys, stamina, logs) == "MAUSOLEUM_CLAMP":
             return self._package_result(resp_status, logs, enzyme="NONE")
-
         enzyme, total_yield = self._harvest_resources(phys, logs)
         self.bio.mito.state.atp_pool += total_yield
-
-        # [SLASH FIX]: Pass 'text' to use it in maintenance (silencing linter)
         self._perform_maintenance(text, phys, logs, tick_count)
-
         clean_words = phys.get("clean_words", [])
         semantic_sig = self.semantic_doctor.assess(clean_words, phys)
-
-        # [SLASH FIX]: Renamed 'stress_mod' arg to match the parameter 'stress_modifier'
         chem_state = self.bio.endo.metabolize(
             feedback,
             health,
@@ -273,7 +274,6 @@ class SomaticLoop:
 
     @staticmethod
     def _audit_folly_desire(phys, stamina, logs) -> str:
-        # [SLASH FIX]: Utilize 'phys' to check for lethal voltage states
         voltage = phys.get("voltage", 0.0)
 
         if stamina <= 0:
@@ -297,58 +297,32 @@ class SomaticLoop:
 
         found_enzymes = []
         total_atp_yield = 0.0
-        # Base metabolic keep-alive
         total_atp_yield += 1.0
 
         for word in clean_words:
             if len(word) < 4: continue
-
-            # [SLASH FIX]: Use get_current_category instead of harvest.
-            # harvest() returns a dict, but we need a single string category here.
             category = TheLexicon.get_current_category(word)
-
-            # Use 'void' or skip if category is None
             if category and category != "void":
                 enzyme = self._map_category_to_enzyme(category)
                 found_enzymes.append(enzyme)
-
-                # Calculate yield based on complexity
                 word_yield = 2.0 if len(word) > 7 else 1.0
                 total_atp_yield += word_yield
-
-                # Log the digestion (limit log noise)
                 if len(found_enzymes) <= 3:
                     logs.append(f"{Prisma.GRN}[BIO]: Digested '{word}' -> {enzyme} (+{word_yield} ATP){Prisma.RST}")
-
-        # High voltage environments trigger Protease (breaking down complex structures)
         if phys.get("voltage", 0.0) > 8.0:
             found_enzymes.append("PROTEASE")
             total_atp_yield += 5.0
-
         if not found_enzymes:
             return "NONE", total_atp_yield
-
-        # Return the most common enzyme found to set the chemical tone
         dominant_enzyme = Counter(found_enzymes).most_common(1)[0][0]
         return dominant_enzyme, total_atp_yield
 
     @staticmethod
     def _map_category_to_enzyme(category: str) -> str:
-        """Maps Lexicon categories to fungal/biological enzymes."""
-        mapping = {
-            "kinetic": "PROTEASE",
-            "static": "CELLULASE",
-            "abstract": "DECRYPTASE",
-            "natural": "LIGNASE",
-            "synthetic": "CHITINASE",
-            "social": "AMYLASE",
-            "antigen": "OXIDASE"
-        }
-        return mapping.get(category, "AMYLASE")
+        return SomaticLoop._ENZYME_MAP.get(category, "AMYLASE")
 
     @staticmethod
     def _perform_maintenance(text: str, phys: Dict, logs: List[str], tick: int):
-        # [SLASH FIX]: Implemented maintenance logic using 'text' and 'phys'.
         if len(text) > 1000:
             logs.append(f"{Prisma.GRY}[MAINTENANCE]: Large input buffer detected. Flushed.{Prisma.RST}")
 
@@ -358,8 +332,6 @@ class SomaticLoop:
 
     @staticmethod
     def _count_harvest_hits(phys: Dict) -> int:
-        # [SLASH FIX]: Implemented nutritional density check using 'phys'.
-        # Counts substantial words (>4 chars) as a proxy for metabolic value.
         clean_words = phys.get("clean_words", [])
         return len([w for w in clean_words if len(w) > 4])
 
@@ -385,6 +357,14 @@ class EndocrineSystem:
     adrenaline: float = 0.0
     melatonin: float = 0.0
     glimmers: int = 0
+    _REACTION_MAP = {
+        "PROTEASE":   {"ADR": BoneConfig.BIO.REWARD_MEDIUM},
+        "CELLULASE":  {"COR": -BoneConfig.BIO.REWARD_MEDIUM, "OXY": BoneConfig.BIO.REWARD_SMALL},
+        "CHITINASE":  {"DOP": BoneConfig.BIO.REWARD_LARGE},
+        "LIGNASE":    {"SER": BoneConfig.BIO.REWARD_MEDIUM},
+        "DECRYPTASE": {"ADR": BoneConfig.BIO.REWARD_SMALL, "DOP": BoneConfig.BIO.REWARD_SMALL},
+        "AMYLASE":    {"SER": BoneConfig.BIO.REWARD_LARGE, "OXY": BoneConfig.BIO.REWARD_MEDIUM}
+    }
 
     @staticmethod
     def _clamp(val: float) -> float:
@@ -420,22 +400,15 @@ class EndocrineSystem:
             final_reward = base_reward * satiety_dampener
             self.dopamine += final_reward
             self.cortisol -= (final_reward * 0.4)
+            pass
 
-        reactions = {
-            "PROTEASE":   {"ADR": BoneConfig.BIO.REWARD_MEDIUM},
-            "CELLULASE":  {"COR": -BoneConfig.BIO.REWARD_MEDIUM, "OXY": BoneConfig.BIO.REWARD_SMALL},
-            "CHITINASE":  {"DOP": BoneConfig.BIO.REWARD_LARGE},
-            "LIGNASE":    {"SER": BoneConfig.BIO.REWARD_MEDIUM},
-            "DECRYPTASE": {"ADR": BoneConfig.BIO.REWARD_SMALL, "DOP": BoneConfig.BIO.REWARD_SMALL},
-            "AMYLASE":    {"SER": BoneConfig.BIO.REWARD_LARGE, "OXY": BoneConfig.BIO.REWARD_MEDIUM}
-        }
-        if enzyme_type in reactions:
-            impact = reactions[enzyme_type]
-            if "ADR" in impact: self.adrenaline += impact["ADR"]
-            if "COR" in impact: self.cortisol += impact["COR"]
-            if "OXY" in impact: self.oxytocin += impact["OXY"]
-            if "DOP" in impact: self.dopamine += impact["DOP"]
-            if "SER" in impact: self.serotonin += impact["SER"]
+            impact = self._REACTION_MAP.get(enzyme_type)
+            if impact:
+                if "ADR" in impact: self.adrenaline += impact["ADR"]
+                if "COR" in impact: self.cortisol += impact["COR"]
+                if "OXY" in impact: self.oxytocin += impact["OXY"]
+                if "DOP" in impact: self.dopamine += impact["DOP"]
+                if "SER" in impact: self.serotonin += impact["SER"]
 
     def _apply_environmental_pressure(self, feedback: Dict, health: float, stamina: float, ros_level: float, stress_mod: float):
         if feedback.get("STATIC", 0) > 0.6:
@@ -473,21 +446,25 @@ class EndocrineSystem:
             self.cortisol -= 0.1
 
     def _maintain_homeostasis(self, social_context: bool):
-        """Attempts to balance the hormones to prevent runaway loops."""
-        if self.serotonin > 0.6:
-            self.cortisol -= BoneConfig.BIO.REWARD_SMALL
+        if self.serotonin > 0.5:
+            excess = self.serotonin - 0.5
+            self.cortisol -= (excess * 0.2)
+
         if social_context:
             self.oxytocin += BoneConfig.BIO.REWARD_MEDIUM
             self.cortisol -= BoneConfig.BIO.REWARD_MEDIUM
-        elif self.serotonin > 0.7 and self.cortisol < 0.3:
-            self.oxytocin += BoneConfig.BIO.REWARD_SMALL
-        if self.cortisol > 0.7 and not social_context:
-            self.oxytocin -= BoneConfig.BIO.REWARD_SMALL
-        if self.oxytocin > 0.6:
-            self.cortisol -= BoneConfig.BIO.REWARD_LARGE
+
+        if self.cortisol > 0.6:
+            suppression = (self.cortisol - 0.6) * 0.5
+            self.oxytocin -= suppression
+
+        if self.oxytocin > 0.5:
+            relief = (self.oxytocin - 0.5) * 0.8
+            self.cortisol -= relief
+
         if self.adrenaline < 0.2:
             self.melatonin += (BoneConfig.BIO.REWARD_SMALL / 2)
-        else:
+        elif self.adrenaline > 0.8:
             self.melatonin = 0.0
 
     def check_for_glimmer(self, feedback: Dict, harvest_hits: int) -> Optional[str]:
@@ -676,7 +653,7 @@ class ViralTracer:
             action = "move"
 
         if sensory == "void" or action == "void":
-            return "GRAFT FAILED: Missing Lexicon Data."
+            return "GRAFT FAILED: The patients' vocabulary is too limited for a breakthrough."
 
         if node_a not in self.mem.graph:
             self.mem.graph[node_a] = {"edges": {}, "last_tick": 0}

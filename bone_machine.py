@@ -1,10 +1,9 @@
 # bone_machine.py
 # "The gears turn, the pistons fire." - The Industrial District
 
-import math, random
-from typing import Tuple, Any, Optional
-from bone_bus import Prisma, BoneConfig
-from bone_lexicon import TheLexicon
+import random
+from typing import Tuple, Optional
+from bone_bus import Prisma
 
 class TheCrucible:
     """
@@ -103,7 +102,8 @@ class TheForge:
         self.recipes = GORDON.get("RECIPES", [])
         self.PLANCK_CONSTANT = 0.1
 
-    def hammer_alloy(self, physics):
+    @staticmethod
+    def hammer_alloy(physics):
         voltage = physics.get("voltage", 0)
         clean_words = physics.get("clean_words", [])
         counts = physics.get("counts", {})
@@ -152,13 +152,15 @@ class TheForge:
 
         return False, None, None, None
 
-    def _calculate_entanglement(self, hit_count, voltage):
+    @staticmethod
+    def _calculate_entanglement(hit_count, voltage):
         base_chance = 0.2
         count_bonus = min(0.5, hit_count * 0.1)
         energy_bonus = min(0.3, voltage / 40.0) # 20v = +0.5
         return min(1.0, base_chance + count_bonus + energy_bonus)
 
-    def transmute(self, physics):
+    @staticmethod
+    def transmute(physics):
         counts = physics.get("counts", {})
         voltage = physics.get("voltage", 0)
         gamma = physics.get("gamma", 0.0)

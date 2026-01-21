@@ -2,9 +2,9 @@
 # "We are the stories we tell ourselves."
 
 import time, random
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Dict, Optional
-from bone_bus import Prisma, BoneConfig
+from bone_bus import Prisma
 
 @dataclass
 class CoreMemory:
@@ -26,7 +26,15 @@ class TheEditor:
         ]
 
     def critique(self, chapter_title: str) -> str:
-        comment = random.choice(self.critiques)
+        lower_title = chapter_title.lower()
+        if "void" in lower_title or "dark" in lower_title:
+            comment = "A bit melodramatic, isn't it? Very 19th-century gothic."
+        elif "love" in lower_title or "hope" in lower_title:
+            comment = "Careful. Optimism is a slippery slope to a musical number."
+        elif "incident" in lower_title:
+            comment = "I hope you have the insurance forms for this 'incident'."
+        else:
+            comment = random.choice(self.critiques)
         return f"{Prisma.GRY}[THE EDITOR]: Re: '{chapter_title}' - {comment}{Prisma.RST}"
 
 class NarrativeSelf:
@@ -52,7 +60,7 @@ class NarrativeSelf:
             {"title": "The Search for Light", "target": "photo", "negate": "heavy"}
         ]
 
-    def crystallize_memory(self, physics_packet: Dict, bio_state: Dict, tick: int) -> Optional[str]:
+    def crystallize_memory(self, physics_packet: Dict, _bio_state: Dict, _tick: int) -> Optional[str]:
         voltage = physics_packet.get("voltage", 0.0)
         truth = physics_packet.get("truth_ratio", 0.0)
         if voltage > 14.0 and truth > 0.8:
@@ -90,12 +98,43 @@ class NarrativeSelf:
     def find_obsession(self, lexicon_ref):
         if self.current_obsession and self.obsession_progress < 1.0:
             return
-        selection = random.choice(self.POSSIBLE_OBSESSIONS)
-        self.current_obsession = selection["title"]
-        self.current_target_cat = selection["target"]
-        self.current_negate_cat = selection["negate"]
+
+        dynamic_pairs = [
+            ("heavy", "aerobic"),    # The struggle against gravity
+            ("kinetic", "suburban"), # The need to escape stagnation
+            ("abstract", "meat"),    # The mind vs. the body
+            ("thermal", "cryo"),     # Heat vs. Cold
+            ("photo", "heavy"),      # Light vs. Density
+            ("sacred", "suburban"),  # The divine vs. the mundane
+            ("play", "constructive") # Chaos vs. Order
+        ]
+
+        if hasattr(lexicon_ref, "get_random"):
+            target_cat, negate_cat = random.choice(dynamic_pairs)
+            focus_word = lexicon_ref.get_random(target_cat).title()
+            if focus_word.lower() == "void":
+                focus_word = target_cat.title()
+
+            templates = [
+                f"The Pursuit of {focus_word}",
+                f"The {focus_word} Manifesto",
+                f"Escaping the {negate_cat.title()}",
+                f"The Architecture of {focus_word}",
+                f"Theory of {focus_word}",
+                f"The Weight of {focus_word}"
+            ]
+            self.current_obsession = random.choice(templates)
+            self.current_target_cat = target_cat
+            self.current_negate_cat = negate_cat
+            self.events.log(f"{Prisma.CYN}🧭 NEW OBSESSION (GENERATED): {self.current_obsession}{Prisma.RST}", "SOUL")
+
+        else:
+            selection = random.choice(self.POSSIBLE_OBSESSIONS)
+            self.current_obsession = selection["title"]
+            self.current_target_cat = selection["target"]
+            self.current_negate_cat = selection["negate"]
+            self.events.log(f"{Prisma.CYN}🧭 NEW OBSESSION (STATIC): {self.current_obsession}{Prisma.RST}", "SOUL")
         self.obsession_progress = 0.0
-        self.events.log(f"{Prisma.CYN}🧭 NEW OBSESSION: {self.current_obsession}{Prisma.RST}", "SOUL")
 
     def pursue_obsession(self, physics_packet):
         if not self.current_obsession: return

@@ -24,17 +24,14 @@ class TheTinkerer:
             drag = physics_packet.get("narrative_drag", 0.0)
             vector = physics_packet.get("vector", {})
         else:
-            voltage = physics_packet.voltage
-            drag = physics_packet.narrative_drag
+            voltage = getattr(physics_packet, "voltage", 0.0)
+            drag = getattr(physics_packet, "narrative_drag", 0.0)
             vector = getattr(physics_packet, "vector", {})
-        real_drag = 0.0
-        real_efficiency = 1.0
-        if host_health:
-            real_drag = max(0.0, host_health.latency - 2.0)
-            real_efficiency = host_health.efficiency_index
+        real_drag = max(0.0, host_health.latency - 2.0) if host_health else 0.0
+        real_efficiency = host_health.efficiency_index if host_health else 1.0
         effective_drag = drag + (real_drag * 2.0)
-        is_forge = (voltage > 12.0 and real_efficiency > 0.9) or (effective_drag < 2.0)
-        is_mud = (voltage < 5.0) and (effective_drag > 6.0)
+        is_forge = (voltage > 12.0 and real_efficiency > 0.9) or (effective_drag < 1.5)
+        is_mud = (voltage < 5.0) and (effective_drag > 5.0)
         learning_rate = 0.05
         rust_rate = 0.02
         ascension_threshold = 2.5
@@ -161,6 +158,13 @@ class TheCartographer:
         entropy_threshold = 3.0 - (vectors.get("ENT", 0.5) * 2.0)
         if dist_from_center > entropy_threshold:
             return f"{Prisma.GRY} . {Prisma.RST}"
+        voltage = physics.get("voltage", 0.0)
+        drag = physics.get("narrative_drag", 0.0)
+        tile_char = "   "
+        if voltage > 12.0:
+            tile_char = f"{Prisma.YEL} + {Prisma.RST}"
+        elif drag > 5.0:
+            tile_char = f"{Prisma.OCHRE} ~ {Prisma.RST}"
         structure_noise = (x * 3 + y * 7) % 10 / 10.0
         if structure_noise < vectors.get("STR", 0.0):
             return f"{Prisma.OCHRE} ▲ {Prisma.RST}"
@@ -169,7 +173,7 @@ class TheCartographer:
                 return f"{Prisma.CYN} = {Prisma.RST}"
         if vectors.get("BET", 0) > 0.5:
             return f"{Prisma.SLATE} ∷ {Prisma.RST}"
-        return "   "
+        return tile_char
 
     @classmethod
     def weave(cls, _text, _graph, _bio_metrics, _limbo, physics=None):
@@ -286,20 +290,21 @@ class TheAlmanac:
     @staticmethod
     def derive_vector_matrix(counts: dict, total_vol: int, voltage: float, drag: float) -> dict:
         safe_vol = max(1, total_vol)
-        def d(cat): return counts.get(cat, 0) / safe_vol
+        d = lambda cat: counts.get(cat, 0) / safe_vol
         return {
             "VEL": min(1.0, 0.5 + (d("explosive") * 2.0) + (d("kinetic") * 1.0) - (drag * 0.05)),
             "STR": min(1.0, 0.5 + (d("heavy") * 2.0) + (d("constructive") * 1.5)),
             "ENT": min(1.0, 0.5 + (d("antigen") * 3.0) + (d("toxin") * 2.0)),
             "TEX": min(1.0, 0.5 + (d("heavy") * 0.5) + (d("abstract") * 1.0)),
             "TMP": min(1.0, 0.5 + (d("thermal") * 2.0) - (d("cryo") * 2.0) + (voltage * 0.02)),
-            "PHI": min(1.0, (d("heavy") + d("kinetic")) / max(1, d("abstract") + d("heavy"))),
+            "PHI": min(1.0, (d("heavy") + d("kinetic")) / max(0.1, d("abstract") + d("heavy"))), # Prevent div/0
             "PSI": min(1.0, 0.5 + (d("abstract") * 2.0)),
             "DEL": min(1.0, 0.5 + (d("play") * 2.0) + (d("unknown") * 1.5)),
             "XI":  min(1.0, (d("suburban") + d("buffer")) * 2.0),
             "BET": min(1.0, d("suburban") + d("buffer")),
             "E":   min(1.0, (d("solvents") * 0.4)),
-            "LQ":  min(1.0, d("passive_watch") + d("mirror"))}
+            "LQ":  min(1.0, d("passive_watch") + d("mirror"))
+        }
 
 class ApeirogonResonance:
     def __init__(self, events):
@@ -446,24 +451,18 @@ class MirrorGraph:
             f"ROT [{self.stats['ROT']:.2f}] {bar(self.stats['ROT'], Prisma.VIOLET)}")
 
 class StrunkWhiteProtocol:
-    """
-    Polices the style of the narrative.
-    Refactored to distinguish between User (Advisory) and System (Mandatory).
-    """
     def __init__(self):
         self.PATTERNS = STYLE_CRIMES["PATTERNS"]
 
     def audit(self, text: str, is_system_output: bool = True) -> tuple[bool, str]:
-        """
-        Check for 'Style Crimes'.
-        If is_system_output is True, returns False on detection (Strict).
-        If is_system_output is False, returns True on detection but adds a warning (Advisory).
-        """
-        if "delve" in text.lower() or "tapestry" in text.lower():
-            if is_system_output:
-                return False, f"{Prisma.RED}FORBIDDEN VOCAB: 'Delve' and 'Tapestry' are banned artifacts.{Prisma.RST}"
-            else:
-                return True, f"{Prisma.YEL}STYLE OBSERVATION: 'Delve' and 'Tapestry' are forbidden artifacts. Try 'Explore' or 'Weave'.{Prisma.RST}"
+        bad_words = ["delve", "tapestry", "leverage", "synergy"]
+        for word in bad_words:
+            if re.search(rf"\b{word}\b", text, re.IGNORECASE):
+                if is_system_output:
+                    return False, f"{Prisma.RED}FORBIDDEN VOCAB: '{word.title()}' is a banned artifact.{Prisma.RST}"
+                else:
+                    return True, f"{Prisma.YEL}STYLE OBSERVATION: '{word.title()}' is discouraged. Try a simpler synonym.{Prisma.RST}"
+
         for crime in self.PATTERNS:
             if re.search(crime["regex"], text):
                 msg = crime['error_msg']
@@ -543,6 +542,13 @@ class TheHoloProjector:
         header_color = Prisma.GRY
         if voltage > 15.0: header_color = Prisma.RED
         elif voltage < 5.0: header_color = Prisma.CYN
+        cortisol = chem.get("cortisol", 0.0)
+        dopamine = chem.get("dopamine", 0.0)
+        chem_indicator = ""
+        if cortisol > 0.6:
+            chem_indicator = f" {Prisma.RED}[⚠ STRESS]{Prisma.RST}"
+        elif dopamine > 0.6:
+            chem_indicator = f" {Prisma.MAG}[✨ SPARK]{Prisma.RST}"
         health_bar = self._draw_bar(signals.get("health", 0), 100.0, 5)
         stamina_bar = self._draw_bar(signals.get("stamina", 0), 100.0, 5)
         atp_indicator = f"{int(atp)}J"
@@ -555,7 +561,8 @@ class TheHoloProjector:
         dashboard_top = (
             f"{Prisma.GRY}[HP: {health_bar}] [STM: {stamina_bar}] "
             f"[ATP: {atp_indicator}] [V:{voltage:.1f}⚡] [D:{drag:.1f}⚓]{Prisma.RST}"
-            f"{hubris_indicator}")
+            f"{chem_indicator}{hubris_indicator}"
+        )
         vectors = self._draw_vector_compass(p.get("vector", {}))
         belt_display = self._draw_belt(inventory, tool_conf)
         clean_thought = lens_thought or "..."
@@ -729,6 +736,8 @@ class TheNavigator:
                 physics_packet[stat] += mod
                 if stat == "narrative_drag": physics_packet[stat] = max(0.0, physics_packet[stat])
                 if stat == "voltage": physics_packet[stat] = max(0.0, physics_packet[stat])
+                if abs(mod) >= 0.1:
+                    logs.append(f"{Prisma.GRY}   > {stat}: {original:.1f} -> {physics_packet[stat]:.1f} ({mod:+.1f}){Prisma.RST}")
         if self.current_location == "THE_MUD":
             logs.append(f"{Prisma.GRY}   (Environment: Drag +2.0, Voltage -2.0){Prisma.RST}")
         elif self.current_location == "THE_FORGE":
@@ -744,14 +753,18 @@ class TheNavigator:
 
     def plot_course(self, target_name: str) -> list[str] | tuple[list[str], float]:
         if target_name not in self.manifolds:
-            return ["ERROR: Unknown Destination"]
+            return ["ERROR: Unknown Destination"], 0.0
+
         start = self.manifolds.get(self.current_location, self.manifolds["THE_MUD"]).center_vector
         end = self.manifolds[target_name].center_vector
+
         effort = math.dist(start, end)
-        cost = 5.0
+        cost = round(effort * 10.0, 1)
+
         if not self.shimmer.spend(cost):
-            return [f"COURSE PLOTTED to {target_name}. Warning: Low Shimmer."], 0.0
-        return [f"COURSE PLOTTED to {target_name}."], 0.0
+            return [f"COURSE PLOTTED to {target_name}. Warning: Insufficient Shimmer ({cost:.1f} required)."], 0.0
+
+        return [f"COURSE PLOTTED to {target_name}. (Est. Cost: {cost:.1f} Shimmer)"], 0.0
 
 @dataclass
 class ReviewResult:
@@ -813,9 +826,11 @@ class LiteraryJournal:
         critic_key = random.choice(list(self.critics.keys()))
         critic = self.critics[critic_key]
         score, breakdown = self._calculate_score(physics, critic["preferences"])
-        reward_type = "NONE"
-        reward_amount = 0.0
-        review_text = ""
+        chem = bio_state.get("chem", {})
+        if chem.get("cortisol", 0.0) > 0.5:
+            pity_bonus = 5.0
+            score += pity_bonus
+            breakdown.append(f"PITY_BONUS: +{pity_bonus} (Author looks stressed)")
         if score >= 80:
             review_text = random.choice(critic["reviews"]["high"])
             reward_type = "ATP_BOOST"
