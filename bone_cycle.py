@@ -11,7 +11,6 @@ from bone_viewer import GeodesicRenderer
 from bone_architect import PanicRoom
 
 class PIDController:
-    """A Proportional-Integral-Derivative controller w/Integral Windup Protection."""
     def __init__(self, kp: float, ki: float, kd: float, setpoint: float = 0.0, output_limits: Tuple[float, float] = (-5.0, 5.0)):
         self.kp = kp
         self.ki = ki
@@ -43,7 +42,6 @@ class PIDController:
         self.last_time = time.time()
 
 class CycleStabilizer:
-    """The Gyroscope. Keeps the narrative vehicle from flipping over. Now with 20% more sass."""
     def __init__(self, events_ref):
         self.events = events_ref
         self.voltage_pid = PIDController(kp=0.25, ki=0.05, kd=0.1, setpoint=10.0, output_limits=(-4.0, 4.0))
@@ -95,7 +93,6 @@ class CycleStabilizer:
         return corrections_made
 
 class SimulationPhase:
-    """Base class for any step in the cycle."""
     def __init__(self, engine_ref):
         self.eng = engine_ref
         self.name = "GENERIC_PHASE"
@@ -194,7 +191,6 @@ class MetabolismPhase(SimulationPhase):
 
     @staticmethod
     def _generate_feedback(physics):
-        """Standardizes physics data for the bio-engine."""
         return {
             "INTEGRITY": physics.get("truth_ratio", 0.0),
             "STATIC": physics.get("repetition", 0.0),
@@ -203,7 +199,6 @@ class MetabolismPhase(SimulationPhase):
         }
 
     def _check_circadian_rhythm(self):
-        """Only checks the clock occasionally to save cycles."""
         if self.eng.tick_count % 10 == 0:
             bias, msg = self.eng.bio.endo.calculate_circadian_bias()
             if msg:
@@ -212,7 +207,6 @@ class MetabolismPhase(SimulationPhase):
         return None
 
     def _audit_hubris(self, ctx, physics):
-        """Checks if the user is flying too close to the sun."""
         hubris_hit, hubris_msg, event_type = self.eng.phys.tension.audit_hubris(physics)
         if hubris_hit:
             ctx.log(hubris_msg)
@@ -224,7 +218,6 @@ class MetabolismPhase(SimulationPhase):
                 ctx.log(f"   {Prisma.RED}IMPACT TRAUMA: -{damage} HP.{Prisma.RST}")
 
     def _apply_healing(self, ctx):
-        """Orchestrates Kintsugi (Repairing breaks with gold) and Therapy (Healing trauma vectors)."""
         is_cracked, koan = self.eng.kintsugi.check_integrity(self.eng.stamina)
         if is_cracked:
             ctx.log(f"{Prisma.YEL}🏺 KINTSUGI ACTIVATED: Vessel cracking.{Prisma.RST}")
@@ -357,6 +350,22 @@ class IntrusionPhase(SimulationPhase):
                 ctx.logs[-1] = self.eng.limbo.haunt(ctx.logs[-1])
             else:
                 ctx.log(self.eng.limbo.haunt("The air is heavy."))
+        trauma_sum = sum(self.eng.trauma_accum.values())
+        is_bored = self.eng.phys.pulse.is_bored()
+        if (trauma_sum > 10.0 or is_bored) and random.random() < 0.2:
+            dream_text, relief = self.eng.mind.dreamer.hallucinate(
+                ctx.physics.vector,
+                trauma_level=trauma_sum
+            )
+            prefix = "💭 NIGHTMARE" if trauma_sum > 10.0 else "💭 DAYDREAM"
+            ctx.log(f"{Prisma.VIOLET}{prefix}: {dream_text}{Prisma.RST}")
+            if relief > 0:
+                keys = list(self.eng.trauma_accum.keys())
+                target = random.choice(keys)
+                self.eng.trauma_accum[target] = max(0.0, self.eng.trauma_accum[target] - relief)
+                ctx.log(f"   {Prisma.GRY}(Psychic pressure released: -{relief:.1f} {target}){Prisma.RST}")
+            if is_bored:
+                self.eng.phys.pulse.boredom_level = 0.0
         is_p, p_msg = self.eng.check_pareidolia(ctx.clean_words)
         if is_p:
             ctx.log(p_msg)
@@ -386,12 +395,10 @@ class SoulPhase(SimulationPhase):
                 target = mandate["value"]
                 self.eng.bio.governor.set_override(target)
                 ctx.log(f"{Prisma.RED}⚖️ COUNCIL ORDER: Emergency Shift to {target}.{Prisma.RST}")
-
             elif action == "CIRCUIT_BREAKER":
                 ctx.physics["voltage"] = 0.0
                 ctx.physics["narrative_drag"] = 20.0 # Heavy brakes
                 ctx.log(f"{Prisma.RED}⚖️ COUNCIL ORDER: Circuit Breaker Tripped. Voltage dump.{Prisma.RST}")
-
         if adjustments:
             for param, delta in adjustments.items():
                 if hasattr(ctx.physics, "__getitem__") or isinstance(ctx.physics, dict):
@@ -424,9 +431,7 @@ class CognitionPhase(SimulationPhase):
 class StateReconciler:
     @staticmethod
     def fork(ctx: CycleContext) -> CycleContext:
-        """Creates a mutable sandbox (Deep Copy) of the current context."""
         new_ctx = CycleContext(input_text=ctx.input_text)
-
         new_ctx.user_profile = ctx.user_profile
         new_ctx.is_alive = ctx.is_alive
         new_ctx.refusal_triggered = ctx.refusal_triggered
@@ -445,24 +450,19 @@ class StateReconciler:
     @staticmethod
     def _scan_for_mythology(eng, logs):
         if not hasattr(eng, 'akashic'): return
-
         for line in logs:
             if "NEUROPLASTICITY" not in line:
                 continue
-
             try:
                 parts = line.split("'")
                 if len(parts) < 3:
                     continue
                 word = parts[1]
-
                 if "[" not in line or "]" not in line:
                     continue
-
                 category_segment = line.split("[")[1]
                 category = category_segment.split("]")[0].lower()
                 eng.akashic.register_word(word, category)
-
             except (IndexError, ValueError):
                 pass
 
@@ -503,47 +503,28 @@ class CycleSimulator:
 
     def run_simulation(self, ctx: CycleContext) -> CycleContext:
         reconciler = StateReconciler()
-
         for phase in self.pipeline:
-            # 1. Circuit Breaker Check
             if not self._check_circuit_breaker(phase.name):
                 continue
-
-            # 2. Pre-flight Checks
             if ctx.refusal_triggered or (ctx.is_bureaucratic and phase.name not in ["OBSERVE", "GATEKEEP"]):
                 break
             if not ctx.is_alive:
                 break
-
-            # 3. FORK: Create the Transactional Sandbox
             sandbox = reconciler.fork(ctx)
-
             try:
-                # 4. RUN: Execute logic in the sandbox
                 sandbox = phase.run(sandbox)
-
-                # 5. STABILIZE: Fix the physics *inside* the sandbox
-                # This ensures we don't commit unstable physics to the main timeline.
                 self.stabilizer.stabilize(sandbox, phase.name)
-
-                # 6. JOIN: Commit the transaction
                 reconciler.reconcile(ctx, sandbox)
-
             except Exception as e:
                 print(f"{Prisma.YEL}>>> ROLLING BACK TIME ({phase.name} Failed){Prisma.RST}")
                 if hasattr(sandbox.physics, 'diff_view'):
-                    # Compare the broken sandbox against the clean canonical state
                     print(f"{Prisma.YEL}>>> STATE DRIFT AT CRASH:{Prisma.RST}")
                     print(sandbox.physics.diff_view(ctx.physics))
-
-                # 7. ROLLBACK: We effectively discard 'sandbox' and keep 'ctx' as is.
                 self._handle_phase_crash(ctx, phase.name, e)
                 break
-
         return ctx
 
     def _check_circuit_breaker(self, phase_name: str) -> bool:
-        """Returns False if a subsystem required for this phase is offline."""
         health = self.eng.system_health
         if phase_name == "OBSERVE" and not health.physics_online: return False
         if phase_name == "METABOLISM" and not health.bio_online: return False

@@ -795,31 +795,19 @@ class TheAkashicRecord:
                 self.ingredient_affinity[item] = self.ingredient_affinity.get(item, 0) + 1
 
     def track_successful_forge(self, ingredient_name, catalyst_type, result_item):
-        """
-        If users keep trying to forge the same random junk and it works,
-        we should make it a canonical recipe.
-        """
         key = (ingredient_name, catalyst_type)
         if key not in self.recipe_candidates:
             self.recipe_candidates[key] = {}
-
         result_name = result_item["description"] if isinstance(result_item, dict) else "Artifact"
         self.recipe_candidates[key][result_name] = self.recipe_candidates[key].get(result_name, 0) + 1
-
         if self.recipe_candidates[key][result_name] >= self.RECIPE_THRESHOLD:
             self._crystallize_recipe(ingredient_name, catalyst_type, result_item)
 
     def _hybridize_lenses(self, lens_a, lens_b):
-        """
-        Structural Mutation: Merges two lenses into a new permanent lens.
-        """
         new_key = f"{lens_a}_{lens_b}_HYBRID"
         if new_key in LENSES: return
-
-        # Pinker: Linguistic synthesis of the two roles
         role_a = LENSES.get(lens_a, {}).get("role", "Observer")
         role_b = LENSES.get(lens_b, {}).get("role", "Participant")
-
         new_lens = {
             "role": f"The {role_a} / {role_b} Synthesis",
             "msg": f"Perspective shift: {lens_a} and {lens_b} are aligning. The dialectic is resolved.",
@@ -828,8 +816,6 @@ class TheAkashicRecord:
         LENSES[new_key] = new_lens
         self.lens_cooccurrence[(lens_a, lens_b)] = 0
         print(f"✨ MYTHOLOGY ENGINE: A new lens has formed: {new_key}")
-
-    # bone_data.py
 
     @staticmethod
     def _crystallize_recipe(ingredient, catalyst, result_item):
@@ -840,7 +826,6 @@ class TheAkashicRecord:
             "msg": "The universe remembers this combination. It is now Law.",
             "dynamic_result": result_item
         }
-
         current_recipes: List[Dict[str, Any]] = GORDON["RECIPES"]
         for r in current_recipes:
             if r.get("ingredient") == ingredient and r.get("catalyst_category") == catalyst:
@@ -851,28 +836,23 @@ class TheAkashicRecord:
     def propose_new_category(self, word_list, category_name):
         if category_name not in LEXICON:
             LEXICON[category_name] = []
-
         for w in word_list:
             if w not in LEXICON[category_name]:
                 LEXICON[category_name].append(w)
                 self.discovered_words[w] = category_name
-
         print(f"✨ MYTHOLOGY ENGINE: The Lexicon expands. New Category: '{category_name.upper()}'")
 
     @staticmethod
     def forge_new_item(vector_data):
         dominant = max(vector_data, key=vector_data.get)
         if dominant not in ITEM_GENERATION["PREFIXES"]: dominant = "void"
-
         prefix = random.choice(ITEM_GENERATION["PREFIXES"].get(dominant, ["Strange"]))
         base_type = random.choice(list(ITEM_GENERATION["BASES"].keys()))
         base_name = random.choice(ITEM_GENERATION["BASES"][base_type])
         suffix = random.choice(ITEM_GENERATION["SUFFIXES"].get(dominant, ["of Mystery"]))
-
         name = f"{prefix.upper()} {base_name.upper()} {suffix.upper()}"
         value = vector_data[dominant] * 10.0
         description = f"A procedurally generated artifact. It vibrates with {dominant} energy."
-
         new_item = {
             "description": description,
             "function": "ARTIFACT",
@@ -888,7 +868,6 @@ class TheAkashicRecord:
             if word not in LEXICON[category]:
                 LEXICON[category].append(word)
                 self.discovered_words[word] = category
-
                 if len(LEXICON[category]) > 50 and category != "heavy":
                     print(f"⚠️ MYTHOLOGY ENGINE: Category '{category}' is bloating. Suggest fission.")
                 return True

@@ -365,10 +365,6 @@ class EntropyVent:
         )
 
 class TheBouncer:
-    """
-    Gatekeeper of the input loop.
-    Now equipped with Strunk & White for style advisory (User Mode).
-    """
     def __init__(self, engine_ref):
         self.eng = engine_ref
         self.hn = CutTheShit()

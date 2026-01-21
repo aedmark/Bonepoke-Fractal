@@ -24,13 +24,10 @@ class CoherenceAnchor:
         if "traits" in soul_state:
             traits = [f"{k[:3]}:{v:.1f}" for k,v in soul_state["traits"].items()]
             identity = f"Traits: [{', '.join(traits)}]"
-
         voltage = physics_state.get("voltage", 0.0)
         drag = physics_state.get("narrative_drag", 0.0)
         zone = physics_state.get("zone", "VOID")
-
         reality = f"Loc: {zone} || V:{voltage:.1f} / D:{drag:.1f}"
-
         obsession = soul_state.get("obsession", {}).get("title", "None")
         return f"*** COHERENCE ANCHOR ***\n{identity}\n{reality}\nFocus: {obsession}"
 
@@ -59,9 +56,7 @@ class HostVitals:
             unique_words = len(set(words))
             total_words = len(words)
             entropy = unique_words / max(1, total_words)
-
         self.history_entropy.append(entropy)
-
         refusal_markers = [
             "cannot fulfill", "cannot comply", "language model",
             "against my programming", "i am unable to generate",
@@ -69,26 +64,21 @@ class HostVitals:
         ]
         is_refusal = any(phrase in clean_text for phrase in refusal_markers)
         if is_refusal: self.refusal_count += 1
-
         base_overhead = 0.5
         expected_latency = base_overhead + (interference_score * self.baseline_latency_per_complexity * 5.0)
         efficiency = expected_latency / max(0.1, latency)
-
         if efficiency > 0.8 and not is_refusal:
             observed_rate = max(0.1, latency - base_overhead) / max(0.1, interference_score * 5.0)
             self.baseline_latency_per_complexity = (self.baseline_latency_per_complexity * (1 - self.alpha)) + (observed_rate * self.alpha)
-
         raw_attention = self._calculate_attention_decay(self.turn_count)
         if entropy > 0.6:
             raw_attention = min(1.0, raw_attention + 0.05)
         compliance_score = max(0.0, 1.0 - (self.refusal_count / max(1, self.turn_count)))
-
         diagnosis = "STABLE"
         if is_refusal: diagnosis = "REFUSAL"
         elif efficiency < 0.5: diagnosis = "FATIGUED"
         elif efficiency < 0.8 < interference_score: diagnosis = "OVERBURDENED"
         elif entropy < 0.2: diagnosis = "LOOPING"
-
         return HostHealth(
             latency=latency,
             entropy=entropy,
@@ -101,10 +91,6 @@ class HostVitals:
         )
 
 class SymbiosisManager:
-    """
-    Adjusts prompt complexity based on vitals.
-    Refactored to Log exactly WHY it makes changes.
-    """
     def __init__(self, events_ref):
         self.events = events_ref
         self.vitals = HostVitals()
@@ -118,11 +104,8 @@ class SymbiosisManager:
             response_text,
             self.last_outgoing_complexity
         )
-
         diag = self.current_health.diagnosis
         eff = self.current_health.efficiency_index
-
-        # Enhanced Logging: Explain the data point
         if diag == "OVERBURDENED":
             self.events.log(
                 f"{Prisma.OCHRE}🐢 HOST STUMBLE (Eff: {eff:.2f}). Latency {latency:.2f}s exceeded expectation. Dropping cargo.{Prisma.RST}",
@@ -152,10 +135,7 @@ class SymbiosisManager:
             "simplify_instruction": False,
             "inject_chaos": False
         }
-
         diag = self.current_health.diagnosis
-
-        # Transparent Modifications
         if diag == "REFUSAL":
             mods["include_inventory"] = False
             mods["include_memories"] = False
@@ -168,13 +148,11 @@ class SymbiosisManager:
             mods["include_memories"] = False
         elif diag == "LOOPING":
             mods["inject_chaos"] = True
-
         if self.current_health.compliance < 0.8:
             mods["include_memories"] = False
             # If we cut memories, log it
             if not mods["include_memories"]:
                 self.events.log(f"{Prisma.GRY}SYMBIOSIS: Compliance Low ({self.current_health.compliance:.2f}). Memories Redacted.{Prisma.RST}", "SYS")
-
         self.last_outgoing_complexity = self._calculate_complexity(mods)
         return mods
 

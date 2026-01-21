@@ -18,24 +18,19 @@ class TheStrangeLoop:
         phrase_hit = any(t in text_lower for t in self.triggers)
         psi = physics.get("psi", 0.0)
         abstract_hit = False
-
         if psi > 0.6:
             if "self" in text_lower or "mirror" in text_lower or "define" in text_lower:
                 abstract_hit = True
-
         threshold = getattr(BoneConfig.COUNCIL, "STRANGE_LOOP_VOLTAGE", 8.0)
-
         if (phrase_hit or abstract_hit) and physics.get("voltage", 0) > threshold:
             self.recursion_depth += 1
             mandate = {}
-
             if self.recursion_depth > 3:
                 mandate = {"action": "FORCE_MODE", "value": "MAINTENANCE"}
                 return True, (
                     f"{Prisma.RED}∞ FATAL REGRESS DETECTED:{Prisma.RST} "
                     f"Abstraction layer unstable. GROUNDING INITIATED."
                 ), mandate
-
             return True, (
                 f"{Prisma.MAG}∞ STRANGE LOOP DETECTED:{Prisma.RST} "
                 f"Metacognitive resonance high (Psi: {psi:.2f}). "
@@ -81,7 +76,6 @@ class TheLeveragePoint:
                 f"Manic phase detected (V:{current_voltage:.1f}). "
                 f"The Council MANDATES dampening (-{voltage_correction:.1f}V)."
             ), corrections, mandate
-
         return False, "", corrections, {}
 
 class TheFootnote:
@@ -136,7 +130,6 @@ class CouncilChamber:
             for k, v in corrections.items():
                 total_corrections[k] = total_corrections.get(k, 0.0) + v
             if m_mandate: mandates.append(m_mandate)
-
         return advice, total_corrections, mandates
 
     def annotate_logs(self, logs: list[str]) -> list[str]:

@@ -2,7 +2,7 @@
 # "The brain is a machine for jumping to conclusions." - S. Pinker
 
 import re, time, json, urllib.request, urllib.error, random, math
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
 from bone_data import LENSES, DREAMS
 from bone_bus import Prisma, BoneConfig, EventBus
@@ -24,34 +24,28 @@ except ImportError:
     print("Telemetry module not found. Flying blind.")
 
 def cosine_similarity(vec_a: Dict[str, float], vec_b: Dict[str, float]) -> float:
-    """Calculates alignment between two semantic vectors."""
     intersection = set(vec_a.keys()) & set(vec_b.keys())
     numerator = sum(vec_a[k] * vec_b[k] for k in intersection)
-
     sum1 = sum(vec_a[k]**2 for k in vec_a.keys())
     sum2 = sum(vec_b[k]**2 for k in vec_b.keys())
     denominator = math.sqrt(sum1) * math.sqrt(sum2)
-
     if not denominator: return 0.0
     return numerator / denominator
 
 @dataclass
 class ChemicalState:
-    """Represents the neuro-chemical balance of the mind."""
     dopamine: float = 0.0
     cortisol: float = 0.0
     adrenaline: float = 0.0
     serotonin: float = 0.0
 
     def decay(self, rate: float = 0.2):
-        """Applies a half-life to the chemicals."""
         self.dopamine = max(0.0, self.dopamine * (1.0 - rate))
         self.cortisol = max(0.0, self.cortisol * (1.0 - rate))
         self.adrenaline = max(0.0, self.adrenaline * (1.0 - rate))
         self.serotonin = max(0.0, self.serotonin * (1.0 - rate))
 
     def mix(self, new_state: Dict[str, float], weight: float = 0.5):
-        """Blends new influx with existing state (Meadows: Stocks & Flows)."""
         self.dopamine = (self.dopamine * (1.0 - weight)) + (new_state.get("DOP", 0.0) * weight)
         self.cortisol = (self.cortisol * (1.0 - weight)) + (new_state.get("COR", 0.0) * weight)
         self.adrenaline = (self.adrenaline * (1.0 - weight)) + (new_state.get("ADR", 0.0) * weight)
@@ -70,7 +64,6 @@ class NarrativeSpotlight:
         self.semantic_drift_factor = 0.1
 
     def expand_horizon(self, dimension: str, new_category: str):
-        """Allows the system to learn new associations for dimensions."""
         if dimension in self.dimension_map:
             self.dimension_map[dimension].add(new_category)
 
@@ -196,7 +189,6 @@ class LLMInterface:
         return defaults.get(provider, "https://api.openai.com/v1/chat/completions")
 
     def _log(self, message: str, level: str = "SYS"):
-        """Safe logging wrapper that handles missing EventBus."""
         if self.events:
             self.events.log(message, level)
         else:
@@ -205,23 +197,19 @@ class LLMInterface:
     def generate(self, prompt: str, params: Dict[str, Any]) -> str:
         if self.provider == "mock":
             return self.mock_generation(prompt)
-
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}"
         }
-
         payload = {
             "model": self.model,
             "messages": [{"role": "user", "content": prompt}],
             "stream": False
         }
         payload.update(params)
-
         try:
             data = json.dumps(payload).encode("utf-8")
             req = urllib.request.Request(self.base_url, data=data, headers=headers)
-
             with urllib.request.urlopen(req, timeout=30.0) as response:
                 if response.status == 200:
                     result = json.loads(response.read().decode("utf-8"))
@@ -290,39 +278,32 @@ class PromptComposer:
         role = mind.get("role", "The Observer")
         lens = mind.get("lens", "NARRATOR")
         sys_inst = state.get("system_instruction", "")
-
         if modifiers["simplify_instruction"]:
             sys_inst = "Keep responses short. Focus on the immediate physical sensation."
-
         identity_block = (
             f"=== SYSTEM IDENTITY ===\n"
             f"Role: {lens} ({role})\n"
             f"Directive: {sys_inst}\n"
         )
-
         somatic_block = ""
         if modifiers["include_somatic"]:
             somatic_txt = ""
             if RosettaStone:
                 sem_state = RosettaStone.translate(phys, bio)
                 somatic_txt = RosettaStone.render_system_prompt_addition(sem_state)
-
             moods = []
             chem = bio.get("chem", {})
             if chem.get("ADR", 0) > 0.6: moods.append("HIGH ALERT (Adrenaline)")
             if chem.get("COR", 0) > 0.6: moods.append("DEFENSIVE (Cortisol)")
             if chem.get("DOP", 0) > 0.6: moods.append("SEEKING (Dopamine)")
-
             somatic_block = (
                 f"### BIOLOGICAL STATE\n"
                 f"Mood: {', '.join(moods) if moods else 'Homeostasis'}\n"
                 f"{somatic_txt}\n"
             )
-
         context_block = ""
         inventory = state.get("inventory", [])
         inv_str = ", ".join(inventory) if inventory else "Empty"
-
         context_framing = "THE WORLD:"
         if lens == "GORDON":
             context_framing = "THE WORKSPACE (Things to fix):"
@@ -330,21 +311,16 @@ class PromptComposer:
             context_framing = "EVIDENCE LOCKER:"
         elif lens == "JESTER":
             context_framing = "PROPS FOR THE GAG:"
-
         parts = []
         if modifiers["include_inventory"]:
             parts.append(f"{context_framing} Inventory: {inv_str}")
-
         parts.append(f"Location: {state.get('world', {}).get('orbit', ['Void'])[0]}")
-
         if modifiers["include_memories"]:
             spotlight = state.get("spotlight", [])
             mem_str = "\n".join([f"- {m}" for m in spotlight]) if spotlight else "(None)"
             parts.append(f"Active Memories:\n{mem_str}")
-
         if parts:
             context_block = "### WORLD CONTEXT\n" + "\n".join(parts) + "\n"
-
         user_name = profile.get("name", "Traveler")
         confidence = profile.get("confidence", 0)
         social_block = (
@@ -353,17 +329,13 @@ class PromptComposer:
         )
         if confidence > 20:
             social_block += f"Use their name naturally. You know them.\n"
-
         ballast_txt = ""
         if ballast:
             ballast_txt = "\n[WARNING: SOLIPSISM DETECTED. STOP ABSTRACTING. BE CONCRETE.]\n"
-
         chaos_txt = ""
         if modifiers["inject_chaos"]:
             chaos_txt = "\n[SYSTEM INJECTION]: The narrative is stuck. Introduce a sudden, random event or glitch.\n"
-
         clean_q = self._sanitize(user_query)
-
         semantic_ops = state.get("semantic_operators", [])
         ops_block = ""
         if semantic_ops:
@@ -372,7 +344,6 @@ class PromptComposer:
                 f"### NARRATIVE CONSTRAINTS (ACTIVE ARTIFACTS)\n"
                 f"{ops_list}\n"
             )
-
         final_prompt = (
             f"{identity_block}\n"
             f"=== BIOLOGICAL STATE ===\n"
@@ -406,16 +377,11 @@ class ResponseValidator:
                     "reason": "IMMERSION_BREAK",
                     "replacement": f"{Prisma.GRY}[The system attempts to recite a EULA, but hiccups instead.]{Prisma.RST}"
                 }
-
         if len(response.strip()) < 2:
             return {"valid": False, "reason": "TOO_SHORT", "replacement": "..."}
-
         return {"valid": True, "content": response}
 
-
-# noinspection PyArgumentList,PyUnusedLocal
 class TheCortex:
-    """The Orchestrator of Cognition. Connects the Body (Cycle) to the Mind (LLM)."""
     def __init__(self, engine_ref, llm_client=None):
         self.sub = engine_ref
         self.events = engine_ref.events
@@ -455,7 +421,6 @@ class TheCortex:
             self.sub.neuro_plasticity.plasticity_mod = 2.0
 
     def learn_from_response(self, response_text):
-        """Harvests new vocabulary from the LLM's own creative output."""
         words = self.sub.lex.sanitize(response_text)
         unknowns = [w for w in words if not self.sub.lex.get_categories_for_word(w)]
         if unknowns and len(unknowns) < 5:
@@ -546,15 +511,10 @@ class TheCortex:
         }
 
     def _audit_solipsism(self, text: str, lens_name: str = "NARRATOR"):
-        """
-        Checks if the LLM is talking to itself too much.
-        [SLASH FIX]: Thresholds are now relative to the active Persona (Lens).
-        """
         words = text.lower().split()
         if not words: return
         self_refs = words.count("i") + words.count("me") + words.count("my")
         density = self_refs / len(words)
-
         threshold_map = {
             "NARRATOR": 0.10,
             "SHERLOCK": 0.12,
@@ -562,9 +522,7 @@ class TheCortex:
             "JESTER": 0.25,
             "GORDON": 0.15
         }
-
         limit = threshold_map.get(lens_name, 0.15)
-
         if density > limit:
             if not self.ballast_active:
                 self.events.log(f"SOLIPSISM WARNING (Lens: {lens_name}): Ballast Engaged. Density {density:.2f} > {limit:.2f}", "SYS")
@@ -572,39 +530,24 @@ class TheCortex:
                 self.ballast_counter = 3
 
 class NeuroPlasticity:
-    """
-    Manages Hebbian Learning: "Neurons that fire together, wire together."
-    Called by bone_body.py during high-voltage events.
-    """
     def __init__(self):
         self.plasticity_mod = 1.0
 
     @staticmethod
     def force_hebbian_link(graph, word_a, word_b):
-        """
-        Creates a strong edge between two concepts in the graph.
-        """
         if word_a == word_b: return None
-
         if word_a not in graph:
             graph[word_a] = {"edges": {}, "last_tick": 0}
         if word_b not in graph:
             graph[word_b] = {"edges": {}, "last_tick": 0}
-
         current_weight = graph[word_a]["edges"].get(word_b, 0.0)
         new_weight = min(10.0, current_weight + 2.5)
         graph[word_a]["edges"][word_b] = new_weight
-
         back_weight = graph[word_b]["edges"].get(word_a, 0.0)
         graph[word_b]["edges"][word_a] = min(10.0, back_weight + 1.0)
-
         return f"{Prisma.MAG}⚡ HEBBIAN GRAFT: Wired '{word_a}' <-> '{word_b}'.{Prisma.RST}"
 
 class ShimmerState:
-    """
-    The Fuel Tank for Navigation.
-    'Shimmer' is the resource consumed to move between Manifolds (e.g., Courtyard -> Aerie).
-    """
     def __init__(self, max_val=50.0):
         self.current = max_val
         self.max_val = max_val
@@ -624,24 +567,19 @@ class ShimmerState:
         return None
 
 class DreamEngine:
-    """
-    Generates 'hallucinations' when the system is asleep or in high-entropy states.
-    """
     def __init__(self, events):
         self.events = events
-        self.PROMPTS = DREAMS.get("PROMPTS", ["{A} -> {B}?"]) if 'DREAMS' in globals() else []
+        self.PROMPTS = DREAMS.get("PROMPTS", ["{A} -> {B}?"]) if 'DREAMS' in globals() else ["The void rearranges '{A}' into '{B}'."]
 
-    def hallucinate(self, vector: Dict[str, float]) -> str:
-        dims = [k for k, v in vector.items() if v > 0.5]
-
-        val_a = dims[0] if len(dims) > 0 else "VOID"
-        val_b = dims[1] if len(dims) > 1 else "ENTROPY"
-
-        if self.PROMPTS:
-            template = random.choice(self.PROMPTS)
-            try:
-                return template.format(A=val_a, B=val_b)
-            except KeyError:
-                return f"Dreaming of {val_a} and {val_b}..."
-
-        return f"Dreaming of {val_a}..."
+    def hallucinate(self, vector: Dict[str, float], trauma_level: float = 0.0) -> Tuple[str, float]:
+        dims = [k for k, v in vector.items() if v > 0.3]
+        if not dims:
+            dims = ["VOID", "SILENCE"]
+        val_a = random.choice(dims)
+        val_b = "ENTROPY" if trauma_level > 5.0 else random.choice(dims)
+        template = random.choice(self.PROMPTS)
+        content = template.format(A=val_a, B=val_b) if "{A}" in template else f"{template} ({val_a})"
+        relief = 0.0
+        if trauma_level > 0:
+            relief = min(trauma_level, random.uniform(1.0, 3.0))
+        return content, relief

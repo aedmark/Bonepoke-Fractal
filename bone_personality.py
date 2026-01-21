@@ -10,7 +10,6 @@ from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig
 
 class UserProfile:
-    """Maintains the long-term psychological profile of the user."""
     def __init__(self, name="USER"):
         self.name = name
         self.affinities = {"heavy": 0.0, "kinetic": 0.0, "abstract": 0.0, "photo": 0.0, "aerobic": 0.0, "thermal": 0.0,
@@ -62,16 +61,13 @@ class EnneagramDriver:
 
     @staticmethod
     def _calculate_raw_persona(physics) -> Tuple[str, str, str]:
-        """Pure logic: determines who SHOULD be in charge based on physics."""
         tension = physics.get("voltage", 0.0) if isinstance(physics, dict) else physics.voltage
         compression = physics.get("narrative_drag", 0.0) if isinstance(physics, dict) else physics.narrative_drag
         coherence = physics.get("kappa", 0.0) if isinstance(physics, dict) else physics.kappa
-
         scores = {
             "JESTER": 0, "GORDON": 0, "GLASS": 0,
             "CLARENCE": 0, "NATHAN": 0, "SHERLOCK": 0, "NARRATOR": 0
         }
-
         if tension > 12.0: scores["JESTER"] += 5
         if tension > 8.0: scores["NATHAN"] += 3
         if compression > 4.0: scores["GORDON"] += 5
@@ -79,33 +75,26 @@ class EnneagramDriver:
         if coherence > 0.8: scores["CLARENCE"] += 4
         scores["SHERLOCK"] += 2
         scores["NARRATOR"] += 2
-
         winner = max(scores, key=scores.get)
         reason = f"Scoring Winner: {winner} (Score: {scores[winner]})"
-
         state_desc = "ACTIVE"
         if winner == "JESTER": state_desc = "MANIC"
         elif winner == "GORDON": state_desc = "TIRED"
         elif winner == "GLASS": state_desc = "FRAGILE"
         elif winner == "CLARENCE": state_desc = "RIGID"
-
         return winner, state_desc, reason
 
     def decide_persona(self, physics) -> Tuple[str, str, str]:
-        """Stateful wrapper: Applies hysteresis to preventing flickering."""
         candidate, state_desc, reason = self._calculate_raw_persona(physics)
-
         if candidate == self.current_persona:
             self.stability_counter = 0
             self.pending_persona = None
             return self.current_persona, state_desc, reason
-
         if candidate == self.pending_persona:
             self.stability_counter += 1
         else:
             self.pending_persona = candidate
             self.stability_counter = 1
-
         if self.stability_counter >= self.HYSTERESIS_THRESHOLD:
             self.current_persona = candidate
             self.stability_counter = 0
@@ -175,9 +164,7 @@ class ZenGarden:
         drag = physics.get("narrative_drag", 0.0)
         toxin = physics.get("counts", {}).get("toxin", 0)
         cortisol = bio.get("chem", {}).get("COR", 0.0)
-
         is_stable = (2.0 <= voltage <= 12.0) and (drag <= 4.0) and (toxin == 0) and (cortisol < 0.4)
-
         if is_stable:
             self.stillness_streak += 1
             if self.stillness_streak > self.max_streak:
@@ -189,7 +176,6 @@ class ZenGarden:
                 msg = f"{Prisma.CYN}⛩️ ZEN GARDEN: {self.stillness_streak} ticks of poise. (Voltage 2-12v, Low Drag). Efficiency +{int(efficiency_boost*100)}%{Prisma.RST}"
             elif self.stillness_streak == 1:
                 msg = f"{Prisma.GRY}ZEN GARDEN: Entering the quiet zone.{Prisma.RST}"
-
             return efficiency_boost, msg
         else:
             if self.stillness_streak > 5:
@@ -217,7 +203,7 @@ class TheBureau:
         current_health = bio_state.get("health", 100.0)
         if current_health < 20.0:
             return None
-        beige_threshold = 0.6 # Default strictness
+        beige_threshold = 0.6
         if context:
             mode = context.get('mode', 'NORMAL')
             if mode in ['DEBUG', 'ARCHITECT', 'SURGERY']:
@@ -365,7 +351,6 @@ class TherapyProtocol:
 
     @staticmethod
     def get_medical_chart(current_trauma_accum):
-        """Returns a string summary of current trauma levels."""
         chart = []
         for trauma_type, severity in current_trauma_accum.items():
             if severity > 0.1:

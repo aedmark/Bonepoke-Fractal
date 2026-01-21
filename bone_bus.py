@@ -64,7 +64,6 @@ class EventBus:
         self.subscribers[event_type].append(callback)
 
     def publish(self, event_type, data=None):
-        """If we are dormant, we queue the impulse rather than acting on it. This preserves the integrity of the embryonic state."""
         if self.dormant:
             self.gestation_queue.append((event_type, data))
             return
@@ -90,7 +89,6 @@ class EventBus:
 
     def get_recent_logs(self, count=10):
         return list(self.buffer)[-count:]
-
 
 class BoneConfig:
     GRAVITY_WELL_THRESHOLD = 15.0
@@ -212,14 +210,8 @@ class BoneConfig:
 
     @classmethod
     def _validate_ranges(cls, data: Dict[str, Any], parent_key: str = "") -> Tuple[Dict[str, Any], str]:
-        """
-        Recursively validates configuration dictionaries against defined constraints.
-        Now drills down into nested class structures (METABOLISM, PHYSICS, etc).
-        """
         sanitized = {}
         logs = []
-
-        # Define constraints map (could be moved to a static dict for cleanliness)
         constraints = {
             "MAX_HEALTH": (1.0, 1000.0, float),
             "MAX_STAMINA": (1.0, 1000.0, float),
@@ -228,28 +220,20 @@ class BoneConfig:
             "MAX_MEMORY_CAPACITY": (10, 1000, int),
             "VERBOSE_LOGGING": (0, 1, bool),
         }
-
         for key, value in data.items():
             full_key = f"{parent_key}.{key}" if parent_key else key
-
-            # Recursion for nested dictionaries (matching nested Config classes)
             if isinstance(value, dict):
                 sub_sanitized, sub_log = cls._validate_ranges(value, full_key)
                 sanitized[key] = sub_sanitized
                 if sub_log: logs.append(sub_log)
                 continue
-
             if key in constraints:
                 min_val, max_val, expected_type = constraints[key]
-
-                # Type coercion (int -> float)
                 if expected_type == float and isinstance(value, int):
                     value = float(value)
-
                 if not isinstance(value, expected_type):
                     logs.append(f"Skipped {full_key}: Invalid type {type(value)}.")
                     continue
-
                 if expected_type in [int, float]:
                     if min_val <= value <= max_val:
                         sanitized[key] = value
@@ -401,7 +385,6 @@ class PhysicsPacket:
 
     def snapshot(self) -> 'PhysicsPacket':
         data = self.to_dict()
-        # Deep copy mutable containers to prevent quantum entanglement
         data['clean_words'] = list(self.clean_words)
         data['counts'] = dict(self.counts)
         data['vector'] = dict(self.vector)
@@ -409,46 +392,31 @@ class PhysicsPacket:
         return PhysicsPacket(**data)
 
     def diff(self, other: 'PhysicsPacket') -> Dict[str, Tuple[Any, Any]]:
-        """
-        Calculates the delta between this packet (Current) and another (Previous).
-        Returns: {field_name: (old_value, new_value)}
-        """
         deltas = {}
         for f in fields(self):
             key = f.name
             curr = getattr(self, key)
-
-            # Handle case where 'other' might be None or a dict (safety check)
             if isinstance(other, dict):
                 prev = other.get(key)
             elif hasattr(other, key):
                 prev = getattr(other, key)
             else:
                 prev = None
-
             if curr != prev:
                 if isinstance(curr, float) and isinstance(prev, float):
                     if abs(curr - prev) < 0.001:
                         continue
-
                 deltas[key] = (prev, curr)
         return deltas
 
     def diff_view(self, other: 'PhysicsPacket', indent: int = 3) -> str:
-        """
-        Returns a color-coded string visualization of the state drift.
-        Usage: print(ctx.physics.diff_view(last_stable_physics))
-        """
         deltas = self.diff(other)
         if not deltas:
             return f"{' ' * indent}{Prisma.GRY}(No State Drift){Prisma.RST}"
-
         lines = []
         for key, (old, new) in deltas.items():
-            # Green for growth, Red for reduction (if numeric), or just Cyan/Magenta for change.
             color = Prisma.CYN
             arrow = "->"
-
             if isinstance(new, (int, float)) and isinstance(old, (int, float)):
                 if new > old:
                     color = Prisma.GRN
@@ -456,15 +424,11 @@ class PhysicsPacket:
                 elif new < old:
                     color = Prisma.RED
                     arrow = "▼"
-
-            # Truncate long strings/lists for display sanity
             str_old = str(old)
             str_new = str(new)
             if len(str_old) > 20: str_old = str_old[:17] + "..."
             if len(str_new) > 20: str_new = str_new[:17] + "..."
-
             lines.append(f"{' ' * indent}{Prisma.GRY}{key}:{Prisma.RST} {str_old} {color}{arrow}{Prisma.RST} {str_new}")
-
         return "\n".join(lines)
 
     @classmethod

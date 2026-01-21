@@ -1,4 +1,4 @@
-# BONEAMANITA 10.6.3 - "Semantic Fluidity"
+# BONEAMANITA 10.6.4 - "Semantic Fluidity"
 # Architects: SLASH, KISHO, The Courtyard, Taylor & Edmark
 
 import time, json
@@ -27,11 +27,10 @@ def bootstrap_systems():
 
 class SessionGuardian:
     def __init__(self, engine_ref):
-        # [SLASH PATCH]: Clarity update.
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.6.3', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.6.4', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -250,7 +249,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.6.3', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.6.4', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

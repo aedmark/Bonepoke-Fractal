@@ -26,6 +26,7 @@ class EngineProtocol(Protocol):
     user_name: str
 
     def trigger_death(self, last_phys) -> Dict: ...
+
     def get_metrics(self, atp=0.0) -> Dict: ...
 
 class CommandProcessor:
@@ -35,7 +36,6 @@ class CommandProcessor:
         self.Lex = lexicon_ref
         self.Config = config_ref
         self.Map = cartographer_ref
-
         self.registry: Dict[str, Callable[[List[str]], bool]] = {
             "/save": self._cmd_save,
             "/load": self._cmd_load,
@@ -78,12 +78,10 @@ class CommandProcessor:
         except ValueError:
             self._log(f"{self.P.RED}SYNTAX ERROR: Unbalanced quotes. The Bureau rejects your form.{self.P.RST}")
             return True
-
         cmd = parts[0].lower()
         if cmd not in self.registry:
             self._log(f"{self.P.RED}Unknown command '{cmd}'. Try /help for the manifesto.{self.P.RST}")
             return True
-
         if cmd in ["/teach", "/kill", "/flag"] and not self.Config.VERBOSE_LOGGING:
             try:
                 trust = self.eng.mind.mirror.profile.confidence
@@ -92,7 +90,6 @@ class CommandProcessor:
                     return True
             except AttributeError:
                 pass
-
         try:
             return self.registry[cmd](parts)
         except Exception as e:
@@ -114,7 +111,6 @@ class CommandProcessor:
                               costs={"atp": 50.0, "stamina": 30.0},
                               checks={"health": 80.0}):
             return True
-
         mode = "MITOSIS"
         target = None
 
@@ -129,11 +125,9 @@ class CommandProcessor:
                     self._log(f"{self.P.YEL}ISOLATION: No partners found. Mitosis fallback.{self.P.RST}")
             except OSError:
                 pass
-
         self._log(f"{self.P.MAG}INITIATING {mode}...{self.P.RST}")
         log_text, child_mutations = self.eng.repro.attempt_reproduction(self.eng, mode, target)
         self._log(log_text)
-
         if child_mutations:
             self._log(f"{self.P.CYN}↺ CIRCULATION: The parent learns from the child.{self.P.RST}")
             for key, val in child_mutations.items():
@@ -152,7 +146,6 @@ class CommandProcessor:
     def _cmd_save(self, _parts):
         try:
             self.eng.mind.mirror.profile.save()
-
             path = self.eng.mind.mem.save(
                 health=self.eng.health,
                 stamina=self.eng.stamina,
@@ -171,7 +164,6 @@ class CommandProcessor:
     def _cmd_rummage(self, _parts):
         phys = self.eng.phys.tension.last_physics_packet
         if not phys: return True
-
         success, msg, cost = self.eng.gordon.rummage(phys, self.eng.stamina)
         self.eng.stamina = max(0.0, self.eng.stamina - cost)
         self._log(msg)
@@ -182,10 +174,8 @@ class CommandProcessor:
             return True
         phys = self.eng.phys.tension.last_physics_packet
         if not phys or "raw_text" not in phys: return True
-
         bio = {"cortisol": self.eng.bio.endo.cortisol, "oxytocin": self.eng.bio.endo.oxytocin}
         result, anchors = self.Map.weave(phys["raw_text"], self.eng.mind.mem.graph, bio, self.eng.limbo, physics=phys)
-
         self._log(f"{self.P.OCHRE}CARTOGRAPHY REPORT:{self.P.RST}\n{result}")
         if anchors: self._log(f"LANDMARKS: {', '.join(anchors)}")
         return True
@@ -315,37 +305,29 @@ class CommandProcessor:
         if not phys:
             self._log(f"{self.P.RED}CANNOT PUBLISH: No physics data generated yet.{self.P.RST}")
             return True
-
         result = self.eng.journal.publish(phys["raw_text"], phys, self.eng.bio)
-
         self._log(f"{self.P.OCHRE}--- LITERARY REVIEW ---{self.P.RST}")
         self._log(f"Critic: {self.P.WHT}{result.critic_name}{self.P.RST}")
         self._log(f"Score:  {self.P.CYN}{result.score:.1f}/100{self.P.RST}")
         self._log(f"Review: {self.P.GRY}\"{result.verdict}\"{self.P.RST}")
-
         if self.Config.VERBOSE_LOGGING:
             self._log(f"{self.P.GRY}   [Scoring Logic]: {', '.join(result.breakdown)}{self.P.RST}")
-
         if result.reward_type == "ATP_BOOST":
             current_atp = self.eng.bio.mito.state.atp_pool
             max_atp = getattr(self.Config, "MAX_ATP", 200.0)
             self.eng.bio.mito.state.atp_pool = min(max_atp, current_atp + result.reward_amount)
             self._log(f"{self.P.GRN}   [REWARD]: +{result.reward_amount} ATP (Royalties){self.P.RST}")
-
             if result.score > 90:
                 max_health = getattr(self.Config, "MAX_HEALTH", 100.0)
                 self.eng.health = min(max_health, self.eng.health + 5)
                 self._log(f"{self.P.GRN}   [CRITICAL ACCLAIM]: +5 Health.{self.P.RST}")
-
         elif result.reward_type == "STAMINA_REGEN":
             max_stamina = getattr(self.Config, "MAX_STAMINA", 100.0)
             self.eng.stamina = min(max_stamina, self.eng.stamina + result.reward_amount)
             self._log(f"{self.P.GRN}   [REWARD]: +{result.reward_amount} Stamina (Validation){self.P.RST}")
-
         elif result.reward_type == "CORTISOL_SPIKE":
             self.eng.bio.endo.cortisol = min(1.0, self.eng.bio.endo.cortisol + (result.reward_amount * 0.05))
             self._log(f"{self.P.RED}   [PENALTY]: Rejection hurts. Cortisol rising.{self.P.RST}")
-
         return True
 
     def _cmd_soul(self, _parts):
@@ -353,7 +335,6 @@ class CommandProcessor:
         self._log(f"{self.P.MAG}--- SOUL DIAGNOSTICS ---{self.P.RST}")
         self._log(f"Traits: {soul.traits}")
         self._log(f"Obsession: {soul.current_obsession} ({soul.obsession_progress*100:.1f}%)")
-
         if soul.core_memories:
             self._log(f"{self.P.WHT}CORE MEMORIES:{self.P.RST}")
             for i, mem in enumerate(soul.core_memories[-3:]):
@@ -373,7 +354,6 @@ class CommandProcessor:
         return True
 
     def _cmd_synapse(self, _parts):
-        """Displays the alignment between System Vector and simulated LLM Vector."""
         phys = self.eng.phys.tension.last_physics_packet
         if not phys:
             self._log("SYNAPSE OFFLINE: No physics data.")
@@ -398,31 +378,25 @@ class CommandProcessor:
                 if metric == "voltage": current_val = self.eng.phys.tension.last_physics_packet.get("voltage", 0)
                 elif metric == "trust": current_val = self.eng.mind.mirror.profile.confidence
                 elif metric == "health": current_val = self.eng.health
-
                 if current_val < threshold:
                     self._log(f"{self.P.OCHRE}🛑 DENIED ({context}): {metric.title()} too low ({current_val:.1f} < {threshold}).{self.P.RST}")
                     return False
-
         stamina_cost = costs.get("stamina", 0.0)
         atp_cost = costs.get("atp", 0.0)
-
         if self.eng.stamina < stamina_cost:
             self._log(f"{self.P.RED}🛑 EXHAUSTED: This command requires {stamina_cost} Stamina.{self.P.RST}")
             return False
-
         current_atp = self.eng.bio.mito.state.atp_pool
         if current_atp < atp_cost:
             self._log(f"{self.P.RED}🛑 STARVING: This command requires {atp_cost} ATP (Have: {current_atp:.1f}).{self.P.RST}")
             return False
-
         if stamina_cost > 0: self.eng.stamina -= stamina_cost
         if atp_cost > 0: self.eng.bio.mito.state.atp_pool -= atp_cost
-
         return True
 
     def _cmd_help(self, _parts):
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 10.6.3 MANUAL ---{self.P.RST}",
+            f"\n{self.P.CYN}--- BONEAMANITA 10.6.4 MANUAL ---{self.P.RST}",
             f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"
         ]
         categories = {
@@ -435,7 +409,6 @@ class CommandProcessor:
         def get_doc(func):
             paperwork = inspect.getdoc(func)
             return paperwork if paperwork else "Undocumented protocol."
-
         for cat, methods in categories.items():
             help_lines.append(f"{self.P.WHT}{cat}:{self.P.RST}")
             for m_name in methods:
@@ -444,7 +417,6 @@ class CommandProcessor:
                     doc = get_doc(getattr(self, m_name))
                     help_lines.append(f"  {cmd_name:<12} - {doc}")
             help_lines.append("")
-
         help_lines.append(f"{self.P.GRY}Type carefully. The machine is listening.{self.P.RST}")
         self._log("\n".join(help_lines))
         return True

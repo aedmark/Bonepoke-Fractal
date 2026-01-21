@@ -6,7 +6,6 @@ from typing import Tuple, Optional
 from bone_bus import Prisma
 from bone_lexicon import TheLexicon
 
-
 class TheCrucible:
     def __init__(self):
         self.max_voltage_cap = 20.0
@@ -25,12 +24,10 @@ class TheCrucible:
             self.dampener_charges -= 1
             reduction = voltage_spike * 0.7
             return True, f"CRUCIBLE DAMPENER: Circuit Breaker. Reduced {voltage_spike:.1f}v by {reduction:.1f}v.", reduction
-
         elif voltage_spike > 8.0 and stability_index < 0.3:
             self.dampener_charges -= 1
             reduction = voltage_spike * 0.4
             return True, f"CRUCIBLE DAMPENER: Instability detected. Dampening charge on unstable ground.", reduction
-
         return False, "Structure is holding the charge.", 0.0
 
     def audit_fire(self, physics):
@@ -209,7 +206,6 @@ class TheTheremin:
             self.decoherence_buildup = 0.0
             self.classical_turns = 0
             return False, resin_flow, f"{Prisma.RED}WAVEFUNCTION COLLAPSE: System is solid amber. INITIATING AIRSTRIKE.{Prisma.RST}", "AIRSTRIKE"
-
         if self.classical_turns > 3:
             critical_event = "CORROSION"
             theremin_msg = f"{theremin_msg} | {Prisma.YEL}FOSSILIZATION IMMINENT{Prisma.RST}"

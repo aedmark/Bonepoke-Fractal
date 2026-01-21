@@ -10,7 +10,6 @@ from bone_personality import UserProfile, PublicParksDepartment, ZenGarden
 from bone_council import CouncilChamber
 from bone_data import DEATH, RESONANCE, ALMANAC_DATA, STYLE_CRIMES, TheAkashicRecord, NARRATIVE_DATA
 
-
 class TheTinkerer:
     def __init__(self, gordon_ref, events_ref):
         self.gordon = gordon_ref
@@ -138,7 +137,6 @@ class DeathGen:
         flavor_text = random.choice(cause_list) if cause_list else "Unknown Error"
         prefix_list = DeathGen.PREFIXES
         prefix = random.choice(prefix_list) if prefix_list else "RIP."
-
         verdict = "You vanished."
         if physics["voltage"] > 15.0:
             verdict_list = DeathGen.VERDICTS.get("HEAVY", [])
@@ -146,7 +144,6 @@ class DeathGen:
         elif physics["voltage"] < 2.0:
             verdict_list = DeathGen.VERDICTS.get("LIGHT", [])
             if verdict_list: verdict = random.choice(verdict_list)
-
         return f"{prefix} Cause of Death: {flavor_text}. {verdict}"
 
 class TheCartographer:
@@ -231,7 +228,6 @@ class TheAlmanac:
             real_entropy = host_health.entropy
         max_trauma = max(trauma, key=trauma.get) if trauma else "NONE"
         trauma_val = trauma.get(max_trauma, 0)
-
         if real_latency > 5.0:
             condition = "HIGH_DRAG"
             advice = f"Host Latency High ({real_latency:.1f}s). Simplify syntax to reduce load."
@@ -416,10 +412,8 @@ class MirrorGraph:
         mods = {"drag_mult": 1.0, "plasticity": 1.0, "loot_chance": 1.0, "atp_tax": 0.0, "voltage_cap": 20.0, "flavor": ""}
         if top_stat == "NEUTRAL":
             return mods
-
         intensity = self.stats[top_stat]
         if intensity < 0.3: return mods
-
         if top_stat == "WAR":
             mods["drag_mult"] = 1.5
             mods["loot_chance"] = 2.0
@@ -462,7 +456,6 @@ class StrunkWhiteProtocol:
                     return False, f"{Prisma.RED}FORBIDDEN VOCAB: '{word.title()}' is a banned artifact.{Prisma.RST}"
                 else:
                     return True, f"{Prisma.YEL}STYLE OBSERVATION: '{word.title()}' is discouraged. Try a simpler synonym.{Prisma.RST}"
-
         for crime in self.PATTERNS:
             if re.search(crime["regex"], text):
                 msg = crime['error_msg']
@@ -701,26 +694,20 @@ class TheNavigator:
             if old_loc != "THE_GLITCH":
                 return self.current_location, self.manifolds["THE_GLITCH"].entry_msg
             return self.current_location, None
-
         narrative_drag = physics_packet.get("narrative_drag", 0.0)
-
         if host_health:
             real_drag = max(0.0, host_health.latency - 2.0)
             narrative_drag += (real_drag * 1.5)
-
         drag = min(10.0, max(0.0, narrative_drag))
         volt = min(20.0, max(0.0, physics_packet.get("voltage", 0.0)))
-
         current_vec = (round(drag / 10.0, 2), round(volt / 20.0, 2))
         best_fit = "THE_MUD"
         min_dist = 999.0
-
         for name, manifold in self.manifolds.items():
             dist = math.dist(current_vec, manifold.center_vector)
             if dist < manifold.radius and dist < min_dist:
                 min_dist = dist
                 best_fit = name
-
         self.current_location = best_fit
         if self.current_location != old_loc:
             return self.current_location, self.manifolds[self.current_location].entry_msg
@@ -754,16 +741,12 @@ class TheNavigator:
     def plot_course(self, target_name: str) -> list[str] | tuple[list[str], float]:
         if target_name not in self.manifolds:
             return ["ERROR: Unknown Destination"], 0.0
-
         start = self.manifolds.get(self.current_location, self.manifolds["THE_MUD"]).center_vector
         end = self.manifolds[target_name].center_vector
-
         effort = math.dist(start, end)
         cost = round(effort * 10.0, 1)
-
         if not self.shimmer.spend(cost):
             return [f"COURSE PLOTTED to {target_name}. Warning: Insufficient Shimmer ({cost:.1f} required)."], 0.0
-
         return [f"COURSE PLOTTED to {target_name}. (Est. Cost: {cost:.1f} Shimmer)"], 0.0
 
 @dataclass

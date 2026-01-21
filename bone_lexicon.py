@@ -179,7 +179,8 @@ class LinguisticAnalyzer:
         total = max(1.0, sum(dims.values()))
         return {k: round(v / total, 3) for k, v in dims.items()}
 
-    def calculate_flux(self, vec_a: Dict[str, float], vec_b: Dict[str, float]) -> float:
+    @staticmethod
+    def calculate_flux(vec_a: Dict[str, float], vec_b: Dict[str, float]) -> float:
         if not vec_a or not vec_b: return 0.0
         keys = set(vec_a.keys()) | set(vec_b.keys())
         diff_sq = sum((vec_a.get(k, 0.0) - vec_b.get(k, 0.0)) ** 2 for k in keys)
@@ -190,7 +191,6 @@ class LinguisticAnalyzer:
         if not field_vector or not base_cat:
             return base_cat
         dominant_field = max(field_vector, key=field_vector.get) if field_vector else None
-
         if dominant_field and field_vector[dominant_field] > 0.6:
             return base_cat
         return base_cat
@@ -262,7 +262,6 @@ class SemanticField:
         self.history = []
 
     def update(self, text: str) -> Dict[str, float]:
-        """Inject new text into the field and get the reaction."""
         new_vector = self.analyzer.vectorize(text)
         if not new_vector:
             return self.current_vector
@@ -280,7 +279,6 @@ class SemanticField:
         return self.current_vector
 
     def get_atmosphere(self) -> str:
-        """Returns the dominant 'weather' of the field."""
         if not self.current_vector: return "VOID"
         dom = max(self.current_vector, key=self.current_vector.get)
         if self.momentum > 0.5:

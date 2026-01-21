@@ -23,7 +23,6 @@ class SystemEmbryo:
     soul_legacy: Optional[Dict] = None
 
 class PanicRoom:
-    """The Fail-Safe. When the simulation breaks, we retreat here to prevent a full crash. """
     @staticmethod
     def get_safe_physics():
         return PhysicsPacket(
@@ -59,7 +58,6 @@ class PanicRoom:
         }
 
 class BoneArchitect:
-    """The Builder. Constructs the Mind, Body, and Physics systems in the correct dependency order."""
     @staticmethod
     def _construct_mind(events, lex) -> Tuple[MindSystem, LimboLayer]:
         _mem = MycelialNetwork(events)
@@ -105,17 +103,12 @@ class BoneArchitect:
 
     @staticmethod
     def incubate(events, lex) -> SystemEmbryo:
-        """Builds the systems but keeps the EventBus in a 'Dormant' state. This prevents components from reacting to their own creation."""
-
         if hasattr(events, "set_dormancy"):
             events.set_dormancy(True)
-
         events.log(f"{Prisma.GRY}[ARCHITECT]: Laying foundations (Dormancy Active)...{Prisma.RST}", "SYS")
-
         mind, limbo = BoneArchitect._construct_mind(events, lex)
         bio = BoneArchitect._construct_bio(events, mind, lex)
         physics = BoneArchitect._construct_physics(events, bio)
-
         return SystemEmbryo(
             mind=mind,
             limbo=limbo,
@@ -127,33 +120,25 @@ class BoneArchitect:
 
     @staticmethod
     def awaken(embryo: SystemEmbryo) -> SystemEmbryo:
-        """Loads ancestral data, applies traits, and finally releases the EventBus lock."""
         events = embryo.bio.mito.events
-
         load_result = embryo.mind.mem.autoload_last_spore()
         inherited_traits = {}
         inherited_antibodies = set()
         soul_legacy = {}
-
         if load_result:
             if isinstance(load_result, tuple):
                 if len(load_result) >= 1: inherited_traits = load_result[0]
                 if len(load_result) >= 2: inherited_antibodies = load_result[1]
                 if len(load_result) >= 3: soul_legacy = load_result[2]
-
             events.log(f"{Prisma.CYN}[ARCHITECT]: Ancestral Spirit detected.{Prisma.RST}", "SYS")
         else:
             events.log(f"{Prisma.WHT}[ARCHITECT]: No ancestors found. A new lineage begins.{Prisma.RST}", "SYS")
-
         embryo.bio.mito.state.mother_hash = embryo.mind.mem.session_id
         embryo.bio.mito.apply_inheritance(inherited_traits)
         embryo.bio.immune.active_antibodies = inherited_antibodies
         embryo.soul_legacy = soul_legacy
-
         embryo.is_gestating = False
         events.log(f"{Prisma.GRN}[ARCHITECT]: Embryo viable. Breaking the shell...{Prisma.RST}", "SYS")
-
         if hasattr(events, "set_dormancy"):
             events.set_dormancy(False)
-
         return embryo

@@ -98,23 +98,20 @@ class NarrativeSelf:
     def find_obsession(self, lexicon_ref):
         if self.current_obsession and self.obsession_progress < 1.0:
             return
-
         dynamic_pairs = [
-            ("heavy", "aerobic"),    # The struggle against gravity
-            ("kinetic", "suburban"), # The need to escape stagnation
-            ("abstract", "meat"),    # The mind vs. the body
-            ("thermal", "cryo"),     # Heat vs. Cold
-            ("photo", "heavy"),      # Light vs. Density
-            ("sacred", "suburban"),  # The divine vs. the mundane
-            ("play", "constructive") # Chaos vs. Order
+            ("heavy", "aerobic"),
+            ("kinetic", "suburban"),
+            ("abstract", "meat"),
+            ("thermal", "cryo"),
+            ("photo", "heavy"),
+            ("sacred", "suburban"),
+            ("play", "constructive")
         ]
-
         if hasattr(lexicon_ref, "get_random"):
             target_cat, negate_cat = random.choice(dynamic_pairs)
             focus_word = lexicon_ref.get_random(target_cat).title()
             if focus_word.lower() == "void":
                 focus_word = target_cat.title()
-
             templates = [
                 f"The Pursuit of {focus_word}",
                 f"The {focus_word} Manifesto",
@@ -127,7 +124,6 @@ class NarrativeSelf:
             self.current_target_cat = target_cat
             self.current_negate_cat = negate_cat
             self.events.log(f"{Prisma.CYN}🧭 NEW OBSESSION (GENERATED): {self.current_obsession}{Prisma.RST}", "SOUL")
-
         else:
             selection = random.choice(self.POSSIBLE_OBSESSIONS)
             self.current_obsession = selection["title"]

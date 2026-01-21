@@ -174,11 +174,9 @@ class GordonKnot:
                     template = random.choice(GORDON_LOGS["FUMBLE"])
                     msg = template.format(item=dropped)
                     logs.append(f"{Prisma.RED}{msg}{Prisma.RST}")
-
         for item in self.inventory:
             data = self.get_item_data(item)
             traits = data.get("passive_traits", [])
-
             for trait in traits:
                 handler = EFFECT_DISPATCH.get(trait)
                 if handler:
@@ -195,7 +193,6 @@ class GordonKnot:
         vol = physics_ref.get("voltage", 0.0)
         drag = physics_ref.get("narrative_drag", 0.0)
         psi = physics_ref.get("psi", 0.0)
-
         loot_table = ["TRAPPERKEEPER_OF_VIGILANCE", "THE_RED_STAPLER", "PERMIT_A38", "DUCT_TAPE", "THE_STYLE_GUIDE"]
         if vol > BoneConfig.PHYSICS.VOLTAGE_CRITICAL:
             loot_table = ["QUANTUM_GUM", "JAR_OF_FIREFLIES", "BROKEN_WATCH"]
@@ -203,10 +200,8 @@ class GordonKnot:
             loot_table = ["POCKET_ROCKS", "LEAD_BOOTS", "ANCHOR_STONE"]
         elif psi > 0.7:
             loot_table = ["HORSE_PLUSHIE", "SPIDER_LOCUS", "WAFFLE_OF_PERSISTENCE"]
-
         if random.random() < 0.3:
             return True, f"{Prisma.GRY}RUMMAGE: Gordon dug through the trash. Just lint and old receipts.{Prisma.RST}", stamina_penalty
-
         found_item = random.choice(loot_table)
         msg = self.acquire(found_item)
         prefix = f"{Prisma.OCHRE}RUMMAGE:{Prisma.RST} "
@@ -274,18 +269,15 @@ class GordonKnot:
             return f"{Prisma.VIOLET}TRAUMA DEEPENED: The scar on '{culprit}' is worse.{Prisma.RST}"
 
     def get_semantic_operators(self) -> List[str]:
-        """ Retrieves narrative constraints based on held items. """
         operators = []
         for item in self.inventory:
             data = self.get_item_data(item)
-
             for trait in data.get("passive_traits", []):
                 if trait in SEMANTIC_INJECTIONS:
                     operators.append(SEMANTIC_INJECTIONS[trait])
             if item == "SILENT_KNIFE":
                 operators.append("CONSTRAINT: Do not use the verb 'to be'.")
-
-        return list(set(operators)) # Dedupe to avoid shouting
+        return list(set(operators))
 
     def deploy_pizza(self, physics_ref, item_name="STABILITY_PIZZA") -> Tuple[bool, str]:
         data = self.get_item_data(item_name)

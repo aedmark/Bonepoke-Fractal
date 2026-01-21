@@ -49,7 +49,6 @@ class GenesisProtocol:
 
     @staticmethod
     def ping(url: str) -> bool:
-        # noinspection PyBroadException
         try:
             req = urllib.request.Request(url, method="GET")
             with urllib.request.urlopen(req, timeout=3.0) as _:
@@ -205,7 +204,7 @@ class GenesisProtocol:
     def wizard(self) -> bool:
         os.system('cls' if os.name == 'nt' else 'clear')
         banner = f"""
-{Prisma.CYN}   GENESIS PROTOCOL v10.6.3{Prisma.RST}
+{Prisma.CYN}   GENESIS PROTOCOL v10.6.4{Prisma.RST}
 {Prisma.GRY}State Machine Active. Tensegrity Nominal.{Prisma.RST}
 ------------------------------------"""
         print(banner)
@@ -376,8 +375,6 @@ Do not break character. Do not explain the simulation rules unless asked.
             "base_url": None,
             "api_key": "sk-dummy-key",
             "model": "local-model"}
-
-        # 1. Load Configuration
         if os.path.exists(CONFIG_FILE):
             try:
                 with open(CONFIG_FILE, "r") as f:
@@ -387,8 +384,6 @@ Do not break character. Do not explain the simulation rules unless asked.
                 self.type_out("Config file corrupted. Reverting to Safe Defaults.", color=Prisma.YEL)
                 self.config = safe_config.copy()
                 config_status = "CORRUPT"
-
-        # 2. Verify Configuration
         if config_status == "LOADED":
             self.type_out("...Verifying saved configuration...", color=Prisma.GRY)
             is_valid, msg = self.validate_brain_uplink(self.config)
@@ -399,43 +394,30 @@ Do not break character. Do not explain the simulation rules unless asked.
                 config_status = "STALE"
             else:
                 config_status = "VALID"
-
-        # 3. Wizard (if needed)
         if config_status != "VALID":
             self.type_out("Entering Setup Wizard...", color=Prisma.CYN)
             try:
-                # [THE FIX]: Wrap the wizard in a Kinetic Shield
                 success = self.wizard()
             except KeyboardInterrupt:
                 print(f"\n{Prisma.paint('...Signal Lost. Sequence Aborted.', 'R')}")
                 sys.exit(0)
-
             if not success:
                 self.type_out(f"\n{Prisma.YEL}Setup failed or cancelled. Initializing Mock Mode (Safe Mode).{Prisma.RST}")
                 self.config = safe_config.copy()
                 self.config["provider"] = "mock"
-
-        # 4. Boot Engine
         self.type_out("\n...Booting Core Systems...", color=Prisma.GRY)
         self._sync_configuration()
-
-        # [THE TRANSITION]: Initialize Engine (Creates EventBus)
         engine = BoneAmanita()
-
         self.perform_identity_handshake(engine)
-
-        # 5. Uplink Brain
         if self.config["provider"] != "mock":
             self.type_out(f"...Connecting Neural Uplink ({self.config['provider']})...", color=Prisma.CYN)
             try:
-                # [THE FIX]: Inject engine.events into the interface
                 client = LLMInterface(
                     events_ref=engine.events,
                     provider=self.config["provider"],
                     base_url=self.config.get("base_url"),
                     api_key=self.config.get("api_key"),
                     model=self.config.get("model"))
-
                 if hasattr(engine, 'cortex'):
                     engine.cortex.llm = client
                     self.type_out("   [CORTEX]: Uplink Established via EventBus.", color=Prisma.GRN)
@@ -445,9 +427,7 @@ Do not break character. Do not explain the simulation rules unless asked.
             except Exception as e:
                 self.type_out(f"{Prisma.RED}FATAL UPLINK ERROR: {e}{Prisma.RST}")
                 self.type_out("Falling back to internal logic.", color=Prisma.GRY)
-
         self.type_out("...System Online. Good luck.\n", color=Prisma.GRN)
-
         with SessionGuardian(engine) as session_engine:
             while True:
                 try:
