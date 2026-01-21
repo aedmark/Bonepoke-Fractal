@@ -116,56 +116,64 @@ class TheTensionMeter:
             None
         )
 
+    def audit_narrative_causality(self, physics):
+        voltage = physics.get("voltage", 0.0)
+        coherence = physics.get("kappa", 1.0) # Structural soundness
+        valence = physics.get("valence", 0.0)  # Heroism/Positivity
+
+        if voltage > 12.0 and coherence < 0.4 and valence > 0.6:
+            physics["narrative_drag"] = 0.0 # Friction disappears
+            physics["voltage"] += 10.0      # Energy spikes
+            physics["flow_state"] = "NARRATIVE_IMPERATIVE"
+
+            return (
+                True,
+                f"{Prisma.MAG}✨ NARRATIVE CAUSALITY: 'It just might work...'{Prisma.RST}\n"
+                f"   {Prisma.CYN}The odds were million-to-one. Therefore, success is guaranteed.{Prisma.RST}\n"
+                f"   {Prisma.GRY}(Drag set to 0.0 | Voltage Boosted){Prisma.RST}",
+                "DESPERATE_MEASURES"
+            )
+        return False, None, None
+
     def gaze(self, text: str, graph: Dict = None) -> Dict:
         graph = graph or {}
         clean_words = TheLexicon.clean(text)
         valence = TheLexicon.get_valence(clean_words)
-
         field_vector = self.semantic_field.update(text)
         semantic_flux = self.semantic_field.momentum
         atmosphere = self.semantic_field.get_atmosphere()
-
         counts, unknowns = self._tally_categories(clean_words, text)
         if unknowns:
             self._trigger_neuroplasticity(unknowns, counts)
-
         geodesic = GeodesicEngine.collapse_wavefunction(clean_words, counts, BoneConfig)
-
         hybrid_vector = geodesic.dimensions.copy()
-
         for dim, hist_val in field_vector.items():
             if dim in hybrid_vector:
                 hybrid_vector[dim] = (hybrid_vector[dim] + hist_val) / 2.0
             else:
                 hybrid_vector[dim] = hist_val
-
         hybrid_vector["TEX"] = hybrid_vector.get("STR", 0.0)
         hybrid_vector["TMP"] = hybrid_vector.get("PHI", 0.0)
         hybrid_vector["XI"]  = hybrid_vector.get("BET", 0.0)
         hybrid_vector["LQ"]  = hybrid_vector.get("DEL", 0.0)
-
         raw_voltage = geodesic.tension
         dynamic_voltage = raw_voltage + (semantic_flux * 5.0)
-
         self.voltage_buffer.append(dynamic_voltage)
         if self.voltage_buffer:
             smoothed_voltage = sum(self.voltage_buffer) / len(self.voltage_buffer)
         else:
             smoothed_voltage = dynamic_voltage
         smoothed_voltage = round(smoothed_voltage, 2)
-
         graph_mass = 0.0
         if graph:
             anchors = [w for w in clean_words if w in graph]
             if anchors:
                 graph_mass = sum(sum(graph[w]["edges"].values()) for w in anchors)
-
         integrity_packet = {
             "kappa": geodesic.coherence,
             "psi": geodesic.abstraction,
             "mass": round(graph_mass, 1)
         }
-
         metrics = self._derive_complex_metrics(
             counts, clean_words,
             smoothed_voltage,
@@ -183,11 +191,9 @@ class TheTensionMeter:
             integrity_packet,
             metrics
         )
-
         self.last_physics_packet = packet["physics"]
         if hasattr(self.events, "publish"):
             self.events.publish("PHYSICS_CALCULATED", packet)
-
         return packet
 
     @staticmethod
@@ -399,6 +405,9 @@ class TheBouncer:
     def check_entry(self, ctx: CycleContext) -> Tuple[bool, Optional[Dict]]:
         phys = ctx.physics
         clean = ctx.clean_words
+        is_red_tape, tape_packet = self._check_bureaucracy(ctx)
+        if is_red_tape:
+            return False, tape_packet
         hn_output = self.hn.attempt_entry(phys, clean)
         if hn_output and self.hn.in_hn_state:
             return False, self._pack_refusal(ctx, "HN_SINGLETON", hn_output)
@@ -442,6 +451,18 @@ class TheBouncer:
             "ui": ui,
             "logs": logs,
             "metrics": self.eng.get_metrics()}
+
+    def _check_bureaucracy(self, ctx) -> Tuple[bool, Optional[Dict]]:
+        if random.randint(1, 42) == 42:
+            if ctx.physics.get("voltage", 0) < 5.0:
+                return True, self._pack_refusal(
+                    ctx,
+                    "VOGON_HOLD",
+                    f"{Prisma.OCHRE}🛑 BUREAUCRATIC HALT (Form 27B/6 Missing){Prisma.RST}\n"
+                    f"   {Prisma.GRY}Processing of '{ctx.input_text}' has been suspended pending sub-committee review.{Prisma.RST}\n"
+                    f"   {Prisma.GRY}Please resubmit this thought in triplicate, or simply panic.{Prisma.RST}"
+                )
+        return False, None
 
 class Humility:
     def __init__(self):
