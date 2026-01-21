@@ -120,38 +120,60 @@ class TheTensionMeter:
         graph = graph or {}
         clean_words = TheLexicon.clean(text)
         valence = TheLexicon.get_valence(clean_words)
+
         field_vector = self.semantic_field.update(text)
         semantic_flux = self.semantic_field.momentum
         atmosphere = self.semantic_field.get_atmosphere()
+
         counts, unknowns = self._tally_categories(clean_words, text)
         if unknowns:
             self._trigger_neuroplasticity(unknowns, counts)
+
         geodesic = GeodesicEngine.collapse_wavefunction(clean_words, counts, BoneConfig)
+
+        hybrid_vector = geodesic.dimensions.copy()
+
+        for dim, hist_val in field_vector.items():
+            if dim in hybrid_vector:
+                hybrid_vector[dim] = (hybrid_vector[dim] + hist_val) / 2.0
+            else:
+                hybrid_vector[dim] = hist_val
+
+        hybrid_vector["TEX"] = hybrid_vector.get("STR", 0.0)
+        hybrid_vector["TMP"] = hybrid_vector.get("PHI", 0.0)
+        hybrid_vector["XI"]  = hybrid_vector.get("BET", 0.0)
+        hybrid_vector["LQ"]  = hybrid_vector.get("DEL", 0.0)
+
         raw_voltage = geodesic.tension
         dynamic_voltage = raw_voltage + (semantic_flux * 5.0)
+
         self.voltage_buffer.append(dynamic_voltage)
         if self.voltage_buffer:
             smoothed_voltage = sum(self.voltage_buffer) / len(self.voltage_buffer)
         else:
             smoothed_voltage = dynamic_voltage
         smoothed_voltage = round(smoothed_voltage, 2)
+
         graph_mass = 0.0
         if graph:
             anchors = [w for w in clean_words if w in graph]
             if anchors:
                 graph_mass = sum(sum(graph[w]["edges"].values()) for w in anchors)
+
         integrity_packet = {
             "kappa": geodesic.coherence,
             "psi": geodesic.abstraction,
             "mass": round(graph_mass, 1)
         }
+
         metrics = self._derive_complex_metrics(
             counts, clean_words,
             smoothed_voltage,
             integrity_packet,
-            geodesic.dimensions,
+            hybrid_vector,
             flux=semantic_flux
         )
+
         metrics["valence"] = valence
         metrics["atmosphere"] = atmosphere
         packet = self._package_physics(
@@ -161,9 +183,11 @@ class TheTensionMeter:
             integrity_packet,
             metrics
         )
+
         self.last_physics_packet = packet["physics"]
         if hasattr(self.events, "publish"):
             self.events.publish("PHYSICS_CALCULATED", packet)
+
         return packet
 
     @staticmethod

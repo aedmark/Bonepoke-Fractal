@@ -433,28 +433,21 @@ class TheCortex:
         self.ballast_active = False
         self.ballast_counter = 0
         self.last_alignment_score = 1.0
-        self.event_handlers = {
-            "AIRSTRIKE": self._handle_airstrike,
-            "ICARUS_CRASH": self._handle_icarus,
-            "RUPTURE": self._handle_rupture
-        }
         if hasattr(self.events, "subscribe"):
-            self.events.subscribe("BONE_EVENT", self._route_event)
+            self.events.subscribe("AIRSTRIKE", self._handle_airstrike)
+            self.events.subscribe("ICARUS_CRASH", self._handle_icarus)
+            self.events.subscribe("RUPTURE", self._handle_rupture)
 
-    def _route_event(self, event_type, data):
-        if event_type in self.event_handlers:
-            self.event_handlers[event_type](data)
-
-    def _handle_airstrike(self, *args):
+    def _handle_airstrike(self, _payload):
         self.events.log("AIRSTRIKE DETECTED: Engaging defensive ballast.", "CORTEX")
         self.ballast_active = True
         self.ballast_counter = 5
 
-    def _handle_icarus(self, *args):
+    def _handle_icarus(self, _payload):
         self.events.log("ICARUS PROTOCOL: Wings melted. Resetting cognitive baseline.", "CORTEX")
         self.last_alignment_score = 1.0
 
-    def _handle_rupture(self, *args):
+    def _handle_rupture(self, _payload):
         self.events.log("RUPTURE: Semantic containment breach.", "CORTEX")
         if hasattr(self.sub, 'neuro_plasticity'):
             self.sub.neuro_plasticity.plasticity_mod = 2.0

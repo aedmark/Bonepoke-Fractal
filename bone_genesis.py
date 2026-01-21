@@ -53,7 +53,7 @@ class GenesisProtocol:
             req = urllib.request.Request(url, method="GET")
             with urllib.request.urlopen(req, timeout=3.0) as _:
                 return True
-        except:
+        except (urllib.error.URLError, OSError, ValueError):
             return False
 
     def _probe_service(self, target_config: Dict) -> Optional[str]:

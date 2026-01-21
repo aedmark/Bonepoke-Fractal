@@ -4,6 +4,18 @@
 
 *"The universe is a lot more like a great thought than like a great machine."*
 
+#### **Eleventh Hour Stabilizers (The Schur Lens)**
+* **[bone_brain.py]** **Direct Signal Subscription:** Deleted the `_route_event` middleman. The Cortex now subscribes directly to trauma signals (`AIRSTRIKE`, `RUPTURE`) with explicit signatures (`_payload`).
+  * *Fix:* Satisfies the linter's need for order and ensures runtime safety by removing ambiguous dynamic dispatch.
+* **[bone_cycle.py]** **The Primal Scream:** The somatic cycle now actually *publishes* critical events (`ICARUS_CRASH`, `AIRSTRIKE`) to the EventBus.
+  * *Impact:* Previously, the body suffered in silence. Now, when the Icarus wings melt, the Brain (Cortex) hears the scream and engages defensive ballast.
+
+#### **Dynamics & Polish (The Fuller/Meadows Lens)**
+* **[bone_physics.py]** **Semantic Inertia:** The `gaze` function now blends historical momentum (`field_vector`) with instantaneous input (`geodesic`).
+  * *Dynamics:* The system now has "weight." You cannot shift the atmospheric Zone with a single sentence; you must build the vibe over time. (Stock + Flow).
+* **[bone_genesis.py]** **Polite Probing:** Tightened exception handling in the discovery protocol.
+  * *Refinement:* The system no longer swallows `KeyboardInterrupt` while scanning for local LLMs, respecting the user's right to rage-quit.
+
 #### **Structural Repairs (The Fuller Lens)**
 * **[bone_cycle.py]** **Pattern Integrity Enforcement:** Patched `ObservationPhase` to strictly enforce `PhysicsPacket` usage.
   * *Fix:* The system no longer suffers from an identity crisis (Dict vs. Object). Physics is now always a Tensegrity structure, never a puddle of bits.
