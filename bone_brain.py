@@ -33,6 +33,19 @@ def cosine_similarity(vec_a: Dict[str, float], vec_b: Dict[str, float]) -> float
     return numerator / denominator
 
 @dataclass
+class BrainConfig:
+    BASE_PLASTICITY: float = 0.4        # Default receptivity
+    VOLTAGE_SENSITIVITY: float = 0.03   # How much Voltage increases plasticity
+    MAX_PLASTICITY: float = 0.95        # Cap on change (sanity check)
+    BASE_DECAY_RATE: float = 0.1        # Decay per minute
+    BASE_TEMP: float = 0.7
+    BASE_TOP_P: float = 0.9
+    CORTISOL_FREEZE: float = 0.2        # Temp reduction per unit of Cortisol (Fear)
+    DOPAMINE_NOVELTY: float = 0.4       # Temp increase per unit of Dopamine (Seeking)
+    ADRENALINE_RUSH: float = 600.0      # Max extra tokens for Adrenaline (Fight)
+    SEROTONIN_CALM: float = 0.5         # Alignment force per unit of Serotonin (Satiety)
+
+@dataclass
 class ChemicalState:
     dopamine: float = 0.0
     cortisol: float = 0.0
@@ -125,49 +138,75 @@ class NeurotransmitterModulator:
         current_time = time.time()
         elapsed = current_time - self.last_tick
         self.last_tick = current_time
+
+        # Dynamic Decay
         decay_steps = elapsed / 60.0
-        decay_amount = min(0.9, decay_steps * 0.1)
+        decay_amount = min(0.9, decay_steps * BrainConfig.BASE_DECAY_RATE)
         if decay_amount > 0:
             self.current_chem.decay(rate=decay_amount)
-        self.current_chem.mix(incoming_chem, weight=0.6)
+
+        # Dynamic Plasticity
+        plasticity = BrainConfig.BASE_PLASTICITY + (base_voltage * BrainConfig.VOLTAGE_SENSITIVITY)
+        plasticity = max(0.1, min(BrainConfig.MAX_PLASTICITY, plasticity))
+        self.current_chem.mix(incoming_chem, weight=plasticity)
         profile = self.lens_profiles.get(lens_name, self.lens_profiles["NARRATOR"])
+
+        # Parameterized LLM Settings
         params = {
-            "temperature": 0.7,
-            "top_p": 0.9,
+            "temperature": BrainConfig.BASE_TEMP,
+            "top_p": BrainConfig.BASE_TOP_P,
             "frequency_penalty": 0.0,
             "presence_penalty": 0.0,
             "max_tokens": getattr(BoneConfig, "MAX_OUTPUT_TOKENS", 4096)
         }
+
+        # Voltage Stress (Manic State)
         if base_voltage > 18.0:
             params["temperature"] = 0.3
             params["max_tokens"] = 150
             params["frequency_penalty"] = 0.5
+
+        # Cortisol (Fear/Rigidity)
         effective_cortisol = self.current_chem.cortisol * profile["cortisol_dampener"]
         if effective_cortisol > 0.8:
-            params["temperature"] = 0.2
+            params["temperature"] = 0.2 # Freezing
             params["frequency_penalty"] = 1.0
             params["presence_penalty"] = 0.5
         elif effective_cortisol > 0.4:
-            params["temperature"] = 0.5
-            params["top_p"] = 0.8
+            params["temperature"] -= (effective_cortisol * BrainConfig.CORTISOL_FREEZE)
+
+        # Dopamine (Creativity/Seeking)
         if self.current_chem.dopamine > 0.3:
-            params["temperature"] += (self.current_chem.dopamine * 0.4)
-            params["presence_penalty"] += (self.current_chem.dopamine * 0.4)
+            boost = self.current_chem.dopamine * BrainConfig.DOPAMINE_NOVELTY
+            params["temperature"] += boost
+            params["presence_penalty"] += boost
+
+        # Adrenaline (Hypergraphia/Speed)
         effective_adrenaline = self.current_chem.adrenaline * profile["adrenaline_boost"]
         if effective_adrenaline > 0.3:
             base_tokens = 200
-            params["max_tokens"] = int(base_tokens + (600 * effective_adrenaline))
+            extra_tokens = BrainConfig.ADRENALINE_RUSH * effective_adrenaline
+            params["max_tokens"] = int(base_tokens + extra_tokens)
             params["frequency_penalty"] += (effective_adrenaline * 0.6)
+
+        # Serotonin (Satisfaction/Convergence)
         if self.current_chem.serotonin > 0.5:
-            diff = 0.7 - params["temperature"]
-            params["temperature"] += (diff * self.current_chem.serotonin * 0.5)
+            # Pull temperature back towards the stable baseline (0.7)
+            target = BrainConfig.BASE_TEMP
+            diff = target - params["temperature"]
+            params["temperature"] += (diff * self.current_chem.serotonin * BrainConfig.SEROTONIN_CALM)
+
+        # Voltage Modulation
         if base_voltage > 15.0:
             params["temperature"] += 0.25
         elif base_voltage < 5.0:
             params["temperature"] -= 0.15
+
+        # Safety Clamps
         params["temperature"] = max(0.1, min(1.6, params["temperature"]))
         params["top_p"] = max(0.1, min(1.0, params["top_p"]))
         params["max_tokens"] = max(50, params["max_tokens"])
+
         return params
 
 class LLMInterface:

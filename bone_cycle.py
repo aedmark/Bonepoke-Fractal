@@ -3,12 +3,13 @@
 
 import traceback, random, time
 from typing import Dict, Any, Tuple, List
-from bone_bus import Prisma, BoneConfig, CycleContext
+from bone_bus import Prisma, BoneConfig, CycleContext, PhysicsPacket
 from bone_village import TownHall
 from bone_personality import TheBureau
 from bone_physics import TheBouncer, RuptureValve, ChromaScope
 from bone_viewer import GeodesicRenderer
 from bone_architect import PanicRoom
+
 
 class PIDController:
     def __init__(self, kp: float, ki: float, kd: float, setpoint: float = 0.0, output_limits: Tuple[float, float] = (-5.0, 5.0)):
@@ -108,7 +109,11 @@ class ObservationPhase(SimulationPhase):
 
     def run(self, ctx: CycleContext):
         gaze_result = self.eng.phys.tension.gaze(ctx.input_text, self.eng.mind.mem.graph)
-        ctx.physics = gaze_result["physics"]
+        raw_physics = gaze_result["physics"]
+        if isinstance(raw_physics, dict):
+            ctx.physics = PhysicsPacket.from_dict(raw_physics)
+        else:
+            ctx.physics = raw_physics
         ctx.clean_words = gaze_result["clean_words"]
         self.eng.tick_count += 1
         rupture = self.vsl_32v.analyze(ctx.physics)
@@ -449,7 +454,6 @@ class StateReconciler:
 
     @staticmethod
     def _scan_for_mythology(eng, logs):
-        if not hasattr(eng, 'akashic'): return
         for line in logs:
             if "NEUROPLASTICITY" not in line:
                 continue
@@ -462,7 +466,10 @@ class StateReconciler:
                     continue
                 category_segment = line.split("[")[1]
                 category = category_segment.split("]")[0].lower()
-                eng.akashic.register_word(word, category)
+                eng.events.publish("MYTHOLOGY_UPDATE", {
+                    "word": word,
+                    "category": category
+                })
             except (IndexError, ValueError):
                 pass
 

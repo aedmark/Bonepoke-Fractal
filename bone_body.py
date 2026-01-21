@@ -198,15 +198,7 @@ class SomaticLoop:
     def digest_cycle(self, text: str, physics_data: Any, feedback: Dict,
                      health: float, stamina: float, stress_modifier: float,
                      tick_count: int = 0, circadian_bias: Dict = None) -> Dict:
-        if hasattr(physics_data, "dimensions"):
-            phys = {
-                "voltage": physics_data.tension,
-                "drag": physics_data.compression,
-                "counts": {},
-                "vector": physics_data
-            }
-        else:
-            phys = self._normalize_physics(physics_data)
+        phys = self._normalize_physics(physics_data)
         logs = []
         receipt = self._calculate_taxes(phys, logs)
         resp_status = self.bio.mito.respirate(receipt)
@@ -232,15 +224,35 @@ class SomaticLoop:
 
     @staticmethod
     def _normalize_physics(physics_packet: Any) -> Dict:
+        if hasattr(physics_packet, "to_dict"):
+            data = physics_packet.to_dict()
+            return {
+                "voltage": data.get("voltage", 0.0),
+                "drag": data.get("narrative_drag", 0.0),
+                "counts": data.get("counts", {}),
+                "clean_words": data.get("clean_words", []),
+                "kappa": data.get("kappa", 0.5),
+                "narrative_drag": data.get("narrative_drag", 0.0)
+            }
+        if hasattr(physics_packet, "dimensions"):
+            return {
+                "voltage": getattr(physics_packet, "tension", 0.0),
+                "drag": getattr(physics_packet, "compression", 0.0),
+                "counts": {},
+                "clean_words": [],
+                "kappa": getattr(physics_packet, "coherence", 0.5),
+                "narrative_drag": getattr(physics_packet, "compression", 0.0)
+            }
         if isinstance(physics_packet, dict):
             return {
                 "voltage": physics_packet.get("voltage", 0.0),
                 "drag": physics_packet.get("narrative_drag", 0.0),
                 "counts": physics_packet.get("counts", {}),
                 "clean_words": physics_packet.get("clean_words", []),
-                "kappa": physics_packet.get("kappa", 0.5)
+                "kappa": physics_packet.get("kappa", 0.5),
+                "narrative_drag": physics_packet.get("narrative_drag", 0.0)
             }
-        return {"voltage": 0.0, "drag": 0.0, "counts": {}, "clean_words": [], "kappa": 0.5}
+        return {"voltage": 0.0, "drag": 0.0, "counts": {}, "clean_words": [], "kappa": 0.5, "narrative_drag": 0.0}
 
     def _calculate_taxes(self, phys, logs) -> MetabolicReceipt:
         base = self.taxes["metabolic_base"]

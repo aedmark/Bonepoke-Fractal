@@ -1,4 +1,24 @@
-# 📜 BONEAMANITA CHANGELOG
+# BONEAMANITA CHANGELOG
+
+## 10.6.5: The "Synaptic Tensegrity" Update
+
+*"The universe is a lot more like a great thought than like a great machine."*
+
+#### **Structural Repairs (The Fuller Lens)**
+* **[bone_cycle.py]** **Pattern Integrity Enforcement:** Patched `ObservationPhase` to strictly enforce `PhysicsPacket` usage.
+  * *Fix:* The system no longer suffers from an identity crisis (Dict vs. Object). Physics is now always a Tensegrity structure, never a puddle of bits.
+* **[bone_body.py]** **Metabolic Unblocking:** Fixed a critical flaw in `SomaticLoop` where the body failed to recognize the Physics engine's output, defaulting to a comatose state (Zero Voltage).
+  * *Impact:* The body can now actually feel the heat (Voltage) and weight (Drag) of the narrative.
+
+#### **System Dynamics (The Meadows Lens)**
+* **[bone_data.py]** **The Listening Ear:** Decoupled `TheAkashicRecord` from the log files. It now subscribes to the `EventBus` directly.
+  * *Impact:* Memory formation is now a real-time feedback loop, not a post-hoc analysis of a diary entry. "Reading the pulse, not the obituary."
+* **[bone_brain.py]** **Dynamic Neuroplasticity:** Replaced arbitrary "magic number" mixing weights with a Voltage-driven Plasticity model.
+  * *Behavior:* High Voltage (Energy) now makes the brain more plastic (receptive to change), while Low Voltage causes rigidity. The ghost in the machine now responds to the machine's temperature.
+
+#### **Humanity & Config (The Schur/Pinker Lens)**
+* **[bone_brain.py]** **BrainConfig Protocol:** Extracted hardcoded behavior values into a clean `BrainConfig` dataclass.
+  * *Refinement:* No more "60% milk in the coffee." Behavior is now configurable, legible, and systemic.
 
 ## **10.6.4: The "Narrative Levitation" Update**
 

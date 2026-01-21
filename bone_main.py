@@ -1,4 +1,4 @@
-# BONEAMANITA 10.6.4 - "Narrative Levitation"
+# BONEAMANITA 10.6.5 - "Narrative Physics Reloaded"
 # Architects: SLASH, KISHO, The Courtyard, Taylor & Edmark
 
 import time, json
@@ -30,7 +30,7 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.6.4', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.6.5', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -66,6 +66,8 @@ class BoneAmanita:
         self.akashic = TheAkashicRecord()
         print(f"{Prisma.CYN}[SLASH]: The Akashic Record is open for writing.{Prisma.RST}")
         self.events = EventBus()
+        if hasattr(self.akashic, 'setup_listeners'):
+            self.akashic.setup_listeners(self.events)
         self.telemetry = TelemetryService.initialize(f"session_{int(time.time())}")
         self.events.log(f"{Prisma.CYN}[SLASH]: Telemetry Uplink Established.{Prisma.RST}", "BOOT")
         self.system_health = SystemHealth()
@@ -249,7 +251,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.6.4', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.6.5', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

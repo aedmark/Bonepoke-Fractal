@@ -2,6 +2,7 @@
 
 import random
 from typing import Dict, Any, Tuple, cast, List
+from bone_bus import Prisma
 
 BIO_NARRATIVE = {
     "MITO": {
@@ -783,6 +784,17 @@ class TheAkashicRecord:
         self.RECIPE_THRESHOLD = 3
         self.HYBRID_LENS_THRESHOLD = 5
         self.NEW_CATEGORY_THRESHOLD = 10
+
+    def setup_listeners(self, event_bus):
+        event_bus.subscribe("MYTHOLOGY_UPDATE", self._on_mythology_update)
+        print(f"{Prisma.CYN}[AKASHIC]: Listening for mythic resonance...{Prisma.RST}")
+
+    def _on_mythology_update(self, payload):
+        if not payload or not isinstance(payload, dict): return
+        word = payload.get("word")
+        category = payload.get("category")
+        if word and category:
+            self.register_word(word, category)
 
     def record_interaction(self, lenses_active: list, ingredients_used: list = None):
         if len(lenses_active) >= 2:
