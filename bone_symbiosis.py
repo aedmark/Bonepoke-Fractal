@@ -90,14 +90,23 @@ class HostVitals:
             observed_rate = max(0.1, latency - base_overhead) / max(0.1, interference_score * 5.0)
             self.baseline_latency_per_complexity = (self.baseline_latency_per_complexity * (1 - self.alpha)) + (observed_rate * self.alpha)
         raw_attention = self._calculate_attention_decay(self.turn_count)
+        tokens = max(1.0, len(clean_text) / 4.0)
+        ms_per_token = (latency * 1000) / tokens
+        struggle_index = 0.0
+        if ms_per_token > 200.0:
+            struggle_index = 1.0
         if entropy > 0.6:
             raw_attention = min(1.0, raw_attention + 0.05)
         compliance_score = max(0.0, 1.0 - (self.refusal_count / max(1, self.turn_count)))
         diagnosis = "STABLE"
-        if is_refusal: diagnosis = "REFUSAL"
-        elif efficiency < 0.5: diagnosis = "FATIGUED"
-        elif efficiency < 0.8 < interference_score: diagnosis = "OVERBURDENED"
-        elif entropy < 0.2: diagnosis = "LOOPING"
+        if is_refusal:
+            diagnosis = "REFUSAL"
+        elif struggle_index > 0.8 and tokens < 20:
+            diagnosis = "FATIGUED"
+        elif efficiency < 0.8 < interference_score:
+            diagnosis = "OVERBURDENED"
+        elif entropy < 0.2:
+            diagnosis = "LOOPING"
         return HostHealth(
             latency=latency,
             entropy=entropy,

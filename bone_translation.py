@@ -20,30 +20,40 @@ class RosettaStone:
         "NEUTRAL": 3.0,
         "TRANSITION_DOWN": 1.5
     }
+
     KAPPA_THRESHOLDS = {
         "LOCKED": 0.8,
         "DRIFT": 0.2
     }
+
     CHEM_THRESHOLDS = {
-        "COR_DEFENSIVE": 0.7,
-        "ADR_URGENT": 0.7,
-        "DOP_CRAVING": 0.8,
-        "OXY_WARM": 0.7
+        "COR_DEFENSIVE": 0.7,  # Cortisol
+        "ADR_URGENT": 0.7,     # Adrenaline
+        "DOP_CRAVING": 0.8,    # Dopamine
+        "OXY_WARM": 0.7        # Oxytocin
+    }
+
+    ENTROPY_THRESHOLDS = {
+        "HIGH": 0.8
     }
 
     @staticmethod
     def _safe_get(obj: Any, keys: list, default: float) -> float:
-        if not obj: return default
+        if not obj:
+            return default
+
         is_dict = isinstance(obj, dict)
         for k in keys:
             if is_dict and k in obj:
-                return obj[k]
+                return float(obj[k])
             if not is_dict and hasattr(obj, k):
-                return getattr(obj, k)
+                return float(getattr(obj, k))
+
         return default
 
     @staticmethod
     def translate(physics: Any, bio: Any) -> SemanticState:
+        # 1. Handle the Void (Empty Input)
         if physics is None or (isinstance(physics, dict) and not physics):
             return SemanticState(
                 tone_instruction=SOMATIC_LIBRARY["TONE"]["VOID"],
@@ -52,10 +62,14 @@ class RosettaStone:
                 physical_sensation=SOMATIC_LIBRARY["SENSATION"]["VOID"],
                 metaphorical_context=f"System State is {SOMATIC_LIBRARY['MATTER']['VOID']}."
             )
+
+        # 2. Extract Variables (using the robust _safe_get)
         vol = RosettaStone._safe_get(physics, ["voltage", "vol"], 0.0)
         drag = RosettaStone._safe_get(physics, ["narrative_drag", "drag"], 0.0)
         kappa = RosettaStone._safe_get(physics, ["kappa", "k"], 0.0)
         entropy = RosettaStone._safe_get(physics, ["E", "entropy"], 0.0)
+
+        # 3. Extract Biology (Handling mixed object/dict types)
         chem = {}
         atp = 100.0
         if isinstance(bio, dict):
@@ -64,62 +78,78 @@ class RosettaStone:
         elif hasattr(bio, "endo") and hasattr(bio, "mito"):
             chem = bio.endo.get_state()
             atp = bio.mito.state.atp_pool
+
+        # 4. Determine Tone & Pacing (Voltage Logic)
         if vol >= BoneConfig.PHYSICS.VOLTAGE_CRITICAL:
             tone = SOMATIC_LIBRARY["TONE"]["CRITICAL_HIGH"]
             pacing = SOMATIC_LIBRARY["PACING"]["CRITICAL_HIGH"]
         elif vol >= BoneConfig.PHYSICS.VOLTAGE_MED:
             tone = SOMATIC_LIBRARY["TONE"]["HIGH"]
             pacing = SOMATIC_LIBRARY["PACING"]["HIGH"]
-        elif vol >= 6.0:
+        elif vol >= RosettaStone.VOLTAGE_THRESHOLDS["TRANSITION_UP"]:
             tone = SOMATIC_LIBRARY["TONE"]["TRANSITION_UP"]
             pacing = SOMATIC_LIBRARY["PACING"]["NEUTRAL"]
-        elif vol >= 3.0:
+        elif vol >= RosettaStone.VOLTAGE_THRESHOLDS["NEUTRAL"]:
             tone = SOMATIC_LIBRARY["TONE"]["NEUTRAL"]
             pacing = SOMATIC_LIBRARY["PACING"]["NEUTRAL"]
-        elif vol >= 1.5:
+        elif vol >= RosettaStone.VOLTAGE_THRESHOLDS["TRANSITION_DOWN"]:
             tone = SOMATIC_LIBRARY["TONE"]["TRANSITION_DOWN"]
             pacing = SOMATIC_LIBRARY["PACING"]["LOW"]
         else:
             tone = SOMATIC_LIBRARY["TONE"]["LOW"]
             pacing = SOMATIC_LIBRARY["PACING"]["LOW"]
+
+        # 5. Determine Sensation (Drag Logic)
         if drag > BoneConfig.PHYSICS.DRAG_HEAVY:
             sensation = SOMATIC_LIBRARY["SENSATION"]["MUD"]
         elif drag < BoneConfig.PHYSICS.DRAG_FLOOR:
             sensation = SOMATIC_LIBRARY["SENSATION"]["FLOAT"]
         else:
             sensation = SOMATIC_LIBRARY["SENSATION"]["SOLID"]
-        if kappa < 0.2:
+
+        # 6. Determine Focus (Kappa Logic)
+        if kappa < RosettaStone.KAPPA_THRESHOLDS["DRIFT"]:
             focus = SOMATIC_LIBRARY["FOCUS"]["DRIFT"]
-        elif kappa > 0.8:
+        elif kappa > RosettaStone.KAPPA_THRESHOLDS["LOCKED"]:
             focus = SOMATIC_LIBRARY["FOCUS"]["LOCKED"]
         else:
             focus = SOMATIC_LIBRARY["FOCUS"]["COHERENT"]
+
+        # 7. Apply Chemical Modifiers (The "Flavor" Layer)
         cor = chem.get("COR", 0.0)
-        if cor > 0.7:
+        if cor > RosettaStone.CHEM_THRESHOLDS["COR_DEFENSIVE"]:
             tone = f"Defensive, paranoid. {tone}"
             focus += " You feel threatened."
+
         adr = chem.get("ADR", 0.0)
-        if adr > 0.7:
+        if adr > RosettaStone.CHEM_THRESHOLDS["ADR_URGENT"]:
             pacing = "Staccato. Breathless. Urgent."
             sensation += " Your heart is hammering against your ribs."
+
         dop = chem.get("DOP", 0.0)
-        if dop > 0.8:
+        if dop > RosettaStone.CHEM_THRESHOLDS["DOP_CRAVING"]:
             tone = f"Obsessive, craving. {tone}"
             focus += " You are fixated on the next reward."
+
         oxy = chem.get("OXY", 0.0)
-        if oxy > 0.7:
+        metaphor_suffix = ""
+        if oxy > RosettaStone.CHEM_THRESHOLDS["OXY_WARM"]:
             tone = f"Warm, communal. {tone}"
             metaphor_suffix = "Connected."
-        else:
-            metaphor_suffix = ""
+
+        # 8. ATP Starvation Override (Survival Priority)
         if atp < BoneConfig.BIO.ATP_STARVATION:
             tone = "Desperate, starving, hollow."
             sensation = "You are starving. The engine is sputtering. You need words with nutritional value."
             pacing = "Broken. Gasping."
+
+        # 9. State of Matter (Emergent Physics)
         is_high_energy = vol >= BoneConfig.PHYSICS.VOLTAGE_HIGH
-        is_low_energy = vol <= RosettaStone.VOLTAGE_THRESHOLDS["TRANSITION_DOWN"]
         is_high_drag = drag >= BoneConfig.PHYSICS.DRAG_HEAVY
-        is_high_entropy = entropy > 0.8
+        is_high_entropy = entropy > RosettaStone.ENTROPY_THRESHOLDS["HIGH"]
+
+        is_low_energy = vol <= RosettaStone.VOLTAGE_THRESHOLDS["TRANSITION_DOWN"]
+
         if is_high_energy and is_high_drag:
             state_of_matter = SOMATIC_LIBRARY["MATTER"]["MAGMA"]
         elif is_high_energy and is_high_entropy:
@@ -128,7 +158,7 @@ class RosettaStone:
             state_of_matter = SOMATIC_LIBRARY["MATTER"]["SUBLIMATION"]
         elif is_high_entropy:
             if is_low_energy:
-                state_of_matter = "DECAY (Rotting)" # Schur: Spooky!
+                state_of_matter = "DECAY (Rotting)"
             else:
                 state_of_matter = SOMATIC_LIBRARY["MATTER"]["GAS"]
         elif is_high_drag:
@@ -137,7 +167,9 @@ class RosettaStone:
             state_of_matter = SOMATIC_LIBRARY["MATTER"]["ENERGY"]
         else:
             state_of_matter = SOMATIC_LIBRARY["MATTER"]["LIQUID"]
+
         full_context = f"System State is {state_of_matter}. {metaphor_suffix}"
+
         return SemanticState(
             tone_instruction=tone,
             pacing_instruction=pacing,
@@ -145,6 +177,7 @@ class RosettaStone:
             physical_sensation=sensation,
             metaphorical_context=full_context
         )
+
     @staticmethod
     def render_system_prompt_addition(state: SemanticState) -> str:
         return (

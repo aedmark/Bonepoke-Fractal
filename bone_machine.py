@@ -5,6 +5,7 @@ import random
 from typing import Tuple, Optional
 from bone_bus import Prisma
 from bone_lexicon import TheLexicon
+from dataclasses import dataclass
 
 class TheCrucible:
     def __init__(self):

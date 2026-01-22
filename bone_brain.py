@@ -7,21 +7,10 @@ from dataclasses import dataclass
 from bone_data import LENSES, DREAMS
 from bone_bus import Prisma, BoneConfig, EventBus
 from bone_symbiosis import SymbiosisManager
-try:
-    from bone_lexicon import TheLexicon
-except ImportError:
-    TheLexicon = None
-    print(f"{Prisma.YEL}[WARNING]: TheLexicon missing. Spotlight will be dim.{Prisma.RST}")
-try:
-    from bone_translation import RosettaStone
-except ImportError:
-    RosettaStone = None
-    print(f"{Prisma.YEL}[WARNING]: RosettaStone missing. Reverting to Pidgin Protocol.{Prisma.RST}")
-try:
-    from bone_telemetry import TelemetryService
-except ImportError:
-    TelemetryService = None
-    print("Telemetry module not found. Flying blind.")
+from bone_spores import MycelialNetwork
+from bone_lexicon import TheLexicon
+from bone_translation import RosettaStone
+from bone_telemetry import TelemetryService
 
 def cosine_similarity(vec_a: Dict[str, float], vec_b: Dict[str, float]) -> float:
     intersection = set(vec_a.keys()) & set(vec_b.keys())
@@ -34,16 +23,16 @@ def cosine_similarity(vec_a: Dict[str, float], vec_b: Dict[str, float]) -> float
 
 @dataclass
 class BrainConfig:
-    BASE_PLASTICITY: float = 0.4        # Default receptivity
-    VOLTAGE_SENSITIVITY: float = 0.03   # How much Voltage increases plasticity
-    MAX_PLASTICITY: float = 0.95        # Cap on change (sanity check)
-    BASE_DECAY_RATE: float = 0.1        # Decay per minute
+    BASE_PLASTICITY: float = 0.4
+    VOLTAGE_SENSITIVITY: float = 0.03
+    MAX_PLASTICITY: float = 0.95
+    BASE_DECAY_RATE: float = 0.1
     BASE_TEMP: float = 0.7
     BASE_TOP_P: float = 0.9
-    CORTISOL_FREEZE: float = 0.2        # Temp reduction per unit of Cortisol (Fear)
-    DOPAMINE_NOVELTY: float = 0.4       # Temp increase per unit of Dopamine (Seeking)
-    ADRENALINE_RUSH: float = 600.0      # Max extra tokens for Adrenaline (Fight)
-    SEROTONIN_CALM: float = 0.5         # Alignment force per unit of Serotonin (Satiety)
+    CORTISOL_FREEZE: float = 0.2
+    DOPAMINE_NOVELTY: float = 0.4
+    ADRENALINE_RUSH: float = 600.0
+    SEROTONIN_CALM: float = 0.5
 
 @dataclass
 class ChemicalState:

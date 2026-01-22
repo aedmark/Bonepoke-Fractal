@@ -9,6 +9,8 @@ from bone_personality import TheBureau
 from bone_physics import TheBouncer, RuptureValve, ChromaScope
 from bone_viewer import GeodesicRenderer
 from bone_architect import PanicRoom
+from bone_synesthesia import SynestheticCortex
+from bone_symbiosis import SymbiosisManager
 
 
 class PIDController:
@@ -45,7 +47,6 @@ class PIDController:
 class CycleStabilizer:
     def __init__(self, events_ref):
         self.events = events_ref
-
         self.voltage_pid = PIDController(
             kp=0.15,
             ki=0.02,
@@ -53,7 +54,6 @@ class CycleStabilizer:
             setpoint=10.0,
             output_limits=(-4.0, 4.0)
         )
-
         self.drag_pid = PIDController(
             kp=0.30,
             ki=0.05,
@@ -523,6 +523,21 @@ class StateReconciler:
         canonical.mind_state = sandbox.mind_state
         canonical.clean_words = sandbox.clean_words
 
+class SensationPhase(SimulationPhase):
+    def __init__(self, engine_ref):
+        super().__init__(engine_ref)
+        self.name = "SENSATION"
+        self.synesthesia = SynestheticCortex(self.eng.bio)
+
+    def run(self, ctx: CycleContext):
+        impulse = self.synesthesia.perceive(ctx.physics)
+        self.synesthesia.apply_impulse(impulse)
+        if impulse.stamina_impact != 0:
+            self.eng.stamina = max(0.0, self.eng.stamina + impulse.stamina_impact)
+        if impulse.somatic_reflex:
+            ctx.log(f"{Prisma.MAG}* {impulse.somatic_reflex} *{Prisma.RST}")
+        return ctx
+
 class CycleSimulator:
     def __init__(self, engine_ref):
         self.eng = engine_ref
@@ -530,6 +545,7 @@ class CycleSimulator:
         self.pipeline: List[SimulationPhase] = [
             ObservationPhase(engine_ref),
             MaintenancePhase(engine_ref),
+            SensationPhase(engine_ref),
             GatekeeperPhase(engine_ref),
             MetabolismPhase(engine_ref),
             RealityFilterPhase(engine_ref),
@@ -657,12 +673,16 @@ class GeodesicOrchestrator:
         self.eng = engine_ref
         self.simulator = CycleSimulator(engine_ref)
         self.reporter = CycleReporter(engine_ref)
+        self.symbiosis = SymbiosisManager(self.eng.events)
 
-    def run_turn(self, user_message: str) -> Dict[str, Any]:
+    def run_turn(self, user_message: str, latency: float = 0.0) -> Dict[str, Any]:
         ctx = CycleContext(input_text=user_message)
         ctx.user_name = self.eng.user_name
         self.eng.events.flush()
         ctx = self.simulator.run_simulation(ctx)
         if not ctx.is_alive:
             return self.eng.trigger_death(ctx.physics)
-        return self.reporter.render_snapshot(ctx)
+        snapshot = self.reporter.render_snapshot(ctx)
+        if "ui" in snapshot:
+            self.symbiosis.monitor_host(latency, snapshot["ui"], len(user_message))
+        return snapshot

@@ -22,7 +22,7 @@ class BoneJSONEncoder(json.JSONEncoder):
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_10.8.3"
+        self.genome = "BONEAMANITA_10.8.4"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -128,10 +128,10 @@ class MycotoxinFactory:
                         return None, ""
         plosive = sum(1 for c in w if c in self.PHONETICS["PLOSIVE"])
         nasal = sum(1 for c in w if c in self.PHONETICS["NASAL"])
-        density_score = (plosive * 1.5) + (nasal * 0.8)
-        compression_mod = 1.0 if clean_len > 5 else 1.5
+        density_score = (plosive * 1.2) + (nasal * 0.8)
+        compression_mod = 1.0 if clean_len > 4 else 1.2
         final_density = (density_score / clean_len) * compression_mod
-        if final_density > 0.8:
+        if final_density > 1.0:
             return "TOXIN_HEAVY", f"Detected phonetic toxicity in '{w}'."
         return None, ""
 

@@ -2,7 +2,7 @@
 
 ### **A Field Guide to the Digital Mycelium**
 
-**Version:** 10.8.3
+**Version:** 10.8.4
 **Architects:** SLASH (Pinker/Fuller/Schur/Meadows)
 **Philosophy:** Tensegrity, Narrative Physics, and Systemic Whimsy.
 
