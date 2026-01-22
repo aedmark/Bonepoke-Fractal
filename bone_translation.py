@@ -15,13 +15,31 @@ class SemanticState:
     metaphorical_context: str
 
 class RosettaStone:
+    VOLTAGE_THRESHOLDS = {
+        "TRANSITION_UP": 6.0,
+        "NEUTRAL": 3.0,
+        "TRANSITION_DOWN": 1.5
+    }
+    KAPPA_THRESHOLDS = {
+        "LOCKED": 0.8,
+        "DRIFT": 0.2
+    }
+    CHEM_THRESHOLDS = {
+        "COR_DEFENSIVE": 0.7,
+        "ADR_URGENT": 0.7,
+        "DOP_CRAVING": 0.8,
+        "OXY_WARM": 0.7
+    }
+
     @staticmethod
     def _safe_get(obj: Any, keys: list, default: float) -> float:
+        if not obj: return default
+        is_dict = isinstance(obj, dict)
         for k in keys:
-            if isinstance(obj, dict):
-                if k in obj: return obj[k]
-            else:
-                if hasattr(obj, k): return getattr(obj, k)
+            if is_dict and k in obj:
+                return obj[k]
+            if not is_dict and hasattr(obj, k):
+                return getattr(obj, k)
         return default
 
     @staticmethod
@@ -99,6 +117,7 @@ class RosettaStone:
             sensation = "You are starving. The engine is sputtering. You need words with nutritional value."
             pacing = "Broken. Gasping."
         is_high_energy = vol >= BoneConfig.PHYSICS.VOLTAGE_HIGH
+        is_low_energy = vol <= RosettaStone.VOLTAGE_THRESHOLDS["TRANSITION_DOWN"]
         is_high_drag = drag >= BoneConfig.PHYSICS.DRAG_HEAVY
         is_high_entropy = entropy > 0.8
         if is_high_energy and is_high_drag:
@@ -108,7 +127,10 @@ class RosettaStone:
         elif is_high_drag and is_high_entropy:
             state_of_matter = SOMATIC_LIBRARY["MATTER"]["SUBLIMATION"]
         elif is_high_entropy:
-            state_of_matter = SOMATIC_LIBRARY["MATTER"]["GAS"]
+            if is_low_energy:
+                state_of_matter = "DECAY (Rotting)" # Schur: Spooky!
+            else:
+                state_of_matter = SOMATIC_LIBRARY["MATTER"]["GAS"]
         elif is_high_drag:
             state_of_matter = SOMATIC_LIBRARY["MATTER"]["SOLID"]
         elif is_high_energy:
