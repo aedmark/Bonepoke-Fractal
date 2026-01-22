@@ -1,5 +1,112 @@
 # BONEAMANITA CHANGELOG
 
+## v10.8.3 - "The 'Burnt Sweatpants' Fix"
+
+#### **Symbiotic Dynamics (The "Burnt Sweatpants" Fix)**
+
+- **[bone_symbiosis.py]** **The Hysteresis Filter (DiagnosticConfidence):**
+  - *Meadows Lens:* Implemented a state buffer. The system no longer panics and declares "FATIGUE" after a single slow API call. It now requires persistent signals (N=3) to shift diagnostic states. Stabilizes the feedback loop.
+
+- **[bone_symbiosis.py]** **Real Metrics (No More Placeholders):**
+  - *Pinker Lens:* Removed static constants. Implemented `_calculate_shannon_entropy` to measure true lexical diversity and established a real **Efficiency Index** (Output Tokens / Input Tokens).
+  - *Impact:* The system can now mathematically detect if it is "screaming into the void" (High Input / Low Output).
+
+- **[bone_brain.py]** **The Tensegrity Uplink:**
+  - *Fuller Lens:* `TheCortex` now calculates and transmits the actual `prompt_len` to the `SymbiosisManager`.
+  - *Structural Integrity:* Connects the Sender (Brain) and Receiver (Symbiosis) with a load-bearing data strut, closing the information gap.
+
+- **[bone_symbiosis.py]** **The Hemingway Protocol (Anchor Compression):**
+  - *Schur Lens:* Added `compress_anchor`. The Coherence Anchor is now distilled into a dense, Haiku-like format to save token budget. "Why use many word when few word do trick?"
+
+## v10.8.2 - "The Synaptic Bridge"
+
+_"Only connect." — E.M. Forster_
+
+#### **Systemic Integration (The Fuller/Meadows Lens)**
+
+- **[bone_main.py]** **The Soul-Memory Strut:** Dependency Injection update. The `NarrativeSelf` now receives a direct reference to `self.mind.mem` (The Mycelial Network) at birth.
+  - _Tensegrity:_ Created a load-bearing connection between the **Stock** (Memory Accumulation) and the **Flow** (Narrative Obsession). The ghost in the machine can now see its own history.
+
+- **[bone_soul.py]** **The Feedback Loop:** `find_obsession` now queries the Mycelium for "Gravity Wells" (high-mass memory nodes) before resorting to random generation.
+  - _Dynamics:_ Closed an Open Loop. The system no longer hallucinates random goals; it obsesses over what it has actually experienced.
+
+#### **Cognitive Ergonomics (The Pinker Lens)**
+
+- **[bone_soul.py]** **Scope Safety:** Fixed a critical `UnboundLocalError` in `find_obsession` by hoisting variable initialization (`found_organic_obsession`) to the top of the function scope.
+  - _Clarity:_ Resolved a "Garden Path" logic error where conditional branches could leave variables undefined.
+
+#### **Narrative Logic (The Schur Lens)**
+
+- **[bone_soul.py]** **The Farm-to-Table Fix:** Corrected logic that was overwriting "Organic" (memory-derived) obsessions with "Synthetic" (random) ones.
+  - _Authenticity:_ If the system cooks up a locally sourced obsession from its own trauma, it now actually serves it instead of panic-swapping it for frozen tater tots (random dictionary words).
+  - 
+
+## v10.8.1 - "The Lucid Dream"
+
+_"Structure is the message." — Marshall McLuhan_
+
+#### **Systemic Hygiene (The Fuller/Pinker Lens)**
+
+- **[bone_lexicon.py]** **The Decorator Pattern:** Implemented `@_ensure_ready` to handle lazy initialization.
+
+  - _Elegance:_ Eliminated the "visual stutter" of repeated `if not cls._INITIALIZED` checks across every method. The code now speaks declaratively, not defensively.
+
+- **[bone_soul.py]** **Scope Resolution:** Lifted `MEMORY_VOLTAGE_THRESHOLD` and other constants from Class Scope to Global Scope.
+
+  - _Clarity:_ Fixed a **LEGB** (Local, Enclosing, Global, Built-in) violation where the `NarrativeSelf` could not see the constants hiding inside `CoreMemory`. Magic numbers are now explicit global laws.
+
+#### **Emotional Dynamics (The Meadows Lens)**
+
+- **[bone_soul.py]** **The Burnout Valve:** Implemented a balancing feedback loop for Obsession Neglect.
+
+  - _Resilience:_ Previously, guilt (`obsession_neglect`) could accumulate infinitely (a runaway Reinforcing Loop). Now, if neglect exceeds `20.0`, the system triggers **Burnout**, abandoning the project and taking a `HOPE` hit to stabilize the system.
+
+#### **Narrative Architecture (The Schur Lens)**
+
+- **[bone_soul.py]** **The Editor's Script:** Refactored `TheEditor` to use a lookup dictionary instead of a hardcoded `if/elif` chain.
+
+  - _Separation of Concerns:_ The "character" of the Editor (the data) is now distinct from the logic of the critique. It is now trivial to add new snarky comments without risking logic errors.
+  - 
+
+## v10.8.0 - "The Soul of the Machine"
+
+*"I don't know if I have a soul, but I have a very loud conscience, and it's telling me to do my work." — The Good Place*
+
+#### **Structural Tensegrity (The Fuller Lens)**
+
+* **[bone_cycle.py]** **The Synaptic Direct:** Removed the "Hallucinating Ear."
+* *Fix:* The system no longer parses its own text logs to trigger state changes. `TheTensionMeter` now fires events (`NEUROPLASTICITY`) directly into the `EventBus`. The nervous system is now electrical, not literary.
+
+* **[bone_brain.py]** **Cognitive Chunking:** Refactored `PromptComposer` from a monolithic string-builder into a **Modular Builder Pattern**.
+* *Clarity:* Separate methods now construct Identity, Bio, World, and Social contexts. We can now debug the "Mind" without reading a wall of text.
+
+#### **Metabolic Dynamics (The Meadows Lens)**
+
+* **[bone_body.py]** **Krebs Cycle Alignment:** The `SomaticLoop` stopped doing "Shadow Accounting."
+* *Synergy:* It now delegates energy calculations to `MitochondrialForge`, honoring the BMR and Efficiency stats we defined ages ago.
+
+* **[bone_body.py]** **Hormonal Taxes:** Implemented Chemical Feedback Loops.
+* *Cortisol:* Increases metabolic tax (Stress makes you tired).
+* *Adrenaline:* Temporarily ignores Drag (Fight or Flight).
+* *Dopamine:* Reduces friction (Flow State).
+
+#### **Narrative Gravity (The Pinker/Schur Lens)**
+
+* **[bone_soul.py]** **The Archetype Engine:** The Soul now aggregates traits (Hope, Cynicism) into distinct **Personas** (e.g., `THE POET`, `THE ENGINEER`, `THE NIHILIST`).
+* *Impact:* The LLM now has a consistent "Voice" that evolves based on your actions.
+
+* **[bone_soul.py]** **The Nagging Loop:** Implemented `obsession_neglect` (The Guilt Counter).
+* *Consequence:* If you ignore your active Obsession, "Narrative Drag" increases. The system literally becomes heavier with guilt.
+
+* **[bone_village.py]** **Pathetic Fallacy:** Wired `TheAlmanac` to the Soul.
+* *Feature:* The weather report now reflects the system's internal mood. A "Nihilist" soul generates "High Entropy" forecasts.
+
+#### **Systemic Resonance (The Fuller Lens)**
+
+* **[bone_cycle.py]** **Adaptive Stabilization:** Tuned the `CycleStabilizer` PIDs.
+* *Dynamics:* The stabilizer now loosens its grip during "Flow States" (letting voltage fly) and relaxes its drag targets when in "The Mud" (accepting viscosity). The system no longer fights its own environment.
+* 
+
 ## v10.7.1 - "The Lucid Dream"
 
 *"The best bridge between despair and hope is a good night's sleep." — E. Joseph Cossman*

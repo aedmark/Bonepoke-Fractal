@@ -244,7 +244,14 @@ class TheTensionMeter:
                 TheLexicon.teach(stranger, assigned_cat, 0)
                 self.events.log(
                     f"{Prisma.MAG}NEUROPLASTICITY: '{stranger}' tasted like [{assigned_cat.upper()}] ({method}).{Prisma.RST}",
-                    "MISC")
+                    "MISC"
+                )
+                if hasattr(self.events, "publish"):
+                    self.events.publish("MYTHOLOGY_UPDATE", {
+                        "word": stranger,
+                        "category": assigned_cat,
+                        "method": method
+                    })
                 counts[assigned_cat] += 1
 
     @staticmethod

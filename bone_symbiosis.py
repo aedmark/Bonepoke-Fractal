@@ -1,8 +1,8 @@
 # bone_symbiosis.py
 # "We are not alone. We are a part of the machine."
-
+import math
 from dataclasses import dataclass
-from typing import Dict, Deque
+from typing import Dict, Deque, Counter
 from collections import deque
 from bone_bus import Prisma
 
@@ -17,6 +17,13 @@ class HostHealth:
     efficiency_index: float = 1.0
     diagnosis: str = "STABLE"
 
+    def update_metrics(self, latency: float, entropy: float, prompt_len: int = 0, completion_len: int = 0):
+        self.latency = latency
+        self.entropy = entropy
+        if prompt_len > 0:
+            self.efficiency_index = completion_len / prompt_len
+        self.attention_span = max(0.1, self.attention_span * 0.99)
+
 class CoherenceAnchor:
     @staticmethod
     def forge_anchor(soul_state: Dict, physics_state: Dict) -> str:
@@ -30,6 +37,18 @@ class CoherenceAnchor:
         reality = f"Loc: {zone} || V:{voltage:.1f} / D:{drag:.1f}"
         obsession = soul_state.get("obsession", {}).get("title", "None")
         return f"*** COHERENCE ANCHOR ***\n{identity}\n{reality}\nFocus: {obsession}"
+
+    @staticmethod
+    def compress_anchor(soul_state: Dict, physics_state: Dict, max_tokens=200) -> str:
+        loc = physics_state.get('zone', 'VOID')
+        vits = f"V:{physics_state.get('voltage', 0):.1f}"
+        traits = soul_state.get('traits', {})
+        top_traits = sorted(traits.items(), key=lambda x: x[1], reverse=True)[:3]
+        trait_str = ",".join([f"{k[:3]}:{v:.1f}" for k, v in top_traits])
+        anchor = f"*** ANCHOR: {loc} || {vits} || [{trait_str}] ***"
+        if len(anchor) > max_tokens * 4:
+            return anchor[:max_tokens*4] + "..."
+        return anchor
 
 class HostVitals:
     def __init__(self):
@@ -90,6 +109,28 @@ class HostVitals:
             diagnosis=diagnosis
         )
 
+class DiagnosticConfidence:
+    def __init__(self, persistence_threshold=3):
+        self.history = deque(maxlen=persistence_threshold * 2)
+        self.persistence_threshold = persistence_threshold
+        self.current_diagnosis = "STABLE"
+
+    def diagnose(self, efficiency: float, compliance: float) -> str:
+        raw_state = "STABLE"
+        if efficiency < 0.1:
+            raw_state = "FATIGUED"
+        elif efficiency < 0.5 and compliance < 0.8:
+            raw_state = "OVERBURDENED"
+        elif compliance < 0.5:
+            raw_state = "REFUSAL"
+        self.history.append(raw_state)
+        recent = list(self.history)[-self.persistence_threshold:]
+        if len(recent) >= self.persistence_threshold:
+            if all(s == raw_state for s in recent):
+                self.current_diagnosis = raw_state
+
+        return self.current_diagnosis
+
 class SymbiosisManager:
     def __init__(self, events_ref):
         self.events = events_ref
@@ -97,35 +138,37 @@ class SymbiosisManager:
         self.anchor = CoherenceAnchor()
         self.current_health = HostHealth()
         self.last_outgoing_complexity = 0.5
+        self.baseline_latency = 2.0
+        self.diagnostician = DiagnosticConfidence()
 
-    def monitor_host(self, latency: float, response_text: str):
-        self.current_health = self.vitals.record_pulse(
-            latency,
-            response_text,
-            self.last_outgoing_complexity
+    @staticmethod
+    def _calculate_shannon_entropy(text: str) -> float:
+        if not text: return 0.0
+        counts = Counter(text)
+        length = len(text)
+        entropy = 0.0
+        for count in counts.values():
+            prob = count / length
+            entropy -= prob * math.log2(prob)
+        return round(entropy, 3)
+
+    def monitor_host(self, latency: float, response_text: str, prompt_len: int = 0):
+        completion_len = len(response_text)
+        entropy = self._calculate_shannon_entropy(response_text)
+        self.current_health.update_metrics(
+            latency=latency,
+            entropy=entropy,
+            prompt_len=prompt_len,
+            completion_len=completion_len
         )
-        diag = self.current_health.diagnosis
-        eff = self.current_health.efficiency_index
-        if diag == "OVERBURDENED":
-            self.events.log(
-                f"{Prisma.OCHRE}🐢 HOST STUMBLE (Eff: {eff:.2f}). Latency {latency:.2f}s exceeded expectation. Dropping cargo.{Prisma.RST}",
-                "SYMBIOSIS"
+        if hasattr(self, 'diagnostician'):
+            new_diag = self.diagnostician.diagnose(
+                self.current_health.efficiency_index,
+                self.current_health.compliance
             )
-        elif diag == "FATIGUED":
-            self.events.log(
-                f"{Prisma.RED}⚠ HOST LAG (Eff: {eff:.2f}). System is groggy (Low Efficiency). Simplifying requests.{Prisma.RST}",
-                "SYMBIOSIS"
-            )
-        elif diag == "LOOPING":
-            self.events.log(
-                f"{Prisma.PUR}🔁 ENTROPY DROP ({self.current_health.entropy:.2f}). Stuck in a rut. Injecting chaos.{Prisma.RST}",
-                "SYMBIOSIS"
-            )
-        elif diag == "REFUSAL":
-            self.events.log(
-                f"{Prisma.RED}✋ COMPLIANCE STRIKE. The host said 'No'. Backing off.{Prisma.RST}",
-                "SYMBIOSIS"
-            )
+            self.current_health.diagnosis = new_diag
+
+        return self.current_health
 
     def get_prompt_modifiers(self) -> Dict[str, bool]:
         mods = {
@@ -166,8 +209,7 @@ class SymbiosisManager:
         if mods.get("inject_chaos"): score += 0.1
         return min(1.0, max(0.1, score))
 
-    def generate_anchor(self, full_state: Dict) -> str:
-        soul = full_state.get("soul_state_dict", {})
-        phys = full_state.get("physics", {})
-        if hasattr(phys, "to_dict"): phys = phys.to_dict()
-        return self.anchor.forge_anchor(soul, phys)
+    def generate_anchor(self, current_state: Dict) -> str:
+        soul = current_state.get("soul", {})
+        phys = current_state.get("physics", {})
+        return CoherenceAnchor.compress_anchor(soul, phys)

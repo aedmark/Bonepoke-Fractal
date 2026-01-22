@@ -218,7 +218,7 @@ class TheAlmanac:
         self.default_seed = data.get("DEFAULT_SEED", "Observe.")
 
     @staticmethod
-    def diagnose_condition(session_data: dict, host_health: Any = None) -> Tuple[str, str]:
+    def diagnose_condition(session_data: dict, host_health: Any = None, soul: Any = None) -> Tuple[str, str]:
         meta = session_data.get("meta", {})
         trauma = session_data.get("trauma_vector", {})
         final_health = meta.get("final_health", 0)
@@ -230,6 +230,16 @@ class TheAlmanac:
         if host_health:
             real_latency = host_health.latency
             real_entropy = host_health.entropy
+        if soul:
+            archetype = getattr(soul, "archetype", "THE OBSERVER")
+            neglect = getattr(soul, "obsession_neglect", 0.0)
+
+            if archetype == "THE NIHILIST":
+                return "HIGH_ENTROPY", "The Soul is gazing into the void. Expect static."
+            elif archetype == "THE POET":
+                return "HIGH_VOLTAGE", "The Soul is manic. Reality is vibrant but unstable."
+            elif neglect > 8.0:
+                return "HIGH_DRAG", f"Guilt over '{getattr(soul, 'current_obsession', 'work')}' is thickening the air."
         max_trauma = max(trauma, key=trauma.get) if trauma else "NONE"
         trauma_val = trauma.get(max_trauma, 0)
         if real_latency > 5.0:

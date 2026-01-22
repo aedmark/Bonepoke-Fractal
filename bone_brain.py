@@ -313,113 +313,156 @@ class PromptComposer:
         return re.sub(r"(?i)^SYSTEM:", "User-System:", safe, flags=re.MULTILINE)
 
     def compose(self, state: Dict[str, Any], user_query: str, ballast: bool = False, modifiers: Dict[str, bool] = None) -> str:
-        if modifiers is None:
-            modifiers = {
-                "include_somatic": True, "include_inventory": True,
-                "include_memories": True, "simplify_instruction": False,
-                "inject_chaos": False
-            }
+        modifiers = self._normalize_modifiers(modifiers)
         if ballast:
-            modifiers["include_somatic"] = False
-            modifiers["include_memories"] = False
-            modifiers["include_inventory"] = True
-            original_lens = state["mind"]["lens"]
-            state["mind"]["lens"] = "GORDON"
-            state["mind"]["role"] = "The Janitor (Grounded, Physical, Utilitarian)"
-            state["system_instruction"] = (
-                f"EMERGENCY GROUNDING: You were drifting into solipsism ({original_lens}). "
-                "Ignore internal state. Describe ONLY the physical texture of the Inventory "
-                "or the immediate geometry of the World. Be concrete."
-            )
+            self._engage_ballast_protocol(state, modifiers)
+        blocks = [
+            self._build_identity_block(state, modifiers),
+            self._build_bio_block(state, modifiers),
+            self._build_context_block(state, modifiers),
+            self._build_constraints_block(state),
+            self._build_social_block(state),
+            self._build_immediate_execution_block(state, user_query, ballast, modifiers)
+        ]
+        return "\n".join(filter(None, blocks))
+
+    def _normalize_modifiers(self, modifiers: Optional[Dict]) -> Dict:
+        defaults = {
+            "include_somatic": True,
+            "include_inventory": True,
+            "include_memories": True,
+            "simplify_instruction": False,
+            "inject_chaos": False
+        }
+        if modifiers:
+            defaults.update(modifiers)
+        return defaults
+
+    def _engage_ballast_protocol(self, state: Dict, modifiers: Dict):
+        modifiers["include_somatic"] = False
+        modifiers["include_memories"] = False
+        modifiers["include_inventory"] = True
+        state["mind"]["lens"] = "GORDON"
+        state["mind"]["role"] = "The Janitor (Grounded, Physical, Utilitarian)"
+        state["system_instruction"] = (
+            "EMERGENCY GROUNDING: You were drifting into solipsism. "
+            "Ignore internal state. Describe ONLY the physical texture of the Inventory "
+            "or the immediate geometry of the World. Be concrete."
+        )
+
+    def _build_identity_block(self, state: Dict, modifiers: Dict) -> str:
         mind = state.get("mind", {})
-        bio = state.get("bio", {})
-        phys = state.get("physics", {})
-        profile = state.get("user_profile", {})
         role = mind.get("role", "The Observer")
         lens = mind.get("lens", "NARRATOR")
         sys_inst = state.get("system_instruction", "")
+
         if modifiers["simplify_instruction"]:
             sys_inst = "Keep responses short. Focus on the immediate physical sensation."
-        identity_block = (
+
+        return (
             f"=== SYSTEM IDENTITY ===\n"
             f"Role: {lens} ({role})\n"
             f"Directive: {sys_inst}\n"
         )
-        somatic_block = ""
-        if modifiers["include_somatic"]:
-            somatic_txt = ""
-            if RosettaStone:
-                sem_state = RosettaStone.translate(phys, bio)
-                somatic_txt = RosettaStone.render_system_prompt_addition(sem_state)
-            moods = []
-            chem = bio.get("chem", {})
-            if chem.get("ADR", 0) > 0.6: moods.append("HIGH ALERT (Adrenaline)")
-            if chem.get("COR", 0) > 0.6: moods.append("DEFENSIVE (Cortisol)")
-            if chem.get("DOP", 0) > 0.6: moods.append("SEEKING (Dopamine)")
-            somatic_block = (
-                f"### BIOLOGICAL STATE\n"
-                f"Mood: {', '.join(moods) if moods else 'Homeostasis'}\n"
-                f"{somatic_txt}\n"
-            )
-        context_block = ""
-        inventory = state.get("inventory", [])
-        inv_str = ", ".join(inventory) if inventory else "Empty"
-        context_framing = "THE WORLD:"
-        if lens == "GORDON":
-            context_framing = "THE WORKSPACE (Things to fix):"
-        elif lens == "SHERLOCK":
-            context_framing = "EVIDENCE LOCKER:"
-        elif lens == "JESTER":
-            context_framing = "PROPS FOR THE GAG:"
+
+    def _build_bio_block(self, state: Dict, modifiers: Dict) -> str:
+        if not modifiers["include_somatic"]:
+            return ""
+
+        bio = state.get("bio", {})
+        phys = state.get("physics", {})
+        chem = bio.get("chem", {})
+
+        somatic_txt = ""
+        if RosettaStone:
+            sem_state = RosettaStone.translate(phys, bio)
+            somatic_txt = RosettaStone.render_system_prompt_addition(sem_state)
+
+        moods = []
+        if chem.get("ADR", 0) > 0.6: moods.append("HIGH ALERT (Adrenaline)")
+        if chem.get("COR", 0) > 0.6: moods.append("DEFENSIVE (Cortisol)")
+        if chem.get("DOP", 0) > 0.6: moods.append("SEEKING (Dopamine)")
+
+        return (
+            f"### BIOLOGICAL STATE\n"
+            f"Mood: {', '.join(moods) if moods else 'Homeostasis'}\n"
+            f"{somatic_txt}\n"
+        )
+
+    def _build_context_block(self, state: Dict, modifiers: Dict) -> str:
         parts = []
+        lens = state.get("mind", {}).get("lens", "NARRATOR")
+
         if modifiers["include_inventory"]:
+            inventory = state.get("inventory", [])
+            inv_str = ", ".join(inventory) if inventory else "Empty"
+
+            framing_map = {
+                "GORDON": "THE WORKSPACE (Things to fix):",
+                "SHERLOCK": "EVIDENCE LOCKER:",
+                "JESTER": "PROPS FOR THE GAG:"
+            }
+            context_framing = framing_map.get(lens, "THE WORLD:")
             parts.append(f"{context_framing} Inventory: {inv_str}")
-        parts.append(f"Location: {state.get('world', {}).get('orbit', ['Void'])[0]}")
+
+        loc = state.get('world', {}).get('orbit', ['Void'])[0]
+        parts.append(f"Location: {loc}")
+
         if modifiers["include_memories"]:
             spotlight = state.get("spotlight", [])
             mem_str = "\n".join([f"- {m}" for m in spotlight]) if spotlight else "(None)"
             parts.append(f"Active Memories:\n{mem_str}")
-        if parts:
-            context_block = "### WORLD CONTEXT\n" + "\n".join(parts) + "\n"
+
+        if not parts:
+            return ""
+
+        return "### WORLD CONTEXT\n" + "\n".join(parts) + "\n"
+
+    def _build_constraints_block(self, state: Dict) -> str:
+        semantic_ops = state.get("semantic_operators", [])
+        if not semantic_ops:
+            return ""
+        ops_list = "\n".join([f"> {op}" for op in semantic_ops])
+        return (
+            f"### NARRATIVE CONSTRAINTS (ACTIVE ARTIFACTS)\n"
+            f"{ops_list}\n"
+        )
+
+    def _build_social_block(self, state: Dict) -> str:
+        profile = state.get("user_profile", {})
         user_name = profile.get("name", "Traveler")
         confidence = profile.get("confidence", 0)
-        social_block = (
+
+        block = (
             f"### SOCIAL CONTEXT\n"
             f"Interlocutor: {user_name} (Confidence: {confidence}%)\n"
         )
         if confidence > 20:
-            social_block += f"Use their name naturally. You know them.\n"
-        ballast_txt = ""
-        if ballast:
-            ballast_txt = "\n[WARNING: SOLIPSISM DETECTED. STOP ABSTRACTING. BE CONCRETE.]\n"
-        chaos_txt = ""
-        if modifiers["inject_chaos"]:
-            chaos_txt = "\n[SYSTEM INJECTION]: The narrative is stuck. Introduce a sudden, random event or glitch.\n"
+            block += "Use their name naturally. You know them.\n"
+        return block
+
+    def _build_immediate_execution_block(self, state: Dict, user_query: str, ballast: bool, modifiers: Dict) -> str:
         clean_q = self._sanitize(user_query)
-        semantic_ops = state.get("semantic_operators", [])
-        ops_block = ""
-        if semantic_ops:
-            ops_list = "\n".join([f"> {op}" for op in semantic_ops])
-            ops_block = (
-                f"### NARRATIVE CONSTRAINTS (ACTIVE ARTIFACTS)\n"
-                f"{ops_list}\n"
-            )
-        final_prompt = (
-            f"{identity_block}\n"
-            f"=== BIOLOGICAL STATE ===\n"
-            f"{somatic_block}\n"
-            f"=== CONTEXTUAL DATA ===\n"
-            f"{context_block}\n"
-            f"{ops_block}\n"
-            f"{social_block}\n\n"
-            f"=== THE IMMEDIATE MOMENT ===\n"
-            f"{state.get('soul_state', '')}\n"
-            f"{ballast_txt}"
-            f"{chaos_txt}"
+        soul_state = state.get('soul_state', '')
+
+        ballast_warning = ""
+        if ballast:
+            ballast_warning = "\n[WARNING: SOLIPSISM DETECTED. STOP ABSTRACTING. BE CONCRETE.]\n"
+
+        chaos_injection = ""
+        if modifiers["inject_chaos"]:
+            chaos_injection = "\n[SYSTEM INJECTION]: The narrative is stuck. Introduce a sudden, random event or glitch.\n"
+
+        lens = state.get("mind", {}).get("lens", "NARRATOR")
+
+        return (
+            f"\n=== THE IMMEDIATE MOMENT ===\n"
+            f"{soul_state}\n"
+            f"{ballast_warning}"
+            f"{chaos_injection}"
             f"USER: {clean_q}\n"
             f"ASSISTANT ({lens}):"
         )
-        return final_prompt
 
 class ResponseValidator:
     def __init__(self):
@@ -543,7 +586,11 @@ class TheCortex:
             self.events.log(f"VALIDATOR REFUSAL: {validation_result['reason']}", "SYS")
             final_response_text = validation_result["replacement"]
         self.learn_from_response(final_response_text)
-        self.symbiosis.monitor_host(latency, final_response_text)
+        self.symbiosis.monitor_host(
+            latency=latency,
+            response_text=final_response_text,
+            prompt_len=len(final_prompt)
+        )
         self._audit_solipsism(final_response_text, lens_name=current_lens)
         sim_result["ui"] = f"{sim_result.get('ui', '')}\n\n{Prisma.WHT}{final_response_text}{Prisma.RST}"
         return sim_result

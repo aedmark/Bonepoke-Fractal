@@ -45,8 +45,23 @@ class PIDController:
 class CycleStabilizer:
     def __init__(self, events_ref):
         self.events = events_ref
-        self.voltage_pid = PIDController(kp=0.25, ki=0.05, kd=0.1, setpoint=10.0, output_limits=(-4.0, 4.0))
-        self.drag_pid = PIDController(kp=0.4, ki=0.1, kd=0.05, setpoint=1.5, output_limits=(-3.0, 3.0))
+
+        self.voltage_pid = PIDController(
+            kp=0.15,
+            ki=0.02,
+            kd=0.20,
+            setpoint=10.0,
+            output_limits=(-4.0, 4.0)
+        )
+
+        self.drag_pid = PIDController(
+            kp=0.30,
+            ki=0.05,
+            kd=0.10,
+            setpoint=1.5,
+            output_limits=(-3.0, 3.0)
+        )
+
         self.last_phase: str = "INIT"
 
     @staticmethod
@@ -61,35 +76,74 @@ class CycleStabilizer:
         if abs(correction) < 0.05: return 0.0
         p = ctx.physics
         is_dict = isinstance(p, dict)
+
         if is_dict:
             old_val = p.get(key, 0.0)
             p[key] = max(0.0, old_val + correction)
         else:
             old_val = getattr(p, key, 0.0)
             setattr(p, key, max(0.0, old_val + correction))
+
         return correction
 
+    def _adjust_setpoints(self, ctx: CycleContext):
+        p = ctx.physics
+        if isinstance(p, dict):
+            flow = p.get("flow_state", "LAMINAR")
+            world = getattr(ctx, "world_state", {})
+            manifold = p.get("manifold") or "THE_CONSTRUCT"
+            if not manifold and isinstance(world, dict):
+                orbit = world.get("orbit")
+                if orbit and isinstance(orbit, (list, tuple)):
+                    manifold = orbit[0]
+        else:
+            flow = getattr(p, "flow_state", "LAMINAR")
+            manifold = getattr(p, "manifold", "THE_CONSTRUCT")
+
+        if flow in ["SUPERCONDUCTIVE", "FLOW_BOOST", "HUBRIS_RISK"]:
+            self.voltage_pid.setpoint = 20.0
+        elif manifold == "THE_FORGE":
+            self.voltage_pid.setpoint = 15.0
+        else:
+            self.voltage_pid.setpoint = 10.0
+
+        if manifold == "THE_MUD":
+            self.drag_pid.setpoint = 5.0
+        elif manifold == "THE_AERIE":
+            self.drag_pid.setpoint = 0.5
+        else:
+            self.drag_pid.setpoint = 1.5
+
     def stabilize(self, ctx: CycleContext, current_phase: str):
+        self._adjust_setpoints(ctx)
+
         curr_v, curr_d = self._get_current_metrics(ctx)
+
         v_force = self.voltage_pid.update(curr_v)
         d_force = self.drag_pid.update(curr_d)
+
         corrections_made = False
+
         if abs(curr_v - self.voltage_pid.setpoint) > 6.0:
             applied_v = self._apply_correction(ctx, "voltage", v_force)
             if abs(applied_v) > 0.1:
                 reason = "PID_DAMPENER" if applied_v < 0 else "PID_EXCITATION"
                 ctx.record_flux(current_phase, "voltage", curr_v, curr_v + applied_v, reason)
-                if abs(applied_v) > 1.0:
-                    self.events.log(f"{Prisma.GRY}⚖️ STABILIZER: Voltage corrected ({applied_v:+.1f}v). Steady...{Prisma.RST}", "SYS")
+
+                if abs(applied_v) > 1.5:
+                    self.events.log(f"{Prisma.GRY}⚖️ STABILIZER: Voltage corrected ({applied_v:+.1f}v). Target: {self.voltage_pid.setpoint}{Prisma.RST}", "SYS")
                 corrections_made = True
+
         if abs(curr_d - self.drag_pid.setpoint) > 2.5:
             applied_d = self._apply_correction(ctx, "narrative_drag", d_force)
             if abs(applied_d) > 0.1:
                 reason = "PID_LUBRICATION" if applied_d < 0 else "PID_BRAKING"
                 ctx.record_flux(current_phase, "narrative_drag", curr_d, curr_d + applied_d, reason)
+
                 if applied_d < -1.0:
-                    self.events.log(f"{Prisma.GRY}🛢️ STABILIZER: Grease applied. Drag reduced ({applied_d:+.1f}).{Prisma.RST}", "SYS")
+                    self.events.log(f"{Prisma.GRY}🛢️ STABILIZER: Grease applied. Drag reduced ({applied_d:+.1f}). Target: {self.drag_pid.setpoint}{Prisma.RST}", "SYS")
                 corrections_made = True
+
         self.last_phase = current_phase
         return corrections_made
 
@@ -454,32 +508,9 @@ class StateReconciler:
         return new_ctx
 
     @staticmethod
-    def _scan_for_mythology(eng, logs):
-        for line in logs:
-            if "NEUROPLASTICITY" not in line:
-                continue
-            try:
-                parts = line.split("'")
-                if len(parts) < 3:
-                    continue
-                word = parts[1]
-                if "[" not in line or "]" not in line:
-                    continue
-                category_segment = line.split("[")[1]
-                category = category_segment.split("]")[0].lower()
-                eng.events.publish("MYTHOLOGY_UPDATE", {
-                    "word": word,
-                    "category": category
-                })
-            except (IndexError, ValueError):
-                pass
-
-    @staticmethod
     def reconcile(canonical: CycleContext, sandbox: CycleContext, engine_ref=None):
         canonical.physics = sandbox.physics
         new_logs = sandbox.logs[len(canonical.logs):]
-        if engine_ref and new_logs:
-            StateReconciler._scan_for_mythology(engine_ref, new_logs)
         new_flux = sandbox.flux_log[len(canonical.flux_log):]
         if new_flux:
             canonical.flux_log.extend(new_flux)

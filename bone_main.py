@@ -1,4 +1,4 @@
-# BONEAMANITA 10.7.1 - "The Lucid Dream"
+# BONEAMANITA 10.8.3 - "The 'Burnt Sweatpants' Fix"
 # Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark
 
 import time, json
@@ -28,7 +28,7 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.7.1', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.8.3', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -83,7 +83,7 @@ class BoneAmanita:
         self.shimmer_state = self.embryo.shimmer
         self.soul_legacy_data = self.embryo.soul_legacy
         self.navigator = self.phys.nav
-        self.soul = NarrativeSelf(self.events)
+        self.soul = NarrativeSelf(self.events, memory_ref=self.mind.mem)
         if self.soul_legacy_data:
             self.soul.load_from_dict(self.soul_legacy_data)
         self.journal = TownHall.Journal()
@@ -252,7 +252,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.7.1', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.8.3', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

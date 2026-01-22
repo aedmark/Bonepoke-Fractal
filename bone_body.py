@@ -190,10 +190,6 @@ class SomaticLoop:
         self.folly = folly_ref
         self.events = events_ref
         self.semantic_doctor = SemanticEndocrinologist(memory_ref, lexicon_ref)
-        self.taxes = {
-            "existential_drag": 0.05,
-            "metabolic_base": 0.1
-        }
 
     def digest_cycle(self, text: str, physics_data: Any, feedback: Dict,
                      health: float, stamina: float, stress_modifier: float,
@@ -259,14 +255,33 @@ class SomaticLoop:
         return {"voltage": 0.0, "drag": 0.0, "counts": {}, "clean_words": [], "kappa": 0.5, "narrative_drag": 0.0}
 
     def _calculate_taxes(self, phys, logs) -> MetabolicReceipt:
-        base = self.taxes["metabolic_base"]
-        drag_tax = phys.get("drag", 0.0) * 0.5
-        inefficiency = 0.0
-        if phys.get("voltage", 0) > 10.0:
-            inefficiency += 0.2
-            logs.append(BIO_NARRATIVE["TAX"]["HIGH_VOLTAGE"].format(color=Prisma.RED, reset=Prisma.RST))
-        total = base + drag_tax + inefficiency
-        return MetabolicReceipt(base, drag_tax, inefficiency, total, "CALCULATED")
+        chem = self.bio.endo
+        modifiers = []
+
+        if chem.cortisol > 0.5:
+            stress_tax = 1.0 + (chem.cortisol * 0.5)
+            modifiers.append(stress_tax)
+            if random.random() < 0.3:
+                logs.append(f"{Prisma.RED}[BIO]: Cortisol spiking. Metabolism inefficient (x{stress_tax:.2f}).{Prisma.RST}")
+
+        if chem.adrenaline > 0.6:
+            modifiers.append(0.5)
+            logs.append(f"{Prisma.YEL}[BIO]: Adrenaline Surge. Pain ignored.{Prisma.RST}")
+
+        if chem.dopamine > 0.7:
+            modifiers.append(0.8)
+
+        drag = phys.get("narrative_drag", 0.0)
+        receipt = self.bio.mito.calculate_metabolism(drag, external_modifiers=modifiers)
+
+        voltage = phys.get("voltage", 0.0)
+        if voltage > 15.0:
+            manic_tax = (voltage - 15.0) * 0.1
+            receipt.inefficiency_tax += manic_tax
+            receipt.total_burn += manic_tax
+            logs.append(f"{Prisma.MAG}[BIO]: Voltage Gap ({voltage:.1f}v). Wires heating up (-{manic_tax:.1f} ATP).{Prisma.RST}")
+
+        return receipt
 
     @staticmethod
     def _audit_folly_desire(phys, stamina, logs) -> str:
