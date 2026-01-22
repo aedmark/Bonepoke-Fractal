@@ -227,8 +227,30 @@ class CommandProcessor:
         return True
 
     def _cmd_kip(self, _parts):
+        going_to_sleep = self.Config.VERBOSE_LOGGING
+        if going_to_sleep:
+            self._log(f"{self.P.CYN}Closing eyes (Saving & Dreaming)...{self.P.RST}")
+            try:
+                self.eng.mind.mem.save(
+                    health=self.eng.health,
+                    stamina=self.eng.stamina,
+                    mutations={},
+                    trauma_accum=self.eng.trauma_accum,
+                    joy_history=[],
+                    mitochondria_traits=self.eng.bio.mito.adapt(self.eng.health),
+                    antibodies=list(self.eng.bio.immune.active_antibodies),
+                    soul_data=self.eng.soul.to_dict()
+                )
+            except Exception as e:
+                self._log(f"{self.P.RED}Auto-Save Failed: {e}{self.P.RST}")
+
+            if hasattr(self.eng.mind, "dreamer") and hasattr(self.eng.mind, "mem"):
+                dream_log = self.eng.mind.dreamer.enter_rem_cycle(self.eng.mind.mem)
+                self._log(dream_log)
+
         self.Config.VERBOSE_LOGGING = not self.Config.VERBOSE_LOGGING
-        self._log(f"VERBOSE LOGGING: {self.Config.VERBOSE_LOGGING}")
+        state = "OPEN" if self.Config.VERBOSE_LOGGING else "SHUT"
+        self._log(f"EYELIDS: {state}")
         return True
 
     def _cmd_mode(self, parts):
@@ -396,9 +418,26 @@ class CommandProcessor:
 
     def _cmd_help(self, _parts):
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 10.8.3 MANUAL ---{self.P.RST}",
+            f"\n{self.P.CYN}--- BONEAMANITA 10.8.4 MANUAL ---{self.P.RST}",
             f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"
         ]
+
+        metrics = self.eng.get_metrics()
+        health = metrics.get("health", 0)
+        atp = self.eng.bio.mito.state.atp_pool
+
+        suggestion = ""
+        if atp < 20.0:
+            suggestion = f"{self.P.RED}CRITICAL ADVICE: You are starving. Try '/rummage' or '/weave' to generate semantic mass.{self.P.RST}"
+        elif health < 40.0:
+            suggestion = f"{self.P.RED}CRITICAL ADVICE: You are bleeding. Lower Voltage or find 'Constructive' words.{self.P.RST}"
+        elif self.eng.phys.pulse.is_bored():
+            suggestion = f"{self.P.YEL}ADVICE: The machine is bored. Try '/garden' or '/mode JESTER'.{self.P.RST}"
+        else:
+            suggestion = f"{self.P.GRN}ADVICE: Systems nominal. Go make art ('/publish').{self.P.RST}"
+
+        help_lines.append(suggestion + "\n")
+
         categories = {
             "CORE": ["_cmd_status", "_cmd_save", "_cmd_load", "_cmd_help"],
             "WORLD": ["_cmd_map", "_cmd_manifold", "_cmd_garden", "_cmd_voids"],
@@ -409,6 +448,7 @@ class CommandProcessor:
         def get_doc(func):
             paperwork = inspect.getdoc(func)
             return paperwork if paperwork else "Undocumented protocol."
+
         for cat, methods in categories.items():
             help_lines.append(f"{self.P.WHT}{cat}:{self.P.RST}")
             for m_name in methods:
@@ -417,6 +457,7 @@ class CommandProcessor:
                     doc = get_doc(getattr(self, m_name))
                     help_lines.append(f"  {cmd_name:<12} - {doc}")
             help_lines.append("")
+
         help_lines.append(f"{self.P.GRY}Type carefully. The machine is listening.{self.P.RST}")
         self._log("\n".join(help_lines))
         return True

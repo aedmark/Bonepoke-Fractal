@@ -1,5 +1,47 @@
 # BONEAMANITA CHANGELOG
 
+
+## v10.8.4 - The "Connected" Update
+
+### **1. Telemetry & Observability (`bone_telemetry.py`)**
+
+* **Feature (Meadows):** Implemented `LogManager` with automatic log rotation (5MB limit, 5 backups). The "Bathtub" now has a drain; infinite disk usage loops are closed.
+* **Optimization (Fuller):** `StructuredLogger` now maintains an open file handle (Tensegrity) instead of opening/closing on every write (Efficiency), reducing I/O overhead.
+* **Safety (Pinker):** Enhanced `_sanitize` method with recursion depth limits to prevent graph-traversal crashes.
+
+### **2. Phenomenology & Translation (`bone_translation.py`)**
+
+* **Refactor (Pinker):** Replaced "Magic Numbers" in `RosettaStone` with explicit, named constants (`VOLTAGE_THRESHOLDS`, `KAPPA_THRESHOLDS`) for readability and maintainability.
+* **Feature (Meadows):** Added the **DECAY** state (Low Energy + High Entropy), allowing the system to recognize when it is "rotting" rather than just drifting.
+* **Hardening:** Implemented `_safe_get` to robustly handle inconsistent data structures (dicts vs objects) coming from the physics engine.
+
+### **3. Biological Symbiosis (`bone_symbiosis.py`)**
+
+* **Bug Fix (The "Fatigue" Patch):** Redefined "Efficiency" to check **Latency per Token** instead of `Output Length / Input Length`.
+* *Previously:* Short answers were misdiagnosed as "FATIGUE."
+* *Now:* Only high-latency struggling is flagged as FATIGUE.
+
+
+* **Logic Update:** Inverted `efficiency_index` logic to align with standard metrics (1.0 = Healthy, 0.0 = Struggling).
+
+### **4. Memory & Spores (`bone_spores.py`)**
+
+* **Bug Fix (The "Bob" Patch):** Tuned `MycotoxinFactory` to be less aggressive against short words.
+* Reduced plosive weight and increased density threshold to 1.0. Common names like "Bob" or "Dad" are no longer classified as toxic antigens.
+
+### **5. System Wiring & Architecture**
+
+* **Neuro-Somatic Coupling (`bone_body.py`):**
+* Added `process_synesthesia` to `TheEndocrineSystem`. The body now directly translates physics (Voltage/Drag) into Hormones (Adrenaline/Cortisol) without needing a separate cortex class.
+
+* **Cycle Integration (`bone_cycle.py`):**
+* Wired `SymbiosisManager` into `GeodesicOrchestrator` to monitor host health *after* every turn.
+* Wired `process_synesthesia` into `MetabolismPhase` so the system "feels" the input before processing it.
+
+* **Brain Integration (`bone_brain.py`):**
+* Replaced placeholder memory with `MycelialNetwork`. `TheMind` now has actual long-term storage capabilities.
+
+
 ## v10.8.3 - "The 'Burnt Sweatpants' Fix"
 
 #### **Symbiotic Dynamics (The "Burnt Sweatpants" Fix)**

@@ -667,6 +667,24 @@ class DreamEngine:
         self.events = events
         self.PROMPTS = DREAMS.get("PROMPTS", ["{A} -> {B}?"]) if 'DREAMS' in globals() else ["The void rearranges '{A}' into '{B}'."]
 
+    def enter_rem_cycle(self, memory_system) -> str:
+        residue_word = "static"
+        if hasattr(memory_system, "short_term_buffer") and memory_system.short_term_buffer:
+            engram = memory_system.short_term_buffer[-1]
+            if "trigger" in engram and engram["trigger"]:
+                residue_word = engram["trigger"][0]
+        consolidation_msg = "Neural pathways quiescent."
+        if hasattr(memory_system, "replay_dreams"):
+            consolidation_msg = memory_system.replay_dreams()
+        dream_vector = {"ENTROPY": 0.5, "VOID": 0.5, "STR": 0.2}
+        dream_text, _ = self.hallucinate(dream_vector, trauma_level=1.0)
+        return (
+            f"{Prisma.VIOLET}☾ HYPNAGOGIC STATE ☽{Prisma.RST}\n"
+            f"   Day Residue: '{residue_word.upper()}'... transforming...\n"
+            f"   Dream: \"{dream_text}\"\n"
+            f"   {Prisma.GRY}{consolidation_msg}{Prisma.RST}"
+        )
+
     def hallucinate(self, vector: Dict[str, float], trauma_level: float = 0.0) -> Tuple[str, float]:
         dims = [k for k, v in vector.items() if v > 0.3]
         if not dims:

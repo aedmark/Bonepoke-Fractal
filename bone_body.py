@@ -99,17 +99,27 @@ class MitochondrialForge:
                 base_tax = (limit - self.GRACE) * self.TAX_LOW
                 excess_drag = taxable_drag - (limit - self.GRACE)
                 drag_tax = base_tax + (excess_drag * self.TAX_HIGH)
+
         if external_modifiers:
             for mod in external_modifiers:
                 drag_tax *= mod
+
         raw_cost = max(0.1, self.BMR + drag_tax)
-        safe_efficiency = max(0.1, self.state.efficiency_mod)
-        final_cost = raw_cost / safe_efficiency
+        ros_penalty = max(0.0, (self.state.ros_buildup / BoneConfig.CRITICAL_ROS_LIMIT) * 0.5)
+        dynamic_efficiency = max(0.1, self.state.efficiency_mod - ros_penalty)
+
+        final_cost = raw_cost / dynamic_efficiency
+
         inefficiency_tax = 0.0
-        if safe_efficiency < 1.0:
+        if dynamic_efficiency < 1.0:
             inefficiency_tax = final_cost - raw_cost
+
         status = "RESPIRING"
         symptom = BIO_NARRATIVE["MITO"]["NOMINAL"]
+
+        if ros_penalty > 0.2:
+            symptom = f"{Prisma.OCHRE}TOXIC DRAG: System sluggish due to ROS buildup (-{int(ros_penalty*100)}% Eff).{Prisma.RST}"
+
         if drag < -1.0:
             symptom = f"{Prisma.CYN}GLIDING (Drag {drag}){Prisma.RST}"
         if final_cost > self.state.atp_pool:
