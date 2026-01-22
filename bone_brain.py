@@ -72,11 +72,9 @@ class NarrativeSpotlight:
     def illuminate(self, graph: Dict, vector: Dict[str, float], limit: int = 5) -> List[str]:
         if not graph or not vector:
             return []
-        active_dims = {k: v for k, v in vector.items() if v > 0.3}
+        active_dims = {k: v for k, v in vector.items() if v > 0.6}
         if not active_dims:
-            candidates = list(graph.keys())
-            if not candidates: return []
-            return [f"Drifting thought: '{random.choice(candidates)}'"]
+            return []
         scored_memories = []
         secondary_candidates = set()
         for node, data in graph.items():
@@ -91,7 +89,7 @@ class NarrativeSpotlight:
                             secondary_candidates.add(neighbor)
             mass = sum(data.get("edges", {}).values())
             resonance_score += (mass * 0.1)
-            if resonance_score > 0.5:
+            if resonance_score > 0.7:
                 scored_memories.append((resonance_score, node, data))
         for neighbor in secondary_candidates:
             if neighbor not in graph: continue
@@ -123,83 +121,37 @@ class NeurotransmitterModulator:
             "GORDON": {"cortisol_dampener": 0.8, "adrenaline_boost": 0.8}
         }
 
-    def modulate(self, incoming_chem: Dict[str, float], base_voltage: float, lens_name: str = "NARRATOR") -> Dict[str, Any]:
+    def modulate(self, incoming_chem: Dict[str, float], base_voltage: float, lens_name: str = "NARRATOR", model_name: str = "") -> Dict[str, Any]:
         current_time = time.time()
         elapsed = current_time - self.last_tick
         self.last_tick = current_time
-
-        # Dynamic Decay
         minutes_passed = elapsed / 60.0
-        if minutes_passed > 10.0:
-            effective_decay_time = 10.0 + math.log(minutes_passed - 9.0)
-        else:
-            effective_decay_time = minutes_passed
-
-        decay_amount = min(0.5, effective_decay_time * BrainConfig.BASE_DECAY_RATE)
+        decay_amount = min(0.5, minutes_passed * BrainConfig.BASE_DECAY_RATE)
         if decay_amount > 0:
             self.current_chem.decay(rate=decay_amount)
-
-        # Dynamic Plasticity
         plasticity = BrainConfig.BASE_PLASTICITY + (base_voltage * BrainConfig.VOLTAGE_SENSITIVITY)
         plasticity = max(0.1, min(BrainConfig.MAX_PLASTICITY, plasticity))
         self.current_chem.mix(incoming_chem, weight=plasticity)
         profile = self.lens_profiles.get(lens_name, self.lens_profiles["NARRATOR"])
-
-        # Parameterized LLM Settings
+        base_tokens = 720
         params = {
-            "temperature": BrainConfig.BASE_TEMP,
-            "top_p": BrainConfig.BASE_TOP_P,
+            "temperature": BrainConfig.BASE_TEMP, # Likely 0.7
+            "top_p": BrainConfig.BASE_TOP_P,      # Likely 0.9
             "frequency_penalty": 0.0,
             "presence_penalty": 0.0,
             "max_tokens": getattr(BoneConfig, "MAX_OUTPUT_TOKENS", 4096)
         }
 
-        # Voltage Stress (Manic State)
-        if base_voltage > 18.0:
-            params["temperature"] = 0.3
-            params["max_tokens"] = 150
-            params["frequency_penalty"] = 0.5
-
-        # Cortisol (Fear/Rigidity)
-        effective_cortisol = self.current_chem.cortisol * profile["cortisol_dampener"]
-        if effective_cortisol > 0.8:
-            params["temperature"] = 0.2 # Freezing
-            params["frequency_penalty"] = 1.0
-            params["presence_penalty"] = 0.5
-        elif effective_cortisol > 0.4:
-            params["temperature"] -= (effective_cortisol * BrainConfig.CORTISOL_FREEZE)
-
-        # Dopamine (Creativity/Seeking)
-        if self.current_chem.dopamine > 0.3:
-            boost = self.current_chem.dopamine * BrainConfig.DOPAMINE_NOVELTY
-            params["temperature"] += boost
-            params["presence_penalty"] += boost
-
-        # Adrenaline (Hypergraphia/Speed)
-        effective_adrenaline = self.current_chem.adrenaline * profile["adrenaline_boost"]
+        effective_adrenaline = self.current_chem.adrenaline
         if effective_adrenaline > 0.3:
-            base_tokens = 200
             extra_tokens = BrainConfig.ADRENALINE_RUSH * effective_adrenaline
             params["max_tokens"] = int(base_tokens + extra_tokens)
-            params["frequency_penalty"] += (effective_adrenaline * 0.6)
-
-        # Serotonin (Satisfaction/Convergence)
-        if self.current_chem.serotonin > 0.5:
-            # Pull temperature back towards the stable baseline (0.7)
-            target = BrainConfig.BASE_TEMP
-            diff = target - params["temperature"]
-            params["temperature"] += (diff * self.current_chem.serotonin * BrainConfig.SEROTONIN_CALM)
-
-        # Voltage Modulation
-        if base_voltage > 15.0:
-            params["temperature"] += 0.25
-        elif base_voltage < 5.0:
-            params["temperature"] -= 0.15
-
-        # Safety Clamps
-        params["temperature"] = max(0.1, min(1.6, params["temperature"]))
-        params["top_p"] = max(0.1, min(1.0, params["top_p"]))
-        params["max_tokens"] = max(50, params["max_tokens"])
+            params["frequency_penalty"] = 0.1
+        else:
+            params["max_tokens"] = base_tokens
+        if "gemma" in model_name.lower() or "3" in model_name.lower():
+            params["temperature"] = min(0.7, params["temperature"])
+        params["max_tokens"] = max(100, params["max_tokens"])
 
         return params
 
@@ -303,8 +255,12 @@ class PromptComposer:
 
     def compose(self, state: Dict[str, Any], user_query: str, ballast: bool = False, modifiers: Dict[str, bool] = None) -> str:
         modifiers = self._normalize_modifiers(modifiers)
+        if modifiers.get("grace_period", False):
+            self._engage_warmup_protocol(state, modifiers)
+
         if ballast:
             self._engage_ballast_protocol(state, modifiers)
+
         blocks = [
             self._build_identity_block(state, modifiers),
             self._build_bio_block(state, modifiers),
@@ -321,11 +277,26 @@ class PromptComposer:
             "include_inventory": True,
             "include_memories": True,
             "simplify_instruction": False,
-            "inject_chaos": False
+            "inject_chaos": False,
+            "grace_period": False
         }
         if modifiers:
             defaults.update(modifiers)
         return defaults
+
+    def _engage_warmup_protocol(self, state: Dict, modifiers: Dict):
+        modifiers["include_somatic"] = False
+        modifiers["include_inventory"] = False
+        modifiers["include_memories"] = False
+
+        state["mind"]["lens"] = "ANALYSIS"
+        state["mind"]["role"] = "The Critic"
+        state["system_instruction"] = (
+            "WARMUP PHASE: Connection establishing. "
+            "The user is speaking in metaphors. "
+            "Match their tone. Analyze their intent. "
+            "Do not be brief. Expand on the idea presented."
+        )
 
     def _engage_ballast_protocol(self, state: Dict, modifiers: Dict):
         modifiers["include_somatic"] = False
@@ -346,7 +317,7 @@ class PromptComposer:
         sys_inst = state.get("system_instruction", "")
 
         if modifiers["simplify_instruction"]:
-            sys_inst = "Keep responses short. Focus on the immediate physical sensation."
+            sys_inst = "The connection is drifting. Ground the narrative in concrete details, but maintain a cohesive, literate voice. Do not become robotic."
 
         return (
             f"=== SYSTEM IDENTITY ===\n"
@@ -384,7 +355,11 @@ class PromptComposer:
 
         if modifiers["include_inventory"]:
             inventory = state.get("inventory", [])
-            inv_str = ", ".join(inventory) if inventory else "Empty"
+            if inventory:
+                humanized = [i.replace("_", " ").title() for i in inventory]
+                inv_str = ", ".join(humanized)
+            else:
+                inv_str = "Empty"
 
             framing_map = {
                 "GORDON": "THE WORKSPACE (Things to fix):",
@@ -392,7 +367,7 @@ class PromptComposer:
                 "JESTER": "PROPS FOR THE GAG:"
             }
             context_framing = framing_map.get(lens, "THE WORLD:")
-            parts.append(f"{context_framing} Inventory: {inv_str}")
+            parts.append(f"{context_framing} Inventory: {inv_str} (Constraint: Use these tools if relevant, but do not invent new ones.)")
 
         loc = state.get('world', {}).get('orbit', ['Void'])[0]
         parts.append(f"Location: {loc}")
@@ -450,7 +425,7 @@ class PromptComposer:
             f"{ballast_warning}"
             f"{chaos_injection}"
             f"USER: {clean_q}\n"
-            f"ASSISTANT ({lens}):"
+            f"ASSISTANT: [{lens} Mode Active] "
         )
 
 class ResponseValidator:
@@ -527,15 +502,21 @@ class TheCortex:
     def process(self, user_input: str) -> Dict[str, Any]:
         sim_result = self.sub.cycle_controller.run_turn(user_input)
         if sim_result.get("type") not in ["SNAPSHOT", None]:
-            if sim_result.get("ui") and not sim_result.get("logs"):
-                return sim_result
+            return sim_result
         full_state = self._gather_state(sim_result)
         voltage = full_state["physics"].get("voltage", 5.0)
         chem = full_state["bio"].get("chem", {})
         current_lens = full_state["mind"].get("lens", "NARRATOR")
-        llm_params = self.modulator.modulate(chem, voltage, lens_name=current_lens)
+
+        model_id = self.llm.model if hasattr(self.llm, "model") else "unknown"
+        llm_params = self.modulator.modulate(chem, voltage, lens_name=current_lens, model_name=model_id)
+
         modifiers = self.symbiosis.get_prompt_modifiers()
-        if self.last_alignment_score < 0.4:
+        GRACE_LIMIT = 5
+        if self.sub.tick_count < GRACE_LIMIT:
+            modifiers["grace_period"] = True
+            self.events.log(f"WARMUP PROTOCOL ACTIVE ({self.sub.tick_count}/{GRACE_LIMIT})", "CORTEX")
+        if self.last_alignment_score < 0.25:
             modifiers["simplify_instruction"] = True
             self.events.log(f"{Prisma.VIOLET}NEURAL DRIFT: Alignment {self.last_alignment_score:.2f}. Engaging Ballast.{Prisma.RST}", "CORTEX")
         if self.ballast_active:
@@ -563,10 +544,20 @@ class TheCortex:
             self.events.log(f"{Prisma.OCHRE}ALIGNMENT FAIL ({self.last_alignment_score:.2f}). Retrying...{Prisma.RST}", "CORTEX")
             llm_params["temperature"] = min(1.5, llm_params.get("temperature", 0.7) + 0.3)
             attempts += 1
-        if self.last_alignment_score > 0.8:
-            sim_result["physics"]["kappa"] = min(1.0, sim_result["physics"].get("kappa", 0) + 0.05)
-        elif self.last_alignment_score < 0.3:
-            sim_result["physics"]["voltage"] += 2.0
+        if "physics" in sim_result:
+            if self.last_alignment_score > 0.8:
+                current_kappa = sim_result["physics"].get("kappa", 0) if isinstance(sim_result["physics"], dict) else getattr(sim_result["physics"], "kappa", 0)
+                new_kappa = min(1.0, current_kappa + 0.05)
+                if isinstance(sim_result["physics"], dict):
+                    sim_result["physics"]["kappa"] = new_kappa
+                else:
+                    setattr(sim_result["physics"], "kappa", new_kappa)
+            elif self.last_alignment_score < 0.3:
+                if isinstance(sim_result["physics"], dict):
+                    sim_result["physics"]["voltage"] = sim_result["physics"].get("voltage", 0) + 2.0
+                else:
+                    current_volts = getattr(sim_result["physics"], "voltage", 0)
+                    setattr(sim_result["physics"], "voltage", current_volts + 2.0)
         self.events.log(f"{Prisma.CYN}SYNAPTIC ALIGNMENT: {self.last_alignment_score:.2f}{Prisma.RST}", "CORTEX")
         validation_result = self.validator.validate(raw_response_text, full_state)
         if validation_result["valid"]:

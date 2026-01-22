@@ -140,7 +140,6 @@ class MitochondrialForge:
             symptom=symptom)
 
     def respirate(self, receipt: MetabolicReceipt) -> str:
-        """Executes the burn, depleting ATP and generating Reactive Oxygen Species (ROS)."""
         if receipt.status == "NECROSIS":
             self.state.atp_pool = 0.0
             return "NECROSIS"

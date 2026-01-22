@@ -292,12 +292,12 @@ class LexiconService:
     ANTIGEN_REGEX = None
     SOLVENTS = set()
 
-    @classmethod
-    def _ensure_ready(cls, func):
-        def wrapper(*args, **kwargs):
+    @staticmethod
+    def _ensure_ready(func):
+        def wrapper(cls, *args, **kwargs):
             if not cls._INITIALIZED:
                 cls.initialize()
-            return func(*args, **kwargs)
+            return func(cls, *args, **kwargs)
         return wrapper
 
     @classmethod

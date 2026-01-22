@@ -103,14 +103,10 @@ class SynestheticCortex:
 
         return "Steady Pulse."
 
-    def apply_impulse(self, impulse: BiologicalImpulse):
-        """
-        Directly modifies the endocrine system.
-        """
-        if not self.bio: return
-
+    def apply_impulse(self, impulse: BiologicalImpulse) -> float:
+        if not self.bio:
+            return 0.0
         endo = self.bio.endo
-
         endo.cortisol = max(0.0, min(1.0, endo.cortisol + impulse.cortisol_delta))
         endo.oxytocin = max(0.0, min(1.0, endo.oxytocin + impulse.oxytocin_delta))
         endo.dopamine = max(0.0, min(1.0, endo.dopamine + impulse.dopamine_delta))

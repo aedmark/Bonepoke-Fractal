@@ -5,6 +5,71 @@ import time
 from typing import Dict, List, Any
 from bone_bus import Prisma, BoneConfig
 
+class Projector:
+    def __init__(self):
+        self.width = 60
+        self.height = 15
+
+    def render(self, physics_ctx, data_ctx, mind_ctx) -> str:
+        # Unpack Contexts
+        physics = physics_ctx.get("physics", {})
+        title_data = data_ctx.get("title", {})
+        health = data_ctx.get("health", 100)
+        stamina = data_ctx.get("stamina", 100)
+        atp = data_ctx.get("bio", {}).get("atp", 0)
+        inventory = data_ctx.get("inventory", [])
+        vectors = data_ctx.get("vectors", {})
+
+        # Formatting
+        hp_bar = self._bar(health, 100, 5, "█", Prisma.RED)
+        stm_bar = self._bar(stamina, 100, 5, "█", Prisma.GRN)
+
+        # Vector Block
+        vel = vectors.get("VEL", 0.0)
+        str_v = vectors.get("STR", 0.0)
+        ent = vectors.get("ENT", 0.0)
+        phi = vectors.get("PHI", 0.0)
+        tmp = vectors.get("TMP", 0.0)
+        psi = physics.get("psi", 0.0)
+
+        # Header
+        header = (
+            f"♦ NARRATOR  [HP: {hp_bar}] [STM: {stm_bar}] [ATP: {int(atp)}J] "
+            f"[V:{physics.get('voltage', 0):.1f}⚡] [D:{physics.get('narrative_drag', 0):.1f}⚓]"
+        )
+
+        # Vector Display (The "Meters")
+        vector_row = (
+            f"VEL {vel:.1f} | STR {str_v:.1f} ENT {ent:.1f} | "
+            f"PHI {phi:.1f} TMP {tmp:.1f} | PSI {psi:.1f}"
+        )
+
+        # Zone/Mind indicator
+        zone = physics.get("zone", "UNKNOWN")
+        lens = mind_ctx[0] if mind_ctx else "RAW"
+        sub_header = f"   🪐 {zone}  ({lens})"
+
+        # Inventory Strip
+        belt_content = " ".join([f"[{i}]" for i in inventory]) if inventory else "[BELT EMPTY]"
+        belt_display = f"{Prisma.GRY}{belt_content}{Prisma.RST}"
+
+        div = "—" * 40
+
+        return (
+            f"{header}\n"
+            f"{Prisma.CYN}{vector_row}{Prisma.RST}\n"
+            f"{sub_header}\n"
+            f"{Prisma.GRY}{div}{Prisma.RST}\n"
+            f"   {belt_display}\n"
+            f"{Prisma.GRY}{div}{Prisma.RST}"
+        )
+
+    def _bar(self, val, max_val, width, char, color):
+        if max_val == 0: return ""
+        ratio = max(0.0, min(1.0, val / max_val))
+        fill = int(ratio * width)
+        return f"{color}{char * fill}{Prisma.GRY}{char * (width - fill)}{Prisma.RST}"
+
 class GeodesicRenderer:
     def __init__(self, engine_ref, chroma_ref, strunk_ref, valve_ref):
         self.eng = engine_ref
@@ -14,7 +79,7 @@ class GeodesicRenderer:
         self.vsl_32v = valve_ref
 
     @staticmethod
-    def _render_soul_strip(soul_ref) -> str:
+    def render_soul_strip(soul_ref) -> str:
         if not soul_ref: return ""
         chapter = soul_ref.chapters[-1] if soul_ref.chapters else "The Prologue"
         obsession = soul_ref.current_obsession or "Drifting..."
@@ -28,12 +93,17 @@ class GeodesicRenderer:
             f"🧭 Obsession: {obsession} {bar} {trait_str}"
         )
 
-    def render_frame(self, ctx, current_tick: int, current_events: List[Dict]) -> Dict[str, Any]:
+    def render_dashboard(self, ctx) -> str:
         physics = ctx.physics
         mind = ctx.mind_state
         bio = ctx.bio_result
         world = ctx.world_state
-        title_data = self._get_title_data(mind, physics, ctx.clean_words)
+
+        title_data = self.eng.mind.wise.architect(
+            {"physics": physics, "clean_words": ctx.clean_words},
+            (mind.get("lens"), mind.get("thought"), mind.get("role")),
+            False
+        )
         raw_dashboard = self.projector.render(
             {"physics": physics},
             {
@@ -41,12 +111,26 @@ class GeodesicRenderer:
                 "health": self.eng.health,
                 "stamina": self.eng.stamina,
                 "bio": bio,
-                "world": world},
-            (mind.get("lens"), mind.get("thought")))
+                "world": world,
+                "inventory": self.eng.gordon.inventory if hasattr(self.eng, 'gordon') else [],
+                "vectors": physics.get("vector", {})
+            },
+            (mind.get("lens"), mind.get("thought"))
+        )
+        return raw_dashboard
+
+    def render_frame(self, ctx, current_tick: int, current_events: List[Dict]) -> Dict[str, Any]:
+        physics = ctx.physics
+        bio = ctx.bio_result
+        raw_dashboard = self.render_dashboard(ctx)
         colored_ui = self.vsl_chroma.modulate(raw_dashboard, physics.get("vector", {}))
         clean_ui, style_log = self.strunk_white.sanitize(colored_ui)
+
+        if "The system is listening." in clean_ui:
+            clean_ui = clean_ui.replace("The system is listening.", "")
+
         if hasattr(self.eng, 'soul'):
-            soul_ui = self._render_soul_strip(self.eng.soul)
+            soul_ui = self.render_soul_strip(self.eng.soul)
             clean_ui = f"{clean_ui}\n{soul_ui}"
         if style_log:
             self._punish_style_crime(style_log)
@@ -133,3 +217,71 @@ class GeodesicRenderer:
             else:
                 composed.extend([f"   {i}" for i in items])
         return composed
+
+class CachedRenderer:
+    def __init__(self, base_renderer):
+        self._base = base_renderer
+        self._cache = {
+            "soul_strip": {"hash": 0, "content": ""},
+            "dashboard": {"hash": 0, "content": ""},
+            "last_tick": -1
+        }
+        self.THEMES = {
+            "DEFAULT": {"border": "═", "accent": Prisma.CYN, "alert": Prisma.RED},
+            "NOIR": {"border": "-", "accent": Prisma.GRY, "alert": Prisma.WHT},
+            "RETRO": {"border": "*", "accent": Prisma.MAG, "alert": Prisma.YEL},
+            "MINIMAL": {"border": " ", "accent": Prisma.RST, "alert": Prisma.RST}
+        }
+        self.active_theme = self.THEMES["DEFAULT"]
+
+    def _compute_hash(self, data: Any) -> int:
+        return hash(str(data))
+
+    def render_frame(self, ctx, tick: int, events: List[Dict]) -> Dict:
+        soul_ref = getattr(self._base.eng, 'soul', None)
+
+        if soul_ref:
+            soul_state = (soul_ref.current_obsession, soul_ref.obsession_progress)
+            soul_hash = self._compute_hash(soul_state)
+
+            if soul_hash != self._cache["soul_strip"]["hash"]:
+                self._cache["soul_strip"]["content"] = self._base.render_soul_strip(soul_ref)
+                self._cache["soul_strip"]["hash"] = soul_hash
+        else:
+            self._cache["soul_strip"]["content"] = ""
+
+        voltage = ctx.physics.get("voltage", 0) if isinstance(ctx.physics, dict) else ctx.physics.voltage
+
+        if voltage > 15.0 or tick != self._cache["last_tick"]:
+            raw_dashboard = self._base.render_dashboard(ctx)
+            colored = self._base.vsl_chroma.modulate(raw_dashboard, ctx.physics.get("vector", {}))
+            clean, _ = self._base.strunk_white.sanitize(colored)
+            self._cache["dashboard"]["content"] = clean
+            self._cache["last_tick"] = tick
+
+        frame = {
+            "ui": f"{self._cache['dashboard']['content']}\n{self._cache['soul_strip']['content']}",
+            "logs": self._base.compose_logs(ctx.logs, events, tick),
+            "metrics": ctx.bio_result if hasattr(ctx, 'bio_result') else {}
+        }
+        return frame
+
+class ThemeContext:
+    THEMES = {
+        "DEFAULT": {"border": "═", "accent": Prisma.CYN, "alert": Prisma.RED},
+        "NOIR": {"border": "-", "accent": Prisma.GRY, "alert": Prisma.WHT},
+        "RETRO": {"border": "*", "accent": Prisma.MAG, "alert": Prisma.YEL},
+        "MINIMAL": {"border": " ", "accent": Prisma.RST, "alert": Prisma.RST}
+    }
+
+    def __init__(self, theme_name="DEFAULT"):
+        self.active = self.THEMES.get(theme_name, self.THEMES["DEFAULT"])
+
+    def frame(self, content: str, label: str = "") -> str:
+        b = self.active["border"]
+        c = self.active["accent"]
+        r = Prisma.RST
+        width = 60
+        header = f"{c}{b*5} {label} {b*(width-7-len(label))}{r}"
+        footer = f"{c}{b*width}{r}"
+        return f"{header}\n{content}\n{footer}"

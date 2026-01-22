@@ -486,113 +486,6 @@ class StrunkWhiteProtocol:
             return text, msg
         return text, None
 
-class TheHoloProjector:
-    def __init__(self):
-        self.BAR_CHARS = [" ", " ", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
-
-    def _draw_bar(self, value, max_val=1.0, width=5):
-        ratio = max(0.0, min(1.0, value / max(1.0, max_val)))
-        idx = int(ratio * (len(self.BAR_CHARS) - 1))
-        return self.BAR_CHARS[idx] * width
-
-    @staticmethod
-    def _draw_belt(inventory: List[str], tool_confidence: Dict[str, float]) -> str:
-        if not inventory:
-            return f"{Prisma.GRY}   [BELT EMPTY]{Prisma.RST}"
-        icons = []
-        for item in inventory:
-            conf = tool_confidence.get(item, 1.0)
-            if conf < 0.5:
-                color = Prisma.OCHRE
-                status = "▼"
-            elif conf > 2.5:
-                color = Prisma.MAG
-                status = "▲"
-            elif conf > 1.5:
-                color = Prisma.CYN
-                status = "♦"
-            else:
-                color = Prisma.GRY
-                status = "•"
-            short_name = item.replace("_", " ").title()
-            if len(short_name) > 10:
-                parts = short_name.split()
-                if len(parts) > 1:
-                    short_name = f"{parts[0][0]}.{parts[1]}"
-                else:
-                    short_name = short_name[:10]
-            icons.append(f"{color}{status} {short_name}{Prisma.RST}")
-        return "   " + " | ".join(icons)
-
-    def _draw_vector_compass(self, vector_data):
-        pairs = [
-            ("VEL", vector_data.get("VEL", 0), "STR", vector_data.get("STR", 0)),
-            ("ENT", vector_data.get("ENT", 0), "PHI", vector_data.get("PHI", 0)),
-            ("TMP", vector_data.get("TMP", 0), "PSI", vector_data.get("PSI", 0)),]
-        display = []
-        for l1, v1, l2, v2 in pairs:
-            bar1 = self._draw_bar(v1, 1.0, 3)
-            bar2 = self._draw_bar(v2, 1.0, 3)
-            display.append(f"{Prisma.CYN}{l1} {bar1}{Prisma.RST} | {Prisma.MAG}{bar2} {l2}{Prisma.RST}")
-        return "   ".join(display)
-
-    def render(self, m: Dict, signals: Dict, lens_data: Tuple) -> str:
-        p = m["physics"]
-        bio = signals.get("bio", {})
-        chem = bio.get("chem", {})
-        atp = bio.get("atp", 0.0)
-        inventory = signals.get("inventory", [])
-        tool_conf = signals.get("tool_confidence", {})
-        voltage = p.get("voltage", 0.0)
-        drag = p.get("narrative_drag", 0.0)
-        lens_name = lens_data[0]
-        lens_thought = lens_data[1]
-        header_color = Prisma.GRY
-        if voltage > 15.0: header_color = Prisma.RED
-        elif voltage < 5.0: header_color = Prisma.CYN
-        cortisol = chem.get("cortisol", 0.0)
-        dopamine = chem.get("dopamine", 0.0)
-        chem_indicator = ""
-        if cortisol > 0.6:
-            chem_indicator = f" {Prisma.RED}[⚠ STRESS]{Prisma.RST}"
-        elif dopamine > 0.6:
-            chem_indicator = f" {Prisma.MAG}[✨ SPARK]{Prisma.RST}"
-        health_bar = self._draw_bar(signals.get("health", 0), 100.0, 5)
-        stamina_bar = self._draw_bar(signals.get("stamina", 0), 100.0, 5)
-        atp_indicator = f"{int(atp)}J"
-        flow_state = p.get("flow_state", "LAMINAR")
-        hubris_indicator = ""
-        if flow_state == "HUBRIS_RISK":
-            hubris_indicator = f" {Prisma.YEL}[⚠ HUBRIS IMMINENT]{Prisma.RST}"
-        elif p.get("perfection_streak", 0) >= 5:
-            hubris_indicator = f" {Prisma.CYN}[∞ FLOW STATE]{Prisma.RST}"
-        dashboard_top = (
-            f"{Prisma.GRY}[HP: {health_bar}] [STM: {stamina_bar}] "
-            f"[ATP: {atp_indicator}] [V:{voltage:.1f}⚡] [D:{drag:.1f}⚓]{Prisma.RST}"
-            f"{chem_indicator}{hubris_indicator}"
-        )
-        vectors = self._draw_vector_compass(p.get("vector", {}))
-        belt_display = self._draw_belt(inventory, tool_conf)
-        clean_thought = lens_thought or "..."
-        if lens_name == "NARRATOR":
-            clean_thought = clean_thought.replace("You are [The Witness]...", "")
-        separator = f"{Prisma.SLATE}{'—'*40}{Prisma.RST}"
-        lens_display = lens_name.upper() if lens_name else "UNKNOWN"
-        ui_block = [
-            separator,
-            f"{header_color}♦ {lens_display}{Prisma.RST}  {dashboard_top}",
-            f"{vectors}",
-            separator,
-            f"{belt_display}",
-            separator,
-            f"{Prisma.WHT}{clean_thought}{Prisma.RST}",
-            ""]
-        world = signals.get("world", {})
-        orbit = world.get("orbit")
-        if orbit and orbit[0] != "VOID_DRIFT":
-            ui_block.insert(3, f"   🪐 {Prisma.OCHRE}{orbit[2]}{Prisma.RST}")
-        return "\n".join(ui_block)
-
 class SoritesIntegrator:
     def __init__(self, memory_network):
         self.mem = memory_network
@@ -886,6 +779,5 @@ class TownHall:
     Mirror = MirrorGraph
     Sorites = SoritesIntegrator
     Akashic = TheAkashicRecord
-    Projector = TheHoloProjector
     StrunkWhite = StrunkWhiteProtocol
     CouncilChamber = CouncilChamber

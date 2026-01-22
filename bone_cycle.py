@@ -7,7 +7,7 @@ from bone_bus import Prisma, BoneConfig, CycleContext, PhysicsPacket
 from bone_village import TownHall
 from bone_personality import TheBureau
 from bone_physics import TheBouncer, RuptureValve, ChromaScope
-from bone_viewer import GeodesicRenderer
+from bone_viewer import GeodesicRenderer, CachedRenderer
 from bone_architect import PanicRoom
 from bone_synesthesia import SynestheticCortex
 from bone_symbiosis import SymbiosisManager
@@ -403,7 +403,9 @@ class IntrusionPhase(SimulationPhase):
         self.name = "INTRUSION"
 
     def run(self, ctx: CycleContext):
-        p_active, p_log = self.eng.bio.parasite.infect(ctx.physics, self.eng.stamina)
+        phys_data = ctx.physics.to_dict() if hasattr(ctx.physics, 'to_dict') else ctx.physics
+        p_active, p_log = self.eng.bio.parasite.infect(phys_data, self.eng.stamina)
+
         if p_active: ctx.log(p_log)
         if self.eng.limbo.ghosts:
             if ctx.logs:
@@ -530,7 +532,9 @@ class SensationPhase(SimulationPhase):
         self.synesthesia = SynestheticCortex(self.eng.bio)
 
     def run(self, ctx: CycleContext):
-        impulse = self.synesthesia.perceive(ctx.physics)
+        phys_data = ctx.physics.to_dict() if hasattr(ctx.physics, 'to_dict') else ctx.physics
+        impulse = self.synesthesia.perceive(phys_data)
+
         self.synesthesia.apply_impulse(impulse)
         if impulse.stamina_impact != 0:
             self.eng.stamina = max(0.0, self.eng.stamina + impulse.stamina_impact)
@@ -610,12 +614,15 @@ class CycleReporter:
         self.eng = engine_ref
         self.vsl_chroma = ChromaScope()
         self.strunk_white = TownHall.StrunkWhite()
-        self.renderer = GeodesicRenderer(
+
+        raw_renderer = GeodesicRenderer(
             self.eng,
             self.vsl_chroma,
             self.strunk_white,
             RuptureValve(self.eng.mind.lex, self.eng.mind.mem)
         )
+
+        self.renderer = CachedRenderer(raw_renderer)
 
     def render_snapshot(self, ctx: CycleContext) -> Dict[str, Any]:
         try:
@@ -664,7 +671,7 @@ class CycleReporter:
         return {
             "type": "BUREAUCRACY",
             "ui": ctx.bureau_ui,
-            "logs": self.renderer.compose_logs(ctx.logs, self.eng.events.flush(), self.eng.tick_count),
+            "logs": GeodesicRenderer.compose_logs(ctx.logs, self.eng.events.flush(), self.eng.tick_count),
             "metrics": self.eng.get_metrics(ctx.bio_result.get("atp", 0.0))
         }
 

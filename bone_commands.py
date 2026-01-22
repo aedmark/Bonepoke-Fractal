@@ -418,7 +418,7 @@ class CommandProcessor:
 
     def _cmd_help(self, _parts):
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 10.8.4 MANUAL ---{self.P.RST}",
+            f"\n{self.P.CYN}--- BONEAMANITA 10.8.8 MANUAL ---{self.P.RST}",
             f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"
         ]
 

@@ -1,4 +1,4 @@
-# BONEAMANITA 10.8.4 - "The 'Burnt Sweatpants' Fix"
+# BONEAMANITA 10.8.8
 # Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark
 
 import time, json
@@ -18,6 +18,7 @@ from bone_brain import TheCortex, LLMInterface
 from bone_soul import NarrativeSelf
 from bone_architect import BoneArchitect
 from bone_cycle import GeodesicOrchestrator
+from bone_viewer import Projector, GeodesicRenderer
 
 def bootstrap_systems():
     print(f"{Prisma.GRY}...Bootstrapping Sub-Systems...{Prisma.RST}")
@@ -28,7 +29,7 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.8.4', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.8.8', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -83,12 +84,12 @@ class BoneAmanita:
         self.shimmer_state = self.embryo.shimmer
         self.soul_legacy_data = self.embryo.soul_legacy
         self.navigator = self.phys.nav
-        self.soul = NarrativeSelf(self.events, memory_ref=self.mind.mem)
+        self.soul = NarrativeSelf(self, self.events, memory_ref=self.mind.mem)
         if self.soul_legacy_data:
             self.soul.load_from_dict(self.soul_legacy_data)
         self.journal = TownHall.Journal()
         self.repro = LiteraryReproduction()
-        self.projector = TownHall.Projector()
+        self.projector = Projector()
         self.gordon = GordonKnot()
         self.kintsugi = KintsugiProtocol()
         self.therapy = TherapyProtocol()
@@ -127,7 +128,11 @@ class BoneAmanita:
         if self._ethical_audit():
             self.events.log(f"{Prisma.WHT}MERCY SIGNAL: Trauma boards wiped.{Prisma.RST}", "SYS")
         if self.phys.tension.last_physics_packet:
-            bureau_result = self.bureau.audit(self.phys.tension.last_physics_packet, self.bio.mito.state)
+            bio_snapshot = {
+                "health": self.health,
+                "stamina": self.stamina
+            }
+            bureau_result = self.bureau.audit(self.phys.tension.last_physics_packet, bio_snapshot)
             if bureau_result:
                 if bureau_result.get("log"):
                     self.events.log(bureau_result["log"], "BUREAU")
@@ -252,7 +257,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.8.4', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.8.8', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

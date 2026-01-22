@@ -5,7 +5,7 @@ import random, copy
 from dataclasses import dataclass, field
 from typing import List, Dict, Tuple, Optional
 from bone_bus import Prisma, BoneConfig
-from bone_data import GORDON_LOGS
+from bone_data import GORDON_LOGS, GORDON
 
 SEMANTIC_INJECTIONS = {
     "CUT_THE_CRAP": "CONSTRAINT: Prune all adjectives. Write in sparse, staccato sentences.",
@@ -140,9 +140,9 @@ class GordonKnot:
         self._initialize_reflexes()
 
     def load_config(self):
-        from bone_data import GORDON
-        if not self.inventory:
-            self.inventory = GORDON.get("STARTING_INVENTORY", ["POCKET_ROCKS"])
+        starting_gear = GORDON.get("STARTING_INVENTORY", ["POCKET_ROCKS", "SILENT_KNIFE"])
+        if not self.inventory or self.inventory == ["POCKET_ROCKS"]:
+            self.inventory = list(starting_gear)
         self.CRITICAL_ITEMS = {"SILENT_KNIFE"}
         default_scars = GORDON.get("SCAR_TISSUE", {})
         if not self.scar_tissue:

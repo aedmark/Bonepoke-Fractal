@@ -4,7 +4,7 @@
 import sys, os, json, time, urllib.request, urllib.error
 import traceback
 from typing import Optional, Dict, Tuple, List, Any
-from bone_data import LENSES, LEXICON
+from bone_data import LENSES, LEXICON, BIO_NARRATIVE
 from bone_main import BoneAmanita, SessionGuardian, BoneConfig
 from bone_brain import LLMInterface, TheCortex
 from bone_village import Prisma
@@ -204,7 +204,7 @@ class GenesisProtocol:
     def wizard(self) -> bool:
         os.system('cls' if os.name == 'nt' else 'clear')
         banner = f"""
-{Prisma.CYN}   GENESIS PROTOCOL v10.8.4{Prisma.RST}
+{Prisma.CYN}   GENESIS PROTOCOL v10.8.8{Prisma.RST}
 {Prisma.GRY}State Machine Active. Tensegrity Nominal.{Prisma.RST}
 ------------------------------------"""
         print(banner)

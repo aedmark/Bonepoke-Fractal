@@ -4,7 +4,6 @@ import random
 from typing import Dict, Any, Tuple, cast, List
 from bone_bus import Prisma
 
-# A dynamic container that allows the heavy static data to be extended or replaced at runtime.
 class LoreManifest:
     _INSTANCE = None
 
@@ -58,8 +57,6 @@ class LoreManifest:
             if category not in self._overlays:
                 self._overlays[category] = list(self._registry[category])
             self._overlays[category].extend(data)
-
-TheLore = LoreManifest.get_instance()
 
 BIO_NARRATIVE = {
     "MITO": {
@@ -446,6 +443,12 @@ GORDON = {
             "catalyst_category": "thermal",
             "result": "LAVA_LAMP",
             "msg": "The rocks surrender to the heat. They melt into a groovy, glowing goo."
+        },
+        {
+            "ingredient": "POCKET_ROCKS",
+            "catalyst_category": "kinetic",
+            "result": "POCKET_SAND",
+            "msg": "The erosion of time and the incredible force of wind turn your rocks into sand. Use it wisely!"
         },
         {
             "ingredient": "BROKEN_WATCH",
@@ -941,3 +944,5 @@ class TheAkashicRecord:
                     print(f"⚠️ MYTHOLOGY ENGINE: Category '{category}' is bloating. Suggest fission.")
                 return True
         return False
+
+TheLore = LoreManifest.get_instance()

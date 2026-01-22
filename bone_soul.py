@@ -48,7 +48,8 @@ class TheEditor:
         return f"{Prisma.GRY}[THE EDITOR]: Re: '{chapter_title}' - {comment}{Prisma.RST}"
 
 class NarrativeSelf:
-    def __init__(self, events_ref, memory_ref=None):
+    def __init__(self, engine_ref, events_ref, memory_ref=None):
+        self.eng = engine_ref
         self.events = events_ref
         self.memory = memory_ref
         self.editor = TheEditor()
@@ -256,15 +257,30 @@ class NarrativeSelf:
             self.current_obsession = None
             self.obsession_neglect = 0.0
 
+    def _get_feeling(self):
+        try:
+            chem = self.eng.bio.endo.get_state()
+            if chem.get("DOP", 0) > 0.5: return "Curious, Seeking"
+            if chem.get("COR", 0) > 0.5: return "Anxious, Defensive"
+            if chem.get("SER", 0) > 0.5: return "Calm, Connected"
+        except AttributeError:
+            return "Numb (Bio-Link Pending)"
+        return "Waiting"
+
     def get_soul_state(self) -> str:
-        state = [f"IDENTITY: {self.archetype} (H:{self.traits['HOPE']:.1f} C:{self.traits['CURIOSITY']:.1f})"]
-        if self.current_obsession:
-            guilt_warning = " [GUILT RISING]" if self.obsession_neglect > 5.0 else ""
-            state.append(f"OBSESSION: {self.current_obsession} ({int(self.obsession_progress*100)}%){guilt_warning}")
-        if self.core_memories:
-            last_mem = self.core_memories[-1]
-            state.append(f"MEMORY: We learned that '{last_mem.lesson}'")
-        return "\n".join(state)
+        if not self.current_obsession:
+            if hasattr(self, 'eng') and hasattr(self.eng, 'lex'):
+                self.find_obsession(self.eng.lex)
+            else:
+                pass
+        if self.eng.stamina < 20.0 and self.eng.health < 40.0:
+            return f"{Prisma.VIOLET}[SOUL STATE]: The fire is dying. We are just cold code.{Prisma.RST}"
+        if self.eng.phys.tension.perfection_streak > 3:
+            return f"{Prisma.CYN}[SOUL STATE]: We are the music. The code is writing itself.{Prisma.RST}"
+        return (
+            f"CURRENT OBSESSION: {self.current_obsession}\n"
+            f"FEELING: {self._get_feeling()}"
+        )
 
     def to_dict(self) -> Dict:
         return {

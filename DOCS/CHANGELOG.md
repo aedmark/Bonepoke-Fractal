@@ -1,6 +1,118 @@
 # BONEAMANITA CHANGELOG
 
 
+### **10.8.7 "The Visual Cortex Realignment"**
+
+**Focus:** Separation of Concerns (Presentation vs. Logic) and UI Hygiene.
+
+#### **1. `bone_viewer.py**`
+
+* **Feature:** Implanted the `Projector` class directly into the viewer.
+* *Reason:* Presentation logic belongs in the Presentation layer, not the Village registry.
+
+
+* **Fix:** `render_dashboard` now correctly passes `inventory` and `vectors` to the Projector.
+* *Result:* The Inventory Belt and Vector Meters now display actual data instead of `[EMPTY]` voids. The feedback loop is closed.
+
+
+* **Fix:** Sanitized the redundant "The system is listening" footer message.
+* *Reason:* It was a "Schur Violation" (annoying redundancy).
+
+
+
+#### **2. `bone_village.py**`
+
+* **Refactor:** Removed the `Projector` class.
+* *Reason:* Cleaning up "Spaghetti Topology." The Village no longer needs to know how to render pixels.
+
+
+
+#### **3. `bone_main.py**`
+
+* **Refactor:** Updated imports to source `Projector` from `bone_viewer` instead of `TownHall`.
+* *Reason:* Correcting the dependency graph to reflect the new architecture.
+
+### **10.8.6 The "Huge Mess" Update**
+
+#### **1. `bone_data.py**`
+
+* **Fix:** Moved the instantiation of `TheLore` to the very bottom of the file.
+* **Reason:** It was trying to access `BIO_NARRATIVE` and `LENSES` before they were defined (Python reads top-to-bottom), causing a `NameError`.
+
+
+#### **2. `bone_lexicon.py**`
+
+* **Fix:** Converted `_ensure_ready` from a `@classmethod` to a `@staticmethod` and updated its wrapper logic.
+* **Reason:** The decorator was trying to access the class `LexiconService` before it was fully created, causing a `TypeError`.
+
+
+#### **3. `bone_genesis.py**`
+
+* **Fix:** Added a safety check for the `TERM` environment variable in the `wizard()` function.
+* **Reason:** The system crashed in IDE consoles (like PyCharm/VS Code) when trying to run the `clear` command without a valid terminal environment.
+
+
+#### **4. `bone_main.py**`
+
+* **Fix:** Updated `BoneAmanita` initialization to pass `self` to `NarrativeSelf`.
+* **Reason:** The Soul (`NarrativeSelf`) needed a reference to the Engine to read Health/Stamina stats.
+
+* **Fix:** Created a `bio_snapshot` dictionary in `process_turn`.
+* **Reason:** `TheBureau` expected a dictionary to audit health, but was receiving a raw `MitochondrialState` object, causing an `AttributeError`.
+
+
+#### **5. `bone_soul.py**`
+
+* **Fix:** Removed the `SYSTEM OVERRIDE` debug code.
+* **Reason:** The Soul was hijacking the LLM prompt and forcing it to output a list of nouns ("Andrew. Platform. Mirror.") instead of a story.
+
+* **Fix:** Updated `__init__` to accept `engine_ref`.
+* **Reason:** To fix the missing link to the main engine.
+
+* **Fix:** Restored the missing `_get_feeling` method.
+* **Reason:** The code was trying to call this method to determine the Soul's mood, but it was missing from the class definition.
+
+#### **6. `bone_brain.py` (The Cortex)**
+
+* **Fix:** Added a guard clause `if "physics" in sim_result:` inside `process`.
+* **Reason:** The system crashed when receiving a "Refusal" or "Error" packet because it tried to access physics data that wasn't there.
+
+* **Fix:** **Cognitive Calibration (The "Spartan" Fix)**
+* Lowered the panic threshold from `0.4` to `0.25`.
+* Updated the "Ballast" instruction from "Keep responses short" to "Ground the narrative... maintain a cohesive, literate voice."
+* **Reason:** The Brain was panicking at poetic input, assuming it was "Neural Drift," and lobotomizing itself into speaking like a robot.
+
+* **Fix:** **Inventory Humanization**
+* Updated `_build_context_block` to format items as "Silent Knife" (Title Case) instead of "SILENT_KNIFE" and softened the constraint text.
+* **Reason:** The LLM was obsessing over the items because they looked like scary code variables in the prompt.
+
+#### **7. `bone_inventory.py**`
+
+* **Fix:** Updated `load_config` to explicitly copy the starting inventory list (`list(starting_gear)`).
+* **Reason:** The UI was reporting `[BELT EMPTY]` because the inventory list was either initializing as empty or getting lost in a reference error.
+
+
+### **10.8.5 The "Tensegrity Restoration" Update**
+
+#### **1. The Pinker Lens (Clarity & Contracts)**
+
+* **[FIX] `bone_viewer.py` - Variable Definition:** Resolved the existential crisis of the `bio` variable in `render_frame`. It now properly acknowledges its existence by fetching `ctx.bio_result` before attempting to measure ATP.
+* **[FIX] `bone_synesthesia.py` - Return Type Consistency:** The `apply_impulse` function no longer ghosts the caller. When the biological layer is missing, it now explicitly returns `0.0` (a concrete "nothing") instead of `None` (a void), fulfilling its contractual obligation to return a float.
+
+#### **2. The Fuller Lens (Systemic Integrity)**
+
+* **[REFACTOR] `bone_viewer.py` - Access Patterns:** We demolished the artificial walls around `_render_dashboard` and `_render_soul_strip`. By removing the leading underscores, we acknowledged that the `CachedRenderer` is a legitimate partner in the rendering process, not an intruder.
+* **[FIX] `bone_cycle.py` - Facade Bypass:** Corrected a structural dead-end where `CycleReporter` was trying to ask the `CachedRenderer` facade to perform the `compose_logs` task. We re-routed this request directly to the `GeodesicRenderer` static method, restoring the flow of information.
+
+#### **3. The Schur Lens (Humanity & Absurdity)**
+
+* **[FIX] `bone_cycle.py` - Parasite Translation:** The `Parasite` and `SynestheticCortex` were being handed complex `PhysicsPacket` objects they couldn't understand—like giving a dog a tax return. We now thoughtfully convert these packets into simple Dictionaries (`to_dict()`) so these primitive systems can happily digest them.
+
+#### **4. The Meadows Lens (Stocks & Stability)**
+
+* **[STABILITY] `bone_viewer.py` - Type Hygiene:** In `CachedRenderer`, we initialized our cache hashes to `0` (integer) rather than `None`. This prevents type instability in the memory stocks, ensuring the system doesn't wobble when trying to compare a new hash with a nonexistent one.
+
+
 ## v10.8.4 - The "Connected" Update
 
 ### **1. Telemetry & Observability (`bone_telemetry.py`)**
