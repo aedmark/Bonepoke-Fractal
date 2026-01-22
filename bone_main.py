@@ -1,4 +1,4 @@
-# BONEAMANITA 10.8.8
+# BONEAMANITA 10.8.9
 # Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark
 
 import time, json
@@ -19,6 +19,7 @@ from bone_soul import NarrativeSelf
 from bone_architect import BoneArchitect
 from bone_cycle import GeodesicOrchestrator
 from bone_viewer import Projector, GeodesicRenderer
+from bone_translation import SomaticInterface
 
 def bootstrap_systems():
     print(f"{Prisma.GRY}...Bootstrapping Sub-Systems...{Prisma.RST}")
@@ -29,7 +30,7 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.8.8', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.8.9', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -109,6 +110,7 @@ class BoneAmanita:
         self.cycle_controller = GeodesicOrchestrator(self)
         local_brain = LLMInterface(events_ref=self.events)
         self.cortex = TheCortex(self, llm_client=local_brain)
+        self.somatic = SomaticInterface(self)
         self.tick_count = 0
         self.health = self.mind.mem.session_health if self.mind.mem.session_health else BoneConfig.MAX_HEALTH
         self.stamina = self.mind.mem.session_stamina if self.mind.mem.session_stamina else BoneConfig.MAX_STAMINA
@@ -142,6 +144,15 @@ class BoneAmanita:
                     self.bio.mito.state.atp_pool += bureau_result["atp_gain"]
         if self.phys.tension.last_physics_packet:
             perf_metrics = self.observer.get_report()
+            avg_cycle = perf_metrics.get("avg_cycle_sec", 0.0)
+            reporter = self.cycle_controller.reporter
+            if avg_cycle > 2.0 and reporter.current_mode != "PERFORMANCE":
+                self.events.log(f"{Prisma.OCHRE}⚠️ HIGH LATENCY ({avg_cycle:.2f}s). Engaging Performance Mode.{Prisma.RST}", "SYS")
+                reporter.switch_renderer("PERFORMANCE")
+            elif avg_cycle < 0.5 and reporter.current_mode == "PERFORMANCE":
+                self.events.log(f"{Prisma.GRN}⚡ LATENCY NOMINAL ({avg_cycle:.2f}s). Restoring High-Fidelity.{Prisma.RST}", "SYS")
+                reporter.switch_renderer("STANDARD")
+
             @dataclass
             class HostStats:
                 latency: float
@@ -257,7 +268,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.8.8', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.8.9', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

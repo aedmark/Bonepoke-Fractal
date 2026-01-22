@@ -285,3 +285,12 @@ class ThemeContext:
         header = f"{c}{b*5} {label} {b*(width-7-len(label))}{r}"
         footer = f"{c}{b*width}{r}"
         return f"{header}\n{content}\n{footer}"
+
+def get_renderer(engine_ref, chroma_ref, strunk_ref, valve_ref, mode="STANDARD"):
+    base = GeodesicRenderer(engine_ref, chroma_ref, strunk_ref, valve_ref)
+    if mode == "PERFORMANCE":
+        return CachedRenderer(base)
+    elif mode == "DEBUG":
+        return base
+    else:
+        return base

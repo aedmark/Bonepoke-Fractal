@@ -328,15 +328,25 @@ class PromptComposer:
     def _build_bio_block(self, state: Dict, modifiers: Dict) -> str:
         if not modifiers["include_somatic"]:
             return ""
-
         bio = state.get("bio", {})
         phys = state.get("physics", {})
         chem = bio.get("chem", {})
-
         somatic_txt = ""
         if RosettaStone:
-            sem_state = RosettaStone.translate(phys, bio)
-            somatic_txt = RosettaStone.render_system_prompt_addition(sem_state)
+            translation_packet = {
+                "chemistry": chem,
+                "atp": bio.get("atp", 0.0)
+            }
+
+            try:
+                sem_state = RosettaStone.translate(phys, translation_packet)
+                somatic_txt = (
+                    f"SOMATIC STATE: {sem_state.tone}\n"
+                    f"SENSATION: {sem_state.somatic_sensation}\n"
+                    f"DIRECTIVE: {sem_state.internal_monologue_hint}"
+                )
+            except Exception as e:
+                somatic_txt = f"[Somatic Bridge Error: {e}]"
 
         moods = []
         if chem.get("ADR", 0) > 0.6: moods.append("HIGH ALERT (Adrenaline)")

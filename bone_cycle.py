@@ -116,11 +116,10 @@ class CycleStabilizer:
 
     def stabilize(self, ctx: CycleContext, current_phase: str):
         self._adjust_setpoints(ctx)
-
         curr_v, curr_d = self._get_current_metrics(ctx)
-
-        v_force = self.voltage_pid.update(curr_v)
-        d_force = self.drag_pid.update(curr_d)
+        SIMULATION_TICK_DELTA = 0.5
+        v_force = self.voltage_pid.update(curr_v, dt=SIMULATION_TICK_DELTA)
+        d_force = self.drag_pid.update(curr_d, dt=SIMULATION_TICK_DELTA)
 
         corrections_made = False
 
@@ -614,15 +613,31 @@ class CycleReporter:
         self.eng = engine_ref
         self.vsl_chroma = ChromaScope()
         self.strunk_white = TownHall.StrunkWhite()
-
-        raw_renderer = GeodesicRenderer(
+        from bone_viewer import get_renderer
+        self.valve = RuptureValve(self.eng.mind.lex, self.eng.mind.mem)
+        self.renderer = get_renderer(
             self.eng,
             self.vsl_chroma,
             self.strunk_white,
-            RuptureValve(self.eng.mind.lex, self.eng.mind.mem)
+            self.valve,
+            mode="STANDARD"
         )
+        self.current_mode = "STANDARD"
 
-        self.renderer = CachedRenderer(raw_renderer)
+    def switch_renderer(self, mode: str):
+        if self.current_mode == mode:
+            return
+
+        from bone_viewer import get_renderer
+        self.renderer = get_renderer(
+            self.eng,
+            self.vsl_chroma,
+            self.strunk_white,
+            getattr(self, 'valve', None),
+            mode=mode
+        )
+        self.current_mode = mode
+        self.eng.events.log(f"VIEWPORT SHIFT: Switched to {mode} mode.", "SYS")
 
     def render_snapshot(self, ctx: CycleContext) -> Dict[str, Any]:
         try:
@@ -631,6 +646,8 @@ class CycleReporter:
             if ctx.is_bureaucratic:
                 return self._package_bureaucracy(ctx)
             self._inject_flux_readout(ctx)
+            self._inject_somatic_pulse(ctx)
+
             captured_events = self.eng.events.flush()
             return self.renderer.render_frame(ctx, self.eng.tick_count, captured_events)
         except Exception as e:
@@ -640,6 +657,16 @@ class CycleReporter:
                 "logs": ctx.logs,
                 "metrics": self.eng.get_metrics()
             }
+
+    def _inject_somatic_pulse(self, ctx: CycleContext):
+        qualia = self.eng.somatic.get_current_qualia()
+        somatic_log = (
+            f"{qualia.color_code}♦ SENSATION: {qualia.somatic_sensation} "
+            f"[{qualia.tone}]{Prisma.RST}"
+        )
+        hint_log = f"{Prisma.GRY}   ({qualia.internal_monologue_hint}){Prisma.RST}"
+        ctx.logs.insert(0, hint_log)
+        ctx.logs.insert(0, somatic_log)
 
     @staticmethod
     def _inject_flux_readout(ctx: CycleContext):

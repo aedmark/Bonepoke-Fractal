@@ -39,15 +39,23 @@ class PanicRoom:
         )
 
     @staticmethod
-    def get_safe_bio():
-        return {
+    def get_safe_bio(previous_state=None):
+        base = {
             "is_alive": True,
             "atp": 10.0,
             "chem": {"DOP": 0.0, "COR": 0.0, "OXY": 0.0, "SER": 0.0},
-            "logs": [f"{Prisma.RED}BIO FAIL: Life support active.{Prisma.RST}"],
+            "logs": [f"{Prisma.RED}BIO FAIL: Triage Protocol Active.{Prisma.RST}"],
             "respiration": "NECROSIS",
             "enzyme": "NONE"
         }
+
+        if previous_state and isinstance(previous_state, dict):
+            old_chem = previous_state.get("chemistry", {})
+            if old_chem:
+                base["chem"]["COR"] = min(0.9, old_chem.get("COR", 0.0))
+                base["chem"]["SER"] = max(0.2, old_chem.get("SER", 0.0)) # Administer SSRIs
+
+        return base
 
     @staticmethod
     def get_safe_mind():

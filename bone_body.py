@@ -149,6 +149,12 @@ class MitochondrialForge:
             return self.APOPTOSIS_TRIGGER
         self.state.atp_pool -= receipt.total_burn
         ros_generation = receipt.total_burn * self.ROS_FACTOR * (1.0 / self.state.ros_resistance)
+        natural_decay = 0.05
+        if self.state.ros_buildup > 10.0:
+            scrub_magnitude = (self.state.ros_buildup * 0.1)
+            self.state.ros_buildup -= scrub_magnitude
+            if self.state.ros_buildup < 0: self.state.ros_buildup = 0
+
         self.state.ros_buildup += ros_generation
         return "RESPIRING"
 

@@ -20,6 +20,15 @@ class Prisma:
     VIOLET = "\033[35;2m"
     SLATE = "\033[30;1m"
     PUR = "\033[35m"
+    GREEN = GRN
+    GRAY = GRY
+    GREY = GRY
+    WHITE = WHT
+    CYAN = CYN
+    MAGENTA = MAG
+    YELLOW = YEL
+    BLUE = BLU
+    RESET = RST
     _COLOR_MAP = {
         "R": RED, "G": GRN, "Y": YEL, "B": BLU,
         "M": MAG, "C": CYN, "W": WHT, "0": GRY,
@@ -248,6 +257,22 @@ class BoneConfig:
 
         return sanitized, "; ".join(logs) if logs else ""
 
+    @classmethod
+    def tune(cls, sector: str, parameter: str, value: Any) -> str:
+        if not hasattr(cls, sector):
+            return f"❌ SECTOR ERROR: '{sector}' does not exist."
+
+        target_sector = getattr(cls, sector)
+        if not hasattr(target_sector, parameter):
+            return f"❌ PARAM ERROR: '{parameter}' not found in {sector}."
+
+        current_val = getattr(target_sector, parameter)
+        if type(current_val) != type(value) and not (isinstance(current_val, float) and isinstance(value, int)):
+            return f"⚠️ TYPE MISMATCH: Cannot replace {type(current_val)} with {type(value)}."
+
+        setattr(target_sector, parameter, value)
+        return f"✅ TUNED: {sector}.{parameter} -> {value}"
+
 @dataclass
 class ErrorLog:
     component: str
@@ -387,8 +412,8 @@ class PhysicsPacket:
     def snapshot(self) -> 'PhysicsPacket':
         data = self.to_dict()
         data['clean_words'] = list(self.clean_words)
-        data['counts'] = dict(self.counts)
-        data['vector'] = dict(self.vector)
+        data['counts'] = self.counts.copy()
+        data['vector'] = self.vector.copy()
         data['audit_trail'] = list(self.audit_trail)
         return PhysicsPacket(**data)
 

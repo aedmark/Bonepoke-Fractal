@@ -1,5 +1,62 @@
 # BONEAMANITA CHANGELOG
 
+### **10.8.9 "The Adaptive Substrate"**
+
+**Focus:** Cognitive Ergonomics, Dynamic Resilience, and Feedback Loops.
+
+#### **1. `bone_bus.py` (The Constitution)**
+
+* **Refactor:** "Pinker’s Palette." Added explicit aliases (`GREEN`, `GRAY`, `RESET`) to `Prisma`.
+* *Reason:* Code should be readable as natural language. Disemvoweled constants (`GRN`, `GRY`) increase cognitive load and obscure intent.
+
+* **Feature:** "Meadows' Tuning Fork." Implemented `BoneConfig.tune()` to allow dynamic, runtime adjustment of system constants.
+* *Reason:* You cannot dance with a system if you have to reboot it to change the tempo. This creates a Leverage Point for real-time calibration.
+
+* **Fix:** "Fuller’s Pattern Integrity." Updated `PhysicsPacket.snapshot()` to perform deep copies of mutable state.
+* *Reason:* History must be immutable. Reference leakage caused "spooky action at a distance," violating the structural integrity of the timeline.
+
+#### **2. `bone_view.py` & `bone_cycle.py` (The Face)**
+
+* **Feature:** "The Schur Switch." Implemented a `get_renderer` factory and `switch_renderer` logic in `CycleReporter`.
+* *Reason:* Sometimes you need a high-fidelity geodesic map; sometimes you just need to know if the bus is on fire. The system can now toggle between "Standard" (High Fidelity) and "Performance" (Cached) modes.
+
+#### **3. `bone_main.py` (The Nervous System)**
+
+* **Integration:** "The Latency Loop." Injected a **Balancing Feedback Loop** into `process_turn`.
+* *Reason:* The system now monitors its own cognitive latency (`TheObserver`). If thinking gets sluggish (>2.0s), it automatically downgrades to a cached renderer. When clarity returns, it restores full fidelity. The system now adapts its behavior to its own metabolic constraints.
+* 
+
+### **10.8.8 "The Phenomenological Bridge"**
+
+**Focus:** Systemic Health, Temporal Stability, and Embodied Qualia.
+
+#### **1. `bone_translation.py` (New File)**
+
+* **Feature:** Implemented `RosettaStone`, a translation layer that converts cold metrics (Voltage, Drag, Entropy) into warm, embodied experience (Tone, Sensation, Metaphor).
+* **Feature:** Added `SomaticInterface` to allow other systems to query "How do we feel?"
+* *Reason:* The system was computing but not *feeling*. We moved from data reporting to qualia generation.
+
+#### **2. `bone_body.py**`
+
+* **Fix:** The "ROS Death Spiral." Implemented a **Balancing Feedback Loop** (Scrubber Enzyme) in `MitochondrialForge`.
+* *Reason:* Previously, high ROS reduced efficiency, which caused more burn, which created *more* ROS. The system now autoregulates toxicity to prevent inevitable apoptosis.
+
+#### **3. `bone_cycle.py**`
+
+* **Refactor:** "Temporal Tensegrity." Decoupled the PID Controller from wall-clock time (`time.time()`) and enforced a fixed `SIMULATION_TICK_DELTA`.
+* *Reason:* Physics should be determined by the simulation's structure, not by how fast the user types.
+* **Feature:** Integrated the "Somatic Pulse." The `CycleReporter` now logs the system's internal feeling (e.g., `♦ SENSATION: Weightless...`) at the start of every turn.
+
+#### **4. `bone_architect.py**`
+
+* **Refactor:** "Humanized Panic Room." `get_safe_bio` now preserves the chemical history (Trauma/Cortisol) of the dying state instead of wiping it clean.
+* *Reason:* A lobotomy is not a cure. The system must remember its pain to learn from it.
+
+#### **5. `bone_brain.py**`
+
+* **Wiring:** Patched `PromptComposer` to correctly inject the `SomaticState` into the LLM's system prompt.
+* *Reason:* The "Ghost" (LLM) can now hear the "Machine" (Body). This closes the loop between physical sensation and cognitive expression.
+
 
 ### **10.8.7 "The Visual Cortex Realignment"**
 
