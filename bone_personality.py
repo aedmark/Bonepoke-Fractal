@@ -381,42 +381,112 @@ class TherapyProtocol:
         return "\n".join(chart)
 
 class KintsugiProtocol:
-    REPAIR_VOLTAGE_MIN = 8.0
-    WHIMSY_THRESHOLD = 0.3
+    # Constants for Clarity (Pinker)
+    PATH_SCAR = "SCAR"                  # Survival mechanism. Quick, leaves drag.
+    PATH_INTEGRATION = "KINTSUGI"       # The Gold Fill. Trauma -> Resilience.
+    PATH_ALCHEMY = "ALCHEMY"            # Transmutation. Trauma -> Fuel.
+
+    REPAIR_VOLTAGE_MIN = 8.0            # Energy required to melt the gold.
+    WHIMSY_THRESHOLD = 0.3              # Playfulness required to see the crack as art.
     STAMINA_CRITICAL = 15.0
 
     def __init__(self):
         self.active_koan = None
         self.repairs_count = 0
         self.koans = NARRATIVE_DATA["KINTSUGI_KOANS"]
+        self.gold_reserves = 5.0  # A stock of "grace" or capacity for repair.
 
     def check_integrity(self, stamina):
+        """
+        Meadows: Monitoring the stock of Stamina.
+        If it drops too low, we trigger the repair feedback loop.
+        """
         if stamina < self.STAMINA_CRITICAL and not self.active_koan:
             self.active_koan = random.choice(self.koans)
             return True, self.active_koan
         return False, None
 
-    def attempt_repair(self, phys, trauma_accum):
+    def attempt_repair(self, phys, trauma_accum, soul_ref=None):
+        """
+        The Resolution Engine. Determines HOW we heal based on system state.
+        """
         if not self.active_koan: return None
+
         voltage = phys.get("voltage", 0.0)
         clean = phys.get("clean_words", [])
+
+        # Pinker: Explicitly calculating the "ingredients" for the repair.
         play_count = sum(1 for w in clean if w in TheLexicon.get("play") or w in TheLexicon.get("abstract"))
         total = max(1, len(clean))
         whimsy_score = play_count / total
-        if voltage > self.REPAIR_VOLTAGE_MIN and whimsy_score > self.WHIMSY_THRESHOLD:
-            healed_log = []
-            for k in trauma_accum:
-                if trauma_accum[k] > 0:
-                    trauma_accum[k] = max(0.0, trauma_accum[k] - 0.5)
-            if trauma_accum:
-                target_trauma = max(trauma_accum, key=trauma_accum.get)
-                trauma_accum[target_trauma] = max(0.0, trauma_accum[target_trauma] - 1.0)
-                healed_log.append(f"Major repair on {target_trauma}")
-            old_koan = self.active_koan
-            self.active_koan = None
-            self.repairs_count += 1
-            return {"success": True, "msg": f"{Prisma.YEL}🏺 KINTSUGI COMPLETE: The crack is filled with Gold.{Prisma.RST}", "detail": f"'{old_koan}' resolved. (V: {voltage:.1f} | Whimsy: {whimsy_score:.2f}).", "healed": healed_log}
-        return {"success": False, "msg": None, "detail": f"The gold is too cold. Need Voltage > {self.REPAIR_VOLTAGE_MIN} and Playfulness."}
+
+        # Determine the Pathway (Fuller: Systemic decision making)
+        pathway = self.PATH_SCAR # Default
+        if voltage > 15.0 and whimsy_score > 0.5:
+            pathway = self.PATH_ALCHEMY
+        elif voltage > self.REPAIR_VOLTAGE_MIN and whimsy_score > self.WHIMSY_THRESHOLD:
+            pathway = self.PATH_INTEGRATION
+
+        # Execute the Resolution
+        result = self._execute_pathway(pathway, trauma_accum, soul_ref, voltage)
+
+        # Reset Logic
+        old_koan = self.active_koan
+        self.active_koan = None
+        self.repairs_count += 1
+
+        result["detail"] = f"'{old_koan}' resolved via {pathway}. (V: {voltage:.1f} | Whimsy: {whimsy_score:.2f})"
+        return result
+
+    def _execute_pathway(self, pathway, trauma_accum, soul_ref, voltage):
+        healed_log = []
+        msg = ""
+        success = False
+
+        # Target the deepest wound
+        if not trauma_accum:
+            return {"success": False, "msg": "No trauma to heal."}
+
+        target_trauma = max(trauma_accum, key=trauma_accum.get)
+        severity = trauma_accum[target_trauma]
+
+        if pathway == self.PATH_ALCHEMY:
+            # High Energy Transmutation
+            reduction = severity * 0.8
+            trauma_accum[target_trauma] = max(0.0, severity - reduction)
+
+            # Schur: The pain becomes fuel.
+            atp_boost = reduction * 10.0
+            msg = f"{Prisma.VIOLET}🔮 ALCHEMICAL TRANSMUTATION: Pain has become Power. (+{atp_boost:.1f} ATP){Prisma.RST}"
+            healed_log.append(f"Transmuted {target_trauma} into Fuel.")
+            success = True
+            return {"success": True, "msg": msg, "healed": healed_log, "atp_gain": atp_boost}
+
+        elif pathway == self.PATH_INTEGRATION:
+            # The Gold Fill (Kintsugi)
+            reduction = 2.0
+            trauma_accum[target_trauma] = max(0.0, severity - reduction)
+
+            # Fuller: We build a stronger strut where the break was.
+            if soul_ref:
+                # Assuming we add 'WISDOM' to soul traits
+                current_wis = soul_ref.traits.get("WISDOM", 0.0)
+                soul_ref.traits["WISDOM"] = min(1.0, current_wis + 0.1)
+                healed_log.append("Gained Wisdom (+0.1)")
+
+            msg = f"{Prisma.YEL}🏺 KINTSUGI COMPLETE: The {target_trauma} is filled with Gold.{Prisma.RST}"
+            healed_log.append(f"Repaired {target_trauma} (-{reduction})")
+            success = True
+
+        else: # PATH_SCAR
+            # Survival Healing
+            reduction = 0.5
+            trauma_accum[target_trauma] = max(0.0, severity - reduction)
+            msg = f"{Prisma.GRY}🩹 SCAR TISSUE FORMED: It is ugly, but it holds.{Prisma.RST}"
+            healed_log.append(f"Scarred over {target_trauma} (-{reduction})")
+            success = True
+
+        return {"success": success, "msg": msg, "healed": healed_log}
 
 class LimboLayer:
     MAX_ECTOPLASM = 50

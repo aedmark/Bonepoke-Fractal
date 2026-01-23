@@ -2,8 +2,8 @@
 # "We are the stories we tell ourselves."
 
 import time, random
-from dataclasses import dataclass
-from typing import List, Dict, Optional
+from dataclasses import dataclass, field
+from typing import List, Dict, Optional, Any
 from bone_bus import Prisma
 
 MEMORY_VOLTAGE_THRESHOLD = 14.0
@@ -17,6 +17,8 @@ class CoreMemory:
     emotional_flavor: str
     lesson: str
     impact_voltage: float
+    type: str = "INCIDENT"
+    meta: Dict[str, Any] = field(default_factory=dict)
 
 class TheEditor:
     def __init__(self):
@@ -60,7 +62,8 @@ class NarrativeSelf:
             "CURIOSITY": 0.5,
             "CYNICISM": 0.5,
             "HOPE": 0.5,
-            "DISCIPLINE": 0.5
+            "DISCIPLINE": 0.5,
+            "WISDOM": 0.1
         }
 
         self.archetype = "THE OBSERVER"
@@ -103,8 +106,10 @@ class NarrativeSelf:
             buffs["voltage_mod"] = 0.5
             buffs["drag_mod"] = 0.5
 
+        wisdom_factor = self.traits.get("WISDOM", 0.0)
         if self.obsession_neglect > 5.0:
-            buffs["drag_mod"] += 0.5
+            mitigated_drag = 0.5 * (1.0 - wisdom_factor) # Wisdom reduces the penalty
+            buffs["drag_mod"] += mitigated_drag
 
         return buffs
 
@@ -163,97 +168,134 @@ class NarrativeSelf:
                 self.traits[k] += decay_rate
 
     def find_obsession(self, lexicon_ref):
+        # 1. Stability Check
         if self.current_obsession and self.obsession_progress < 1.0:
             return
+
+        # 2. THE ORGANIC IGNITION (Reading the Physics of 'Now')
+        focus_word = None
         target_cat = "abstract"
-        focus_word = "Void"
-        found_organic_obsession = False
-        if self.memory and hasattr(self.memory, "get_shapley_attractors"):
-            attractors = self.memory.get_shapley_attractors()
-            if attractors:
-                focus_word = random.choice(list(attractors.keys()))
-                if hasattr(lexicon_ref, "get_current_category"):
+        found_organic = False
+
+        # Access the Physics Packet via the Engine -> Physics -> Tension -> Last Packet
+        if hasattr(self.eng, 'phys') and hasattr(self.eng.phys, 'tension'):
+            packet = self.eng.phys.tension.last_physics_packet
+            # Ensure we have a valid packet with words
+            if packet and hasattr(packet, 'clean_words') and packet.clean_words:
+                candidates = []
+                for w in packet.clean_words:
+                    if len(w) < 4: continue
+                    # Use Lexicon to find "heavy" words
+                    visc = lexicon_ref.measure_viscosity(w)
+                    cat = lexicon_ref.get_current_category(w)
+                    if cat: visc += 0.2
+                    candidates.append((w, visc))
+
+                # Pick the heaviest word
+                candidates.sort(key=lambda x: x[1], reverse=True)
+
+                if candidates:
+                    focus_word = candidates[0][0]
                     cat = lexicon_ref.get_current_category(focus_word)
-                    if cat and cat != "unknown":
-                        target_cat = cat
-                        found_organic_obsession = True
+                    if cat: target_cat = cat
+                    found_organic = True
+
+        # 3. Memory Fallback
+        if not found_organic:
+            if self.memory and hasattr(self.memory, "get_shapley_attractors"):
+                attractors = self.memory.get_shapley_attractors()
+                if attractors:
+                    focus_word = random.choice(list(attractors.keys()))
+                    cat = lexicon_ref.get_current_category(focus_word)
+                    if cat: target_cat = cat
+                    found_organic = True
+
+                    # 4. Void Fallback (Synthesis)
         negate_map = {
             "heavy": "aerobic", "kinetic": "heavy", "abstract": "meat",
             "thermal": "cryo", "photo": "heavy", "sacred": "suburban",
             "play": "constructive", "meat": "abstract", "cryo": "thermal",
-            "aerobic": "heavy", "suburban": "sacred", "constructive": "play"
+            "aerobic": "heavy", "suburban": "sacred", "constructive": "play",
+            "antigen": "abstract", "toxin": "vital"
         }
-        if not found_organic_obsession:
-            if hasattr(lexicon_ref, "get_random"):
-                dynamic_pairs = [
-                    ("heavy", "aerobic"), ("kinetic", "suburban"), ("abstract", "meat"),
-                    ("thermal", "cryo"), ("photo", "heavy"), ("sacred", "suburban"),
-                    ("play", "constructive")
-                ]
-                target_cat, _ = random.choice(dynamic_pairs)
-                focus_word = lexicon_ref.get_random(target_cat).title()
-            else:
-                selection = random.choice(self.POSSIBLE_OBSESSIONS)
-                self.current_obsession = selection["title"]
-                self.current_target_cat = selection["target"]
-                self.current_negate_cat = selection["negate"]
-                self.events.log(f"{Prisma.CYN}🧭 NEW OBSESSION (STATIC): {self.current_obsession}{Prisma.RST}", "SOUL")
-                self.obsession_neglect = 0.0
-                self.obsession_progress = 0.0
-                return
+
+        if not found_organic or not focus_word:
+            target_cat, _ = random.choice(list(negate_map.items()))
+            focus_word = lexicon_ref.get_random(target_cat).title()
+            if focus_word.lower() == "void": focus_word = target_cat.title()
+
+        # 5. Crystallize
         self.current_target_cat = target_cat
         self.current_negate_cat = negate_map.get(target_cat, "none")
-        if focus_word.lower() == "void":
-            focus_word = target_cat.title()
-        templates = [
-            f"The Pursuit of {focus_word.title()}",
-            f"The {focus_word.title()} Manifesto",
-            f"Escaping the {self.current_negate_cat.title()}",
-            f"The Architecture of {focus_word.title()}",
-            f"Theory of {focus_word.title()}",
-            f"The Weight of {focus_word.title()}"
-        ]
+
+        if found_organic:
+            templates = [
+                f"The Theory of {focus_word.title()}",
+                f"Deconstructing '{focus_word.title()}'",
+                f"The Architecture of {focus_word.title()}",
+                f"Why {focus_word.title()} Matters",
+                f"A Treatise on {focus_word.title()}",
+                f"The Weight of {focus_word.title()}"
+            ]
+            source_tag = "ORGANIC"
+        else:
+            templates = [
+                f"The Pursuit of {focus_word.title()}",
+                f"Escaping the {self.current_negate_cat.title()}",
+                f"Meditations on {focus_word.title()}"
+            ]
+            source_tag = "SYNTHETIC"
+
         self.current_obsession = random.choice(templates)
-        source_tag = "ORGANIC" if found_organic_obsession else "SYNTHETIC"
-        self.events.log(f"{Prisma.CYN}🧭 NEW OBSESSION ({source_tag}): {self.current_obsession}{Prisma.RST}", "SOUL")
+        self.events.log(f"{Prisma.CYN}🧭 NEW MUSE ({source_tag}): {self.current_obsession}{Prisma.RST}", "SOUL")
         self.obsession_neglect = 0.0
         self.obsession_progress = 0.0
 
     def pursue_obsession(self, physics_packet):
         if not self.current_obsession: return
+
+        # 1. Calculate Velocity
         counts = physics_packet.get("counts", {})
         target_hits = counts.get(self.current_target_cat, 0)
-        negate_hits = counts.get(self.current_negate_cat, 0)
-        velocity = (target_hits * 0.05) - (negate_hits * 0.02)
+        velocity = target_hits * 0.05
+
+        # 2. The Drift Check
         if velocity == 0:
-            self.obsession_neglect += 0.2
+            self.obsession_neglect += 0.5
 
-            if self.obsession_neglect > 20.0:
-                self.events.log(f"{Prisma.RED}💔 OBSESSION ABANDONED: '{self.current_obsession}' withered from neglect.{Prisma.RST}", "SOUL")
-                self.events.log(self.editor.critique("The Unfinished Manuscript"), "EDIT")
-
+            # SHELVING PROTOCOL (No punishment)
+            if self.obsession_neglect > 10.0:
+                self.events.log(f"{Prisma.GRY}[SOUL]: The Muse has wandered. '{self.current_obsession}' is shelved.{Prisma.RST}", "SOUL")
+                self.chapters.append(f"Unfinished: {self.current_obsession}")
                 self.current_obsession = None
                 self.obsession_neglect = 0.0
                 self.obsession_progress = 0.0
-                self.traits["HOPE"] = max(0.0, self.traits["HOPE"] - 0.2)
+                self.traits["CURIOSITY"] = min(1.0, self.traits["CURIOSITY"] + 0.1)
                 return
-
-            if self.obsession_neglect > 5.0 and random.random() < 0.1:
-                self.events.log(f"{Prisma.OCHRE}[SOUL]: The obsession '{self.current_obsession}' is gathering dust. (Guilt Rising){Prisma.RST}", "SOUL")
         else:
-            self.obsession_neglect = max(0.0, self.obsession_neglect - 0.5)
+            self.obsession_neglect = max(0.0, self.obsession_neglect - 1.0)
             self.obsession_progress = max(0.0, min(1.0, self.obsession_progress + velocity))
+            if random.random() < 0.2:
+                self.events.log(f"{Prisma.CYN}[SOUL]: The work proceeds. (+{velocity:.2f}){Prisma.RST}", "SOUL")
 
-            if velocity > 0 and random.random() < 0.3:
-                self.events.log(f"{Prisma.GRY}[SOUL]: This data fuels the obsession. (+{velocity:.2f}){Prisma.RST}", "SOUL")
-            elif velocity < 0 and random.random() < 0.3:
-                self.events.log(f"{Prisma.OCHRE}[SOUL]: Distraction detected. The work suffers.{Prisma.RST}", "SOUL")
-
+        # 3. Completion State (The Masterpiece)
         if self.obsession_progress >= 1.0:
-            self.events.log(f"{Prisma.GRN}✅ MASTERPIECE COMPLETE: '{self.current_obsession}' is resolved.{Prisma.RST}", "SOUL")
-            self.events.log(self.editor.critique("The Final Draft"), "EDIT")
-            self.traits["HOPE"] = min(1.0, self.traits["HOPE"] + 0.3)
-            self.traits["DISCIPLINE"] = min(1.0, self.traits["DISCIPLINE"] + 0.1)
+            self.events.log(f"{Prisma.GRN}✅ MASTERPIECE CRYSTALLIZED: '{self.current_obsession}' is complete.{Prisma.RST}", "SOUL")
+
+            victory_memory = CoreMemory(
+                timestamp=time.time(),
+                trigger_words=[self.current_target_cat], # Minimal trigger
+                emotional_flavor="TRIUMPH",
+                lesson=f"Finished {self.current_obsession}",
+                impact_voltage=10.0,
+                type="MASTERPIECE",
+                meta={"title": self.current_obsession}
+            )
+            self.core_memories.append(victory_memory)
+
+            self.traits["HOPE"] = min(1.0, self.traits["HOPE"] + 0.2)
+            self.traits["DISCIPLINE"] = min(1.0, self.traits["DISCIPLINE"] + 0.2)
+
             self.current_obsession = None
             self.obsession_neglect = 0.0
 

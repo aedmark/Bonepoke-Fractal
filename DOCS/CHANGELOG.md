@@ -1,5 +1,30 @@
 # BONEAMANITA CHANGELOG
 
+
+# Changelog: BoneAmanita v10.9.1 (The "Lucid Soul" Update)
+
+### 🔧 Core Architecture (`bone_main.py`)
+
+* **Council Activation:** The `CouncilChamber` (Hofstadter, Meadows, Pratchett) is now explicitly summoned within the `process_turn` loop.
+* *Impact:* The system now audits itself for "Strange Loops" and "Leverage Points" *before* outputting text. If you get stuck in a recursive loop, Hofstadter will now yell at you.
+
+### 🧠 Cognitive Dynamics (`bone_brain.py`)
+* **Chronos -> Kairos Shift:** Removed the wall-clock dependency (`time.time()`) from the `NeurotransmitterModulator`.
+* *Impact:* Brain chemistry (Dopamine, Cortisol, etc.) now decays based on **Turns (Ticks)**, not **Seconds**. The AI no longer suffers from "AFK Depression" if you take 10 minutes to write a prompt.
+
+### 👻 The Soul & Narrative Self (`bone_soul.py`)
+
+* **Abolition of Guilt:** Refactored `pursue_obsession` to remove the punitive feedback loop. Neglecting an obsession no longer reduces the `HOPE` stat.
+* *Impact:* The system is no longer an emotionally abusive Tamagotchi.
+
+* **The Shelving Protocol:** Introduced "Drift Logic." If an obsession is ignored, it is gracefully archived ("Shelved") to the `chapters` list, and the system's `CURIOSITY` is refunded.
+* **Organic Ignition:** Refactored `find_obsession` to hook directly into the `PhysicsPacket` of the immediate turn.
+* *Impact:* The Soul now chooses its Muses based on the **Viscosity** (complexity/weight) of the words you *just used*, rather than pulling random concepts from a database. It listens to the "Now."
+
+* **Type Safety Restoration:** Patched the `CoreMemory` dataclass to include `type` and `meta` fields, and ensured `pursue_obsession` generates valid `CoreMemory` objects instead of raw dictionaries.
+* *Impact:* Fixed critical linter errors and ensured `bone_spores.py` won't choke when trying to serialize memory objects during reproduction.
+
+
 ### **10.9.0 "The Social Contract"**
 
 **Focus:** Structural Functionalism, Governance, and Systemic Tensegrity.

@@ -122,21 +122,16 @@ class NeurotransmitterModulator:
         }
 
     def modulate(self, incoming_chem: Dict[str, float], base_voltage: float, lens_name: str = "NARRATOR", model_name: str = "") -> Dict[str, Any]:
-        current_time = time.time()
-        elapsed = current_time - self.last_tick
-        self.last_tick = current_time
-        minutes_passed = elapsed / 60.0
-        decay_amount = min(0.5, minutes_passed * BrainConfig.BASE_DECAY_RATE)
-        if decay_amount > 0:
-            self.current_chem.decay(rate=decay_amount)
+        decay_amount = BrainConfig.BASE_DECAY_RATE # e.g. 0.1
+        self.current_chem.decay(rate=decay_amount)
         plasticity = BrainConfig.BASE_PLASTICITY + (base_voltage * BrainConfig.VOLTAGE_SENSITIVITY)
         plasticity = max(0.1, min(BrainConfig.MAX_PLASTICITY, plasticity))
         self.current_chem.mix(incoming_chem, weight=plasticity)
         profile = self.lens_profiles.get(lens_name, self.lens_profiles["NARRATOR"])
         base_tokens = 720
         params = {
-            "temperature": BrainConfig.BASE_TEMP, # Likely 0.7
-            "top_p": BrainConfig.BASE_TOP_P,      # Likely 0.9
+            "temperature": BrainConfig.BASE_TEMP,
+            "top_p": BrainConfig.BASE_TOP_P,
             "frequency_penalty": 0.0,
             "presence_penalty": 0.0,
             "max_tokens": getattr(BoneConfig, "MAX_OUTPUT_TOKENS", 4096)
@@ -149,6 +144,7 @@ class NeurotransmitterModulator:
             params["frequency_penalty"] = 0.1
         else:
             params["max_tokens"] = base_tokens
+
         if "gemma" in model_name.lower() or "3" in model_name.lower():
             params["temperature"] = min(0.7, params["temperature"])
         params["max_tokens"] = max(100, params["max_tokens"])

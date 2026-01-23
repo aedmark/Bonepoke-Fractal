@@ -1,4 +1,4 @@
-# BONEAMANITA 10.9.0
+# BONEAMANITA 10.9.1
 # Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark
 
 import time, json
@@ -30,7 +30,7 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.9.0', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.9.1', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -137,6 +137,47 @@ class BoneAmanita:
         if cmd_response: return cmd_response
         if self._ethical_audit():
             self.events.log(f"{Prisma.WHT}MERCY SIGNAL: Trauma boards wiped.{Prisma.RST}", "SYS")
+        needs_repair, _ = self.kintsugi.check_integrity(self.stamina)
+        if needs_repair:
+            repair_result = self.kintsugi.attempt_repair(
+                self.phys.tension.last_physics_packet,
+                self.trauma_accum,
+                self.soul
+            )
+            if repair_result and repair_result["msg"]:
+                self.events.log(repair_result["msg"], "KINTSUGI")
+                if repair_result.get("atp_gain"):
+                    self.bio.mito.state.atp_pool += repair_result["atp_gain"]
+
+        if self.phys.tension.last_physics_packet:
+            advice, corrections, mandates = self.council.convene(
+                user_message,
+                self.phys.tension.last_physics_packet
+            )
+            for adv in advice:
+                self.events.log(adv, "COUNCIL")
+            for param, delta in corrections.items():
+                if hasattr(self.phys, "dynamics") and param in self.phys.dynamics.__dict__:
+                    curr = getattr(self.phys.dynamics, param, 0.0)
+                    setattr(self.phys.dynamics, param, curr + delta)
+            for man in mandates:
+                if man.get("action") == "CIRCUIT_BREAKER":
+                    self.bio.endo.cortisol = max(0.0, self.bio.endo.cortisol - 0.5)
+                    self.events.log(f"{Prisma.CYN}⚡ MANDATE EXECUTED: Cortisol Damped.{Prisma.RST}", "SYS")
+
+            bio_snapshot = {
+                "health": self.health,
+                "stamina": self.stamina
+            }
+            bureau_result = self.bureau.audit(self.phys.tension.last_physics_packet, bio_snapshot)
+            if bureau_result:
+                if bureau_result.get("log"):
+                    self.events.log(bureau_result["log"], "BUREAU")
+                if bureau_result.get("ui"):
+                    self.events.log(bureau_result["ui"], "UI_INTERRUPT")
+                if bureau_result.get("atp_gain", 0) > 0:
+                    self.bio.mito.state.atp_pool += bureau_result["atp_gain"]
+
         if self.phys.tension.last_physics_packet:
             bio_snapshot = {
                 "health": self.health,
@@ -276,7 +317,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.9.0', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.9.1', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")
