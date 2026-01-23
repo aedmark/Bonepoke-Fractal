@@ -662,35 +662,108 @@ class ShimmerState:
 class DreamEngine:
     def __init__(self, events):
         self.events = events
-        self.PROMPTS = DREAMS.get("PROMPTS", ["{A} -> {B}?"]) if 'DREAMS' in globals() else ["The void rearranges '{A}' into '{B}'."]
+        self.PROMPTS = DREAMS.get("PROMPTS", ["{A} -> {B}?"])
+        self.NIGHTMARES = DREAMS.get("NIGHTMARES", {})
+        self.VISIONS = DREAMS.get("VISIONS", ["Static."])
 
-    def enter_rem_cycle(self, memory_system) -> str:
+    def enter_rem_cycle(self, memory_system: Any, bio_readout: Dict[str, Any] = None) -> str:
+        """
+        Generates a dream based on Memory (Content) and Biology (Tone).
+        bio_readout structure expected:
+        {
+            "chem": {"COR": float, "DOP": float, ...},
+            "mito": {"ros": float, "atp": float},
+            "physics": {"voltage": float, "entropy": float}
+        }
+        """
+        # 1. Capture Content (Day Residue)
         residue_word = "static"
-        if hasattr(memory_system, "short_term_buffer") and memory_system.short_term_buffer:
-            engram = memory_system.short_term_buffer[-1]
-            if "trigger" in engram and engram["trigger"]:
-                residue_word = engram["trigger"][0]
-        consolidation_msg = "Neural pathways quiescent."
+        context_word = "void"
+
+        if hasattr(memory_system, "graph") and memory_system.graph:
+            sorted_nodes = sorted(
+                memory_system.graph.items(),
+                key=lambda item: item[1].get("last_tick", 0),
+                reverse=True
+            )
+            if sorted_nodes:
+                residue_word = sorted_nodes[0][0]
+                if len(sorted_nodes) > 1:
+                    context_word = sorted_nodes[1][0]
+
+        # 2. Determine Tone via Biological Telemetry
+        dream_type = "NORMAL"
+        subtype = "ABSTRACT"
+
+        if bio_readout:
+            chem = bio_readout.get("chem", {})
+            mito = bio_readout.get("mito", {})
+            phys = bio_readout.get("physics", {})
+
+            cortisol = chem.get("COR", 0.0)
+            ros = mito.get("ros", 0.0)
+            voltage = phys.get("voltage", 0.0)
+            atp = mito.get("atp", 100.0)
+
+            # Physiological Triage
+            if ros > 8.0:
+                dream_type = "NIGHTMARE"
+                subtype = "SEPTIC" # Toxic/Decay
+            elif cortisol > 0.6:
+                dream_type = "NIGHTMARE"
+                subtype = "BARIC" # Crushing weight/Fear
+            elif voltage > 20.0:
+                dream_type = "NIGHTMARE"
+                subtype = "THERMAL" # Burnout
+            elif atp < 15.0:
+                dream_type = "NIGHTMARE"
+                subtype = "CRYO" # Stasis/Freezing
+            elif chem.get("DOP", 0.0) > 0.7:
+                dream_type = "LUCID" # High Dopamine = Control
+
+        # 3. Weave the Dream
+        dream_text = self._weave_dream(residue_word, context_word, dream_type, subtype)
+
+        # 4. Consolidation
+        consolidation_msg = "Neural pathways consolidated."
         if hasattr(memory_system, "replay_dreams"):
             consolidation_msg = memory_system.replay_dreams()
-        dream_vector = {"ENTROPY": 0.5, "VOID": 0.5, "STR": 0.2}
-        dream_text, _ = self.hallucinate(dream_vector, trauma_level=1.0)
+
         return (
-            f"{Prisma.VIOLET}☾ HYPNAGOGIC STATE ☽{Prisma.RST}\n"
-            f"   Day Residue: '{residue_word.upper()}'... transforming...\n"
+            f"{Prisma.VIOLET}☾ REM CYCLE [{dream_type}:{subtype}] ☽{Prisma.RST}\n"
+            f"   Day Residue: '{residue_word.upper()}' detected.\n"
             f"   Dream: \"{dream_text}\"\n"
             f"   {Prisma.GRY}{consolidation_msg}{Prisma.RST}"
         )
 
+    def _weave_dream(self, residue: str, context: str, dream_type: str, subtype: str) -> str:
+        if dream_type == "NIGHTMARE":
+            # Fetch specific nightmare templates from bone_data
+            # Defaults to generic if subtype not found
+            templates = self.NIGHTMARES.get(subtype, self.NIGHTMARES.get("BARIC", ["{ghost} is heavy."]))
+            template = random.choice(templates)
+            return template.format(ghost=residue)
+
+        if dream_type == "LUCID":
+            return f"You hold '{residue}' in your hand. You control its shape. It becomes '{context}'."
+
+        # Standard Dream
+        template = random.choice(self.PROMPTS)
+        return template.format(A=residue, B=context)
+
     def hallucinate(self, vector: Dict[str, float], trauma_level: float = 0.0) -> Tuple[str, float]:
         dims = [k for k, v in vector.items() if v > 0.3]
-        if not dims:
-            dims = ["VOID", "SILENCE"]
-        val_a = random.choice(dims)
-        val_b = "ENTROPY" if trauma_level > 5.0 else random.choice(dims)
-        template = random.choice(self.PROMPTS)
-        content = template.format(A=val_a, B=val_b) if "{A}" in template else f"{template} ({val_a})"
-        relief = 0.0
-        if trauma_level > 0:
-            relief = min(trauma_level, random.uniform(1.0, 3.0))
-        return content, relief
+        if not dims: dims = ["VOID"]
+
+        val_a = dims[0]
+        val_b = "ENTROPY" if trauma_level > 5.0 else (dims[1] if len(dims) > 1 else "SILENCE")
+
+        if trauma_level > 5.0:
+            cat = "SEPTIC" if vector.get("ENT", 0) > 0.5 else "BARIC"
+            template = random.choice(self.NIGHTMARES.get(cat, self.NIGHTMARES["BARIC"]))
+            content = template.format(ghost=val_a)
+        else:
+            template = random.choice(self.PROMPTS)
+            content = template.format(A=val_a, B=val_b)
+
+        return content, 0.0

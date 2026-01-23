@@ -231,6 +231,7 @@ class CommandProcessor:
         if going_to_sleep:
             self._log(f"{self.P.CYN}Closing eyes (Saving & Dreaming)...{self.P.RST}")
             try:
+                # [Existing save logic remains here...]
                 self.eng.mind.mem.save(
                     health=self.eng.health,
                     stamina=self.eng.stamina,
@@ -245,7 +246,15 @@ class CommandProcessor:
                 self._log(f"{self.P.RED}Auto-Save Failed: {e}{self.P.RST}")
 
             if hasattr(self.eng.mind, "dreamer") and hasattr(self.eng.mind, "mem"):
-                dream_log = self.eng.mind.dreamer.enter_rem_cycle(self.eng.mind.mem)
+                bio_packet = {
+                    "chem": self.eng.bio.endo.get_state(),
+                    "mito": {
+                        "ros": self.eng.bio.mito.state.ros_buildup,
+                        "atp": self.eng.bio.mito.state.atp_pool
+                    },
+                    "physics": self.eng.phys.tension.last_physics_packet
+                }
+                dream_log = self.eng.mind.dreamer.enter_rem_cycle(self.eng.mind.mem, bio_readout=bio_packet)
                 self._log(dream_log)
 
         self.Config.VERBOSE_LOGGING = not self.Config.VERBOSE_LOGGING
@@ -418,7 +427,7 @@ class CommandProcessor:
 
     def _cmd_help(self, _parts):
         help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 10.9.1 MANUAL ---{self.P.RST}",
+            f"\n{self.P.CYN}--- BONEAMANITA 10.9.2 MANUAL ---{self.P.RST}",
             f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"
         ]
 

@@ -4,7 +4,7 @@
 from typing import Tuple, Dict, Any, Optional
 from dataclasses import dataclass
 from bone_bus import Prisma, MindSystem, PhysSystem, PhysicsPacket
-from bone_village import TownHall
+from bone_village import MirrorGraph, ApeirogonResonance, SoritesIntegrator, TheNavigator
 from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont, MycelialNetwork
 from bone_body import BioSystem, MitochondrialForge, EndocrineSystem, MetabolicGovernor, ViralTracer, ThePacemaker
 from bone_brain import DreamEngine, ShimmerState, NeuroPlasticity
@@ -53,7 +53,7 @@ class PanicRoom:
             old_chem = previous_state.get("chemistry", {})
             if old_chem:
                 base["chem"]["COR"] = min(0.9, old_chem.get("COR", 0.0))
-                base["chem"]["SER"] = max(0.2, old_chem.get("SER", 0.0)) # Administer SSRIs
+                base["chem"]["SER"] = max(0.2, old_chem.get("SER", 0.0))
 
         return base
 
@@ -75,10 +75,10 @@ class BoneArchitect:
             mem=_mem,
             lex=lex,
             dreamer=DreamEngine(events),
-            mirror=TownHall.Mirror(events),
-            wise=TownHall.Apeirogon(events),
+            mirror=MirrorGraph(events),
+            wise=ApeirogonResonance(events),
             tracer=ViralTracer(_mem),
-            integrator=TownHall.Sorites(_mem)
+            integrator=SoritesIntegrator(_mem)
         )
         return mind, limbo
 
@@ -106,7 +106,7 @@ class BoneArchitect:
             pulse=ThePacemaker(),
             gate=TheTangibilityGate(),
             dynamics=TemporalDynamics(),
-            nav=TownHall.Navigator(bio.shimmer)
+            nav=TheNavigator(bio.shimmer)
         )
 
     @staticmethod

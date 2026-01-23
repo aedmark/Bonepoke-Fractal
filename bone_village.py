@@ -57,7 +57,7 @@ class TheTinkerer:
             if self.tool_confidence[item_name] <= 0.1:
                 is_critical = item_name in self.gordon.CRITICAL_ITEMS
                 if is_critical:
-                    self.tool_confidence[item_name] = 0.2  # Keep it barely alive
+                    self.tool_confidence[item_name] = 0.2
                     if random.random() < 0.2:
                         self.events.log(f"{Prisma.RED}[TINKER]: {item_name} is structurally critical, but Gordon refuses to let it go.{Prisma.RST}", "SYS")
                 else:
@@ -133,7 +133,7 @@ class DeathGen:
 
     @classmethod
     def load_protocols(cls):
-        death_data = TheLore.get("DEATH") #
+        death_data = TheLore.get("DEATH")
         cls.PREFIXES = death_data.get("PREFIXES", ["System Halt."])
         cls.CAUSES = death_data.get("CAUSES", {})
         cls.VERDICTS = death_data.get("VERDICTS", {})
@@ -315,7 +315,7 @@ class TheAlmanac:
             "ENT": min(1.0, 0.5 + (d("antigen") * 3.0) + (d("toxin") * 2.0)),
             "TEX": min(1.0, 0.5 + (d("heavy") * 0.5) + (d("abstract") * 1.0)),
             "TMP": min(1.0, 0.5 + (d("thermal") * 2.0) - (d("cryo") * 2.0) + (voltage * 0.02)),
-            "PHI": min(1.0, (d("heavy") + d("kinetic")) / max(0.1, d("abstract") + d("heavy"))), # Prevent div/0
+            "PHI": min(1.0, (d("heavy") + d("kinetic")) / max(0.1, d("abstract") + d("heavy"))),
             "PSI": min(1.0, 0.5 + (d("abstract") * 2.0)),
             "DEL": min(1.0, 0.5 + (d("play") * 2.0) + (d("unknown") * 1.5)),
             "XI":  min(1.0, (d("suburban") + d("buffer")) * 2.0),
@@ -789,13 +789,10 @@ class VillageCouncil:
         """Generates a holistic report of the system's social ecology."""
         report = [f"{Prisma.WHT}--- VILLAGE CENSUS ---{Prisma.RST}"]
 
-        # 1. Environmental Health (Navigator)
         nav = self.hall.Navigator
         report.append(f"Location: {nav.current_location}")
         report.append(f"Shimmer Reserves: {nav.shimmer.current:.1f}")
 
-        # 2. Economic Health (Tinkerer)
-        # We access the LIVE tool_confidence dictionary from the Tinkerer instance
         tinker = self.hall.Tinkerer
         confident_tools = [k for k, v in tinker.tool_confidence.items() if v > 1.5]
         rusting_tools = [k for k, v in tinker.tool_confidence.items() if v < 0.5]
@@ -808,10 +805,8 @@ class VillageCouncil:
         if rusting_tools:
             report.append(f"   WARNING: {', '.join(rusting_tools)} are at risk.")
 
-        # 3. Cultural Health (Almanac & Journal)
-        # We can check the Almanac for the current 'weather'
         condition, advice = self.hall.Almanac.diagnose_condition(
-            session_data={"meta": {"avg_voltage": 10}}, # Simplified context
+            session_data={"meta": {"avg_voltage": 10}},
             host_health=None
         )
         report.append(f"Public Mood: {condition}")
@@ -821,7 +816,6 @@ class VillageCouncil:
 
 class TownHall:
     def __init__(self, gordon_ref, events_ref, shimmer_ref):
-        # 1. Instantiate the Essential Services
         self.Tinkerer = TheTinkerer(gordon_ref, events_ref)
         self.Navigator = TheNavigator(shimmer_ref)
         self.Almanac = TheAlmanac()
@@ -831,16 +825,12 @@ class TownHall:
         self.Mirror = MirrorGraph(events_ref)
         self.ZenGarden = ZenGarden(events_ref)
 
-        # 2. Instantiate the Council (wiring it to self)
         self.Council = VillageCouncil(self)
 
-        # 3. Static/Utility References
-        # We store references to the classes/protocols for easy access
         self.Lexicon = TheLexicon
         self.CycleContext = CycleContext
         self.Manifold = Manifold
         self.DeathGen = DeathGen
         self.Apeirogon = ApeirogonResonance(events_ref)
 
-        # 4. Initialize Systems
         self.DeathGen.load_protocols()

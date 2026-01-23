@@ -251,53 +251,50 @@ class NarrativeSelf:
         self.obsession_neglect = 0.0
         self.obsession_progress = 0.0
 
-    def pursue_obsession(self, physics_packet):
-        if not self.current_obsession: return
+    def _generate_new_obsession(self):
+        """
+        Automated rotation of the Soul's focus.
+        Called when the user ignores the current obsession for too long (Drift).
+        """
+        # 1. Reset State
+        self.current_obsession = None
 
-        # 1. Calculate Velocity
-        counts = physics_packet.get("counts", {})
-        target_hits = counts.get(self.current_target_cat, 0)
-        velocity = target_hits * 0.05
-
-        # 2. The Drift Check
-        if velocity == 0:
-            self.obsession_neglect += 0.5
-
-            # SHELVING PROTOCOL (No punishment)
-            if self.obsession_neglect > 10.0:
-                self.events.log(f"{Prisma.GRY}[SOUL]: The Muse has wandered. '{self.current_obsession}' is shelved.{Prisma.RST}", "SOUL")
-                self.chapters.append(f"Unfinished: {self.current_obsession}")
-                self.current_obsession = None
-                self.obsession_neglect = 0.0
-                self.obsession_progress = 0.0
-                self.traits["CURIOSITY"] = min(1.0, self.traits["CURIOSITY"] + 0.1)
-                return
+        # 2. Acquire Lexicon (The Map)
+        lex_ref = None
+        if hasattr(self.eng, 'lex'):
+            lex_ref = self.eng.lex
         else:
-            self.obsession_neglect = max(0.0, self.obsession_neglect - 1.0)
-            self.obsession_progress = max(0.0, min(1.0, self.obsession_progress + velocity))
-            if random.random() < 0.2:
-                self.events.log(f"{Prisma.CYN}[SOUL]: The work proceeds. (+{velocity:.2f}){Prisma.RST}", "SOUL")
+            # Fallback for unit testing or disconnected states
+            from bone_lexicon import TheLexicon
+            lex_ref = TheLexicon
 
-        # 3. Completion State (The Masterpiece)
-        if self.obsession_progress >= 1.0:
-            self.events.log(f"{Prisma.GRN}✅ MASTERPIECE CRYSTALLIZED: '{self.current_obsession}' is complete.{Prisma.RST}", "SOUL")
+        # 3. Find New Path
+        self.find_obsession(lex_ref)
 
-            victory_memory = CoreMemory(
-                timestamp=time.time(),
-                trigger_words=[self.current_target_cat], # Minimal trigger
-                emotional_flavor="TRIUMPH",
-                lesson=f"Finished {self.current_obsession}",
-                impact_voltage=10.0,
-                type="MASTERPIECE",
-                meta={"title": self.current_obsession}
-            )
-            self.core_memories.append(victory_memory)
+        # 4. Log the Drift (Schur: Add a little narrative flavor)
+        if self.current_obsession:
+            # find_obsession logs its own "NEW MUSE" message, so we just add a small internal note
+            pass
 
-            self.traits["HOPE"] = min(1.0, self.traits["HOPE"] + 0.2)
-            self.traits["DISCIPLINE"] = min(1.0, self.traits["DISCIPLINE"] + 0.2)
+    def pursue_obsession(self, physics: Dict) -> str | None:
+        clean_words = physics.get("clean_words", [])
 
-            self.current_obsession = None
+        hit = False
+        if self.current_target_cat:
+            hit = any(self.current_target_cat in w for w in clean_words)
+        if hit:
+            self.obsession_progress += 10.0
             self.obsession_neglect = 0.0
+            return f"{Prisma.MAG}★ OBSESSION FULFILLED: You touched the '{self.current_obsession}'. (+Hope){Prisma.RST}"
+        self.obsession_neglect += 1.0
+
+        if self.obsession_neglect > 10.0:
+            old_obsession = self.current_obsession
+            self.chapters.append(f"The era of '{old_obsession}' ended quietly.")
+            self._generate_new_obsession()
+            return f"{Prisma.GRY}∞ DRIFT: '{old_obsession}' has drifted away. A new interest takes hold.{Prisma.RST}"
+
+        return None
 
     def _get_feeling(self):
         try:

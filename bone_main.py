@@ -1,4 +1,4 @@
-# BONEAMANITA 10.9.1
+# BONEAMANITA 10.9.2 "ELECTRIC SHEEP"
 # Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark
 
 import time, json
@@ -30,7 +30,7 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.9.1', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.9.2', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -317,7 +317,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.9.1', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.9.2', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

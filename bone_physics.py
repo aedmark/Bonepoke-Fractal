@@ -7,7 +7,7 @@ from collections import Counter, deque
 from dataclasses import dataclass, field
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig, PhysicsPacket, CycleContext
-from bone_village import TownHall
+from bone_village import StrunkWhiteProtocol
 
 SOLVENT_WORDS = {'i', 'you', 'said', 'the', 'and', 'was', 'a', 'is', 'it'}
 MAX_SOLVENT_TOLERANCE = 40.0
@@ -407,7 +407,7 @@ class TheBouncer:
         self.hn = CutTheShit()
         self.semantic = SemanticFilter(self.eng.mind.mem)
         self.vent = EntropyVent(self.eng.mind.mem)
-        self.strunk = TownHall.StrunkWhite()
+        self.strunk = StrunkWhiteProtocol()
 
     def check_entry(self, ctx: CycleContext) -> Tuple[bool, Optional[Dict]]:
         phys = ctx.physics

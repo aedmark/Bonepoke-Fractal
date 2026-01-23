@@ -4,7 +4,7 @@
 import traceback, random, time
 from typing import Dict, Any, Tuple, List
 from bone_bus import Prisma, BoneConfig, CycleContext, PhysicsPacket
-from bone_village import TownHall
+from bone_village import TownHall, StrunkWhiteProtocol
 from bone_personality import TheBureau
 from bone_physics import TheBouncer, RuptureValve, ChromaScope
 from bone_viewer import GeodesicRenderer, CachedRenderer
@@ -231,21 +231,72 @@ class MetabolismPhase(SimulationPhase):
         )
         if gov_msg:
             self.eng.events.log(gov_msg, "GOV")
+
         bio_feedback = self._generate_feedback(physics)
         stress_mod = self.eng.bio.governor.get_stress_modifier(self.eng.tick_count)
         circadian_bias = self._check_circadian_rhythm()
+
+        # 1. Run Digestion
         ctx.bio_result = self.eng.soma.digest_cycle(
             ctx.input_text, physics, bio_feedback,
             self.eng.health, self.eng.stamina, stress_mod, self.eng.tick_count,
             circadian_bias=circadian_bias
         )
         ctx.is_alive = ctx.bio_result["is_alive"]
+
         for bio_item in ctx.bio_result["logs"]:
             if any(x in str(bio_item) for x in ["CRITICAL", "TAX", "Poison", "NECROSIS"]):
                 ctx.log(bio_item)
+
         self._audit_hubris(ctx, physics)
         self._apply_healing(ctx)
+
+        # 2. SLASH PATCH: Autonomic Sleep Trigger
+        self._check_narcolepsy(ctx)
+
         return ctx
+
+    def _check_narcolepsy(self, ctx: CycleContext):
+        """
+        Automatic system reset based on metabolic state.
+        Triggers if ATP is critically low or if the circadian timer hits.
+        """
+        atp = ctx.bio_result.get("atp", 100.0)
+        tick = self.eng.tick_count
+
+        trigger = False
+        reason = ""
+
+        # Thresholds
+        if atp < 5.0:
+            trigger = True
+            reason = "METABOLIC CRASH (Low ATP)"
+        elif tick > 0 and tick % 100 == 0:
+            trigger = True
+            reason = "CIRCADIAN CLEANUP"
+
+        if trigger and hasattr(self.eng.mind, "dreamer"):
+            # Prepare the Bio-Link Packet
+            phys_data = ctx.physics
+            if hasattr(phys_data, "to_dict"):
+                phys_data = phys_data.to_dict()
+
+            bio_packet = {
+                "chem": ctx.bio_result.get("chemistry", {}),
+                "mito": {"ros": 0.0, "atp": atp},
+                "physics": phys_data
+            }
+
+            # Trigger REM
+            dream_log = self.eng.mind.dreamer.enter_rem_cycle(self.eng.mind.mem, bio_readout=bio_packet)
+
+            # Log to UI
+            ctx.log(f"\n{Prisma.VIOLET}[AUTO-SLEEP]: {reason} initiated.{Prisma.RST}")
+            ctx.log(dream_log)
+
+            # Mechanic: Sleeping restores a small amount of ATP to prevent death loops
+            self.eng.bio.mito.state.atp_pool += 15.0
+            ctx.log(f"{Prisma.GRN}   (Microsleep Restored 15.0 ATP){Prisma.RST}")
 
     @staticmethod
     def _generate_feedback(physics):
@@ -612,7 +663,7 @@ class CycleReporter:
     def __init__(self, engine_ref):
         self.eng = engine_ref
         self.vsl_chroma = ChromaScope()
-        self.strunk_white = TownHall.StrunkWhite()
+        self.strunk_white = StrunkWhiteProtocol()
         from bone_viewer import get_renderer
         self.valve = RuptureValve(self.eng.mind.lex, self.eng.mind.mem)
         self.renderer = get_renderer(

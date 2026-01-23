@@ -1,4 +1,4 @@
-# bone_body.py
+""" bone_body.py """
 
 import math, random, time
 from collections import deque, Counter
@@ -48,115 +48,108 @@ class BioSystem:
 @dataclass
 class MitochondrialState:
     atp_pool: float = 100.0
+    membrane_potential: float = 1.0
     ros_buildup: float = 0.0
-    membrane_potential: float = -150.0
-    mother_hash: str = "MITOCHONDRIAL_EVE_001"
-    efficiency_mod: float = 1.0
-    ros_resistance: float = 1.0
-    enzymes: Set[str] = field(default_factory=set)
+    mother_hash: str = "EVE"
+    retrograde_signal: str = "QUIET"
 
 class MitochondrialForge:
-    APOPTOSIS_TRIGGER = "CYTOCHROME_C_RELEASE"
+    """
+    The powerhouse of the cell? No.
+    The dynamic energy broker and signaling hub of the system.
+    """
+    ROS_THRESHOLD_SIGNAL = 3.0
+    ROS_THRESHOLD_DAMAGE = 8.0
+    ROS_THRESHOLD_PURGE = 12.0
 
-    def __init__(self, lineage_seed: str, events, inherited_traits: Optional[Dict] = None):
-        self.state = MitochondrialState(mother_hash=lineage_seed)
-        self.events = events
-        self.krebs_cycle_active = True
-        self.BMR = BoneConfig.METABOLISM.BASE_RATE
-        self.TAX_LOW = BoneConfig.METABOLISM.DRAG_TAX_LOW
-        self.TAX_HIGH = BoneConfig.METABOLISM.DRAG_TAX_HIGH
-        self.GRACE = BoneConfig.METABOLISM.DRAG_GRACE_BUFFER
-        self.ROS_FACTOR = BoneConfig.METABOLISM.ROS_GENERATION_FACTOR
-        if inherited_traits:
-            self.apply_inheritance(inherited_traits)
+    def __init__(self, state_ref: MitochondrialState, events_ref):
+        self.state = state_ref
+        self.events = events_ref
 
-    def apply_inheritance(self, traits: Dict):
-        self.state.efficiency_mod = traits.get("efficiency_mod", 1.0)
-        self.state.ros_resistance = traits.get("ros_resistance", 1.0)
-        if "enzymes" in traits:
-            self.state.enzymes = set(traits["enzymes"])
-            self.events.log(f"{Prisma.CYN}[MITO]: Inherited Enzymes: {list(self.state.enzymes)}.{Prisma.RST}")
+    def process_cycle(self, physics_packet: dict, external_modifiers: List[float] = None) -> MetabolicReceipt:
+        voltage = physics_packet.get("voltage", 0.0)
+        drag = physics_packet.get("narrative_drag", 0.0)
 
-    def adapt(self, final_health: float) -> Dict:
-        traits = {
-            "efficiency_mod": self.state.efficiency_mod,
-            "ros_resistance": self.state.ros_resistance,
-            "enzymes": list(self.state.enzymes)}
-        if final_health <= 0 and random.random() < 0.3:
-            traits["ros_resistance"] = round(traits.get("ros_resistance", 1.0) + 0.1, 2)
-        return traits
+        base_demand = max(0.1, voltage * 0.4)
+        cognitive_load_tax = (drag ** 1.5) * 0.5
 
-    def calculate_metabolism(self, drag: float, external_modifiers: Optional[List[float]] = None) -> MetabolicReceipt:
-        limit = BoneConfig.MAX_DRAG_LIMIT
-        if drag < 0:
-            drag_tax = drag * 0.1
-        else:
-            safe_drag = max(0.0, drag)
-            taxable_drag = max(0.0, safe_drag - self.GRACE)
-            if taxable_drag <= (limit - self.GRACE):
-                drag_tax = taxable_drag * self.TAX_LOW
-            else:
-                base_tax = (limit - self.GRACE) * self.TAX_LOW
-                excess_drag = taxable_drag - (limit - self.GRACE)
-                drag_tax = base_tax + (excess_drag * self.TAX_HIGH)
-
+        mod_factor = 1.0
         if external_modifiers:
-            for mod in external_modifiers:
-                drag_tax *= mod
+            for m in external_modifiers:
+                mod_factor *= m
 
-        raw_cost = max(0.1, self.BMR + drag_tax)
-        ros_penalty = max(0.0, (self.state.ros_buildup / BoneConfig.CRITICAL_ROS_LIMIT) * 0.5)
-        dynamic_efficiency = max(0.1, self.state.efficiency_mod - ros_penalty)
+        efficiency = max(0.1, self.state.membrane_potential)
 
-        final_cost = raw_cost / dynamic_efficiency
+        total_metabolic_cost = ((base_demand + cognitive_load_tax) * mod_factor) / efficiency
 
-        inefficiency_tax = 0.0
-        if dynamic_efficiency < 1.0:
-            inefficiency_tax = final_cost - raw_cost
+        waste_generated = total_metabolic_cost * (1.0 - efficiency) * 0.5
+        self.state.ros_buildup += waste_generated
+
+        self.state.atp_pool -= total_metabolic_cost
+
+        self._apply_adaptive_dynamics(waste_generated)
 
         status = "RESPIRING"
-        symptom = BIO_NARRATIVE["MITO"]["NOMINAL"]
-
-        if ros_penalty > 0.2:
-            symptom = f"{Prisma.OCHRE}TOXIC DRAG: System sluggish due to ROS buildup (-{int(ros_penalty*100)}% Eff).{Prisma.RST}"
-
-        if drag < -1.0:
-            symptom = f"{Prisma.CYN}GLIDING (Drag {drag}){Prisma.RST}"
-        if final_cost > self.state.atp_pool:
-            status = "NECROSIS"
-            symptom = BIO_NARRATIVE["MITO"]["NECROSIS"].format(cost=final_cost, pool=self.state.atp_pool)
-        elif self.state.ros_buildup > BoneConfig.CRITICAL_ROS_LIMIT:
-            status = self.APOPTOSIS_TRIGGER
-            symptom = BIO_NARRATIVE["MITO"]["APOPTOSIS"]
-        elif drag_tax > 3.0:
-            symptom = BIO_NARRATIVE["MITO"]["GRINDING"]
+        if self.state.atp_pool < 20.0: status = "LOW_POWER"
+        if self.state.atp_pool <= 0.0: status = "NECROSIS"
 
         return MetabolicReceipt(
-            base_cost=round(self.BMR, 2),
-            drag_tax=round(drag_tax, 2),
-            inefficiency_tax=round(inefficiency_tax, 2),
-            total_burn=round(final_cost, 2),
+            base_cost=round(base_demand, 2),
+            drag_tax=round(cognitive_load_tax, 2),
+            inefficiency_tax=round(total_metabolic_cost - (base_demand + cognitive_load_tax), 2),
+            total_burn=round(total_metabolic_cost, 2),
             status=status,
-            symptom=symptom)
+            symptom=self.state.retrograde_signal
+        )
 
-    def respirate(self, receipt: MetabolicReceipt) -> str:
-        if receipt.status == "NECROSIS":
-            self.state.atp_pool = 0.0
-            return "NECROSIS"
-        if receipt.status == self.APOPTOSIS_TRIGGER:
-            self.krebs_cycle_active = False
-            self.state.atp_pool = 0.0
-            return self.APOPTOSIS_TRIGGER
-        self.state.atp_pool -= receipt.total_burn
-        ros_generation = receipt.total_burn * self.ROS_FACTOR * (1.0 / self.state.ros_resistance)
-        natural_decay = 0.05
-        if self.state.ros_buildup > 10.0:
-            scrub_magnitude = (self.state.ros_buildup * 0.1)
-            self.state.ros_buildup -= scrub_magnitude
-            if self.state.ros_buildup < 0: self.state.ros_buildup = 0
+    def _apply_adaptive_dynamics(self, current_waste):
+        """
+        Meadows Lens: Balancing Loops.
+        Small stress improves the system. Large stress breaks it.
+        """
+        self.state.atp_pool = min(100.0, self.state.atp_pool + 2.0)
 
-        self.state.ros_buildup += ros_generation
-        return "RESPIRING"
+        if self.state.ros_buildup < self.ROS_THRESHOLD_SIGNAL:
+            self.state.membrane_potential = max(0.5, self.state.membrane_potential - 0.001)
+            self.state.retrograde_signal = "QUIET"
+
+        elif self.state.ros_buildup < self.ROS_THRESHOLD_DAMAGE:
+            self.state.membrane_potential = min(1.0, self.state.membrane_potential + 0.005)
+            self.state.retrograde_signal = "MITOHORMESIS_ACTIVE"
+            self.state.ros_buildup = max(0.0, self.state.ros_buildup - 0.5)
+
+        else:
+            self.state.membrane_potential -= 0.02
+            self.state.retrograde_signal = "OXIDATIVE_STRESS"
+
+        if self.state.ros_buildup > self.ROS_THRESHOLD_PURGE:
+            self._trigger_mitophagy()
+
+    def _trigger_mitophagy(self):
+        """The Nuclear Option. Expensive cleaning."""
+        self.state.atp_pool -= 30.0
+        self.state.ros_buildup = 0.0
+        self.state.membrane_potential = 0.6
+        self.state.retrograde_signal = "MITOPHAGY_RESET"
+        self.events.log(f"{Prisma.RED}[MITO]: CRITICAL WASTE LEVELS. Purging organelles.{Prisma.RST}", "BIO")
+
+    def _print_receipt(self, base, tax, total) -> MetabolicReceipt:
+        status = "NOMINAL"
+        if self.state.atp_pool < 20.0: status = "LOW_POWER"
+        if self.state.atp_pool <= 0.0: status = "METABOLIC_COLLAPSE"
+
+        return MetabolicReceipt(
+            base_cost=round(base, 2),
+            drag_tax=round(tax, 2),
+            inefficiency_tax=round(total - (base + tax), 2),
+            total_burn=round(total, 2),
+            status=status,
+            symptom=self.state.retrograde_signal
+        )
+
+    def apply_inheritance(self, traits: dict):
+        if traits.get("high_metabolism"):
+            self.state.membrane_potential = 1.1
 
 class SemanticEndocrinologist:
     def __init__(self, memory_ref, lexicon_ref):
@@ -211,17 +204,25 @@ class SomaticLoop:
                      tick_count: int = 0, circadian_bias: Dict = None) -> Dict:
         phys = self._normalize_physics(physics_data)
         logs = []
-        receipt = self._calculate_taxes(phys, logs)
-        resp_status = self.bio.mito.respirate(receipt)
+
+        modifiers = self._gather_hormonal_modifiers(phys, logs)
+
+        receipt = self.bio.mito.process_cycle(phys, external_modifiers=modifiers)
+        resp_status = receipt.status
+
         if self._audit_folly_desire(phys, stamina, logs) == "MAUSOLEUM_CLAMP":
             return self._package_result(resp_status, logs, enzyme="NONE")
+
         enzyme, total_yield = self._harvest_resources(phys, logs)
         self.bio.mito.state.atp_pool += total_yield
+
         if self.bio.mito.state.atp_pool > BoneConfig.MAX_ATP:
             excess = self.bio.mito.state.atp_pool - BoneConfig.MAX_ATP
             self.bio.mito.state.atp_pool = BoneConfig.MAX_ATP
             logs.append(f"{Prisma.GRY}[BIO]: Venting excess energy ({excess:.1f} ATP).{Prisma.RST}")
+
         self._perform_maintenance(text, phys, logs, tick_count)
+
         clean_words = phys.get("clean_words", [])
         semantic_sig = self.semantic_doctor.assess(clean_words, phys)
         chem_state = self.bio.endo.metabolize(
@@ -236,6 +237,31 @@ class SomaticLoop:
             semantic_signal=semantic_sig
         )
         return self._package_result(resp_status, logs, chem_state, enzyme)
+
+    def _gather_hormonal_modifiers(self, phys, logs) -> List[float]:
+        """Collects biochemical taxes and bonuses."""
+        chem = self.bio.endo
+        modifiers = []
+
+        if chem.cortisol > 0.5:
+            stress_tax = 1.0 + (chem.cortisol * 0.5)
+            modifiers.append(stress_tax)
+            if random.random() < 0.3:
+                logs.append(f"{Prisma.RED}[BIO]: Cortisol spiking. Metabolism inefficient (x{stress_tax:.2f}).{Prisma.RST}")
+
+        if chem.adrenaline > 0.6:
+            modifiers.append(0.5)
+            logs.append(f"{Prisma.YEL}[BIO]: Adrenaline Surge. Pain ignored.{Prisma.RST}")
+
+        if chem.dopamine > 0.7:
+            modifiers.append(0.8)
+
+        voltage = phys.get("voltage", 0.0)
+        if voltage > 15.0:
+            modifiers.append(1.2)
+            logs.append(f"{Prisma.MAG}[BIO]: Voltage Gap ({voltage:.1f}v). Wires heating up.{Prisma.RST}")
+
+        return modifiers
 
     @staticmethod
     def _normalize_physics(physics_packet: Any) -> Dict:
@@ -268,35 +294,6 @@ class SomaticLoop:
                 "narrative_drag": physics_packet.get("narrative_drag", 0.0)
             }
         return {"voltage": 0.0, "drag": 0.0, "counts": {}, "clean_words": [], "kappa": 0.5, "narrative_drag": 0.0}
-
-    def _calculate_taxes(self, phys, logs) -> MetabolicReceipt:
-        chem = self.bio.endo
-        modifiers = []
-
-        if chem.cortisol > 0.5:
-            stress_tax = 1.0 + (chem.cortisol * 0.5)
-            modifiers.append(stress_tax)
-            if random.random() < 0.3:
-                logs.append(f"{Prisma.RED}[BIO]: Cortisol spiking. Metabolism inefficient (x{stress_tax:.2f}).{Prisma.RST}")
-
-        if chem.adrenaline > 0.6:
-            modifiers.append(0.5)
-            logs.append(f"{Prisma.YEL}[BIO]: Adrenaline Surge. Pain ignored.{Prisma.RST}")
-
-        if chem.dopamine > 0.7:
-            modifiers.append(0.8)
-
-        drag = phys.get("narrative_drag", 0.0)
-        receipt = self.bio.mito.calculate_metabolism(drag, external_modifiers=modifiers)
-
-        voltage = phys.get("voltage", 0.0)
-        if voltage > 15.0:
-            manic_tax = (voltage - 15.0) * 0.1
-            receipt.inefficiency_tax += manic_tax
-            receipt.total_burn += manic_tax
-            logs.append(f"{Prisma.MAG}[BIO]: Voltage Gap ({voltage:.1f}v). Wires heating up (-{manic_tax:.1f} ATP).{Prisma.RST}")
-
-        return receipt
 
     @staticmethod
     def _audit_folly_desire(phys, stamina, logs) -> str:

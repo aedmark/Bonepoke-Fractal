@@ -1,5 +1,45 @@
 # BONEAMANITA CHANGELOG
 
+# Changelog: BoneAmanita v10.9.2 (The "Mitochondrial Hormesis" Update)
+
+**Focus:** Systemic Coupling, Metabolic Dynamics, and Autonomic Reflexes.
+
+### 🧬 Bio-Physics (`bone_body.py`)
+
+* **Mitochondrial Hormesis:** Implemented a **Meadows Feedback Loop**. The mitochondria are no longer static batteries; they now adapt to stress.
+  * *Low Stress:* System becomes lazy (Efficiency drops).
+  * *Moderate Stress:* **Mitohormesis** triggers (Efficiency INCREASES).
+  * *High Stress:* Oxidative damage occurs.
+* **Non-Linear Drag:** Cognitive load now scales exponentially (`drag ** 1.5`). Messy code is now significantly more expensive to run than clean code.
+* **Retrograde Signaling:** The engine now talks back. Mitochondria emit status signals (`QUIET`, `MITOHORMESIS_ACTIVE`, `OXIDATIVE_STRESS`) that the rest of the body can read.
+* **The Transmission Fix:** Wired `SomaticLoop` to correctly pass endocrine modifiers to the `MitochondrialForge`. Hormones (Cortisol, Adrenaline) now directly impact the efficiency of the energy cycle.
+
+### 🧠 Cognition & Dreams (`bone_brain.py`)
+
+* **Associative Dreaming:** Dreams are no longer random noise. The `DreamEngine` now scans the `MycelialNetwork` for "Day Residue" (recent memory nodes) to populate dream templates.
+* **Bio-Feedback Nightmares:** The tone of a dream is now dictated by the system's physiological state.
+  * *High ROS:* Triggers **Septic Nightmares** (Decay/Rot).
+  * *High Voltage:* Triggers **Thermal Nightmares** (Fire/Burnout).
+  * *Low ATP:* Triggers **Baric Nightmares** (Crushing Weight/Stasis).
+
+### 👻 The Soul (`bone_soul.py`)
+
+* **Drift Logic:** Implemented `_generate_new_obsession`. When an interest fades, the Soul now gracefully rotates to a new obsession instead of throwing an error or waiting for manual intervention.
+* **Unclosed Loops Fixed:** Connected the "Drift" feedback loop to the Lexicon, allowing the system to autonomously discover new "Muses."
+
+### ⚙️ Cycle Dynamics (`bone_cycle.py` & `bone_commands.py`)
+
+* **Autonomic Narcolepsy:** Implemented a survival reflex in the `MetabolismPhase`. If ATP drops below critical levels (5.0), the system force-triggers a REM cycle to consolidate memory and recover energy.
+* **Circadian Rhythm:** Added a maintenance trigger every 100 ticks to ensure regular "Garbage Collection" via sleep.
+* **The Bio-Link:** Wired both the manual sleep command (`/kip`) and the autonomic trigger to pass a real-time `bio_packet` to the brain, ensuring dreams always reflect the true state of the body.
+
+### 🏗️ Architecture (`bone_architect.py`)
+
+* **Tensegrity Repair:** Decoupled `BoneArchitect` from the `TownHall` container. The Architect now imports blueprints (`MirrorGraph`, `TheNavigator`, `SoritesIntegrator`) directly.
+  * *Fix:* "Stopped ordering pizza from the trash." (Direct instantiation is cleaner than nested attribute access).
+
+### 🐛 Bug Fixes
+* **Removed Bloat:** Deleted the obsolete `_calculate_taxes` and `respirate` methods in `bone_body.py` in favor of the unified `process_cycle`.
 
 # Changelog: BoneAmanita v10.9.1 (The "Lucid Soul" Update)
 
