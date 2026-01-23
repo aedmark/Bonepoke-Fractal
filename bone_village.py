@@ -6,7 +6,7 @@ from typing import List, Dict, Any, Tuple, Optional
 from dataclasses import dataclass, field
 from bone_bus import Prisma, BoneConfig, CycleContext
 from bone_lexicon import TheLexicon
-from bone_personality import UserProfile, PublicParksDepartment, ZenGarden
+from bone_personality import UserProfile, ZenGarden
 from bone_council import CouncilChamber
 from bone_data import TheAkashicRecord, TheLore
 
@@ -542,38 +542,45 @@ class TheNavigator:
         self.root_system = None
         self.root_tolerance = 0.4
         self.residence_time = 0
+
         self.manifolds = {
             "THE_CONSTRUCT": Manifold(
                 "THE_CONSTRUCT", (0.05, 0.1), 0.25,
                 "Neutral Territory (The Loading Zone)",
                 {"plasticity": 0.5, "narrative_drag": -5.0},
-                f"{Prisma.WHT}THE CONSTRUCT: A boundless white void. The air smells of static and potential. We need prose. Lots of prose.{Prisma.RST}"
+                f"{Prisma.WHT}THE CONSTRUCT: A boundless white void. The air smells of static and potential.{Prisma.RST}"
             ),
             "THE_MUD": Manifold(
                 "THE_MUD", (0.8, 0.2), 0.2,
                 "High Fatigue, Low Tension (Stagnation)",
                 {"narrative_drag": 2.0, "voltage": -2.0},
-                f"{Prisma.OCHRE}THE MUD: The ground is sticky. Movement costs double.{Prisma.RST}"),
+                f"{Prisma.OCHRE}THE MUD: The ground is sticky. Movement costs double.{Prisma.RST}"
+            ),
             "THE_FORGE": Manifold(
                 "THE_FORGE", (0.1, 0.9), 0.2,
                 "Low Fatigue, High Tension (Transformation)",
                 {"voltage": 5.0, "narrative_drag": -1.0, "psi": -0.1},
-                f"{Prisma.RED}THE FORGE: Sparks fly. Your words are heating up.{Prisma.RST}"),
+                f"{Prisma.RED}THE FORGE: Sparks fly. Your words are heating up.{Prisma.RST}"
+            ),
             "THE_AERIE": Manifold(
                 "THE_AERIE", (0.2, 0.1), 0.2,
                 "Low Fatigue, Low Tension (Abstraction)",
                 {"narrative_drag": -3.0, "psi": 0.3, "voltage": -1.0},
-                f"{Prisma.CYN}THE AERIE: The air is thin. Concepts float freely here.{Prisma.RST}"),
+                f"{Prisma.CYN}THE AERIE: The air is thin. Concepts float freely here.{Prisma.RST}"
+            ),
             "THE_GLITCH": Manifold(
                 "THE_GLITCH", (0.9, 0.9), 0.1,
                 "High Fatigue, High Tension (Collapse)",
                 {"turbulence": 0.5, "beta_index": 2.0},
-                f"{Prisma.VIOLET}THE GLITCH: Reality is buffering...{Prisma.RST}"),
+                f"{Prisma.VIOLET}THE GLITCH: Reality is buffering...{Prisma.RST}"
+            ),
             "THE_GARDEN": Manifold(
                 "THE_GARDEN", (0.5, 0.5), 0.3,
                 "Balanced State (Integration)",
                 {"kappa": 0.2, "truth_ratio": 0.1},
-                f"{Prisma.GRN}THE GARDEN: The soil is rich. Roots go deep.{Prisma.RST}")}
+                f"{Prisma.GRN}THE GARDEN: The soil is rich. Roots go deep.{Prisma.RST}"
+            )
+        }
 
     def strike_root(self, vector_data):
         self.root_system = vector_data
@@ -824,13 +831,10 @@ class TownHall:
         self.Paradox = ParadoxSeed("Who watches the watchers?", ["mirror", "reflection"])
         self.Mirror = MirrorGraph(events_ref)
         self.ZenGarden = ZenGarden(events_ref)
-
-        self.Council = VillageCouncil(self)
-
+        self.Council = CouncilChamber()
         self.Lexicon = TheLexicon
         self.CycleContext = CycleContext
         self.Manifold = Manifold
         self.DeathGen = DeathGen
         self.Apeirogon = ApeirogonResonance(events_ref)
-
         self.DeathGen.load_protocols()

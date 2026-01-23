@@ -1,5 +1,5 @@
-# bone_cycle.py
-# "The wheel turns, and ages come and pass." - Jordan
+""" bone_cycle.py
+'The wheel turns, and ages come and pass.' - Jordan """
 
 import traceback, random, time
 from typing import Dict, Any, Tuple, List
@@ -236,7 +236,6 @@ class MetabolismPhase(SimulationPhase):
         stress_mod = self.eng.bio.governor.get_stress_modifier(self.eng.tick_count)
         circadian_bias = self._check_circadian_rhythm()
 
-        # 1. Run Digestion
         ctx.bio_result = self.eng.soma.digest_cycle(
             ctx.input_text, physics, bio_feedback,
             self.eng.health, self.eng.stamina, stress_mod, self.eng.tick_count,
@@ -251,7 +250,6 @@ class MetabolismPhase(SimulationPhase):
         self._audit_hubris(ctx, physics)
         self._apply_healing(ctx)
 
-        # 2. SLASH PATCH: Autonomic Sleep Trigger
         self._check_narcolepsy(ctx)
 
         return ctx
@@ -261,14 +259,14 @@ class MetabolismPhase(SimulationPhase):
         Automatic system reset based on metabolic state.
         Triggers if ATP is critically low or if the circadian timer hits.
         """
-        atp = ctx.bio_result.get("atp", 100.0)
+
+        current_atp = self.eng.bio.mito.state.atp_pool
         tick = self.eng.tick_count
 
         trigger = False
         reason = ""
 
-        # Thresholds
-        if atp < 5.0:
+        if current_atp < 5.0:
             trigger = True
             reason = "METABOLIC CRASH (Low ATP)"
         elif tick > 0 and tick % 100 == 0:
@@ -276,27 +274,25 @@ class MetabolismPhase(SimulationPhase):
             reason = "CIRCADIAN CLEANUP"
 
         if trigger and hasattr(self.eng.mind, "dreamer"):
-            # Prepare the Bio-Link Packet
-            phys_data = ctx.physics
-            if hasattr(phys_data, "to_dict"):
-                phys_data = phys_data.to_dict()
+            phys_data = ctx.physics.to_dict() if hasattr(ctx.physics, 'to_dict') else ctx.physics
 
             bio_packet = {
                 "chem": ctx.bio_result.get("chemistry", {}),
-                "mito": {"ros": 0.0, "atp": atp},
+                "mito": {"ros": 0.0, "atp": current_atp},
                 "physics": phys_data
             }
 
-            # Trigger REM
             dream_log = self.eng.mind.dreamer.enter_rem_cycle(self.eng.mind.mem, bio_readout=bio_packet)
 
-            # Log to UI
             ctx.log(f"\n{Prisma.VIOLET}[AUTO-SLEEP]: {reason} initiated.{Prisma.RST}")
             ctx.log(dream_log)
+            self.eng.bio.mito.state.atp_pool = 33.0
 
-            # Mechanic: Sleeping restores a small amount of ATP to prevent death loops
-            self.eng.bio.mito.state.atp_pool += 15.0
-            ctx.log(f"{Prisma.GRN}   (Microsleep Restored 15.0 ATP){Prisma.RST}")
+            ctx.is_alive = True
+            ctx.bio_result["respiration"] = "REM_CYCLE"
+            ctx.bio_result["atp"] = 33.0
+
+            ctx.log(f"{Prisma.GRN}   (Microsleep / Defibrillator Active. ATP stabilized at 33.0){Prisma.RST}")
 
     @staticmethod
     def _generate_feedback(physics):
@@ -304,7 +300,7 @@ class MetabolismPhase(SimulationPhase):
         return {
             "INTEGRITY": physics.get("truth_ratio", 0.0),
             "STATIC": physics.get("repetition", 0.0),
-            "FORCE": physics.get("voltage", 0.0) / max_v, # Dynamic scaling
+            "FORCE": physics.get("voltage", 0.0) / max_v,
             "BETA": physics.get("beta_index", 1.0)
         }
 
@@ -454,16 +450,33 @@ class IntrusionPhase(SimulationPhase):
 
     def run(self, ctx: CycleContext):
         phys_data = ctx.physics.to_dict() if hasattr(ctx.physics, 'to_dict') else ctx.physics
-        p_active, p_log = self.eng.bio.parasite.infect(phys_data, self.eng.stamina)
 
+        p_active, p_log = self.eng.bio.parasite.infect(phys_data, self.eng.stamina)
         if p_active: ctx.log(p_log)
+
         if self.eng.limbo.ghosts:
             if ctx.logs:
                 ctx.logs[-1] = self.eng.limbo.haunt(ctx.logs[-1])
             else:
                 ctx.log(self.eng.limbo.haunt("The air is heavy."))
+
+        drag = ctx.physics.get("narrative_drag", 0.0)
+        kappa = ctx.physics.get("kappa", 0.5)
+
+        if (drag > 4.0 or kappa < 0.3) and ctx.clean_words:
+            start_node = random.choice(ctx.clean_words)
+            loop_path = self.eng.mind.tracer.inject(start_node)
+
+            if loop_path:
+                rewire_msg = self.eng.mind.tracer.psilocybin_rewire(loop_path)
+                if rewire_msg:
+                    ctx.log(f"{Prisma.CYN}🦠 IMMUNE SYSTEM: {rewire_msg}{Prisma.RST}")
+                    self.eng.bio.endo.dopamine += 0.2
+                    ctx.physics["narrative_drag"] = max(0.0, drag - 2.0)
+
         trauma_sum = sum(self.eng.trauma_accum.values())
         is_bored = self.eng.phys.pulse.is_bored()
+
         if (trauma_sum > 10.0 or is_bored) and random.random() < 0.2:
             dream_text, relief = self.eng.mind.dreamer.hallucinate(
                 ctx.physics.vector,
@@ -471,17 +484,22 @@ class IntrusionPhase(SimulationPhase):
             )
             prefix = "💭 NIGHTMARE" if trauma_sum > 10.0 else "💭 DAYDREAM"
             ctx.log(f"{Prisma.VIOLET}{prefix}: {dream_text}{Prisma.RST}")
+
             if relief > 0:
                 keys = list(self.eng.trauma_accum.keys())
-                target = random.choice(keys)
-                self.eng.trauma_accum[target] = max(0.0, self.eng.trauma_accum[target] - relief)
-                ctx.log(f"   {Prisma.GRY}(Psychic pressure released: -{relief:.1f} {target}){Prisma.RST}")
+                if keys:
+                    target = random.choice(keys)
+                    self.eng.trauma_accum[target] = max(0.0, self.eng.trauma_accum[target] - relief)
+                    ctx.log(f"   {Prisma.GRY}(Psychic pressure released: -{relief:.1f} {target}){Prisma.RST}")
+
             if is_bored:
                 self.eng.phys.pulse.boredom_level = 0.0
+
         is_p, p_msg = self.eng.check_pareidolia(ctx.clean_words)
         if is_p:
             ctx.log(p_msg)
             ctx.physics["psi"] = min(1.0, ctx.physics["psi"] + 3.0)
+
         return ctx
 
 class SoulPhase(SimulationPhase):
@@ -509,7 +527,7 @@ class SoulPhase(SimulationPhase):
                 ctx.log(f"{Prisma.RED}⚖️ COUNCIL ORDER: Emergency Shift to {target}.{Prisma.RST}")
             elif action == "CIRCUIT_BREAKER":
                 ctx.physics["voltage"] = 0.0
-                ctx.physics["narrative_drag"] = 20.0 # Heavy brakes
+                ctx.physics["narrative_drag"] = 20.0
                 ctx.log(f"{Prisma.RED}⚖️ COUNCIL ORDER: Circuit Breaker Tripped. Voltage dump.{Prisma.RST}")
         if adjustments:
             for param, delta in adjustments.items():
@@ -538,6 +556,10 @@ class CognitionPhase(SimulationPhase):
             self.eng.phys.dynamics.voltage_history,
             self.eng.tick_count
         )
+        thought = ctx.mind_state.get("thought")
+        if thought:
+            ctx.log(thought)
+
         return ctx
 
 class StateReconciler:
@@ -563,6 +585,8 @@ class StateReconciler:
     def reconcile(canonical: CycleContext, sandbox: CycleContext, engine_ref=None):
         canonical.physics = sandbox.physics
         new_logs = sandbox.logs[len(canonical.logs):]
+        if new_logs:
+            canonical.logs.extend(new_logs)
         new_flux = sandbox.flux_log[len(canonical.flux_log):]
         if new_flux:
             canonical.flux_log.extend(new_flux)
@@ -584,12 +608,10 @@ class SensationPhase(SimulationPhase):
     def run(self, ctx: CycleContext):
         phys_data = ctx.physics.to_dict() if hasattr(ctx.physics, 'to_dict') else ctx.physics
         impulse = self.synesthesia.perceive(phys_data)
-
+        ctx.last_impulse = impulse
         self.synesthesia.apply_impulse(impulse)
         if impulse.stamina_impact != 0:
             self.eng.stamina = max(0.0, self.eng.stamina + impulse.stamina_impact)
-        if impulse.somatic_reflex:
-            ctx.log(f"{Prisma.MAG}* {impulse.somatic_reflex} *{Prisma.RST}")
         return ctx
 
 class CycleSimulator:
@@ -710,7 +732,8 @@ class CycleReporter:
             }
 
     def _inject_somatic_pulse(self, ctx: CycleContext):
-        qualia = self.eng.somatic.get_current_qualia()
+        impulse = getattr(ctx, "last_impulse", None)
+        qualia = self.eng.somatic.get_current_qualia(impulse)
         somatic_log = (
             f"{qualia.color_code}♦ SENSATION: {qualia.somatic_sensation} "
             f"[{qualia.tone}]{Prisma.RST}"
@@ -768,6 +791,9 @@ class GeodesicOrchestrator:
         if not ctx.is_alive:
             return self.eng.trigger_death(ctx.physics)
         snapshot = self.reporter.render_snapshot(ctx)
+        snapshot["enzyme"] = ctx.bio_result.get("enzyme", "NONE")
+        snapshot["chemistry"] = ctx.bio_result.get("chemistry", {})
         if "ui" in snapshot:
             self.symbiosis.monitor_host(latency, snapshot["ui"], len(user_message))
+
         return snapshot

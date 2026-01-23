@@ -1,5 +1,5 @@
-# bone_inventory.py
-# "Organization is the first step toward civilization." - Schur
+""" bone_inventory.py
+ 'Organization is the first step toward civilization.' - Schur """
 
 import random, copy
 from dataclasses import dataclass, field

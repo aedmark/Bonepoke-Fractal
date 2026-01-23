@@ -47,17 +47,17 @@ class BioSystem:
 
 @dataclass
 class MitochondrialState:
-    atp_pool: float = 100.0
+    atp_pool: float = 60.0
     membrane_potential: float = 1.0
     ros_buildup: float = 0.0
     mother_hash: str = "EVE"
     retrograde_signal: str = "QUIET"
 
+    @property
+    def efficiency_mod(self) -> float:
+        return self.membrane_potential
+
 class MitochondrialForge:
-    """
-    The powerhouse of the cell? No.
-    The dynamic energy broker and signaling hub of the system.
-    """
     ROS_THRESHOLD_SIGNAL = 3.0
     ROS_THRESHOLD_DAMAGE = 8.0
     ROS_THRESHOLD_PURGE = 12.0
@@ -102,13 +102,28 @@ class MitochondrialForge:
             symptom=self.state.retrograde_signal
         )
 
-    def _apply_adaptive_dynamics(self, current_waste):
+    def adapt(self, stress_level: float):
         """
-        Meadows Lens: Balancing Loops.
-        Small stress improves the system. Large stress breaks it.
+        Public Interface for structural adaptation.
+        Allows the engine to manually trigger metabolic shifts outside the cycle.
         """
-        self.state.atp_pool = min(100.0, self.state.atp_pool + 2.0)
+        old_potential = self.state.membrane_potential
+        if stress_level > 5.0:
+            self.state.membrane_potential = max(0.4, self.state.membrane_potential - 0.15)
+            self.events.log(
+                f"{Prisma.RED}[MITO]: Trauma Adaptive Response (Stress {stress_level:.1f}). "
+                f"Efficiency dropped ({old_potential:.2f} -> {self.state.membrane_potential:.2f}).{Prisma.RST}",
+                "BIO"
+            )
+        elif stress_level > 1.0:
+            self.state.membrane_potential = min(1.5, self.state.membrane_potential + 0.05)
+            if random.random() < 0.2:
+                self.events.log(
+                    f"{Prisma.GRN}[MITO]: Hormetic Adaptation. System hardening.{Prisma.RST}",
+                    "BIO"
+                )
 
+    def _apply_adaptive_dynamics(self, current_waste):
         if self.state.ros_buildup < self.ROS_THRESHOLD_SIGNAL:
             self.state.membrane_potential = max(0.5, self.state.membrane_potential - 0.001)
             self.state.retrograde_signal = "QUIET"
@@ -353,7 +368,7 @@ class SomaticLoop:
     @staticmethod
     def _count_harvest_hits(phys: Dict) -> int:
         clean_words = phys.get("clean_words", [])
-        return len([w for w in clean_words if len(w) > 4])
+        return len([w for w in clean_words if len(w) >= 4])
 
     def _package_result(self, resp_status, logs, chem_state=None, enzyme="NONE"):
         is_alive = (resp_status == "RESPIRING")
@@ -444,13 +459,17 @@ class EndocrineSystem:
     def _apply_semantic_pressure(self, signal: SemanticSignal):
         if signal.novelty > 0.3:
             self.dopamine += (signal.novelty * 0.3)
+
         if signal.resonance > 0.2:
             self.oxytocin += (signal.resonance * 0.4)
             self.cortisol -= (signal.resonance * 0.2)
+
         if signal.valence > 0.3:
             self.serotonin += (signal.valence * 0.3)
+            self.oxytocin += (signal.valence * 0.2)
         elif signal.valence < -0.3:
             self.cortisol += (abs(signal.valence) * 0.2)
+
         if signal.coherence > 0.7:
             self.adrenaline -= 0.1
             self.cortisol -= 0.1
@@ -660,24 +679,34 @@ class ThePacemaker:
 
     def check_pulse(self, clean_words: List[str]) -> float:
         if not clean_words: return 0.0
+
         current_set = set(clean_words)
-        overlaps = 0
+        max_overlap = 0.0
+
         for old_words in self.history:
             old_set = set(old_words)
             intersection = len(current_set & old_set)
             union = len(current_set | old_set)
-            if union > 0: overlaps += (intersection / union)
+
+            if union > 0:
+                score = intersection / union
+                if score > max_overlap:
+                    max_overlap = score
+
         self.history.append(clean_words)
-        self.repetition_score = min(1.0, overlaps / max(1, len(self.history)))
+        self.repetition_score = max_overlap
+
         now = time.time()
         delta = now - self.last_tick_time
         self.last_tick_time = now
+
         if self.repetition_score > 0.3:
             self.boredom_level += 2.0
         elif delta > 60:
             self.boredom_level += 5.0
         else:
             self.boredom_level = max(0.0, self.boredom_level - 1.0)
+
         return self.repetition_score
 
     def get_status(self):
@@ -712,7 +741,7 @@ class NoeticLoop:
             voltage_history)
         lens_name, lens_msg, lens_role = self.arbiter.consult(
             physics_packet,
-            self.bio,
+            _bio_result_dict,
             inventory,
             tick_count,
             ignition_score)

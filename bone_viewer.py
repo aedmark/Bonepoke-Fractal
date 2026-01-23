@@ -180,33 +180,51 @@ class GeodesicRenderer:
         return ""
 
     @staticmethod
-    def compose_logs(cycle_logs: List[str], bus_events: List[Dict], current_tick: int) -> List[str]:
-        is_warmup = current_tick <= 5
-        all_events = [{"text": l, "category": "NARRATIVE"} for l in cycle_logs]
-        all_events.extend(bus_events)
+    def compose_logs(logs: list, events: list, tick: int) -> List[str]:
+        safe_logs = []
+        for log in logs:
+            if log is None: continue
+            safe_logs.append(str(log))
+
+        is_warmup = tick <= 5
+        all_events = [{"text": l, "category": "NARRATIVE"} for l in safe_logs]
+        all_events.extend(events) # Fix: 'bus_events' -> 'events'
+
         if not all_events: return []
+
         buckets = {"CRITICAL": [], "NARRATIVE": [], "CMD": [], "SYS": [], "BIO": [], "PSYCH": [], "OTHER": []}
+
         for e in all_events:
-            cat = e.get("category", "OTHER").upper()
+            if not e: continue
+
+            raw_cat = e.get("category", "OTHER")
+            if raw_cat is None: raw_cat = "OTHER"
+            cat = str(raw_cat).upper()
+
             if is_warmup and cat in ["SYS", "BIO", "PSYCH", "OTHER"]:
                 continue
+
             if cat not in buckets: cat = "OTHER"
-            text = e.get("text", "")
-            if "RUPTURE" in text or "DEATH" in text or "PANIC" in text: 
+            text = str(e.get("text", ""))
+            if "RUPTURE" in text or "DEATH" in text or "PANIC" in text:
                 cat = "CRITICAL"
             buckets[cat].append(text)
         composed = []
+
         if buckets["CRITICAL"]:
             composed.append(f"{Prisma.RED}--- CRITICAL ALERTS ---{Prisma.RST}")
             composed.extend(buckets["CRITICAL"])
+
         if buckets["NARRATIVE"]:
             composed.extend(buckets["NARRATIVE"])
         compressible = [
-            ("CMD", Prisma.WHT, "COMMANDS"), 
-            ("PSYCH", Prisma.VIOLET, "PSYCHOLOGY"), 
-            ("BIO", Prisma.GRN, "BIOLOGY"), 
-            ("SYS", Prisma.GRY, "SYSTEM"), 
-            ("OTHER", Prisma.GRY, "MISC")]
+            ("CMD", Prisma.WHT, "COMMANDS"),
+            ("PSYCH", Prisma.VIOLET, "PSYCHOLOGY"),
+            ("BIO", Prisma.GRN, "BIOLOGY"),
+            ("SYS", Prisma.GRY, "SYSTEM"),
+            ("OTHER", Prisma.GRY, "MISC")
+        ]
+
         for cat, color, label in compressible:
             items = buckets[cat]
             if not items: continue
@@ -216,6 +234,7 @@ class GeodesicRenderer:
                 composed.append(f"   {color}   ... and {len(items)-3} more.{Prisma.RST}")
             else:
                 composed.extend([f"   {i}" for i in items])
+
         return composed
 
 class CachedRenderer:

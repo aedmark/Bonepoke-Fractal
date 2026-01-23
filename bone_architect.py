@@ -1,12 +1,12 @@
-# bone_architect.py
-# "We shape our buildings; thereafter they shape us." - Churchill
+""" bone_architect.py
+ "We shape our buildings; thereafter they shape us." - Churchill """
 
 from typing import Tuple, Dict, Any, Optional
 from dataclasses import dataclass
 from bone_bus import Prisma, MindSystem, PhysSystem, PhysicsPacket
 from bone_village import MirrorGraph, ApeirogonResonance, SoritesIntegrator, TheNavigator
 from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont, MycelialNetwork
-from bone_body import BioSystem, MitochondrialForge, EndocrineSystem, MetabolicGovernor, ViralTracer, ThePacemaker
+from bone_body import BioSystem, MitochondrialForge, MitochondrialState, EndocrineSystem, MetabolicGovernor, ViralTracer, ThePacemaker
 from bone_brain import DreamEngine, ShimmerState, NeuroPlasticity
 from bone_personality import LimboLayer
 from bone_physics import TheTensionMeter, TheTangibilityGate, TemporalDynamics
@@ -84,8 +84,9 @@ class BoneArchitect:
 
     @staticmethod
     def _construct_bio(events, mind, lex) -> BioSystem:
+        mito_state = MitochondrialState()
         return BioSystem(
-            mito=MitochondrialForge("PENDING_ACTIVATION", events),
+            mito=MitochondrialForge(mito_state, events),
             endo=EndocrineSystem(),
             immune=MycotoxinFactory(),
             lichen=LichenSymbiont(),

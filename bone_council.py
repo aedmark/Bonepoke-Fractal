@@ -1,5 +1,5 @@
-# bone_council.py
-# The Advisory Board: Hofstadter, Meadows, and Pratchett
+""" bone_council.py
+ The Advisory Board: Hofstadter, Meadows, and Pratchett """
 
 import random
 from bone_bus import Prisma, BoneConfig

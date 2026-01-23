@@ -1,5 +1,5 @@
-# bone_brain.py
-# "The brain is a machine for jumping to conclusions." - S. Pinker
+""" bone_brain.py
+# "The brain is a machine for jumping to conclusions." - S. Pinker """
 
 import re, time, json, urllib.request, urllib.error, random, math
 from typing import Dict, Any, List, Optional, Tuple
@@ -122,7 +122,7 @@ class NeurotransmitterModulator:
         }
 
     def modulate(self, incoming_chem: Dict[str, float], base_voltage: float, lens_name: str = "NARRATOR", model_name: str = "") -> Dict[str, Any]:
-        decay_amount = BrainConfig.BASE_DECAY_RATE # e.g. 0.1
+        decay_amount = BrainConfig.BASE_DECAY_RATE
         self.current_chem.decay(rate=decay_amount)
         plasticity = BrainConfig.BASE_PLASTICITY + (base_voltage * BrainConfig.VOLTAGE_SENSITIVITY)
         plasticity = max(0.1, min(BrainConfig.MAX_PLASTICITY, plasticity))
@@ -676,7 +676,6 @@ class DreamEngine:
             "physics": {"voltage": float, "entropy": float}
         }
         """
-        # 1. Capture Content (Day Residue)
         residue_word = "static"
         context_word = "void"
 
@@ -691,7 +690,6 @@ class DreamEngine:
                 if len(sorted_nodes) > 1:
                     context_word = sorted_nodes[1][0]
 
-        # 2. Determine Tone via Biological Telemetry
         dream_type = "NORMAL"
         subtype = "ABSTRACT"
 
@@ -705,26 +703,23 @@ class DreamEngine:
             voltage = phys.get("voltage", 0.0)
             atp = mito.get("atp", 100.0)
 
-            # Physiological Triage
             if ros > 8.0:
                 dream_type = "NIGHTMARE"
-                subtype = "SEPTIC" # Toxic/Decay
+                subtype = "SEPTIC"
             elif cortisol > 0.6:
                 dream_type = "NIGHTMARE"
-                subtype = "BARIC" # Crushing weight/Fear
+                subtype = "BARIC"
             elif voltage > 20.0:
                 dream_type = "NIGHTMARE"
-                subtype = "THERMAL" # Burnout
+                subtype = "THERMAL"
             elif atp < 15.0:
                 dream_type = "NIGHTMARE"
-                subtype = "CRYO" # Stasis/Freezing
+                subtype = "CRYO"
             elif chem.get("DOP", 0.0) > 0.7:
-                dream_type = "LUCID" # High Dopamine = Control
+                dream_type = "LUCID"
 
-        # 3. Weave the Dream
         dream_text = self._weave_dream(residue_word, context_word, dream_type, subtype)
 
-        # 4. Consolidation
         consolidation_msg = "Neural pathways consolidated."
         if hasattr(memory_system, "replay_dreams"):
             consolidation_msg = memory_system.replay_dreams()
@@ -738,8 +733,6 @@ class DreamEngine:
 
     def _weave_dream(self, residue: str, context: str, dream_type: str, subtype: str) -> str:
         if dream_type == "NIGHTMARE":
-            # Fetch specific nightmare templates from bone_data
-            # Defaults to generic if subtype not found
             templates = self.NIGHTMARES.get(subtype, self.NIGHTMARES.get("BARIC", ["{ghost} is heavy."]))
             template = random.choice(templates)
             return template.format(ghost=residue)
@@ -747,7 +740,6 @@ class DreamEngine:
         if dream_type == "LUCID":
             return f"You hold '{residue}' in your hand. You control its shape. It becomes '{context}'."
 
-        # Standard Dream
         template = random.choice(self.PROMPTS)
         return template.format(A=residue, B=context)
 

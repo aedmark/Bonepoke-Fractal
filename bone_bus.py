@@ -1,4 +1,4 @@
-# bone_bus.py - All aboard the Magic Bone Bus!
+""" bone_bus.py - All aboard the Magic Bone Bus! """
 
 import json, os, time, random
 from collections import deque

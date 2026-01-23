@@ -67,14 +67,16 @@ class SynestheticCortex:
             impulse.dopamine_delta += 0.15
             impulse.somatic_reflex = "Buzz (Excitement)"
 
-        if counts.get("kinetic", 0) > 0 or counts.get("explosive", 0) > 0:
-            impulse.adrenaline_delta += 0.1
+        k_count = counts.get("kinetic", 0) + counts.get("explosive", 0)
+        if k_count > 0:
+            # We cap it at 0.4 to prevent heart explosions
+            adr_boost = min(0.4, k_count * 0.08)
+            impulse.adrenaline_delta += adr_boost
             impulse.cortisol_delta += 0.02
             impulse.stamina_impact -= 1.0
 
-        if physics.get("voltage", 0) > 18.0:
+        if physics.get("voltage", 0) > 15.0:
             impulse.adrenaline_delta += 0.2
-            impulse.somatic_reflex = "Tremor (Voltage Overload)"
 
         if not impulse.somatic_reflex:
             impulse.somatic_reflex = self._derive_reflex(physics, impulse)
@@ -85,7 +87,7 @@ class SynestheticCortex:
         """
         Determine the immediate physical sensation based on the net hormonal shift.
         """
-        if impulse.adrenaline_delta > 0.15:
+        if impulse.adrenaline_delta > 0.1:
             return "Pupils Dilating."
         if impulse.cortisol_delta > 0.1:
             return "Gut Tightening."

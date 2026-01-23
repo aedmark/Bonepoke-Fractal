@@ -1,7 +1,7 @@
 # BONEAMANITA 10.9.2 "ELECTRIC SHEEP"
 # Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark
 
-import time, json
+import time, json, uuid
 from dataclasses import dataclass
 from typing import Dict, Any
 from bone_bus import EventBus, Prisma, BoneConfig, SystemHealth, TheObserver
@@ -11,7 +11,7 @@ from bone_village import TownHall, DeathGen
 from bone_lexicon import TheLexicon, LiteraryReproduction
 from bone_inventory import GordonKnot
 from bone_telemetry import TelemetryService
-from bone_personality import TheFolly, CassandraProtocol, ChorusDriver, KintsugiProtocol, TherapyProtocol, TheBureau
+from bone_personality import TheFolly, ChorusDriver, KintsugiProtocol, TherapyProtocol, TheBureau
 from bone_physics import CosmicDynamics, ZoneInertia
 from bone_body import SomaticLoop, NoeticLoop
 from bone_brain import TheCortex, LLMInterface
@@ -51,6 +51,7 @@ class SessionGuardian:
 
 class BoneAmanita:
     def __init__(self, lexicon_layer=None, user_name="TRAVELER"):
+        self.kernel_hash = str(uuid.uuid4())[:8].upper()
         self.user_name = user_name
         self.lex = lexicon_layer if lexicon_layer else TheLexicon
         if hasattr(self.lex, 'initialize'):
@@ -106,7 +107,6 @@ class BoneAmanita:
         self.therapy = TherapyProtocol()
         self.folly = TheFolly()
         self.stabilizer = ZoneInertia()
-        self.cassandra = CassandraProtocol(self)
         self.director = ChorusDriver()
         self.bureau = TheBureau()
         self.cosmic = CosmicDynamics()

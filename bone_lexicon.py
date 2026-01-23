@@ -33,10 +33,6 @@ class LexiconStore:
                 self.VOCAB[cat] = word_set
                 for w in word_set:
                     self._index_word(w, cat)
-        if "antigen" not in self.VOCAB and "antigen" in data:
-            self.VOCAB["antigen"] = set(data["antigen"])
-            for w in self.VOCAB["antigen"]:
-                self._index_word(w, "antigen")
         self._load_hive()
 
     def _index_word(self, word: str, category: str):

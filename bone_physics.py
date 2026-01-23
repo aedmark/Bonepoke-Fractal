@@ -410,6 +410,9 @@ class TheBouncer:
         self.strunk = StrunkWhiteProtocol()
 
     def check_entry(self, ctx: CycleContext) -> Tuple[bool, Optional[Dict]]:
+        is_empty, empty_packet = self._check_thermodynamics(ctx)
+        if is_empty:
+            return False, empty_packet
         phys = ctx.physics
         clean = ctx.clean_words
         is_red_tape, tape_packet = self._check_bureaucracy(ctx)
@@ -449,6 +452,26 @@ class TheBouncer:
             ctx.logs.append(vent_msg)
             return False, self._pack_refusal(ctx, "REFUSAL")
         return True, None
+
+    def _check_thermodynamics(self, ctx) -> Tuple[bool, Optional[Dict]]:
+        """
+        Structural Constraint Check.
+        If ATP and Stamina are both critical, the system does not 'refuse' via personality.
+        It refuses via physics. The silence is a first-class outcome.
+        """
+        try:
+            atp = self.eng.bio.mito.state.atp_pool
+            stamina = self.eng.stamina
+        except AttributeError:
+            return False, None
+
+        if atp < 5.0 and stamina < 5.0:
+            return True, self._pack_refusal(
+                ctx,
+                "THERMODYNAMIC_FAIL",
+                f"{Prisma.GRY}[SYSTEM DARK] Energy critical. The inputs dissolve into the void.{Prisma.RST}"
+            )
+        return False, None
 
     def _pack_refusal(self, ctx, type_str, specific_ui=None):
         logs = ctx.logs[:]
@@ -503,33 +526,6 @@ class Humility:
 
 class GeodesicDome:
     def __init__(self):
-        self.manifolds = {
-            "THE_MUD": {
-                "E": 0.8, "B": 0.2,
-                "Desc": "High Fatigue, Low Tension (Stagnation)",
-                "mods": {"narrative_drag": 2.0, "voltage": -5.0, "stamina_cost": 1.5}
-            },
-            "THE_FORGE": {
-                "E": 0.2, "B": 0.9,
-                "Desc": "Low Fatigue, High Tension (Transformation)",
-                "mods": {"voltage": 5.0, "heat": 2.0, "entropy": -0.5}
-            },
-            "THE_AERIE": {
-                "E": 0.1, "B": 0.1,
-                "Desc": "Low Fatigue, Low Tension (Abstraction)",
-                "mods": {"psi": 1.5, "gravity": -0.5, "narrative_drag": -2.0}
-            },
-            "THE_GLITCH": {
-                "E": 0.9, "B": 0.9,
-                "Desc": "High Fatigue, High Tension (Collapse)",
-                "mods": {"entropy": 2.0, "coherence": -1.0, "toxicity": 0.5}
-            },
-            "THE_GARDEN": {
-                "E": 0.5, "B": 0.5,
-                "Desc": "Balanced State (Integration)",
-                "mods": {"health_regen": 0.5, "coherence": 1.0}
-            }
-        }
         self.TRIGRAM_MAP = {
             "VEL": ("☳", "ZHEN",  "Thunder",  Prisma.GRN),
             "STR": ("☶", "GEN",   "Mountain", Prisma.SLATE),
@@ -563,16 +559,6 @@ class GeodesicDome:
         if length < 50:
             base_b *= (length / 50.0)
         return round(e_metric, 3), round(base_b, 3)
-
-    def locate_manifold(self, e_val: float, b_val: float) -> Tuple[str, float]:
-        best_fit = "THE_MUD"
-        min_dist = 10.0
-        for name, coords in self.manifolds.items():
-            dist = math.sqrt((e_val - coords["E"])**2 + (b_val - coords["B"])**2)
-            if dist < min_dist:
-                min_dist = dist
-                best_fit = name
-        return best_fit, min_dist
 
     def resolve_trigram(self, vector: Dict[str, float]) -> Dict[str, Any]:
         if not vector:
@@ -616,8 +602,6 @@ class RuptureValve:
         e_val, b_val = self.geodesic.calculate_metrics(raw_text, counts)
         physics["E"] = e_val
         physics["B"] = b_val
-        manifold, dist = self.geodesic.locate_manifold(e_val, b_val)
-        physics["manifold"] = manifold
         is_modified, new_text, audit_log = self.humility.check_boundary(raw_text, physics.get("voltage", 0.0))
         if is_modified:
             physics["raw_text_display"] = new_text

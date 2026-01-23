@@ -2,7 +2,7 @@
 # "The limits of my language mean the limits of my world." - Wittgenstein
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 from bone_bus import Prisma, BoneConfig
 
 @dataclass
@@ -53,56 +53,51 @@ class RosettaStone:
     }
 
     @staticmethod
-    def translate(physics: Dict, bio: Dict) -> SomaticState:
+    def translate(physics: Dict, bio: Dict, impulse: Any = None) -> SomaticState:
         """
         The Core Translation Loop.
-        1. Base Physics (Voltage/Drag) -> Base State
-        2. Chemistry -> Emotional Modifiers
-        3. Emergence -> Magma/Plasma checks
-        4. Survival -> Starvation Override
+        Now accepts an optional 'impulse' to ground the sensation in biology.
         """
-
         # 1. Extract Metrics
         voltage = physics.get("voltage", 0.0)
         drag = physics.get("narrative_drag", 0.0)
         coherence = physics.get("kappa", 0.5)
-        entropy = physics.get("entropy", 0.0) # Assuming entropy is tracked or derived
-
+        entropy = physics.get("entropy", 0.0)
         chem = bio.get("chemistry", {})
         atp = bio.get("atp", 0.0)
 
         # 2. Base Dimensions
         tone, color = RosettaStone._derive_voltage_tone(voltage)
-        sensation = RosettaStone._derive_drag_sensation(drag)
         focus = RosettaStone._derive_coherence_focus(coherence)
         pacing = "Steady"
         metaphor = "Solid State"
 
-        # 3. Chemical Modifiers (The "Hormonal Overlay")
+        # [SLASH PATCH] Synesthetic Bridge
+        # If the body has already reacted, use that reflex. Don't guess.
+        if impulse and getattr(impulse, 'somatic_reflex', None):
+            sensation = impulse.somatic_reflex
+        else:
+            sensation = RosettaStone._derive_drag_sensation(drag)
+
+        # 3. Chemical Modifiers
         tone = RosettaStone._apply_chemistry(tone, chem)
 
-        # 4. Emergent States (Non-linear combinations)
-        # High Voltage + High Drag = MAGMA
+        # 4. Emergent States (Overrides)
         if voltage > 12.0 and drag > 5.0:
-            sensation = RosettaStone.LIBRARY["SENSATION"]["MAGMA"]
-            metaphor = "Volcanic Pressure"
+            sensation = f"{sensation} (Magmatic Pressure)"
             color = Prisma.RED
-
-        # High Voltage + High Entropy = PLASMA
         elif voltage > 12.0 and entropy > 0.8:
-            sensation = RosettaStone.LIBRARY["SENSATION"]["PLASMA"]
-            metaphor = "Ionized Gas"
+            sensation = f"{sensation} (Ionized Plasma)"
             color = Prisma.MAG
 
-        # 5. Survival Override (Hierarchy of Needs)
+        # 5. Survival Override
         if atp < 5.0:
             tone = "Desperate"
-            sensation = RosettaStone.LIBRARY["SENSATION"]["STARVATION"]
-            metaphor = "Entropic Decay"
+            sensation = "Hollow, sputtering"
             color = Prisma.GRY
 
         # 6. Synthesize Hint
-        hint = f"Act {tone.lower()}. Feel {sensation.lower()}. Thoughts are {focus.lower()}."
+        hint = f"Act {tone.lower()}. Body feels: {sensation.lower()}. Mind is {focus.lower()}."
 
         return SomaticState(
             tone=tone,
@@ -158,21 +153,17 @@ class RosettaStone:
         return current_tone
 
 class SomaticInterface:
-    """
-    The Public API for the System's Soul.
-    Allows other modules to query 'How are we feeling?'
-    """
     def __init__(self, engine_ref):
         self.eng = engine_ref
 
-    def get_current_qualia(self) -> SomaticState:
+    def get_current_qualia(self, impulse: Any = None) -> SomaticState:
         physics = self.eng.phys.tension.last_physics_packet if self.eng.phys.tension.last_physics_packet else {}
         if hasattr(physics, "to_dict"): physics = physics.to_dict()
 
         bio = self.eng.bio.endo.get_state()
         bio["atp"] = self.eng.bio.mito.state.atp_pool
 
-        return RosettaStone.translate(physics, bio)
+        return RosettaStone.translate(physics, bio, impulse)
 
     def report(self):
         qualia = self.get_current_qualia()

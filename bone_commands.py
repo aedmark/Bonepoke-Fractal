@@ -1,5 +1,5 @@
-# bone_commands.py
-# "The snake spits out its tail. The circle becomes a line."
+""" bone_commands.py
+ 'The snake spits out its tail. The circle becomes a line.' """
 
 import inspect, os, random, shlex
 from typing import Dict, Callable, List, Any, Protocol, runtime_checkable
@@ -231,7 +231,6 @@ class CommandProcessor:
         if going_to_sleep:
             self._log(f"{self.P.CYN}Closing eyes (Saving & Dreaming)...{self.P.RST}")
             try:
-                # [Existing save logic remains here...]
                 self.eng.mind.mem.save(
                     health=self.eng.health,
                     stamina=self.eng.stamina,

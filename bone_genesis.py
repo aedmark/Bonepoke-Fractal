@@ -1,5 +1,4 @@
-# bone_genesis.py
-# "The beginning is a very delicate time." - Herbert
+""" bone_genesis.py 'The beginning is a very delicate time.' - Herbert """
 
 import sys, os, json, time, urllib.request, urllib.error
 import traceback
@@ -287,14 +286,12 @@ class GenesisProtocol:
                 return True
             else:
                 self.type_out(f"Configuration failed: {msg}", color=Prisma.RED)
-                # The Failsafe Prompt
                 retry = input(f"{Prisma.paint('Typo? Try again? (Y/n)', 'Y')} ").strip().lower()
                 if retry == 'n':
                     return False
                 self.type_out("\n...Retrying Uplink...\n", color=Prisma.GRY)
 
     def export_system_prompt(self):
-        # [SLASH FIX]: Fetch words from Lexicon or use defaults if Lexicon isn't loaded
         heavy_words = LEXICON.get("heavy", ["stone", "iron", "lead", "dense", "gravity"])
         explosive_words = LEXICON.get("explosive", ["fire", "burst", "shatter", "run", "scream"])
 

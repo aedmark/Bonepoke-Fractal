@@ -1,4 +1,4 @@
-# bone_data.py - The Living Mythology
+""" bone_data.py - The Living Mythology """
 
 import random
 from typing import Dict, Any, Tuple, cast, List
@@ -46,14 +46,12 @@ class LoreManifest:
 
     def inject(self, category: str, data: Any):
         if category not in self._registry:
-            self._registry[category] = data # New category
+            self._registry[category] = data
         elif isinstance(self._registry[category], dict) and isinstance(data, dict):
-            # Shallow merge for dicts
             if category not in self._overlays:
                 self._overlays[category] = self._registry[category].copy()
             self._overlays[category].update(data)
         elif isinstance(self._registry[category], list) and isinstance(data, list):
-            # Extend for lists
             if category not in self._overlays:
                 self._overlays[category] = list(self._registry[category])
             self._overlays[category].extend(data)
@@ -336,7 +334,11 @@ LEXICON = {
     ],
     "explosive": [
         "run", "sprint", "explode", "burst", "shatter", "crash", "flash", "snap", "rush", "tear",
-        "break", "launch", "whip", "slam", "strike"
+        "break", "launch", "whip", "slam", "strike", "danger", "panic", "crisis", "alarm", "emergency"
+    ],
+    "kinetic": [
+        "fast", "velocity", "speed", "kinetic", "motion", "drift", "slide", "flow", "racing",
+        "rapid", "swift", "momentum", "blur", "dash", "hasten", "fly", "zip", "zoom"
     ],
     "constructive": [
         "build", "forge", "weave", "graft", "carve", "bind", "weld", "anchor", "lift", "carry",
@@ -384,7 +386,7 @@ LEXICON = {
     ],
     "suburban": [
         "nice", "okay", "lawn", "mow", "hedge", "property", "hoa", "compliant", "behave", "normal",
-        "regular", "chat", "folks", "weekend", "traffic", "driveway"
+        "regular", "chat", "folks", "weekend", "traffic", "driveway", "home"
     ],
     "play": [
         "bounce", "dance", "twirl", "float", "wobble", "tickle", "jiggle", "soar", "wander", "wonder",
@@ -839,7 +841,7 @@ class TheAkashicRecord:
         self.forged_items: Dict[str, Any] = {}
         self.recipe_candidates: Dict[Tuple[str, str], Dict[str, int]] = {}
         self.lens_cooccurrence: Dict[Tuple[str, str], int] = {}
-        self.ingredient_affinity: Dict[str, int] = {} # [PATCH] Tracking material usage
+        self.ingredient_affinity: Dict[str, int] = {}
         self.style_drift = {"chaos_score": 0.0, "rigidity_score": 0.0}
         self.RECIPE_THRESHOLD = 3
         self.HYBRID_LENS_THRESHOLD = 5
