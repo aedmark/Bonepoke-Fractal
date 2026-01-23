@@ -1,5 +1,31 @@
 # BONEAMANITA CHANGELOG
 
+### **10.9.0 "The Social Contract"**
+
+**Focus:** Structural Functionalism, Governance, and Systemic Tensegrity.
+
+#### **1. `bone_village.py` (The Society)**
+
+* **Refactor:** "The Institutional Shift." Transformed `TownHall` from a static namespace into an **instantiated society**.
+* *Reason:* As per **Fuller's Tensegrity**, a system's strength comes from the continuous tension between its parts. The Village components (Tinkerer, Navigator, Journal) are now explicitly wired together via a shared `TownHall` instance, preventing "split-brain" causality errors.
+
+* **New Feature:** "The Village Council." Implemented a governance layer that conducts a **Census**.
+* *Reason:* A nod to **Structural Functionalism**—the village is now a system of interrelated parts working toward a common goal (stability). The Council polls the *live* state of the economy (Tinkerer), environment (Navigator), and culture (Almanac) to generate holistic health reports.
+
+* **Feature:** "The Safety Net." `TheTinkerer` now recognizes **Critical Items** (e.g., `SILENT_KNIFE`).
+* *Reason:* **Meadows** warns that efficiency without resilience is brittle. Tools now dull rather than disintegrate, preventing the "Poverty Trap" reinforcing loop where a tired user loses the very tools they need to recover.
+
+#### **2. `bone_main.py` (The Wiring)**
+
+* **Fix:** "Causality Restoration." Reordered the bootstrap sequence to ensure `GordonKnot` (the individual) exists before `TownHall` (the society) is founded.
+* *Reason:* You cannot have a village without villagers. This resolves the `AttributeError` crashes by respecting the temporal order of creation.
+
+#### **3. `bone_inventory.py` (The Hands)**
+
+* **Feature:** "The Swanson Protocol." Added `maintain_gear()` to `GordonKnot`.
+* *Reason:* **Schur's** belief in honest work. Users can now spend Stamina to repair Integrity or soothe Scar Tissue. It provides a constructive outlet for energy that doesn't involve "finding more stuff."
+* 
+
 ### **10.8.9 "The Adaptive Substrate"**
 
 **Focus:** Cognitive Ergonomics, Dynamic Resilience, and Feedback Loops.

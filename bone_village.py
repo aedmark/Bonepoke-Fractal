@@ -41,6 +41,7 @@ class TheTinkerer:
             if item_name not in self.tool_confidence:
                 self.tool_confidence[item_name] = 1.0
             current = self.tool_confidence[item_name]
+
             if is_forge:
                 self.tool_confidence[item_name] = min(3.0, current + learning_rate)
                 if self.tool_confidence[item_name] >= ascension_threshold:
@@ -52,8 +53,15 @@ class TheTinkerer:
                 if random.random() < 0.1:
                     reason = "Damp Narrative" if drag > 4.0 else "System Lag"
                     self.events.log(f"{Prisma.OCHRE}[TINKER]: {item_name} is rusting ({reason}).{Prisma.RST}", "SYS")
+
             if self.tool_confidence[item_name] <= 0.1:
-                items_to_shed.append(item_name)
+                is_critical = item_name in self.gordon.CRITICAL_ITEMS
+                if is_critical:
+                    self.tool_confidence[item_name] = 0.2  # Keep it barely alive
+                    if random.random() < 0.2:
+                        self.events.log(f"{Prisma.RED}[TINKER]: {item_name} is structurally critical, but Gordon refuses to let it go.{Prisma.RST}", "SYS")
+                else:
+                    items_to_shed.append(item_name)
         for item in items_to_shed:
             if item in inventory_list:
                 inventory_list.remove(item)
@@ -533,6 +541,7 @@ class TheNavigator:
         self.current_location = "THE_CONSTRUCT"
         self.root_system = None
         self.root_tolerance = 0.4
+        self.residence_time = 0
         self.manifolds = {
             "THE_CONSTRUCT": Manifold(
                 "THE_CONSTRUCT", (0.05, 0.1), 0.25,
@@ -623,8 +632,14 @@ class TheNavigator:
                 min_dist = dist
                 best_fit = name
         self.current_location = best_fit
-        if self.current_location != old_loc:
+        if self.current_location == old_loc:
+            self.residence_time += 1
+            if self.residence_time == 10:
+                return self.current_location, f"{Prisma.GRY}NAVIGATOR: We have been in {self.current_location} for a long time. The view is getting stale.{Prisma.RST}"
+        else:
+            self.residence_time = 0
             return self.current_location, self.manifolds[self.current_location].entry_msg
+
         return self.current_location, None
 
     def apply_environment(self, physics_packet: dict) -> List[str]:
@@ -762,22 +777,70 @@ class LiteraryJournal:
             breakdown=breakdown
         )
 
+class VillageCouncil:
+    """
+    The central coordination body.
+    It reads the state of the village components to detect systemic issues.
+    """
+    def __init__(self, town_hall_instance):
+        self.hall = town_hall_instance
+
+    def call_census(self) -> str:
+        """Generates a holistic report of the system's social ecology."""
+        report = [f"{Prisma.WHT}--- VILLAGE CENSUS ---{Prisma.RST}"]
+
+        # 1. Environmental Health (Navigator)
+        nav = self.hall.Navigator
+        report.append(f"Location: {nav.current_location}")
+        report.append(f"Shimmer Reserves: {nav.shimmer.current:.1f}")
+
+        # 2. Economic Health (Tinkerer)
+        # We access the LIVE tool_confidence dictionary from the Tinkerer instance
+        tinker = self.hall.Tinkerer
+        confident_tools = [k for k, v in tinker.tool_confidence.items() if v > 1.5]
+        rusting_tools = [k for k, v in tinker.tool_confidence.items() if v < 0.5]
+
+        econ_status = "Stable"
+        if len(rusting_tools) > 2: econ_status = "Recession (Rust Setting In)"
+        elif len(confident_tools) > 3: econ_status = "Boom (High Confidence)"
+
+        report.append(f"Economy: {econ_status}")
+        if rusting_tools:
+            report.append(f"   WARNING: {', '.join(rusting_tools)} are at risk.")
+
+        # 3. Cultural Health (Almanac & Journal)
+        # We can check the Almanac for the current 'weather'
+        condition, advice = self.hall.Almanac.diagnose_condition(
+            session_data={"meta": {"avg_voltage": 10}}, # Simplified context
+            host_health=None
+        )
+        report.append(f"Public Mood: {condition}")
+        report.append(f"Town Motto: '{advice}'")
+
+        return "\n".join(report)
+
 class TownHall:
-    Lexicon = TheLexicon
-    Almanac = TheAlmanac
-    CycleContext = CycleContext
-    Journal = LiteraryJournal
-    Cartographer = TheCartographer
-    Navigator = TheNavigator
-    Manifold = Manifold
-    PublicParksDepartment = PublicParksDepartment
-    ZenGarden = ZenGarden
-    Tinkerer = TheTinkerer
-    ParadoxSeed = ParadoxSeed
-    DeathGen = DeathGen
-    Apeirogon = ApeirogonResonance
-    Mirror = MirrorGraph
-    Sorites = SoritesIntegrator
-    Akashic = TheAkashicRecord
-    StrunkWhite = StrunkWhiteProtocol
-    CouncilChamber = CouncilChamber
+    def __init__(self, gordon_ref, events_ref, shimmer_ref):
+        # 1. Instantiate the Essential Services
+        self.Tinkerer = TheTinkerer(gordon_ref, events_ref)
+        self.Navigator = TheNavigator(shimmer_ref)
+        self.Almanac = TheAlmanac()
+        self.Journal = LiteraryJournal()
+        self.Cartographer = TheCartographer()
+        self.Paradox = ParadoxSeed("Who watches the watchers?", ["mirror", "reflection"])
+        self.Mirror = MirrorGraph(events_ref)
+        self.ZenGarden = ZenGarden(events_ref)
+
+        # 2. Instantiate the Council (wiring it to self)
+        self.Council = VillageCouncil(self)
+
+        # 3. Static/Utility References
+        # We store references to the classes/protocols for easy access
+        self.Lexicon = TheLexicon
+        self.CycleContext = CycleContext
+        self.Manifold = Manifold
+        self.DeathGen = DeathGen
+        self.Apeirogon = ApeirogonResonance(events_ref)
+
+        # 4. Initialize Systems
+        self.DeathGen.load_protocols()

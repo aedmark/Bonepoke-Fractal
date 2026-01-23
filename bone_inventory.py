@@ -207,6 +207,30 @@ class GordonKnot:
         prefix = f"{Prisma.OCHRE}RUMMAGE:{Prisma.RST} "
         return True, f"{prefix}{msg}", stamina_penalty
 
+    def maintain_gear(self, stamina_pool: float) -> Tuple[bool, str, float]:
+        cost = 15.0
+        if stamina_pool < cost:
+            return False, f"{Prisma.GRY}GORDON: 'Hands are shaking. Need rest.' (Req: {cost} Stamina){Prisma.RST}", 0.0
+
+        restored = 0
+        if self.integrity < 100.0:
+            gain = random.randint(5, 15)
+            self.integrity = min(100.0, self.integrity + gain)
+            msg = f"{Prisma.GRN}MAINTENANCE: Gordon sharpened the knives and oiled the leather. (+{gain} Integrity){Prisma.RST}"
+        else:
+            if self.scar_tissue:
+                healed_scar = random.choice(list(self.scar_tissue.keys()))
+                self.scar_tissue[healed_scar] = max(0.0, self.scar_tissue[healed_scar] - 0.2)
+                if self.scar_tissue[healed_scar] <= 0:
+                    del self.scar_tissue[healed_scar]
+                    msg = f"{Prisma.CYN}THERAPY: Gordon realized '{healed_scar}' isn't so scary anymore.{Prisma.RST}"
+                else:
+                    msg = f"{Prisma.CYN}REFLECTION: Gordon is working through '{healed_scar}'.{Prisma.RST}"
+            else:
+                msg = f"{Prisma.GRY}GORDON: 'Everything is in order.'{Prisma.RST}"
+
+        return True, msg, cost
+
     def acquire(self, tool_name: str) -> str:
         tool_name = tool_name.upper()
         registry_data = self.get_item_data(tool_name)

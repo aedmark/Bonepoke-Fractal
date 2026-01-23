@@ -1,4 +1,4 @@
-# BONEAMANITA 10.8.9
+# BONEAMANITA 10.9.0
 # Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark
 
 import time, json
@@ -7,7 +7,7 @@ from typing import Dict, Any
 from bone_bus import EventBus, Prisma, BoneConfig, SystemHealth, TheObserver
 from bone_commands import CommandProcessor
 from bone_data import TheAkashicRecord, TheLore
-from bone_village import TownHall
+from bone_village import TownHall, DeathGen
 from bone_lexicon import TheLexicon, LiteraryReproduction
 from bone_inventory import GordonKnot
 from bone_telemetry import TelemetryService
@@ -30,7 +30,7 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 10.8.9', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 10.9.0', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -64,7 +64,7 @@ class BoneAmanita:
             except Exception as e:
                 print(f"{Prisma.GRY}[INIT]: Ancestral check skipped ({e}).{Prisma.RST}")
         self.lex.compile_antigens()
-        TownHall.DeathGen.load_protocols()
+        DeathGen.load_protocols()
         LiteraryReproduction.load_genetics()
         self.akashic = TheAkashicRecord()
         print(f"{Prisma.CYN}[SLASH]: The Akashic Record is open for writing.{Prisma.RST}")
@@ -85,27 +85,35 @@ class BoneAmanita:
         self.shimmer_state = self.embryo.shimmer
         self.soul_legacy_data = self.embryo.soul_legacy
         self.navigator = self.phys.nav
+        self.gordon = GordonKnot()
         self.soul = NarrativeSelf(self, self.events, memory_ref=self.mind.mem)
         if self.soul_legacy_data:
             self.soul.load_from_dict(self.soul_legacy_data)
-        self.journal = TownHall.Journal()
+        self.town_hall = TownHall(self.gordon, self.events, self.shimmer_state)
+
+        # Create local aliases for system access (Backwards Compatibility)
+        self.navigator = self.town_hall.Navigator
+        self.journal = self.town_hall.Journal
+        self.tinkerer = self.town_hall.Tinkerer
+        self.almanac = self.town_hall.Almanac
+        self.zen = self.town_hall.ZenGarden
+        self.council = self.town_hall.Council  # Now points to the new VillageCouncil
+
+        # Standalone Protocols
         self.repro = LiteraryReproduction()
         self.projector = Projector()
-        self.gordon = GordonKnot()
         self.kintsugi = KintsugiProtocol()
         self.therapy = TherapyProtocol()
         self.folly = TheFolly()
         self.stabilizer = ZoneInertia()
         self.cassandra = CassandraProtocol(self)
         self.director = ChorusDriver()
-        self.tinkerer = TownHall.Tinkerer(self.gordon, self.events)
         self.bureau = TheBureau()
-        self.almanac = TownHall.Almanac()
         self.cosmic = CosmicDynamics()
-        self.council = TownHall.CouncilChamber()
-        self.cmd = CommandProcessor(self, Prisma, self.lex, BoneConfig, TownHall.Cartographer)
-        self.zen = TownHall.ZenGarden(self.events)
-        self.soma = SomaticLoop(self.bio, self.mind.mem, self.lex, self.gordon, self.folly, self.events)
+
+        # Command Processor (Using the Village Cartographer)
+        self.cmd = CommandProcessor(self, Prisma, self.lex, BoneConfig, self.town_hall.Cartographer)
+        self.soma = SomaticLoop(self.bio, self.mind.mem, self.lex, self.folly, self.events)
         self.noetic = NoeticLoop(self.mind, self.bio, self.events)
         self.cycle_controller = GeodesicOrchestrator(self)
         local_brain = LLMInterface(events_ref=self.events)
@@ -193,7 +201,7 @@ class BoneAmanita:
         return None
 
     def trigger_death(self, last_phys) -> Dict:
-        eulogy = TownHall.DeathGen.eulogy(last_phys, self.bio.mito.state)
+        eulogy = self.town_hall.DeathGen.eulogy(last_phys, self.bio.mito.state)
         death_log = [f"\n{Prisma.RED}SYSTEM HALT: {eulogy}{Prisma.RST}"]
         try:
             path = self.mind.mem.save(
@@ -268,7 +276,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 10.8.9', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 10.9.0', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")
