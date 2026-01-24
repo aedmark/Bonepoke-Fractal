@@ -305,7 +305,7 @@ class SomaticLoop:
                 total_atp_yield += (base_word_yield * damped_multiplier)
                 if len(found_enzymes) <= 3:
                     logs.append(f"{Prisma.GRN}[BIO]: Digested '{word}' (x{count}) -> {enzyme} (+{(base_word_yield * damped_multiplier):.1f} ATP){Prisma.RST}")
-        if phys.get("voltage", 0.0) > 8.0:
+        if phys.get("voltage", 0.0) > 8.0 and found_enzymes:
             found_enzymes.append("PROTEASE")
             total_atp_yield += 5.0
         if not found_enzymes:

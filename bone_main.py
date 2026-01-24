@@ -1,4 +1,4 @@
-""" BONEAMANITA 11.1.0 'NEW BEGINNINGS'
+""" BONEAMANITA 11.2.0 'The Sympathetic Resonance'
  Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark """
 
 import time, json, uuid
@@ -30,7 +30,7 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 11.1.0', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 11.2.0', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -317,7 +317,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 11.1.0', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 11.2.0', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

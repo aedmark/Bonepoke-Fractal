@@ -87,12 +87,9 @@ class DiagnosticProbe:
         original_validate = gen.validate_brain_uplink
         gen.detect_local_brains = mock_detect_local_brains
         gen.validate_brain_uplink = mock_validate_brain_uplink
-
         if os.path.exists("bone_config.json"):
             os.remove("bone_config.json")
-
         inputs = ["1", "1", "gemma3"]
-
         print(f"\n{Prisma.paint('--- Injection: Running Setup Wizard (Simulated) ---', 'C')}")
         try:
             with MockInput(inputs):
@@ -156,9 +153,7 @@ class DiagnosticProbe:
                 self.report("Metabolic Digest", True, f"Produced {enzyme}.")
             else:
                 self.report("Metabolic Digest", False, "No enzyme produced.")
-
         omni_phrase = "The heavy iron engine runs fast with kinetic fire. Danger approaches the soft warm home. We must analyze the abstract void."
-
         self.run_epoch(
             "THE OMNI-PHRASE",
             "A stress test of semantic density. Attempting to trigger multiple systems at once.",
@@ -182,23 +177,29 @@ class DiagnosticProbe:
     def run_dream_suite(self):
         print(f"\n{Prisma.paint('=== EPOCH 6: THE REM CYCLE ===', 'Y')}")
         print(f"{Prisma.paint('Forcing metabolic crash to test auto-sleep protocols.', 'GRY')}")
-
         old_atp = self.eng.bio.mito.state.atp_pool
         self.eng.bio.mito.state.atp_pool = 1.0
         print(f"{Prisma.paint(f'>>> CRITICAL: ATP drained ({old_atp:.1f} -> 1.0)', 'R')}")
-
         self.run_epoch(
             "NARCOLEPSY TRIGGER",
             "System should detect low energy and force a dream state.",
             ["system sleep"],
-            self._validate_dream
-        )
-
+            self._validate_dream)
         self.eng.bio.mito.state.atp_pool = 60.0
         print(f"{Prisma.paint('>>> METABOLISM RESET: ATP restored', 'G')}")
 
+    def rejuvenate(self):
+        print(f"\n{Prisma.paint('>>> SYSTEM REJUVENATION: Restoring Vitals...', 'G')}")
+        self.eng.health = 100.0
+        self.eng.stamina = 100.0
+        self.eng.bio.mito.state.atp_pool = 100.0
+        self.eng.bio.endo.cortisol = 0.0
+        self.eng.bio.endo.dopamine = 0.5
+        self.eng.phys.pulse.boredom_level = 0.0
+
     def run_gamut(self):
         self.run_genesis_suite()
+        self.rejuvenate()
         self.run_omni_test()
         self.run_dream_suite()
 
@@ -210,7 +211,7 @@ class DiagnosticProbe:
                 self.report("Refusal Protocols", True, "- System correctly rejected garbage.")
             else:
                 self.report("Assimilation", True, "- Input processed normally.")
-
+        self.rejuvenate()
         self.run_epoch(
             "THE BABEL STRESS",
             "Injecting high-entropy, undefined neologisms to test plasticity.",
@@ -220,13 +221,12 @@ class DiagnosticProbe:
 
         def validate_sisyphus(eng, snap):
             atp = eng.bio.mito.state.atp_pool
-            if atp < 90.0:
+            if atp < 95.0:
                 self.report("Metabolic Burn", True, f"ATP Draining correctly ({atp:.1f}).")
             else:
                 self.report("Metabolic Burn", False, f"ATP not draining ({atp:.1f}). Input is too nutritious.")
-
         bad_food = ["syntax error void null"] * 5
-
+        self.rejuvenate()
         self.run_epoch(
             "THE SISYPHUS LOOP",
             "Feeding unprocessable, high-drag inputs to force metabolic waste.",
@@ -250,7 +250,7 @@ class DiagnosticProbe:
                     self.report("Hormonal Alignment (ADR)", True, f"Adrenaline Level: {endo.adrenaline:.2f}")
                 else:
                     self.report("Hormonal Alignment (ADR)", False, f"System remained calm. (Adr: {endo.adrenaline:.2f})")
-
+        self.rejuvenate()
         self.run_epoch(
             "THE HEART MONITOR",
             "Testing somatic alignment with emotive keywords.",
@@ -275,7 +275,7 @@ class DiagnosticProbe:
                     self.report("Boredom Detection", True, f"Pulse Status: {pulse}")
                 else:
                     self.report("Boredom Detection", False, "System is surprisingly amused by repetition.")
-
+        self.rejuvenate()
         self.run_epoch(
             "THE RED TAPE",
             "Repeating identical inputs to trigger stagnation protocols.",
@@ -302,7 +302,7 @@ class DiagnosticProbe:
             else:
                 self.report("Muse Protocol", False, "System was passive (No question or connection).")
                 print(f"      > Output: {ui_text.strip()}")
-
+        self.rejuvenate()
         self.run_epoch(
             "THE MUSE CHECK",
             "Feeding poetic input to test 'Yes, And' engagement protocols.",

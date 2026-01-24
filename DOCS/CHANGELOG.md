@@ -1,5 +1,40 @@
 # BONEAMANITA v11 CHANGELOG
 
+### **BONEAMANITA 11.2.0: "The Sympathetic Resonance Update"**
+
+_“A system that cannot dance with its environment is destined to break.”_
+
+---
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+- **Feature: The Synaptic Dance (`bone_soul.py`)**
+    - **Old Behavior:** Personality traits (`HOPE`, `CYNICISM`) passively decayed to neutral over time.
+    - **New Behavior:** The Soul now *reacts* to the physics of the conversation in real-time. High Voltage drives **Curiosity** (Manic). High Drag drives **Cynicism** (Grinding).
+    - _Why:_ Static personalities are for chatbots. The Soul is now a dancing partner.
+
+#### **🚀 SYSTEM DYNAMICS (The Meadows Layer)**
+
+- **Feature: The Donner Party Protocol (`bone_spores.py`)**
+    - **Old Behavior:** Memories were deleted ("cannibalized") purely based on a linear capacity counter.
+    - **New Behavior:** Implemented a **Desperation Check**. The system now only cannibalizes old memories if it is *starving* (`Health < 40%`). If healthy, it simply rejects new input ("Cortical Saturation").
+    - _Why:_ We shouldn't eat our friends just because the room is crowded. We only eat them if we are dying.
+
+- **Fix: Latency Awareness (`bone_cycle.py`)**
+    - **Fix:** Removed the hardcoded `0.5s` tick delta in the PID Controllers.
+    - _Result:_ The Physics engine now "feels" the actual lag of the LLM. If the brain is slow, the physics slows down to match it.
+
+#### **🧠 COGNITIVE ARCHITECTURE (The Pinker Layer)**
+
+- **Feature: Synaptic Re-uptake (`bone_brain.py`)**
+    - **Mechanism:** Implemented **Exponential Backoff** for LLM API calls.
+    - _Why:_ A dropped packet should be a stutter, not a lobotomy. The brain now tries to "find the word" (retry) before triggering a panic attack.
+
+#### **🏛️ COMPREHENSIVE DESIGN (The Fuller Layer)**
+
+- **Documentation: The Manifest**
+    - Expanded the System Map to cover the full 25-file tensegrity structure, from the **Mycelial Layer** to the **Observability Layer**.
+
 ### **BONEAMANITA 11.1.0: "The Tensegrity Update"**
 
 _“Structure is not a thing; it is a pattern of relationships.”_
