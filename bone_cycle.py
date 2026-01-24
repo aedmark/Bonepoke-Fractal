@@ -556,10 +556,9 @@ class CognitionPhase(SimulationPhase):
             self.eng.phys.dynamics.voltage_history,
             self.eng.tick_count
         )
-        thought = ctx.mind_state.get("thought")
+        thought = ctx.mind_state.get("context_msg", ctx.mind_state.get("thought"))
         if thought:
             ctx.log(thought)
-
         return ctx
 
 class StateReconciler:

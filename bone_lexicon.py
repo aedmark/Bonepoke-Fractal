@@ -1,5 +1,5 @@
-# bone_lexicon.py - The Global Dictionary
-# "Words are things, I'm convinced." - Maya Angelou
+""" bone_lexicon.py - The Global Dictionary
+ 'Words are things, I'm convinced.' - Maya Angelou """
 
 import json, random, re, string, time, unicodedata, os
 from typing import Tuple, Dict, Set, Optional, List
@@ -439,7 +439,7 @@ class LiteraryReproduction:
     @classmethod
     def load_genetics(cls):
         try:
-            genetics = TheLore.get("GENETICS") #
+            genetics = TheLore.get("GENETICS")
             cls.MUTATIONS = genetics.get("MUTATIONS", {})
             cls.JOY_CLADE = genetics.get("JOY_CLADE", {})
         except Exception:

@@ -1,4 +1,4 @@
-# bone_telemetry.py
+""" bone_telemetry.py """
 
 import json
 import time

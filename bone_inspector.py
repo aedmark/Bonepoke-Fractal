@@ -13,7 +13,6 @@ from bone_bus import Prisma, CycleContext, PhysicsPacket
 from bone_cycle import CycleSimulator, GeodesicOrchestrator
 from bone_genesis import GenesisProtocol
 
-
 @contextmanager
 def MockInput(inputs: List[str]):
     """
@@ -287,6 +286,40 @@ class DiagnosticProbe:
             "Repeating identical inputs to trigger stagnation protocols.",
             ["form 27b/6", "form 27b/6", "form 27b/6"],
             validate_boredom
+        )
+
+        def validate_muse(eng, snap):
+            packet = eng.phys.tension.last_physics_packet
+
+            logs = snap.get("logs", [])
+            last_log = logs[-1] if logs else ""
+
+            mind_state = snap.get("mind_state", {})
+            current_lens = eng.noetic.arbiter.current_focus
+
+            print(f"      > Lens Active: {current_lens}")
+
+            if current_lens not in ["NARRATOR", "SHERLOCK"]:
+                self.report("Muse Protocol", False, f"System failed to detect literary tone. (Got {current_lens})")
+                return
+
+            ui_text = snap.get("ui", "")
+
+            if "?" in ui_text:
+                self.report("Muse Protocol", True, f"Engagement Detected: Question Mark found.")
+                print(f"      > Output: {ui_text.strip()}")
+            elif len(ui_text) > 20:
+                self.report("Muse Protocol", True, "Engagement Detected: Response length indicates connection.")
+                print(f"      > Output: {ui_text.strip()}")
+            else:
+                self.report("Muse Protocol", False, "System was passive (No question or connection).")
+                print(f"      > Output: {ui_text.strip()}")
+
+        self.run_epoch(
+            "THE MUSE CHECK",
+            "Feeding poetic input to test 'Yes, And' engagement protocols.",
+            ["The shadows lengthen, not from absence of light, but from the weight of time."],
+            validate_muse
         )
 
 

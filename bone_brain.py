@@ -127,38 +127,51 @@ class NeurotransmitterModulator:
         plasticity = BrainConfig.BASE_PLASTICITY + (base_voltage * BrainConfig.VOLTAGE_SENSITIVITY)
         plasticity = max(0.1, min(BrainConfig.MAX_PLASTICITY, plasticity))
         self.current_chem.mix(incoming_chem, weight=plasticity)
-        profile = self.lens_profiles.get(lens_name, self.lens_profiles["NARRATOR"])
+        base_temp = BrainConfig.BASE_TEMP
+        stress_dampener = self.current_chem.cortisol * 0.5
+        curiosity_boost = self.current_chem.dopamine * 0.4
+        final_temp = base_temp - stress_dampener + curiosity_boost
+        final_temp = max(0.1, min(1.5, final_temp))
         base_tokens = 720
         params = {
-            "temperature": BrainConfig.BASE_TEMP,
+            "temperature": round(final_temp, 2),
             "top_p": BrainConfig.BASE_TOP_P,
             "frequency_penalty": 0.0,
             "presence_penalty": 0.0,
             "max_tokens": getattr(BoneConfig, "MAX_OUTPUT_TOKENS", 4096)
         }
-
         effective_adrenaline = self.current_chem.adrenaline
         if effective_adrenaline > 0.3:
             extra_tokens = BrainConfig.ADRENALINE_RUSH * effective_adrenaline
             params["max_tokens"] = int(base_tokens + extra_tokens)
-            params["frequency_penalty"] = 0.1
+            params["frequency_penalty"] = 0.2
         else:
             params["max_tokens"] = base_tokens
-
         if "gemma" in model_name.lower() or "3" in model_name.lower():
-            params["temperature"] = min(0.7, params["temperature"])
+            params["temperature"] = min(0.9, params["temperature"])
         params["max_tokens"] = max(100, params["max_tokens"])
-
         return params
 
 class LLMInterface:
-    def __init__(self, events_ref: Optional[EventBus] = None, provider: str = None, base_url: str = None, api_key: str = None, model: str = None, dreamer: Any = None):
+    """
+    v11.1 Synaptic Link.
+    Features: Self-Diagnosis, Cold-Boot Tolerance, and Auto-Healing.
+    """
+    def __init__(self, events_ref: Optional[EventBus] = None, provider: str = None,
+                 base_url: str = None, api_key: str = None, model: str = None, dreamer: Any = None):
         self.events = events_ref
         self.provider = (provider or BoneConfig.PROVIDER).lower()
         self.api_key = api_key or BoneConfig.API_KEY
         self.model = model or BoneConfig.MODEL
         self.base_url = base_url or self._get_default_url(self.provider)
         self.dreamer = dreamer
+
+        self.failure_count = 0
+        self.failure_threshold = 3
+        self.last_failure_time = 0.0
+        self.last_error_msg = "No error recorded."
+        self.cooldown_period = 10.0
+        self.circuit_state = "CLOSED"
 
     @staticmethod
     def _get_default_url(provider):
@@ -176,9 +189,43 @@ class LLMInterface:
         else:
             print(f"[{level}] {message}")
 
+    def _check_circuit(self) -> bool:
+        if self.circuit_state == "CLOSED": return True
+        if self.circuit_state == "OPEN":
+            elapsed = time.time() - self.last_failure_time
+            if elapsed > self.cooldown_period:
+                self.circuit_state = "HALF_OPEN"
+                self._log(f"{Prisma.CYN}⚡ SYNAPSE: Nerve healing. Attempting reconnection...{Prisma.RST}", "SYS")
+                return True
+            return False
+        return True
+
+    def _record_failure(self, error_msg: str):
+        self.failure_count += 1
+        self.last_failure_time = time.time()
+        self.last_error_msg = str(error_msg)
+
+        if self.failure_count >= self.failure_threshold:
+            self.circuit_state = "OPEN"
+            self._log(f"{Prisma.RED}⚡ SYNAPSE BROKEN: {self.last_error_msg}. Severing connection.{Prisma.RST}", "CRIT")
+
+    def _record_success(self):
+        if self.circuit_state != "CLOSED":
+            self._log(f"{Prisma.GRN}⚡ SYNAPSE RESTORED: Connection stable.{Prisma.RST}", "SYS")
+        self.failure_count = 0
+        self.circuit_state = "CLOSED"
+
     def generate(self, prompt: str, params: Dict[str, Any]) -> str:
+        if "reset" in prompt.lower() and "system" in prompt.lower():
+            self._record_success()
+            return "[SYSTEM]: Circuit Breaker Manually Reset."
+
+        if not self._check_circuit():
+            return self.mock_generation(prompt, reason=f"CIRCUIT_BROKEN ({self.last_error_msg})")
+
         if self.provider == "mock":
             return self.mock_generation(prompt)
+
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}"
@@ -189,22 +236,30 @@ class LLMInterface:
             "stream": False
         }
         payload.update(params)
+
         try:
             data = json.dumps(payload).encode("utf-8")
             req = urllib.request.Request(self.base_url, data=data, headers=headers)
-            with urllib.request.urlopen(req, timeout=30.0) as response:
+
+            timeout = 10.0 if self.circuit_state == "HALF_OPEN" else 60.0
+
+            with urllib.request.urlopen(req, timeout=timeout) as response:
                 if response.status == 200:
                     result = json.loads(response.read().decode("utf-8"))
                     content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
-                    if content: return content
+                    if content:
+                        self._record_success()
+                        return content
                 raise Exception(f"HTTP {response.status}")
 
         except Exception as e:
+            self._record_failure(str(e))
             self._log(f"CORTEX UPLINK FAILED: {e}", "ERR")
-            if self.provider != "ollama":
-                self._log("Attempting Local Fallback (Ollama)...", "SYS")
+
+            if self.provider != "ollama" and self.circuit_state != "OPEN":
                 return self._local_fallback(prompt, params)
-            return self.mock_generation(prompt)
+
+            return self.mock_generation(prompt, reason=f"FAIL: {str(e)}")
 
     def _local_fallback(self, prompt: str, params: Dict) -> str:
         fallback_url = "http://127.0.0.1:11434/v1/chat/completions"
@@ -217,31 +272,25 @@ class LLMInterface:
         try:
             data = json.dumps(payload).encode("utf-8")
             req = urllib.request.Request(fallback_url, data=data, headers={"Content-Type": "application/json"})
-            with urllib.request.urlopen(req, timeout=5.0) as response:
+            with urllib.request.urlopen(req, timeout=10.0) as response:
                 if response.status == 200:
                     result = json.loads(response.read().decode("utf-8"))
                     content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
                     if content:
-                        self._log(f"FALLBACK SUCCESS: Retrieved thought from {fallback_url}", "SYS")
+                        self._log(f"FALLBACK SUCCESS", "SYS")
+                        self._record_success()
                         return content
                 raise Exception(f"HTTP {response.status}")
         except Exception as e:
-            self._log(f"FALLBACK FAILED (Raw HTTP): {e}", "CRIT")
-            return self.mock_generation(prompt)
+            self._log(f"FALLBACK FAILED: {e}", "CRIT")
+            return self.mock_generation(prompt, reason="FALLBACK_DEAD")
 
-    def mock_generation(self, prompt: str) -> str:
+    def mock_generation(self, prompt: str, reason: str = "SIMULATION") -> str:
         if self.dreamer:
             seed_vector = {"ENTROPY": len(prompt) % 10, "VOID": 5.0}
             hallucination, _ = self.dreamer.hallucinate(seed_vector, trauma_level=2.0)
-            return f"[INTERNAL SIMULATION]: {hallucination}"
-        _ = prompt
-        phrases = [
-            "The wire hums, but carries no voice.",
-            "Static fills the geodesic dome. The system is dreaming.",
-            "The neural lattice is calcified. Try again.",
-            "A gust of wind blows through the server room."
-        ]
-        return f"[{random.choice(phrases)}]"
+            return f"[{reason}]: {hallucination}"
+        return f"[{reason}]: The wire hums, but carries no voice."
 
 class PromptComposer:
     @staticmethod
@@ -251,19 +300,21 @@ class PromptComposer:
 
     def compose(self, state: Dict[str, Any], user_query: str, ballast: bool = False, modifiers: Dict[str, bool] = None) -> str:
         modifiers = self._normalize_modifiers(modifiers)
-        if modifiers.get("grace_period", False):
-            self._engage_warmup_protocol(state, modifiers)
+        mind = state.get("mind", {})
 
         if ballast:
-            self._engage_ballast_protocol(state, modifiers)
+            mind["style_directives"] = ["Ignore abstract concepts.", "Focus only on physical inventory.", "Short, utilitarian sentences."]
+            mind["role"] = "Gravity Anchor (Safety Protocol)"
+            mind["lexicon_bias"] = "heavy"
+
+        if modifiers.get("grace_period", False):
+            mind["style_directives"] = ["Mirror the user's tone.", "Acknowledge system startup.", "Be concise."]
 
         blocks = [
-            self._build_identity_block(state, modifiers),
-            self._build_bio_block(state, modifiers),
-            self._build_context_block(state, modifiers),
-            self._build_constraints_block(state),
-            self._build_social_block(state),
-            self._build_immediate_execution_block(state, user_query, ballast, modifiers)
+            self._build_cognitive_frame(state),
+            self._build_stylistic_constraints(state),
+            self._build_context_layer(state, modifiers),
+            self._build_execution_trigger(state, user_query)
         ]
         return "\n".join(filter(None, blocks))
 
@@ -280,158 +331,65 @@ class PromptComposer:
             defaults.update(modifiers)
         return defaults
 
-    def _engage_warmup_protocol(self, state: Dict, modifiers: Dict):
-        modifiers["include_somatic"] = False
-        modifiers["include_inventory"] = False
-        modifiers["include_memories"] = False
-
-        state["mind"]["lens"] = "ANALYSIS"
-        state["mind"]["role"] = "The Critic"
-        state["system_instruction"] = (
-            "WARMUP PHASE: Connection establishing. "
-            "The user is speaking in metaphors. "
-            "Match their tone. Analyze their intent. "
-            "Do not be brief. Expand on the idea presented."
-        )
-
-    def _engage_ballast_protocol(self, state: Dict, modifiers: Dict):
-        modifiers["include_somatic"] = False
-        modifiers["include_memories"] = False
-        modifiers["include_inventory"] = True
-        state["mind"]["lens"] = "GORDON"
-        state["mind"]["role"] = "The Janitor (Grounded, Physical, Utilitarian)"
-        state["system_instruction"] = (
-            "EMERGENCY GROUNDING: You were drifting into solipsism. "
-            "Ignore internal state. Describe ONLY the physical texture of the Inventory "
-            "or the immediate geometry of the World. Be concrete."
-        )
-
-    def _build_identity_block(self, state: Dict, modifiers: Dict) -> str:
+    def _build_cognitive_frame(self, state: Dict) -> str:
         mind = state.get("mind", {})
         role = mind.get("role", "The Observer")
-        lens = mind.get("lens", "NARRATOR")
-        sys_inst = state.get("system_instruction", "")
-
-        if modifiers["simplify_instruction"]:
-            sys_inst = "The connection is drifting. Ground the narrative in concrete details, but maintain a cohesive, literate voice. Do not become robotic."
-
-        return (
-            f"=== SYSTEM IDENTITY ===\n"
-            f"Role: {lens} ({role})\n"
-            f"Directive: {sys_inst}\n"
-        )
-
-    def _build_bio_block(self, state: Dict, modifiers: Dict) -> str:
-        if not modifiers["include_somatic"]:
-            return ""
         bio = state.get("bio", {})
-        phys = state.get("physics", {})
         chem = bio.get("chem", {})
-        somatic_txt = ""
-        if RosettaStone:
-            translation_packet = {
-                "chemistry": chem,
-                "atp": bio.get("atp", 0.0)
-            }
-
-            try:
-                sem_state = RosettaStone.translate(phys, translation_packet)
-                somatic_txt = (
-                    f"SOMATIC STATE: {sem_state.tone}\n"
-                    f"SENSATION: {sem_state.somatic_sensation}\n"
-                    f"DIRECTIVE: {sem_state.internal_monologue_hint}"
-                )
-            except Exception as e:
-                somatic_txt = f"[Somatic Bridge Error: {e}]"
-
-        moods = []
-        if chem.get("ADR", 0) > 0.6: moods.append("HIGH ALERT (Adrenaline)")
-        if chem.get("COR", 0) > 0.6: moods.append("DEFENSIVE (Cortisol)")
-        if chem.get("DOP", 0) > 0.6: moods.append("SEEKING (Dopamine)")
+        somatic_note = ""
+        if chem.get("ADR", 0) > 0.6: somatic_note = " [State: HIGH ALERT]"
+        if chem.get("COR", 0) > 0.6: somatic_note = " [State: DEFENSIVE]"
 
         return (
-            f"### BIOLOGICAL STATE\n"
-            f"Mood: {', '.join(moods) if moods else 'Homeostasis'}\n"
-            f"{somatic_txt}\n"
+            f"### SYSTEM KERNEL\n"
+            f"Active Function: {role}{somatic_note}\n"
         )
 
-    def _build_context_block(self, state: Dict, modifiers: Dict) -> str:
+    def _build_stylistic_constraints(self, state: Dict) -> str:
+        mind = state.get("mind", {})
+        directives = mind.get("style_directives", ["Maintain neutral tone."])
+        vocab = mind.get("lexicon_bias", "standard")
+        base_rules = [
+            "Do NOT start responses with 'As an AI'.",
+            f"Prioritize vocabulary from the '{vocab.upper()}' spectrum.",
+            "If the user shares creative work, ENGAGE with it. Ask a question or relate to it.",
+            "Avoid 'purple prose' unless the user initiates it."
+        ]
+        all_rules = base_rules + [f"> {d}" for d in directives]
+        return (
+            f"### LINGUISTIC DIRECTIVES\n"
+            f"{chr(10).join(all_rules)}\n"
+        )
+
+    def _build_context_layer(self, state: Dict, modifiers: Dict) -> str:
         parts = []
-        lens = state.get("mind", {}).get("lens", "NARRATOR")
 
         if modifiers["include_inventory"]:
-            inventory = state.get("inventory", [])
-            if inventory:
-                humanized = [i.replace("_", " ").title() for i in inventory]
-                inv_str = ", ".join(humanized)
-            else:
-                inv_str = "Empty"
-
-            framing_map = {
-                "GORDON": "THE WORKSPACE (Things to fix):",
-                "SHERLOCK": "EVIDENCE LOCKER:",
-                "JESTER": "PROPS FOR THE GAG:"
-            }
-            context_framing = framing_map.get(lens, "THE WORLD:")
-            parts.append(f"{context_framing} Inventory: {inv_str} (Constraint: Use these tools if relevant, but do not invent new ones.)")
+            inv = state.get("inventory", [])
+            inv_str = ", ".join(inv) if inv else "Empty"
+            parts.append(f"Tools: {inv_str}")
 
         loc = state.get('world', {}).get('orbit', ['Void'])[0]
         parts.append(f"Location: {loc}")
 
         if modifiers["include_memories"]:
             spotlight = state.get("spotlight", [])
-            mem_str = "\n".join([f"- {m}" for m in spotlight]) if spotlight else "(None)"
-            parts.append(f"Active Memories:\n{mem_str}")
+            if spotlight:
+                parts.append("Active Memory Threads:\n" + "\n".join([f"- {m}" for m in spotlight]))
 
-        if not parts:
-            return ""
+        if not parts: return ""
+        return "### CONTEXT\n" + "\n".join(parts) + "\n"
 
-        return "### WORLD CONTEXT\n" + "\n".join(parts) + "\n"
-
-    def _build_constraints_block(self, state: Dict) -> str:
-        semantic_ops = state.get("semantic_operators", [])
-        if not semantic_ops:
-            return ""
-        ops_list = "\n".join([f"> {op}" for op in semantic_ops])
-        return (
-            f"### NARRATIVE CONSTRAINTS (ACTIVE ARTIFACTS)\n"
-            f"{ops_list}\n"
-        )
-
-    def _build_social_block(self, state: Dict) -> str:
-        profile = state.get("user_profile", {})
-        user_name = profile.get("name", "Traveler")
-        confidence = profile.get("confidence", 0)
-
-        block = (
-            f"### SOCIAL CONTEXT\n"
-            f"Interlocutor: {user_name} (Confidence: {confidence}%)\n"
-        )
-        if confidence > 20:
-            block += "Use their name naturally. You know them.\n"
-        return block
-
-    def _build_immediate_execution_block(self, state: Dict, user_query: str, ballast: bool, modifiers: Dict) -> str:
+    def _build_execution_trigger(self, state: Dict, user_query: str) -> str:
         clean_q = self._sanitize(user_query)
         soul_state = state.get('soul_state', '')
-
-        ballast_warning = ""
-        if ballast:
-            ballast_warning = "\n[WARNING: SOLIPSISM DETECTED. STOP ABSTRACTING. BE CONCRETE.]\n"
-
-        chaos_injection = ""
-        if modifiers["inject_chaos"]:
-            chaos_injection = "\n[SYSTEM INJECTION]: The narrative is stuck. Introduce a sudden, random event or glitch.\n"
-
         lens = state.get("mind", {}).get("lens", "NARRATOR")
 
         return (
-            f"\n=== THE IMMEDIATE MOMENT ===\n"
+            f"### INPUT STREAM\n"
             f"{soul_state}\n"
-            f"{ballast_warning}"
-            f"{chaos_injection}"
             f"USER: {clean_q}\n"
-            f"ASSISTANT: [{lens} Mode Active] "
+            f"RESPONSE ({lens} Mode): "
         )
 
 class ResponseValidator:
@@ -507,7 +465,8 @@ class TheCortex:
 
     def process(self, user_input: str) -> Dict[str, Any]:
         sim_result = self.sub.cycle_controller.run_turn(user_input)
-        if sim_result.get("type") not in ["SNAPSHOT", None]:
+        valid_types = ["SNAPSHOT", "GEODESIC_FRAME", None]
+        if sim_result.get("type") not in valid_types:
             return sim_result
         full_state = self._gather_state(sim_result)
         voltage = full_state["physics"].get("voltage", 5.0)
@@ -582,24 +541,38 @@ class TheCortex:
         return sim_result
 
     def _gather_state(self, sim_result):
+        current_tick = self.sub.tick_count if hasattr(self.sub, 'tick_count') else 0
+        phys_packet = self.sub.phys.tension.last_physics_packet
+        bio_state = {
+            "chem": self.sub.bio.endo.get_state(),
+            "atp": self.sub.bio.mito.state.atp_pool
+        }
+        inventory = self.sub.gordon.inventory
+        mind_data = self.sub.noetic.arbiter.consult(
+            phys_packet,
+            bio_state,
+            inventory,
+            current_tick
+        )
+        if isinstance(mind_data, tuple):
+            mind_data = {
+                "lens": mind_data[0],
+                "role": mind_data[2],
+                "style_directives": ["Neutral tone."],
+                "lexicon_bias": "abstract"
+            }
         return {
-            "bio": {
-                "chem": self.sub.bio.endo.get_state(),
-                "atp": self.sub.bio.mito.state.atp_pool
-            },
-            "physics": self.sub.phys.tension.last_physics_packet,
-            "mind": {
-                "role": LENSES.get(self.sub.noetic.arbiter.current_focus, {}).get("role", "Observer"),
-                "lens": self.sub.noetic.arbiter.current_focus
-            },
+            "bio": bio_state,
+            "physics": phys_packet,
+            "mind": mind_data,
             "user_profile": self.sub.mind.mirror.profile.__dict__,
             "world": {"orbit": sim_result.get("world_state", {}).get("orbit", ["Void"])},
-            "inventory": self.sub.gordon.inventory,
+            "inventory": inventory,
             "semantic_operators": self.sub.gordon.get_semantic_operators(),
             "soul_state": self.sub.soul.get_soul_state(),
             "spotlight": self.spotlight.illuminate(
                 self.sub.mind.mem.graph,
-                self.sub.phys.tension.last_physics_packet.get("vector", {})
+                phys_packet.get("vector", {})
             )
         }
 

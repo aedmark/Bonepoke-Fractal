@@ -1,5 +1,5 @@
-# BONEAMANITA 10.9.2 "ELECTRIC SHEEP"
-# Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark
+""" BONEAMANITA 10.9.2 'ELECTRIC SHEEP'
+ Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark """
 
 import time, json, uuid
 from dataclasses import dataclass
@@ -92,15 +92,13 @@ class BoneAmanita:
             self.soul.load_from_dict(self.soul_legacy_data)
         self.town_hall = TownHall(self.gordon, self.events, self.shimmer_state)
 
-        # Create local aliases for system access (Backwards Compatibility)
         self.navigator = self.town_hall.Navigator
         self.journal = self.town_hall.Journal
         self.tinkerer = self.town_hall.Tinkerer
         self.almanac = self.town_hall.Almanac
         self.zen = self.town_hall.ZenGarden
-        self.council = self.town_hall.Council  # Now points to the new VillageCouncil
+        self.council = self.town_hall.Council
 
-        # Standalone Protocols
         self.repro = LiteraryReproduction()
         self.projector = Projector()
         self.kintsugi = KintsugiProtocol()
@@ -111,7 +109,6 @@ class BoneAmanita:
         self.bureau = TheBureau()
         self.cosmic = CosmicDynamics()
 
-        # Command Processor (Using the Village Cartographer)
         self.cmd = CommandProcessor(self, Prisma, self.lex, BoneConfig, self.town_hall.Cartographer)
         self.soma = SomaticLoop(self.bio, self.mind.mem, self.lex, self.folly, self.events)
         self.noetic = NoeticLoop(self.mind, self.bio, self.events)

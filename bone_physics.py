@@ -1,5 +1,5 @@
-# bone_physics.py
-# "Gravity is just a habit that space-time hasn't been able to break."
+""" bone_physics.py
+ 'Gravity is just a habit that space-time hasn't been able to break.' """
 
 import math, re, random
 from typing import Dict, List, Any, Tuple, Optional, Union
@@ -118,12 +118,12 @@ class TheTensionMeter:
 
     def audit_narrative_causality(self, physics):
         voltage = physics.get("voltage", 0.0)
-        coherence = physics.get("kappa", 1.0) # Structural soundness
-        valence = physics.get("valence", 0.0)  # Heroism/Positivity
+        coherence = physics.get("kappa", 1.0)
+        valence = physics.get("valence", 0.0)
 
         if voltage > 12.0 and coherence < 0.4 and valence > 0.6:
-            physics["narrative_drag"] = 0.0 # Friction disappears
-            physics["voltage"] += 10.0      # Energy spikes
+            physics["narrative_drag"] = 0.0
+            physics["voltage"] += 10.0
             physics["flow_state"] = "NARRATIVE_IMPERATIVE"
 
             return (
@@ -615,9 +615,9 @@ class RuptureValve:
     def _audit_rupture(self, physics, e_val, b_val):
         truth = physics.get("truth_ratio", 0.0)
         voltage = physics.get("voltage", 0.0)
-        if e_val > 0.85 and b_val < 0.15 and voltage > 5.0:
+        if e_val > 0.85 and b_val < 0.15 and voltage > 10.0:
             return self._rupture(physics, "FATIGUE_FAILURE", "System diluted. Narrative coherence dissolving.")
-        if b_val > 0.8 and e_val < 0.3 and voltage > 15.0:
+        if b_val > 0.8 and e_val < 0.3 and voltage > 25.0:
             return self._rupture(physics, "MANIC_FRACTURE", "Crystal lattice too tight. Structure shattering.")
         if b_val > 0.7 and e_val > 0.6:
             if truth > 0.6:

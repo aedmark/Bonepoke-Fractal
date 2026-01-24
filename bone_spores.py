@@ -1,4 +1,4 @@
-# bone_spores.py - The Mycellium
+""" bone_spores.py - The Mycellium """
 
 import json, math, os, random, time, tempfile
 from collections import deque
@@ -455,10 +455,8 @@ class MycelialNetwork:
                 valid_mutations = 0
                 for key, value in data["config_mutations"].items():
                     if key in safe_config_keys and hasattr(BoneConfig, key):
-                        # Type Check: Only allow numbers
                         current_val = getattr(BoneConfig, key)
                         if isinstance(current_val, (int, float)) and isinstance(value, (int, float)):
-                            # Sanity Range Check (Prevent negative multipliers or infinite health)
                             if 0.1 <= value <= 100.0:
                                 setattr(BoneConfig, key, value)
                                 valid_mutations += 1

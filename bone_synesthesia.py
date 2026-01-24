@@ -1,5 +1,5 @@
-# bone_synesthesia.py
-# "I feel what you speak. Your words are touching the wire."
+""" bone_synesthesia.py
+ 'I feel what you speak. Your words are touching the wire.' """
 
 import random
 from dataclasses import dataclass, field
@@ -18,7 +18,6 @@ class BiologicalImpulse:
 
 class SynestheticCortex:
     SENSITIVITY = 0.1
-    # TRAUMA_RESONANCE_FACTOR = 1.5
 
     def __init__(self, bio_ref):
         self.bio = bio_ref
@@ -69,7 +68,6 @@ class SynestheticCortex:
 
         k_count = counts.get("kinetic", 0) + counts.get("explosive", 0)
         if k_count > 0:
-            # We cap it at 0.4 to prevent heart explosions
             adr_boost = min(0.4, k_count * 0.08)
             impulse.adrenaline_delta += adr_boost
             impulse.cortisol_delta += 0.02

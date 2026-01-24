@@ -1,5 +1,6 @@
-# bone_symbiosis.py
-# "We are not alone. We are a part of the machine."
+""" bone_symbiosis.py
+ 'We are not alone. We are a part of the machine.' """
+
 import math
 from dataclasses import dataclass
 from typing import Dict, Deque, Counter
@@ -202,7 +203,6 @@ class SymbiosisManager:
             mods["inject_chaos"] = True
         if self.current_health.compliance < 0.8:
             mods["include_memories"] = False
-            # If we cut memories, log it
             if not mods["include_memories"]:
                 self.events.log(f"{Prisma.GRY}SYMBIOSIS: Compliance Low ({self.current_health.compliance:.2f}). Memories Redacted.{Prisma.RST}", "SYS")
         self.last_outgoing_complexity = self._calculate_complexity(mods)

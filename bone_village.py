@@ -1,5 +1,5 @@
-# bone_village.py
-# "It takes a village... to raise a simulation."
+""" bone_village.py
+ 'It takes a village... to raise a simulation.' """
 
 import random, re, time, math
 from typing import List, Dict, Any, Tuple, Optional

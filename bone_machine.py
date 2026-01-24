@@ -1,5 +1,5 @@
-# bone_machine.py
-# "The gears turn, the pistons fire." - The Industrial District
+""" bone_machine.py
+ 'The gears turn, the pistons fire.' - The Industrial District """
 
 import random
 from typing import Tuple, Optional
@@ -127,7 +127,7 @@ class TheForge:
     def _calculate_entanglement(hit_count, voltage):
         base_chance = 0.2
         count_bonus = min(0.5, hit_count * 0.1)
-        energy_bonus = min(0.3, voltage / 40.0) # 20v = +0.5
+        energy_bonus = min(0.3, voltage / 40.0)
         return min(1.0, base_chance + count_bonus + energy_bonus)
 
     @staticmethod

@@ -1,5 +1,5 @@
-# bone_view.py
-# The Geodesic Viewport - Separation of Presentation and Logic
+""" bone_view.py
+ The Geodesic Viewport - Separation of Presentation and Logic """
 
 import time
 from typing import Dict, List, Any
@@ -11,7 +11,6 @@ class Projector:
         self.height = 15
 
     def render(self, physics_ctx, data_ctx, mind_ctx) -> str:
-        # Unpack Contexts
         physics = physics_ctx.get("physics", {})
         title_data = data_ctx.get("title", {})
         health = data_ctx.get("health", 100)
@@ -20,11 +19,9 @@ class Projector:
         inventory = data_ctx.get("inventory", [])
         vectors = data_ctx.get("vectors", {})
 
-        # Formatting
         hp_bar = self._bar(health, 100, 5, "█", Prisma.RED)
         stm_bar = self._bar(stamina, 100, 5, "█", Prisma.GRN)
 
-        # Vector Block
         vel = vectors.get("VEL", 0.0)
         str_v = vectors.get("STR", 0.0)
         ent = vectors.get("ENT", 0.0)
@@ -32,24 +29,20 @@ class Projector:
         tmp = vectors.get("TMP", 0.0)
         psi = physics.get("psi", 0.0)
 
-        # Header
         header = (
             f"♦ NARRATOR  [HP: {hp_bar}] [STM: {stm_bar}] [ATP: {int(atp)}J] "
             f"[V:{physics.get('voltage', 0):.1f}⚡] [D:{physics.get('narrative_drag', 0):.1f}⚓]"
         )
 
-        # Vector Display (The "Meters")
         vector_row = (
             f"VEL {vel:.1f} | STR {str_v:.1f} ENT {ent:.1f} | "
             f"PHI {phi:.1f} TMP {tmp:.1f} | PSI {psi:.1f}"
         )
 
-        # Zone/Mind indicator
         zone = physics.get("zone", "UNKNOWN")
         lens = mind_ctx[0] if mind_ctx else "RAW"
         sub_header = f"   🪐 {zone}  ({lens})"
 
-        # Inventory Strip
         belt_content = " ".join([f"[{i}]" for i in inventory]) if inventory else "[BELT EMPTY]"
         belt_display = f"{Prisma.GRY}{belt_content}{Prisma.RST}"
 
@@ -83,7 +76,9 @@ class GeodesicRenderer:
         if not soul_ref: return ""
         chapter = soul_ref.chapters[-1] if soul_ref.chapters else "The Prologue"
         obsession = soul_ref.current_obsession or "Drifting..."
-        progress = int(soul_ref.obsession_progress * 10)
+        raw_prog = getattr(soul_ref, "obsession_progress", 0.0)
+        normalized = max(0.0, min(1.0, raw_prog / 100.0))
+        progress = int(normalized * 10)
         bar = f"{Prisma.MAG}{'■'*progress}{Prisma.GRY}{'□'*(10-progress)}{Prisma.RST}"
         traits = [f"{k[0]}:{v:.1f}" for k, v in soul_ref.traits.items()]
         trait_str = f"{Prisma.GRY}[{' '.join(traits)}]{Prisma.RST}"
@@ -181,42 +176,51 @@ class GeodesicRenderer:
 
     @staticmethod
     def compose_logs(logs: list, events: list, tick: int) -> List[str]:
-        safe_logs = []
-        for log in logs:
-            if log is None: continue
-            safe_logs.append(str(log))
+        safe_logs = [str(l) for l in logs if l is not None]
 
         is_warmup = tick <= 5
+
         all_events = [{"text": l, "category": "NARRATIVE"} for l in safe_logs]
-        all_events.extend(events) # Fix: 'bus_events' -> 'events'
+        all_events.extend(events)
 
         if not all_events: return []
 
         buckets = {"CRITICAL": [], "NARRATIVE": [], "CMD": [], "SYS": [], "BIO": [], "PSYCH": [], "OTHER": []}
 
+        plasticity_count = 0
+        mirror_count = 0
+
         for e in all_events:
             if not e: continue
-
-            raw_cat = e.get("category", "OTHER")
-            if raw_cat is None: raw_cat = "OTHER"
+            raw_cat = e.get("category", "OTHER") or "OTHER"
             cat = str(raw_cat).upper()
+            text = str(e.get("text", ""))
 
-            if is_warmup and cat in ["SYS", "BIO", "PSYCH", "OTHER"]:
+            if is_warmup and cat in ["SYS", "BIO", "PSYCH", "OTHER"]: continue
+            if "RUPTURE" in text or "DEATH" in text or "PANIC" in text: cat = "CRITICAL"
+
+            if "NEUROPLASTICITY" in text:
+                plasticity_count += 1
+                continue
+            if "[MIRROR]" in text:
+                mirror_count += 1
                 continue
 
             if cat not in buckets: cat = "OTHER"
-            text = str(e.get("text", ""))
-            if "RUPTURE" in text or "DEATH" in text or "PANIC" in text:
-                cat = "CRITICAL"
             buckets[cat].append(text)
-        composed = []
 
+        if plasticity_count > 0:
+            buckets["PSYCH"].append(f"NEUROPLASTICITY: Integrated {plasticity_count} new associations.")
+        if mirror_count > 0:
+            buckets["SYS"].append(f"🪞 [MIRROR]: Reflection adjusted ({mirror_count}x).")
+
+        composed = []
         if buckets["CRITICAL"]:
             composed.append(f"{Prisma.RED}--- CRITICAL ALERTS ---{Prisma.RST}")
             composed.extend(buckets["CRITICAL"])
-
         if buckets["NARRATIVE"]:
             composed.extend(buckets["NARRATIVE"])
+
         compressible = [
             ("CMD", Prisma.WHT, "COMMANDS"),
             ("PSYCH", Prisma.VIOLET, "PSYCHOLOGY"),
@@ -279,6 +283,7 @@ class CachedRenderer:
             self._cache["last_tick"] = tick
 
         frame = {
+            "type": "GEODESIC_FRAME",
             "ui": f"{self._cache['dashboard']['content']}\n{self._cache['soul_strip']['content']}",
             "logs": self._base.compose_logs(ctx.logs, events, tick),
             "metrics": ctx.bio_result if hasattr(ctx, 'bio_result') else {}

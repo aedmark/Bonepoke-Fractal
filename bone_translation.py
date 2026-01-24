@@ -1,5 +1,5 @@
-# bone_translation.py
-# "The limits of my language mean the limits of my world." - Wittgenstein
+""" bone_translation.py
+ 'The limits of my language mean the limits of my world.' - Wittgenstein """
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple, Any
@@ -7,10 +7,6 @@ from bone_bus import Prisma, BoneConfig
 
 @dataclass
 class SomaticState:
-    """
-    The qualitative experience of the system.
-    This is what it FEELS like to be the machine right now.
-    """
     tone: str
     pacing: str
     focus: str
@@ -20,13 +16,6 @@ class SomaticState:
     color_code: str = Prisma.GRY
 
 class RosettaStone:
-    """
-    The Phenomenological Bridge.
-    Translates cold system metrics (Voltage, Drag, Chemistry) into
-    warm, embodied experience (Tone, Sensation, Metaphor).
-    """
-
-    # The Vocabulary of the Machine
     LIBRARY = {
         "TONE": {
             "LOW": "Hollow, Flat, Depressed",
@@ -54,11 +43,6 @@ class RosettaStone:
 
     @staticmethod
     def translate(physics: Dict, bio: Dict, impulse: Any = None) -> SomaticState:
-        """
-        The Core Translation Loop.
-        Now accepts an optional 'impulse' to ground the sensation in biology.
-        """
-        # 1. Extract Metrics
         voltage = physics.get("voltage", 0.0)
         drag = physics.get("narrative_drag", 0.0)
         coherence = physics.get("kappa", 0.5)
@@ -66,23 +50,18 @@ class RosettaStone:
         chem = bio.get("chemistry", {})
         atp = bio.get("atp", 0.0)
 
-        # 2. Base Dimensions
         tone, color = RosettaStone._derive_voltage_tone(voltage)
         focus = RosettaStone._derive_coherence_focus(coherence)
         pacing = "Steady"
         metaphor = "Solid State"
 
-        # [SLASH PATCH] Synesthetic Bridge
-        # If the body has already reacted, use that reflex. Don't guess.
         if impulse and getattr(impulse, 'somatic_reflex', None):
             sensation = impulse.somatic_reflex
         else:
             sensation = RosettaStone._derive_drag_sensation(drag)
 
-        # 3. Chemical Modifiers
         tone = RosettaStone._apply_chemistry(tone, chem)
 
-        # 4. Emergent States (Overrides)
         if voltage > 12.0 and drag > 5.0:
             sensation = f"{sensation} (Magmatic Pressure)"
             color = Prisma.RED
@@ -90,13 +69,11 @@ class RosettaStone:
             sensation = f"{sensation} (Ionized Plasma)"
             color = Prisma.MAG
 
-        # 5. Survival Override
         if atp < 5.0:
             tone = "Desperate"
             sensation = "Hollow, sputtering"
             color = Prisma.GRY
 
-        # 6. Synthesize Hint
         hint = f"Act {tone.lower()}. Body feels: {sensation.lower()}. Mind is {focus.lower()}."
 
         return SomaticState(
@@ -111,7 +88,6 @@ class RosettaStone:
 
     @staticmethod
     def _derive_voltage_tone(v: float) -> Tuple[str, str]:
-        # Fuzzy thresholds to prevent jitter
         lib = RosettaStone.LIBRARY["TONE"]
         if v < 2.0: return lib["LOW"], Prisma.GRY
         if v < 6.0: return lib["NEUTRAL"], Prisma.WHT
@@ -135,7 +111,6 @@ class RosettaStone:
 
     @staticmethod
     def _apply_chemistry(current_tone: str, chem: Dict) -> str:
-        # Chemicals color the base voltage state
         cortisol = chem.get("COR", 0.0)
         dopamine = chem.get("DOP", 0.0)
         oxytocin = chem.get("OXY", 0.0)

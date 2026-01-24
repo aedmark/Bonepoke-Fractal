@@ -732,19 +732,25 @@ class NoeticLoop:
             return {
                 "mode": "COGNITIVE",
                 "lens": "GRADIENT_WALKER",
-                "thought": f"ECHO: {stripped_thought}",
+                "context_msg": f"ECHO: {stripped_thought}",
                 "role": "The Reducer",
                 "ignition": 0.0,
                 "hebbian_msg": None}
         ignition_score, _, _ = self.mind.integrator.measure_ignition(
             physics_packet["clean_words"],
             voltage_history)
-        lens_name, lens_msg, lens_role = self.arbiter.consult(
+        mind_data = self.arbiter.consult(
             physics_packet,
             _bio_result_dict,
             inventory,
             tick_count,
             ignition_score)
+        if isinstance(mind_data, tuple):
+            mind_data = {
+                "lens": mind_data[0],
+                "context_msg": mind_data[1],
+                "role": mind_data[2]
+            }
         hebbian_msg = None
         if physics_packet["voltage"] > 12.0 and len(physics_packet["clean_words"]) >= 2:
             if random.random() < 0.15:
@@ -752,8 +758,11 @@ class NoeticLoop:
                 hebbian_msg = self.bio.plasticity.force_hebbian_link(self.mind.mem.graph, w1, w2)
         return {
             "mode": "COGNITIVE",
-            "lens": lens_name,
-            "thought": lens_msg,
-            "role": lens_role,
+            "lens": mind_data.get("lens"),
+            "context_msg": mind_data.get("context_msg", mind_data.get("msg")),
+            "role": mind_data.get("role"),
             "ignition": ignition_score,
-            "hebbian_msg": hebbian_msg}
+            "hebbian_msg": hebbian_msg,
+            "style_directives": mind_data.get("style_directives", []),
+            "lexicon_bias": mind_data.get("lexicon_bias", "abstract")
+        }

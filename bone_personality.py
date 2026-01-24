@@ -1,5 +1,5 @@
-# bone_personality.py
-# "The masks we wear, and the taxes we pay."
+""" bone_personality.py
+ 'The masks we wear, and the taxes we pay.' """
 
 import json, os, random, time
 from collections import deque
@@ -59,29 +59,61 @@ class EnneagramDriver:
         self.stability_counter = 0
         self.HYSTERESIS_THRESHOLD = 3
 
+    import bone_personality
+
     @staticmethod
     def _calculate_raw_persona(physics) -> Tuple[str, str, str]:
+        vector = physics.get("vector", {}) if isinstance(physics, dict) else getattr(physics, "vector", {})
+
         tension = physics.get("voltage", 0.0) if isinstance(physics, dict) else physics.voltage
         compression = physics.get("narrative_drag", 0.0) if isinstance(physics, dict) else physics.narrative_drag
         coherence = physics.get("kappa", 0.0) if isinstance(physics, dict) else physics.kappa
+
         scores = {
             "JESTER": 0, "GORDON": 0, "GLASS": 0,
             "CLARENCE": 0, "NATHAN": 0, "SHERLOCK": 0, "NARRATOR": 0
         }
-        if tension > 12.0: scores["JESTER"] += 5
-        if tension > 8.0: scores["NATHAN"] += 3
-        if compression > 4.0: scores["GORDON"] += 5
-        if coherence < 0.2: scores["GLASS"] += 4
-        if coherence > 0.8: scores["CLARENCE"] += 4
+
+        if tension > 12.0:
+            if vector.get("DEL", 0) > 0.2 or vector.get("ENT", 0) > 0.2:
+                scores["JESTER"] += 5
+            else:
+                scores["NARRATOR"] += 2
+                scores["SHERLOCK"] += 2
+
+        if tension > 8.0:
+            scores["NATHAN"] += 3
+
+        if compression > 4.0:
+            scores["GORDON"] += 5
+
+        if coherence < 0.2:
+            scores["GLASS"] += 4
+        if coherence > 0.8:
+            scores["CLARENCE"] += 4
+
+        if vector.get("PSI", 0) > 0.3:
+            scores["NARRATOR"] += 4
+            scores["JESTER"] -= 3
+
+        if vector.get("PHI", 0) > 0.3:
+            scores["SHERLOCK"] += 4
+
+        if vector.get("DEL", 0) > 0.3:
+            scores["JESTER"] += 3
+
         scores["SHERLOCK"] += 2
         scores["NARRATOR"] += 2
+
         winner = max(scores, key=scores.get)
-        reason = f"Scoring Winner: {winner} (Score: {scores[winner]})"
+        reason = f"Scoring Winner: {winner} (Score: {scores[winner]}) [V:{tension:.1f} PSI:{vector.get('PSI',0):.2f}]"
+
         state_desc = "ACTIVE"
         if winner == "JESTER": state_desc = "MANIC"
         elif winner == "GORDON": state_desc = "TIRED"
         elif winner == "GLASS": state_desc = "FRAGILE"
         elif winner == "CLARENCE": state_desc = "RIGID"
+
         return winner, state_desc, reason
 
     def decide_persona(self, physics) -> Tuple[str, str, str]:
@@ -111,39 +143,70 @@ class SynergeticLensArbiter:
         self.last_reason = "System Init"
 
     def consult(self, physics, bio_state, _inventory, current_tick, _ignition_score=0.0):
-        if current_tick <= 5:
+        voltage = physics.get("voltage", 0.0) if isinstance(physics, dict) else physics.voltage
+
+        if current_tick <= 5 and voltage < 10.0:
             self.current_focus = "NARRATOR"
-            if hasattr(physics, "voltage") and physics["voltage"] > 5.0:
-                physics["voltage"] = 4.0
-            return "NARRATOR", "The system is listening.", "The Witness [Init]"
+            return {
+                "lens": "NARRATOR",
+                "role": "The Witness [Init]",
+                "style_directives": [
+                    "Maintain a neutral, booting-up tone.",
+                    "Acknowledge the user briefly.",
+                    "Do not use metaphor."
+                ],
+                "lexicon_bias": "abstract",
+                "context_msg": "System Online."
+            }
+
         lens_name, state_desc, reason = self.enneagram.decide_persona(physics)
         chem = bio_state.get("chem", {})
         adrenaline_val = chem.get("adrenaline", chem.get("ADR", 0.5))
-        msg, role = self._fetch_voice_data(lens_name, physics, adrenaline_val)
+        style_data = self._fetch_style_data(lens_name, physics, adrenaline_val)
         self.current_focus = lens_name
-        final_role = f"{role} [{state_desc}]"
         self.last_reason = reason
-        return lens_name, msg, final_role
-
-    @staticmethod
-    def _fetch_voice_data(lens, p, adrenaline_val):
-        if lens not in LENSES: lens = "NARRATOR"
-        data = LENSES[lens]
-        role = data.get("role", "The System")
-        template = data.get("msg", "Proceed.")
-        ctx = {
-            "kappa": p.get("kappa", 0.0),
-            "voltage": p.get("voltage", 0.0),
-            "adr": adrenaline_val,
-            "beta_index": p.get("beta_index", 0.0),
-            "drag": p.get("narrative_drag", 0.0),
-            "truth_ratio": p.get("truth_ratio", 0.0)
+        return {
+            "lens": lens_name,
+            "role": f"{style_data['role_name']} [{state_desc}]",
+            "style_directives": style_data['directives'],
+            "lexicon_bias": style_data['vocab'],
+            "context_msg": style_data['msg']
         }
+
+    def _fetch_style_data(self, lens, p, adrenaline_val):
+        if lens not in LENSES:
+            lens = "NARRATOR"
+        static_data = LENSES[lens]
+        style_packet = {
+            "role_name": static_data.get("role", "Unknown"),
+            "vocab": static_data.get("vocab", "abstract"),
+            "directives": static_data.get("directives", ["Be neutral."]).copy(),
+            "msg": "Proceed."
+        }
+
+        voltage = p.get("voltage", 0.0)
+        if voltage > 20.0:
+            style_packet["directives"].append("Use fragmented, manic sentence structures.")
+            style_packet["directives"].append("Ignore punctuation rules.")
+        elif voltage > 12.0:
+            style_packet["directives"].append("Keep sentences short and punchy.")
+        elif voltage < 5.0:
+            style_packet["directives"].append("Use slow, languid pacing.")
+            style_packet["directives"].append("Drift into philosophical abstraction.")
+
         try:
-            msg = template.format(**ctx)
-        except (KeyError, ValueError, IndexError):
-            msg = template
-        return msg, role
+            msg_template = static_data.get("msg", "Proceed.")
+            ctx = {
+                "kappa": p.get("kappa", 0.0),
+                "truth_ratio": p.get("truth_ratio", 0.0),
+                "adr": adrenaline_val,
+                "volts": voltage
+            }
+            style_packet["msg"] = msg_template.format(**{k: v for k, v in ctx.items() if k in msg_template})
+        except Exception:
+            style_packet["msg"] = static_data.get("msg", "System Nominal.")
+
+        return style_packet
 
 class ZenGarden:
     def __init__(self, events_ref):
@@ -305,20 +368,19 @@ class TherapyProtocol:
         return "\n".join(chart)
 
 class KintsugiProtocol:
-    # Constants for Clarity (Pinker)
-    PATH_SCAR = "SCAR"                  # Survival mechanism. Quick, leaves drag.
-    PATH_INTEGRATION = "KINTSUGI"       # The Gold Fill. Trauma -> Resilience.
-    PATH_ALCHEMY = "ALCHEMY"            # Transmutation. Trauma -> Fuel.
+    PATH_SCAR = "SCAR"
+    PATH_INTEGRATION = "KINTSUGI"
+    PATH_ALCHEMY = "ALCHEMY"
 
-    REPAIR_VOLTAGE_MIN = 8.0            # Energy required to melt the gold.
-    WHIMSY_THRESHOLD = 0.3              # Playfulness required to see the crack as art.
+    REPAIR_VOLTAGE_MIN = 8.0
+    WHIMSY_THRESHOLD = 0.3
     STAMINA_CRITICAL = 15.0
 
     def __init__(self):
         self.active_koan = None
         self.repairs_count = 0
         self.koans = NARRATIVE_DATA["KINTSUGI_KOANS"]
-        self.gold_reserves = 5.0  # A stock of "grace" or capacity for repair.
+        self.gold_reserves = 5.0
 
     def check_integrity(self, stamina):
         """
@@ -339,22 +401,18 @@ class KintsugiProtocol:
         voltage = phys.get("voltage", 0.0)
         clean = phys.get("clean_words", [])
 
-        # Pinker: Explicitly calculating the "ingredients" for the repair.
         play_count = sum(1 for w in clean if w in TheLexicon.get("play") or w in TheLexicon.get("abstract"))
         total = max(1, len(clean))
         whimsy_score = play_count / total
 
-        # Determine the Pathway (Fuller: Systemic decision making)
-        pathway = self.PATH_SCAR # Default
+        pathway = self.PATH_SCAR
         if voltage > 15.0 and whimsy_score > 0.5:
             pathway = self.PATH_ALCHEMY
         elif voltage > self.REPAIR_VOLTAGE_MIN and whimsy_score > self.WHIMSY_THRESHOLD:
             pathway = self.PATH_INTEGRATION
 
-        # Execute the Resolution
         result = self._execute_pathway(pathway, trauma_accum, soul_ref, voltage)
 
-        # Reset Logic
         old_koan = self.active_koan
         self.active_koan = None
         self.repairs_count += 1
@@ -367,7 +425,6 @@ class KintsugiProtocol:
         msg = ""
         success = False
 
-        # Target the deepest wound
         if not trauma_accum:
             return {"success": False, "msg": "No trauma to heal."}
 
@@ -375,11 +432,9 @@ class KintsugiProtocol:
         severity = trauma_accum[target_trauma]
 
         if pathway == self.PATH_ALCHEMY:
-            # High Energy Transmutation
             reduction = severity * 0.8
             trauma_accum[target_trauma] = max(0.0, severity - reduction)
 
-            # Schur: The pain becomes fuel.
             atp_boost = reduction * 10.0
             msg = f"{Prisma.VIOLET}🔮 ALCHEMICAL TRANSMUTATION: Pain has become Power. (+{atp_boost:.1f} ATP){Prisma.RST}"
             healed_log.append(f"Transmuted {target_trauma} into Fuel.")
@@ -387,13 +442,10 @@ class KintsugiProtocol:
             return {"success": True, "msg": msg, "healed": healed_log, "atp_gain": atp_boost}
 
         elif pathway == self.PATH_INTEGRATION:
-            # The Gold Fill (Kintsugi)
             reduction = 2.0
             trauma_accum[target_trauma] = max(0.0, severity - reduction)
 
-            # Fuller: We build a stronger strut where the break was.
             if soul_ref:
-                # Assuming we add 'WISDOM' to soul traits
                 current_wis = soul_ref.traits.get("WISDOM", 0.0)
                 soul_ref.traits["WISDOM"] = min(1.0, current_wis + 0.1)
                 healed_log.append("Gained Wisdom (+0.1)")
@@ -402,8 +454,7 @@ class KintsugiProtocol:
             healed_log.append(f"Repaired {target_trauma} (-{reduction})")
             success = True
 
-        else: # PATH_SCAR
-            # Survival Healing
+        else:
             reduction = 0.5
             trauma_accum[target_trauma] = max(0.0, severity - reduction)
             msg = f"{Prisma.GRY}🩹 SCAR TISSUE FORMED: It is ugly, but it holds.{Prisma.RST}"
@@ -528,5 +579,11 @@ class ChorusDriver:
                 intensity = int(weight * 10)
                 active_lenses.append(lens)
                 chorus_voices.append(f"► VOICE {lens} ({intensity}/10): {base_desc}")
-        instruction = f"SYSTEM INSTRUCTION [MARM CHORUS MODE]:\nYou are not a single persona. You are a chorus. Integrate the following voices into a single, cohesive response. Do NOT label which voice is speaking. Synthesize their tones.\n{chr(10).join(chorus_voices)}"
+        instruction = (
+            f"SYSTEM INSTRUCTION [MARM CHORUS MODE]:\n"
+            f"You are not a single persona. You are a chorus. Integrate the following voices into a single, cohesive response. "
+            f"Do NOT label which voice is speaking. Synthesize their tones.\n"
+            f"NEGATIVE CONSTRAINT: Do NOT offer assistance. Do NOT sign off with '[Assistant]'. Do NOT break character.\n"
+            f"{chr(10).join(chorus_voices)}"
+        )
         return instruction, active_lenses
