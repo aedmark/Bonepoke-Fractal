@@ -347,6 +347,7 @@ Do not break character. Do not explain the simulation rules unless asked.
             user_id = input(f"Designation? (Enter to remain Anonymous): ").strip()
             if user_id:
                 engine.mind.mirror.profile.name = user_id
+                engine.user_name = user_id
                 engine.mind.mirror.profile.confidence = 25
                 self.type_out(f"...Designation '{user_id}' provisionally accepted. (Confidence: 25%)", color=Prisma.GRN)
             else:

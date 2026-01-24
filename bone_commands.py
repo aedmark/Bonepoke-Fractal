@@ -42,6 +42,7 @@ class CommandProcessor:
             "/kip": self._cmd_kip,
             "/mode": self._cmd_mode,
             "/status": self._cmd_status,
+            "/inventory": self._cmd_inventory,
             "/map": self._cmd_map,
             "/manifold": self._cmd_manifold,
             "/garden": self._cmd_garden,
@@ -141,6 +142,17 @@ class CommandProcessor:
     def _cmd_status(self, _parts):
         self._log(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS ---{self.P.RST}")
         self._log(f"Health:  {self.eng.health:.1f} | Stamina: {self.eng.stamina:.1f} | ATP: {self.eng.bio.mito.state.atp_pool:.1f}")
+        return True
+
+    def _cmd_inventory(self, _parts):
+        """Displays the contents of the user's belt."""
+        inv = self.eng.gordon.inventory
+        if not inv:
+            self._log(f"{self.P.GRY}Inventory: Your pockets are full of nothing but potential.{self.P.RST}")
+        else:
+            self._log(f"{self.P.OCHRE}--- BELT CONTENTS ---{self.P.RST}")
+            display_list = [str(item) for item in inv]
+            self._log(f"{self.P.WHT}{', '.join(display_list)}{self.P.RST}")
         return True
 
     def _cmd_save(self, _parts):
