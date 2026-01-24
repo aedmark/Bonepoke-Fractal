@@ -8,6 +8,7 @@ from bone_data import LENSES, NARRATIVE_DATA
 from bone_bus import EventBus
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig
+from bone_data import SANCTUARY
 
 class UserProfile:
     def __init__(self, name="USER"):
@@ -61,16 +62,30 @@ class EnneagramDriver:
 
     @staticmethod
     def _calculate_raw_persona(physics) -> Tuple[str, str, str]:
-        vector = physics.get("vector", {}) if isinstance(physics, dict) else getattr(physics, "vector", {})
-
-        tension = physics.get("voltage", 0.0) if isinstance(physics, dict) else physics.voltage
-        compression = physics.get("narrative_drag", 0.0) if isinstance(physics, dict) else physics.narrative_drag
-        coherence = physics.get("kappa", 0.0) if isinstance(physics, dict) else physics.kappa
+        if isinstance(physics, dict):
+            vector = physics.get("vector", {})
+            tension = physics.get("voltage", 0.0)
+            compression = physics.get("narrative_drag", 0.0)
+            coherence = physics.get("kappa", 0.0)
+            zone = physics.get("zone", "")
+        else:
+            vector = getattr(physics, "vector", {})
+            tension = getattr(physics, "voltage", 0.0)
+            compression = getattr(physics, "narrative_drag", 0.0)
+            coherence = getattr(physics, "kappa", 0.0)
+            zone = getattr(physics, "zone", "")
 
         scores = {
             "JESTER": 0, "GORDON": 0, "GLASS": 0,
             "CLARENCE": 0, "NATHAN": 0, "SHERLOCK": 0, "NARRATOR": 0
         }
+
+        is_safe_metrics = (4.0 <= tension <= 10.0 and 0.5 <= compression <= 3.5)
+
+        if zone == SANCTUARY.ZONE or is_safe_metrics:
+            scores["NARRATOR"] += 6
+            scores["JESTER"] += 3
+            scores["GORDON"] -= 2
 
         if tension > 12.0:
             if vector.get("DEL", 0) > 0.3 or vector.get("ENT", 0) > 0.3:
@@ -104,7 +119,7 @@ class EnneagramDriver:
         scores["NARRATOR"] += 2
 
         winner = max(scores, key=scores.get)
-        reason = f"Scoring Winner: {winner} (Score: {scores[winner]}) [V:{tension:.1f} PSI:{vector.get('PSI',0):.2f}]"
+        reason = f"Scoring Winner: {winner} (Score: {scores[winner]}) [V:{tension:.1f}]"
 
         state_desc = "ACTIVE"
         if winner == "JESTER": state_desc = "MANIC"

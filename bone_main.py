@@ -1,4 +1,4 @@
-""" BONEAMANITA 11.0 'NEW BEGINNINGS'
+""" BONEAMANITA 11.1.0 'NEW BEGINNINGS'
  Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark """
 
 import time, json, uuid
@@ -30,7 +30,7 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 11.0', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 11.1.0', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -293,10 +293,13 @@ class BoneAmanita:
         health_ratio = self.health / BoneConfig.MAX_HEALTH
         desperation = trauma_sum * (1.0 - health_ratio)
         if desperation > 0.7:
-            self.events.log(f"{Prisma.WHT}ETHICAL RELEASE: Desperation ({desperation:.2f}) exceeds limits.{Prisma.RST}", "SYS")
-            self.trauma_accum = {k:0.0 for k in self.trauma_accum}
+            self.events.log(f"{Prisma.WHT}ETHICAL RELEASE: Desperation Index ({desperation:.2f}) critical.{Prisma.RST}", "SYS")
+            decay_factor = 0.1
+            for k in self.trauma_accum:
+                self.trauma_accum[k] *= decay_factor
+            self.events.log(f"{Prisma.CYN}*** CATHARSIS *** Trauma stocks reduced by 90%. Ghost remains.{Prisma.RST}", "SYS")
             self.health = min(self.health + 30.0, 100.0)
-            self.bio.endo.cortisol = 0.0
+            self.bio.endo.cortisol *= 0.2
             self.bio.endo.serotonin = max(0.5, self.bio.endo.serotonin + 0.3)
             return True
         return False
@@ -314,7 +317,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 11.0', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 11.1.0', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

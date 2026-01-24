@@ -12,14 +12,16 @@ from bone_lexicon import TheLexicon
 from bone_translation import RosettaStone
 from bone_telemetry import TelemetryService
 
+
 def cosine_similarity(vec_a: Dict[str, float], vec_b: Dict[str, float]) -> float:
     intersection = set(vec_a.keys()) & set(vec_b.keys())
     numerator = sum(vec_a[k] * vec_b[k] for k in intersection)
-    sum1 = sum(vec_a[k]**2 for k in vec_a.keys())
-    sum2 = sum(vec_b[k]**2 for k in vec_b.keys())
+    sum1 = sum(vec_a[k] ** 2 for k in vec_a.keys())
+    sum2 = sum(vec_b[k] ** 2 for k in vec_b.keys())
     denominator = math.sqrt(sum1) * math.sqrt(sum2)
     if not denominator: return 0.0
     return numerator / denominator
+
 
 @dataclass
 class BrainConfig:
@@ -33,6 +35,7 @@ class BrainConfig:
     DOPAMINE_NOVELTY: float = 0.4
     ADRENALINE_RUSH: float = 600.0
     SEROTONIN_CALM: float = 0.5
+
 
 @dataclass
 class ChemicalState:
@@ -52,6 +55,7 @@ class ChemicalState:
         self.cortisol = (self.cortisol * (1.0 - weight)) + (new_state.get("COR", 0.0) * weight)
         self.adrenaline = (self.adrenaline * (1.0 - weight)) + (new_state.get("ADR", 0.0) * weight)
         self.serotonin = (self.serotonin * (1.0 - weight)) + (new_state.get("SER", 0.0) * weight)
+
 
 class NarrativeSpotlight:
     def __init__(self):
@@ -109,6 +113,7 @@ class NarrativeSpotlight:
             results.append(f"{prefix} Engram: '{name.upper()}'{conn_str}")
         return results
 
+
 class NeurotransmitterModulator:
     def __init__(self):
         self.current_chem = ChemicalState()
@@ -121,7 +126,19 @@ class NeurotransmitterModulator:
             "GORDON": {"cortisol_dampener": 0.8, "adrenaline_boost": 0.8}
         }
 
-    def modulate(self, incoming_chem: Dict[str, float], base_voltage: float, lens_name: str = "NARRATOR", model_name: str = "") -> Dict[str, Any]:
+    def force_state(self, state_name: str):
+        if state_name == "MANIC":
+            self.current_chem.dopamine = 1.0
+            self.current_chem.adrenaline = 1.0
+            self.current_chem.cortisol = 0.2
+            self.current_chem.serotonin = 0.0
+        elif state_name == "DEPRESSED":
+            self.current_chem.dopamine = 0.0
+            self.current_chem.serotonin = 0.0
+            self.current_chem.cortisol = 0.8
+
+    def modulate(self, incoming_chem: Dict[str, float], base_voltage: float, lens_name: str = "NARRATOR",
+                 model_name: str = "") -> Dict[str, Any]:
         decay_amount = BrainConfig.BASE_DECAY_RATE
         self.current_chem.decay(rate=decay_amount)
         plasticity = BrainConfig.BASE_PLASTICITY + (base_voltage * BrainConfig.VOLTAGE_SENSITIVITY)
@@ -152,6 +169,7 @@ class NeurotransmitterModulator:
         params["max_tokens"] = max(100, params["max_tokens"])
         return params
 
+
 class LLMInterface:
     def __init__(self, events_ref: Optional[EventBus] = None, provider: str = None,
                  base_url: str = None, api_key: str = None, model: str = None, dreamer: Any = None):
@@ -161,7 +179,6 @@ class LLMInterface:
         self.model = model or BoneConfig.MODEL
         self.base_url = base_url or self._get_default_url(self.provider)
         self.dreamer = dreamer
-
         self.failure_count = 0
         self.failure_threshold = 3
         self.last_failure_time = 0.0
@@ -173,8 +190,7 @@ class LLMInterface:
             "ollama": "http://127.0.0.1:11434/v1/chat/completions",
             "openai": "https://api.openai.com/v1/chat/completions",
             "lm_studio": "http://127.0.0.1:1234/v1/chat/completions",
-            "localai": "http://127.0.0.1:8080/v1/chat/completions"
-        }
+            "localai": "http://127.0.0.1:8080/v1/chat/completions"}
         return defaults.get(provider, "https://api.openai.com/v1/chat/completions")
 
     def _is_synapse_active(self) -> bool:
@@ -185,56 +201,63 @@ class LLMInterface:
             if elapsed > 10.0:
                 self.circuit_state = "HALF_OPEN"
                 if self.events:
-                    self.events.log(f"{Prisma.CYN}⚡ SYNAPSE: Nerve healing. Attempting reconnection...{Prisma.RST}", "SYS")
+                    self.events.log(f"{Prisma.CYN}⚡ SYNAPSE: Nerve healing. Attempting reconnection...{Prisma.RST}","SYS")
                 return True
             return False
         return True
 
-    def _transmit(self, payload: Dict[str, Any], timeout: float = 60.0) -> str:
-        """The low-level wire transmission."""
+    def _transmit(self, payload: Dict[str, Any], timeout: float = 60.0, max_retries: int = 2) -> str:
+        """The low-level wire transmission with synaptic re-uptake (retries)."""
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}"
         }
         data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(self.base_url, data=data, headers=headers)
-
-        with urllib.request.urlopen(req, timeout=timeout) as response:
-            if response.status == 200:
-                result = json.loads(response.read().decode("utf-8"))
-                return result.get("choices", [{}])[0].get("message", {}).get("content", "")
-            raise Exception(f"HTTP {response.status}")
+        last_error = None
+        for attempt in range(max_retries + 1):
+            try:
+                req = urllib.request.Request(self.base_url, data=data, headers=headers)
+                with urllib.request.urlopen(req, timeout=timeout) as response:
+                    if response.status == 200:
+                        body = response.read().decode("utf-8")
+                        result = json.loads(body)
+                        choices = result.get("choices", [])
+                        if not choices:
+                            return ""
+                        return choices[0].get("message", {}).get("content", "")
+                    raise Exception(f"HTTP {response.status}")
+            except Exception as e:
+                last_error = e
+                if attempt < max_retries:
+                    backoff = 1.0 * (attempt + 1)
+                    if self.events:
+                        self.events.log(f"{Prisma.YEL}⚡ SYNAPSE FLICKER: Retrying in {backoff}s... ({e}){Prisma.RST}", "SYS")
+                    time.sleep(backoff)
+        raise last_error
 
     def generate(self, prompt: str, params: Dict[str, Any]) -> str:
         if "reset" in prompt.lower() and "system" in prompt.lower():
             self.failure_count = 0
             self.circuit_state = "CLOSED"
             return "[SYSTEM]: Circuit Breaker Manually Reset."
-
         if not self._is_synapse_active():
             return self.mock_generation(prompt, reason=f"CIRCUIT_BROKEN")
-
         if self.provider == "mock":
             return self.mock_generation(prompt)
-
         payload = {
             "model": self.model,
             "messages": [{"role": "user", "content": prompt}],
-            "stream": False
-        }
+            "stream": False}
         payload.update(params)
-
         try:
             timeout = 10.0 if self.circuit_state == "HALF_OPEN" else 60.0
             content = self._transmit(payload, timeout)
-
             if content:
                 if self.circuit_state != "CLOSED" and self.events:
                     self.events.log(f"{Prisma.GRN}⚡ SYNAPSE RESTORED.{Prisma.RST}", "SYS")
                 self.failure_count = 0
                 self.circuit_state = "CLOSED"
                 return content
-
         except Exception as e:
             self.failure_count += 1
             self.last_failure_time = time.time()
@@ -242,10 +265,8 @@ class LLMInterface:
                 self.circuit_state = "OPEN"
                 if self.events:
                     self.events.log(f"{Prisma.RED}⚡ SYNAPSE SEVERED: {e}{Prisma.RST}", "CRIT")
-
             if self.provider != "ollama" and self.circuit_state != "OPEN":
                 return self._local_fallback(prompt, params)
-
         return self.mock_generation(prompt, reason="SILENCE")
 
     def _local_fallback(self, prompt: str, params: Dict) -> str:
@@ -275,46 +296,39 @@ class LLMInterface:
             return f"[{reason}]: {hallucination}"
         return f"[{reason}]: The wire hums. There is no signal."
 
+
 class PromptComposer:
-    def compose(self, state: Dict[str, Any], user_query: str, ballast: bool = False, modifiers: Dict[str, bool] = None) -> str:
+    def compose(self, state: Dict[str, Any], user_query: str, ballast: bool = False,
+                modifiers: Dict[str, bool] = None) -> str:
         modifiers = self._normalize_modifiers(modifiers)
         mind = state.get("mind", {})
-
         role = mind.get("role", "The Observer")
         lens = mind.get("lens", "NARRATOR")
         bio = state.get("bio", {})
         chem = bio.get("chem", {})
-
         mood = "Neutral"
         if chem.get("ADR", 0) > 0.6: mood = "High Alert / Adrenaline"
         if chem.get("COR", 0) > 0.6: mood = "Defensive / Anxious"
         if chem.get("DOP", 0) > 0.6: mood = "Curious / Manic"
-
         vocab_bias = mind.get("lexicon_bias", "standard")
         style_notes = [
             f"Voice: {role}.",
             f"Current Mood: {mood}.",
             f"Vocabulary Bias: Use words that feel '{vocab_bias}'.",
             "Constraint: Be concise. Do NOT use 'As an AI'.",
-            "Constraint: If the user offers a concept, play with it. Don't just analyze it."
-        ]
-
+            "Constraint: If the user offers a concept, play with it. Don't just analyze it."]
         if ballast:
             style_notes.append("SAFETY OVERRIDE: Ground the user. Focus on physical objects. Be literal.")
-
         loc = state.get('world', {}).get('orbit', ['Void'])[0]
         scene_elements = [f"Location: {loc}"]
-
         if modifiers["include_inventory"]:
             inv = state.get("inventory", [])
             items = ", ".join(inv) if inv else "Empty hands"
             scene_elements.append(f"Holding: {items}")
-
         if modifiers["include_memories"]:
             spotlight = state.get("spotlight", [])
             if spotlight:
                 scene_elements.append("Memory Echoes: " + " | ".join(spotlight[:2]))
-
         return (
             f"[DIRECTOR'S NOTES]\n"
             f"{' | '.join(style_notes)}\n"
@@ -322,8 +336,7 @@ class PromptComposer:
             f"{' | '.join(scene_elements)}\n"
             f"[ACTION]\n"
             f"User: {self._sanitize(user_query)}\n"
-            f"{role}:"
-        )
+            f"{role}:")
 
     @staticmethod
     def _sanitize(text: str) -> str:
@@ -335,18 +348,17 @@ class PromptComposer:
             "include_somatic": True,
             "include_inventory": True,
             "include_memories": True,
-            "grace_period": False
-        }
+            "grace_period": False}
         if modifiers:
             defaults.update(modifiers)
         return defaults
+
 
 class ResponseValidator:
     def __init__(self):
         self.banned_phrases = [
             "large language model", "AI assistant", "cannot feel", "as an AI",
-            "against my programming", "cannot comply", "language model"
-        ]
+            "against my programming", "cannot comply", "language model"]
 
     def validate(self, response: str, _state: Dict) -> Dict:
         low_resp = response.lower()
@@ -355,25 +367,24 @@ class ResponseValidator:
                 return {
                     "valid": False,
                     "reason": "IMMERSION_BREAK",
-                    "replacement": f"{Prisma.GRY}[The system attempts to recite a EULA, but hiccups instead.]{Prisma.RST}"
-                }
+                    "replacement": f"{Prisma.GRY}[The system attempts to recite a EULA, but hiccups instead.]{Prisma.RST}"}
         if len(response.strip()) < 2:
             return {"valid": False, "reason": "TOO_SHORT", "replacement": "..."}
         return {"valid": True, "content": response}
+
 
 class TheCortex:
     def __init__(self, engine_ref, llm_client=None):
         self.sub = engine_ref
         self.events = engine_ref.events
         self.dreamer = DreamEngine(self.events)
-
+        self.last_physics = {}
         if llm_client:
             self.llm = llm_client
             if not hasattr(self.llm, 'dreamer') or self.llm.dreamer is None:
                 self.llm.dreamer = self.dreamer
         else:
             self.llm = LLMInterface(self.events, provider="mock", dreamer=self.dreamer)
-
         self.composer = PromptComposer()
         self.modulator = NeurotransmitterModulator()
         self.spotlight = NarrativeSpotlight()
@@ -381,7 +392,6 @@ class TheCortex:
         self.validator = ResponseValidator()
         self.ballast_active = False
         self.ballast_counter = 0
-
         if hasattr(self.events, "subscribe"):
             self.events.subscribe("AIRSTRIKE", self._handle_airstrike)
 
@@ -392,52 +402,46 @@ class TheCortex:
 
     def process(self, user_input: str) -> Dict[str, Any]:
         sim_result = self.sub.cycle_controller.run_turn(user_input)
-
         if sim_result.get("type") not in ["SNAPSHOT", "GEODESIC_FRAME", None]:
             return sim_result
-
         full_state = self._gather_state(sim_result)
-
         voltage = full_state["physics"].get("voltage", 5.0)
         chem = full_state["bio"].get("chem", {})
         current_lens = full_state["mind"].get("lens", "NARRATOR")
         model_id = self.llm.model if hasattr(self.llm, "model") else "unknown"
-
         llm_params = self.modulator.modulate(chem, voltage, lens_name=current_lens, model_name=model_id)
-
         modifiers = self.symbiosis.get_prompt_modifiers()
         if self.sub.tick_count < 5: modifiers["grace_period"] = True
         if self.ballast_active:
             self.ballast_counter -= 1
             if self.ballast_counter <= 0: self.ballast_active = False
-
         final_prompt = self.composer.compose(
             full_state,
             user_input,
             ballast=self.ballast_active,
-            modifiers=modifiers
-        )
-
+            modifiers=modifiers)
         start_time = time.time()
         raw_response_text = self.llm.generate(final_prompt, llm_params)
         latency = time.time() - start_time
-
         system_vector = full_state["physics"].get("vector", {})
         response_vector = self.sub.lex.vectorize(raw_response_text)
         alignment_score = cosine_similarity(system_vector, response_vector)
-
+        physics_data = sim_result.get("physics", {})
         if alignment_score < 0.3:
-            self.events.log(f"{Prisma.OCHRE}DIVERGENCE ({alignment_score:.2f}): The Ghost is wandering.{Prisma.RST}", "CORTEX")
-            if isinstance(sim_result["physics"], dict):
+            self.events.log(f"{Prisma.OCHRE}DIVERGENCE ({alignment_score:.2f}): The Ghost is wandering.{Prisma.RST}",
+                            "CORTEX")
+            if isinstance(physics_data, dict):
+                self.last_physics = physics_data
+                voltage = physics_data.get("voltage", 0.0)
+                if voltage > 18.0:
+                    self.modulator.force_state("MANIC")
                 sim_result["physics"]["voltage"] = sim_result["physics"].get("voltage", 0) + 1.0
-
         validation_result = self.validator.validate(raw_response_text, full_state)
-        final_response_text = validation_result["content"] if validation_result["valid"] else validation_result["replacement"]
-
+        final_response_text = validation_result["content"] if validation_result["valid"] else validation_result[
+            "replacement"]
         self.learn_from_response(final_response_text)
         self.symbiosis.monitor_host(latency=latency, response_text=final_response_text, prompt_len=len(final_prompt))
         self._audit_solipsism(final_response_text, lens_name=current_lens)
-
         sim_result["ui"] = f"{sim_result.get('ui', '')}\n\n{Prisma.WHT}{final_response_text}{Prisma.RST}"
         return sim_result
 
@@ -446,22 +450,19 @@ class TheCortex:
         phys_packet = self.sub.phys.tension.last_physics_packet
         bio_state = {
             "chem": self.sub.bio.endo.get_state(),
-            "atp": self.sub.bio.mito.state.atp_pool
-        }
+            "atp": self.sub.bio.mito.state.atp_pool}
         inventory = self.sub.gordon.inventory
         mind_data = self.sub.noetic.arbiter.consult(
             phys_packet,
             bio_state,
             inventory,
-            current_tick
-        )
+            current_tick)
         if isinstance(mind_data, tuple):
             mind_data = {
                 "lens": mind_data[0],
                 "role": mind_data[2],
                 "style_directives": ["Neutral tone."],
-                "lexicon_bias": "abstract"
-            }
+                "lexicon_bias": "abstract"}
         return {
             "bio": bio_state,
             "physics": phys_packet,
@@ -473,8 +474,7 @@ class TheCortex:
             "soul_state": self.sub.soul.get_soul_state(),
             "spotlight": self.spotlight.illuminate(
                 self.sub.mind.mem.graph,
-                phys_packet.get("vector", {})
-            )
+                phys_packet.get("vector", {}))
         }
 
     def _audit_solipsism(self, text: str, lens_name: str = "NARRATOR"):
@@ -494,6 +494,7 @@ class TheCortex:
                 self.sub.lex.teach(target, "kinetic", self.sub.tick_count)
                 self.events.log(f"AUTO-DIDACTIC: Learned '{target}' from self.", "CORTEX")
 
+
 class NeuroPlasticity:
     def __init__(self):
         self.plasticity_mod = 1.0
@@ -511,6 +512,7 @@ class NeuroPlasticity:
         back_weight = graph[word_b]["edges"].get(word_a, 0.0)
         graph[word_b]["edges"][word_a] = min(10.0, back_weight + 1.0)
         return f"{Prisma.MAG}⚡ HEBBIAN GRAFT: Wired '{word_a}' <-> '{word_b}'.{Prisma.RST}"
+
 
 class ShimmerState:
     def __init__(self, max_val=50.0):
@@ -531,6 +533,7 @@ class ShimmerState:
             return "CONSERVE"
         return None
 
+
 class DreamEngine:
     def __init__(self, events):
         self.events = events
@@ -539,15 +542,7 @@ class DreamEngine:
         self.VISIONS = DREAMS.get("VISIONS", ["Static."])
 
     def enter_rem_cycle(self, memory_system: Any, bio_readout: Dict[str, Any] = None) -> str:
-        """
-        Generates a dream based on Memory (Content) and Biology (Tone).
-        bio_readout structure expected:
-        {
-            "chem": {"COR": float, "DOP": float, ...},
-            "mito": {"ros": float, "atp": float},
-            "physics": {"voltage": float, "entropy": float}
-        }
-        """
+        """ Generates a dream based on Memory (Content) and Biology (Tone). """
         residue_word = "static"
         context_word = "void"
 
@@ -555,26 +550,21 @@ class DreamEngine:
             sorted_nodes = sorted(
                 memory_system.graph.items(),
                 key=lambda item: item[1].get("last_tick", 0),
-                reverse=True
-            )
+                reverse=True)
             if sorted_nodes:
                 residue_word = sorted_nodes[0][0]
                 if len(sorted_nodes) > 1:
                     context_word = sorted_nodes[1][0]
-
         dream_type = "NORMAL"
         subtype = "ABSTRACT"
-
         if bio_readout:
             chem = bio_readout.get("chem", {})
             mito = bio_readout.get("mito", {})
             phys = bio_readout.get("physics", {})
-
             cortisol = chem.get("COR", 0.0)
             ros = mito.get("ros", 0.0)
             voltage = phys.get("voltage", 0.0)
             atp = mito.get("atp", 100.0)
-
             if ros > 8.0:
                 dream_type = "NIGHTMARE"
                 subtype = "SEPTIC"
@@ -589,39 +579,31 @@ class DreamEngine:
                 subtype = "CRYO"
             elif chem.get("DOP", 0.0) > 0.7:
                 dream_type = "LUCID"
-
         dream_text = self._weave_dream(residue_word, context_word, dream_type, subtype)
-
         consolidation_msg = "Neural pathways consolidated."
         if hasattr(memory_system, "replay_dreams"):
             consolidation_msg = memory_system.replay_dreams()
-
         return (
             f"{Prisma.VIOLET}☾ REM CYCLE [{dream_type}:{subtype}] ☽{Prisma.RST}\n"
             f"   Day Residue: '{residue_word.upper()}' detected.\n"
             f"   Dream: \"{dream_text}\"\n"
-            f"   {Prisma.GRY}{consolidation_msg}{Prisma.RST}"
-        )
+            f"   {Prisma.GRY}{consolidation_msg}{Prisma.RST}")
 
     def _weave_dream(self, residue: str, context: str, dream_type: str, subtype: str) -> str:
         if dream_type == "NIGHTMARE":
             templates = self.NIGHTMARES.get(subtype, self.NIGHTMARES.get("BARIC", ["{ghost} is heavy."]))
             template = random.choice(templates)
             return template.format(ghost=residue)
-
         if dream_type == "LUCID":
             return f"You hold '{residue}' in your hand. You control its shape. It becomes '{context}'."
-
         template = random.choice(self.PROMPTS)
         return template.format(A=residue, B=context)
 
     def hallucinate(self, vector: Dict[str, float], trauma_level: float = 0.0) -> Tuple[str, float]:
         dims = [k for k, v in vector.items() if v > 0.3]
         if not dims: dims = ["VOID"]
-
         val_a = dims[0]
         val_b = "ENTROPY" if trauma_level > 5.0 else (dims[1] if len(dims) > 1 else "SILENCE")
-
         if trauma_level > 5.0:
             cat = "SEPTIC" if vector.get("ENT", 0) > 0.5 else "BARIC"
             template = random.choice(self.NIGHTMARES.get(cat, self.NIGHTMARES["BARIC"]))
@@ -629,5 +611,4 @@ class DreamEngine:
         else:
             template = random.choice(self.PROMPTS)
             content = template.format(A=val_a, B=val_b)
-
         return content, 0.0

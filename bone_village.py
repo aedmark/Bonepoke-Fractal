@@ -346,16 +346,41 @@ class ApeirogonResonance:
     def architect(self, metrics, station, is_bored):
         phys = metrics.get("physics", {})
         vec = phys.get("vector", {})
+
         if is_bored:
-            return {"title": "THE FRACTAL BLOOM", "color": Prisma.VIOLET, "desc": "Boredom Threshold exceeded. Entropy is high.", "context": "CHAOS"}
+            return {
+                "title": "THE FRACTAL BLOOM",
+                "color": Prisma.VIOLET,
+                "desc": "Boredom Threshold exceeded. Entropy is high.",
+                "context": "CHAOS"
+            }
+
         if station:
+            lens_name = station[0] or "UNKNOWN"
+            thought = station[1] or "Processing..."
+            role = station[2] or "Observer"
+
             role_color = Prisma.CYN
-            if station[0] == "GORDON": role_color = Prisma.OCHRE
-            elif station[0] == "SHERLOCK": role_color = Prisma.INDIGO
-            elif station[0] == "JESTER": role_color = Prisma.VIOLET
-            return {"title": station[2].upper().replace('THE ', 'THE '), "color": role_color, "desc": station[1], "context": station[0]}
+            if lens_name == "GORDON": role_color = Prisma.OCHRE
+            elif lens_name == "SHERLOCK": role_color = Prisma.INDIGO
+            elif lens_name == "JESTER": role_color = Prisma.VIOLET
+
+            title_text = str(role).upper().replace('THE ', 'THE ')
+
+            return {
+                "title": title_text,
+                "color": role_color,
+                "desc": thought,
+                "context": lens_name
+            }
+
         if not vec or len(vec) < 2:
-            return {"title": "THE VOID", "color": Prisma.GRY, "desc": "No data.", "context": "VOID"}
+            return {
+                "title": "THE VOID",
+                "color": Prisma.GRY,
+                "desc": "No data.",
+                "context": "VOID"
+            }
         sorted_dims = sorted(vec.items(), key=lambda x: abs(x[1] - 0.5), reverse=True)
         p_dim, p_val = sorted_dims[0]
         s_dim, s_val = sorted_dims[1]

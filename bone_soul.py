@@ -57,15 +57,12 @@ class NarrativeSelf:
         self.editor = TheEditor()
         self.chapters: List[str] = []
         self.core_memories: List[CoreMemory] = []
-
         self.traits = {
             "CURIOSITY": 0.5,
             "CYNICISM": 0.5,
             "HOPE": 0.5,
             "DISCIPLINE": 0.5,
-            "WISDOM": 0.1
-        }
-
+            "WISDOM": 0.1}
         self.archetype = "THE OBSERVER"
         self.current_obsession: Optional[str] = None
         self.obsession_progress: float = 0.0
@@ -77,15 +74,16 @@ class NarrativeSelf:
             {"title": "Thermodynamic Heat", "target": "thermal", "negate": "cryo"},
             {"title": "The Velocity of Thought", "target": "kinetic", "negate": "heavy"},
             {"title": "The Architecture of Silence", "target": "abstract", "negate": "kinetic"},
-            {"title": "The Search for Light", "target": "photo", "negate": "heavy"}
-        ]
+            {"title": "The Search for Light", "target": "photo", "negate": "heavy"},
+            {"title": "The Geometry of Stillness", "target": "buffer", "negate": "kinetic"},
+            {"title": "The Comfort of Small Things", "target": "suburban", "negate": "heavy"},
+            {"title": "Equilibrium Studies", "target": "aerobic", "negate": "thermal"}]
 
     def _determine_archetype(self) -> str:
         c = self.traits["CURIOSITY"]
         y = self.traits["CYNICISM"]
         h = self.traits["HOPE"]
         d = self.traits["DISCIPLINE"]
-
         if h > 0.7 and c > 0.6: return "THE POET"
         if d > 0.7 and c > 0.6: return "THE ENGINEER"
         if y > 0.7 and d > 0.6: return "THE CRITIC"
@@ -95,7 +93,6 @@ class NarrativeSelf:
 
     def get_passive_buffs(self) -> Dict[str, float]:
         buffs = {"voltage_mod": 1.0, "drag_mod": 1.0, "plasticity": 1.0}
-
         if self.archetype == "THE POET":
             buffs["voltage_mod"] = 1.2
             buffs["drag_mod"] = 0.8
@@ -105,30 +102,24 @@ class NarrativeSelf:
         elif self.archetype == "THE NIHILIST":
             buffs["voltage_mod"] = 0.5
             buffs["drag_mod"] = 0.5
-
         wisdom_factor = self.traits.get("WISDOM", 0.0)
         if self.obsession_neglect > 5.0:
             mitigated_drag = 0.5 * (1.0 - wisdom_factor)
             buffs["drag_mod"] += mitigated_drag
-
         return buffs
 
     def crystallize_memory(self, physics_packet: Dict, _bio_state: Dict, _tick: int) -> Optional[str]:
         voltage = physics_packet.get("voltage", 0.0)
         truth = physics_packet.get("truth_ratio", 0.0)
-
-        self._decay_traits()
-
+        dance_move = self._synaptic_dance(physics_packet)
         prev_arch = self.archetype
         self.archetype = self._determine_archetype()
         if prev_arch != self.archetype:
             self.events.log(f"{Prisma.VIOLET}🎭 IDENTITY SHIFT: {prev_arch} -> {self.archetype}{Prisma.RST}", "SOUL")
-
         if voltage > MEMORY_VOLTAGE_THRESHOLD and truth > MEMORY_TRUTH_THRESHOLD:
             clean_words = physics_packet.get("clean_words", [])
             flavor = "MANIC" if voltage > MANIC_VOLTAGE_THRESHOLD else "LUCID"
             lesson = "The world is loud."
-
             if "love" in clean_words or "help" in clean_words:
                 lesson = "Connection is possible."
                 self.traits["HOPE"] = min(1.0, self.traits["HOPE"] + 0.2)
@@ -138,26 +129,45 @@ class NarrativeSelf:
             elif "why" in clean_words:
                 lesson = "The question remains."
                 self.traits["CURIOSITY"] = min(1.0, self.traits["CURIOSITY"] + 0.2)
-
             memory = CoreMemory(
                 timestamp=time.time(),
                 trigger_words=clean_words[:5],
                 emotional_flavor=flavor,
                 lesson=lesson,
-                impact_voltage=voltage
-            )
+                impact_voltage=voltage)
             self.core_memories.append(memory)
             chapter_title = f"The Incident of the {random.choice(clean_words).title()}"
             self.chapters.append(chapter_title)
-
             log_msg = (
                 f"{Prisma.MAG}✨ CORE MEMORY FORMED: '{chapter_title}'{Prisma.RST}\n"
-                f"   Lesson: {lesson} (Archetype: {self.archetype})"
-            )
+                f"   Lesson: {lesson} (Archetype: {self.archetype})")
             self.events.log(log_msg, "SOUL")
             self.events.log(self.editor.critique(chapter_title), "EDIT")
             return lesson
         return None
+
+    def _synaptic_dance(self, physics: Dict) -> str:
+        voltage = physics.get("voltage", 0.0)
+        drag = physics.get("narrative_drag", 0.0)
+        momentum = 0.01
+        move_name = "Drifting"
+        if voltage > 15.0:
+            self.traits["CURIOSITY"] = min(1.0, self.traits["CURIOSITY"] + (momentum * 4))
+            self.traits["DISCIPLINE"] = max(0.0, self.traits["DISCIPLINE"] - (momentum * 2))
+            move_name = "Accelerating"
+        elif drag > 4.0:
+            self.traits["CYNICISM"] = min(1.0, self.traits["CYNICISM"] + (momentum * 3))
+            self.traits["HOPE"] = max(0.0, self.traits["HOPE"] - (momentum * 3))
+            move_name = "Enduring"
+        elif 5.0 < voltage < 12.0 and drag < 2.0:
+            self.traits["WISDOM"] = min(1.0, self.traits["WISDOM"] + (momentum * 2))
+            self.traits["DISCIPLINE"] = min(1.0, self.traits["DISCIPLINE"] + momentum)
+            move_name = "Flowing"
+        decay = 0.002
+        for k in self.traits:
+            if self.traits[k] > 0.5: self.traits[k] -= decay
+            elif self.traits[k] < 0.5: self.traits[k] += decay
+        return move_name
 
     def _decay_traits(self):
         decay_rate = 0.005

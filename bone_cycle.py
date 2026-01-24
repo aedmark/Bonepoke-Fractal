@@ -11,7 +11,7 @@ from bone_viewer import GeodesicRenderer, CachedRenderer
 from bone_architect import PanicRoom
 from bone_synesthesia import SynestheticCortex
 from bone_symbiosis import SymbiosisManager
-
+from bone_sanctuary import SanctuaryGovernor, SANCTUARY
 
 class PIDController:
     def __init__(self, kp: float, ki: float, kd: float, setpoint: float = 0.0, output_limits: Tuple[float, float] = (-5.0, 5.0)):
@@ -99,40 +99,31 @@ class CycleStabilizer:
         else:
             flow = getattr(p, "flow_state", "LAMINAR")
             manifold = getattr(p, "manifold", "THE_CONSTRUCT")
-
-        if flow in ["SUPERCONDUCTIVE", "FLOW_BOOST", "HUBRIS_RISK"]:
-            self.voltage_pid.setpoint = 20.0
-        elif manifold == "THE_FORGE":
-            self.voltage_pid.setpoint = 15.0
-        else:
-            self.voltage_pid.setpoint = 10.0
-
-        if manifold == "THE_MUD":
-            self.drag_pid.setpoint = 5.0
-        elif manifold == "THE_AERIE":
-            self.drag_pid.setpoint = 0.5
-        else:
-            self.drag_pid.setpoint = 1.5
+        manifold_physics = {
+            "THE_FORGE":  {"voltage": 15.0, "drag": 1.5},
+            "THE_MUD":    {"voltage": 10.0, "drag": 5.0},
+            "THE_AERIE":  {"voltage": 10.0, "drag": 0.5},
+            "DEFAULT":    {"voltage": 10.0, "drag": 1.5}
+        }
+        high_energy_states = {"SUPERCONDUCTIVE", "FLOW_BOOST", "HUBRIS_RISK"}
+        target_cfg = manifold_physics.get(manifold, manifold_physics["DEFAULT"])
+        self.voltage_pid.setpoint = 20.0 if flow in high_energy_states else target_cfg["voltage"]
+        self.drag_pid.setpoint = target_cfg["drag"]
 
     def stabilize(self, ctx: CycleContext, current_phase: str):
         self._adjust_setpoints(ctx)
         curr_v, curr_d = self._get_current_metrics(ctx)
-        SIMULATION_TICK_DELTA = 0.5
-        v_force = self.voltage_pid.update(curr_v, dt=SIMULATION_TICK_DELTA)
-        d_force = self.drag_pid.update(curr_d, dt=SIMULATION_TICK_DELTA)
-
+        v_force = self.voltage_pid.update(curr_v, dt=None)
+        d_force = self.drag_pid.update(curr_d, dt=None)
         corrections_made = False
-
         if abs(curr_v - self.voltage_pid.setpoint) > 6.0:
             applied_v = self._apply_correction(ctx, "voltage", v_force)
             if abs(applied_v) > 0.1:
                 reason = "PID_DAMPENER" if applied_v < 0 else "PID_EXCITATION"
                 ctx.record_flux(current_phase, "voltage", curr_v, curr_v + applied_v, reason)
-
                 if abs(applied_v) > 1.5:
                     self.events.log(f"{Prisma.GRY}⚖️ STABILIZER: Voltage corrected ({applied_v:+.1f}v). Target: {self.voltage_pid.setpoint}{Prisma.RST}", "SYS")
                 corrections_made = True
-
         if abs(curr_d - self.drag_pid.setpoint) > 2.5:
             applied_d = self._apply_correction(ctx, "narrative_drag", d_force)
             if abs(applied_d) > 0.1:
@@ -142,7 +133,6 @@ class CycleStabilizer:
                 if applied_d < -1.0:
                     self.events.log(f"{Prisma.GRY}🛢️ STABILIZER: Grease applied. Drag reduced ({applied_d:+.1f}). Target: {self.drag_pid.setpoint}{Prisma.RST}", "SYS")
                 corrections_made = True
-
         self.last_phase = current_phase
         return corrections_made
 
@@ -171,6 +161,52 @@ class ObservationPhase(SimulationPhase):
         self.eng.tick_count += 1
         rupture = self.vsl_32v.analyze(ctx.physics)
         if rupture: ctx.log(rupture["log"])
+        return ctx
+
+class SanctuaryPhase(SimulationPhase):
+    """The Safe Harbor Check - runs BEFORE heavy machinery."""
+
+    def __init__(self, engine_ref):
+        super().__init__(engine_ref)
+        self.name = "SANCTUARY"
+        self.governor = SanctuaryGovernor(self.eng.events)
+
+    def run(self, ctx: CycleContext):
+        in_safe_zone, distance = self.governor.assess(ctx.physics)
+
+        trauma_sum = sum(self.eng.trauma_accum.values())
+
+        if trauma_sum > 25.0:
+            return ctx
+
+        if trauma_sum < 15.0:
+            v_applied, d_applied = self.governor.apply_gentle_correction(ctx.physics)
+            if abs(v_applied) > 0.01:
+                old_v = ctx.physics["voltage"] if isinstance(ctx.physics, dict) else ctx.physics.voltage
+                ctx.record_flux("SANCTUARY", "voltage", old_v - v_applied, old_v, "GENTLE_NUDGE")
+
+        if in_safe_zone:
+            if isinstance(ctx.physics, dict):
+                ctx.physics["zone"] = SANCTUARY.ZONE
+                ctx.physics["zone_color"] = "GRN"
+                ctx.physics["flow_state"] = "LAMINAR"
+            else:
+                ctx.physics.zone = SANCTUARY.ZONE
+                ctx.physics.zone_color = "GRN"
+                ctx.physics.flow_state = "LAMINAR"
+
+            self.eng.health = min(BoneConfig.MAX_HEALTH, self.eng.health + 0.5)
+            self.eng.stamina = min(BoneConfig.MAX_STAMINA, self.eng.stamina + 1.0)
+
+            if hasattr(self.eng, 'bio'):
+                self.eng.bio.endo.serotonin = min(1.0, self.eng.bio.endo.serotonin + 0.05)
+
+            for key in list(self.eng.trauma_accum.keys()):
+                self.eng.trauma_accum[key] = max(0.0, self.eng.trauma_accum[key] - 0.1)
+
+            if random.random() < 0.1:
+                ctx.log(f"{SANCTUARY.COLOR}![☀️] SANCTUARY: Breathing space.{Prisma.RST}")
+
         return ctx
 
 class MaintenancePhase(SimulationPhase):
@@ -549,13 +585,26 @@ class CognitionPhase(SimulationPhase):
 
     def run(self, ctx: CycleContext):
         self.eng.mind.mem.encode(ctx.clean_words, ctx.physics, "GEODESIC")
+        if ctx.is_alive and ctx.clean_words:
+            max_h = getattr(BoneConfig, "MAX_HEALTH", 100.0)
+            current_h = max(0.0, self.eng.health)
+            desperation = 1.0 - (current_h / max_h)
+            bury_msg, new_wells = self.eng.mind.mem.bury(
+                ctx.clean_words,
+                self.eng.tick_count,
+                resonance=ctx.physics.get("voltage", 5.0),
+                desperation_level=desperation)
+            if bury_msg:
+                prefix = f"{Prisma.YEL}⚠️ MEMORY:{Prisma.RST}" if "SATURATION" in bury_msg else f"{Prisma.RED}🍖 DONNER PROTOCOL:{Prisma.RST}"
+                ctx.log(f"{prefix} {bury_msg}")
+            if new_wells:
+                ctx.log(f"{Prisma.CYN}🌌 GRAVITY WELL FORMED: {new_wells}{Prisma.RST}")
         ctx.mind_state = self.eng.noetic.think(
             ctx.physics,
             ctx.bio_result,
             self.eng.gordon.inventory,
             self.eng.phys.dynamics.voltage_history,
-            self.eng.tick_count
-        )
+            self.eng.tick_count)
         thought = ctx.mind_state.get("context_msg", ctx.mind_state.get("thought"))
         if thought:
             ctx.log(thought)
@@ -625,6 +674,7 @@ class CycleSimulator:
             MetabolismPhase(engine_ref),
             RealityFilterPhase(engine_ref),
             NavigationPhase(engine_ref),
+            SanctuaryPhase(engine_ref),
             MachineryPhase(engine_ref),
             IntrusionPhase(engine_ref),
             SoulPhase(engine_ref),

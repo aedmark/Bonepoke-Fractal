@@ -15,10 +15,6 @@ from bone_genesis import GenesisProtocol
 
 @contextmanager
 def MockInput(inputs: List[str]):
-    """
-    A context manager to mock user input.
-    Popping from the list simulates a user typing responses in sequence.
-    """
     original_input = builtins.input
     input_iterator = iter(inputs)
 

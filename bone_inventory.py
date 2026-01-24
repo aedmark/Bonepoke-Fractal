@@ -18,6 +18,13 @@ SEMANTIC_INJECTIONS = {
     "BUREAUCRATIC_ANCHOR": "STYLE: Use formal, procedural language. Cite non-existent regulations."
 }
 
+@dataclass
+class TensegrityState:
+    mass: float = 0.0
+    lift: float = 0.0
+    volume: float = 0.0
+    is_collapsed: bool = False
+
 def effect_conductive(physics: Dict, _data: Dict, item_name: str) -> Optional[str]:
     voltage = physics.get("voltage", 0.0)
     limit = BoneConfig.INVENTORY.CONDUCTIVE_THRESHOLD
@@ -130,6 +137,7 @@ class GordonKnot:
     scar_tissue: Dict[str, float] = field(default_factory=dict)
     pain_memory: set = field(default_factory=set)
     last_flinch_turn: int = -10
+    physics_state: TensegrityState = field(default_factory=TensegrityState)
     ITEM_REGISTRY: Dict = field(default_factory=dict, init=False)
     CRITICAL_ITEMS: set = field(default_factory=set, init=False)
     REFLEX_MAP: Dict = field(init=False, default_factory=dict)
@@ -138,6 +146,7 @@ class GordonKnot:
         self.load_config()
         self.pain_memory = set(self.scar_tissue.keys())
         self._initialize_reflexes()
+        self._recalculate_tensegrity()
 
     def load_config(self):
         starting_gear = GORDON.get("STARTING_INVENTORY", ["POCKET_ROCKS", "SILENT_KNIFE"])
@@ -162,6 +171,24 @@ class GordonKnot:
             "function": "NONE",
             "usage_msg": "It does nothing."})
 
+    def _recalculate_tensegrity(self):
+        total_mass = 0.0
+        total_lift = 0.0
+        total_vol = 0.0
+        for item_name in self.inventory:
+            data = self.get_item_data(item_name)
+            total_mass += data.get("mass", 1.0)
+            total_lift += data.get("lift", 0.0)
+            total_vol += data.get("volume", 1.0)
+        collapsed = False
+        if total_mass > 20.0 and total_mass > (total_lift * 3.0 + 10.0):
+            collapsed = True
+        self.physics_state = TensegrityState(
+            mass=total_mass,
+            lift=total_lift,
+            volume=total_vol,
+            is_collapsed=collapsed)
+
     def audit_tools(self, physics_ref: Dict) -> List[str]:
         logs = []
         turbulence = physics_ref.get("turbulence", 0.0)
@@ -171,6 +198,7 @@ class GordonKnot:
                 if droppable:
                     dropped = random.choice(droppable)
                     self.inventory.remove(dropped)
+                    self._recalculate_tensegrity()
                     template = random.choice(GORDON_LOGS["FUMBLE"])
                     msg = template.format(item=dropped)
                     logs.append(f"{Prisma.RED}{msg}{Prisma.RST}")
@@ -238,24 +266,32 @@ class GordonKnot:
             return f"{Prisma.GRY}JUNK: Gordon shakes his head. 'Not standard issue.' ({tool_name}){Prisma.RST}"
         if tool_name in self.inventory:
             return f"{Prisma.GRY}DUPLICATE: You already have a {tool_name}.{Prisma.RST}"
-        if len(self.inventory) >= BoneConfig.INVENTORY.MAX_SLOTS:
-            return f"{Prisma.YEL}OVERBURDENED: Gordon sighs. 'Pockets full.' (Drop something first).{Prisma.RST}"
+        if self.physics_state.volume >= BoneConfig.INVENTORY.MAX_SLOTS:
+            return f"{Prisma.YEL}FULL: Gordon's pockets are bursting. (Vol: {self.physics_state.volume}){Prisma.RST}"
         self.inventory.append(tool_name)
+        self._recalculate_tensegrity()
         desc = registry_data.get('description', 'A thing.')
         return f"{Prisma.GRN}LOOT DROP: Acquired [{tool_name}].{Prisma.RST}\n   {Prisma.GRY}\"{desc}\"{Prisma.RST}"
 
     def check_gravity(self, current_drift: float, psi: float) -> Tuple[float, Optional[str]]:
-        for item in self.inventory:
-            data = self.get_item_data(item)
-            if data.get("function") == "GRAVITY_BUFFER" and current_drift > 0.5:
-                force = data.get("value", 2.0)
-                cost = data.get("cost_value", 0.0)
-                if data.get("cost") == "INTEGRITY":
-                    self.integrity -= cost
-                return max(0.0, current_drift - force), f"🪨 {item}: {data.get('usage_msg', 'Drift Reduced.')} (Integrity -{cost})"
+        if self.physics_state.is_collapsed and self.inventory:
+            droppable = [i for i in self.inventory if i not in self.CRITICAL_ITEMS]
+            if droppable:
+                dropped = random.choice(droppable)
+                self.inventory.remove(dropped)
+                self._recalculate_tensegrity()
+                return current_drift + 2.0, f"{Prisma.RED}STRUCTURAL FAILURE: Pocket ripped! Dropped {dropped}.{Prisma.RST}"
+        net_drag = self.physics_state.mass - self.physics_state.lift
+        new_drift = max(0.0, current_drift + (net_drag * 0.1))
+        msg = None
+        if self.physics_state.lift > self.physics_state.mass:
+            reduction = (self.physics_state.lift - self.physics_state.mass) * 0.2
+            new_drift = max(0.0, current_drift - reduction)
+            if reduction > 1.0:
+                msg = f"BOUYANCY: Your gear is lifting you up. (Drift -{reduction:.1f})"
         if psi > 0.8 and current_drift > 4.0:
-            return max(4.0, current_drift - 1.0), "WIND WOLVES: The logic is howling. You grip the roof. (Drift Resisted)."
-        return current_drift, None
+            return max(4.0, new_drift - 1.0), "WIND WOLVES: The logic is howling. You grip the roof. (Drift Resisted)."
+        return new_drift, msg
 
     def flinch(self, clean_words: List[str], current_turn: int) -> Tuple[bool, Optional[str], Optional[Dict]]:
         if (current_turn - self.last_flinch_turn) < 10:

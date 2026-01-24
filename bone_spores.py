@@ -22,7 +22,7 @@ class BoneJSONEncoder(json.JSONEncoder):
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_11.0"
+        self.genome = "BONEAMANITA_11.1.0"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -231,7 +231,7 @@ class MycelialNetwork:
                 bloom_msg = seed.bloom()
         return bloom_msg
 
-    def bury(self, clean_words: List[str], tick: int, resonance=5.0, learning_mod=1.0) -> Tuple[Optional[str], List[str]]:
+    def bury(self, clean_words: List[str], tick: int, resonance=5.0, learning_mod=1.0, desperation_level=0.0) -> Tuple[Optional[str], List[str]]:
         total_len = sum(len(w) for w in clean_words)
         count = max(1, len(clean_words))
         avg_len = total_len / count
@@ -271,6 +271,8 @@ class MycelialNetwork:
                 rev_delta = learning_rate * (1.0 - (rev_weight * decay_rate))
                 rev_edges[current] = min(10.0, rev_weight + rev_delta)
         if len(self.graph) > BoneConfig.MAX_MEMORY_CAPACITY:
+            if desperation_level < 0.6:
+                return f"CORTICAL SATURATION: Memory full & Glucose High. Input rejected.", []
             victim, log_msg = self.cannibalize(current_tick=tick)
             if not victim:
                 protected = set(self.cortical_stack)

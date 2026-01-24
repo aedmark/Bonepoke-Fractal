@@ -884,6 +884,18 @@ SOMATIC_LIBRARY = {
     }
 }
 
+class SANCTUARY:
+    """Target Ranges for a 'Happy' State."""
+    VOLTAGE_TARGET = 7.0
+    VOLTAGE_TOLERANCE = 3.0
+    DRAG_TARGET = 2.0
+    DRAG_TOLERANCE = 1.5
+    TRUTH_TARGET = 0.7
+    E_TARGET = 0.4
+    B_TARGET = 0.5
+    ZONE = "SANCTUARY"
+    COLOR = Prisma.GRN
+
 class TheAkashicRecord:
     def __init__(self):
         self.discovered_words: Dict[str, str] = {}
