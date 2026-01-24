@@ -112,9 +112,9 @@ class GenesisProtocol:
         except Exception as e:
             return False, f"Assay Exception: {e}"
 
-    def validate_brain_uplink(self, config: Dict) -> Tuple[bool, str]:
+    def validate_brain_uplink(self, config: Dict) -> Tuple[bool, str, Optional[Any]]:
         if config["provider"] == "mock":
-            return True, "Mock Mode Active."
+            return True, "Mock Mode Active.", None
         self.type_out(f"\n...Initiating Neuro-Compatibility Assay ({config['provider']})...", color=Prisma.CYN)
         try:
             test_client = LLMInterface(
@@ -126,12 +126,12 @@ class GenesisProtocol:
             success, msg = self._perform_compatibility_assay(test_client)
             if success:
                 self.type_out(f"   [SYSTEM]: Neural Substrate is viable.", color=Prisma.GRN)
-                return True, "Nominal"
+                return True, "Nominal", test_client
             else:
                 self.type_out(f"   [SYSTEM]: Neural Substrate rejected.", color=Prisma.RED)
-                return False, msg
+                return False, msg, None
         except Exception as uplink_err:
-            return False, f"Exception during validation: {uplink_err}"
+            return False, f"Exception during validation: {uplink_err}", None
 
     def _save_config(self):
         try:
@@ -188,7 +188,7 @@ class GenesisProtocol:
                 "base_url": base_url,
                 "api_key": key,
                 "model": model}
-            is_valid, msg = self.validate_brain_uplink(candidate_config)
+            is_valid, msg, _ = self.validate_brain_uplink(candidate_config)
             if is_valid:
                 self.config = candidate_config
                 self._save_config()
@@ -203,7 +203,7 @@ class GenesisProtocol:
     def wizard(self) -> bool:
         os.system('cls' if os.name == 'nt' else 'clear')
         banner = f"""
-{Prisma.CYN}   GENESIS PROTOCOL v11.2.0{Prisma.RST}
+{Prisma.CYN}   GENESIS PROTOCOL v11.2.1{Prisma.RST}
 {Prisma.GRY}State Machine Active. Tensegrity Nominal.{Prisma.RST}
 ------------------------------------"""
         print(banner)
@@ -279,7 +279,7 @@ class GenesisProtocol:
                 self.type_out("Target Model Name (e.g., gpt-4-turbo, llama3-70b-8192):")
                 model = input(f"{Prisma.paint('>', 'C')} ").strip()
                 candidate_config["model"] = model if model else "gpt-4-turbo"
-            is_valid, msg = self.validate_brain_uplink(candidate_config)
+            is_valid, msg, _ = self.validate_brain_uplink(candidate_config)
             if is_valid:
                 self.config = candidate_config
                 self._save_config()
@@ -366,6 +366,7 @@ Do not break character. Do not explain the simulation rules unless asked.
             self.type_out("   > System integrity compromised. Proceeding with volatile memory.", color=Prisma.YEL)
 
     def launch(self):
+        pre_warmed_client = None
         config_status = "MISSING"
         safe_config = {
             "provider": "mock",
@@ -383,7 +384,7 @@ Do not break character. Do not explain the simulation rules unless asked.
                 config_status = "CORRUPT"
         if config_status == "LOADED":
             self.type_out("...Verifying saved configuration...", color=Prisma.GRY)
-            is_valid, msg = self.validate_brain_uplink(self.config)
+            is_valid, msg, pre_warmed_client = self.validate_brain_uplink(self.config)
             if not is_valid:
                 self.type_out(f"{Prisma.RED}Saved configuration is stale: {msg}{Prisma.RST}")
                 self.type_out("   > Purging stale config to prevent contamination.", color=Prisma.GRY)
@@ -409,12 +410,15 @@ Do not break character. Do not explain the simulation rules unless asked.
         if self.config["provider"] != "mock":
             self.type_out(f"...Connecting Neural Uplink ({self.config['provider']})...", color=Prisma.CYN)
             try:
-                client = LLMInterface(
-                    events_ref=engine.events,
-                    provider=self.config["provider"],
-                    base_url=self.config.get("base_url"),
-                    api_key=self.config.get("api_key"),
-                    model=self.config.get("model"))
+                if pre_warmed_client:
+                    client = pre_warmed_client
+                else:
+                    client = LLMInterface(
+                        events_ref=engine.events,
+                        provider=self.config["provider"],
+                        base_url=self.config.get("base_url"),
+                        api_key=self.config.get("api_key"),
+                        model=self.config.get("model"))
                 if hasattr(engine, 'cortex'):
                     engine.cortex.llm = client
                     self.type_out("   [CORTEX]: Uplink Established via EventBus.", color=Prisma.GRN)

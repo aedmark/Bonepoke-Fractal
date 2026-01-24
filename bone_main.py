@@ -1,4 +1,4 @@
-""" BONEAMANITA 11.2.0 'The Sympathetic Resonance'
+""" BONEAMANITA 11.2.1 'The Pre-Warmed Panic Room'
  Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark """
 
 import time, json, uuid
@@ -30,22 +30,28 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 11.2.0', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 11.2.1', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         print(f"\n{Prisma.paint('--- SYSTEM HALT ---', 'R')}")
         if exc_type:
-            print(f"{Prisma.paint(f'CRITICAL FAILURE: {exc_val}', 'R')}")
-            if hasattr(self.engine_instance, "events"):
-                self.engine_instance.events.log(f"CRASH: {exc_val}", "SYS")
+            try:
+                print(f"{Prisma.paint(f'CRITICAL FAILURE: {exc_val}', 'R')}")
+                if hasattr(self.engine_instance, "events"):
+                    self.engine_instance.events.log(f"CRASH: {exc_val}", "SYS")
+            except:
+                print(f"CRITICAL FAILURE (Raw): {exc_val}")
         try:
             print(f"{Prisma.paint('Initiating Emergency Spore Preservation...', 'Y')}")
             result_msg = self.engine_instance.emergency_save(exit_cause="INTERRUPT" if exc_type else "MANUAL")
             print(f"{Prisma.paint(result_msg, 'C' if '✔' in result_msg else 'R')}")
         except Exception as e:
-            print(f"{Prisma.paint(f'FATAL: State corruption during shutdown. {e}', 'R')}")
+            print(f"FATAL: State corruption during shutdown. {e}")
+            if self.engine_instance:
+                with open(f"panic_dump_{int(time.time())}.json", "w") as f:
+                    json.dump({"error": str(e), "cause": str(exc_val)}, f)
         print(f"{Prisma.paint('Disconnected.', '0')}")
         return exc_type is KeyboardInterrupt
 
@@ -85,20 +91,17 @@ class BoneAmanita:
         self.phys = self.embryo.physics
         self.shimmer_state = self.embryo.shimmer
         self.soul_legacy_data = self.embryo.soul_legacy
-        self.navigator = self.phys.nav
         self.gordon = GordonKnot()
         self.soul = NarrativeSelf(self, self.events, memory_ref=self.mind.mem)
         if self.soul_legacy_data:
             self.soul.load_from_dict(self.soul_legacy_data)
         self.town_hall = TownHall(self.gordon, self.events, self.shimmer_state)
-
         self.navigator = self.town_hall.Navigator
         self.journal = self.town_hall.Journal
         self.tinkerer = self.town_hall.Tinkerer
         self.almanac = self.town_hall.Almanac
         self.zen = self.town_hall.ZenGarden
         self.council = self.town_hall.Council
-
         self.repro = LiteraryReproduction()
         self.projector = Projector()
         self.kintsugi = KintsugiProtocol()
@@ -108,7 +111,6 @@ class BoneAmanita:
         self.director = ChorusDriver()
         self.bureau = TheBureau()
         self.cosmic = CosmicDynamics()
-
         self.cmd = CommandProcessor(self, Prisma, self.lex, BoneConfig, self.town_hall.Cartographer)
         self.soma = SomaticLoop(self.bio, self.mind.mem, self.lex, self.folly, self.events)
         self.noetic = NoeticLoop(self.mind, self.bio, self.events)
@@ -317,7 +319,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 11.2.0', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 11.2.1', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

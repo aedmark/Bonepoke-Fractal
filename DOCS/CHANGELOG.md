@@ -1,5 +1,34 @@
 # BONEAMANITA v11 CHANGELOG
 
+### **BONEAMANITA 11.2.1: "The Pre-Warmed Panic Room"**
+
+*“We fixed the timeline where the AI forgot who it was before it started, and we built a bunker for when the paint factory burns down.”*
+
+---
+
+#### **🚀 SYSTEM DYNAMICS (The Meadows Layer)**
+
+* **Optimization: The Uplink Reservoir (`bone_genesis.py`)**
+* **Old Behavior:** The system built a bridge to the LLM to test it, burned the bridge, and then built it again five seconds later. This was a "leaky bucket" in our time stock.
+* **New Behavior:** We now "pre-warm" the client. If the validation passes, we hold the living connection in memory and graft it directly onto the cortex.
+* **Why:** Never drain a stock twice to fill the same flow.
+
+#### **🏗️ TENSEGRITY (The Fuller Layer)**
+
+* **Fix: Schrödinger's Navigator (`bone_main.py`)**
+* **Fix:** Removed a redundant structural member where `self.navigator` was assigned twice in the same initialization sequence.
+* **Result:** Pattern integrity restored. We have collapsed the wave function; the cat is now strictly alive and navigating.
+* **Refactor: Timeline Stabilization (`bone_genesis.py`)**
+* **Fix:** Patched a critical `UnboundLocalError` where the `pre_warmed_client` variable only existed in the "Success" timeline. It now exists in all timelines (initialized to `None`), ensuring the multiverse remains consistent.
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+* **Feature: The Panic Room (`bone_main.py`)**
+* **Old Behavior:** If the system crashed *while* trying to log a crash (a meta-crash), it would silently die because the pretty-printer (`Prisma`) failed.
+* **New Behavior:** Implemented a raw `try/except` block that bypasses the aesthetic layer entirely. If the ship is going down, it dumps a raw `panic_dump.json` file.
+* **Why:** Because sometimes you don't have time to paint the "EXIT" sign before you run through the door.
+
+
 ### **BONEAMANITA 11.2.0: "The Sympathetic Resonance Update"**
 
 _“A system that cannot dance with its environment is destined to break.”_

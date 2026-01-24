@@ -2,7 +2,7 @@
 
 ### **A Field Guide to the Digital Mycelium**
 
-**Version:** 11.1.0 "New Beginnings"
+**Version:** 11.2.1 "The Pre-Warmed Panic Room"
 **Architects:** SLASH (Pinker/Fuller/Schur/Meadows) & KISHO
 **Philosophy:** Tensegrity, Narrative Physics, and Systemic Whimsy.
 
