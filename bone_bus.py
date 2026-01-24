@@ -1,6 +1,6 @@
 """ bone_bus.py - All aboard the Magic Bone Bus! """
 
-import json, os, time, random
+import json, os, time, random, copy
 from collections import deque
 from dataclasses import dataclass, field, fields
 from typing import List, Dict, Any, Optional, Counter, Tuple
@@ -99,6 +99,29 @@ class EventBus:
     def get_recent_logs(self, count=10):
         return list(self.buffer)[-count:]
 
+class BonePresets:
+    """
+    Standardized configurations for the BoneAmanita Engine.
+    'Structure determines behavior.' - Roberts
+    """
+    ZEN_GARDEN = {
+        "PHYSICS.VOLTAGE_FLOOR": 1.0,
+        "PHYSICS.VOLTAGE_MAX": 10.0,
+        "PHYSICS.DRAG_FLOOR": 2.0,      # More friction = slower, calmer
+        "BIO.DECAY_RATE": 0.001,        # Slower entropy
+        "BIO.STAMINA_EXHAUSTED": 5.0,   # Harder to faint
+        "COUNCIL.MANIC_VOLTAGE_TRIGGER": 99.0 # Disable mania
+    }
+
+    THUNDERDOME = {
+        "PHYSICS.VOLTAGE_FLOOR": 8.0,   # Always buzzing
+        "PHYSICS.VOLTAGE_MAX": 30.0,    # Let it scream
+        "PHYSICS.DRAG_FLOOR": 0.5,      # Slippery slopes
+        "BIO.ATP_STARVATION": 20.0,     # Hunger strikes faster
+        "COUNCIL.MANIC_VOLTAGE_TRIGGER": 12.0, # Easy to go manic
+        "CHANCE.RARE": 0.20             # Chaos is common
+    }
+
 class BoneConfig:
     GRAVITY_WELL_THRESHOLD = 15.0
     SHAPLEY_MASS_THRESHOLD = 5.0
@@ -193,6 +216,20 @@ class BoneConfig:
         UNCOMMON = 0.10
         COMMON = 0.20
         FREQUENT = 0.30
+
+    @classmethod
+    def load_preset(cls, preset_dict: Dict[str, Any]) -> List[str]:
+        logs = []
+        for key, value in preset_dict.items():
+            if "." not in key:
+                logs.append(f"⚠️ SKIPPED: Invalid key format '{key}'")
+                continue
+            sector_name, param_name = key.split(".", 1)
+            result = cls.tune(sector_name, param_name, value)
+            logs.append(result)
+        if cls.VERBOSE_LOGGING:
+            print(f"{Prisma.CYN}[CONFIG]: Paradigm Shift Complete. {len(logs)} parameters tuned.{Prisma.RST}")
+        return logs
 
     @staticmethod
     def check_pareidolia(words):
@@ -347,6 +384,8 @@ class SystemHealth:
     mind_online: bool = True
     cortex_online: bool = True
     errors: List[ErrorLog] = field(default_factory=list)
+    warnings: List[str] = field(default_factory=list)
+    hints: List[str] = field(default_factory=list)
     observer: Optional['TheObserver'] = None
 
     def link_observer(self, observer_ref):
@@ -362,6 +401,21 @@ class SystemHealth:
         elif component == "MIND": self.mind_online = False
         elif component == "CORTEX": self.cortex_online = False
         return f"[{component} OFFLINE]: {msg}"
+
+    def report_warning(self, message: str):
+        self.warnings.append(message)
+
+    def report_hint(self, message: str):
+        self.hints.append(message)
+
+    def flush_feedback(self) -> Dict[str, List[str]]:
+        feedback = {
+            "warnings": list(self.warnings),
+            "hints": list(self.hints)
+        }
+        self.warnings.clear()
+        self.hints.clear()
+        return feedback
 
 @dataclass
 class PhysicsPacket:
@@ -483,6 +537,7 @@ class CycleContext:
     timestamp: float = field(default_factory=time.time)
     bureau_ui: str = ""
     user_profile: Dict = field(default_factory=lambda: {"name": "TRAVELER", "confidence": 0})
+    last_impulse: Any = None
 
     @property
     def user_name(self):
@@ -494,6 +549,7 @@ class CycleContext:
 
     def log(self, message: str):
         self.logs.append(message)
+
     def record_flux(self, phase: str, metric: str, initial: float, final: float, reason: str = ""):
         delta = final - initial
         if abs(delta) > 0.001:
@@ -506,6 +562,27 @@ class CycleContext:
                 "reason": reason,
                 "timestamp": time.time()
             })
+
+    def snapshot(self) -> 'CycleContext':
+        new_ctx = CycleContext(
+            input_text=self.input_text,
+            physics=self.physics.snapshot() if hasattr(self.physics, 'snapshot') else copy.deepcopy(self.physics),
+            bio_result=copy.deepcopy(self.bio_result),
+            mind_state=copy.deepcopy(self.mind_state),
+            world_state=copy.deepcopy(self.world_state),
+            user_profile=copy.deepcopy(self.user_profile),
+            clean_words=list(self.clean_words),
+            logs=list(self.logs),
+            flux_log=list(self.flux_log),
+            is_alive=self.is_alive,
+            refusal_triggered=self.refusal_triggered,
+            refusal_packet=copy.deepcopy(self.refusal_packet),
+            is_bureaucratic=self.is_bureaucratic,
+            bureau_ui=self.bureau_ui,
+            timestamp=self.timestamp,
+            last_impulse=self.last_impulse
+        )
+        return new_ctx
 
 @dataclass
 class MindSystem:

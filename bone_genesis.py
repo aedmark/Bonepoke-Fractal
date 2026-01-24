@@ -12,6 +12,7 @@ CONFIG_FILE = "bone_config.json"
 
 class GenesisProtocol:
     def __init__(self):
+        self.tutorial_requested = False
         self.config: Dict[str, Any] = {
             "provider": "mock",
             "base_url": None,
@@ -203,16 +204,21 @@ class GenesisProtocol:
     def wizard(self) -> bool:
         os.system('cls' if os.name == 'nt' else 'clear')
         banner = f"""
-{Prisma.CYN}   GENESIS PROTOCOL v11.2.3{Prisma.RST}
+{Prisma.CYN}   GENESIS PROTOCOL v11.2.4{Prisma.RST}
 {Prisma.GRY}State Machine Active. Tensegrity Nominal.{Prisma.RST}
 ------------------------------------"""
         print(banner)
+        print(f"   0. {Prisma.WHT}Boot Camp{Prisma.RST} (Tutorial Mode)")
         print(f"   1. {Prisma.WHT}Auto-Detect Local Brains{Prisma.RST} (Ollama, LM Studio)")
         print(f"   2. {Prisma.WHT}Cloud Uplink{Prisma.RST} (OpenAI API)")
         print(f"   3. {Prisma.WHT}Manual Configuration{Prisma.RST} (The Ron Swanson Option)")
         print(f"   4. {Prisma.WHT}Mock Mode{Prisma.RST} (Simulation Only)")
         print(f"   5. {Prisma.WHT}Export System Prompt{Prisma.RST}")
         choice = input(f"\n{Prisma.paint('>', 'C')} ").strip()
+        if choice == "0":
+            self.tutorial_requested = True
+            print(f"\n{Prisma.GRN}   [BOOT CAMP ENABLED]{Prisma.RST}")
+            print(f"{Prisma.GRY}   Training wheels attached. Now, select your brain...{Prisma.RST}\n")
         if choice == "5":
             self.export_system_prompt()
             return False
@@ -407,7 +413,7 @@ Do not break character. Do not explain the simulation rules unless asked.
                 self.config["provider"] = "mock"
         self.type_out("\n...Booting Core Systems...", color=Prisma.GRY)
         self._sync_configuration()
-        engine = BoneAmanita()
+        engine = BoneAmanita(tutorial_mode=self.tutorial_requested)
         self.perform_identity_handshake(engine)
         if self.config["provider"] != "mock":
             self.type_out(f"...Connecting Neural Uplink ({self.config['provider']})...", color=Prisma.CYN)
@@ -432,6 +438,12 @@ Do not break character. Do not explain the simulation rules unless asked.
                 self.type_out("Falling back to internal logic.", color=Prisma.GRY)
         self.type_out("...System Online. Good luck.\n", color=Prisma.GRN)
         with SessionGuardian(engine) as session_engine:
+            if self.config.get("provider") != "mock":
+                print(f"{Prisma.GRY}...Initializing Neural Handshake...{Prisma.RST}")
+                boot_prompt = f"System Boot. Acknowledge user '{engine.user_name}'. Be atmospheric but brief."
+                boot_result = session_engine.process_turn(boot_prompt)
+                if boot_result.get("ui"):
+                    print(boot_result["ui"])
             while True:
                 try:
                     prompt_char = Prisma.paint('>', 'W')
@@ -462,7 +474,6 @@ Do not break character. Do not explain the simulation rules unless asked.
                         user_input = "\n".join(lines)
                         status_color = 'Y' if buffer_full else '0'
                         print(f"{Prisma.paint(f'   [Block received: {len(user_input)} chars]', status_color)}")
-                    if not user_input: continue
                 except EOFError: break
                 except KeyboardInterrupt:
                     print(f"\n{Prisma.paint('...Interrupted.', 'Y')}")

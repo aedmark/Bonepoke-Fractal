@@ -1,10 +1,10 @@
-""" BONEAMANITA 11.2.3 'Spinning Plates'
+""" BONEAMANITA 11.2.4 'Soft Landing'
  Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark """
 
 import time, json, uuid
 from dataclasses import dataclass
 from typing import Dict, Any
-from bone_bus import EventBus, Prisma, BoneConfig, SystemHealth, TheObserver
+from bone_bus import EventBus, Prisma, BoneConfig, SystemHealth, TheObserver, BonePresets
 from bone_commands import CommandProcessor
 from bone_data import TheAkashicRecord, TheLore
 from bone_village import TownHall, DeathGen
@@ -30,7 +30,7 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 11.2.3', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 11.2.4', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -55,8 +55,41 @@ class SessionGuardian:
         print(f"{Prisma.paint('Disconnected.', '0')}")
         return exc_type is KeyboardInterrupt
 
+class TutorialDirector:
+    def __init__(self, engine_ref):
+        self.eng = engine_ref
+        self.step = 0
+        self.complete = False
+        self.steps = [
+            {"goal": "LOOK", "msg": "Step 1: Calibration. The system is blind. Type 'LOOK' to open the aperture."},
+            {"goal": "WAIT", "msg": "Step 2: Time. The system breathes. Type 'WAIT' (or hit Enter) to let a cycle pass."},
+            {"goal": "INSPECT", "msg": "Step 3: Introspection. You have a body. Type '/inventory' to check your belt."},
+            {"goal": "GRADUATE", "msg": "Step 4: Integration. You are ready. The training wheels are coming off."}]
+
+    def audit(self, input_text: str, cycle_result: Dict) -> Dict:
+        if self.complete: return cycle_result
+        success = False
+        if self.step == 0 and "LOOK" in input_text.upper(): success = True
+        elif self.step == 1 and ("WAIT" in input_text.upper() or input_text.strip() == ""): success = True
+        elif self.step == 2 and "/INV" in input_text.upper(): success = True
+        if success:
+            self.step += 1
+            cycle_result["ui"] += f"\n\n{Prisma.GRN}>>> OBJECTIVE MET.{Prisma.RST}"
+            if self.step >= len(self.steps) - 1:
+                self.complete = True
+                cycle_result["ui"] += f"\n{Prisma.GRN}*** TUTORIAL COMPLETE ***{Prisma.RST}"
+            else:
+                next_msg = self.steps[self.step]['msg']
+                cycle_result["ui"] += f"\n{Prisma.CYN}NEXT: {next_msg}{Prisma.RST}"
+        else:
+            current_msg = self.steps[self.step]['msg']
+            header = f"\n{Prisma.paint('--- BOOT CAMP PROTOCOL ---', 'C')}\n{current_msg}\n"
+            if "ui" in cycle_result:
+                cycle_result["ui"] = header + cycle_result["ui"]
+        return cycle_result
+
 class BoneAmanita:
-    def __init__(self, lexicon_layer=None, user_name="TRAVELER"):
+    def __init__(self, lexicon_layer=None, user_name="TRAVELER", tutorial_mode=False):
         self.kernel_hash = str(uuid.uuid4())[:8].upper()
         self.user_name = user_name
         self.lex = lexicon_layer if lexicon_layer else TheLexicon
@@ -92,6 +125,11 @@ class BoneAmanita:
         self.shimmer_state = self.embryo.shimmer
         self.soul_legacy_data = self.embryo.soul_legacy
         self.gordon = GordonKnot()
+        self.tutorial = TutorialDirector(self) if tutorial_mode else None
+        if tutorial_mode:
+            print(f"{Prisma.CYN}[BOOT CAMP]: Engaging Training Wheels (Low Voltage, High Safety).{Prisma.RST}")
+            if hasattr(BonePresets, 'ZEN_GARDEN'):
+                BoneConfig.load_preset(BonePresets.ZEN_GARDEN)
         self.soul = NarrativeSelf(self, self.events, memory_ref=self.mind.mem)
         if self.soul_legacy_data:
             self.soul.load_from_dict(self.soul_legacy_data)
@@ -118,6 +156,7 @@ class BoneAmanita:
         local_brain = LLMInterface(events_ref=self.events)
         self.cortex = TheCortex(self, llm_client=local_brain)
         self.somatic = SomaticInterface(self)
+        BoneConfig.load_preset(BonePresets.ZEN_GARDEN)
         self.tick_count = 0
         self.health = self.mind.mem.session_health if self.mind.mem.session_health else BoneConfig.MAX_HEALTH
         self.stamina = self.mind.mem.session_stamina if self.mind.mem.session_stamina else BoneConfig.MAX_STAMINA
@@ -133,7 +172,10 @@ class BoneAmanita:
         self.observer.user_turns += 1
         if not user_message: user_message = ""
         cmd_response = self._phase_check_commands(user_message)
-        if cmd_response: return cmd_response
+        if cmd_response:
+            if self.tutorial:
+                cmd_response = self.tutorial.audit(user_message, cmd_response)
+            return cmd_response
         if self._ethical_audit():
             self.events.log(f"{Prisma.WHT}MERCY SIGNAL: Trauma boards wiped.{Prisma.RST}", "SYS")
         needs_repair, _ = self.kintsugi.check_integrity(self.stamina)
@@ -195,16 +237,19 @@ class BoneAmanita:
                 warning = f"\n{Prisma.GRY}[SYSTEM LAG: {report['status']} | Cycle: {duration:.2f}s]{Prisma.RST}"
                 cortex_packet["ui"] += warning
         cortex_packet["metrics"]["perf"] = report
+        if self.tutorial:
+            cortex_packet = self.tutorial.audit(user_message, cortex_packet)
         return cortex_packet
 
     def _phase_check_commands(self, user_message):
         if user_message.strip().startswith("/"):
             self.cmd.execute(user_message)
             cmd_logs = [e['text'] for e in self.events.flush()]
+            ui_output = "\n".join(cmd_logs) if cmd_logs else "Command Executed."
             return {
                 "type": "COMMAND",
-                "ui": f"\n{Prisma.GRY}Command Processed.{Prisma.RST}",
-                "logs": cmd_logs if cmd_logs else ["Command Executed."],
+                "ui": f"\n{ui_output}",
+                "logs": cmd_logs,
                 "metrics": self.get_metrics()}
         return None
 
@@ -287,7 +332,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 11.2.3', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 11.2.4', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")
@@ -310,7 +355,6 @@ if __name__ == "__main__":
         while True:
             try:
                 user_input = input(f"{Prisma.paint(f'{session_engine.user_name} >', 'W')} ")
-                if not user_input: continue
             except EOFError:
                 break
             if user_input.lower() in ["exit", "quit", "/exit"]:

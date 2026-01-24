@@ -2,6 +2,60 @@
 
 ---
 
+### **BONEAMANITA 11.2.4: "Soft Landing"**
+
+_“Gentleness is not weakness. It is the precise application of force.”_
+
+---
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+- **Feature: The Boot Camp Protocol (`TutorialDirector`)**
+- **Problem:** New users were dropped into a "Void" with no instructions, leading to existential dread before the first turn.
+- **Solution:** Implemented a 4-step interactive curriculum (Look, Wait, Inspect, Graduate) that guides the Traveler through the core loops.
+- **Tone Shift:** Injected a "Softener" into `TheCortex` during tutorials. The AI temporarily suspends its "Cryptic Void God" persona to act as a helpful mentor.
+
+- **Fix: The Air Lock (`bone_genesis.py`)**
+- **Bug:** The input loop was swallowing empty "Enter" key presses, making it impossible to perform the "WAIT" action.
+- **Fix:** The airlock is unsealed. The system now recognizes silence (Enter) as a valid input.
+
+- **Improvement: The Neural Handshake**
+- **Old:** The system booted into a blank cursor.
+- **New:** The Cortex now proactively greets the user by name immediately after boot, bridging the gap between "System Online" and the first prompt.
+
+#### **🚀 SYSTEM DYNAMICS (The Meadows Layer)**
+
+- **Feature: Dynamic Paradigms (`BonePresets`)**
+- **Old:** Physics constants were hardcoded, requiring a restart to change the "vibe."
+- **New:** Introduced hot-swappable `BonePresets` (e.g., `ZEN_GARDEN`, `THUNDERDOME`).
+- **Why:** High leverage. We can now shift the system's entire rule set from "Safe Mode" to "Chaos Mode" with a single function call.
+
+- **Upgrade: The Nervous System (`DiagnosticHub`)**
+- **New:** Upgraded `SystemHealth` to differentiate between `Errors` (System Breaks), `Warnings` (Resource Low), and `Hints` (Missed Opportunities).
+- **Effect:** The system no longer fails silently; it complains constructively directly in the UI stream.
+
+#### **🏗️ TENSEGRITY (The Fuller Layer)**
+
+- **Refactor: The Immutable Snapshot (`CycleContext`)**
+- **Critical Fix:** `CycleContext` now performs a true `deepcopy` during snapshots.
+- **Why:** Previously, rolling back a phase (Time Travel) left "ghost data" in mutable dictionaries. Now, the past is truly immutable.
+
+- **Resilience: The Neural Circuit Breaker (`LLMInterface`)**
+- **Fix:** Implemented a robust retry loop for LLM failures.
+- **Result:** A malformed JSON response is now treated as a hiccup (Retry), not a stroke (Crash).
+
+#### **🧠 COGNITION (The Pinker Lens)**
+
+- **Bug Fix: The Phantom Limb (`bone_genesis.py`)**
+- **Bug:** The Genesis Protocol attempted to access configuration data via the Engine (`engine.config`) rather than its own internal state.
+- **Fix:** Reconnected the neural pathways to the correct memory bank.
+
+- **Bug Fix: The Impossible Setter (`MachineryPhase`)**
+- **Bug:** Attempted to write to a read-only property (`efficiency_mod`).
+- **Fix:** The logic now correctly modifies the underlying state (`membrane_potential`).
+
+---
+
 ### **BONEAMANITA 11.2.3: "Spinning Plates"**
 
 *“We stopped the mitochondria from printing money, and we taught the hormones to tell time.”*
