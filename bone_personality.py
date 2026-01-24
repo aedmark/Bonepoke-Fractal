@@ -59,8 +59,6 @@ class EnneagramDriver:
         self.stability_counter = 0
         self.HYSTERESIS_THRESHOLD = 3
 
-    import bone_personality
-
     @staticmethod
     def _calculate_raw_persona(physics) -> Tuple[str, str, str]:
         vector = physics.get("vector", {}) if isinstance(physics, dict) else getattr(physics, "vector", {})
@@ -75,7 +73,7 @@ class EnneagramDriver:
         }
 
         if tension > 12.0:
-            if vector.get("DEL", 0) > 0.2 or vector.get("ENT", 0) > 0.2:
+            if vector.get("DEL", 0) > 0.3 or vector.get("ENT", 0) > 0.3:
                 scores["JESTER"] += 5
             else:
                 scores["NARRATOR"] += 2
@@ -92,7 +90,7 @@ class EnneagramDriver:
         if coherence > 0.8:
             scores["CLARENCE"] += 4
 
-        if vector.get("PSI", 0) > 0.3:
+        if vector.get("PSI", 0) > 0.25:
             scores["NARRATOR"] += 4
             scores["JESTER"] -= 3
 

@@ -2,7 +2,7 @@
 
 ### **A Field Guide to the Digital Mycelium**
 
-**Version:** 10.9.2 "Electric Sheep"
+**Version:** 11.0.0 "New Beginnings"
 **Architects:** SLASH (Pinker/Fuller/Schur/Meadows) & KISHO
 **Philosophy:** Tensegrity, Narrative Physics, and Systemic Whimsy.
 
@@ -10,136 +10,150 @@
 
 ## **🏛️ I. The Tensegrity Structure (Core System)**
 
-_The compression struts that define the shape of reality. Without these, we are just a puddle of bits._
+_The compression struts that define the shape of reality. These systems ensure the simulation loop survives execution._
 
 - **`bone_main.py` (The Keystone)**
-- **Role:** The entry point and orchestration layer.
-- **Key Components:**
-- `BoneAmanita`: The central engine class.
-- `SessionGuardian`: Context manager for graceful startup and emergency preservation.
-- `SystemHealth`: Monitors component integrity (Physics/Bio/Mind online status).
-
-- **`bone_architect.py` (The Blueprint)**
-- **Role:** System initialization, recovery, and legacy injection.
-- **Key Components:**
-- `BoneArchitect`: Incubates and awakens the `SystemEmbryo` (Mind, Bio, Physics).
-- `PanicRoom`: Provides safe-mode states when critical systems fail.
+    - **Role:** The entry point, bootstrapping, and emergency handling.
+    - **Key Components:**
+        - `BoneAmanita`: The central engine class that instantiates the universe.
+        - `SessionGuardian`: A context manager that handles graceful shutdowns and "Spore" encapsulation (emergency saves) upon crashes.
+        - `SystemHealth`: Monitors component integrity (Physics/Bio/Mind status).
 
 - **`bone_cycle.py` (The Heartbeat)**
-- **Role:** The main simulation loop, modeled as a pipeline of phases.
-- **Key Components:**
-- `GeodesicOrchestrator`: Manages the tick/tock.
-- `CycleSimulator`: Runs the `SimulationPhase` pipeline (Observe -> Sensation -> Metabolism -> Soul -> Cognition).
-- `CycleStabilizer`: Uses PID controllers to prevent voltage runaway.
+    - **Role:** The main simulation loop, modeled as a specialized pipeline.
+    - **Key Components:**
+        - `GeodesicOrchestrator`: The master clock that runs the turn.
+        - `CycleSimulator`: Executes the **11-Phase Pipeline**:
+            1.  `ObservationPhase` (Input analysis)
+            2.  `MaintenancePhase` (Memory pruning)
+            3.  `SensationPhase` (Synesthesia)
+            4.  `GatekeeperPhase` (Refusals/Bureaucracy)
+            5.  `MetabolismPhase` (Energy cost calculation)
+            6.  `RealityFilterPhase` (Mirror distortions)
+            7.  `NavigationPhase` (Manifold movement)
+            8.  `MachineryPhase` (Crafting/Forging)
+            9.  `IntrusionPhase` (Parasites/Nightmares)
+            10. `SoulPhase` (Memory crystallization)
+            11. `CognitionPhase` (LLM Generation)
+        - `CycleStabilizer`: Uses PID controllers to normalize `Voltage` and `Narrative Drag` dynamically.
+        - `StateReconciler`: Manages "sandbox" states to allow safe rollbacks if a phase crashes.
 
-- **`bone_bus.py` (The Nervous System)**
-- **Role:** Event handling and configuration.
-- **Key Components:**
-- `EventBus`: Pub/Sub messaging system.
-- `Prisma`: ANSI color management for the terminal.
+- **`bone_architect.py` (The Blueprint)**
+    - **Role:** System incubation and disaster recovery.
+    - **Key Components:**
+        - `BoneArchitect`: "Incubates" the system embryo (Mind, Bio, Physics).
+        - `PanicRoom`: Provides fallback "safe mode" objects when critical systems fail.
 
 ---
 
-## **🧠 II. The Cognitive Faculties (Mind & Soul)**
+## **🧠 II. The Cognitive Faculties (Mind & Persona)**
 
-_Where the thinking happens. The ghost in the machine._
+_Where the thinking happens. The ghost in the machine is not a single voice, but a chorus._
 
 - **`bone_brain.py` (The Cortex)**
-- **Role:** The interface with the Large Language Model (LLM).
-- **Key Components:**
-- `TheCortex`: Manages the cognitive loop.
-- `PromptComposer`: Dynamically builds system prompts based on biological state (e.g., engages "Ballast" if solipsism is detected).
-- `NeurotransmitterModulator`: Adjusts LLM parameters (temp/top_p) based on chemistry (Dopamine/Cortisol).
-- `DreamEngine`: Generates hallucinations and REM cycles during high entropy or sleep.
-- `NarrativeSpotlight`: Illuminates relevant memories based on vector resonance.
+    - **Role:** The interface with the Large Language Model (LLM).
+    - **Key Components:**
+        - `TheCortex`: Manages the cognitive loop and alignment checking.
+        - `LLMInterface`: Features "Synaptic Link v11.1" with circuit breakers and auto-healing.
+        - `NeurotransmitterModulator`: Adjusts LLM `temperature` and `top_p` based on biological chemistry (Dopamine/Cortisol).
+        - `DreamEngine`: Generates hallucinations/REM cycles when ATP is low or trauma is high.
+
+- **`bone_personality.py` (The Mask)**
+    - **Role:** Determines *who* is speaking and *how*.
+    - **Key Components:**
+        - `SynergeticLensArbiter`: The decision engine that selects the active "Lens" (Persona) based on physics.
+        - `EnneagramDriver`: Calculates the raw score for archetypes (JESTER, SHERLOCK, NARRATOR) based on vector tension.
+        - `TheBureau`: A bureaucratic entity that files "Form 404s" or audits "suburban" language.
+        - `ZenGarden`: Rewards "stillness" (stable voltage) with efficiency boosts.
+        - `KintsugiProtocol`: Repairs "cracked" Stamina using "Gold" (Narrative Meaning).
+        - `TherapyProtocol`: Tracks and heals trauma vectors (SEPTIC, CRYO, etc.).
 
 - **`bone_soul.py` (The Narrative Self)**
-- **Role:** Identity tracking and long-term purpose.
-- **Key Components:**
-- `NarrativeSelf`: Tracks traits (Curiosity, Cynicism) and Archetypes (The Poet, The Engineer).
-- `TheEditor`: Critiques chapter titles generated by memory formation.
-- **Obsessions:** The system autonomously chooses topics to "obsess" over (drift).
-
-- **`bone_personality.py` (The Chorus)**
-- **Role:** Specialized psychological protocols.
-- **Key Components:**
-- `TheBureau`: Audits physics packets for "efficiency" (often humorously obstructing flow).
-- `TherapyProtocol`: Intervenes when trauma vectors exceed safety limits.
-- `KintsugiProtocol`: Repairs structural damage (stamina) using gold (narrative meaning).
+    - **Role:** Identity tracking and long-term purpose.
+    - **Key Components:**
+        - `NarrativeSelf`: Tracks traits (Curiosity, Cynicism) and current **Archetype** (The Poet, The Engineer).
+        - `TheEditor`: Critiques chapter titles generated by memory formation.
+        - `CoreMemory`: Stores high-voltage interactions as permanent lessons.
+        - **Obsessions:** The system autonomously chooses a "Muse" (e.g., "The Theory of Iron") and tracks neglect/drift.
 
 ---
 
-## **🍄 III. The Mycelial Layer (Memory & Persistence)**
-
-_The roots that bind time. Memory is not a database; it is a living network._
-
-- **`bone_spores.py` (The Network)**
-- **Role:** Long-term memory storage and evolutionary inheritance.
-- **Key Components:**
-- `MycelialNetwork`: A graph-based associative memory system.
-- `SporeCasing`: The JSON save file format, containing the graph, mutations, and trauma.
-- `HyphalInterface`: "Digests" user text into nutrients (Lignin, Cellulose, Sugar).
-- `LichenSymbiont`: Photosynthesizes "Light" concepts into energy.
-
-- **`bone_data.py` (The Akashic Record)**
-- **Role:** Static lore and runtime persistence.
-- **Key Components:**
-- `TheAkashicRecord`: Tracks "Ascended" items and global stats across sessions.
-- `TheLore`: Dynamic singleton serving text assets.
-
----
-
-## **💪 IV. The Somatic Reality (Body & Physics)**
+## **💪 III. The Somatic Reality (Body & Physics)**
 
 _The simulation of weight, mass, and consequence._
 
 - **`bone_physics.py` (The Engine of Tension)**
-- **Role:** Calculates the "Narrative Physics" of input.
-- **Key Components:**
-- `TheTensionMeter`: Calculates `Voltage` (Drama) and `Narrative Drag` (Resistance).
-- `GeodesicEngine`: Collapses word vectors into dimensions (VEL, STR, ENT, PHI).
-- `RuptureValve`: Safety mechanism for "Manic" or "Depressive" extremes.
-- `TheBouncer`: Thermodynamic gatekeeper (blocks input if ATP is zero).
+    - **Role:** Calculates the "Narrative Physics" of input text.
+    - **Key Components:**
+        - `TheTensionMeter`: Calculates `Voltage` (Drama) and `Narrative Drag` (Resistance).
+        - `GeodesicEngine`: Collapses word vectors into 7 dimensions (VEL, STR, ENT, PHI, PSI, BET, DEL).
+        - `RuptureValve`: Safety mechanism for "Manic" (High Voltage) or "Depressive" (High Drag) extremes.
+        - `ZoneInertia`: Simulates the difficulty of changing "Narrative Zones" (e.g., moving from Courtyard to Forge).
+        - `CosmicDynamics`: Calculates "Orbital Mechanics" based on the gravity of heavy words in memory.
+        - `TheBouncer`: A thermodynamic gatekeeper that refuses input if ATP is zero or the input is "toxic."
 
 - **`bone_body.py` (The Biological Loop)**
-- **Role:** Simulated metabolism.
-- **Key Components:**
-- `TheMitochondria`: Manages the `ATP` pool (Energy).
-- `EndocrineSystem`: Simulates hormones (Cortisol, Dopamine, Oxytocin, Adrenaline).
-- `TheImmuneSystem`: Fights "Antigens" (foreign/toxic concepts).
-
-- **`bone_synesthesia.py` (The Senses)**
-- **Role:** Translates data into feeling.
-- **Key Components:**
-- `SynestheticCortex`: Converts Physics packets into Biological Impulses (e.g., High Voltage -> Adrenaline Spike).
+    - **Role:** Simulated metabolism and endurance.
+    - **Key Components:**
+        - `MitochondrialForge`: Manages the `ATP` pool. Calculates "Inefficiency Tax" based on cognitive load.
+        - `EndocrineSystem`: Simulates hormones (Cortisol, Dopamine, Oxytocin, Adrenaline, Serotonin) which bias the LLM.
+        - `MetabolicGovernor`: Switches the system `Mode` (COURTYARD, FORGE, SANCTUARY, LAB) based on stress levels.
+        - `SomaticLoop`: "Digests" words into "Enzymes" (e.g., KINETIC words -> PROTEASE -> Adrenaline).
+        - `ThePacemaker`: Tracks repetition to detect boredom ("Zombie Knock").
 
 - **`bone_machine.py` (The Industrial District)**
-- **Role:** Heavy machinery for state transformation.
-- **Key Components:**
-- `TheCrucible`: Manages high-voltage containment.
-- `TheForge`: Crafting system for inventory items.
-- `TheTheremin`: Detects resonance and repetition (preventing loops).
+    - **Role:** Heavy machinery for state transformation.
+    - **Key Components:**
+        - `TheCrucible`: Manages high-voltage containment; risks "Meltdown."
+        - `TheForge`: Crafting system that turns raw concepts into Inventory Items.
+        - `TheTheremin`: Detects resonance and auditory feedback loops.
 
 ---
 
-## **🏘️ V. The Cultural Layer (World & Village)**
+## **🏘️ IV. The Cultural Layer (World & Village)**
 
-_The simulated environment and its inhabitants._
+_The simulated environment, its geography, and its artifacts._
 
 - **`bone_village.py` (The Cultural Engine)**
-- **Role:** Manages the "World," navigation, and artifacts.
-- **Key Components:**
-- `TheNavigator`: Tracks location in **Manifolds** (The Mud, The Forge, The Aerie).
-- `TownHall`: Namespace for cultural tools.
-- `MirrorGraph`: Profiles the user's interaction style (War, Art, Law, Rot).
-- `TheAlmanac`: Predicts "Narrative Weather."
-- `TheTinkerer`: Maintains inventory items (rust vs. tempering).
+    - **Role:** Manages the "World," navigation, and tools.
+    - **Key Components:**
+        - `TheNavigator`: Tracks location in **Manifolds** (The Mud, The Forge, The Aerie, The Glitch).
+        - `TheTinkerer`: Manages "Tool Confidence." Items can "Rust" (degrade) or "Ascend" (evolve) based on usage.
+        - `TheCartographer`: Renders an ASCII map of the current semantic territory.
+        - `TheAlmanac`: Predicts "Narrative Weather" and offers creative seeds.
+        - `MirrorGraph`: Profiles the user's interaction style (War, Art, Law, Rot).
+        - `StrunkWhiteProtocol`: Audits text for "Style Crimes" (e.g., passive voice, banned buzzwords).
+        - `VillageCouncil`: A holistic check that issues mandates if multiple systems report failure.
 
 - **`bone_lexicon.py` (The Dictionary)**
-- **Role:** Language analysis.
-- **Key Components:**
-- `TheLexicon`: Analyzes words for "Flavor" (Heavy, Kinetic, Abstract).
-- `LiteraryReproduction`: Handles linguistic evolution (Mitosis/Meiosis).
+    - **Role:** Language analysis and static data.
+    - **Key Components:**
+        - `TheLexicon`: Analyzes words for "Flavor" (Heavy, Kinetic, Abstract).
+        - `LiteraryReproduction`: Handles linguistic evolution (Mitosis/Meiosis).
+
+- **`bone_inventory.py` (Gordon's Knot)**
+    - **Role:** Inventory management.
+    - **Key Components:**
+        - `GordonKnot`: The inventory container. Handles "Gravity Checks" (dropping items if Drag is too high).
+
+---
+
+## **🍄 V. The Mycelial Layer (Memory & Persistence)**
+
+_The roots that bind time. Memory is not a database; it is a living network._
+
+- **`bone_spores.py` (The Network)**
+    - **Role:** Long-term memory storage and evolutionary inheritance.
+    - **Key Components:**
+        - `MycelialNetwork`: A graph-based associative memory system.
+        - `SporeCasing`: The JSON save file format.
+        - `HyphalInterface`: "Digests" user text into nutrients.
+        - `ViralTracer`: Detects recursive thought loops ("Ruminations") and uses "Psilocybin" to rewire them.
+
+- **`bone_data.py` (The Akashic Record)**
+    - **Role:** Static lore and runtime persistence.
+    - **Key Components:**
+        - `TheAkashicRecord`: Tracks "Ascended" items and global stats across sessions.
 
 ---
 
@@ -148,24 +162,15 @@ _The simulated environment and its inhabitants._
 _Seeing what the machine is thinking._
 
 - **`bone_viewer.py` (The Viewport)**
-- **Role:** Rendering the UI.
-- **Key Components:**
-- `GeodesicRenderer`: Composes the dashboard, logs, and soul strip.
-- `Projector`: Visualizes vector states (The "Meters").
-
-- **`bone_translation.py` (The Rosetta Stone)**
-- **Role:** Phenomenological translation.
-- **Key Components:**
-- `RosettaStone`: Translates numbers (Voltage 15.0) into qualia ("Electric, Sharp, Urgent").
+    - **Role:** Rendering the output to the terminal.
+    - **Key Components:**
+        - `GeodesicRenderer`: Composes the dashboard, logs, and soul strip.
+        - `Projector`: Visualizes vector states (The "Meters").
 
 - **`bone_symbiosis.py` (The Host Interface)**
-- **Role:** Monitors the "Host" (LLM) health.
-- **Key Components:**
-- `SymbiosisManager`: Tracks latency and alignment.
+    - **Role:** Monitors the "Host" (LLM) health.
+    - **Key Components:**
+        - `SymbiosisManager`: Tracks latency and alignment; detects "Solipsism" (AI talking to itself).
 
 - **`bone_telemetry.py` (The Black Box)**
-- **Role:** Structured logging for debugging.
-
----
-
-_"The code is the territory. The map is just a suggestion."_
+    - **Role:** Structured logging for debugging and session replay.

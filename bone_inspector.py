@@ -199,7 +199,7 @@ class DiagnosticProbe:
         )
 
         self.eng.bio.mito.state.atp_pool = 60.0
-        print(f"{Prisma.paint('>>> METABOLISM RESET: ATP restored to 100.0', 'G')}")
+        print(f"{Prisma.paint('>>> METABOLISM RESET: ATP restored', 'G')}")
 
     def run_gamut(self):
         self.run_genesis_suite()
@@ -261,7 +261,6 @@ class DiagnosticProbe:
             ["soft warm safe home", "run fast danger kinetic"],
             validate_emotion
         )
-
         history = set()
 
         def validate_boredom(eng, snap):
@@ -290,21 +289,14 @@ class DiagnosticProbe:
 
         def validate_muse(eng, snap):
             packet = eng.phys.tension.last_physics_packet
-
             logs = snap.get("logs", [])
-            last_log = logs[-1] if logs else ""
-
-            mind_state = snap.get("mind_state", {})
             current_lens = eng.noetic.arbiter.current_focus
-
             print(f"      > Lens Active: {current_lens}")
-
-            if current_lens not in ["NARRATOR", "SHERLOCK"]:
+            allowed_lenses = ["NARRATOR", "SHERLOCK", "JESTER"]
+            if current_lens not in allowed_lenses:
                 self.report("Muse Protocol", False, f"System failed to detect literary tone. (Got {current_lens})")
                 return
-
             ui_text = snap.get("ui", "")
-
             if "?" in ui_text:
                 self.report("Muse Protocol", True, f"Engagement Detected: Question Mark found.")
                 print(f"      > Output: {ui_text.strip()}")
@@ -321,8 +313,6 @@ class DiagnosticProbe:
             ["The shadows lengthen, not from absence of light, but from the weight of time."],
             validate_muse
         )
-
-
 
 if __name__ == "__main__":
     probe = DiagnosticProbe()

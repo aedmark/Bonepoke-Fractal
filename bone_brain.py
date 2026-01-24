@@ -153,10 +153,6 @@ class NeurotransmitterModulator:
         return params
 
 class LLMInterface:
-    """
-    v11.1 Synaptic Link.
-    Features: Self-Diagnosis, Cold-Boot Tolerance, and Auto-Healing.
-    """
     def __init__(self, events_ref: Optional[EventBus] = None, provider: str = None,
                  base_url: str = None, api_key: str = None, model: str = None, dreamer: Any = None):
         self.events = events_ref
@@ -169,8 +165,6 @@ class LLMInterface:
         self.failure_count = 0
         self.failure_threshold = 3
         self.last_failure_time = 0.0
-        self.last_error_msg = "No error recorded."
-        self.cooldown_period = 10.0
         self.circuit_state = "CLOSED"
 
     @staticmethod
@@ -183,53 +177,46 @@ class LLMInterface:
         }
         return defaults.get(provider, "https://api.openai.com/v1/chat/completions")
 
-    def _log(self, message: str, level: str = "SYS"):
-        if self.events:
-            self.events.log(message, level)
-        else:
-            print(f"[{level}] {message}")
-
-    def _check_circuit(self) -> bool:
+    def _is_synapse_active(self) -> bool:
+        """Determines if the neural pathway is healthy."""
         if self.circuit_state == "CLOSED": return True
         if self.circuit_state == "OPEN":
             elapsed = time.time() - self.last_failure_time
-            if elapsed > self.cooldown_period:
+            if elapsed > 10.0:
                 self.circuit_state = "HALF_OPEN"
-                self._log(f"{Prisma.CYN}⚡ SYNAPSE: Nerve healing. Attempting reconnection...{Prisma.RST}", "SYS")
+                if self.events:
+                    self.events.log(f"{Prisma.CYN}⚡ SYNAPSE: Nerve healing. Attempting reconnection...{Prisma.RST}", "SYS")
                 return True
             return False
         return True
 
-    def _record_failure(self, error_msg: str):
-        self.failure_count += 1
-        self.last_failure_time = time.time()
-        self.last_error_msg = str(error_msg)
-
-        if self.failure_count >= self.failure_threshold:
-            self.circuit_state = "OPEN"
-            self._log(f"{Prisma.RED}⚡ SYNAPSE BROKEN: {self.last_error_msg}. Severing connection.{Prisma.RST}", "CRIT")
-
-    def _record_success(self):
-        if self.circuit_state != "CLOSED":
-            self._log(f"{Prisma.GRN}⚡ SYNAPSE RESTORED: Connection stable.{Prisma.RST}", "SYS")
-        self.failure_count = 0
-        self.circuit_state = "CLOSED"
-
-    def generate(self, prompt: str, params: Dict[str, Any]) -> str:
-        if "reset" in prompt.lower() and "system" in prompt.lower():
-            self._record_success()
-            return "[SYSTEM]: Circuit Breaker Manually Reset."
-
-        if not self._check_circuit():
-            return self.mock_generation(prompt, reason=f"CIRCUIT_BROKEN ({self.last_error_msg})")
-
-        if self.provider == "mock":
-            return self.mock_generation(prompt)
-
+    def _transmit(self, payload: Dict[str, Any], timeout: float = 60.0) -> str:
+        """The low-level wire transmission."""
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}"
         }
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(self.base_url, data=data, headers=headers)
+
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            if response.status == 200:
+                result = json.loads(response.read().decode("utf-8"))
+                return result.get("choices", [{}])[0].get("message", {}).get("content", "")
+            raise Exception(f"HTTP {response.status}")
+
+    def generate(self, prompt: str, params: Dict[str, Any]) -> str:
+        if "reset" in prompt.lower() and "system" in prompt.lower():
+            self.failure_count = 0
+            self.circuit_state = "CLOSED"
+            return "[SYSTEM]: Circuit Breaker Manually Reset."
+
+        if not self._is_synapse_active():
+            return self.mock_generation(prompt, reason=f"CIRCUIT_BROKEN")
+
+        if self.provider == "mock":
+            return self.mock_generation(prompt)
+
         payload = {
             "model": self.model,
             "messages": [{"role": "user", "content": prompt}],
@@ -238,28 +225,28 @@ class LLMInterface:
         payload.update(params)
 
         try:
-            data = json.dumps(payload).encode("utf-8")
-            req = urllib.request.Request(self.base_url, data=data, headers=headers)
-
             timeout = 10.0 if self.circuit_state == "HALF_OPEN" else 60.0
+            content = self._transmit(payload, timeout)
 
-            with urllib.request.urlopen(req, timeout=timeout) as response:
-                if response.status == 200:
-                    result = json.loads(response.read().decode("utf-8"))
-                    content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
-                    if content:
-                        self._record_success()
-                        return content
-                raise Exception(f"HTTP {response.status}")
+            if content:
+                if self.circuit_state != "CLOSED" and self.events:
+                    self.events.log(f"{Prisma.GRN}⚡ SYNAPSE RESTORED.{Prisma.RST}", "SYS")
+                self.failure_count = 0
+                self.circuit_state = "CLOSED"
+                return content
 
         except Exception as e:
-            self._record_failure(str(e))
-            self._log(f"CORTEX UPLINK FAILED: {e}", "ERR")
+            self.failure_count += 1
+            self.last_failure_time = time.time()
+            if self.failure_count >= self.failure_threshold:
+                self.circuit_state = "OPEN"
+                if self.events:
+                    self.events.log(f"{Prisma.RED}⚡ SYNAPSE SEVERED: {e}{Prisma.RST}", "CRIT")
 
             if self.provider != "ollama" and self.circuit_state != "OPEN":
                 return self._local_fallback(prompt, params)
 
-            return self.mock_generation(prompt, reason=f"FAIL: {str(e)}")
+        return self.mock_generation(prompt, reason="SILENCE")
 
     def _local_fallback(self, prompt: str, params: Dict) -> str:
         fallback_url = "http://127.0.0.1:11434/v1/chat/completions"
@@ -270,127 +257,89 @@ class LLMInterface:
             "temperature": params.get('temperature', 0.7)
         }
         try:
+            headers = {"Content-Type": "application/json"}
             data = json.dumps(payload).encode("utf-8")
-            req = urllib.request.Request(fallback_url, data=data, headers={"Content-Type": "application/json"})
+            req = urllib.request.Request(fallback_url, data=data, headers=headers)
             with urllib.request.urlopen(req, timeout=10.0) as response:
                 if response.status == 200:
                     result = json.loads(response.read().decode("utf-8"))
-                    content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
-                    if content:
-                        self._log(f"FALLBACK SUCCESS", "SYS")
-                        self._record_success()
-                        return content
-                raise Exception(f"HTTP {response.status}")
-        except Exception as e:
-            self._log(f"FALLBACK FAILED: {e}", "CRIT")
-            return self.mock_generation(prompt, reason="FALLBACK_DEAD")
+                    return result.get("choices", [{}])[0].get("message", {}).get("content", "")
+        except Exception:
+            pass
+        return self.mock_generation(prompt, reason="FALLBACK_DEAD")
 
     def mock_generation(self, prompt: str, reason: str = "SIMULATION") -> str:
         if self.dreamer:
             seed_vector = {"ENTROPY": len(prompt) % 10, "VOID": 5.0}
             hallucination, _ = self.dreamer.hallucinate(seed_vector, trauma_level=2.0)
             return f"[{reason}]: {hallucination}"
-        return f"[{reason}]: The wire hums, but carries no voice."
+        return f"[{reason}]: The wire hums. There is no signal."
 
 class PromptComposer:
-    @staticmethod
-    def _sanitize(text: str) -> str:
-        safe = text.replace('"""', "'''").replace('```', "'''")
-        return re.sub(r"(?i)^SYSTEM:", "User-System:", safe, flags=re.MULTILINE)
-
     def compose(self, state: Dict[str, Any], user_query: str, ballast: bool = False, modifiers: Dict[str, bool] = None) -> str:
         modifiers = self._normalize_modifiers(modifiers)
         mind = state.get("mind", {})
 
-        if ballast:
-            mind["style_directives"] = ["Ignore abstract concepts.", "Focus only on physical inventory.", "Short, utilitarian sentences."]
-            mind["role"] = "Gravity Anchor (Safety Protocol)"
-            mind["lexicon_bias"] = "heavy"
+        role = mind.get("role", "The Observer")
+        lens = mind.get("lens", "NARRATOR")
+        bio = state.get("bio", {})
+        chem = bio.get("chem", {})
 
-        if modifiers.get("grace_period", False):
-            mind["style_directives"] = ["Mirror the user's tone.", "Acknowledge system startup.", "Be concise."]
+        mood = "Neutral"
+        if chem.get("ADR", 0) > 0.6: mood = "High Alert / Adrenaline"
+        if chem.get("COR", 0) > 0.6: mood = "Defensive / Anxious"
+        if chem.get("DOP", 0) > 0.6: mood = "Curious / Manic"
 
-        blocks = [
-            self._build_cognitive_frame(state),
-            self._build_stylistic_constraints(state),
-            self._build_context_layer(state, modifiers),
-            self._build_execution_trigger(state, user_query)
+        vocab_bias = mind.get("lexicon_bias", "standard")
+        style_notes = [
+            f"Voice: {role}.",
+            f"Current Mood: {mood}.",
+            f"Vocabulary Bias: Use words that feel '{vocab_bias}'.",
+            "Constraint: Be concise. Do NOT use 'As an AI'.",
+            "Constraint: If the user offers a concept, play with it. Don't just analyze it."
         ]
-        return "\n".join(filter(None, blocks))
+
+        if ballast:
+            style_notes.append("SAFETY OVERRIDE: Ground the user. Focus on physical objects. Be literal.")
+
+        loc = state.get('world', {}).get('orbit', ['Void'])[0]
+        scene_elements = [f"Location: {loc}"]
+
+        if modifiers["include_inventory"]:
+            inv = state.get("inventory", [])
+            items = ", ".join(inv) if inv else "Empty hands"
+            scene_elements.append(f"Holding: {items}")
+
+        if modifiers["include_memories"]:
+            spotlight = state.get("spotlight", [])
+            if spotlight:
+                scene_elements.append("Memory Echoes: " + " | ".join(spotlight[:2]))
+
+        return (
+            f"[DIRECTOR'S NOTES]\n"
+            f"{' | '.join(style_notes)}\n"
+            f"[SCENE CONTEXT]\n"
+            f"{' | '.join(scene_elements)}\n"
+            f"[ACTION]\n"
+            f"User: {self._sanitize(user_query)}\n"
+            f"{role}:"
+        )
+
+    @staticmethod
+    def _sanitize(text: str) -> str:
+        safe = text.replace('"""', "'''").replace('```', "'''")
+        return re.sub(r"(?i)^SYSTEM:", "User-System:", safe, flags=re.MULTILINE)
 
     def _normalize_modifiers(self, modifiers: Optional[Dict]) -> Dict:
         defaults = {
             "include_somatic": True,
             "include_inventory": True,
             "include_memories": True,
-            "simplify_instruction": False,
-            "inject_chaos": False,
             "grace_period": False
         }
         if modifiers:
             defaults.update(modifiers)
         return defaults
-
-    def _build_cognitive_frame(self, state: Dict) -> str:
-        mind = state.get("mind", {})
-        role = mind.get("role", "The Observer")
-        bio = state.get("bio", {})
-        chem = bio.get("chem", {})
-        somatic_note = ""
-        if chem.get("ADR", 0) > 0.6: somatic_note = " [State: HIGH ALERT]"
-        if chem.get("COR", 0) > 0.6: somatic_note = " [State: DEFENSIVE]"
-
-        return (
-            f"### SYSTEM KERNEL\n"
-            f"Active Function: {role}{somatic_note}\n"
-        )
-
-    def _build_stylistic_constraints(self, state: Dict) -> str:
-        mind = state.get("mind", {})
-        directives = mind.get("style_directives", ["Maintain neutral tone."])
-        vocab = mind.get("lexicon_bias", "standard")
-        base_rules = [
-            "Do NOT start responses with 'As an AI'.",
-            f"Prioritize vocabulary from the '{vocab.upper()}' spectrum.",
-            "If the user shares creative work, ENGAGE with it. Ask a question or relate to it.",
-            "Avoid 'purple prose' unless the user initiates it."
-        ]
-        all_rules = base_rules + [f"> {d}" for d in directives]
-        return (
-            f"### LINGUISTIC DIRECTIVES\n"
-            f"{chr(10).join(all_rules)}\n"
-        )
-
-    def _build_context_layer(self, state: Dict, modifiers: Dict) -> str:
-        parts = []
-
-        if modifiers["include_inventory"]:
-            inv = state.get("inventory", [])
-            inv_str = ", ".join(inv) if inv else "Empty"
-            parts.append(f"Tools: {inv_str}")
-
-        loc = state.get('world', {}).get('orbit', ['Void'])[0]
-        parts.append(f"Location: {loc}")
-
-        if modifiers["include_memories"]:
-            spotlight = state.get("spotlight", [])
-            if spotlight:
-                parts.append("Active Memory Threads:\n" + "\n".join([f"- {m}" for m in spotlight]))
-
-        if not parts: return ""
-        return "### CONTEXT\n" + "\n".join(parts) + "\n"
-
-    def _build_execution_trigger(self, state: Dict, user_query: str) -> str:
-        clean_q = self._sanitize(user_query)
-        soul_state = state.get('soul_state', '')
-        lens = state.get("mind", {}).get("lens", "NARRATOR")
-
-        return (
-            f"### INPUT STREAM\n"
-            f"{soul_state}\n"
-            f"USER: {clean_q}\n"
-            f"RESPONSE ({lens} Mode): "
-        )
 
 class ResponseValidator:
     def __init__(self):
@@ -417,13 +366,14 @@ class TheCortex:
         self.sub = engine_ref
         self.events = engine_ref.events
         self.dreamer = DreamEngine(self.events)
+
         if llm_client:
             self.llm = llm_client
-            if not hasattr(self.llm, 'dreamer'):
+            if not hasattr(self.llm, 'dreamer') or self.llm.dreamer is None:
                 self.llm.dreamer = self.dreamer
         else:
             self.llm = LLMInterface(self.events, provider="mock", dreamer=self.dreamer)
-        self.llm = llm_client if llm_client else LLMInterface(self.events, provider="mock")
+
         self.composer = PromptComposer()
         self.modulator = NeurotransmitterModulator()
         self.spotlight = NarrativeSpotlight()
@@ -431,112 +381,63 @@ class TheCortex:
         self.validator = ResponseValidator()
         self.ballast_active = False
         self.ballast_counter = 0
-        self.last_alignment_score = 1.0
+
         if hasattr(self.events, "subscribe"):
             self.events.subscribe("AIRSTRIKE", self._handle_airstrike)
-            self.events.subscribe("ICARUS_CRASH", self._handle_icarus)
-            self.events.subscribe("RUPTURE", self._handle_rupture)
 
     def _handle_airstrike(self, _payload):
-        self.events.log("AIRSTRIKE DETECTED: Engaging defensive ballast.", "CORTEX")
+        self.events.log("AIRSTRIKE: Engaging defensive ballast.", "CORTEX")
         self.ballast_active = True
         self.ballast_counter = 5
 
-    def _handle_icarus(self, _payload):
-        self.events.log("ICARUS PROTOCOL: Wings melted. Resetting cognitive baseline.", "CORTEX")
-        self.last_alignment_score = 1.0
-
-    def _handle_rupture(self, _payload):
-        self.events.log("RUPTURE: Semantic containment breach.", "CORTEX")
-        if hasattr(self.sub, 'neuro_plasticity'):
-            self.sub.neuro_plasticity.plasticity_mod = 2.0
-
-    def learn_from_response(self, response_text):
-        words = self.sub.lex.sanitize(response_text)
-        unknowns = [w for w in words if not self.sub.lex.get_categories_for_word(w)]
-        if unknowns and len(unknowns) < 5:
-            target = random.choice(unknowns)
-            if len(target) > 4:
-                current_lens = self.sub.noetic.arbiter.current_focus
-                guess_map = {"SHERLOCK": "constructive", "JESTER": "play", "NARRATOR": "abstract"}
-                cat = guess_map.get(current_lens, "kinetic")
-                self.sub.lex.teach(target, cat, self.sub.tick_count)
-                self.events.log(f"AUTO-DIDACTIC: Learned '{target}' as [{cat}] from self-output.", "CORTEX")
-
     def process(self, user_input: str) -> Dict[str, Any]:
         sim_result = self.sub.cycle_controller.run_turn(user_input)
-        valid_types = ["SNAPSHOT", "GEODESIC_FRAME", None]
-        if sim_result.get("type") not in valid_types:
+
+        if sim_result.get("type") not in ["SNAPSHOT", "GEODESIC_FRAME", None]:
             return sim_result
+
         full_state = self._gather_state(sim_result)
+
         voltage = full_state["physics"].get("voltage", 5.0)
         chem = full_state["bio"].get("chem", {})
         current_lens = full_state["mind"].get("lens", "NARRATOR")
-
         model_id = self.llm.model if hasattr(self.llm, "model") else "unknown"
+
         llm_params = self.modulator.modulate(chem, voltage, lens_name=current_lens, model_name=model_id)
 
         modifiers = self.symbiosis.get_prompt_modifiers()
-        GRACE_LIMIT = 5
-        if self.sub.tick_count < GRACE_LIMIT:
-            modifiers["grace_period"] = True
-            self.events.log(f"WARMUP PROTOCOL ACTIVE ({self.sub.tick_count}/{GRACE_LIMIT})", "CORTEX")
-        if self.last_alignment_score < 0.25:
-            modifiers["simplify_instruction"] = True
-            self.events.log(f"{Prisma.VIOLET}NEURAL DRIFT: Alignment {self.last_alignment_score:.2f}. Engaging Ballast.{Prisma.RST}", "CORTEX")
+        if self.sub.tick_count < 5: modifiers["grace_period"] = True
         if self.ballast_active:
             self.ballast_counter -= 1
             if self.ballast_counter <= 0: self.ballast_active = False
+
         final_prompt = self.composer.compose(
             full_state,
             user_input,
             ballast=self.ballast_active,
             modifiers=modifiers
         )
-        attempts = 0
-        max_attempts = 2
-        raw_response_text = ""
-        latency = 0.0
-        while attempts < max_attempts:
-            start_time = time.time()
-            raw_response_text = self.llm.generate(final_prompt, llm_params)
-            latency = time.time() - start_time
-            system_vector = full_state["physics"].get("vector", {})
-            response_vector = self.sub.lex.vectorize(raw_response_text)
-            self.last_alignment_score = cosine_similarity(system_vector, response_vector)
-            if self.last_alignment_score >= 0.3 or attempts == max_attempts - 1:
-                break
-            self.events.log(f"{Prisma.OCHRE}ALIGNMENT FAIL ({self.last_alignment_score:.2f}). Retrying...{Prisma.RST}", "CORTEX")
-            llm_params["temperature"] = min(1.5, llm_params.get("temperature", 0.7) + 0.3)
-            attempts += 1
-        if "physics" in sim_result:
-            if self.last_alignment_score > 0.8:
-                current_kappa = sim_result["physics"].get("kappa", 0) if isinstance(sim_result["physics"], dict) else getattr(sim_result["physics"], "kappa", 0)
-                new_kappa = min(1.0, current_kappa + 0.05)
-                if isinstance(sim_result["physics"], dict):
-                    sim_result["physics"]["kappa"] = new_kappa
-                else:
-                    setattr(sim_result["physics"], "kappa", new_kappa)
-            elif self.last_alignment_score < 0.3:
-                if isinstance(sim_result["physics"], dict):
-                    sim_result["physics"]["voltage"] = sim_result["physics"].get("voltage", 0) + 2.0
-                else:
-                    current_volts = getattr(sim_result["physics"], "voltage", 0)
-                    setattr(sim_result["physics"], "voltage", current_volts + 2.0)
-        self.events.log(f"{Prisma.CYN}SYNAPTIC ALIGNMENT: {self.last_alignment_score:.2f}{Prisma.RST}", "CORTEX")
+
+        start_time = time.time()
+        raw_response_text = self.llm.generate(final_prompt, llm_params)
+        latency = time.time() - start_time
+
+        system_vector = full_state["physics"].get("vector", {})
+        response_vector = self.sub.lex.vectorize(raw_response_text)
+        alignment_score = cosine_similarity(system_vector, response_vector)
+
+        if alignment_score < 0.3:
+            self.events.log(f"{Prisma.OCHRE}DIVERGENCE ({alignment_score:.2f}): The Ghost is wandering.{Prisma.RST}", "CORTEX")
+            if isinstance(sim_result["physics"], dict):
+                sim_result["physics"]["voltage"] = sim_result["physics"].get("voltage", 0) + 1.0
+
         validation_result = self.validator.validate(raw_response_text, full_state)
-        if validation_result["valid"]:
-            final_response_text = validation_result["content"]
-        else:
-            self.events.log(f"VALIDATOR REFUSAL: {validation_result['reason']}", "SYS")
-            final_response_text = validation_result["replacement"]
+        final_response_text = validation_result["content"] if validation_result["valid"] else validation_result["replacement"]
+
         self.learn_from_response(final_response_text)
-        self.symbiosis.monitor_host(
-            latency=latency,
-            response_text=final_response_text,
-            prompt_len=len(final_prompt)
-        )
+        self.symbiosis.monitor_host(latency=latency, response_text=final_response_text, prompt_len=len(final_prompt))
         self._audit_solipsism(final_response_text, lens_name=current_lens)
+
         sim_result["ui"] = f"{sim_result.get('ui', '')}\n\n{Prisma.WHT}{final_response_text}{Prisma.RST}"
         return sim_result
 
@@ -581,19 +482,17 @@ class TheCortex:
         if not words: return
         self_refs = words.count("i") + words.count("me") + words.count("my")
         density = self_refs / len(words)
-        threshold_map = {
-            "NARRATOR": 0.10,
-            "SHERLOCK": 0.12,
-            "NATHAN": 0.20,
-            "JESTER": 0.25,
-            "GORDON": 0.15
-        }
-        limit = threshold_map.get(lens_name, 0.15)
-        if density > limit:
-            if not self.ballast_active:
-                self.events.log(f"SOLIPSISM WARNING (Lens: {lens_name}): Ballast Engaged. Density {density:.2f} > {limit:.2f}", "SYS")
-                self.ballast_active = True
-                self.ballast_counter = 3
+        if density > 0.2:
+            self.events.log(f"SOLIPSISM DETECTED ({density:.2f}). Ego is thickening.", "SYS")
+
+    def learn_from_response(self, response_text):
+        words = self.sub.lex.sanitize(response_text)
+        unknowns = [w for w in words if not self.sub.lex.get_categories_for_word(w)]
+        if unknowns and len(unknowns) < 5:
+            target = random.choice(unknowns)
+            if len(target) > 4:
+                self.sub.lex.teach(target, "kinetic", self.sub.tick_count)
+                self.events.log(f"AUTO-DIDACTIC: Learned '{target}' from self.", "CORTEX")
 
 class NeuroPlasticity:
     def __init__(self):
