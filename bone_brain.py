@@ -249,24 +249,37 @@ class LLMInterface:
             "messages": [{"role": "user", "content": prompt}],
             "stream": False}
         payload.update(params)
-        try:
-            timeout = 10.0 if self.circuit_state == "HALF_OPEN" else 60.0
-            content = self._transmit(payload, timeout)
-            if content:
+        max_retries = 2
+        for attempt in range(max_retries + 1):
+            try:
+                timeout = 10.0 if self.circuit_state == "HALF_OPEN" else 60.0
+                content = self._transmit(payload, timeout)
+                if not content or len(content.strip()) < 2:
+                    raise ValueError("Response too short or empty")
                 if self.circuit_state != "CLOSED" and self.events:
                     self.events.log(f"{Prisma.GRN}⚡ SYNAPSE RESTORED.{Prisma.RST}", "SYS")
                 self.failure_count = 0
                 self.circuit_state = "CLOSED"
                 return content
-        except Exception as e:
-            self.failure_count += 1
-            self.last_failure_time = time.time()
-            if self.failure_count >= self.failure_threshold:
-                self.circuit_state = "OPEN"
+            except (ValueError, json.JSONDecodeError) as e:
                 if self.events:
-                    self.events.log(f"{Prisma.RED}⚡ SYNAPSE SEVERED: {e}{Prisma.RST}", "CRIT")
-            if self.provider != "ollama" and self.circuit_state != "OPEN":
-                return self._local_fallback(prompt, params)
+                    self.events.log(f"{Prisma.OCHRE}⚡ SYNAPSE GLITCH (Attempt {attempt}): {e}{Prisma.RST}", "SYS")
+                if attempt == max_retries:
+                    return self.mock_generation(prompt, reason="MALFORMED_OUTPUT")
+                time.sleep(0.5 * (attempt + 1))
+            except Exception as e:
+                self.failure_count += 1
+                self.last_failure_time = time.time()
+                if self.failure_count >= self.failure_threshold:
+                    self.circuit_state = "OPEN"
+                    if self.events:
+                        self.events.log(f"{Prisma.RED}⚡ SYNAPSE SEVERED: {e}{Prisma.RST}", "CRIT")
+                    return self.mock_generation(prompt, reason="SEVERED")
+                if self.provider != "ollama" and self.circuit_state != "OPEN":
+                    fallback = self._local_fallback(prompt, params)
+                    if "FALLBACK_DEAD" not in fallback:
+                        return fallback
+                time.sleep(1.0 * (attempt + 1))
         return self.mock_generation(prompt, reason="SILENCE")
 
     def _local_fallback(self, prompt: str, params: Dict) -> str:
@@ -317,6 +330,8 @@ class PromptComposer:
             "Constraint: Be concise. Do NOT use 'As an AI'.",
             "Constraint: If the user offers a concept, play with it. Don't just analyze it.",
             "Constraint: Do not recite the inventory list unless the user asks."]
+        if modifiers.get("soften"):
+            style_notes.append("TONE OVERRIDE: Be warm, helpful, and clear. Act as a mentor guiding a new user. Avoid being cryptic.")
         if ballast:
             style_notes.append("SAFETY OVERRIDE: Ground the user. Focus on physical objects. Be literal.")
         loc = state.get('world', {}).get('orbit', ['Void'])[0]
@@ -415,6 +430,8 @@ class TheCortex:
         llm_params = self.modulator.modulate(chem, voltage, lens_name=current_lens, model_name=model_id)
         modifiers = self.symbiosis.get_prompt_modifiers()
         if self.sub.tick_count < 5: modifiers["grace_period"] = True
+        if hasattr(self.sub, 'tutorial') and self.sub.tutorial:
+            modifiers["soften"] = True
         if self.ballast_active:
             self.ballast_counter -= 1
             if self.ballast_counter <= 0: self.ballast_active = False
@@ -429,7 +446,7 @@ class TheCortex:
         system_vector = full_state["physics"].get("vector", {})
         response_vector = self.sub.lex.vectorize(raw_response_text)
         alignment_score = cosine_similarity(system_vector, response_vector)
-        physics_data = sim_result.get("physics") # SLASH FIX: Default to None
+        physics_data = sim_result.get("physics")
         if alignment_score < 0.3:
             self.events.log(f"{Prisma.OCHRE}DIVERGENCE ({alignment_score:.2f}): The Ghost is wandering.{Prisma.RST}",
                             "CORTEX")

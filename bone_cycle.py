@@ -388,7 +388,7 @@ class MachineryPhase(SimulationPhase):
         if zen_msg: ctx.log(zen_msg)
         if eff_boost > 0:
             current_eff = self.eng.bio.mito.state.efficiency_mod
-            self.eng.bio.mito.state.efficiency_mod = min(2.0, current_eff + (eff_boost * 0.1))
+            self.eng.bio.mito.state.membrane_potential = min(2.0, current_eff + (eff_boost * 0.1))
         if self.eng.gordon.inventory:
             is_craft, craft_msg, old_item, new_item = self.eng.phys.forge.attempt_crafting(physics, self.eng.gordon.inventory)
             if is_craft:
@@ -687,6 +687,7 @@ class CycleReporter:
                 return ctx.refusal_packet
             if ctx.is_bureaucratic:
                 return self._package_bureaucracy(ctx)
+            self._inject_diagnostics(ctx)
             self._inject_flux_readout(ctx)
             self._inject_somatic_pulse(ctx)
             captured_events = self.eng.events.flush()
@@ -697,6 +698,15 @@ class CycleReporter:
                 "ui": f"{Prisma.RED}REALITY FRACTURE (Renderer Crash): {e}{Prisma.RST}\nRaw Output: {ctx.logs}",
                 "logs": ctx.logs,
                 "metrics": self.eng.get_metrics()}
+
+    def _inject_diagnostics(self, ctx: CycleContext):
+        feedback = self.eng.system_health.flush_feedback()
+        if feedback["hints"]:
+            for hint in feedback["hints"]:
+                ctx.logs.append(f"{Prisma.CYN}💡 HINT: {hint}{Prisma.RST}")
+        if feedback["warnings"]:
+            for warn in feedback["warnings"]:
+                ctx.logs.append(f"{Prisma.OCHRE}⚠️ WARNING: {warn}{Prisma.RST}")
 
     def _inject_somatic_pulse(self, ctx: CycleContext):
         impulse = getattr(ctx, "last_impulse", None)
