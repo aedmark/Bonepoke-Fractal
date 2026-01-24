@@ -78,12 +78,14 @@ class MitochondrialForge:
         efficiency = max(0.1, self.state.membrane_potential)
         total_metabolic_cost = ((base_demand + cognitive_load_tax) * mod_factor) / efficiency
         waste_generated = total_metabolic_cost * (1.0 - efficiency) * 0.5
-        self.state.ros_buildup += waste_generated
         self.state.atp_pool -= total_metabolic_cost
+        self.state.ros_buildup += waste_generated
         self._apply_adaptive_dynamics(waste_generated)
         status = "RESPIRING"
         if self.state.atp_pool < 20.0: status = "LOW_POWER"
-        if self.state.atp_pool <= 0.0: status = "NECROSIS"
+        if self.state.atp_pool <= 0.0:
+            status = "NECROSIS"
+            self.state.atp_pool = 0.1
         return MetabolicReceipt(
             base_cost=round(base_demand, 2),
             drag_tax=round(cognitive_load_tax, 2),
@@ -244,32 +246,35 @@ class SomaticLoop:
 
     @staticmethod
     def _normalize_physics(physics_packet: Any) -> Dict:
+        voltage = 0.0
+        drag = 0.0
+        kappa = 0.5
+        clean_words = []
+        counts = {}
         if hasattr(physics_packet, "to_dict"):
             data = physics_packet.to_dict()
-            return {
-                "voltage": data.get("voltage", 0.0),
-                "drag": data.get("narrative_drag", 0.0),
-                "counts": data.get("counts", {}),
-                "clean_words": data.get("clean_words", []),
-                "kappa": data.get("kappa", 0.5),
-                "narrative_drag": data.get("narrative_drag", 0.0)}
-        if hasattr(physics_packet, "dimensions"):
-            return {
-                "voltage": getattr(physics_packet, "tension", 0.0),
-                "drag": getattr(physics_packet, "compression", 0.0),
-                "counts": {},
-                "clean_words": [],
-                "kappa": getattr(physics_packet, "coherence", 0.5),
-                "narrative_drag": getattr(physics_packet, "compression", 0.0)}
-        if isinstance(physics_packet, dict):
-            return {
-                "voltage": physics_packet.get("voltage", 0.0),
-                "drag": physics_packet.get("narrative_drag", 0.0),
-                "counts": physics_packet.get("counts", {}),
-                "clean_words": physics_packet.get("clean_words", []),
-                "kappa": physics_packet.get("kappa", 0.5),
-                "narrative_drag": physics_packet.get("narrative_drag", 0.0)}
-        return {"voltage": 0.0, "drag": 0.0, "counts": {}, "clean_words": [], "kappa": 0.5, "narrative_drag": 0.0}
+            voltage = data.get("voltage", 0.0)
+            drag = data.get("narrative_drag", 0.0)
+            kappa = data.get("kappa", 0.5)
+            clean_words = data.get("clean_words", [])
+            counts = data.get("counts", {})
+        elif hasattr(physics_packet, "dimensions"):
+            voltage = getattr(physics_packet, "tension", 0.0)
+            drag = getattr(physics_packet, "compression", 0.0)
+            kappa = getattr(physics_packet, "coherence", 0.5)
+        elif isinstance(physics_packet, dict):
+            voltage = physics_packet.get("voltage", 0.0)
+            drag = physics_packet.get("narrative_drag", physics_packet.get("drag", 0.0))
+            kappa = physics_packet.get("kappa", 0.5)
+            clean_words = physics_packet.get("clean_words", [])
+            counts = physics_packet.get("counts", {})
+        return {
+            "voltage": voltage,
+            "drag": drag,
+            "narrative_drag": drag,
+            "kappa": kappa,
+            "clean_words": clean_words,
+            "counts": counts}
 
     @staticmethod
     def _audit_folly_desire(phys, stamina, logs) -> str:
@@ -287,20 +292,15 @@ class SomaticLoop:
         if not clean_words:
             return "NONE", 0.0
         found_enzymes = []
-        total_atp_yield = 0.0
-        total_atp_yield += 1.0
+        total_atp_yield = 1.0
         word_counts = Counter(clean_words)
-        processed_words = set()
-        for word in clean_words:
+        for word, count in word_counts.items():
             if len(word) < 4: continue
-            if word in processed_words: continue
-            processed_words.add(word)
             category = TheLexicon.get_current_category(word)
             if category and category != "void":
                 enzyme = self._map_category_to_enzyme(category)
                 found_enzymes.append(enzyme)
                 base_word_yield = 2.0 if len(word) > 7 else 1.0
-                count = word_counts[word]
                 damped_multiplier = 1.0 + math.log(count)
                 total_atp_yield += (base_word_yield * damped_multiplier)
                 if len(found_enzymes) <= 3:
@@ -388,14 +388,13 @@ class EndocrineSystem:
             final_reward = base_reward * satiety_dampener
             self.dopamine += final_reward
             self.cortisol -= (final_reward * 0.4)
-            pass
-            impact = self._REACTION_MAP.get(enzyme_type)
-            if impact:
-                if "ADR" in impact: self.adrenaline += impact["ADR"]
-                if "COR" in impact: self.cortisol += impact["COR"]
-                if "OXY" in impact: self.oxytocin += impact["OXY"]
-                if "DOP" in impact: self.dopamine += impact["DOP"]
-                if "SER" in impact: self.serotonin += impact["SER"]
+        impact = self._REACTION_MAP.get(enzyme_type)
+        if impact:
+            if "ADR" in impact: self.adrenaline = min(1.0, self.adrenaline + impact["ADR"])
+            if "COR" in impact: self.cortisol = max(0.0, self.cortisol + impact["COR"])
+            if "OXY" in impact: self.oxytocin = min(1.0, self.oxytocin + impact["OXY"])
+            if "DOP" in impact: self.dopamine = min(1.0, self.dopamine + impact["DOP"])
+            if "SER" in impact: self.serotonin = min(1.0, self.serotonin + impact["SER"])
 
     def _apply_environmental_pressure(self, feedback: Dict, health: float, stamina: float, ros_level: float, stress_mod: float):
         if feedback.get("STATIC", 0) > 0.6:

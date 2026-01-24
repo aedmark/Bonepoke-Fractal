@@ -141,47 +141,15 @@ class BoneAmanita:
             repair_result = self.kintsugi.attempt_repair(
                 self.phys.tension.last_physics_packet,
                 self.trauma_accum,
-                self.soul
-            )
+                self.soul)
             if repair_result and repair_result["msg"]:
                 self.events.log(repair_result["msg"], "KINTSUGI")
                 if repair_result.get("atp_gain"):
                     self.bio.mito.state.atp_pool += repair_result["atp_gain"]
-
-        if self.phys.tension.last_physics_packet:
-            advice, corrections, mandates = self.council.convene(
-                user_message,
-                self.phys.tension.last_physics_packet
-            )
-            for adv in advice:
-                self.events.log(adv, "COUNCIL")
-            for param, delta in corrections.items():
-                if hasattr(self.phys, "dynamics") and param in self.phys.dynamics.__dict__:
-                    curr = getattr(self.phys.dynamics, param, 0.0)
-                    setattr(self.phys.dynamics, param, curr + delta)
-            for man in mandates:
-                if man.get("action") == "CIRCUIT_BREAKER":
-                    self.bio.endo.cortisol = max(0.0, self.bio.endo.cortisol - 0.5)
-                    self.events.log(f"{Prisma.CYN}⚡ MANDATE EXECUTED: Cortisol Damped.{Prisma.RST}", "SYS")
-
-            bio_snapshot = {
-                "health": self.health,
-                "stamina": self.stamina
-            }
-            bureau_result = self.bureau.audit(self.phys.tension.last_physics_packet, bio_snapshot)
-            if bureau_result:
-                if bureau_result.get("log"):
-                    self.events.log(bureau_result["log"], "BUREAU")
-                if bureau_result.get("ui"):
-                    self.events.log(bureau_result["ui"], "UI_INTERRUPT")
-                if bureau_result.get("atp_gain", 0) > 0:
-                    self.bio.mito.state.atp_pool += bureau_result["atp_gain"]
-
         if self.phys.tension.last_physics_packet:
             bio_snapshot = {
                 "health": self.health,
-                "stamina": self.stamina
-            }
+                "stamina": self.stamina}
             bureau_result = self.bureau.audit(self.phys.tension.last_physics_packet, bio_snapshot)
             if bureau_result:
                 if bureau_result.get("log"):

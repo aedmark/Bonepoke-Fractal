@@ -296,7 +296,6 @@ class LLMInterface:
             return f"[{reason}]: {hallucination}"
         return f"[{reason}]: The wire hums. There is no signal."
 
-
 class PromptComposer:
     def compose(self, state: Dict[str, Any], user_query: str, ballast: bool = False,
                 modifiers: Dict[str, bool] = None) -> str:
@@ -316,15 +315,19 @@ class PromptComposer:
             f"Current Mood: {mood}.",
             f"Vocabulary Bias: Use words that feel '{vocab_bias}'.",
             "Constraint: Be concise. Do NOT use 'As an AI'.",
-            "Constraint: If the user offers a concept, play with it. Don't just analyze it."]
+            "Constraint: If the user offers a concept, play with it. Don't just analyze it.",
+            "Constraint: Do not recite the inventory list unless the user asks."]
         if ballast:
             style_notes.append("SAFETY OVERRIDE: Ground the user. Focus on physical objects. Be literal.")
         loc = state.get('world', {}).get('orbit', ['Void'])[0]
         scene_elements = [f"Location: {loc}"]
         if modifiers["include_inventory"]:
             inv = state.get("inventory", [])
-            items = ", ".join(inv) if inv else "Empty hands"
-            scene_elements.append(f"Holding: {items}")
+            if inv:
+                items = ", ".join(inv)
+                scene_elements.append(f"Belt (Accessible): {items}")
+            else:
+                scene_elements.append("Hands: Empty")
         if modifiers["include_memories"]:
             spotlight = state.get("spotlight", [])
             if spotlight:
@@ -426,10 +429,18 @@ class TheCortex:
         system_vector = full_state["physics"].get("vector", {})
         response_vector = self.sub.lex.vectorize(raw_response_text)
         alignment_score = cosine_similarity(system_vector, response_vector)
-        physics_data = sim_result.get("physics", {})
+        physics_data = sim_result.get("physics") # SLASH FIX: Default to None
         if alignment_score < 0.3:
             self.events.log(f"{Prisma.OCHRE}DIVERGENCE ({alignment_score:.2f}): The Ghost is wandering.{Prisma.RST}",
                             "CORTEX")
+            if physics_data and isinstance(physics_data, dict):
+                self.last_physics = physics_data
+                voltage = physics_data.get("voltage", 0.0)
+                if voltage > 18.0:
+                    self.modulator.force_state("MANIC")
+                sim_result["physics"]["voltage"] = voltage + 1.0
+            if hasattr(self.sub.phys, "dynamics"):
+                pass
             if isinstance(physics_data, dict):
                 self.last_physics = physics_data
                 voltage = physics_data.get("voltage", 0.0)

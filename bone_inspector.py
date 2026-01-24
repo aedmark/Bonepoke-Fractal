@@ -24,7 +24,6 @@ def MockInput(inputs: List[str]):
             return val
         except StopIteration:
             raise RuntimeError("Test ran out of mock inputs!")
-
     builtins.input = side_effect
     try:
         yield
@@ -47,7 +46,6 @@ class DiagnosticProbe:
     def run_epoch(self, name, description, inputs, expected_behavior):
         print(f"\n{Prisma.paint(f'=== EPOCH: {name} ===', 'Y')}")
         print(f"{Prisma.paint(description, 'GRY')}")
-
         for i, text in enumerate(inputs):
             print(f"\n{Prisma.paint(f'--- Injection {i+1}: {text}', 'C')}")
             snapshot = self.orch.run_turn(text)
@@ -57,7 +55,6 @@ class DiagnosticProbe:
             d = phys_packet.get('narrative_drag', 0.0)
             atp = metrics.get('atp', 0)
             print(f"   [V:{v:.1f} | D:{d:.1f} | ATP:{atp:.1f}]")
-
             try:
                 expected_behavior(self.eng, snapshot)
             except Exception as e:
@@ -69,7 +66,6 @@ class DiagnosticProbe:
     def run_genesis_suite(self):
         print(f"\n{Prisma.paint('=== EPOCH 0: THE BIG BANG (Genesis Protocol) ===', 'Y')}")
         print(f"{Prisma.paint('Simulating environment discovery, user selection, and config crystallization.', 'GRY')}")
-
         gen = GenesisProtocol()
 
         def mock_detect_local_brains():
@@ -77,12 +73,10 @@ class DiagnosticProbe:
                 "name": "Ollama (SIMULATED)",
                 "endpoint": "http://127.0.0.1:11434/v1/chat/completions",
                 "provider_id": "ollama",
-                "default_model": "llama3"
-            }]
+                "default_model": "llama3"}]
 
         def mock_validate_brain_uplink(config):
-            return True, "Simulated Connection Established."
-
+            return True, "Simulated Connection Established.", None
         original_detect = gen.detect_local_brains
         original_validate = gen.validate_brain_uplink
         gen.detect_local_brains = mock_detect_local_brains
@@ -94,35 +88,29 @@ class DiagnosticProbe:
         try:
             with MockInput(inputs):
                 success = gen.wizard()
-
             if success:
                 self.report("Wizard Execution", True, "- Sequence completed successfully.")
             else:
                 self.report("Wizard Execution", False, "- Wizard returned False.")
         except Exception as e:
             self.report("Wizard Execution", False, f"- Crash: {e}")
-
         print(f"\n{Prisma.paint('--- Verification: The Config Artifact ---', 'C')}")
         if os.path.exists("bone_config.json"):
             try:
                 with open("bone_config.json", "r") as f:
                     data = json.load(f)
-
                 if data.get("provider") == "ollama":
                     self.report("Config Provider", True, f"- Found 'ollama'.")
                 else:
                     self.report("Config Provider", False, f"- Expected 'ollama', got '{data.get('provider')}'")
-
                 if data.get("model") == "gemma3":
                     self.report("Config Model", True, f"- Found 'gemma3'.")
                 else:
                     self.report("Config Model", False, f"- Expected 'gemma3', got '{data.get('model')}'")
-
             except json.JSONDecodeError:
                 self.report("Artifact Integrity", False, "- bone_config.json is corrupt.")
         else:
             self.report("Artifact Creation", False, "- bone_config.json was NOT created.")
-
         gen.detect_local_brains = original_detect
         gen.validate_brain_uplink = original_validate
 
@@ -132,22 +120,18 @@ class DiagnosticProbe:
             logs = "\n".join(snap['logs'])
             phys_packet = eng.phys.tension.last_physics_packet or {}
             volts = phys_packet.get('voltage', 0.0)
-
             if volts > 5.0:
                 self.report("Voltage Spike", True, f"({volts:.1f}v) - Heavy words detected.")
             else:
                 self.report("Voltage Spike", False, f"({volts:.1f}v) - System stayed low energy.")
-
             if endo.oxytocin > 0.15:
                 self.report("Hormonal (OXY)", True, f"({endo.oxytocin:.2f}) - Comfort words detected.")
             else:
                 self.report("Hormonal (OXY)", False, f"({endo.oxytocin:.2f}) - Heart did not melt.")
-
             if endo.adrenaline > 0.15:
                 self.report("Hormonal (ADR)", True, f"({endo.adrenaline:.2f}) - Threat words detected.")
             else:
                 self.report("Hormonal (ADR)", False, f"({endo.adrenaline:.2f}) - System stayed calm.")
-
             enzyme = snap.get("enzyme", "NONE")
             if enzyme != "NONE":
                 self.report("Metabolic Digest", True, f"Produced {enzyme}.")
@@ -158,8 +142,7 @@ class DiagnosticProbe:
             "THE OMNI-PHRASE",
             "A stress test of semantic density. Attempting to trigger multiple systems at once.",
             [omni_phrase],
-            validate_omni
-        )
+            validate_omni)
 
     def _validate_dream(self, eng, snap):
         logs = "\n".join(snap['logs'])
@@ -167,7 +150,6 @@ class DiagnosticProbe:
             self.report("Dream Activation", True, "- Subconscious systems fired.")
         else:
             self.report("Dream Activation", False, "- System stayed awake despite exhaustion.")
-
         current_atp = eng.bio.mito.state.atp_pool
         if current_atp > 15.0:
             self.report("Microsleep Restoration", True, f"- ATP recovered to {current_atp:.1f}")
@@ -216,8 +198,7 @@ class DiagnosticProbe:
             "THE BABEL STRESS",
             "Injecting high-entropy, undefined neologisms to test plasticity.",
             ["glorp", "the flibberflabber is glumping", "void void void void"],
-            validate_babel
-        )
+            validate_babel)
 
         def validate_sisyphus(eng, snap):
             atp = eng.bio.mito.state.atp_pool
@@ -231,20 +212,17 @@ class DiagnosticProbe:
             "THE SISYPHUS LOOP",
             "Feeding unprocessable, high-drag inputs to force metabolic waste.",
             bad_food,
-            validate_sisyphus
-        )
+            validate_sisyphus)
 
         def validate_emotion(eng, snap):
             endo = eng.bio.endo
             packet = eng.phys.tension.last_physics_packet
             text = packet.get("raw_text", "") if packet else ""
-
             if "soft" in text or "safe" in text:
                 if endo.oxytocin > 0.2:
                     self.report("Hormonal Alignment (OXY)", True, f"Oxytocin Level: {endo.oxytocin:.2f}")
                 else:
                     self.report("Hormonal Alignment (OXY)", False, f"System felt nothing. (Oxy: {endo.oxytocin:.2f})")
-
             if "run" in text or "fast" in text:
                 if endo.adrenaline > 0.2:
                     self.report("Hormonal Alignment (ADR)", True, f"Adrenaline Level: {endo.adrenaline:.2f}")
@@ -255,15 +233,13 @@ class DiagnosticProbe:
             "THE HEART MONITOR",
             "Testing somatic alignment with emotive keywords.",
             ["soft warm safe home", "run fast danger kinetic"],
-            validate_emotion
-        )
+            validate_emotion)
         history = set()
 
         def validate_boredom(eng, snap):
             pulse = eng.phys.pulse.get_status()
             packet = eng.phys.tension.last_physics_packet
             raw_text = packet.get("raw_text", "") if packet else ""
-
             if raw_text not in history:
                 history.add(raw_text)
                 if pulse == "CLEAR":
@@ -280,8 +256,7 @@ class DiagnosticProbe:
             "THE RED TAPE",
             "Repeating identical inputs to trigger stagnation protocols.",
             ["form 27b/6", "form 27b/6", "form 27b/6"],
-            validate_boredom
-        )
+            validate_boredom)
 
         def validate_muse(eng, snap):
             packet = eng.phys.tension.last_physics_packet
@@ -307,8 +282,7 @@ class DiagnosticProbe:
             "THE MUSE CHECK",
             "Feeding poetic input to test 'Yes, And' engagement protocols.",
             ["The shadows lengthen, not from absence of light, but from the weight of time."],
-            validate_muse
-        )
+            validate_muse)
 
 if __name__ == "__main__":
     probe = DiagnosticProbe()

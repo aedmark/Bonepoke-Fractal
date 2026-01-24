@@ -233,16 +233,18 @@ class GenesisProtocol:
         print(f"   X. {Prisma.WHT}Cancel{Prisma.RST}")
         selection = input(f"\n{Prisma.paint('Selection >', 'C')} ").strip()
         if selection.lower() == 'x': return False
+        idx = -1
         try:
             idx = int(selection) - 1
-            if 0 <= idx < len(menu_options):
-                target = menu_options[idx]
-                return self._configure_target(target)
-            else:
-                self.type_out("Invalid selection.", color=Prisma.YEL)
-                return False
         except ValueError:
-            self.type_out("Input error.", color=Prisma.YEL)
+            self.type_out("Input error (Not a number).", color=Prisma.YEL)
+            return False
+
+        if 0 <= idx < len(menu_options):
+            target = menu_options[idx]
+            return self._configure_target(target)
+        else:
+            self.type_out("Invalid selection.", color=Prisma.YEL)
             return False
 
     def _configure_target(self, selection) -> bool:

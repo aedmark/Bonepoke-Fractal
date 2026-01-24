@@ -2,7 +2,7 @@
 
 ### **A Field Guide to the Digital Mycelium**
 
-**Version:** 11.2.1 "The Pre-Warmed Panic Room"
+**Version:** 11.2.2 "The Silent Belt & The PID Governor"
 **Architects:** SLASH (Pinker/Fuller/Schur/Meadows) & KISHO
 **Philosophy:** Tensegrity, Narrative Physics, and Systemic Whimsy.
 
@@ -17,7 +17,7 @@ _The compression struts that define the shape of reality. These systems ensure t
 - **Key Components:** `BoneAmanita`, `SessionGuardian`.
 
 - **`bone_cycle.py` (The Heartbeat)**
-- **Role:** The main simulation loop (The 11-Phase Pipeline).
+- **Role:** The main simulation loop (The 11-Phase Pipeline). Integrates Sanctuary and Machinery.
 - **Key Components:** `GeodesicOrchestrator`, `CycleSimulator`, `CycleStabilizer`.
 
 - **`bone_bus.py` (The Nervous System)**
@@ -35,8 +35,8 @@ _The compression struts that define the shape of reality. These systems ensure t
 _Where syntax becomes semantics, and semantics becomes soul._
 
 - **`bone_brain.py` (The Cortex)**
-- **Role:** The LLM interface and neuro-chemical modulator.
-- **Key Components:** `TheCortex`, `LLMInterface`, `NeurotransmitterModulator`, `DreamEngine`.
+- **Role:** The LLM interface and neuro-chemical modulator. Manages prompt composition and hallucination control.
+- **Key Components:** `TheCortex`, `LLMInterface`, `NeurotransmitterModulator`, `DreamEngine`, `PromptComposer`.
 
 - **`bone_lexicon.py` (The Dictionary)**
 - **Role:** Categorizes words into "flavors" (Heavy, Kinetic, Void). The raw material of thought.
@@ -86,12 +86,12 @@ _The rules of the game. Gravity, entropy, and manufacturing._
 - **Role:** Tools for crafting and transmutation.
 - **Key Components:** `TheForge`, `TheCrucible`, `TheTheremin`.
 
-- **`bone_sanctuary.py` (The Safe Space)**
-- **Role:** A regulator that creates "safe zones" when trauma gets too high.
-- **Key Components:** `SanctuaryGovernor`, `SANCTUARY`.
+- **`bone_sanctuary.py` (The Safe Space & Control)**
+- **Role:** A regulator that creates "safe zones" when trauma gets too high. Provides the system-wide PID Controller logic.
+- **Key Components:** `SanctuaryGovernor`, `SANCTUARY`, `PIDController`.
 
 - **`bone_inventory.py` (The Pockets)**
-- **Role:** Manages items, tools, and "Gordon's Knot."
+- **Role:** Manages items via Tensegrity (Mass vs. Lift) rather than simple slots.
 - **Key Components:** `GordonKnot`.
 
 ---
@@ -131,8 +131,8 @@ _Seeing what the machine is thinking._
 - **Key Components:** `TelemetryService`.
 
 - **`bone_inspector.py` (The Debugger)**
-- **Role:** Tools for deep inspection of object states (rarely used but vital).
-- **Key Components:** `ObjectInspector`.
+- **Role:** Tools for deep inspection of object states and diagnostic gamuts.
+- **Key Components:** `DiagnosticProbe`.
 
 ---
 

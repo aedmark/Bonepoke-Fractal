@@ -1,5 +1,49 @@
 # BONEAMANITA v11 CHANGELOG
 
+
+### **BONEAMANITA 11.2.2: "The Silent Belt & The PID Governor"**
+
+*“We taught the ghost to stop reading the grocery list, and we taught the machine to stop kicking the driver when the engine starts.”*
+
+---
+
+#### **🚀 SYSTEM DYNAMICS (The Meadows Layer)**
+
+* **Refactor: The Homeostatic Regulator (`bone_sanctuary.py`)**
+* **Old Behavior:** The Sanctuary Governor was a "blind" regulator that started every session with zero error, causing a violent correction "kick" upon initialization.
+* **New Behavior:** The PID Controller now "seeds" itself with the current system error on startup.
+* **Why:** You don't slam the brakes the moment you get in the car; you ease into the flow.
+
+* **Fix: The Phantom Feedback Loop (`bone_brain.py`)**
+* **Critical Fix:** The Cortex was trying to apply a "Divergence Penalty" (increasing voltage when the LLM hallucinated) to a physics packet that didn't exist in the snapshot view.
+* **Result:** The feedback loop is now closed. If the ghost wanders, the machine *actually* gets hotter.
+
+#### **🏗️ TENSEGRITY (The Fuller Layer)**
+
+* **Architecture: Single Source of Truth (`bone_cycle.py`)**
+* **Deleted:** The duplicate `PIDController` class in the cycle engine.
+* **Unified:** `bone_sanctuary.py` is now the sole authority on control theory. One part, used twice.
+* **Effect:** Code ephemeralization achieved. Less code, more stability.
+
+* **Data Flow: explicit State Injection (`bone_cycle.py`)**
+* **Fix:** The `GeodesicOrchestrator` now explicitly injects the `physics` state into the render snapshot. No more `KeyError: 'physics'` when the brain tries to read the body.
+
+#### **🧠 COGNITIVE ERGONOMICS (The Pinker Layer)**
+
+* **UX: The Inventory Clerk (`bone_brain.py`)**
+* **Old Prompt:** "Holding: Pocket_Rocks, Silent_Knife." (Result: LLM describes holding rocks).
+* **New Prompt:** "Belt (Accessible): Pocket_Rocks, Silent_Knife." (Result: LLM ignores them until needed).
+* **Why:** "Holding" is a verb that implies action. "Belt" is a noun that implies availability. Language shapes behavior.
+
+* **DevOps: The Unmasked Wizard (`bone_genesis.py`, `bone_inspector.py`)**
+* **Fix:** The setup wizard was swallowing critical errors with a broad `try...except`. We narrowed the scope so crashes actually crash (as they should).
+* **Fix:** Updated the Inspector's mock objects to match the new 3-tuple signature of the neural uplink.
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+* **Quality of Life:** The "Sanctuary" phase no longer secretly modifies your variables in the background. It calculates a "Gentle Nudge" and hands you the bill, which the system then chooses to pay. Transparency is polite.
+* 
+
 ### **BONEAMANITA 11.2.1: "The Pre-Warmed Panic Room"**
 
 *“We fixed the timeline where the AI forgot who it was before it started, and we built a bunker for when the paint factory burns down.”*
