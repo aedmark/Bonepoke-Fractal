@@ -1,5 +1,58 @@
 # BONEAMANITA v11 CHANGELOG
 
+---
+
+### **BONEAMANITA 11.2.3: "Spinning Plates"**
+
+*“We stopped the mitochondria from printing money, and we taught the hormones to tell time.”*
+
+---
+
+#### **🚀 SYSTEM DYNAMICS (The Meadows Layer)**
+
+* **Refactor: The Central Bank of ATP (`MitochondrialForge`)**
+* **Old Behavior:** ATP was deducted in multiple places, creating a race condition where the system could spend energy it didn't have.
+* **New Behavior:** All energy transactions now go through `adjust_atp()`.
+* **Why:** You cannot manage a stock (Energy) if you don't control the flows. The vault is now secure.
+
+* **Fix: The Causality Violation (`EndocrineSystem`)**
+* **Critical Fix:** The system was attempting to apply Homeostasis *before* checking what time of day it was.
+* **Result:** The metabolic order of operations is restored: Circadian Baseline -> Environmental Pressure -> Homeostatic Correction.
+
+* **Tuning: The Dopamine Dampener**
+* **Fix:** Removed a "double-dipping" logic error where successful resource harvesting rewarded Dopamine twice, creating a reinforcing feedback loop (addiction).
+
+#### **🏗️ TENSEGRITY (The Fuller Layer)**
+
+* **Optimization: Ephemeralization of Harvest (`SomaticLoop`)**
+* **Old:** Iterate through the word list for every check ().
+* **New:** `Counter` based logic ().
+* **Effect:** Digestion is now cleaner and faster. We are doing more with less.
+
+* **Structural Integrity: The Recursive Circuit Breaker (`ViralTracer`)**
+* **Fix:** Replaced a dangerous recursive Depth-First Search with an iterative stack.
+* **Why:** Deep thoughts shouldn't crash the stack. The system can now ruminate indefinitely without structural failure.
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+* **Feature: The Ron Swanson Protocol (`ThePacemaker`)**
+* **Fix:** Capped the time-delta calculation.
+* **Old Behavior:** If the server slept for an hour, the system woke up screaming from "terminal boredom."
+* **New Behavior:** The system understands that a nap is just a nap. Maximum boredom accrual is capped at 5 minutes.
+
+* **Safety: The Panic Valve (`MetabolicGovernor`)**
+* **Fix:** Added a voltage override to the Manual Mode. If Voltage > 25.0, the Governor ignores the manual setting and saves the ship.
+
+#### **🧠 COGNITIVE ERGONOMICS (The Pinker Lens)**
+
+* **Clarity: The End of Magic Numbers (`BioConstants`)**
+* **Change:** Replaced cryptic floats (`8.0`, `0.7`) with semantic constants (`ROS_DAMAGE`, `DOPAMINE_SATIETY`).
+* **Why:** Code should be read like a novel, not a sudoku puzzle.
+
+* **Standardization: Noetic Consistency (`NoeticLoop`)**
+* **Fix:** Enforced a standardized dictionary return schema for thoughts. No more guessing if the key is `"msg"` or `"context_msg"`.
+
+---
 
 ### **BONEAMANITA 11.2.2: "The Silent Belt & The PID Governor"**
 

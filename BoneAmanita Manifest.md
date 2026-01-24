@@ -2,8 +2,9 @@
 
 ### **A Field Guide to the Digital Mycelium**
 
-**Version:** 11.2.2 "The Silent Belt & The PID Governor"
+**Version:** 11.2.3 'Spinning Plates'
 **Architects:** SLASH (Pinker/Fuller/Schur/Meadows) & KISHO
+**Humans:** James Taylor & Andrew Edmark
 **Philosophy:** Tensegrity, Narrative Physics, and Systemic Whimsy.
 
 ---
