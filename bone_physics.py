@@ -9,6 +9,15 @@ from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig, PhysicsPacket, CycleContext
 from bone_village import StrunkWhiteProtocol
 
+def cosine_similarity(vec_a: Dict[str, float], vec_b: Dict[str, float]) -> float:
+    intersection = set(vec_a.keys()) & set(vec_b.keys())
+    numerator = sum(vec_a[k] * vec_b[k] for k in intersection)
+    sum1 = sum(vec_a[k] ** 2 for k in vec_a.keys())
+    sum2 = sum(vec_b[k] ** 2 for k in vec_b.keys())
+    denominator = math.sqrt(sum1) * math.sqrt(sum2)
+    if not denominator: return 0.0
+    return numerator / denominator
+
 SOLVENT_WORDS = {'i', 'you', 'said', 'the', 'and', 'was', 'a', 'is', 'it'}
 MAX_SOLVENT_TOLERANCE = 40.0
 TEXT_LENGTH_SCALAR = 1500.0

@@ -3,19 +3,47 @@
 
 import random, copy
 from dataclasses import dataclass, field
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Any
+from enum import Enum, auto
 from bone_bus import Prisma, BoneConfig
 from bone_data import GORDON_LOGS, GORDON
 
-SEMANTIC_INJECTIONS = {
-    "CUT_THE_CRAP": "CONSTRAINT: Prune all adjectives. Write in sparse, staccato sentences.",
-    "ILLUMINATION": "FOCUS: Reveal hidden truths. Ignore surface appearances. Highlight subtext.",
-    "TIME_DILATION_CAP": "STYLE: Describe events in slow motion, focusing on minute sensory details.",
-    "PSI_ANCHOR": "TONE: Warm, comforting, and hopeful. Remind the user they are safe.",
-    "LUMINESCENCE": "VISUAL: The scene is lit by a cold, unwavering light.",
-    "HEAVY_LOAD": "SENSATION: You feel an immense physical weight dragging on your thoughts.",
-    "CONDUCTIVE_HAZARD": "SENSATION: Your nerves are crackling with static electricity.",
-    "BUREAUCRATIC_ANCHOR": "STYLE: Use formal, procedural language. Cite non-existent regulations."
+
+class EffectType(Enum):
+    PHYSICS = auto()
+    SEMANTIC = auto()
+    HYBRID = auto()
+
+
+@dataclass
+class ItemEffect:
+    """
+    Defines WHAT a trait does (type) and HOW it does it (handlers).
+    """
+    effect_type: EffectType
+    physics_handler: Optional[Any] = None
+    semantic_instr: Optional[str] = None
+    priority: int = 50
+
+
+@dataclass
+class PhysicsDelta:
+    """
+    A request to change the system.
+    operator: ADD, SET, MULTIPLY, ADD_COUNT, SET_COUNT, ADD_VECTOR, SET_ZONE
+    field: The specific metric (e.g., 'voltage', 'suburban')
+    value: The value to apply
+    message: Optional log message for the UI
+    """
+    operator: str
+    field: str
+    value: Any
+    message: Optional[str] = None
+
+UNKNOWN_ARTIFACT = {
+    "description": "Unknown Artifact",
+    "function": "NONE",
+    "usage_msg": "It does nothing."
 }
 
 @dataclass
@@ -25,153 +53,177 @@ class TensegrityState:
     volume: float = 0.0
     is_collapsed: bool = False
 
-def effect_conductive(physics: Dict, _data: Dict, item_name: str) -> Tuple[Optional[str], Dict]:
+
+def effect_conductive(physics: Dict, _data: Dict, item_name: str) -> List[PhysicsDelta]:
     voltage = physics.get("voltage", 0.0)
     limit = BoneConfig.INVENTORY.CONDUCTIVE_THRESHOLD
     if voltage > limit:
         damage = voltage * 0.5
-        return (
-            f"{Prisma.RED}CONDUCTIVE HAZARD: {item_name} acts as a lightning rod! -{damage:.1f} HP.{Prisma.RST}",
-            {"pain_signal": physics.get("pain_signal", 0.0) + damage}
-        )
-    return None, {}
+        msg = f"{Prisma.RED}CONDUCTIVE HAZARD: {item_name} acts as a lightning rod! -{damage:.1f} HP.{Prisma.RST}"
+        return [PhysicsDelta("ADD", "pain_signal", damage, msg)]
+    return []
 
-def effect_heavy_load(physics: Dict, _data: Dict, item_name: str) -> Tuple[Optional[str], Dict]:
+def effect_heavy_load(physics: Dict, _data: Dict, item_name: str) -> List[PhysicsDelta]:
     limit = BoneConfig.INVENTORY.HEAVY_LOAD_THRESHOLD
     if physics.get("narrative_drag", 0.0) > limit:
-        return f"{Prisma.GRY}HEAVY LOAD: The {item_name} are dragging you down.{Prisma.RST}", {}
-    return None, {}
+        msg = f"{Prisma.GRY}HEAVY LOAD: The {item_name} are dragging you down.{Prisma.RST}"
+        return [PhysicsDelta("noop", "", 0, msg)]
+    return []
 
-def effect_time_cap(physics: Dict, data: Dict, item_name: str) -> Tuple[Optional[str], Dict]:
+def effect_time_cap(physics: Dict, data: Dict, item_name: str) -> List[PhysicsDelta]:
     current_drag = physics.get("narrative_drag", 0.0)
     cap = data.get("value", 5.0)
     if current_drag > cap:
-        return (
-            f"{Prisma.CYN}TIME DILATION: {item_name} hums. Drag capped at {cap}.{Prisma.RST}",
-            {"narrative_drag": cap}
-        )
-    return None, {}
+        msg = f"{Prisma.CYN}TIME DILATION: {item_name} hums. Drag capped at {cap}.{Prisma.RST}"
+        return [PhysicsDelta("SET", "narrative_drag", cap, msg)]
+    return []
 
-def effect_bureaucratic_anchor(physics: Dict, _data: Dict, item_name: str) -> Tuple[Optional[str], Dict]:
+def effect_bureaucratic_anchor(physics: Dict, _data: Dict, item_name: str) -> List[PhysicsDelta]:
     if physics.get("beta_index", 0) < 1.0:
-        new_beta = min(2.0, physics.get("beta_index", 0) + 0.2)
-        new_drag = physics.get("narrative_drag", 0.0) + 0.5
-        return (
-            f"{Prisma.GRY}{item_name}: Policy enforced. (Beta +0.2, Drag +0.5){Prisma.RST}",
-            {"beta_index": new_beta, "narrative_drag": new_drag}
-        )
-    return None, {}
+        msg = f"{Prisma.GRY}{item_name}: Policy enforced. (Beta +0.2, Drag +0.5){Prisma.RST}"
+        return [
+            PhysicsDelta("ADD", "beta_index", 0.2, msg),
+            PhysicsDelta("ADD", "narrative_drag", 0.5)
+        ]
+    return []
 
-def effect_grounding_gear(physics: Dict, _data: Dict, item_name: str) -> Tuple[Optional[str], Dict]:
+def effect_grounding_gear(physics: Dict, _data: Dict, item_name: str) -> List[PhysicsDelta]:
     zone = physics.get("zone", "COURTYARD")
     if zone in ["AERIE", "VOID_DRIFT"]:
-        new_drag = physics.get("narrative_drag", 0.0) + 2.0
-        new_volt = physics.get("voltage", 0.0) - 2.0
-        return (
-            f"{Prisma.OCHRE}{item_name}: Gravity re-asserted. You sink out of the {zone} into the Mud.{Prisma.RST}",
-            {"zone": "THE_MUD", "narrative_drag": new_drag, "voltage": new_volt}
-        )
-    return None, {}
+        msg = f"{Prisma.OCHRE}{item_name}: Gravity re-asserted. You sink out of the {zone} into the Mud.{Prisma.RST}"
+        return [
+            PhysicsDelta("SET_ZONE", "zone", "THE_MUD", msg),
+            PhysicsDelta("ADD", "narrative_drag", 2.0),
+            PhysicsDelta("ADD", "voltage", -2.0)
+        ]
+    return []
 
-def effect_safety_scissors(physics: Dict, _data: Dict, item_name: str) -> Tuple[Optional[str], Dict]:
+def effect_safety_scissors(physics: Dict, _data: Dict, item_name: str) -> List[PhysicsDelta]:
     counts = physics.get("counts", {})
     suburban = counts.get("suburban", 0)
     if suburban > 2:
-        new_counts = counts.copy()
-        new_counts["suburban"] = 0
-        return (
-            f"{Prisma.CYN}{item_name}: Gordon snips the red tape. {suburban} suburban words discarded.{Prisma.RST}",
-            {"counts": new_counts}
-        )
-    return None, {}
+        msg = f"{Prisma.CYN}{item_name}: Gordon snips the red tape. {suburban} suburban words discarded.{Prisma.RST}"
+        return [PhysicsDelta("SET_COUNT", "suburban", 0, msg)]
+    return []
 
-def effect_caffeine_drip(physics: Dict, _data: Dict, _item_name: str) -> Tuple[Optional[str], Dict]:
-    vectors = physics.get("vector", {})
-    new_vectors = vectors.copy()
-    new_vectors["VEL"] = min(1.0, vectors.get("VEL", 0) + 0.1)
-    
-    delta = {"vector": new_vectors}
-    msg = None
+def effect_caffeine_drip(physics: Dict, _data: Dict, _item_name: str) -> List[PhysicsDelta]:
+    deltas = []
+    current_vel = physics.get("vector", {}).get("VEL", 0)
+    if current_vel < 1.0:
+        deltas.append(PhysicsDelta("ADD_VECTOR", "VEL", 0.1))
+
     if random.random() < 0.2:
-        delta["turbulence"] = min(1.0, physics.get("turbulence", 0) + 0.2)
         msg = f"{Prisma.CYN}CAFFEINE JITTERS: Velocity UP, Stability DOWN.{Prisma.RST}"
-    return msg, delta
+        deltas.append(PhysicsDelta("ADD", "turbulence", 0.2, msg))
 
-def effect_apology_eraser(physics: Dict, _data: Dict, item_name: str) -> Tuple[Optional[str], Dict]:
+    return deltas
+
+def effect_apology_eraser(physics: Dict, _data: Dict, item_name: str) -> List[PhysicsDelta]:
     clean = physics.get("clean_words", [])
     if "sorry" in clean or "apologize" in clean:
-        return (
-            f"{Prisma.GRY}{item_name}: Gordon paints over the apology. 'Don't be sorry. Be better.'{Prisma.RST}",
-            {}
-        )
-    return None, {}
+        msg = f"{Prisma.GRY}{item_name}: Gordon paints over the apology. 'Don't be sorry. Be better.'{Prisma.RST}"
+        return [PhysicsDelta("noop", "", 0, msg)]
+    return []
 
-def effect_sync_check(physics: Dict, _data: Dict, item_name: str) -> Tuple[Optional[str], Dict]:
+def effect_sync_check(physics: Dict, _data: Dict, item_name: str) -> List[PhysicsDelta]:
     tick = physics.get("tick_count", 0)
     voltage = physics.get("voltage", 0.0)
     if str(tick).endswith("11") or abs(voltage - 11.1) < 0.1:
-        return (
-            f"{Prisma.CYN}{item_name}: The hands align. 11:11. Synchronicity achieved.{Prisma.RST}",
-            {"narrative_drag": 0.0, "voltage": 11.1}
-        )
-    return None, {}
+        msg = f"{Prisma.CYN}{item_name}: The hands align. 11:11. Synchronicity achieved.{Prisma.RST}"
+        return [
+            PhysicsDelta("SET", "narrative_drag", 0.0, msg),
+            PhysicsDelta("SET", "voltage", 11.1)
+        ]
+    return []
 
-def effect_organize_chaos(physics: Dict, _data: Dict, _item_name: str) -> Tuple[Optional[str], Dict]:
+def effect_organize_chaos(physics: Dict, _data: Dict, _item_name: str) -> List[PhysicsDelta]:
     turb = physics.get("turbulence", 0.0)
     if turb > 0.2:
-        return (
-            f"{Prisma.CYN}TRAPPERKEEPER PROTOCOL: Chaos filed under 'T' for 'Tamed'. (Turbulence -0.2){Prisma.RST}",
-            {"turbulence": max(0.0, turb - 0.2)}
-        )
-    return None, {}
+        msg = f"{Prisma.CYN}TRAPPERKEEPER PROTOCOL: Chaos filed under 'T' for 'Tamed'. (Turbulence -0.2){Prisma.RST}"
+        return [PhysicsDelta("ADD", "turbulence", -0.2, msg)]
+    return []
 
-def effect_psi_anchor(physics: Dict, _data: Dict, _item_name: str) -> Tuple[Optional[str], Dict]:
+def effect_psi_anchor(physics: Dict, _data: Dict, _item_name: str) -> List[PhysicsDelta]:
     current_psi = physics.get("psi", 0.0)
     dist_from_mean = abs(current_psi - 0.5)
     if dist_from_mean > 0.3:
         correction = 0.1 if current_psi < 0.5 else -0.1
-        return (
-            f"{Prisma.MAG}TINY HORSE: You catch a glimpse of the plushie. You feel grounded. (Psi {correction:+.1f}){Prisma.RST}",
-            {"psi": current_psi + correction}
-        )
-    return None, {}
+        msg = f"{Prisma.MAG}TINY HORSE: You catch a glimpse of the plushie. You feel grounded. (Psi {correction:+.1f}){Prisma.RST}"
+        return [PhysicsDelta("ADD", "psi", correction, msg)]
+    return []
 
-def effect_luminescence(physics: Dict, _data: Dict, _item_name: str) -> Tuple[Optional[str], Dict]:
-    counts = physics.get("counts", {})
-    new_counts = counts.copy()
-    new_counts["photo"] = counts.get("photo", 0) + 2
-    return None, {"counts": new_counts}
+def effect_luminescence(physics: Dict, _data: Dict, _item_name: str) -> List[PhysicsDelta]:
+    return [PhysicsDelta("ADD_COUNT", "photo", 2)]
 
-EFFECT_DISPATCH = {
-    "CONDUCTIVE_HAZARD": effect_conductive,
-    "HEAVY_LOAD": effect_heavy_load,
-    "TIME_DILATION_CAP": effect_time_cap,
-    "BUREAUCRATIC_ANCHOR": effect_bureaucratic_anchor,
-    "GROUNDING_GEAR": effect_grounding_gear,
-    "CUT_THE_CRAP": effect_safety_scissors,
-    "CAFFEINE_DRIP": effect_caffeine_drip,
-    "APOLOGY_ERASER": effect_apology_eraser,
-    "SYNCHRONICITY_CHECK": effect_sync_check,
-    "ORGANIZE_CHAOS": effect_organize_chaos,
-    "PSI_ANCHOR": effect_psi_anchor,
-    "LUMINESCENCE": effect_luminescence}
+
+def _init_trait_registry() -> Dict[str, ItemEffect]:
+    r = {"CONDUCTIVE_HAZARD": ItemEffect(EffectType.PHYSICS, effect_conductive),
+         "HEAVY_LOAD": ItemEffect(EffectType.PHYSICS, effect_heavy_load),
+         "GROUNDING_GEAR": ItemEffect(EffectType.PHYSICS, effect_grounding_gear),
+         "SYNCHRONICITY_CHECK": ItemEffect(EffectType.PHYSICS, effect_sync_check),
+         "ORGANIZE_CHAOS": ItemEffect(EffectType.PHYSICS, effect_organize_chaos),
+         "PSI_ANCHOR": ItemEffect(EffectType.PHYSICS, effect_psi_anchor), "LUMINESCENCE": ItemEffect(
+            EffectType.HYBRID,
+            physics_handler=effect_luminescence,
+            semantic_instr="VISUAL: The scene is lit by a cold, unwavering light."
+        ), "APOLOGY_ERASER": ItemEffect(EffectType.PHYSICS, effect_apology_eraser), "TIME_DILATION_CAP": ItemEffect(
+            EffectType.HYBRID,
+            physics_handler=effect_time_cap,
+            semantic_instr="STYLE: Describe events in slow motion, focusing on minute sensory details."
+        ), "BUREAUCRATIC_ANCHOR": ItemEffect(
+            EffectType.HYBRID,
+            physics_handler=effect_bureaucratic_anchor,
+            semantic_instr="STYLE: Use formal, procedural language. Cite non-existent regulations."
+        ), "CUT_THE_CRAP": ItemEffect(
+            EffectType.HYBRID,
+            physics_handler=effect_safety_scissors,
+            semantic_instr="CONSTRAINT: Prune all adjectives. Write in sparse, staccato sentences.",
+            priority=10
+        ), "CAFFEINE_DRIP": ItemEffect(
+            EffectType.HYBRID,
+            physics_handler=effect_caffeine_drip,
+            semantic_instr="TONE: Jittery, fast-paced, and slightly anxious."
+        ), "ILLUMINATION": ItemEffect(
+            EffectType.SEMANTIC,
+            semantic_instr="FOCUS: Reveal hidden truths. Ignore surface appearances. Highlight subtext."
+        )}
+
+    return r
+
+TRAIT_REGISTRY = _init_trait_registry()
+
 
 @dataclass
 class GordonKnot:
     integrity: float = 65.0
     inventory: List[str] = field(default_factory=list)
     scar_tissue: Dict[str, float] = field(default_factory=dict)
-    pain_memory: set = field(default_factory=set)
     last_flinch_turn: int = -10
     physics_state: TensegrityState = field(default_factory=TensegrityState)
+    active_effect_cache: List[Tuple] = field(default_factory=list, init=False)
+
     ITEM_REGISTRY: Dict = field(default_factory=dict, init=False)
     CRITICAL_ITEMS: set = field(default_factory=set, init=False)
     REFLEX_MAP: Dict = field(init=False, default_factory=dict)
 
     def __post_init__(self):
         self.load_config()
-        self.pain_memory = set(self.scar_tissue.keys())
         self._initialize_reflexes()
+        self._recalculate_tensegrity()
+
+    @property
+    def pain_memory(self) -> set:
+        return set(self.scar_tissue.keys())
+
+    def _enforce_slot_limits(self):
+        limit = BoneConfig.INVENTORY.MAX_SLOTS
+        if len(self.inventory) <= limit:
+            return
+        droppable = [i for i in self.inventory if i not in self.CRITICAL_ITEMS]
+        while len(self.inventory) > limit and droppable:
+            victim = random.choice(droppable)
+            self.inventory.remove(victim)
+            droppable.remove(victim)
         self._recalculate_tensegrity()
 
     def load_config(self):
@@ -182,7 +234,14 @@ class GordonKnot:
         default_scars = GORDON.get("SCAR_TISSUE", {})
         if not self.scar_tissue:
             self.scar_tissue = default_scars
-        self.ITEM_REGISTRY = copy.deepcopy(GORDON.get("ITEM_REGISTRY", {}))
+        raw_registry = GORDON.get("ITEM_REGISTRY", {})
+        self.ITEM_REGISTRY = copy.deepcopy(raw_registry)
+        for name, data in self.ITEM_REGISTRY.items():
+            data.setdefault("description", f"A mysterious {name.lower().replace('_', ' ')}.")
+            data.setdefault("function", "NONE")
+            data.setdefault("usage_msg", "It does nothing.")
+            data.setdefault("passive_traits", [])
+        self._enforce_slot_limits()
 
     def _initialize_reflexes(self):
         self.REFLEX_MAP = {
@@ -191,24 +250,24 @@ class GordonKnot:
             "BOREDOM_CRITICAL": lambda p: p.get("repetition", 0.0) > 0.5}
 
     def get_item_data(self, item_name: str) -> Dict:
-        name = item_name.upper()
-        return self.ITEM_REGISTRY.get(name, {
-            "description": "Unknown Artifact",
-            "function": "NONE",
-            "usage_msg": "It does nothing."})
+        return self.ITEM_REGISTRY.get(item_name.upper(), UNKNOWN_ARTIFACT)
 
     def _recalculate_tensegrity(self):
         total_mass = 0.0
         total_lift = 0.0
         total_vol = 0.0
+        self.active_effect_cache = []
+
         for item_name in self.inventory:
             data = self.get_item_data(item_name)
             total_mass += data.get("mass", 1.0)
             total_lift += data.get("lift", 0.0)
             total_vol += data.get("volume", 1.0)
+
         collapsed = False
         if total_mass > 20.0 and total_mass > (total_lift * 3.0 + 10.0):
             collapsed = True
+
         self.physics_state = TensegrityState(
             mass=total_mass,
             lift=total_lift,
@@ -216,18 +275,23 @@ class GordonKnot:
             is_collapsed=collapsed)
 
     def safe_remove_item(self, item_name: str) -> bool:
-        """Safely remove item, checking dependencies and updating physics state."""
         if item_name in self.CRITICAL_ITEMS:
             return False
         if item_name not in self.inventory:
             return False
-        
+
         self.inventory.remove(item_name)
         self._recalculate_tensegrity()
         return True
 
     def audit_tools(self, physics_ref: Dict) -> List[str]:
+        """
+        Applies all inventory physics effects in a deterministic Aggregation Phase.
+        Handles ADD, SET, MULTIPLY, and nested Dictionary updates.
+        """
         logs = []
+        all_deltas: List[PhysicsDelta] = []
+
         turbulence = physics_ref.get("turbulence", 0.0)
         if turbulence > BoneConfig.INVENTORY.TURBULENCE_THRESHOLD:
             if random.random() < BoneConfig.INVENTORY.TURBULENCE_FUMBLE_CHANCE and self.inventory:
@@ -238,17 +302,47 @@ class GordonKnot:
                         template = random.choice(GORDON_LOGS["FUMBLE"])
                         msg = template.format(item=dropped)
                         logs.append(f"{Prisma.RED}{msg}{Prisma.RST}")
-        for item in self.inventory:
-            data = self.get_item_data(item)
-            traits = data.get("passive_traits", [])
-            for trait in traits:
-                handler = EFFECT_DISPATCH.get(trait)
-                if handler:
-                    msg, delta = handler(physics_ref, data, item)
-                    if delta:
-                        physics_ref.update(delta)
-                    if msg:
-                        logs.append(msg)
+
+        for item_name in self.inventory:
+            data = self.get_item_data(item_name)
+            for trait in data.get("passive_traits", []):
+                effect_def = TRAIT_REGISTRY.get(trait)
+                if effect_def and effect_def.effect_type in [EffectType.PHYSICS, EffectType.HYBRID]:
+                    if effect_def.physics_handler:
+                        new_deltas = effect_def.physics_handler(physics_ref, data, item_name)
+                        all_deltas.extend(new_deltas)
+
+        for delta in all_deltas:
+            if delta.message:
+                logs.append(delta.message)
+
+            if delta.operator == "noop":
+                continue
+
+            if delta.operator == "ADD_COUNT":
+                if "counts" not in physics_ref: physics_ref["counts"] = {}
+                physics_ref["counts"][delta.field] = physics_ref["counts"].get(delta.field, 0) + delta.value
+
+            elif delta.operator == "SET_COUNT":
+                if "counts" not in physics_ref: physics_ref["counts"] = {}
+                physics_ref["counts"][delta.field] = delta.value
+
+            elif delta.operator == "ADD_VECTOR":
+                if "vector" not in physics_ref: physics_ref["vector"] = {}
+                physics_ref["vector"][delta.field] = physics_ref["vector"].get(delta.field, 0.0) + delta.value
+
+            elif delta.operator == "SET_ZONE":
+                physics_ref["zone"] = str(delta.value)
+
+            elif delta.operator == "SET":
+                physics_ref[delta.field] = delta.value
+
+            elif delta.operator == "ADD":
+                physics_ref[delta.field] = physics_ref.get(delta.field, 0.0) + delta.value
+
+            elif delta.operator == "MULTIPLY":
+                physics_ref[delta.field] = physics_ref.get(delta.field, 0.0) * delta.value
+
         return logs
 
     def rummage(self, physics_ref: Dict, stamina_pool: float) -> Tuple[bool, str, float]:
@@ -312,11 +406,8 @@ class GordonKnot:
         return f"{Prisma.GRN}LOOT DROP: Acquired [{tool_name}].{Prisma.RST}\n   {Prisma.GRY}\"{desc}\"{Prisma.RST}"
 
     def check_gravity(self, current_drift: float, psi: float) -> Tuple[float, List[str]]:
-        """Return (new_drift, list_of_messages)"""
         messages = []
         new_drift = current_drift
-
-        # Check gravity-buffering items
         for item in self.inventory:
             data = self.get_item_data(item)
             if data.get("function") == "GRAVITY_BUFFER" and new_drift > 0.5:
@@ -326,82 +417,88 @@ class GordonKnot:
                     self.integrity -= cost
                 new_drift = max(0.0, new_drift - force)
                 messages.append(f"![🪨](https://fonts.gstatic.com/s/e/notoemoji/16.0/1faa8/32.png) {item}: {data.get('usage_msg', 'Drift Reduced.')}")
-
-        # Apply psi-based resistance (separate from items)
         if psi > 0.8 and new_drift > 4.0:
             new_drift = max(4.0, new_drift - 1.0)
             messages.append("WIND WOLVES: The logic is howling. You grip the roof.")
-
         return new_drift, messages
 
     def check_flinch(self, clean_words: List[str], current_turn: int) -> Optional[Dict]:
-        """Return None if no flinch, or dict with 'message' and 'physics_effects'"""
         if (current_turn - self.last_flinch_turn) < 10:
             return None
-
         hits = [w for w in clean_words if w.upper() in self.pain_memory]
         if not hits:
             return None
-
         self.last_flinch_turn = current_turn
         trigger = hits[0].upper()
         sensitivity = self.scar_tissue.get(trigger, 0.5)
-
         if sensitivity > 0.8:
             self.scar_tissue[trigger] = min(1.0, sensitivity + 0.1)
             return {
                 "message": f"{Prisma.RED}PTSD TRIGGER: '{trigger}' sent Gordon into a flashback. He dropped the keys.{Prisma.RST}",
-                "physics_effects": {"narrative_drag": 5.0, "voltage": 15.0}
-            }
+                "physics_effects": {"narrative_drag": 5.0, "voltage": 15.0}}
         elif sensitivity > 0.4:
             self.scar_tissue[trigger] = min(1.0, sensitivity + 0.05)
             return {
                 "message": f"{Prisma.OCHRE}SCAR TISSUE: Gordon flinches at '{trigger}'. Hands are shaking.{Prisma.RST}",
-                "physics_effects": {"narrative_drag": 2.0}
-            }
+                "physics_effects": {"narrative_drag": 2.0}}
         else:
             self.scar_tissue[trigger] = max(0.0, sensitivity - 0.05)
             return {
                 "message": f"{Prisma.GRY}CALLOUS: '{trigger}' hit an old scar. Gordon ignores it.{Prisma.RST}",
-                "physics_effects": {}
-            }
+                "physics_effects": {}}
 
-    def learn_scar(self, toxic_words: List[str], damage: float):
-        if damage < 10.0 or not toxic_words: return None
+    def learn_scar(self, toxic_words: List[str], damage: float, current_integrity: Optional[float] = None) -> Optional[str]:
+        integrity_val = current_integrity if current_integrity is not None else self.integrity
+        damage_ratio = damage / max(1.0, integrity_val)
+        if damage_ratio < 0.1:
+            return None
+        if not toxic_words:
+            return None
         culprit = random.choice(toxic_words).upper()
         if culprit not in self.scar_tissue:
             self.scar_tissue[culprit] = 0.5
-            self.pain_memory.add(culprit)
-            return f"{Prisma.VIOLET}TRAUMA IMPRINTED: Gordon will remember '{culprit}'.{Prisma.RST}"
+            return f"{Prisma.VIOLET}TRAUMA IMPRINTED: Gordon will remember '{culprit}'. (Ratio: {damage_ratio:.2f}){Prisma.RST}"
         else:
             self.scar_tissue[culprit] = min(1.0, self.scar_tissue[culprit] + 0.3)
             return f"{Prisma.VIOLET}TRAUMA DEEPENED: The scar on '{culprit}' is worse.{Prisma.RST}"
 
     def get_semantic_operators(self) -> List[str]:
+        """
+        Returns a prioritized list of semantic instructions from active items.
+        """
         operators = []
         for item in self.inventory:
             data = self.get_item_data(item)
             for trait in data.get("passive_traits", []):
-                if trait in SEMANTIC_INJECTIONS:
-                    operators.append(SEMANTIC_INJECTIONS[trait])
+                effect_def = TRAIT_REGISTRY.get(trait)
+                if effect_def and effect_def.effect_type in [EffectType.SEMANTIC, EffectType.HYBRID]:
+                    if effect_def.semantic_instr:
+                        operators.append((effect_def.priority, effect_def.semantic_instr))
             if item == "SILENT_KNIFE":
-                operators.append("CONSTRAINT: Do not use the verb 'to be'.")
-        return list(set(operators))
+                operators.append((40, "CONSTRAINT: Do not use the verb 'to be'."))
+
+        operators.sort(key=lambda x: x[0])
+
+        seen = set()
+        final_ops = []
+        for _, op in operators:
+            if op not in seen:
+                final_ops.append(op)
+                seen.add(op)
+        return final_ops
 
     def deploy_pizza(self, physics_ref, item_name="STABILITY_PIZZA", lexicon=None) -> Tuple[bool, str]:
         data = self.get_item_data(item_name)
         req_type = data.get("requires", "thermal")
         clean_words = physics_ref.get("clean_words", [])
-        
         if lexicon is None:
             from bone_lexicon import TheLexicon as lexicon
-            
         source = [w for w in clean_words if w in lexicon.get(req_type)]
         if not source:
             return False, f"{Prisma.CYN}🧊 STASIS LOCK: {item_name} is frozen. Apply {req_type.upper()} words to thaw.{Prisma.RST}"
         if data.get("consume_on_use") and item_name in self.inventory:
             if not self.safe_remove_item(item_name):
-                 return False, f"{Prisma.RED}ERROR: Could not consume {item_name}.{Prisma.RST}"
+                return False, f"{Prisma.RED}ERROR: Could not consume {item_name}.{Prisma.RST}"
         physics_ref["narrative_drag"] = 0.1
         physics_ref["psi"] = 0.90
         physics_ref["counts"]["toxin"] = physics_ref["counts"].get("toxin", 0) + 3
@@ -413,7 +510,8 @@ class GordonKnot:
             data = self.get_item_data(item)
             trigger_key = data.get("reflex_trigger")
             if trigger_key and trigger_key in self.REFLEX_MAP:
-                if self.REFLEX_MAP[trigger_key](physics_ref):
+                reflex_func = self.REFLEX_MAP[trigger_key]
+                if callable(reflex_func) and reflex_func(physics_ref):
                     func = data.get("function")
                     if func == "DRIFT_KILLER":
                         if self.safe_remove_item(item):

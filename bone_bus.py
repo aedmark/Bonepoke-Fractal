@@ -87,8 +87,7 @@ class EventBus:
         entry = {
             "text": text,
             "category": category,
-            "timestamp": time.time()
-        }
+            "timestamp": time.time()}
         self.buffer.append(entry)
 
     def flush(self) -> List[Dict]:
@@ -100,27 +99,20 @@ class EventBus:
         return list(self.buffer)[-count:]
 
 class BonePresets:
-    """
-    Standardized configurations for the BoneAmanita Engine.
-    'Structure determines behavior.' - Roberts
-    """
     ZEN_GARDEN = {
         "PHYSICS.VOLTAGE_FLOOR": 1.0,
         "PHYSICS.VOLTAGE_MAX": 10.0,
-        "PHYSICS.DRAG_FLOOR": 2.0,      # More friction = slower, calmer
-        "BIO.DECAY_RATE": 0.001,        # Slower entropy
-        "BIO.STAMINA_EXHAUSTED": 5.0,   # Harder to faint
-        "COUNCIL.MANIC_VOLTAGE_TRIGGER": 99.0 # Disable mania
-    }
-
+        "PHYSICS.DRAG_FLOOR": 2.0,
+        "BIO.DECAY_RATE": 0.001,
+        "BIO.STAMINA_EXHAUSTED": 5.0,
+        "COUNCIL.MANIC_VOLTAGE_TRIGGER": 99.0}
     THUNDERDOME = {
-        "PHYSICS.VOLTAGE_FLOOR": 8.0,   # Always buzzing
-        "PHYSICS.VOLTAGE_MAX": 30.0,    # Let it scream
-        "PHYSICS.DRAG_FLOOR": 0.5,      # Slippery slopes
-        "BIO.ATP_STARVATION": 20.0,     # Hunger strikes faster
-        "COUNCIL.MANIC_VOLTAGE_TRIGGER": 12.0, # Easy to go manic
-        "CHANCE.RARE": 0.20             # Chaos is common
-    }
+        "PHYSICS.VOLTAGE_FLOOR": 8.0,
+        "PHYSICS.VOLTAGE_MAX": 30.0,
+        "PHYSICS.DRAG_FLOOR": 0.5,
+        "BIO.ATP_STARVATION": 20.0,
+        "COUNCIL.MANIC_VOLTAGE_TRIGGER": 12.0,
+        "CHANCE.RARE": 0.20}
 
 class BoneConfig:
     GRAVITY_WELL_THRESHOLD = 15.0
@@ -147,6 +139,12 @@ class BoneConfig:
     TOXIN_WEIGHT = 1.0
     ANTIGENS = ["basically", "actually", "literally", "utilize"]
     MAX_OUTPUT_TOKENS = 4096
+    DEFAULT_LLM_ENDPOINTS = {
+        "ollama": "http://127.0.0.1:11434/v1/chat/completions",
+        "openai": "https://api.openai.com/v1/chat/completions",
+        "lm_studio": "http://127.0.0.1:1234/v1/chat/completions",
+        "localai": "http://127.0.0.1:8080/v1/chat/completions"
+    }
     VERBOSE_LOGGING = True
     PROVIDER = "openai"
     BASE_URL = None

@@ -7,8 +7,59 @@ from bone_data import LENSES, LEXICON, BIO_NARRATIVE
 from bone_main import BoneAmanita, SessionGuardian, BoneConfig
 from bone_brain import LLMInterface, TheCortex
 from bone_village import Prisma
+from bone_cycle import CycleSimulator, GeodesicOrchestrator
 
 CONFIG_FILE = "bone_config.json"
+
+class DiagnosticProbe:
+    def __init__(self, target_engine=None):
+        if target_engine:
+            self.eng = target_engine
+        else:
+            self.eng = BoneAmanita(user_name="TEST_PILOT")
+
+        self.sim = CycleSimulator(self.eng)
+        self.orch = GeodesicOrchestrator(self.eng)
+
+    def report(self, test_name, success, distinct_metric=""):
+        icon = "✔" if success else "✘"
+        color = "G" if success else "R"
+        print(f"{Prisma.paint(f'{icon} {test_name}', color)} {distinct_metric}")
+
+    def rejuvenate(self):
+        self.eng.health = 100.0
+        self.eng.stamina = 100.0
+        self.eng.bio.mito.state.atp_pool = 100.0
+        self.eng.bio.endo.cortisol = 0.0
+
+    def run_preflight(self):
+        print(f"\n{Prisma.paint('=== PRE-FLIGHT SYSTEM CHECK ===', 'C')}")
+        health = self.eng.health
+        self.report("Hull Integrity", health > 0, f"({health:.1f}%)")
+        atp = self.eng.bio.mito.state.atp_pool
+        self.report("ATP Reservoirs", atp > 10, f"({atp:.1f} units)")
+        if hasattr(self.eng, 'cortex') and self.eng.cortex.llm:
+            try:
+                provider = getattr(self.eng.cortex.llm, 'provider', 'UNKNOWN')
+                self.report("Neural Uplink", True, f"[{provider.upper()}] connected.")
+            except Exception:
+                self.report("Neural Uplink", False, "Signal Degraded.")
+        else:
+            self.report("Neural Uplink", False, "Cortex Offline (Mock Mode?)")
+        try:
+            self.orch.run_turn("System Check")
+            pkt = self.eng.phys.tension.last_physics_packet
+            if pkt:
+                v = pkt.get('voltage', 0.0)
+                d = pkt.get('narrative_drag', 0.0)
+                self.report("Physics Engine", True, f"V:{v:.1f} | D:{d:.1f}")
+            else:
+                self.report("Physics Engine", False, "No Physics Packet generated.")
+        except Exception as e:
+            self.report("Physics Engine", False, f"CRITICAL FAILURE: {e}")
+        self.rejuvenate()
+        print(f"{Prisma.paint('=== PRE-FLIGHT COMPLETE ===', 'C')}\n")
+        return True
 
 class GenesisProtocol:
     def __init__(self):
@@ -51,7 +102,7 @@ class GenesisProtocol:
     def ping(url: str) -> bool:
         try:
             req = urllib.request.Request(url, method="GET")
-            with urllib.request.urlopen(req, timeout=3.0) as _:
+            with urllib.request.urlopen(req, timeout=0.5) as _:
                 return True
         except (urllib.error.URLError, OSError, ValueError):
             return False
@@ -204,7 +255,7 @@ class GenesisProtocol:
     def wizard(self) -> bool:
         os.system('cls' if os.name == 'nt' else 'clear')
         banner = f"""
-{Prisma.CYN}   GENESIS PROTOCOL v11.2.4{Prisma.RST}
+{Prisma.CYN}   GENESIS PROTOCOL v11.3.3{Prisma.RST}
 {Prisma.GRY}State Machine Active. Tensegrity Nominal.{Prisma.RST}
 ------------------------------------"""
         print(banner)
@@ -437,6 +488,12 @@ Do not break character. Do not explain the simulation rules unless asked.
             except Exception as e:
                 self.type_out(f"{Prisma.RED}FATAL UPLINK ERROR: {e}{Prisma.RST}")
                 self.type_out("Falling back to internal logic.", color=Prisma.GRY)
+        self.type_out("...Initiating Pre-Flight Diagnostics...", color=Prisma.CYN)
+        try:
+            inspector = DiagnosticProbe(target_engine=engine)
+            inspector.run_preflight()
+        except Exception as e:
+            self.type_out(f"[WARNING] Diagnostic Subsystem Failure: {e}", color=Prisma.YEL)
         self.type_out("...System Online. Good luck.\n", color=Prisma.GRN)
         with SessionGuardian(engine) as session_engine:
             if self.config.get("provider") != "mock":

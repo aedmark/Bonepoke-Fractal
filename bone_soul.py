@@ -9,6 +9,7 @@ from bone_bus import Prisma
 MEMORY_VOLTAGE_THRESHOLD = 14.0
 MEMORY_TRUTH_THRESHOLD = 0.8
 MANIC_VOLTAGE_THRESHOLD = 18.0
+MAX_CORE_MEMORIES = 7
 
 @dataclass
 class CoreMemory:
@@ -108,6 +109,17 @@ class NarrativeSelf:
             buffs["drag_mod"] += mitigated_drag
         return buffs
 
+    def _prune_memories(self):
+        if len(self.core_memories) <= MAX_CORE_MEMORIES:
+            return
+        newest = self.core_memories.pop()
+        self.core_memories.sort(key=lambda m: m.impact_voltage)
+        forgotten = self.core_memories.pop(0)
+        self.core_memories.append(newest)
+        self.events.log(
+            f"{Prisma.GRY}[SOUL]: Memory fading... '{forgotten.trigger_words}' lost to entropy.{Prisma.RST}",
+            "MEM_DECAY")
+
     def crystallize_memory(self, physics_packet: Dict, _bio_state: Dict, _tick: int) -> Optional[str]:
         voltage = physics_packet.get("voltage", 0.0)
         truth = physics_packet.get("truth_ratio", 0.0)
@@ -136,6 +148,7 @@ class NarrativeSelf:
                 lesson=lesson,
                 impact_voltage=voltage)
             self.core_memories.append(memory)
+            self._prune_memories()
             chapter_title = f"The Incident of the {random.choice(clean_words).title()}"
             self.chapters.append(chapter_title)
             log_msg = (

@@ -810,40 +810,25 @@ class LiteraryJournal:
         )
 
 class VillageCouncil:
-    """
-    The central coordination body.
-    It reads the state of the village components to detect systemic issues.
-    """
     def __init__(self, town_hall_instance):
         self.hall = town_hall_instance
 
     def call_census(self) -> str:
-        """Generates a holistic report of the system's social ecology."""
-        report = [f"{Prisma.WHT}--- VILLAGE CENSUS ---{Prisma.RST}"]
-
         nav = self.hall.Navigator
-        report.append(f"Location: {nav.current_location}")
-        report.append(f"Shimmer Reserves: {nav.shimmer.current:.1f}")
-
         tinker = self.hall.Tinkerer
         confident_tools = [k for k, v in tinker.tool_confidence.items() if v > 1.5]
         rusting_tools = [k for k, v in tinker.tool_confidence.items() if v < 0.5]
-
-        econ_status = "Stable"
-        if len(rusting_tools) > 2: econ_status = "Recession (Rust Setting In)"
-        elif len(confident_tools) > 3: econ_status = "Boom (High Confidence)"
-
-        report.append(f"Economy: {econ_status}")
-        if rusting_tools:
-            report.append(f"   WARNING: {', '.join(rusting_tools)} are at risk.")
-
         condition, advice = self.hall.Almanac.diagnose_condition(
             session_data={"meta": {"avg_voltage": 10}},
-            host_health=None
-        )
-        report.append(f"Public Mood: {condition}")
-        report.append(f"Town Motto: '{advice}'")
-
+            host_health=None)
+        report = [
+            f"{Prisma.WHT}--- THE STATE OF THE UNION ---{Prisma.RST}",
+            f"Manifold Location: {Prisma.CYN}{nav.current_location}{Prisma.RST}",
+            f"Reserves: {nav.shimmer.current:.1f} Shimmer",
+            f"Economy: {'FLOURISHING' if len(confident_tools) > 2 else 'STAGNANT'}",
+            f"Mood: {condition} - '{advice}'"]
+        if rusting_tools:
+            report.append(f"{Prisma.RED}WARNING: The following are degrading: {', '.join(rusting_tools)}{Prisma.RST}")
         return "\n".join(report)
 
 class TownHall:

@@ -72,31 +72,34 @@ class CommandProcessor:
     def _log(self, text):
         self.eng.events.log(text, "CMD")
 
+    def _bar(self, current, max_val, color, width=10):
+        ratio = max(0.0, min(1.0, current / max_val))
+        filled = int(ratio * width)
+        return f"{color}{'█' * filled}{'░' * (width - filled)}{self.P.RST}"
+
     def execute(self, text: str) -> bool:
         if not text.startswith("/"): return False
         try:
             parts = shlex.split(text)
         except ValueError:
-            self._log(f"{self.P.RED}SYNTAX ERROR: Unbalanced quotes. The Bureau rejects your form.{self.P.RST}")
+            self._log(f"{self.P.RED}Syntax Error. Check your quotes.{self.P.RST}")
             return True
         cmd = parts[0].lower()
         if cmd not in self.registry:
-            self._log(f"{self.P.RED}Unknown command '{cmd}'. Try /help for the manifesto.{self.P.RST}")
+            self._log(f"{self.P.GRY}Unknown command. Try /help.{self.P.RST}")
             return True
         if cmd in ["/teach", "/kill", "/flag"] and not self.Config.VERBOSE_LOGGING:
             try:
                 trust = self.eng.mind.mirror.profile.confidence
                 if trust < 10:
-                    self._log(f"{self.P.YEL}🔒 LOCKED: Trust {trust}/10 required. Submit Form 27B-6.{self.P.RST}")
+                    self._log(f"{self.P.GRY}🔒 Access Denied. Trust Level: {trust}/10.{self.P.RST}")
                     return True
             except AttributeError:
                 pass
         try:
             return self.registry[cmd](parts)
         except Exception as e:
-            self._log(f"{self.P.RED}COMMAND CRASH: {e}{self.P.RST}")
-            import traceback
-            traceback.print_exc()
+            self._log(f"{self.P.RED}Command Failure: {e}{self.P.RST}")
             return True
 
     def _cmd_manifold(self, _parts):
@@ -114,7 +117,6 @@ class CommandProcessor:
             return True
         mode = "MITOSIS"
         target = None
-
         if len(parts) > 1 and parts[1] == "cross":
             try:
                 if not os.path.exists("memories"): os.makedirs("memories")
@@ -140,19 +142,26 @@ class CommandProcessor:
         return True
 
     def _cmd_status(self, _parts):
-        self._log(f"{self.P.CYN}--- SYSTEM DIAGNOSTICS ---{self.P.RST}")
-        self._log(f"Health:  {self.eng.health:.1f} | Stamina: {self.eng.stamina:.1f} | ATP: {self.eng.bio.mito.state.atp_pool:.1f}")
+        h = self.eng.health
+        s = self.eng.stamina
+        atp = self.eng.bio.mito.state.atp_pool
+        max_h = getattr(self.Config, "MAX_HEALTH", 100.0)
+        max_s = getattr(self.Config, "MAX_STAMINA", 100.0)
+        max_atp = getattr(self.Config, "MAX_ATP", 200.0)
+        lines = [
+            f"{self.P.WHT}--- VITALS ---{self.P.RST}",
+            f"Health:  {self._bar(h, max_h, self.P.RED)} {h:.0f}/{max_h:.0f}",
+            f"Stamina: {self._bar(s, max_s, self.P.GRN)} {s:.0f}/{max_s:.0f}",
+            f"Energy:  {self._bar(atp, max_atp, self.P.YEL)} {atp:.0f} ATP"]
+        self._log("\n".join(lines))
         return True
 
     def _cmd_inventory(self, _parts):
-        """Displays the contents of the user's belt."""
         inv = self.eng.gordon.inventory
         if not inv:
-            self._log(f"{self.P.GRY}Inventory: Your pockets are full of nothing but potential.{self.P.RST}")
+            self._log(f"{self.P.GRY}Pocket: Empty.{self.P.RST}")
         else:
-            self._log(f"{self.P.OCHRE}--- BELT CONTENTS ---{self.P.RST}")
-            display_list = [str(item) for item in inv]
-            self._log(f"{self.P.WHT}{', '.join(display_list)}{self.P.RST}")
+            self._log(f"{self.P.OCHRE}Pocket: {', '.join([str(i) for i in inv])}{self.P.RST}")
         return True
 
     def _cmd_save(self, _parts):
@@ -437,47 +446,24 @@ class CommandProcessor:
         return True
 
     def _cmd_help(self, _parts):
-        help_lines = [
-            f"\n{self.P.CYN}--- BONEAMANITA 11.2.4 MANUAL ---{self.P.RST}",
-            f"{self.P.GRY}Authorized by the Department of Redundancy Department{self.P.RST}\n"
-        ]
-
-        metrics = self.eng.get_metrics()
-        health = metrics.get("health", 0)
+        advice = f"{self.P.GRY}System Nominal.{self.P.RST}"
         atp = self.eng.bio.mito.state.atp_pool
-
-        suggestion = ""
         if atp < 20.0:
-            suggestion = f"{self.P.RED}CRITICAL ADVICE: You are starving. Try '/rummage' or '/weave' to generate semantic mass.{self.P.RST}"
-        elif health < 40.0:
-            suggestion = f"{self.P.RED}CRITICAL ADVICE: You are bleeding. Lower Voltage or find 'Constructive' words.{self.P.RST}"
-        elif self.eng.phys.pulse.is_bored():
-            suggestion = f"{self.P.YEL}ADVICE: The machine is bored. Try '/garden' or '/mode JESTER'.{self.P.RST}"
-        else:
-            suggestion = f"{self.P.GRN}ADVICE: Systems nominal. Go make art ('/publish').{self.P.RST}"
-
-        help_lines.append(suggestion + "\n")
-
+            advice = f"{self.P.RED}ALERT: Low Energy. Rummage or Weave.{self.P.RST}"
+        elif self.eng.health < 40.0:
+            advice = f"{self.P.RED}ALERT: Structural Damage. Reduce Voltage.{self.P.RST}"
         categories = {
-            "CORE": ["_cmd_status", "_cmd_save", "_cmd_load", "_cmd_help"],
-            "WORLD": ["_cmd_map", "_cmd_manifold", "_cmd_garden", "_cmd_voids"],
-            "ACTION": ["_cmd_rummage", "_cmd_reproduce", "_cmd_publish", "_cmd_weave"],
-            "DEBUG": ["_cmd_kip", "_cmd_teach", "_cmd_kill", "_cmd_focus"]
-        }
-
-        def get_doc(func):
-            paperwork = inspect.getdoc(func)
-            return paperwork if paperwork else "Undocumented protocol."
-
-        for cat, methods in categories.items():
-            help_lines.append(f"{self.P.WHT}{cat}:{self.P.RST}")
-            for m_name in methods:
-                if hasattr(self, m_name):
-                    cmd_name = m_name.replace("_cmd_", "/")
-                    doc = get_doc(getattr(self, m_name))
-                    help_lines.append(f"  {cmd_name:<12} - {doc}")
-            help_lines.append("")
-
-        help_lines.append(f"{self.P.GRY}Type carefully. The machine is listening.{self.P.RST}")
-        self._log("\n".join(help_lines))
+            "CORE": ["/status", "/save", "/load", "/mode"],
+            "NAV":  ["/map", "/manifold", "/garden", "/voids"],
+            "ACT":  ["/rummage", "/weave", "/publish", "/kintsugi"],
+            "META": ["/soul", "/mirror", "/chapter", "/focus"]}
+        lines = [
+            f"\n{self.P.CYN}:: BONEAMANITA v11.3.3 ::{self.P.RST}",
+            advice,
+            ""]
+        for cat, cmds in categories.items():
+            row = f"{self.P.WHT}{cat:<6}{self.P.RST} " + "  ".join([f"{c:<10}" for c in cmds])
+            lines.append(row)
+        lines.append(f"\n{self.P.GRY}Type carefully.{self.P.RST}")
+        self._log("\n".join(lines))
         return True

@@ -22,7 +22,7 @@ class BoneJSONEncoder(json.JSONEncoder):
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_11.2.4"
+        self.genome = "BONEAMANITA_11.3.3"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -302,7 +302,6 @@ class MycelialNetwork:
         decay_rate = 0.1
         for i in range(len(filtered)):
             current = filtered[i]
-            
             if current not in self.graph:
                 if not self.memory_manager.should_absorb(current, self.graph):
                     continue
@@ -362,13 +361,10 @@ class MycelialNetwork:
         return None, new_wells
 
     def enforce_limits(self, current_tick: int):
-        # Use Adaptive Pruning First
         adaptive_msg = self.memory_manager.prune_graph(list(self.cortical_stack), BoneConfig.MAX_MEMORY_CAPACITY)
-        
         prune_msg = self.prune_synapses()
         if adaptive_msg:
-            self.events.log(f"{Prisma.DA_GRY}{adaptive_msg}{Prisma.RST}")
-            
+            self.events.log(f"{Prisma.GRY}{adaptive_msg}{Prisma.RST}")
         victims = []
         limit = BoneConfig.MAX_MEMORY_CAPACITY
         safety_break = 0

@@ -279,71 +279,49 @@ class TheBureau:
         self.BUZZWORDS = {"synergy", "paradigm", "leverage", "utilize", "holistic", "bandwidth", "circle back"}
 
     def audit(self, physics, bio_state, context=None):
-        current_health = bio_state.get("health", 100.0)
-        if current_health < 20.0:
+        if bio_state.get("health", 100.0) < 20.0:
             return None
         beige_threshold = 0.6
         if context:
             mode = context.get('mode', 'NORMAL')
-            if mode in ['DEBUG', 'ARCHITECT', 'SURGERY']:
-                beige_threshold = 0.85
-            elif mode == 'POETRY':
-                beige_threshold = 0.3
+            if mode in ['DEBUG', 'ARCHITECT', 'SURGERY']: beige_threshold = 0.85
+            elif mode == 'POETRY': beige_threshold = 0.3
         voltage = physics.get("voltage", 0.0)
         clean_words = physics.get("clean_words", [])
-        buzz_hits = [w for w in clean_words if w in self.BUZZWORDS]
-        if len(buzz_hits) > 0:
-            self.stamp_count += 1
-            full_form_name = "Form 404: Void-Fill Application (Reason: Excessive Synergy)"
-            policy = self.POLICY["Form 404"]
-            mod_log = []
-            for k, v in policy["mod"].items():
-                if k in physics:
-                    physics[k] += v
-                    mod_log.append(f"{k} {v:+.1f}")
-            return {
-                "status": "NULLIFY",
-                "ui": f"{Prisma.GRY}🏢 THE BUREAU: We have detected unauthorized Paradigms.{Prisma.RST}\n   {Prisma.RED}[Filed: {full_form_name}]{Prisma.RST}\n   {Prisma.GRY}Evidence: {', '.join(buzz_hits)}{Prisma.RST}",
-                "log": f"BUREAUCRACY: Filed Form 404. Modifiers: {mod_log}.",
-                "atp_gain": policy["atp"]
-            }
-        suburban_words = [w for w in clean_words if w in TheLexicon.get("suburban") or w in TheLexicon.get("buffer")]
         toxin = physics.get("counts", {}).get("toxin", 0)
-        clean_len = len(clean_words)
-        if toxin > 0: return None
-        if voltage > 8.0: return None
-        suburban_count = len(suburban_words)
-        beige_density = suburban_count / max(1, clean_len)
-        infraction = None
+        if toxin > 0 or voltage > 8.0:
+            return None
+        buzz_hits = [w for w in clean_words if w in self.BUZZWORDS]
+        suburban_words = [w for w in clean_words if w in TheLexicon.get("suburban") or w in TheLexicon.get("buffer")]
+        beige_density = len(suburban_words) / max(1, len(clean_words))
         selected_form = None
-        if beige_density > beige_threshold:
-            infraction = "BLOCK"
-            selected_form = "1099-B" if suburban_count > 2 else "Form W-2"
-        elif voltage < 2.0 and clean_len > 2:
-            infraction = "TAX"
+        evidence = []
+        if buzz_hits:
+            selected_form = "Form 404"
+            evidence = buzz_hits
+        elif beige_density > beige_threshold:
+            selected_form = "1099-B" if len(suburban_words) > 2 else "Form W-2"
+            evidence = list(set(suburban_words))[:3]
+        elif voltage < 2.0 and len(clean_words) > 2:
             selected_form = "Schedule C"
-        if infraction:
-            self.stamp_count += 1
-            full_form_name = next((f for f in self.forms if selected_form in f), self.forms[0])
-            response = random.choice(self.responses)
-            policy = self.POLICY.get(selected_form, self.POLICY["Form W-2"])
-            mod_log = []
-            for k, v in policy["mod"].items():
-                if k in physics:
-                    physics[k] += v
-                    mod_log.append(f"{k} {v:+.1f}")
-            mod_str = f"({', '.join(mod_log)})" if mod_log else ""
-            evidence = ""
-            if suburban_words:
-                unique_offenders = list(set(suburban_words))[:3]
-                evidence = f"\n   {Prisma.RED}Evidence: {', '.join(unique_offenders)}{Prisma.RST}"
-            return {
-                "status": infraction,
-                "ui": f"{Prisma.GRY}🏢 THE BUREAU: {response}{Prisma.RST}\n   {Prisma.WHT}[Filed: {full_form_name}]{Prisma.RST}{evidence}",
-                "log": f"BUREAUCRACY: Filed {selected_form}. {mod_str}. Evidence: {suburban_words}",
-                "atp_gain": policy["atp"]
-            }
-        return None
+        if not selected_form:
+            return None
+        self.stamp_count += 1
+        policy = self.POLICY.get(selected_form, self.POLICY["Form W-2"])
+        mod_log = []
+        for k, v in policy["mod"].items():
+            if k in physics:
+                physics[k] += v
+                mod_log.append(f"{k} {v:+.1f}")
+        full_form_name = next((f for f in self.forms if selected_form in f), selected_form)
+        evidence_str = f"\n   {Prisma.RED}Evidence: {', '.join(evidence)}{Prisma.RST}" if evidence else ""
+        return {
+            "status": policy["effect"],
+            "ui": (f"{Prisma.GRY}🏢 THE BUREAU: {random.choice(self.responses)}{Prisma.RST}\n"
+                   f"   {Prisma.WHT}[Filed: {full_form_name}]{Prisma.RST}{evidence_str}"),
+            "log": f"BUREAUCRACY: Filed {selected_form}. Mods: {mod_log}.",
+            "atp_gain": policy["atp"]
+        }
 
 class TherapyProtocol:
     def __init__(self):

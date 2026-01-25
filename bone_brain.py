@@ -11,17 +11,7 @@ from bone_spores import MycelialNetwork
 from bone_lexicon import TheLexicon
 from bone_translation import RosettaStone
 from bone_telemetry import TelemetryService
-
-
-def cosine_similarity(vec_a: Dict[str, float], vec_b: Dict[str, float]) -> float:
-    intersection = set(vec_a.keys()) & set(vec_b.keys())
-    numerator = sum(vec_a[k] * vec_b[k] for k in intersection)
-    sum1 = sum(vec_a[k] ** 2 for k in vec_a.keys())
-    sum2 = sum(vec_b[k] ** 2 for k in vec_b.keys())
-    denominator = math.sqrt(sum1) * math.sqrt(sum2)
-    if not denominator: return 0.0
-    return numerator / denominator
-
+from bone_physics import cosine_similarity
 
 @dataclass
 class BrainConfig:
@@ -65,8 +55,7 @@ class NarrativeSpotlight:
             "ENT": {"antigen", "toxin", "broken", "void"},
             "PHI": {"thermal", "photo", "explosive"},
             "PSI": {"abstract", "sacred", "void", "idea"},
-            "BET": {"suburban", "solvents", "play"}
-        }
+            "BET": {"suburban", "solvents", "play"}}
         self.semantic_drift_factor = 0.1
 
     def expand_horizon(self, dimension: str, new_category: str):
@@ -123,8 +112,7 @@ class NeurotransmitterModulator:
             "NATHAN": {"cortisol_dampener": 1.5, "adrenaline_boost": 1.5},
             "JESTER": {"cortisol_dampener": 0.0, "adrenaline_boost": 2.0},
             "NARRATOR": {"cortisol_dampener": 1.0, "adrenaline_boost": 1.0},
-            "GORDON": {"cortisol_dampener": 0.8, "adrenaline_boost": 0.8}
-        }
+            "GORDON": {"cortisol_dampener": 0.8, "adrenaline_boost": 0.8}}
 
     def force_state(self, state_name: str):
         if state_name == "MANIC":
@@ -155,8 +143,7 @@ class NeurotransmitterModulator:
             "top_p": BrainConfig.BASE_TOP_P,
             "frequency_penalty": 0.0,
             "presence_penalty": 0.0,
-            "max_tokens": getattr(BoneConfig, "MAX_OUTPUT_TOKENS", 4096)
-        }
+            "max_tokens": getattr(BoneConfig, "MAX_OUTPUT_TOKENS", 4096)}
         effective_adrenaline = self.current_chem.adrenaline
         if effective_adrenaline > 0.3:
             extra_tokens = BrainConfig.ADRENALINE_RUSH * effective_adrenaline
@@ -177,24 +164,15 @@ class LLMInterface:
         self.provider = (provider or BoneConfig.PROVIDER).lower()
         self.api_key = api_key or BoneConfig.API_KEY
         self.model = model or BoneConfig.MODEL
-        self.base_url = base_url or self._get_default_url(self.provider)
+        defaults = getattr(BoneConfig, "DEFAULT_LLM_ENDPOINTS", {})
+        self.base_url = base_url or defaults.get(self.provider, "https://api.openai.com/v1/chat/completions")
         self.dreamer = dreamer
         self.failure_count = 0
         self.failure_threshold = 3
         self.last_failure_time = 0.0
         self.circuit_state = "CLOSED"
 
-    @staticmethod
-    def _get_default_url(provider):
-        defaults = {
-            "ollama": "http://127.0.0.1:11434/v1/chat/completions",
-            "openai": "https://api.openai.com/v1/chat/completions",
-            "lm_studio": "http://127.0.0.1:1234/v1/chat/completions",
-            "localai": "http://127.0.0.1:8080/v1/chat/completions"}
-        return defaults.get(provider, "https://api.openai.com/v1/chat/completions")
-
     def _is_synapse_active(self) -> bool:
-        """Determines if the neural pathway is healthy."""
         if self.circuit_state == "CLOSED": return True
         if self.circuit_state == "OPEN":
             elapsed = time.time() - self.last_failure_time
@@ -207,11 +185,9 @@ class LLMInterface:
         return True
 
     def _transmit(self, payload: Dict[str, Any], timeout: float = 60.0, max_retries: int = 2) -> str:
-        """The low-level wire transmission with synaptic re-uptake (retries)."""
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.api_key}"
-        }
+            "Authorization": f"Bearer {self.api_key}"}
         data = json.dumps(payload).encode("utf-8")
         last_error = None
         for attempt in range(max_retries + 1):
@@ -288,8 +264,7 @@ class LLMInterface:
             "model": getattr(BoneConfig, "OLLAMA_MODEL_ID", "llama3"),
             "messages": [{"role": "user", "content": prompt}],
             "stream": False,
-            "temperature": params.get('temperature', 0.7)
-        }
+            "temperature": params.get('temperature', 0.7)}
         try:
             headers = {"Content-Type": "application/json"}
             data = json.dumps(payload).encode("utf-8")
@@ -310,36 +285,30 @@ class LLMInterface:
         return f"[{reason}]: The wire hums. There is no signal."
 
 class ContextWindowManager:
+    CHARS_PER_TOKEN = 3.5
+
     def compose_context(self, layout: Dict[str, Any], max_tokens: int = 4000) -> str:
-        # Calculate base token usage (approx 3.5 chars per token)
         inv_str = layout.get('inventory', '')
         base_elements = [f"Location: {layout['location']}", inv_str] if inv_str else [f"Location: {layout['location']}"]
-        
         base_str = (
             f"[DIRECTOR'S NOTES]\n{' | '.join(layout['notes'])}\n"
             f"[SCENE CONTEXT]\n{' | '.join(base_elements)}\n"
-            f"[ACTION]\nUser: {layout['user_query']}\n{layout['role']}:"
-        )
-        
-        used_tokens = len(base_str) / 3.5
+            f"[ACTION]\nUser: {layout['user_query']}\n{layout['role']}:")
+        used_tokens = len(base_str) / self.CHARS_PER_TOKEN
         available = max_tokens - used_tokens
-        
         memories = layout.get("memories", [])
         memory_str = ""
         if memories and available > 50:
             kept = []
             for m in memories:
-                cost = len(m) / 3.5
+                cost = len(m) / self.CHARS_PER_TOKEN
                 if cost < available:
                     kept.append(m)
                     available -= cost
             if kept:
-                # Summarize if too many? For now just truncate list.
                 memory_str = "Memory Echoes: " + " | ".join(kept)
-        
         final_scene = list(base_elements)
         if memory_str: final_scene.append(memory_str)
-        
         return (
             f"[DIRECTOR'S NOTES]\n"
             f"{' | '.join(layout['notes'])}\n"
@@ -376,9 +345,7 @@ class PromptComposer:
             style_notes.append("TONE OVERRIDE: Be warm, helpful, and clear. Act as a mentor guiding a new user. Avoid being cryptic.")
         if ballast:
             style_notes.append("SAFETY OVERRIDE: Ground the user. Focus on physical objects. Be literal.")
-        
         loc = state.get('world', {}).get('orbit', ['Void'])[0]
-        
         inv_str = ""
         if modifiers["include_inventory"]:
             inv = state.get("inventory", [])
@@ -387,21 +354,16 @@ class PromptComposer:
                 inv_str = f"Belt (Accessible): {items}"
             else:
                 inv_str = "Hands: Empty"
-                
         memories = []
         if modifiers["include_memories"]:
             memories = state.get("spotlight", [])
-
         layout = {
             "notes": style_notes,
             "location": loc,
             "inventory": inv_str,
             "memories": memories,
             "user_query": self._sanitize(user_query),
-            "role": role
-        }
-        
-        # Priority 5: Compress to token limit logic handled in manager
+            "role": role}
         return self.context_manager.compose_context(layout, max_tokens=BoneConfig.MAX_OUTPUT_TOKENS if hasattr(BoneConfig, 'MAX_OUTPUT_TOKENS') else 4000)
 
     @staticmethod
@@ -425,6 +387,7 @@ class ResponseValidator:
         self.banned_phrases = [
             "large language model", "AI assistant", "cannot feel", "as an AI",
             "against my programming", "cannot comply", "language model"]
+        self.immersion_break_msg = f"{Prisma.GRY}[The system attempts to recite a EULA, but hiccups instead.]{Prisma.RST}"
 
     def validate(self, response: str, _state: Dict) -> Dict:
         low_resp = response.lower()
@@ -433,7 +396,7 @@ class ResponseValidator:
                 return {
                     "valid": False,
                     "reason": "IMMERSION_BREAK",
-                    "replacement": f"{Prisma.GRY}[The system attempts to recite a EULA, but hiccups instead.]{Prisma.RST}"}
+                    "replacement": self.immersion_break_msg}
         if len(response.strip()) < 2:
             return {"valid": False, "reason": "TOO_SHORT", "replacement": "..."}
         return {"valid": True, "content": response}
@@ -550,8 +513,7 @@ class TheCortex:
             "soul_state": self.sub.soul.get_soul_state(),
             "spotlight": self.spotlight.illuminate(
                 self.sub.mind.mem.graph,
-                phys_packet.get("vector", {}))
-        }
+                phys_packet.get("vector", {}))}
 
     def _audit_solipsism(self, text: str, lens_name: str = "NARRATOR"):
         words = text.lower().split()

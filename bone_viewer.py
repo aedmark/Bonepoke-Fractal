@@ -17,39 +17,29 @@ class Projector:
         stamina = data_ctx.get("stamina", 100)
         atp = data_ctx.get("bio", {}).get("atp", 0)
         vectors = data_ctx.get("vectors", {})
-
         hp_bar = self._bar(health, 100, 5, "█", Prisma.RED)
         stm_bar = self._bar(stamina, 100, 5, "█", Prisma.GRN)
-
         vel = vectors.get("VEL", 0.0)
         str_v = vectors.get("STR", 0.0)
         ent = vectors.get("ENT", 0.0)
         phi = vectors.get("PHI", 0.0)
         tmp = vectors.get("TMP", 0.0)
         psi = physics.get("psi", 0.0)
-
         header = (
             f"♦ NARRATOR  [HP: {hp_bar}] [STM: {stm_bar}] [ATP: {int(atp)}J] "
-            f"[V:{physics.get('voltage', 0):.1f}⚡] [D:{physics.get('narrative_drag', 0):.1f}⚓]"
-        )
-
+            f"[V:{physics.get('voltage', 0):.1f}⚡] [D:{physics.get('narrative_drag', 0):.1f}⚓]")
         vector_row = (
             f"VEL {vel:.1f} | STR {str_v:.1f} ENT {ent:.1f} | "
-            f"PHI {phi:.1f} TMP {tmp:.1f} | PSI {psi:.1f}"
-        )
-
+            f"PHI {phi:.1f} TMP {tmp:.1f} | PSI {psi:.1f}")
         zone = physics.get("zone", "UNKNOWN")
         lens = mind_ctx[0] if mind_ctx else "RAW"
         sub_header = f"   🪐 {zone}  ({lens})"
-
         div = "—" * 40
-
         return (
-            f"{header}\n\n"
-            f"{Prisma.CYN}{vector_row}{Prisma.RST}\n\n"
-            f"{sub_header}\n\n"
-            f"{Prisma.GRY}{div}{Prisma.RST}\n\n"
-        )
+            f"{header}\n"
+            f"{Prisma.CYN}{vector_row}{Prisma.RST}\n"
+            f"{sub_header}\n"
+            f"{Prisma.GRY}{div}{Prisma.RST}\n")
 
     def _bar(self, val, max_val, width, char, color):
         if max_val == 0: return ""
@@ -102,10 +92,8 @@ class GeodesicRenderer:
                 "bio": bio,
                 "world": world,
                 "inventory": self.eng.gordon.inventory if hasattr(self.eng, 'gordon') else [],
-                "vectors": physics.get("vector", {})
-            },
-            (mind.get("lens"), mind.get("thought"))
-        )
+                "vectors": physics.get("vector", {})},
+            (mind.get("lens"), mind.get("thought")))
         return raw_dashboard
 
     def render_frame(self, ctx, current_tick: int, current_events: List[Dict]) -> Dict[str, Any]:

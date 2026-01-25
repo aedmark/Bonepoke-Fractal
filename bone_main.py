@@ -1,6 +1,7 @@
-""" BONEAMANITA 11.2.4 'Soft Landing'
+""" BONEAMANITA 11.3.3 'The Smooth Operator'
  Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark """
 
+import os
 import time, json, uuid
 from dataclasses import dataclass
 from typing import Dict, Any
@@ -30,28 +31,28 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 11.2.4', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 11.3.3', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         print(f"\n{Prisma.paint('--- SYSTEM HALT ---', 'R')}")
         if exc_type:
-            try:
-                print(f"{Prisma.paint(f'CRITICAL FAILURE: {exc_val}', 'R')}")
-                if hasattr(self.engine_instance, "events"):
+            print(f"{Prisma.paint(f'CRITICAL FAILURE: {exc_val}', 'R')}")
+            if self.engine_instance and hasattr(self.engine_instance, "events"):
+                try:
                     self.engine_instance.events.log(f"CRASH: {exc_val}", "SYS")
-            except:
-                print(f"CRITICAL FAILURE (Raw): {exc_val}")
+                except:
+                    pass
         try:
             print(f"{Prisma.paint('Initiating Emergency Spore Preservation...', 'Y')}")
-            result_msg = self.engine_instance.emergency_save(exit_cause="INTERRUPT" if exc_type else "MANUAL")
-            print(f"{Prisma.paint(result_msg, 'C' if '✔' in result_msg else 'R')}")
+            if self.engine_instance:
+                exit_cause = "INTERRUPT" if exc_type else "MANUAL"
+                result_msg = self.engine_instance.emergency_save(exit_cause=exit_cause)
+                color = 'C' if '✔' in result_msg else 'R'
+                print(f"{Prisma.paint(result_msg, color)}")
         except Exception as e:
             print(f"FATAL: State corruption during shutdown. {e}")
-            if self.engine_instance:
-                with open(f"panic_dump_{int(time.time())}.json", "w") as f:
-                    json.dump({"error": str(e), "cause": str(exc_val)}, f)
         print(f"{Prisma.paint('Disconnected.', '0')}")
         return exc_type is KeyboardInterrupt
 
@@ -92,9 +93,20 @@ class BoneAmanita:
     def __init__(self, lexicon_layer=None, user_name="TRAVELER", tutorial_mode=False):
         self.kernel_hash = str(uuid.uuid4())[:8].upper()
         self.user_name = user_name
+        self._tutorial_mode_request = tutorial_mode
+        self._initialize_core(lexicon_layer)
+        self._initialize_embryo()
+        self._initialize_identity()
+        self._initialize_village()
+        self._initialize_cognition()
+        self._validate_state()
+
+    def _initialize_core(self, lexicon_layer):
+        print(f"{Prisma.GRY}...Bootstrapping Core Systems...{Prisma.RST}")
         self.lex = lexicon_layer if lexicon_layer else TheLexicon
-        if hasattr(self.lex, 'initialize'):
-            self.lex.initialize()
+        self._load_resource_safely(
+            lambda: self.lex.initialize() if hasattr(self.lex, 'initialize') else None,
+            "Lexicon Init")
         if hasattr(self.lex, 'get_store'):
             try:
                 store = self.lex.get_store()
@@ -104,8 +116,8 @@ class BoneAmanita:
             except Exception as e:
                 print(f"{Prisma.GRY}[INIT]: Ancestral check skipped ({e}).{Prisma.RST}")
         self.lex.compile_antigens()
-        DeathGen.load_protocols()
-        LiteraryReproduction.load_genetics()
+        self._load_resource_safely(DeathGen.load_protocols, "Death Protocols")
+        self._load_resource_safely(LiteraryReproduction.load_genetics, "Genetics")
         self.akashic = TheAkashicRecord()
         print(f"{Prisma.CYN}[SLASH]: The Akashic Record is open for writing.{Prisma.RST}")
         self.events = EventBus()
@@ -116,6 +128,8 @@ class BoneAmanita:
         self.system_health = SystemHealth()
         self.observer = TheObserver()
         self.system_health.link_observer(self.observer)
+
+    def _initialize_embryo(self):
         self.embryo = BoneArchitect.incubate(self.events, self.lex)
         self.embryo = BoneArchitect.awaken(self.embryo)
         self.mind = self.embryo.mind
@@ -125,14 +139,18 @@ class BoneAmanita:
         self.shimmer_state = self.embryo.shimmer
         self.soul_legacy_data = self.embryo.soul_legacy
         self.gordon = GordonKnot()
-        self.tutorial = TutorialDirector(self) if tutorial_mode else None
-        if tutorial_mode:
-            print(f"{Prisma.CYN}[BOOT CAMP]: Engaging Training Wheels (Low Voltage, High Safety).{Prisma.RST}")
-            if hasattr(BonePresets, 'ZEN_GARDEN'):
-                BoneConfig.load_preset(BonePresets.ZEN_GARDEN)
+
+    def _initialize_identity(self):
         self.soul = NarrativeSelf(self, self.events, memory_ref=self.mind.mem)
         if self.soul_legacy_data:
             self.soul.load_from_dict(self.soul_legacy_data)
+        self.tutorial = TutorialDirector(self) if self._tutorial_mode_request else None
+        if self._tutorial_mode_request:
+            print(f"{Prisma.CYN}[BOOT CAMP]: Engaging Training Wheels (Low Voltage, High Safety).{Prisma.RST}")
+            if hasattr(BonePresets, 'ZEN_GARDEN'):
+                BoneConfig.load_preset(BonePresets.ZEN_GARDEN)
+
+    def _initialize_village(self):
         self.town_hall = TownHall(self.gordon, self.events, self.shimmer_state)
         self.navigator = self.town_hall.Navigator
         self.journal = self.town_hall.Journal
@@ -150,17 +168,29 @@ class BoneAmanita:
         self.bureau = TheBureau()
         self.cosmic = CosmicDynamics()
         self.cmd = CommandProcessor(self, Prisma, self.lex, BoneConfig, self.town_hall.Cartographer)
+
+    def _initialize_cognition(self):
         self.soma = SomaticLoop(self.bio, self.mind.mem, self.lex, self.folly, self.events)
         self.noetic = NoeticLoop(self.mind, self.bio, self.events)
         self.cycle_controller = GeodesicOrchestrator(self)
         local_brain = LLMInterface(events_ref=self.events)
         self.cortex = TheCortex(self, llm_client=local_brain)
         self.somatic = SomaticInterface(self)
-        BoneConfig.load_preset(BonePresets.ZEN_GARDEN)
+
+    def _validate_state(self):
+        if not self._tutorial_mode_request:
+            BoneConfig.load_preset(BonePresets.ZEN_GARDEN)
         self.tick_count = 0
         self.health = self.mind.mem.session_health if self.mind.mem.session_health else BoneConfig.MAX_HEALTH
         self.stamina = self.mind.mem.session_stamina if self.mind.mem.session_stamina else BoneConfig.MAX_STAMINA
         self.trauma_accum = self.mind.mem.session_trauma_vector if hasattr(self.mind.mem, 'session_trauma_vector') and self.mind.mem.session_trauma_vector else BoneConfig.TRAUMA_VECTOR.copy()
+
+    def _load_resource_safely(self, loader_func, resource_name):
+        try:
+            loader_func()
+        except Exception as e:
+            self.events.log(f"{Prisma.RED}[INIT]: {resource_name} failed to load: {e}{Prisma.RST}", "BOOT_ERR")
+            print(f"{Prisma.RED}   > {resource_name} skipped (Error: {e}){Prisma.RST}")
 
     def get_avg_voltage(self):
         hist = self.phys.dynamics.voltage_history
@@ -275,33 +305,53 @@ class BoneAmanita:
     def get_metrics(self, atp=0.0):
         return {"health": self.health, "stamina": self.stamina, "atp": atp, "tick": self.tick_count}
 
+    def _get_crash_path(self, prefix="crash"):
+        folder = "crashes"
+        if not os.path.exists(folder):
+            try:
+                os.makedirs(folder)
+            except OSError:
+                folder = "."
+        try:
+            files = sorted([f for f in os.listdir(folder) if f.startswith(prefix)])
+            while len(files) >= 5:
+                oldest = files.pop(0)
+                os.remove(os.path.join(folder, oldest))
+        except Exception:
+            pass
+        return os.path.join(folder, f"{prefix}_{int(time.time())}.json")
+
     def emergency_save(self, exit_cause: str = "UNKNOWN") -> str:
         try:
             sess_id = self.mind.mem.session_id
         except AttributeError:
-            sess_id = f"corrupted_session_{int(time.time())}"
+            sess_id = f"corrupted_{int(time.time())}"
         spore_data = {
             "session_id": sess_id,
             "meta": {
                 "timestamp": time.time(),
                 "final_health": getattr(self, "health", 0),
                 "final_stamina": getattr(self, "stamina", 0),
-                "exit_cause": str(exit_cause)
-            },
+                "exit_cause": str(exit_cause)},
             "core_graph": getattr(self.mind.mem, "graph", {}) if hasattr(self, "mind") else {},
-            "trauma_vector": getattr(self, "trauma_accum", {})
-        }
+            "trauma_vector": getattr(self, "trauma_accum", {})}
         try:
-            if hasattr(self.mind.mem, "loader"):
+            if hasattr(self, "mind") and hasattr(self.mind.mem, "loader"):
                 path = self.mind.mem.loader.save_spore(f"emergency_{sess_id}.json", spore_data)
             else:
-                fname = f"crash_dump_{int(time.time())}.json"
+                fname = self._get_crash_path("spore_emergency")
                 with open(fname, 'w') as f:
                     json.dump(spore_data, f, default=str)
                 path = fname
             return f"✔ Spore encapsulated: {path}"
         except Exception as e:
-            return f"✘ Spore encapsulation failed: {e}"
+            try:
+                fname = self._get_crash_path("panic_dump")
+                with open(fname, 'w') as f:
+                    json.dump({"error": str(e), "data": str(spore_data)}, f)
+                return f"✘ Encapsulation Failed. Panic dump written to {fname}"
+            except:
+                return f"✘ TOTAL SYSTEM FAILURE: {e}"
 
     def _ethical_audit(self):
         trauma_sum = sum(self.trauma_accum.values())
@@ -332,7 +382,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 11.2.4', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 11.3.3', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

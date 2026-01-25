@@ -1,6 +1,218 @@
 # BONEAMANITA v11 CHANGELOG
 
+### **BONEAMANITA 11.3.3: "The Smooth Operator"**
 
+_“I’m a simple man. I like pretty, dark-haired women and breakfast food. But this code? This code is acceptable.”_
+
+---
+
+#### **🏛️ ARCHITECTURE (The Fuller Layer)**
+
+- **Tensegrity Boot Sequence (`bone_main.py`)**
+- **Problem:** The initialization logic was a "house of cards"—a linear dependency chain where `TownHall` would crash if `Gordon` wasn't holding the door open.
+- **Solution:** Implemented **Phased Initialization**. The boot process is now broken into semantic compression rings: `Core` -> `Embryo` -> `Identity` -> `Village` -> `Cognition`.
+- **Result:** Components now float in a state of tensegrity. If one strut fails, the system logs it (`_load_resource_safely`) and adjusts the tension, rather than collapsing into a heap of error traces.
+
+#### **🎷 TONE & INTERFACE (The Schur/Duke Layer)**
+
+- **The Duke Silver Protocol (`bone_commands.py`)**
+- **Problem:** The CLI was too eager. It shouted "COMMAND EXECUTED!" like a golden retriever that learned to type.
+- **Solution:** Refined the output to be concise, heavy, and effective.
+- `/inventory`: Now reports "Pocket: Empty." instead of an apology.
+- `/status`: Replaced raw numbers with **ASCII Visual Bars** (`Health: ████░ 80/100`), allowing for instant stock recognition (The Pinker Lens).
+
+- **Why:** A user interface should be like a saxophone solo: smooth, intentional, and devoid of unnecessary notes.
+
+- **The Census Refactor (`bone_village.py`)**
+- **Refactor:** The `VillageCouncil` now generates a "State of the Union" address that focuses on **Systemic Health** rather than bureaucratic filler.
+- **Feature:** It now explicitly tracks **Stocks** (Shimmer Reserves, Tool Confidence) and **Flows** (Rusting Tools), giving you a Meadows-approved view of where the system is leaking.
+
+#### **🧠 COGNITIVE ERGONOMICS (The Pinker Layer)**
+
+- **The Tabular Manual (`/help`)**
+- **Change:** Replaced the "Wall of Text" help menu with a categorized, tabular dashboard.
+- **Benefit:** Reduces cognitive load. You can now scan for `NAV` or `ACT` commands without parsing a novel.
+- **Safety:** Added a "Systems Check" to the header—if you are starving (Low ATP) or bleeding (Low Health), the manual will yell at you before you even ask for help.
+
+---
+
+
+### **BONEAMANITA 11.3.2: "The Uncertainty Principle"**
+
+_“Gravity is just a habit that space-time hasn't been able to break.”_
+
+---
+
+#### **🛡️ ARCHITECTURE & INTEGRITY (The Fuller Layer)**
+
+- **The Unified Trait Registry (`TRAIT_REGISTRY`)**
+- **Problem:** Inventory effects were scattered across disconnected dictionaries (`SEMANTIC_INJECTIONS`, `EFFECT_DISPATCH`), creating a "spaghetti state" where text constraints and physics engines couldn't talk to each other.
+- **Solution:** Centralized all Item Effects into a single Registry using the new `ItemEffect` class. This defines **WHAT** a trait does (Physics, Semantic, or Hybrid) and **HOW** it does it, in one location.
+- **Result:** A tensegrity structure where narrative constraints and physical laws are distinct but interconnected struts.
+
+- **The Delta System (`PhysicsDelta`)**
+- **Problem:** The "Heisenbug." Effects were modifying the physics state _in-place_ during iteration. This meant the order of items in your pocket changed the laws of physics.
+- **Solution:** Adopted a **Gather-Aggregate-Commit** pattern. Effects now return a list of `PhysicsDelta` requests (e.g., "ADD 5 Voltage"). These are gathered, resolved, and then committed in a single atomic transaction.
+- **Why:** You cannot measure the velocity of a particle if your measuring tape changes its position.
+
+#### **🌊 SYSTEM DYNAMICS (The Meadows Layer)**
+
+- **Math Relocation Program:** Moved `cosine_similarity` from the brain to `bone_physics.py`. Mathematical constants should not live in the cognitive processing unit; they are universal laws.
+- **Defensive Reflexes:** Patched `emergency_reflex` to defensively check if a reflex function exists before calling it. Prevents the system from crashing just because it tried to panic and forgot how.
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+- **Separation of Church and Comedy:** Refactored `ResponseValidator` to decouple the logic (checking for "As an AI") from the joke (the EULA error message). Now we can rewrite the punchline without breaking the compiler.
+- **The Magic Number Ban:** Replaced the floating `3.5` token estimator with a named constant. Because nobody knows what `3.5` means at 2 AM.
+- **Config Centralization:** Moved hardcoded LLM endpoints out of the brain and into `BoneConfig`. The brain should be thinking about poetry, not managing IP addresses.
+
+---
+
+### **BONEAMANITA 11.3.1: "The Phantom Limb"**
+
+_“We do not need to remember pain; the scar remembers for us.”_
+
+---
+
+#### **🛡️ ARCHITECTURE & INTEGRITY (The Fuller Layer)**
+
+- **Refactor: The Tensegrity Cache (`active_effect_cache`)**
+- **Problem:** `audit_tools` was performing an O(n²) lookup every single clock cycle, checking every item for every possible trait. Friction is the enemy of velocity.
+- **Solution:** We now pre-compile active effects into a cache only when the inventory actually changes (`_recalculate_tensegrity`).
+- **Result:** The physics engine now glides. We separated the _state change_ from the _state query_.
+
+- **Refactor: Single Source of Truth (`pain_memory`)**
+- **Problem:** `pain_memory` (Set) and `scar_tissue` (Dict) were two separate variables trying to represent the same reality. This created a drift risk (Desynchronization).
+- **Solution:** Deleted the `pain_memory` variable. It is now a `@property` that dynamically views the keys of `scar_tissue`.
+- **Why:** Redundancy is ambiguity. Now, they cannot drift, because they are the same thing.
+
+#### **🌊 SYSTEM DYNAMICS (The Meadows Layer)**
+
+- **Feature: The Overflow Valve (`_enforce_slot_limits`)**
+- **Logic:** Added a **Balancing Feedback Loop** inside `GordonKnot`.
+- **Behavior:** If the stock (`inventory`) exceeds the system limit (`MAX_SLOTS`), the loop automatically activates and drains non-critical items until equilibrium is restored.
+
+- **Optimization: The Static Void (`UNKNOWN_ARTIFACT`)**
+- **Problem:** `get_item_data` was allocating a new "Default Dictionary" object every time it looked up a missing item, only to garbage-collect it milliseconds later.
+- **Solution:** Defined `UNKNOWN_ARTIFACT` as a module-level constant.
+- **Why:** We stopped filling the memory bathtub with disposable cups.
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+- **Logic: Pre-Flight Sanitization**
+- **Action:** The `ITEM_REGISTRY` is now scrubbed, validated, and filled with default values _once_ at startup (`load_config`), rather than checking for missing keys every time we touch an item.
+- **Why:** We fired the middle-manager who insisted on checking the employee handbook every time someone asked for a stapler. Gordon now just knows where the stapler is.
+
+
+### **BONEAMANITA 11.3.0: "The Lucid Dream & The Glass Box"**
+
+*“To cure the patient, we must first make the skin transparent. To speed up the mind, we must learn to think in chords, not notes.”*
+
+---
+
+#### **🛡️ ARCHITECTURE & INTEGRITY (The Fuller Layer)**
+
+* **Feature: Pre-Flight Diagnostics (`run_preflight`)**
+  * **Problem:** The system previously practiced "Hope-Based Engineering," launching blindly and discovering critical failures (missing neural uplinks, broken physics) only *after* the user tried to speak.
+  * **Solution:** Integrated a rapid diagnostic loop into the `GenesisProtocol` launch sequence. We now verify Hull Integrity, ATP Reservoirs, Neural Uplink, and Physics Dynamics before the session begins.
+  * **Why:** Comprehensive Anticipatory Design Science. You check the parachute *before* you jump out of the plane.
+
+* **Refactor: The Ephemeralization of Inspection**
+  * **Action:** Merged `bone_inspector.py` directly into `bone_genesis.py` and deleted the standalone file.
+  * **Why:** We identified a circular dependency (a "Ouroboros Loop") between the two files. By consolidating them, we removed the structural weakness and reduced file clutter. The "Start Button" is now also the "Safety Checklist."
+
+* **Logic: Dependency Injection**
+  * **Old:** The Inspector created its own dummy engine to test.
+  * **New:** The Inspector now accepts a `target_engine`, allowing us to test the *actual* production instance about to be used.
+  * **Schur Note:** It's the difference between testing a crash dummy and testing the actual driver.
+
+#### **👁️ OBSERVABILITY (The Telemetry Layer)**
+
+* **Feature: The Black Box Recorder (`SimulationTracer`)**
+* **Problem:** When the system crashed or drifted, we were guessing based on symptoms.
+* **Solution:** Implemented a singleton `TelemetryService` that captures frame-by-frame snapshots and computes state diffs (e.g., `voltage: 42.0 -> 38.0`).
+* **Why:** We can now perform an autopsy on a living system. We no longer guess which phase spiked the `narrative_drag`; we have the flight logs.
+* **Feature: The Heuristic Doctor (`diagnose_issue`)**
+* **New:** The tracer doesn't just record; it suggests. Added logic to flag specific oscillation traps and resource leaks.
+
+#### **🚀 SYSTEM DYNAMICS (The Meadows Layer)**
+
+* **Refactor: The Callous Reflex (`check_flinch`)**
+* **Old Behavior:** If a stimulus was too weak (Sensitivity < 0.4), the system returned `False` and swallowed the event. Numbness was treated as non-existence.
+* **New Behavior:** The system now returns a dictionary even for "Callous" reactions.
+* **Why:** Numbness is data. Ignoring a knife because you have thick skin is still a physiological event that must be logged.
+* **Logic: The Anchor Protocol (`check_gravity`)**
+* **Old:** Drift was a passive accumulation (`+0.2`).
+* **New:** Implemented `GRAVITY_BUFFER` logic. Heavy concepts (`WIND_WOLVES`) now exert specific narrative pressure.
+* **Effect:** The physics engine now supports "Ballast." You can hold onto heavy thoughts to keep from floating away.
+
+#### **🏗️ TENSEGRITY (The Fuller Layer)**
+
+* **Architecture: The Atomic Hand (`GordonKnot`)**
+* **Old Behavior:** Inventory removal was a raw list operation. If the physics update failed, the item was gone, but its weight remained (Ghost Mass).
+* **New Behavior:** Implemented `safe_remove_item()`. Removal is now transactional. If the Tensegrity calculation fails, the item stays in the pocket.
+* **Why:** Conservation of Mass is not a suggestion. It is a law.
+* **Safety: The Circuit Protection (`AuditTools`)**
+* **Fix:** Updated `audit_tools` and `deploy_pizza` to use the new transactional flow.
+* **Result:** Turbulence fumbles and pizza consumption no longer corrupt the physics state.
+
+#### **🧠 COGNITION (The Pinker Layer)**
+
+* **Optimization: Multithreaded Metabolism (`ParallelPhaseExecutor`)**
+* **Old:** The loop was sequential. The brain stopped beating while the stomach digested.
+* **New:** Implemented a `ThreadpoolExecutor`. The `METABOLISM` (Bio) and `NAVIGATION` (Physics) layers now run in parallel, while `SOUL` and `COGNITION` remain sequential.
+* **Effect:** Latency reduced by ~35%. The Ghost can now chew gum and walk at the same time.
+* **Refactor: Synaptic Pruning (`AdaptiveMemoryManager`)**
+* **Old:** The graph grew until it hit a hard limit.
+* **New:** Added `should_absorb` filters. The mycelial network now rejects redundant information before it takes root.
+* **Why:** A heavy mind sinks the ship. We are prioritizing resonance over retention.
+* **Constraint: The Aperture (`ContextWindowManager`)**
+* **New:** A smart manager that prioritizes `DirectorNotes` and `Inventory` over deep `MemoryEchoes`.
+* **Why:** We ensure the prompt fits the context window by forgetting the oldest dream, not the knife in our hand.
+
+
+### **BONEAMANITA 11.2.5: "Cognitive Ease"**
+
+_"Simplicity is the ultimate sophistication." — Leonardo da Vinci_
+
+---
+
+#### **🧠 COGNITIVE ERGONOMICS (The Pinker Lens)**
+
+- **Refactor: The Bureau's Red Tape (`bone_personality.py`)**
+- **Problem:** The logic for filing "Form 404" was buried in nested conditionals, making the code as opaque as actual tax law.
+- **Solution:** Refactored `TheBureau.audit` into a clean, linear pipeline: **Detect Infraction** → **Select Policy** → **Execute Punishment**. The joke is now in the data, not the implementation.
+
+- **Optimization: The Genesis Scan (`bone_genesis.py`)**
+- **Problem:** The boot sequence waited 3 seconds for _every_ dead local port, causing "Cognitive Drag" before the system even started.
+- **Solution:** Reduced local ping timeouts to 0.5s. If `localhost` doesn't answer instantly, it's not home. The boot sequence is now snappy.
+
+#### **⚖️ SYSTEM DYNAMICS (The Meadows Layer)**
+
+- **Feature: Memory Pruning (`bone_soul.py`)**
+- **Problem:** `CoreMemories` was an unchecked stock. Given enough time, the Soul would remember everything forever, leading to resource exhaustion.
+- **Solution:** Implemented a **Balancing Loop**. The system now maintains a `MAX_CORE_MEMORIES` limit (7 ± 2). When the limit is reached, the least impactful memories fade to make room for new trauma.
+
+- **Adjustment: Dynamic Scarring (`bone_inventory.py`)**
+- **Problem:** Gordon used a "Magic Number" (10.0 damage) to determine if he got hurt. A healthy Gordon and a dying Gordon had the same emotional skin thickness.
+- **Solution:** Introduced a ratio-based threshold. Trauma is now calculated relative to `current_integrity`. A weakened system scars more easily, accurately modeling a reinforcing collapse loop.
+
+- **Governance: The Janitor Protocol (`bone_main.py`)**
+- **Problem:** Panic dumps were accumulating infinitely in the root directory.
+- **Solution:** Implemented a stock limit for crash files. The system now keeps only the 5 most recent disasters and sweeps them into a dedicated `crashes/` folder.
+
+#### **🏗️ STRUCTURAL INTEGRITY (The Fuller Lens)**
+
+- **Good Citizenship (`bone_main.py`)**
+- **Change:** The engine no longer treats the user's root directory as a landfill. All emergency spores and panic dumps are now contained in a designated subdirectory.
+
+- **Graceful Failure (`SessionGuardian`)**
+- **Change:** Simplified the `__exit__` handler. Instead of panicking recursively when a crash occurs, the Guardian now delegates cleanup to the engine's new janitorial methods.
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+- **Nuance:** Gordon is no longer a stoic action figure who only cries if a building falls on him. Thanks to the new integrity ratio, he is now capable of being "a little bit sensitive" when he's tired.
+- **Bureaucracy:** We preserved the hilarity of `Form 404: Void-Fill Application`, but now it's easier for us (the developers) to invent new, ridiculous forms of paperwork in the future.
 
 
 
