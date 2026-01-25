@@ -1,7 +1,9 @@
 """ bone_cycle.py
 'The wheel turns, and ages come and pass.' - Jordan """
 
-import traceback, random, time
+import traceback, random, time, uuid
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, Tuple, List
 from bone_bus import Prisma, BoneConfig, CycleContext, PhysicsPacket
 from bone_village import TownHall, StrunkWhiteProtocol
@@ -12,6 +14,7 @@ from bone_architect import PanicRoom
 from bone_synesthesia import SynestheticCortex
 from bone_symbiosis import SymbiosisManager
 from bone_sanctuary import SanctuaryGovernor, SANCTUARY, PIDController
+from bone_telemetry import TelemetryService
 
 class CycleStabilizer:
     def __init__(self, events_ref):
@@ -356,13 +359,17 @@ class NavigationPhase(SimulationPhase):
         if shock:
             physics["narrative_drag"] += 1.0
             ctx.log(shock)
-        new_drag, grav_log = self.eng.gordon.check_gravity(physics.get("narrative_drag", 0), physics.get("psi", 0))
-        if grav_log: ctx.log(grav_log)
+        new_drag, grav_logs = self.eng.gordon.check_gravity(physics.get("narrative_drag", 0), physics.get("psi", 0))
+        for log in grav_logs:
+            ctx.log(log)
         physics["narrative_drag"] = new_drag
-        did_flinch, flinch_msg, panic = self.eng.gordon.flinch(ctx.clean_words, self.eng.tick_count)
-        if did_flinch:
-            ctx.log(flinch_msg)
-            if panic: physics.update(panic)
+        physics["narrative_drag"] = new_drag
+        flinch_result = self.eng.gordon.check_flinch(ctx.clean_words, self.eng.tick_count)
+        if flinch_result:
+            if flinch_result.get("message"):
+                ctx.log(flinch_result["message"])
+            if flinch_result.get("physics_effects"):
+                physics.update(flinch_result["physics_effects"])
         current_loc, entry_msg = self.eng.navigator.locate(physics)
         if entry_msg: ctx.log(entry_msg)
         env_logs = self.eng.navigator.apply_environment(physics)
@@ -587,10 +594,93 @@ class SensationPhase(SimulationPhase):
             self.eng.stamina = max(0.0, self.eng.stamina + impulse.stamina_impact)
         return ctx
 
+
+class ParallelPhaseExecutor:
+    def execute_phases(self, simulator, ctx):
+        # Stage 1: Observation (Must be first to seed Physics)
+        self._run_batch(simulator, ["OBSERVE"], ctx, parallel=False)
+
+        # Stage 2: Maintenance and Sensation (Independent Side-Cars)
+        self._run_batch(simulator, ["MAINTENANCE", "SENSATION"], ctx, parallel=True)
+
+        # Stage 3: Control Flow (Gatekeeper & Sanctuary - Sequential)
+        self._run_batch(simulator, ["GATEKEEP", "SANCTUARY"], ctx, parallel=False)
+        
+        if ctx.refusal_triggered or ctx.is_bureaucratic:
+            return
+
+        # Stage 4: Simulation Core (Metabolism & Navigation - Parallel)
+        # Note: We must reconcile carefully. Navigation touches Physics, Metabolism touches Bio.
+        self._run_batch(simulator, ["METABOLISM", "NAVIGATION", "MACHINERY"], ctx, parallel=True)
+
+        # Stage 5: Deep Logic (Sequential due to heavy dependencies)
+        deep_phases = ["REALITY_FILTER", "INTRUSION", "SOUL", "COGNITION"]
+        self._run_batch(simulator, deep_phases, ctx, parallel=False)
+
+    def _run_batch(self, simulator, phase_names, ctx, parallel=False):
+        phases = [p for p in simulator.pipeline if p.name in phase_names]
+        if not phases: return
+        
+        reconciler = StateReconciler()
+        
+        # If any phase name isn't found in pipeline, it's just skipped
+        
+        if parallel and len(phases) > 1:
+            results = []
+            with ThreadPoolExecutor(max_workers=len(phases)) as executor:
+                # We fork context for EACH phase to prevent race conditions during execution
+                phase_map = {}
+                for p in phases:
+                    sandbox = reconciler.fork(ctx)
+                    future = executor.submit(self._run_single_safe, simulator, p, sandbox)
+                    phase_map[future] = (p, sandbox)
+                
+                for future in concurrent.futures.as_completed(phase_map):
+                    p, sandbox = phase_map[future]
+                    try:
+                        res_sandbox = future.result() # This should be the same as sandbox object mutated
+                        results.append((p, res_sandbox))
+                    except Exception as e:
+                        simulator._handle_phase_crash(ctx, p.name, e)
+            
+            # Reconcile all results back to main ctx
+            # Note: This is a simple merge. If two phases modified same field, last one wins.
+            for p, sandbox in results:
+                # We use the existing reconciler but we might loose data if conflicts exist.
+                # However, our grouping tries to avoid heavy conflicts.
+                reconciler.reconcile(ctx, sandbox)
+                
+        else:
+            for p in phases:
+                sandbox = reconciler.fork(ctx)
+                try:
+                    self._run_single_safe(simulator, p, sandbox)
+                    reconciler.reconcile(ctx, sandbox)
+                except Exception as e:
+                    simulator._handle_phase_crash(ctx, p.name, e)
+
+    def _run_single_safe(self, simulator, phase, sandbox):
+        if not simulator._check_circuit_breaker(phase.name):
+            return sandbox
+        
+        tracer = TelemetryService.get_tracer()
+        tracer.start_phase(phase.name, sandbox)
+        
+        try:
+            phase.run(sandbox)
+            simulator.stabilizer.stabilize(sandbox, phase.name)
+        except Exception:
+            raise
+        finally:
+            tracer.end_phase(phase.name, sandbox, sandbox)
+            
+        return sandbox
+
 class CycleSimulator:
     def __init__(self, engine_ref):
         self.eng = engine_ref
         self.stabilizer = CycleStabilizer(self.eng.events)
+        self.executor = ParallelPhaseExecutor()
         self.pipeline: List[SimulationPhase] = [
             ObservationPhase(engine_ref),
             MaintenancePhase(engine_ref),
@@ -607,25 +697,8 @@ class CycleSimulator:
 
     def run_simulation(self, ctx: CycleContext) -> CycleContext:
         reconciler = StateReconciler()
-        for phase in self.pipeline:
-            if not self._check_circuit_breaker(phase.name):
-                continue
-            if ctx.refusal_triggered or (ctx.is_bureaucratic and phase.name not in ["OBSERVE", "GATEKEEP"]):
-                break
-            if not ctx.is_alive:
-                break
-            sandbox = reconciler.fork(ctx)
-            try:
-                sandbox = phase.run(sandbox)
-                self.stabilizer.stabilize(sandbox, phase.name)
-                reconciler.reconcile(ctx, sandbox)
-            except Exception as e:
-                print(f"{Prisma.YEL}>>> ROLLING BACK TIME ({phase.name} Failed){Prisma.RST}")
-                if hasattr(sandbox.physics, 'diff_view'):
-                    print(f"{Prisma.YEL}>>> STATE DRIFT AT CRASH:{Prisma.RST}")
-                    print(sandbox.physics.diff_view(ctx.physics))
-                self._handle_phase_crash(ctx, phase.name, e)
-                break
+        # Using Parallel Executor
+        self.executor.execute_phases(self, ctx)
         return ctx
 
     def _check_circuit_breaker(self, phase_name: str) -> bool:
@@ -758,16 +831,23 @@ class GeodesicOrchestrator:
         self.symbiosis = SymbiosisManager(self.eng.events)
 
     def run_turn(self, user_message: str, latency: float = 0.0) -> Dict[str, Any]:
-        ctx = CycleContext(input_text=user_message)
-        ctx.user_name = self.eng.user_name
-        self.eng.events.flush()
-        ctx = self.simulator.run_simulation(ctx)
-        if not ctx.is_alive:
-            return self.eng.trigger_death(ctx.physics)
-        snapshot = self.reporter.render_snapshot(ctx)
-        snapshot["enzyme"] = ctx.bio_result.get("enzyme", "NONE")
-        snapshot["chemistry"] = ctx.bio_result.get("chemistry", {})
-        snapshot["physics"] = ctx.physics.to_dict() if hasattr(ctx.physics, 'to_dict') else ctx.physics
-        if "ui" in snapshot:
-            self.symbiosis.monitor_host(latency, snapshot["ui"], len(user_message))
-        return snapshot
+        tracer = TelemetryService.get_tracer()
+        cycle_id = str(uuid.uuid4())[:8]
+        tracer.start_cycle(cycle_id)
+
+        try:
+            ctx = CycleContext(input_text=user_message)
+            ctx.user_name = self.eng.user_name
+            self.eng.events.flush()
+            ctx = self.simulator.run_simulation(ctx)
+            if not ctx.is_alive:
+                return self.eng.trigger_death(ctx.physics)
+            snapshot = self.reporter.render_snapshot(ctx)
+            snapshot["enzyme"] = ctx.bio_result.get("enzyme", "NONE")
+            snapshot["chemistry"] = ctx.bio_result.get("chemistry", {})
+            snapshot["physics"] = ctx.physics.to_dict() if hasattr(ctx.physics, 'to_dict') else ctx.physics
+            if "ui" in snapshot:
+                self.symbiosis.monitor_host(latency, snapshot["ui"], len(user_message))
+            return snapshot
+        finally:
+            tracer.finalize_cycle()

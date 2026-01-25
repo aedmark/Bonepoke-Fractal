@@ -5,8 +5,8 @@ import time
 import os
 import glob
 import uuid
-from typing import Any, Dict
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional
+from dataclasses import dataclass, asdict, field
 from bone_bus import Prisma
 
 @dataclass
@@ -109,8 +109,153 @@ class StructuredLogger:
             return self._sanitize(vars(data), depth + 1, max_depth)
         return str(data)
 
+@dataclass
+class PhaseTrace:
+    phase_name: str
+    start_time: float
+    end_time: float = 0.0
+    initial_snapshot: Dict = field(default_factory=dict)
+    final_snapshot: Dict = field(default_factory=dict)
+    state_diff: Dict = field(default_factory=dict)
+    duration: float = 0.0
+
+@dataclass
+class CycleTrace:
+    cycle_id: str
+    start_time: float
+    end_time: float = 0.0
+    phases: Dict[str, PhaseTrace] = field(default_factory=dict)
+    decisions: List[Dict] = field(default_factory=list)
+    performance: Dict[str, float] = field(default_factory=dict)
+    
+    def to_json(self):
+        return json.dumps(asdict(self))
+
+class SimulationTracer:
+    def __init__(self, session_id: str):
+        self.session_id = session_id
+        self.logger = TelemetryService.initialize(session_id)
+        self.current_cycle: Optional[CycleTrace] = None
+        self.active_phases: Dict[str, PhaseTrace] = {}
+
+    def start_cycle(self, cycle_id):
+        self.current_cycle = CycleTrace(
+            cycle_id=cycle_id,
+            start_time=time.time()
+        )
+        # Reset local phase tracker
+        self.active_phases = {}
+
+    def trace_cycle(self, cycle_id):
+        """ Alias for start_cycle for compatibility with the user request """
+        self.start_cycle(cycle_id)
+        
+    def start_phase(self, phase_name: str, ctx=None):
+        if not self.current_cycle: return
+        
+        # Capture critical state metrics for diffing
+        snapshot = {}
+        if ctx:
+            snapshot = self._extract_metrics(ctx)
+            
+        self.active_phases[phase_name] = PhaseTrace(
+            phase_name=phase_name,
+            start_time=time.time(),
+            initial_snapshot=snapshot
+        )
+
+    def end_phase(self, phase_name: str, start_ctx, end_ctx):
+        if not self.current_cycle or phase_name not in self.active_phases:
+            return
+
+        trace = self.active_phases.pop(phase_name)
+        trace.end_time = time.time()
+        trace.duration = trace.end_time - trace.start_time
+        
+        # Calculate diffs
+        if start_ctx and end_ctx:
+            # We use the initial snapshot we captured or capture fresh if missing
+            start_snapshot = trace.initial_snapshot or self._extract_metrics(start_ctx)
+            end_snapshot = self._extract_metrics(end_ctx)
+            trace.final_snapshot = end_snapshot
+            trace.state_diff = self._diff_states(start_snapshot, end_snapshot)
+
+        self.current_cycle.phases[phase_name] = trace
+
+    def finalize_cycle(self):
+        if not self.current_cycle: return
+        
+        self.current_cycle.end_time = time.time()
+        # Log the full cycle trace
+        # In a real high-throughput scenario, we might only log anomalies
+        # or sample periodically. For now, we log everything.
+        self.logger.manager.write(self.current_cycle.to_json())
+        self.current_cycle = None
+
+    def _extract_metrics(self, ctx) -> Dict:
+        """ Extract key metrics for lightweight diffing """
+        # We don't want deep copies of everything, just key indicators
+        metrics = {}
+        
+        # Physics
+        if hasattr(ctx, 'physics'):
+            p = ctx.physics
+            if hasattr(p, 'to_dict'):
+                # Just grab scalar values to save space
+                d = p.to_dict()
+                metrics['physics'] = {k:v for k,v in d.items() if isinstance(v, (int, float, str, bool))}
+            elif isinstance(p, dict):
+                metrics['physics'] = {k:v for k,v in p.items() if isinstance(v, (int, float, str, bool))}
+
+        # Bio
+        if hasattr(ctx, 'bio_result'):
+            metrics['bio'] = {k:v for k,v in ctx.bio_result.items() if isinstance(v, (int, float, str, bool))}
+
+        return metrics
+
+    def _diff_states(self, start: Dict, end: Dict) -> Dict:
+        diffs = {}
+        for category in start:
+            if category not in end: continue
+            
+            s_cat = start[category]
+            e_cat = end[category]
+            
+            cat_diff = {}
+            for k, v in s_cat.items():
+                if k in e_cat and e_cat[k] != v:
+                    # Filter out tiny float jitters
+                    if isinstance(v, float) and isinstance(e_cat[k], float):
+                        if abs(v - e_cat[k]) < 0.001: continue
+                    cat_diff[k] = {"from": v, "to": e_cat[k]}
+            
+            if cat_diff:
+                diffs[category] = cat_diff
+        return diffs
+        
+    def diagnose_issue(self, symptom: str) -> str:
+        """
+        Heuristic diagnostic tool.
+        Multi-step verification of potential causes.
+        """
+        symptom = symptom.lower()
+        if "atp" in symptom and "drop" in symptom:
+            return ("INVESTIGATION: RAPID ATP LOSS\n"
+                    "1. Check MITOCHONDRIA efficiency in Bio System.\n"
+                    "2. Check if HOSTILE NARRATIVE DRAG is taxing metabolism.\n"
+                    "3. Verify no PARASITIC LOAD in Sensation Phase.")
+        
+        if "latency" in symptom or "lag" in symptom:
+            return ("INVESTIGATION: SYSTEM LATENCY\n"
+                    "1. Check LLM Response Times in Telemetry.\n"
+                    "2. Verify Memory Graph size isn't exploding.\n"
+                    "3. Check for infinite loops in Logic Phase.")
+                    
+        return f"INVESTIGATION: UNKNOWN SYMPTOM '{symptom}'. Suggest checking traces for recent exceptions."
+
 class TelemetryService:
     _INSTANCE = None
+    _TRACER = None
 
     @classmethod
     def get_instance(cls):
@@ -120,5 +265,13 @@ class TelemetryService:
 
     @classmethod
     def initialize(cls, session_id):
-        cls._INSTANCE = StructuredLogger(session_id)
+        if cls._INSTANCE is None:
+             cls._INSTANCE = StructuredLogger(session_id)
         return cls._INSTANCE
+    
+    @classmethod
+    def get_tracer(cls, session_id=None):
+        if cls._TRACER is None:
+            if session_id is None: session_id = str(uuid.uuid4())[:8]
+            cls._TRACER = SimulationTracer(session_id)
+        return cls._TRACER

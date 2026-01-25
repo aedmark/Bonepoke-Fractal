@@ -309,13 +309,55 @@ class LLMInterface:
             return f"[{reason}]: {hallucination}"
         return f"[{reason}]: The wire hums. There is no signal."
 
+class ContextWindowManager:
+    def compose_context(self, layout: Dict[str, Any], max_tokens: int = 4000) -> str:
+        # Calculate base token usage (approx 3.5 chars per token)
+        inv_str = layout.get('inventory', '')
+        base_elements = [f"Location: {layout['location']}", inv_str] if inv_str else [f"Location: {layout['location']}"]
+        
+        base_str = (
+            f"[DIRECTOR'S NOTES]\n{' | '.join(layout['notes'])}\n"
+            f"[SCENE CONTEXT]\n{' | '.join(base_elements)}\n"
+            f"[ACTION]\nUser: {layout['user_query']}\n{layout['role']}:"
+        )
+        
+        used_tokens = len(base_str) / 3.5
+        available = max_tokens - used_tokens
+        
+        memories = layout.get("memories", [])
+        memory_str = ""
+        if memories and available > 50:
+            kept = []
+            for m in memories:
+                cost = len(m) / 3.5
+                if cost < available:
+                    kept.append(m)
+                    available -= cost
+            if kept:
+                # Summarize if too many? For now just truncate list.
+                memory_str = "Memory Echoes: " + " | ".join(kept)
+        
+        final_scene = list(base_elements)
+        if memory_str: final_scene.append(memory_str)
+        
+        return (
+            f"[DIRECTOR'S NOTES]\n"
+            f"{' | '.join(layout['notes'])}\n"
+            f"[SCENE CONTEXT]\n"
+            f"{' | '.join(final_scene)}\n"
+            f"[ACTION]\n"
+            f"User: {layout['user_query']}\n"
+            f"{layout['role']}:")
+
 class PromptComposer:
+    def __init__(self):
+        self.context_manager = ContextWindowManager()
+
     def compose(self, state: Dict[str, Any], user_query: str, ballast: bool = False,
                 modifiers: Dict[str, bool] = None) -> str:
         modifiers = self._normalize_modifiers(modifiers)
         mind = state.get("mind", {})
         role = mind.get("role", "The Observer")
-        lens = mind.get("lens", "NARRATOR")
         bio = state.get("bio", {})
         chem = bio.get("chem", {})
         mood = "Neutral"
@@ -334,27 +376,33 @@ class PromptComposer:
             style_notes.append("TONE OVERRIDE: Be warm, helpful, and clear. Act as a mentor guiding a new user. Avoid being cryptic.")
         if ballast:
             style_notes.append("SAFETY OVERRIDE: Ground the user. Focus on physical objects. Be literal.")
+        
         loc = state.get('world', {}).get('orbit', ['Void'])[0]
-        scene_elements = [f"Location: {loc}"]
+        
+        inv_str = ""
         if modifiers["include_inventory"]:
             inv = state.get("inventory", [])
             if inv:
                 items = ", ".join(inv)
-                scene_elements.append(f"Belt (Accessible): {items}")
+                inv_str = f"Belt (Accessible): {items}"
             else:
-                scene_elements.append("Hands: Empty")
+                inv_str = "Hands: Empty"
+                
+        memories = []
         if modifiers["include_memories"]:
-            spotlight = state.get("spotlight", [])
-            if spotlight:
-                scene_elements.append("Memory Echoes: " + " | ".join(spotlight[:2]))
-        return (
-            f"[DIRECTOR'S NOTES]\n"
-            f"{' | '.join(style_notes)}\n"
-            f"[SCENE CONTEXT]\n"
-            f"{' | '.join(scene_elements)}\n"
-            f"[ACTION]\n"
-            f"User: {self._sanitize(user_query)}\n"
-            f"{role}:")
+            memories = state.get("spotlight", [])
+
+        layout = {
+            "notes": style_notes,
+            "location": loc,
+            "inventory": inv_str,
+            "memories": memories,
+            "user_query": self._sanitize(user_query),
+            "role": role
+        }
+        
+        # Priority 5: Compress to token limit logic handled in manager
+        return self.context_manager.compose_context(layout, max_tokens=BoneConfig.MAX_OUTPUT_TOKENS if hasattr(BoneConfig, 'MAX_OUTPUT_TOKENS') else 4000)
 
     @staticmethod
     def _sanitize(text: str) -> str:

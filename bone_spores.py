@@ -135,6 +135,60 @@ class MycotoxinFactory:
             return "TOXIN_HEAVY", f"Detected phonetic toxicity in '{w}'."
         return None, ""
 
+
+class AdaptiveMemoryManager:
+    def __init__(self, network):
+        self.network = network
+        self.threshold = 0.5
+
+    def prune_graph(self, current_focus_words: List[str], max_nodes: int):
+        if len(self.network.graph) <= max_nodes:
+            return None
+        keep_set = set(current_focus_words)
+        keep_set.update(self.network.cortical_stack)
+        neighbors = set()
+        for node in keep_set:
+            if node in self.network.graph:
+                neighbors.update(self.network.graph[node]["edges"].keys())
+        keep_set.update(neighbors)
+        candidates = []
+        for node, data in self.network.graph.items():
+            if node in keep_set:
+                continue
+            last_tick = data.get("last_tick", 0)
+            mass = sum(data["edges"].values())
+            score = (last_tick * 1.0) + (mass * 0.5) 
+            candidates.append((node, score))
+        candidates.sort(key=lambda x: x[1])
+        remove_count = max(0, len(self.network.graph) - max_nodes)
+        max_batch = int(len(self.network.graph) * 0.2)
+        remove_count = min(remove_count, max_batch)
+        victims = [x[0] for x in candidates[:remove_count]]
+        if not victims:
+            return None
+        for v in victims:
+            if v in self.network.graph:
+                self.network.cannibalize(preserve_current=None, current_tick=0) # Re-using cannibalize logic partially? 
+                del self.network.graph[v]
+        cleaned_edges = 0
+        for node in self.network.graph:
+            edges = self.network.graph[node]["edges"]
+            to_remove = [t for t in edges if t not in self.network.graph]
+            for t in to_remove:
+                del edges[t]
+                cleaned_edges += 1
+        return f"ADAPTIVE PRUNE: Archived {len(victims)} nodes. Snapped {cleaned_edges} stale threads."
+
+    def should_absorb(self, word: str, existing_graph: dict) -> bool:
+        if word in existing_graph:
+            return True
+        gain = len(word) * 0.1
+        if word.upper() in TheLexicon.get("heavy"): offset = 0.5
+        elif word.upper() in TheLexicon.get("abstract"): offset = 0.4
+        else: offset = 0.0
+        gain += offset
+        return gain > self.threshold
+
 class MycelialNetwork:
     def __init__(self, events: EventBus, loader: SporeInterface = None, seed_file=None):
         self.loader = loader if loader else LocalFileSporeLoader()
@@ -150,6 +204,7 @@ class MycelialNetwork:
         self.session_stamina = None
         self.short_term_buffer = deque(maxlen=10)
         self.consolidation_threshold = 5.0
+        self.memory_manager = AdaptiveMemoryManager(self)
         if seed_file:
             self.ingest(seed_file)
 
@@ -247,7 +302,10 @@ class MycelialNetwork:
         decay_rate = 0.1
         for i in range(len(filtered)):
             current = filtered[i]
+            
             if current not in self.graph:
+                if not self.memory_manager.should_absorb(current, self.graph):
+                    continue
                 self.graph[current] = {"edges": {}, "last_tick": tick}
             else:
                 self.graph[current]["last_tick"] = tick
@@ -304,7 +362,13 @@ class MycelialNetwork:
         return None, new_wells
 
     def enforce_limits(self, current_tick: int):
+        # Use Adaptive Pruning First
+        adaptive_msg = self.memory_manager.prune_graph(list(self.cortical_stack), BoneConfig.MAX_MEMORY_CAPACITY)
+        
         prune_msg = self.prune_synapses()
+        if adaptive_msg:
+            self.events.log(f"{Prisma.DA_GRY}{adaptive_msg}{Prisma.RST}")
+            
         victims = []
         limit = BoneConfig.MAX_MEMORY_CAPACITY
         safety_break = 0

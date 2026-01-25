@@ -16,7 +16,6 @@ class Projector:
         health = data_ctx.get("health", 100)
         stamina = data_ctx.get("stamina", 100)
         atp = data_ctx.get("bio", {}).get("atp", 0)
-        inventory = data_ctx.get("inventory", [])
         vectors = data_ctx.get("vectors", {})
 
         hp_bar = self._bar(health, 100, 5, "█", Prisma.RED)
@@ -43,18 +42,13 @@ class Projector:
         lens = mind_ctx[0] if mind_ctx else "RAW"
         sub_header = f"   🪐 {zone}  ({lens})"
 
-        belt_content = " ".join([f"[{i}]" for i in inventory]) if inventory else "[BELT EMPTY]"
-        belt_display = f"{Prisma.GRY}{belt_content}{Prisma.RST}"
-
         div = "—" * 40
 
         return (
-            f"{header}\n"
-            f"{Prisma.CYN}{vector_row}{Prisma.RST}\n"
-            f"{sub_header}\n"
-            f"{Prisma.GRY}{div}{Prisma.RST}\n"
-            f"   {belt_display}\n"
-            f"{Prisma.GRY}{div}{Prisma.RST}"
+            f"{header}\n\n"
+            f"{Prisma.CYN}{vector_row}{Prisma.RST}\n\n"
+            f"{sub_header}\n\n"
+            f"{Prisma.GRY}{div}{Prisma.RST}\n\n"
         )
 
     def _bar(self, val, max_val, width, char, color):
