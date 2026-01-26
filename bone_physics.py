@@ -7,7 +7,6 @@ from collections import Counter, deque
 from dataclasses import dataclass, field
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig, PhysicsPacket, CycleContext
-from bone_village import StrunkWhiteProtocol
 
 def cosine_similarity(vec_a: Dict[str, float], vec_b: Dict[str, float]) -> float:
     intersection = set(vec_a.keys()) & set(vec_b.keys())
@@ -406,7 +405,6 @@ class TheBouncer:
         self.hn = CutTheShit()
         self.semantic = SemanticFilter(self.eng.mind.mem)
         self.vent = EntropyVent(self.eng.mind.mem)
-        self.strunk = StrunkWhiteProtocol()
 
     def check_entry(self, ctx: CycleContext) -> Tuple[bool, Optional[Dict]]:
         is_empty, empty_packet = self._check_thermodynamics(ctx)
@@ -425,9 +423,6 @@ class TheBouncer:
         if not passed:
             self.eng.stamina = max(0.0, self.eng.stamina - 2.0)
             return False, self._pack_refusal(ctx, "REFUSAL")
-        style_passed, style_msg = self.strunk.audit(ctx.input_text, is_system_output=False)
-        if style_msg:
-            ctx.logs.append(style_msg)
         repetition_val = self.eng.phys.pulse.check_pulse(clean)
         phys["repetition"] = repetition_val
         pulse_status = self.eng.phys.pulse.get_status()

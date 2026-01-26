@@ -584,9 +584,7 @@ class MindSystem:
     lex: Any
     dreamer: Any
     mirror: Any
-    wise: Any
     tracer: Any
-    integrator: Any
 
 @dataclass
 class PhysSystem:

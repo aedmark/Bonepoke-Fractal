@@ -4,7 +4,7 @@
 from typing import Tuple, Dict, Any, Optional
 from dataclasses import dataclass
 from bone_bus import Prisma, MindSystem, PhysSystem, PhysicsPacket
-from bone_village import MirrorGraph, ApeirogonResonance, SoritesIntegrator, TheNavigator
+from bone_village import MirrorGraph, TheNavigator
 from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont, MycelialNetwork
 from bone_body import BioSystem, MitochondrialForge, MitochondrialState, EndocrineSystem, MetabolicGovernor, ViralTracer, ThePacemaker
 from bone_brain import DreamEngine, ShimmerState, NeuroPlasticity
@@ -71,9 +71,7 @@ class BoneArchitect:
             lex=lex,
             dreamer=DreamEngine(events),
             mirror=MirrorGraph(events),
-            wise=ApeirogonResonance(events),
-            tracer=ViralTracer(_mem),
-            integrator=SoritesIntegrator(_mem))
+            tracer=ViralTracer(_mem))
         return mind, limbo
 
     @staticmethod

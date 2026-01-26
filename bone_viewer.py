@@ -80,8 +80,7 @@ class GeodesicRenderer:
         title_data = self.eng.mind.wise.architect(
             {"physics": physics, "clean_words": ctx.clean_words},
             (mind.get("lens"), mind.get("thought"), mind.get("role")),
-            False
-        )
+            False)
         raw_dashboard = self.projector.render(
             {"physics": physics},
             {
@@ -101,10 +100,8 @@ class GeodesicRenderer:
         raw_dashboard = self.render_dashboard(ctx)
         colored_ui = self.vsl_chroma.modulate(raw_dashboard, physics.get("vector", {}))
         clean_ui, style_log = self.strunk_white.sanitize(colored_ui)
-
         if "The system is listening." in clean_ui:
             clean_ui = clean_ui.replace("The system is listening.", "")
-
         if hasattr(self.eng, 'soul'):
             soul_ui = self.render_soul_strip(self.eng.soul)
             clean_ui = f"{clean_ui}\n{soul_ui}"

@@ -49,6 +49,10 @@ class TheEditor:
         return f"{Prisma.GRY}[THE EDITOR]: Re: '{chapter_title}' - {comment}{Prisma.RST}"
 
 class NarrativeSelf:
+    SYSTEM_NOISE = {
+        "look", "help", "exit", "wait", "inventory", "status", "quit",
+        "save", "load", "score", "map", "xyzzy"
+    }
     def __init__(self, engine_ref, events_ref, memory_ref=None):
         self.eng = engine_ref
         self.events = events_ref
@@ -201,14 +205,13 @@ class NarrativeSelf:
         focus_word = None
         target_cat = "abstract"
         found_organic = False
-        STOPLIST = {"look", "help", "exit", "wait", "inventory", "status", "quit"}
         if hasattr(self.eng, 'phys') and hasattr(self.eng.phys, 'tension'):
             packet = self.eng.phys.tension.last_physics_packet
             if packet and hasattr(packet, 'clean_words') and packet.clean_words:
                 candidates = []
                 for w in packet.clean_words:
                     if len(w) < 4: continue
-                    if w.lower() in STOPLIST: continue
+                    if w.lower() in self.SYSTEM_NOISE: continue
                     visc = lexicon_ref.measure_viscosity(w)
                     cat = lexicon_ref.get_current_category(w)
                     if cat: visc += 0.2

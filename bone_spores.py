@@ -22,7 +22,7 @@ class BoneJSONEncoder(json.JSONEncoder):
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_11.3.4"
+        self.genome = "BONEAMANITA_11.4.1"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -495,6 +495,12 @@ class MycelialNetwork:
                 "loaded_at": time.time()})
             if "fossils" in data:
                 self.fossils.extend(data["fossils"])
+                count = len(data["fossils"])
+                fossil_fuel = count * 0.5
+                if fossil_fuel > 0:
+                    self.events.log(f"{Prisma.OCHRE}🔥 [OSSUARY]: Incinerating {count} fossilized memories... Yield: {fossil_fuel:.1f} Shimmer.{Prisma.RST}", "FUEL")
+                    if hasattr(self.events, "publish"):
+                        self.events.publish("FUEL", fossil_fuel)
                 self.events.log(f"{Prisma.GRY}[OSSUARY]: Loaded {len(data['fossils'])} fossilized memories.{Prisma.RST}")
             if "mutations" in data:
                 accepted_count = 0
@@ -514,13 +520,31 @@ class MycelialNetwork:
             if "config_mutations" in data:
                 self.events.log(f"{Prisma.MAG}EPIGENETICS: Auditing ancestral configuration...{Prisma.RST}")
                 valid_mutations = 0
+                def apply_deep_mutation(root, path, evolved_value):
+                    parts = path.split('.')
+                    target = root
+                    for i, part in enumerate(parts[:-1]):
+                        if hasattr(target, part):
+                            target = getattr(target, part)
+                        else:
+                            return False
+                    last_key = parts[-1]
+                    if hasattr(target, last_key):
+                        current = getattr(target, last_key)
+                        if isinstance(current, (int, float)) and isinstance(evolved_value, (int, float)):
+                            if 0.0 <= evolved_value <= 1000.0:
+                                setattr(target, last_key, evolved_value)
+                                return True
+                    return False
                 for key, value in data["config_mutations"].items():
-                    if key in safe_config_keys and hasattr(BoneConfig, key):
-                        current_val = getattr(BoneConfig, key)
-                        if isinstance(current_val, (int, float)) and isinstance(value, (int, float)):
-                            if 0.1 <= value <= 100.0:
-                                setattr(BoneConfig, key, value)
-                                valid_mutations += 1
+                    is_safe = key in safe_config_keys
+                    if not is_safe and "." in key:
+                        sector = key.split('.')[0]
+                        if sector in ["PHYSICS", "BIO", "COUNCIL", "INVENTORY"]:
+                            is_safe = True
+                    if is_safe:
+                        if apply_deep_mutation(BoneConfig, key, value):
+                            valid_mutations += 1
                 if valid_mutations > 0:
                     self.events.log(f"{Prisma.CYN}   ► Applied {valid_mutations} verified config shifts.{Prisma.RST}")
             if "joy_legacy" in data and data["joy_legacy"]:
@@ -529,9 +553,9 @@ class MycelialNetwork:
                 clade = LiteraryReproduction.JOY_CLADE.get(flavor)
                 if clade:
                     self.events.log(f"{Prisma.CYN}INHERITED GLORY: {clade['title']} ({clade['desc']}){Prisma.RST}")
-                    for stat, val in clade["buff"].items():
+                    for stat, ancestral_bonus in clade["buff"].items():
                         if hasattr(BoneConfig, stat):
-                            setattr(BoneConfig, stat, val)
+                            setattr(BoneConfig, stat, ancestral_bonus)
             if "core_graph" in data:
                 self.graph.update(data["core_graph"])
                 grafted_nodes = list(data["core_graph"].keys())

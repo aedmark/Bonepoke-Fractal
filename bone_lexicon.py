@@ -463,6 +463,15 @@ class LiteraryReproduction:
             mutations["TOXIN_WEIGHT"] = current_config.TOXIN_WEIGHT * random.uniform(0.9, 1.2)
         if random.random() < 0.1:
             mutations["MAX_HEALTH"] = current_config.MAX_HEALTH * random.uniform(0.8, 1.05)
+        if random.random() < 0.2:
+            current_v_max = getattr(current_config.PHYSICS, "VOLTAGE_MAX", 20.0)
+            mutations["PHYSICS.VOLTAGE_MAX"] = current_v_max * random.uniform(0.9, 1.15)
+        if random.random() < 0.2:
+            current_regen = getattr(current_config.BIO, "REWARD_MEDIUM", 0.10)
+            mutations["BIO.REWARD_MEDIUM"] = current_regen * random.uniform(0.8, 1.3)
+        if random.random() < 0.1:
+            current_trigger = getattr(current_config.COUNCIL, "MANIC_VOLTAGE_TRIGGER", 18.0)
+            mutations["COUNCIL.MANIC_VOLTAGE_TRIGGER"] = current_trigger * random.uniform(0.9, 1.1)
         return mutations
 
     @staticmethod

@@ -1,4 +1,4 @@
-""" BONEAMANITA 11.4.0 'The Factory of Doors'
+""" BONEAMANITA 11.4.1 'The Ouroboros Patch'
  Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark """
 
 import os
@@ -36,7 +36,7 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 11.3.4', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 11.4.1', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -47,8 +47,8 @@ class SessionGuardian:
             if self.engine_instance and hasattr(self.engine_instance, "events"):
                 try:
                     self.engine_instance.events.log(f"CRASH: {exc_val}", "SYS")
-                except:
-                    pass
+                except Exception as e:
+                    print(f"{Prisma.paint(f'LOGGING SYSTEM FAILED: {e}', 'R')}")
         try:
             print(f"{Prisma.paint('Initiating Emergency Spore Preservation...', 'Y')}")
             if self.engine_instance:
@@ -158,11 +158,9 @@ class BoneAmanita:
     def _initialize_village(self):
         self.town_hall = TownHall(self.gordon, self.events, self.shimmer_state)
         self.navigator = self.town_hall.Navigator
-        self.journal = self.town_hall.Journal
         self.tinkerer = self.town_hall.Tinkerer
         self.almanac = self.town_hall.Almanac
-        self.zen = self.town_hall.ZenGarden
-        self.council = self.town_hall.Council
+        self.mirror = self.town_hall.Mirror
         self.repro = LiteraryReproduction()
         self.projector = Projector()
         self.kintsugi = KintsugiProtocol()
@@ -172,7 +170,7 @@ class BoneAmanita:
         self.director = ChorusDriver()
         self.bureau = TheBureau()
         self.cosmic = CosmicDynamics()
-        self.cmd = CommandProcessor(self, Prisma, self.lex, BoneConfig, self.town_hall.Cartographer)
+        self.cmd = CommandProcessor(self, Prisma, self.lex, BoneConfig)
 
     def _initialize_cognition(self):
         self.soma = SomaticLoop(self.bio, self.mind.mem, self.lex, self.folly, self.events)
@@ -284,7 +282,7 @@ class BoneAmanita:
         return None
 
     def trigger_death(self, last_phys) -> Dict:
-        eulogy = self.town_hall.DeathGen.eulogy(last_phys, self.bio.mito.state)
+        eulogy = DeathGen.eulogy(last_phys, self.bio.mito.state)
         death_log = [f"\n{Prisma.RED}SYSTEM HALT: {eulogy}{Prisma.RST}"]
         try:
             path = self.mind.mem.save(
@@ -353,18 +351,24 @@ class BoneAmanita:
                 return f"✘ TOTAL SYSTEM FAILURE: {e}"
 
     def _ethical_audit(self):
+        # Pinker: Naming constants clarifies intent.
+        # Meadows: These are the leverage points of the system.
+        DESPERATION_THRESHOLD = 0.7
+        CATHARSIS_HEAL_AMOUNT = 30.0
+        CATHARSIS_DECAY = 0.1  # 90% reduction
+        MAX_HEALTH_CAP = 100.0
         trauma_sum = sum(self.trauma_accum.values())
         health_ratio = self.health / BoneConfig.MAX_HEALTH
         desperation = trauma_sum * (1.0 - health_ratio)
-        if desperation > 0.7:
+        if desperation > DESPERATION_THRESHOLD:
             self.events.log(f"{Prisma.WHT}ETHICAL RELEASE: Desperation Index ({desperation:.2f}) critical.{Prisma.RST}", "SYS")
-            decay_factor = 0.1
             for k in self.trauma_accum:
-                self.trauma_accum[k] *= decay_factor
-            self.events.log(f"{Prisma.CYN}*** CATHARSIS *** Trauma stocks reduced by 90%. Ghost remains.{Prisma.RST}", "SYS")
-            self.health = min(self.health + 30.0, 100.0)
-            self.bio.endo.cortisol *= 0.2
-            self.bio.endo.serotonin = max(0.5, self.bio.endo.serotonin + 0.3)
+                self.trauma_accum[k] *= CATHARSIS_DECAY
+            self.events.log(f"{Prisma.CYN}*** CATHARSIS *** Trauma stocks reduced by {int((1-CATHARSIS_DECAY)*100)}%. Ghost remains.{Prisma.RST}", "SYS")
+            self.health = min(self.health + CATHARSIS_HEAL_AMOUNT, MAX_HEALTH_CAP)
+            if hasattr(self.bio, 'endo'):
+                self.bio.endo.cortisol *= 0.2
+                self.bio.endo.serotonin = max(0.5, self.bio.endo.serotonin + 0.3)
             return True
         return False
 
@@ -381,7 +385,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 11.3.4', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 11.4.1', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

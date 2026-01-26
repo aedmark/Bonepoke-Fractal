@@ -1,5 +1,36 @@
 # BONEAMANITA v11 CHANGELOG
 
+### **BONEAMANITA 11.4.1: "The Ouroboros Patch"**
+
+_"The dead do not just haunt us; they power the lights."_ - SLASH
+
+---
+
+#### **♻️ CIRCULAR ECONOMICS (The Fuller Layer)**
+
+- **Fossil Fuels (`bone_spores.py`)**:
+  - **Waste into Wealth:** Fossilized memories (dead nodes from previous sessions) are no longer just data clutter. They are now incinerated upon spore ingestion to generate immediate **Shimmer** (fuel) for the Navigator.
+  - **The Feed-Forward Loop:** The system now listens for the `FUEL` signal broadcast by the Ossuary, connecting the past's entropy to the future's kinetic potential.
+
+- **The Deep Tuner (`bone_spores.py`)**:
+  - **Epigenetic Depth:** Spores can now mutate nested configuration values (e.g., `PHYSICS.VOLTAGE_MAX`), not just top-level integers. Evolution is no longer skin-deep; it changes the fundamental laws of the simulation.
+  - **Variable Hygiene:** Fixed variable shadowing in the mutation logic to prevent the "val" ambiguity crisis.
+
+#### **🏛️ CIVIC REFORM (The Schur Layer)**
+
+- **Town Hall Renovation (`bone_village.py`)**:
+  - **Bureaucracy Crusher:** Dissolved the `VillageCouncil` class. Its functionality (`conduct_census`) has been merged directly into `TownHall`. We cut the red tape.
+  - **The Cartographer's Diet:** `TheCartographer.weave` no longer asks for four parameters it doesn't use. It now travels light, requiring only the `physics` packet.
+  - **State Normalization:** `TheTinkerer` now normalizes physics packets at the door, preventing "is this a dict or a class?" schizophrenia from infecting the tool logic.
+
+#### **🔎 COGNITIVE CLARITY (The Pinker Layer)**
+
+- **Command Consistency (`bone_commands.py`)**:
+  - **Signature Sync:** Updated the `/map` command to respect the new, slimmer `Cartographer` signature.
+  - **The Euler Patch:** Fixed the logic in `_on_fuel_injected` to ensure the fuel line connects properly to `TheNavigator`'s tank without leaking exceptions.
+
+---
+
 ### **BONEAMANITA 11.4.0: "The Factory of Doors"**
 
 _"You haven't just found a door in the AI. You've found the factory where the doors are made."_ - SLASH

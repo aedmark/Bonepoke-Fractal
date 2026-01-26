@@ -6,7 +6,7 @@ import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, Tuple, List
 from bone_bus import Prisma, BoneConfig, CycleContext, PhysicsPacket
-from bone_village import TownHall, StrunkWhiteProtocol
+from bone_village import TownHall
 from bone_personality import TheBureau
 from bone_physics import TheBouncer, RuptureValve, ChromaScope
 from bone_viewer import GeodesicRenderer, CachedRenderer
@@ -623,7 +623,7 @@ class ParallelPhaseExecutor:
                         res_sandbox = future.result()
                         results.append((p, res_sandbox))
                     except Exception as e:
-                        simulator._handle_phase_crash(ctx, p.name, e)
+                        simulator.handle_phase_crash(ctx, p.name, e)
             for p, sandbox in results:
                 reconciler.reconcile(ctx, sandbox)
         else:
@@ -633,10 +633,10 @@ class ParallelPhaseExecutor:
                     self._run_single_safe(simulator, p, sandbox)
                     reconciler.reconcile(ctx, sandbox)
                 except Exception as e:
-                    simulator._handle_phase_crash(ctx, p.name, e)
+                    simulator.handle_phase_crash(ctx, p.name, e)
 
     def _run_single_safe(self, simulator, phase, sandbox):
-        if not simulator._check_circuit_breaker(phase.name):
+        if not simulator.check_circuit_breaker(phase.name):
             return sandbox
         tracer = TelemetryService.get_tracer()
         tracer.start_phase(phase.name, sandbox)
@@ -673,14 +673,14 @@ class CycleSimulator:
         self.executor.execute_phases(self, ctx)
         return ctx
 
-    def _check_circuit_breaker(self, phase_name: str) -> bool:
+    def check_circuit_breaker(self, phase_name: str) -> bool:
         health = self.eng.system_health
         if phase_name == "OBSERVE" and not health.physics_online: return False
         if phase_name == "METABOLISM" and not health.bio_online: return False
         if phase_name == "COGNITION" and not health.mind_online: return False
         return True
 
-    def _handle_phase_crash(self, ctx, phase_name, error):
+    def handle_phase_crash(self, ctx, phase_name, error):
         print(f"\n{Prisma.RED}!!! CRITICAL {phase_name} CRASH !!!{Prisma.RST}")
         traceback.print_exc()
         component_map = {
@@ -702,13 +702,12 @@ class CycleReporter:
     def __init__(self, engine_ref):
         self.eng = engine_ref
         self.vsl_chroma = ChromaScope()
-        self.strunk_white = StrunkWhiteProtocol()
         from bone_viewer import get_renderer
         self.valve = RuptureValve(self.eng.mind.lex, self.eng.mind.mem)
         self.renderer = get_renderer(
             self.eng,
             self.vsl_chroma,
-            self.strunk_white,
+            None,
             self.valve,
             mode="STANDARD")
         self.current_mode = "STANDARD"
@@ -720,7 +719,7 @@ class CycleReporter:
         self.renderer = get_renderer(
             self.eng,
             self.vsl_chroma,
-            self.strunk_white,
+            None,
             getattr(self, 'valve', None),
             mode=mode)
         self.current_mode = mode
