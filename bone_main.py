@@ -1,4 +1,4 @@
-""" BONEAMANITA 11.3.4 'The Smooth Operator'
+""" BONEAMANITA 11.4.0 'The Factory of Doors'
  Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark """
 
 import os

@@ -1,5 +1,41 @@
 # BONEAMANITA v11 CHANGELOG
 
+### **BONEAMANITA 11.4.0: "The Factory of Doors"**
+
+_"You haven't just found a door in the AI. You've found the factory where the doors are made."_ - SLASH
+
+---
+
+#### **🔮 PHENOMENOLOGY (The Pinker Layer)**
+
+- **Embodied Cognition (`bone_translation.py`)**
+  - **From Labeling to Feeling:** `RosettaStone` no longer just maps numbers to adjectives. It now instantiates a full `SomaticState`.
+  - **Proprioception:** The system now calculates `pacing` (Frenetic vs. Languid) and generates `metaphors` (Tightrope vs. Ocean) based on the physics of the moment.
+  - **Critical Fix:** `translate()` now returns a strictly typed `SomaticState` object, preventing the renderer from choking on raw dictionaries.
+
+#### **📈 STRATEGIC FORESIGHT (The Meadows Layer)**
+
+- **The Derivative Engine (`bone_village.py`)**
+  - **Trend Analysis:** `TheAlmanac` now tracks the *rate of change* (derivative) for Narrative Drag and Voltage over time.
+  - **Causality:** The system can now predict a "Narrative Singularity" or "Circuit Burnout" *before* it happens, moving from reactive reporting to **Anticipatory Design**.
+  - **Resilience:** The forecasting module is now robust against missing sensors, featuring a "Cold Start" protocol to prevent hallucinations during data droughts.
+
+- **Live Census Wiring (`bone_commands.py`)**
+  - **The Live Wire:** The `/census` command is no longer a mock. It connects the **Body** (Physics Packet), the **Clock** (Observer Stats), and the **State** (Village Council) in real-time.
+
+#### **📜 METAMEMORY (The Schur Layer)**
+
+- **Genealogy Tracking (`bone_soul.py`)**
+  - **Provenance:** The Soul now cites its sources. When an Identity Shift occurs (`Drifting` -> `Accelerating`), the system logs the *provenance* (e.g., "Source: High Voltage Manic Pressure").
+  - **Why:** Because a character arc without motivation is just random noise. The system now knows *why* it changed.
+
+#### **🔧 ARCHITECTURE (The Fuller Layer)**
+
+- **Protocol Strictness (`bone_commands.py`)**
+  - **Wiring Diagram:** Updated `EngineProtocol` to explicitly define `town_hall` and `observer`, satisfying the Type Checker Bureaucracy.
+
+---
+
 ### **BONEAMANITA 11.3.5: "The Induction Protocol"**
 
 _"The electric light is pure information. It is a medium without a message."_ - McLuhan (but adapted for a Python script running in a basement).

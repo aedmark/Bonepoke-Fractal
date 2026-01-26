@@ -151,7 +151,8 @@ class NarrativeSelf:
             self.chapters.append(chapter_title)
             log_msg = (
                 f"{Prisma.MAG}✨ CORE MEMORY FORMED: '{chapter_title}'{Prisma.RST}\n"
-                f"   Lesson: {lesson} (Archetype: {self.archetype})")
+                f"   Lesson: {lesson} (Archetype: {self.archetype})\n"
+                f"   {Prisma.GRY}Genealogy: {dance_move}{Prisma.RST}")
             self.events.log(log_msg, "SOUL")
             self.events.log(self.editor.critique(chapter_title), "EDIT")
             return lesson
@@ -162,23 +163,27 @@ class NarrativeSelf:
         drag = physics.get("narrative_drag", 0.0)
         momentum = 0.01
         move_name = "Drifting"
+        provenance = "Inertia"
         if voltage > 15.0:
             self.traits["CURIOSITY"] = min(1.0, self.traits["CURIOSITY"] + (momentum * 4))
             self.traits["DISCIPLINE"] = max(0.0, self.traits["DISCIPLINE"] - (momentum * 2))
             move_name = "Accelerating"
+            provenance = "High Voltage (Manic Pressure)"
         elif drag > 4.0:
             self.traits["CYNICISM"] = min(1.0, self.traits["CYNICISM"] + (momentum * 3))
             self.traits["HOPE"] = max(0.0, self.traits["HOPE"] - (momentum * 3))
             move_name = "Enduring"
+            provenance = "High Drag (Entropy Accumulation)"
         elif 5.0 < voltage < 12.0 and drag < 2.0:
             self.traits["WISDOM"] = min(1.0, self.traits["WISDOM"] + (momentum * 2))
             self.traits["DISCIPLINE"] = min(1.0, self.traits["DISCIPLINE"] + momentum)
             move_name = "Flowing"
+            provenance = "Laminar Flow (Coherence)"
         decay = 0.002
         for k in self.traits:
             if self.traits[k] > 0.5: self.traits[k] -= decay
             elif self.traits[k] < 0.5: self.traits[k] += decay
-        return move_name
+        return f"{move_name} [Source: {provenance}]"
 
     def _decay_traits(self):
         decay_rate = 0.005

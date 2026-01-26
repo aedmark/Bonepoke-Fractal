@@ -220,6 +220,7 @@ class TheCartographer:
 
 class TheAlmanac:
     def __init__(self):
+        self.history_window = []
         data = TheLore.get("ALMANAC_DATA")
         self.forecasts = data.get("FORECASTS", {"BALANCED": ["System nominal."]})
         self.strategies = data.get("STRATEGIES", {})
@@ -268,29 +269,45 @@ class TheAlmanac:
         return condition, advice
 
     def get_seed(self, condition):
-        return self.strategies.get(condition, self.default_seed)
+        seeds = {
+            "COLLAPSING": "Structure",
+            "CLEARING": "Whimsy",
+            "STAGNANT": "Chaos"}
+        return seeds.get(condition.split()[0], "Hope")
 
-    def compile_forecast(self, session_data: dict, host_health: Any = None) -> str:
-        condition, advice = self.diagnose_condition(session_data, host_health)
-        available_forecasts = self.forecasts.get(condition, self.forecasts.get("BALANCED", ["Standard Operation."]))
-        forecast_text = random.choice(available_forecasts)
-        seed_text = self.get_seed(condition)
-        border = f"{Prisma.OCHRE}{'='*40}{Prisma.RST}"
-        report = [
-            "\n", border,
-            f"{Prisma.CYN}   THE ALMANAC: CREATIVE WEATHER REPORT{Prisma.RST}",
-            border,
-            f"Condition: {Prisma.WHT}{condition}{Prisma.RST}",
-            f"Observation: {Prisma.GRY}{advice}{Prisma.RST}",
-            f"{Prisma.SLATE}---{Prisma.RST}",
-            f"{Prisma.MAG}PRESCRIPTION:{Prisma.RST}",
-            f"   {forecast_text}",
-            "",
-            f"{Prisma.GRN}Seed for Next Session:{Prisma.RST}",
-            f"   {seed_text}",
-            border, "\n"
-        ]
-        return "\n".join(report)
+    def compile_forecast(self, session_data: Optional[Dict] = None, host_health: Any = None):
+        if not session_data: session_data = {}
+        current_phys = session_data.get("physics", {})
+        used_history = False
+        if not current_phys and self.history_window:
+            last = self.history_window[-1]
+            current_phys = {"narrative_drag": last["d"], "voltage": last["v"]}
+            used_history = True
+        drag = current_phys.get("narrative_drag", 0.0)
+        voltage = current_phys.get("voltage", 0.0)
+        if not used_history:
+            self.history_window.append({"d": drag, "v": voltage, "t": time.time()})
+            if len(self.history_window) > 10: self.history_window.pop(0)
+        trend = "STABLE"
+        delta_drag = 0.0
+        if len(self.history_window) >= 2:
+            delta_drag = self.history_window[-1]["d"] - self.history_window[0]["d"]
+            if delta_drag > 1.5: trend = "COLLAPSING (Entropy Rising)"
+            elif delta_drag < -1.5: trend = "CLEARING (Negative Entropy)"
+        horizon_warning = "Clear skies."
+        if trend.startswith("COLLAPSING"):
+            horizon_warning = "⚠️ STRATEGIC WARNING: Narrative singularity predicted."
+        elif voltage > 18.0:
+            horizon_warning = "⚠️ STRATEGIC WARNING: Circuit burnout imminent."
+        elif used_history:
+            horizon_warning = "⚠️ TELEMETRY LOST: Forecasting based on cached data."
+        elif not current_phys:
+            horizon_warning = "SYSTEM OFFLINE: Awaiting ignition."
+        return {
+            "weather": f"Drag: {drag:.1f} | Voltage: {voltage:.1f}",
+            "trend": trend,
+            "strategic_horizon": horizon_warning,
+            "advice": "Reduce complexity." if delta_drag > 0.5 else "Maintain course."}
 
     @staticmethod
     def calculate_drag(clean_words: List, counts: dict, config) -> float:
@@ -800,20 +817,26 @@ class VillageCouncil:
     def __init__(self, town_hall_instance):
         self.hall = town_hall_instance
 
-    def call_census(self) -> str:
+    def call_census(self, physics_snapshot: Optional[Dict] = None, host_stats: Any = None) -> str:
         nav = self.hall.Navigator
         tinker = self.hall.Tinkerer
         confident_tools = [k for k, v in tinker.tool_confidence.items() if v > 1.5]
         rusting_tools = [k for k, v in tinker.tool_confidence.items() if v < 0.5]
-        condition, advice = self.hall.Almanac.diagnose_condition(
-            session_data={"meta": {"avg_voltage": 10}},
-            host_health=None)
+        session_data = {
+            "physics": physics_snapshot if physics_snapshot else {},
+            "meta": {
+                "avg_voltage": physics_snapshot.get("voltage", 0.0) if physics_snapshot else 0.0,
+            }
+        }
+        forecast = self.hall.Almanac.compile_forecast(session_data, host_stats)
+        condition, advice = self.hall.Almanac.diagnose_condition(session_data, host_stats)
         report = [
             f"{Prisma.WHT}--- THE STATE OF THE UNION ---{Prisma.RST}",
             f"Manifold Location: {Prisma.CYN}{nav.current_location}{Prisma.RST}",
             f"Reserves: {nav.shimmer.current:.1f} Shimmer",
             f"Economy: {'FLOURISHING' if len(confident_tools) > 2 else 'STAGNANT'}",
-            f"Mood: {condition} - '{advice}'"]
+            f"Mood: {condition} - '{advice}'",
+            f"Strategic Horizon: {forecast['strategic_horizon']} (Trend: {forecast['trend']})"]
         if rusting_tools:
             report.append(f"{Prisma.RED}WARNING: The following are degrading: {', '.join(rusting_tools)}{Prisma.RST}")
         return "\n".join(report)

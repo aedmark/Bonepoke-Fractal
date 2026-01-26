@@ -19,6 +19,8 @@ class EngineProtocol(Protocol):
     journal: Any
     repro: Any
     noetic: Any
+    town_hall: Any
+    observer: Any
     health: float
     stamina: float
     tick_count: int
@@ -44,6 +46,7 @@ class CommandProcessor:
             "/status": self._cmd_status,
             "/inventory": self._cmd_inventory,
             "/map": self._cmd_map,
+            "/census": self._cmd_census,
             "/manifold": self._cmd_manifold,
             "/garden": self._cmd_garden,
             "/voids": self._cmd_voids,
@@ -197,6 +200,27 @@ class CommandProcessor:
         result, anchors = self.Map.weave(phys["raw_text"], self.eng.mind.mem.graph, bio, self.eng.limbo, physics=phys)
         self._log(f"{self.P.OCHRE}CARTOGRAPHY REPORT:{self.P.RST}\n{result}")
         if anchors: self._log(f"LANDMARKS: {', '.join(anchors)}")
+        return True
+
+    def _cmd_census(self, _parts):
+        packet = self.eng.phys.tension.last_physics_packet
+        if hasattr(packet, "to_dict"):
+            live_physics = packet.to_dict()
+        else:
+            live_physics = packet if isinstance(packet, dict) else {}
+        live_stats = None
+        if hasattr(self.eng, "observer"):
+            raw_report = self.eng.observer.get_report()
+            class LiveStats:
+                def __init__(self, r):
+                    self.latency = r.get("avg_llm_sec", 0.0)
+                    self.efficiency_index = 1.0
+                    self.entropy = 1.0
+            live_stats = LiveStats(raw_report)
+        report = self.eng.town_hall.Council.call_census(
+            physics_snapshot=live_physics,
+            host_stats=live_stats)
+        self._log(report)
         return True
 
     def _cmd_garden(self, parts):
@@ -453,7 +477,7 @@ class CommandProcessor:
             "ACT":  ["/rummage", "/weave", "/publish", "/kintsugi"],
             "META": ["/soul", "/mirror", "/chapter", "/focus"]}
         lines = [
-            f"\n{self.P.CYN}:: BONEAMANITA v11.3.4 ::{self.P.RST}",
+            f"\n{self.P.CYN}:: BONEAMANITA v11.4.0 ::{self.P.RST}",
             advice,
             ""]
         for cat, cmds in categories.items():

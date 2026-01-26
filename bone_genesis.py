@@ -33,7 +33,7 @@ class GenesisProtocol:
         print(f"{Prisma.GRY}...Scanning local frequencies...{Prisma.RST}")
         for name, data in self.DISCOVERY_TARGETS.items():
             try:
-                root = data['url'].rsplit('/', 3)[0] # Extract root from API URL
+                root = data['url'].rsplit('/', 3)[0]
                 urllib.request.urlopen(f"{root}{data['check']}", timeout=0.2)
                 found.append({"name": name, "url": data['url']})
                 print(f"   {Prisma.GRN}[FOUND] {name}{Prisma.RST}")
@@ -44,37 +44,25 @@ class GenesisProtocol:
     def setup_uplink(self) -> bool:
         """The Unified Configuration Wizard."""
         print(f"\n{Prisma.CYN}=== GENESIS PROTOCOL SETUP ==={Prisma.RST}")
-
-        # 1. Detect
         local_brains = self.scan_local_brains()
-
         while True:
-            # Dynamic Menu
             t_status = f"{Prisma.GRN}ON{Prisma.RST}" if self.tutorial_mode else f"{Prisma.RED}OFF{Prisma.RST}"
             print(f"\nSelect Neural Substrate:")
             print(f"   0. {Prisma.WHT}Toggle Boot Camp (Tutorial){Prisma.RST} [{t_status}]")
-
             opts = [{"name": "Mock Mode (Simulation Only)", "provider": "mock"}]
             opts += [{"name": b["name"], "provider": "openai", "url": b["url"]} for b in local_brains]
             opts.append({"name": "Manual / Cloud Configuration", "provider": "manual"})
-
             for idx, opt in enumerate(opts):
                 print(f"   {idx+1}. {Prisma.WHT}{opt['name']}{Prisma.RST}")
-
             sel = input(f"{Prisma.paint('>', 'C')} ").strip()
-
             if sel == "0":
                 self.tutorial_mode = not self.tutorial_mode
                 print(f"{Prisma.GRY}   > Boot Camp toggled.{Prisma.RST}")
-                continue # Loop back to redraw menu
-
-            # Adjust index for 1-based list
+                continue
             if not sel.isdigit(): return False
             choice_idx = int(sel) - 1
             if choice_idx < 0 or choice_idx >= len(opts): return False
-
             choice = opts[choice_idx]
-
             if choice["provider"] == "mock":
                 self.config.update({"provider": "mock"})
             elif choice["provider"] == "manual":
@@ -84,13 +72,11 @@ class GenesisProtocol:
                 self.config["api_key"] = input("API Key: ").strip() or "sk-dummy-key"
                 self.config["model"] = input("Model Name: ").strip() or "gpt-3.5-turbo"
             else:
-                # Auto-detected local
-                self.config["provider"] = "openai" # Standardize local LLMs on openai format
+                self.config["provider"] = "openai"
                 self.config["base_url"] = choice["url"]
                 print(f"Target Model for {choice['name']} (default: local-model):")
                 self.config["model"] = input(f"{Prisma.paint('>', 'C')} ").strip() or "local-model"
-            break # Break loop once provider is selected
-
+            break
         if self.config["provider"] != "mock":
             print(f"{Prisma.GRY}...Testing Uplink...{Prisma.RST}")
             try:
@@ -100,16 +86,13 @@ class GenesisProtocol:
             except Exception as e:
                 print(f"{Prisma.RED}[FAILURE] {e}{Prisma.RST}")
                 if input("Save anyway? (y/N) ").lower() != 'y': return False
-
         self._save_config()
         return True
 
     def _get_user_identity(self, engine):
-        """Minimal Identity Handshake."""
         if self.config.get("user_name"):
             engine.user_name = self.config["user_name"]
             return
-
         print(f"\n{Prisma.CYN}[IDENTITY REQUIRED]{Prisma.RST}")
         uid = input("Designation: ").strip()
         if uid:
@@ -127,11 +110,9 @@ class GenesisProtocol:
             except:
                 print("Config corrupt. Re-running setup.")
                 self.setup_uplink()
-
         print(f"\n{Prisma.GRY}...Booting BoneAmanita Core...{Prisma.RST}")
         engine = BoneAmanita(tutorial_mode=self.tutorial_mode)
         self._get_user_identity(engine)
-
         if self.config["provider"] != "mock":
             try:
                 client = LLMInterface(
@@ -139,13 +120,11 @@ class GenesisProtocol:
                     provider=self.config["provider"],
                     base_url=self.config.get("base_url"),
                     api_key=self.config.get("api_key"),
-                    model=self.config.get("model")
-                )
+                    model=self.config.get("model"))
                 engine.cortex = TheCortex(engine, llm_client=client)
                 print(f"{Prisma.GRN}[SYSTEM] Cortex Online: {self.config['model']}{Prisma.RST}")
             except Exception as e:
                 print(f"{Prisma.RED}[ERROR] Cortex Failed: {e}. Falling back to Mock.{Prisma.RST}")
-
         print(f"{Prisma.GRN}System Online. Welcome, {engine.user_name}.\n{Prisma.RST}")
         with SessionGuardian(engine) as session:
             if hasattr(engine, 'cortex'):
