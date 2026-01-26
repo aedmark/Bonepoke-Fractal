@@ -346,41 +346,33 @@ class ApeirogonResonance:
     def architect(self, metrics, station, is_bored):
         phys = metrics.get("physics", {})
         vec = phys.get("vector", {})
-
         if is_bored:
             return {
                 "title": "THE FRACTAL BLOOM",
                 "color": Prisma.VIOLET,
                 "desc": "Boredom Threshold exceeded. Entropy is high.",
-                "context": "CHAOS"
-            }
-
+                "context": "CHAOS"}
         if station:
             lens_name = station[0] or "UNKNOWN"
             thought = station[1] or "Processing..."
             role = station[2] or "Observer"
-
             role_color = Prisma.CYN
             if lens_name == "GORDON": role_color = Prisma.OCHRE
             elif lens_name == "SHERLOCK": role_color = Prisma.INDIGO
             elif lens_name == "JESTER": role_color = Prisma.VIOLET
-
             title_text = str(role).upper().replace('THE ', 'THE ')
-
             return {
                 "title": title_text,
                 "color": role_color,
                 "desc": thought,
-                "context": lens_name
-            }
+                "context": lens_name}
 
         if not vec or len(vec) < 2:
             return {
                 "title": "THE VOID",
                 "color": Prisma.GRY,
                 "desc": "No data.",
-                "context": "VOID"
-            }
+                "context": "VOID"}
         sorted_dims = sorted(vec.items(), key=lambda x: abs(x[1] - 0.5), reverse=True)
         p_dim, p_val = sorted_dims[0]
         s_dim, s_val = sorted_dims[1]
@@ -567,7 +559,6 @@ class TheNavigator:
         self.root_system = None
         self.root_tolerance = 0.4
         self.residence_time = 0
-
         self.manifolds = {
             "THE_CONSTRUCT": Manifold(
                 "THE_CONSTRUCT", (0.05, 0.1), 0.25,
@@ -731,9 +722,7 @@ class LiteraryJournal:
                 "DEFAULT": {
                     "name": "The Void",
                     "preferences": {"voltage": 1.0},
-                    "reviews": {"high": ["Acceptable."], "low": ["Silence."]}
-                }
-            }
+                    "reviews": {"high": ["Acceptable."], "low": ["Silence."]}}}
 
     @staticmethod
     def _calculate_score(physics: Dict, preferences: Dict) -> Tuple[float, List[str]]:
@@ -745,8 +734,7 @@ class LiteraryJournal:
             "kappa": physics.get("kappa", 0),
             "psi": physics.get("psi", 0),
             "truth_ratio": physics.get("truth_ratio", 0),
-            "velocity": physics.get("vector", {}).get("VEL", 0)
-        }
+            "velocity": physics.get("vector", {}).get("VEL", 0)}
         counts = physics.get("counts", {})
         for k, v in counts.items():
             metrics[f"counts_{k}"] = v
@@ -806,8 +794,7 @@ class LiteraryJournal:
             verdict=review_text,
             reward_type=reward_type,
             reward_amount=reward_amount,
-            breakdown=breakdown
-        )
+            breakdown=breakdown)
 
 class VillageCouncil:
     def __init__(self, town_hall_instance):

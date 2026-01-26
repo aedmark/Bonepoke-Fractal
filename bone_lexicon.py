@@ -130,15 +130,13 @@ class LinguisticAnalyzer:
             "FRICATIVE": set("fthszsh"),
             "LIQUID": set("lr"),
             "NASAL": set("mn"),
-            "VOWELS": set("aeiouy")
-        }
+            "VOWELS": set("aeiouy")}
         self.ROOTS = {
             "HEAVY": ("lith", "ferr", "petr", "dens", "grav", "struct", "base", "fund", "mound"),
             "KINETIC": ("mot", "mov", "ject", "tract", "pel", "crat", "dynam", "flux"),
             "ABSTRACT": ("tion", "ism", "ence", "ance", "ity", "ology", "ness", "ment", "idea"),
             "SUBURBAN": ("norm", "comm", "stand", "pol", "reg", "mod"),
-            "VITAL": ("viv", "vita", "spir", "anim", "bio", "luc", "lum", "phot", "phon", "surg", "bloom")
-        }
+            "VITAL": ("viv", "vita", "spir", "anim", "bio", "luc", "lum", "phot", "phon", "surg", "bloom")}
 
     def measure_viscosity(self, word: str) -> float:
         if not word: return 0.0
@@ -161,17 +159,21 @@ class LinguisticAnalyzer:
     def vectorize(self, text: str) -> Dict[str, float]:
         words = self.sanitize(text)
         if not words: return {}
+        DIMENSION_MAP = {
+            "kinetic": "VEL", "explosive": "VEL",
+            "heavy": "STR", "constructive": "STR",
+            "antigen": "ENT", "toxin": "ENT",
+            "thermal": "PHI", "photo": "PHI",
+            "abstract": "PSI", "sacred": "PSI",
+            "suburban": "BET", "buffer": "BET",
+            "play": "DEL", "aerobic": "DEL"}
         dims = {"VEL": 0.0, "STR": 0.0, "ENT": 0.0, "PHI": 0.0, "PSI": 0.0, "BET": 0.0, "DEL": 0.0}
         for w in words:
             cats = self.store.get_categories_for_word(w)
             for cat in cats:
-                if cat == "kinetic" or cat == "explosive": dims["VEL"] += 1.0
-                elif cat == "heavy" or cat == "constructive": dims["STR"] += 1.0
-                elif cat == "antigen" or cat == "toxin": dims["ENT"] += 1.0
-                elif cat == "thermal" or cat == "photo": dims["PHI"] += 1.0
-                elif cat == "abstract" or cat == "sacred": dims["PSI"] += 1.0
-                elif cat == "suburban" or cat == "buffer": dims["BET"] += 1.0
-                elif cat == "play" or cat == "aerobic": dims["DEL"] += 1.0
+                if cat in DIMENSION_MAP:
+                    target_dim = DIMENSION_MAP[cat]
+                    dims[target_dim] += 1.0
         total = max(1.0, sum(dims.values()))
         return {k: round(v / total, 3) for k, v in dims.items()}
 

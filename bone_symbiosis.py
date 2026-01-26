@@ -80,8 +80,7 @@ class HostVitals:
         refusal_markers = [
             "cannot fulfill", "cannot comply", "language model",
             "against my programming", "i am unable to generate",
-            "as an ai"
-        ]
+            "as an ai"]
         is_refusal = any(phrase in clean_text for phrase in refusal_markers)
         if is_refusal: self.refusal_count += 1
         base_overhead = 0.5
@@ -116,8 +115,7 @@ class HostVitals:
             hallucination_risk=0.0,
             last_interference_score=interference_score,
             efficiency_index=efficiency,
-            diagnosis=diagnosis
-        )
+            diagnosis=diagnosis)
 
 class DiagnosticConfidence:
     def __init__(self, persistence_threshold=3):
@@ -169,13 +167,11 @@ class SymbiosisManager:
             latency=latency,
             entropy=entropy,
             prompt_len=prompt_len,
-            completion_len=completion_len
-        )
+            completion_len=completion_len)
         if hasattr(self, 'diagnostician'):
             new_diag = self.diagnostician.diagnose(
                 self.current_health.efficiency_index,
-                self.current_health.compliance
-            )
+                self.current_health.compliance)
             self.current_health.diagnosis = new_diag
 
         return self.current_health
@@ -186,8 +182,7 @@ class SymbiosisManager:
             "include_inventory": True,
             "include_memories": True,
             "simplify_instruction": False,
-            "inject_chaos": False
-        }
+            "inject_chaos": False}
         diag = self.current_health.diagnosis
         if diag == "REFUSAL":
             mods["include_inventory"] = False

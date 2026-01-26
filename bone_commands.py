@@ -66,8 +66,7 @@ class CommandProcessor:
             "/soul": self._cmd_soul,
             "/chapter": self._cmd_chapter,
             "/help": self._cmd_help,
-            "/synapse": self._cmd_synapse
-        }
+            "/synapse": self._cmd_synapse}
 
     def _log(self, text):
         self.eng.events.log(text, "CMD")
@@ -175,8 +174,7 @@ class CommandProcessor:
                 joy_history=[],
                 mitochondria_traits=self.eng.bio.mito.adapt(self.eng.health),
                 antibodies=list(self.eng.bio.immune.active_antibodies),
-                soul_data=self.eng.soul.to_dict()
-            )
+                soul_data=self.eng.soul.to_dict())
             self._log(f"{self.P.GRN}💾 SYSTEM SAVED: {path}{self.P.RST}")
         except Exception as e:
             self._log(f"{self.P.RED}SAVE FAILED: {e}{self.P.RST}")
@@ -260,8 +258,7 @@ class CommandProcessor:
                     joy_history=[],
                     mitochondria_traits=self.eng.bio.mito.adapt(self.eng.health),
                     antibodies=list(self.eng.bio.immune.active_antibodies),
-                    soul_data=self.eng.soul.to_dict()
-                )
+                    soul_data=self.eng.soul.to_dict())
             except Exception as e:
                 self._log(f"{self.P.RED}Auto-Save Failed: {e}{self.P.RST}")
 
@@ -270,10 +267,8 @@ class CommandProcessor:
                     "chem": self.eng.bio.endo.get_state(),
                     "mito": {
                         "ros": self.eng.bio.mito.state.ros_buildup,
-                        "atp": self.eng.bio.mito.state.atp_pool
-                    },
-                    "physics": self.eng.phys.tension.last_physics_packet
-                }
+                        "atp": self.eng.bio.mito.state.atp_pool},
+                    "physics": self.eng.phys.tension.last_physics_packet}
                 dream_log = self.eng.mind.dreamer.enter_rem_cycle(self.eng.mind.mem, bio_readout=bio_packet)
                 self._log(dream_log)
 
@@ -458,7 +453,7 @@ class CommandProcessor:
             "ACT":  ["/rummage", "/weave", "/publish", "/kintsugi"],
             "META": ["/soul", "/mirror", "/chapter", "/focus"]}
         lines = [
-            f"\n{self.P.CYN}:: BONEAMANITA v11.3.3 ::{self.P.RST}",
+            f"\n{self.P.CYN}:: BONEAMANITA v11.3.4 ::{self.P.RST}",
             advice,
             ""]
         for cat, cmds in categories.items():

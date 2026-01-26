@@ -69,8 +69,7 @@ class GeodesicRenderer:
         return (
             f"{Prisma.SLATE}{'-'*40}{Prisma.RST}\n"
             f"📖 {Prisma.WHT}{chapter}{Prisma.RST}\n"
-            f"🧭 Obsession: {obsession} {bar} {trait_str}"
-        )
+            f"🧭 Obsession: {obsession} {bar} {trait_str}")
 
     def render_dashboard(self, ctx) -> str:
         physics = ctx.physics
@@ -159,58 +158,44 @@ class GeodesicRenderer:
     @staticmethod
     def compose_logs(logs: list, events: list, tick: int) -> List[str]:
         safe_logs = [str(l) for l in logs if l is not None]
-
         is_warmup = tick <= 5
-
         all_events = [{"text": l, "category": "NARRATIVE"} for l in safe_logs]
         all_events.extend(events)
-
         if not all_events: return []
-
         buckets = {"CRITICAL": [], "NARRATIVE": [], "CMD": [], "SYS": [], "BIO": [], "PSYCH": [], "OTHER": []}
-
         plasticity_count = 0
         mirror_count = 0
-
         for e in all_events:
             if not e: continue
             raw_cat = e.get("category", "OTHER") or "OTHER"
             cat = str(raw_cat).upper()
             text = str(e.get("text", ""))
-
             if is_warmup and cat in ["SYS", "BIO", "PSYCH", "OTHER"]: continue
             if "RUPTURE" in text or "DEATH" in text or "PANIC" in text: cat = "CRITICAL"
-
             if "NEUROPLASTICITY" in text:
                 plasticity_count += 1
                 continue
             if "[MIRROR]" in text:
                 mirror_count += 1
                 continue
-
             if cat not in buckets: cat = "OTHER"
             buckets[cat].append(text)
-
         if plasticity_count > 0:
             buckets["PSYCH"].append(f"NEUROPLASTICITY: Integrated {plasticity_count} new associations.")
         if mirror_count > 0:
             buckets["SYS"].append(f"🪞 [MIRROR]: Reflection adjusted ({mirror_count}x).")
-
         composed = []
         if buckets["CRITICAL"]:
             composed.append(f"{Prisma.RED}--- CRITICAL ALERTS ---{Prisma.RST}")
             composed.extend(buckets["CRITICAL"])
         if buckets["NARRATIVE"]:
             composed.extend(buckets["NARRATIVE"])
-
         compressible = [
             ("CMD", Prisma.WHT, "COMMANDS"),
             ("PSYCH", Prisma.VIOLET, "PSYCHOLOGY"),
             ("BIO", Prisma.GRN, "BIOLOGY"),
             ("SYS", Prisma.GRY, "SYSTEM"),
-            ("OTHER", Prisma.GRY, "MISC")
-        ]
-
+            ("OTHER", Prisma.GRY, "MISC")]
         for cat, color, label in compressible:
             items = buckets[cat]
             if not items: continue
@@ -220,7 +205,6 @@ class GeodesicRenderer:
                 composed.append(f"   {color}   ... and {len(items)-3} more.{Prisma.RST}")
             else:
                 composed.extend([f"   {i}" for i in items])
-
         return composed
 
 class CachedRenderer:
@@ -229,14 +213,12 @@ class CachedRenderer:
         self._cache = {
             "soul_strip": {"hash": 0, "content": ""},
             "dashboard": {"hash": 0, "content": ""},
-            "last_tick": -1
-        }
+            "last_tick": -1}
         self.THEMES = {
             "DEFAULT": {"border": "═", "accent": Prisma.CYN, "alert": Prisma.RED},
             "NOIR": {"border": "-", "accent": Prisma.GRY, "alert": Prisma.WHT},
             "RETRO": {"border": "*", "accent": Prisma.MAG, "alert": Prisma.YEL},
-            "MINIMAL": {"border": " ", "accent": Prisma.RST, "alert": Prisma.RST}
-        }
+            "MINIMAL": {"border": " ", "accent": Prisma.RST, "alert": Prisma.RST}}
         self.active_theme = self.THEMES["DEFAULT"]
 
     def _compute_hash(self, data: Any) -> int:
@@ -244,32 +226,26 @@ class CachedRenderer:
 
     def render_frame(self, ctx, tick: int, events: List[Dict]) -> Dict:
         soul_ref = getattr(self._base.eng, 'soul', None)
-
         if soul_ref:
             soul_state = (soul_ref.current_obsession, soul_ref.obsession_progress)
             soul_hash = self._compute_hash(soul_state)
-
             if soul_hash != self._cache["soul_strip"]["hash"]:
                 self._cache["soul_strip"]["content"] = self._base.render_soul_strip(soul_ref)
                 self._cache["soul_strip"]["hash"] = soul_hash
         else:
             self._cache["soul_strip"]["content"] = ""
-
         voltage = ctx.physics.get("voltage", 0) if isinstance(ctx.physics, dict) else ctx.physics.voltage
-
         if voltage > 15.0 or tick != self._cache["last_tick"]:
             raw_dashboard = self._base.render_dashboard(ctx)
             colored = self._base.vsl_chroma.modulate(raw_dashboard, ctx.physics.get("vector", {}))
             clean, _ = self._base.strunk_white.sanitize(colored)
             self._cache["dashboard"]["content"] = clean
             self._cache["last_tick"] = tick
-
         frame = {
             "type": "GEODESIC_FRAME",
             "ui": f"{self._cache['dashboard']['content']}\n{self._cache['soul_strip']['content']}",
             "logs": self._base.compose_logs(ctx.logs, events, tick),
-            "metrics": ctx.bio_result if hasattr(ctx, 'bio_result') else {}
-        }
+            "metrics": ctx.bio_result if hasattr(ctx, 'bio_result') else {}}
         return frame
 
 class ThemeContext:
@@ -277,8 +253,7 @@ class ThemeContext:
         "DEFAULT": {"border": "═", "accent": Prisma.CYN, "alert": Prisma.RED},
         "NOIR": {"border": "-", "accent": Prisma.GRY, "alert": Prisma.WHT},
         "RETRO": {"border": "*", "accent": Prisma.MAG, "alert": Prisma.YEL},
-        "MINIMAL": {"border": " ", "accent": Prisma.RST, "alert": Prisma.RST}
-    }
+        "MINIMAL": {"border": " ", "accent": Prisma.RST, "alert": Prisma.RST}}
 
     def __init__(self, theme_name="DEFAULT"):
         self.active = self.THEMES.get(theme_name, self.THEMES["DEFAULT"])

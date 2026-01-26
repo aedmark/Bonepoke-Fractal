@@ -115,8 +115,7 @@ class TheForge:
                             True,
                             f"{Prisma.VIOLET}⚗️ ALCHEMY: '{catalyst_hits[0].upper()}' entangled with {ingredient}. {recipe['msg']}{Prisma.RST}",
                             ingredient,
-                            recipe["result"]
-                        )
+                            recipe["result"])
                     else:
                         msg = (f"{Prisma.GRY}The {ingredient} vibrates near '{catalyst_hits[0]}', "
                                f"but decoherence occurs. (Entanglement: {int(entanglement*100)}%){Prisma.RST}")

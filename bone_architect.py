@@ -35,8 +35,7 @@ class PanicRoom:
             psi=0.5,
             kappa=0.5,
             flow_state="SAFE_MODE",
-            zone="PANIC_ROOM"
-        )
+            zone="PANIC_ROOM")
 
     @staticmethod
     def get_safe_bio(previous_state=None):
@@ -46,15 +45,12 @@ class PanicRoom:
             "chem": {"DOP": 0.0, "COR": 0.0, "OXY": 0.0, "SER": 0.0},
             "logs": [f"{Prisma.RED}BIO FAIL: Triage Protocol Active.{Prisma.RST}"],
             "respiration": "NECROSIS",
-            "enzyme": "NONE"
-        }
-
+            "enzyme": "NONE"}
         if previous_state and isinstance(previous_state, dict):
             old_chem = previous_state.get("chemistry", {})
             if old_chem:
                 base["chem"]["COR"] = min(0.9, old_chem.get("COR", 0.0))
                 base["chem"]["SER"] = max(0.2, old_chem.get("SER", 0.0))
-
         return base
 
     @staticmethod
@@ -62,8 +58,7 @@ class PanicRoom:
         return {
             "lens": "NARRATOR",
             "role": "The Backup System",
-            "thought": "I cannot think clearly, therefore I still am, but barely.",
-        }
+            "thought": "I cannot think clearly, therefore I still am, but barely.",}
 
 class BoneArchitect:
     @staticmethod
@@ -78,8 +73,7 @@ class BoneArchitect:
             mirror=MirrorGraph(events),
             wise=ApeirogonResonance(events),
             tracer=ViralTracer(_mem),
-            integrator=SoritesIntegrator(_mem)
-        )
+            integrator=SoritesIntegrator(_mem))
         return mind, limbo
 
     @staticmethod
@@ -94,8 +88,7 @@ class BoneArchitect:
             plasticity=NeuroPlasticity(),
             governor=MetabolicGovernor(),
             shimmer=ShimmerState(),
-            parasite=ParasiticSymbiont(mind.mem, lex)
-        )
+            parasite=ParasiticSymbiont(mind.mem, lex))
 
     @staticmethod
     def _construct_physics(events, bio) -> PhysSystem:
@@ -107,8 +100,7 @@ class BoneArchitect:
             pulse=ThePacemaker(),
             gate=TheTangibilityGate(),
             dynamics=TemporalDynamics(),
-            nav=TheNavigator(bio.shimmer)
-        )
+            nav=TheNavigator(bio.shimmer))
 
     @staticmethod
     def incubate(events, lex) -> SystemEmbryo:
@@ -124,8 +116,7 @@ class BoneArchitect:
             bio=bio,
             physics=physics,
             shimmer=bio.shimmer,
-            is_gestating=True
-        )
+            is_gestating=True)
 
     @staticmethod
     def awaken(embryo: SystemEmbryo) -> SystemEmbryo:

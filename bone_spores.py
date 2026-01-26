@@ -22,7 +22,7 @@ class BoneJSONEncoder(json.JSONEncoder):
 
 class SporeCasing:
     def __init__(self, session_id, graph, mutations, trauma, joy_vectors):
-        self.genome = "BONEAMANITA_11.3.3"
+        self.genome = "BONEAMANITA_11.3.4"
         self.parent_id = session_id
         self.core_graph = {}
         for k, data in graph.items():
@@ -492,8 +492,7 @@ class MycelialNetwork:
                 "age_hours": time_ago,
                 "trauma": trauma_summary,
                 "mutations": mutation_count,
-                "loaded_at": time.time()
-            })
+                "loaded_at": time.time()})
             if "fossils" in data:
                 self.fossils.extend(data["fossils"])
                 self.events.log(f"{Prisma.GRY}[OSSUARY]: Loaded {len(data['fossils'])} fossilized memories.{Prisma.RST}")

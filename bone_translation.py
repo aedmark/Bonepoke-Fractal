@@ -24,16 +24,14 @@ class RosettaStone:
             "HIGH": "Electric, Sharp, Urgent",
             "CRITICAL": "Manic, Overwhelming, Screaming",
             "PARANOID": "Defensive, Brittle, Watchful",
-            "WARM": "Communal, Soft, Permeable"
-        },
+            "WARM": "Communal, Soft, Permeable"},
         "SENSATION": {
             "FLOAT": "Weightless, drifting in zero-g",
             "SOLID": "Grounded, tactile, firm",
             "MUD": "Heavy, viscous, wading through tar",
             "MAGMA": "Burning constriction, energy trapped in stone",
             "PLASMA": "Structure dissolving into pure light",
-            "STARVATION": "Empty, sputtering, hollowing out"
-        },
+            "STARVATION": "Empty, sputtering, hollowing out"},
         "FOCUS": {
             "DRIFT": "Scattered, dreamlike, associative",
             "COHERENT": "Lucid, integrated, flowing",
@@ -49,33 +47,26 @@ class RosettaStone:
         entropy = physics.get("entropy", 0.0)
         chem = bio.get("chemistry", {})
         atp = bio.get("atp", 0.0)
-
         tone, color = RosettaStone._derive_voltage_tone(voltage)
         focus = RosettaStone._derive_coherence_focus(coherence)
         pacing = "Steady"
         metaphor = "Solid State"
-
         if impulse and getattr(impulse, 'somatic_reflex', None):
             sensation = impulse.somatic_reflex
         else:
             sensation = RosettaStone._derive_drag_sensation(drag)
-
         tone = RosettaStone._apply_chemistry(tone, chem)
-
         if voltage > 12.0 and drag > 5.0:
             sensation = f"{sensation} (Magmatic Pressure)"
             color = Prisma.RED
         elif voltage > 12.0 and entropy > 0.8:
             sensation = f"{sensation} (Ionized Plasma)"
             color = Prisma.MAG
-
         if atp < 5.0:
             tone = "Desperate"
             sensation = "Hollow, sputtering"
             color = Prisma.GRY
-
         hint = f"Act {tone.lower()}. Body feels: {sensation.lower()}. Mind is {focus.lower()}."
-
         return SomaticState(
             tone=tone,
             pacing=pacing,
@@ -83,8 +74,7 @@ class RosettaStone:
             somatic_sensation=sensation,
             metaphor=metaphor,
             internal_monologue_hint=hint,
-            color_code=color
-        )
+            color_code=color)
 
     @staticmethod
     def _derive_voltage_tone(v: float) -> Tuple[str, str]:
@@ -115,7 +105,6 @@ class RosettaStone:
         dopamine = chem.get("DOP", 0.0)
         oxytocin = chem.get("OXY", 0.0)
         adrenaline = chem.get("ADR", 0.0)
-
         if cortisol > 0.7:
             return f"{RosettaStone.LIBRARY['TONE']['PARANOID']} (Overlaid on {current_tone})"
         if adrenaline > 0.7:
@@ -124,7 +113,6 @@ class RosettaStone:
             return f"{RosettaStone.LIBRARY['TONE']['WARM']} {current_tone}"
         if dopamine > 0.8:
             return f"Obsessive, Craving, {current_tone}"
-
         return current_tone
 
 class SomaticInterface:
@@ -134,10 +122,8 @@ class SomaticInterface:
     def get_current_qualia(self, impulse: Any = None) -> SomaticState:
         physics = self.eng.phys.tension.last_physics_packet if self.eng.phys.tension.last_physics_packet else {}
         if hasattr(physics, "to_dict"): physics = physics.to_dict()
-
         bio = self.eng.bio.endo.get_state()
         bio["atp"] = self.eng.bio.mito.state.atp_pool
-
         return RosettaStone.translate(physics, bio, impulse)
 
     def report(self):

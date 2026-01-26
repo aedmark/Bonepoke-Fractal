@@ -24,8 +24,7 @@ class LoreManifest:
             "DREAMS": DREAMS,
             "RESONANCE": RESONANCE,
             "ALMANAC_DATA": ALMANAC_DATA,
-            "SOMATIC_LIBRARY": SOMATIC_LIBRARY
-        }
+            "SOMATIC_LIBRARY": SOMATIC_LIBRARY}
         self._overlays = {}
 
     @classmethod
@@ -39,7 +38,6 @@ class LoreManifest:
             data = self._overlays[category]
         else:
             data = self._registry.get(category, {})
-
         if sub_key and isinstance(data, dict):
             return data.get(sub_key, None)
         return data
@@ -946,8 +944,7 @@ class TheAkashicRecord:
         new_lens = {
             "role": f"The {role_a} / {role_b} Synthesis",
             "msg": f"Perspective shift: {lens_a} and {lens_b} are aligning. The dialectic is resolved.",
-            "derived_from": [lens_a, lens_b]
-        }
+            "derived_from": [lens_a, lens_b]}
         LENSES[new_key] = new_lens
         self.lens_cooccurrence[(lens_a, lens_b)] = 0
         print(f"✨ MYTHOLOGY ENGINE: A new lens has formed: {new_key}")
@@ -959,8 +956,7 @@ class TheAkashicRecord:
             "catalyst_category": catalyst,
             "result": "CUSTOM_ARTIFACT",
             "msg": "The universe remembers this combination. It is now Law.",
-            "dynamic_result": result_item
-        }
+            "dynamic_result": result_item}
         current_recipes: List[Dict[str, Any]] = GORDON["RECIPES"]
         for r in current_recipes:
             if r.get("ingredient") == ingredient and r.get("catalyst_category") == catalyst:
@@ -993,8 +989,7 @@ class TheAkashicRecord:
             "function": "ARTIFACT",
             "passive_traits": [f"{dominant.upper()}_RESONANCE"],
             "value": round(value, 2),
-            "usage_msg": f"You use the {name}. The air ripples with {dominant} force."
-        }
+            "usage_msg": f"You use the {name}. The air ripples with {dominant} force."}
 
         return name, new_item
 

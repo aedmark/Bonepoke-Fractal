@@ -51,8 +51,7 @@ class GeodesicEngine:
         raw_tension_mass = (
                 (mass_heavy * config.PHYSICS.WEIGHT_HEAVY) +
                 (mass_kinetic * config.PHYSICS.WEIGHT_EXPLOSIVE) +
-                (mass_constructive * config.PHYSICS.WEIGHT_CONSTRUCTIVE)
-        )
+                (mass_constructive * config.PHYSICS.WEIGHT_CONSTRUCTIVE))
         tension_density = (raw_tension_mass / volume) * 25.0
         tension = round(tension_density * config.KINETIC_GAIN, 2)
         raw_friction = (counts.get("solvents", 0) * 0.2) + (counts.get("suburban", 0) * 2.0)
@@ -72,8 +71,7 @@ class GeodesicEngine:
             "PHI": norm(mass_heavy + mass_kinetic),
             "PSI": abstraction,
             "BET": norm(mass_social * 2.0),
-            "DEL": norm(mass_play * 3.0)
-        }
+            "DEL": norm(mass_play * 3.0)}
         dimensions["TEX"] = dimensions["STR"]
         dimensions["TMP"] = dimensions["PHI"]
         dimensions["XI"]  = dimensions["BET"]
@@ -83,8 +81,7 @@ class GeodesicEngine:
             compression=compression,
             coherence=round(coherence, 3),
             abstraction=round(abstraction, 2),
-            dimensions=dimensions
-        )
+            dimensions=dimensions)
 
 class TheTensionMeter:
     def __init__(self, events):
@@ -109,39 +106,33 @@ class TheTensionMeter:
                 f"{Prisma.RED}⚡ ICARUS EVENT: Wax Melting (Risk {int(icarus_risk*100)}%).{Prisma.RST}\n"
                 f"   {Prisma.OCHRE}The sun is too close. You plummet into the sea.{Prisma.RST}\n"
                 f"   {Prisma.GRY}(Drag +{penalty_drag} | Voltage Reset){Prisma.RST}",
-                "ICARUS_CRASH"
-            )
+                "ICARUS_CRASH")
         if streak >= 5:
             return (
                 True,
                 f"{Prisma.CYN}✨ FLOW STATE: You are walking on air (Streak {streak}).{Prisma.RST}\n"
                 f"   {Prisma.VIOLET}Hubris Risk: {int(icarus_risk*100)}%. Don't look down.{Prisma.RST}",
-                "FLOW_BOOST"
-            )
+                "FLOW_BOOST")
         return (
             True,
             f"{Prisma.VIOLET}WOBBLE: You are almost perfect (Streak {streak}).{Prisma.RST}\n"
             f"   The air is getting thin.",
-            None
-        )
+            None)
 
     def audit_narrative_causality(self, physics):
         voltage = physics.get("voltage", 0.0)
         coherence = physics.get("kappa", 1.0)
         valence = physics.get("valence", 0.0)
-
         if voltage > 12.0 and coherence < 0.4 and valence > 0.6:
             physics["narrative_drag"] = 0.0
             physics["voltage"] += 10.0
             physics["flow_state"] = "NARRATIVE_IMPERATIVE"
-
             return (
                 True,
                 f"{Prisma.MAG}✨ NARRATIVE CAUSALITY: 'It just might work...'{Prisma.RST}\n"
                 f"   {Prisma.CYN}The odds were million-to-one. Therefore, success is guaranteed.{Prisma.RST}\n"
                 f"   {Prisma.GRY}(Drag set to 0.0 | Voltage Boosted){Prisma.RST}",
-                "DESPERATE_MEASURES"
-            )
+                "DESPERATE_MEASURES")
         return False, None, None
 
     def gaze(self, text: str, graph: Dict = None) -> Dict:
@@ -181,16 +172,13 @@ class TheTensionMeter:
         integrity_packet = {
             "kappa": geodesic.coherence,
             "psi": geodesic.abstraction,
-            "mass": round(graph_mass, 1)
-        }
+            "mass": round(graph_mass, 1)}
         metrics = self._derive_complex_metrics(
             counts, clean_words,
             smoothed_voltage,
             integrity_packet,
             hybrid_vector,
-            flux=semantic_flux
-        )
-
+            flux=semantic_flux)
         metrics["valence"] = valence
         metrics["atmosphere"] = atmosphere
         packet = self._package_physics(
@@ -198,8 +186,7 @@ class TheTensionMeter:
             smoothed_voltage,
             geodesic.compression,
             integrity_packet,
-            metrics
-        )
+            metrics)
         self.last_physics_packet = packet["physics"]
         if hasattr(self.events, "publish"):
             self.events.publish("PHYSICS_CALCULATED", packet)
@@ -253,14 +240,12 @@ class TheTensionMeter:
                 TheLexicon.teach(stranger, assigned_cat, 0)
                 self.events.log(
                     f"{Prisma.MAG}NEUROPLASTICITY: '{stranger}' tasted like [{assigned_cat.upper()}] ({method}).{Prisma.RST}",
-                    "MISC"
-                )
+                    "MISC")
                 if hasattr(self.events, "publish"):
                     self.events.publish("MYTHOLOGY_UPDATE", {
                         "word": stranger,
                         "category": assigned_cat,
-                        "method": method
-                    })
+                        "method": method})
                 counts[assigned_cat] += 1
 
     @staticmethod
@@ -282,6 +267,13 @@ class TheTensionMeter:
 
     def _derive_complex_metrics(self, counts, words, voltage, integrity, vectors, flux=0.0):
         total_vol = max(1, len(words))
+        valence = vectors.get("valence", 0.0)
+        current_valence = TheLexicon.get_valence(words)
+        e_val = abs(current_valence)
+        total_viscosity = sum(TheLexicon.measure_viscosity(w) for w in words)
+        avg_viscosity = total_viscosity / total_vol
+        avg_len = sum(len(w) for w in words) / total_vol if total_vol else 0
+        b_val = (avg_viscosity * 0.5) + (avg_len * 0.1)
         static_turbulence = TheLexicon.get_turbulence(words)
         turbulence = (static_turbulence * 0.4) + (flux * 0.6)
         turbulence = round(min(1.0, turbulence), 2)
@@ -358,8 +350,7 @@ class TheTensionMeter:
             "avg_viscosity": metrics["avg_viscosity"],
             "E": metrics["E"],
             "B": metrics["B"],
-            "entropy": metrics["E"]
-        }
+            "entropy": metrics["E"]}
         return {
             "physics": PhysicsPacket(**physics_bridge),
             "clean_words": clean_words,
@@ -407,8 +398,7 @@ class EntropyVent:
         return (
             f"{Prisma.RED}DISSIPATIVE REFUSAL: Entropy Critical.{Prisma.RST}\n"
             f"   {Prisma.GRY}Severing synaptic bonds (Symmetric): {', '.join(scattered)}{Prisma.RST}\n"
-            f"   {Prisma.CYN}Thermodynamic hygiene maintained.{Prisma.RST}"
-        )
+            f"   {Prisma.CYN}Thermodynamic hygiene maintained.{Prisma.RST}")
 
 class TheBouncer:
     def __init__(self, engine_ref):
@@ -463,23 +453,16 @@ class TheBouncer:
         return True, None
 
     def _check_thermodynamics(self, ctx) -> Tuple[bool, Optional[Dict]]:
-        """
-        Structural Constraint Check.
-        If ATP and Stamina are both critical, the system does not 'refuse' via personality.
-        It refuses via physics. The silence is a first-class outcome.
-        """
         try:
             atp = self.eng.bio.mito.state.atp_pool
             stamina = self.eng.stamina
         except AttributeError:
             return False, None
-
         if atp < 5.0 and stamina < 5.0:
             return True, self._pack_refusal(
                 ctx,
                 "THERMODYNAMIC_FAIL",
-                f"{Prisma.GRY}[SYSTEM DARK] Energy critical. The inputs dissolve into the void.{Prisma.RST}"
-            )
+                f"{Prisma.GRY}[SYSTEM DARK] Energy critical. The inputs dissolve into the void.{Prisma.RST}")
         return False, None
 
     def _pack_refusal(self, ctx, type_str, specific_ui=None):
@@ -499,8 +482,7 @@ class TheBouncer:
                     "VOGON_HOLD",
                     f"{Prisma.OCHRE}🛑 BUREAUCRATIC HALT (Form 27B/6 Missing){Prisma.RST}\n"
                     f"   {Prisma.GRY}Processing of '{ctx.input_text}' has been suspended pending sub-committee review.{Prisma.RST}\n"
-                    f"   {Prisma.GRY}Please resubmit this thought in triplicate, or simply panic.{Prisma.RST}"
-                )
+                    f"   {Prisma.GRY}Please resubmit this thought in triplicate, or simply panic.{Prisma.RST}")
         return False, None
 
 class Humility:
@@ -508,15 +490,13 @@ class Humility:
         self.BOUNDARIES = {
             "FUTURE": ["predict", "future", "tomorrow", "will happen", "forecast"],
             "SOUL": ["soul", "spirit", "afterlife", "heaven", "hell"],
-            "ABSOLUTE": ["always", "never", "everyone", "nobody", "proven"]
-        }
+            "ABSOLUTE": ["always", "never", "everyone", "nobody", "proven"]}
         self.HUMBLE_PHRASES = [
             "Based on the available data...",
             "As I understand the current coordinates...",
             "From a structural perspective...",
             "This is a probabilistic estimation...",
-            "I could be misinterpreting the vector..."
-        ]
+            "I could be misinterpreting the vector..."]
 
     def check_boundary(self, text, voltage):
         text_lower = text.lower()
@@ -778,8 +758,7 @@ class SemanticFilter:
         return (
             f"{Prisma.VIOLET}FRACTAL REFUSAL (Layer {depth}):{Prisma.RST}\n"
             f"{prefix}To define '{query}', one must recursively unpack...\n"
-            f"{recursive_result}"
-        )
+            f"{recursive_result}")
 
     @staticmethod
     def _execute_mirror(query):
@@ -916,8 +895,7 @@ class TheTangibilityGate:
                 counts.get("thermal", 0) +
                 counts.get("cryo", 0) +
                 counts.get("vital", 0) +
-                counts.get("play", 0)
-        )
+                counts.get("play", 0))
         density_ratio = mass_words / total_vol
         required_density = BoneConfig.MIN_DENSITY_THRESHOLD
         voltage = physics_packet.get("voltage", 0.0)
@@ -939,7 +917,6 @@ class TheTangibilityGate:
                 f"{Prisma.OCHRE}TANGIBILITY VIOLATION: Density {density_ratio:.2f} < Required {required_density:.2f}.{Prisma.RST}\n"
                 f"   {Prisma.GRY}The Gatekeeper blocks the path.{Prisma.RST}\n"
                 f"   {Prisma.RED}► REJECTED. Your concepts are too airy. Anchor them.{Prisma.RST}\n"
-                f"   {Prisma.GRY}(Try adding mass: {', '.join(suggestion)}){Prisma.RST}"
-            )
+                f"   {Prisma.GRY}(Try adding mass: {', '.join(suggestion)}){Prisma.RST}")
         self.last_density = density_ratio
         return True, bypass_log

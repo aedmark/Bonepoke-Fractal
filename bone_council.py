@@ -10,8 +10,7 @@ class TheStrangeLoop:
         self.triggers = [
             "who are you", "what are you", "system status",
             "narrative loop", "simulation boundaries", "fourth wall",
-            "recursive", "infinite regress", "strange loop"
-        ]
+            "recursive", "infinite regress", "strange loop"]
 
     def audit(self, text: str, physics: dict) -> tuple[bool, str, dict]:
         text_lower = text.lower()
@@ -86,16 +85,14 @@ class TheFootnote:
             "* This is technically impossible, but the code doesn't know that.",
             "* Do not eat the green wobbly bit.",
             "* Gravity is a habit that is hard to shake.",
-            "* As reliable as a chocolate teapot."
-        ]
+            "* As reliable as a chocolate teapot."]
         self.context_map = {
             "void": ["* Not to be confused with the other kind of void."],
             "gravity": ["* Gravity is a habit that is hard to shake."],
             "physics": ["* This is technically impossible, but the code doesn't know that."],
             "glitch": ["* Do not eat the green wobbly bit."],
             "error": ["* As reliable as a chocolate teapot."],
-            "system": ["* The turtle moves."]
-        }
+            "system": ["* The turtle moves."]}
 
     def commentary(self, log_text: str) -> str:
         if random.random() > BoneConfig.COUNCIL.FOOTNOTE_CHANCE:

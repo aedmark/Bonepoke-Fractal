@@ -1,5 +1,83 @@
 # BONEAMANITA v11 CHANGELOG
 
+### **BONEAMANITA 11.3.5: "The Induction Protocol"**
+
+_"The electric light is pure information. It is a medium without a message."_ - McLuhan (but adapted for a Python script running in a basement).
+
+---
+
+#### **🌐 SYSTEMS GEOMETRY (The Fuller Layer)**
+
+- **Electromagnetism (`E` & `B`) Integration (`bone_physics.py`)**
+  - **Problem:** The `PhysicsPacket` had fields for `E` (Electric) and `B` (Magnetic), but they were initialized to `0.0` and never calculated. Dead code is weight without strength.
+  - **Solution:** Wired `TheTensionMeter` to calculate these fields dynamically.
+    - **`E` (Electric):** Mapped to Absolute Valence (Emotional Charge).
+    - **`B` (Magnetic):** Mapped to Narrative Density (Viscosity + Length).
+  - **Result:** The system now measures the "Charge" and "Density" of user input, creating a composite **Electromagnetic Field**.
+
+- **The Bio-Shield Connection (`bone_body.py`)**
+  - **Synergy:** Connected the Physics Engine directly to the Biological System. The `SomaticLoop` now passes the EM Field to the `BioSystem` before digestion.
+  - **Effect:** High EM acts as a **Shield**, mitigating environmental entropy (Health loss). However, per thermodynamic laws, it generates **Inductive Heating** (Thermal Feedback) if the field exceeds safety limits.
+
+#### **📈 DYNAMICS & FLOW (The Meadows Layer)**
+
+- **Feedback Loop: The Static Balancing Act**
+  - **Reinforcing Loop:** High-energy inputs create a stronger Shield, preserving Health.
+  - **Balancing Loop:** If `EM > 8.0`, the system overheats, damaging Health. This prevents "infinity run" exploits where a user just screams "LOVE LOVE LOVE" (High `E`) forever.
+
+- **Polymorphic Resilience (`bone_inventory.py`)**
+  - **Fix:** The `GordonKnot` (Inventory) can now handle both `PhysicsPacket` objects and raw dictionaries. The code is now "bilingual," reducing brittleness during data serialization.
+
+#### **🧠 COGNITION & HYGIENE (The Pinker Layer)**
+
+- **Variable Grounding (`bone_body.py`)**
+  - **Fix:** The `BioSystem` dataclass was missing definitions for `events` and `biometrics`, causing crash-on-access errors during the shield calculation.
+  - **Patch:** Explicitly defined these fields and updated the `apply_environmental_entropy` method to use public accessors (removing the restricted `_underscore` prefix).
+
+- **The "Ghost Handler" Guard Clause (`bone_inventory.py`)**
+  - **Fix:** `audit_tools` was blindly trying to call physics handlers for items that didn't have them (calling `None` is a cognitive error).
+  - **Patch:** Added a safety check (`if handler:`) before execution.
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+- **Feature: Static Cling (`bone_inventory.py`)**
+  - **The Fun:** If your EM Field is high (you are being very intense), your inventory items now have a 30% chance of sticking to you due to static electricity.
+  - **Output:** You might see messages like *"The POCKET_ROCKS are stuck to your sleeve"* or *"Sparks fly from your empty hands."*
+  - **Why:** Because physics should be felt, and it's funny when a serious user gets attacked by their own stapler.
+
+### **BONEAMANITA 11.3.4: "The Dungeon Master"**
+
+_“There’s a lot of beauty in ordinary things. Isn’t that kind of the point? But sometimes you just want to wake up in a cyberpunk alleyway.”_
+
+---
+
+#### **🎭 HUMAN EXPERIENCE (The Schur Layer)**
+
+- **The "Barista Memory" Protocol (`bone_genesis.py`, `bone_main.py`)**
+- **Problem:** The system acted like a barista who sees you every day but still asks for your name on the cup.
+- **Solution:** Implemented **Identity Persistence**. The system now checks `bone_config.json` for a known `user_name` before prompting.
+- **Result:** Immediate recognition. "Welcome back, Andrew," instead of "Who are you?"
+
+- **The "Cold Open" Fix (`bone_personality.py`, `bone_genesis.py`)**
+- **Problem:** The `SynergeticLensArbiter` forced a "neutral, booting-up" tone for the first 5 ticks, resulting in a boring "Static blooms" opening.
+- **Solution:** Replaced the boot restraint with a **Genesis Mode**. For the first 2 ticks, the persona shifts to `GAME_MASTER`, and the prompt explicitly requests a vivid starting location.
+- **Result:** The Void is replaced by a concrete, atmospheric scene (e.g., "A tavern on Mars") immediately upon boot.
+
+#### **🧠 COGNITION & LANGUAGE (The Pinker Layer)**
+
+- **Variable Shadowing cleanup (`bone_main.py`)**
+- **Problem:** The variable `f` was being used as a file handle in the global scope (`__main__`) and locally in `emergency_save`, creating ambiguity and "shadowing" warnings.
+- **Solution:** Renamed generic handles to explicit nouns: `config_handle`, `spore_file`, and `panic_file`.
+- **Result:** Reduced cognitive load for human readers; `f` is no longer a trap.
+
+#### **🔄 SYSTEMS DYNAMICS (The Meadows Layer)**
+
+- **Trauma Stock Consolidation (`bone_main.py`)**
+- **Problem:** Trauma accumulated during the turn (in `trauma_accum`) evaporated at the end of the cycle because it wasn't being written back to the memory store.
+- **Solution:** Added a write-back step in `process_turn`: `self.mind.mem.session_trauma_vector = self.trauma_accum.copy()`.
+- **Result:** **Long-Term Consequence**. If you get hurt in a turn, the system now remembers it in the next session. The "Stock" is properly maintained.
+
+
 ### **BONEAMANITA 11.3.3: "The Smooth Operator"**
 
 _“I’m a simple man. I like pretty, dark-haired women and breakfast food. But this code? This code is acceptable.”_

@@ -44,8 +44,7 @@ class CycleStabilizer:
     def _apply_correction(ctx: CycleContext, key: str, correction: float):
         if abs(correction) < 0.05: return 0.0
         p = ctx.physics
-        is_dict = isinstance(p, dict)
-        if is_dict:
+        if isinstance(p, dict):
             old_val = p.get(key, 0.0)
             p[key] = max(0.0, old_val + correction)
         else:
@@ -597,59 +596,36 @@ class SensationPhase(SimulationPhase):
 
 class ParallelPhaseExecutor:
     def execute_phases(self, simulator, ctx):
-        # Stage 1: Observation (Must be first to seed Physics)
         self._run_batch(simulator, ["OBSERVE"], ctx, parallel=False)
-
-        # Stage 2: Maintenance and Sensation (Independent Side-Cars)
         self._run_batch(simulator, ["MAINTENANCE", "SENSATION"], ctx, parallel=True)
-
-        # Stage 3: Control Flow (Gatekeeper & Sanctuary - Sequential)
         self._run_batch(simulator, ["GATEKEEP", "SANCTUARY"], ctx, parallel=False)
-        
         if ctx.refusal_triggered or ctx.is_bureaucratic:
             return
-
-        # Stage 4: Simulation Core (Metabolism & Navigation - Parallel)
-        # Note: We must reconcile carefully. Navigation touches Physics, Metabolism touches Bio.
-        self._run_batch(simulator, ["METABOLISM", "NAVIGATION", "MACHINERY"], ctx, parallel=True)
-
-        # Stage 5: Deep Logic (Sequential due to heavy dependencies)
+        self._run_batch(simulator, ["METABOLISM", "NAVIGATION", "MACHINERY"], ctx, parallel=False)
         deep_phases = ["REALITY_FILTER", "INTRUSION", "SOUL", "COGNITION"]
         self._run_batch(simulator, deep_phases, ctx, parallel=False)
 
     def _run_batch(self, simulator, phase_names, ctx, parallel=False):
         phases = [p for p in simulator.pipeline if p.name in phase_names]
         if not phases: return
-        
         reconciler = StateReconciler()
-        
-        # If any phase name isn't found in pipeline, it's just skipped
-        
         if parallel and len(phases) > 1:
             results = []
             with ThreadPoolExecutor(max_workers=len(phases)) as executor:
-                # We fork context for EACH phase to prevent race conditions during execution
                 phase_map = {}
                 for p in phases:
                     sandbox = reconciler.fork(ctx)
                     future = executor.submit(self._run_single_safe, simulator, p, sandbox)
                     phase_map[future] = (p, sandbox)
-                
                 for future in concurrent.futures.as_completed(phase_map):
                     p, sandbox = phase_map[future]
                     try:
-                        res_sandbox = future.result() # This should be the same as sandbox object mutated
+                        res_sandbox = future.result()
                         results.append((p, res_sandbox))
                     except Exception as e:
                         simulator._handle_phase_crash(ctx, p.name, e)
-            
-            # Reconcile all results back to main ctx
-            # Note: This is a simple merge. If two phases modified same field, last one wins.
             for p, sandbox in results:
-                # We use the existing reconciler but we might loose data if conflicts exist.
-                # However, our grouping tries to avoid heavy conflicts.
                 reconciler.reconcile(ctx, sandbox)
-                
         else:
             for p in phases:
                 sandbox = reconciler.fork(ctx)
@@ -662,10 +638,8 @@ class ParallelPhaseExecutor:
     def _run_single_safe(self, simulator, phase, sandbox):
         if not simulator._check_circuit_breaker(phase.name):
             return sandbox
-        
         tracer = TelemetryService.get_tracer()
         tracer.start_phase(phase.name, sandbox)
-        
         try:
             phase.run(sandbox)
             simulator.stabilizer.stabilize(sandbox, phase.name)
@@ -673,7 +647,6 @@ class ParallelPhaseExecutor:
             raise
         finally:
             tracer.end_phase(phase.name, sandbox, sandbox)
-            
         return sandbox
 
 class CycleSimulator:
@@ -697,7 +670,6 @@ class CycleSimulator:
 
     def run_simulation(self, ctx: CycleContext) -> CycleContext:
         reconciler = StateReconciler()
-        # Using Parallel Executor
         self.executor.execute_phases(self, ctx)
         return ctx
 

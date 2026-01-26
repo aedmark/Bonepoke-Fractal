@@ -1,5 +1,4 @@
-""" bone_personality.py
- 'The masks we wear, and the taxes we pay.' """
+""" bone_personality.py - 'The masks we wear, and the taxes we pay.' """
 
 import json, os, random, time
 from collections import deque
@@ -59,76 +58,56 @@ class EnneagramDriver:
         self.pending_persona = None
         self.stability_counter = 0
         self.HYSTERESIS_THRESHOLD = 3
+        self.WEIGHTS = {
+            "JESTER":   {"tension_min": 12.0, "vectors": {"DEL": 3.0, "ENT": 3.0, "PSI": -3.0}},
+            "GORDON":   {"drag_min": 4.0,     "vectors": {"STR": 2.0, "E": 2.0}},
+            "GLASS":    {"coherence_max": 0.2,"vectors": {"LQ": 2.0}},
+            "CLARENCE": {"coherence_min": 0.8,"vectors": {"TEX": 4.0, "BET": 2.0}},
+            "NATHAN":   {"tension_min": 8.0,  "vectors": {"TMP": 3.0, "PHI": 1.0}},
+            "SHERLOCK": {"tension_min": 10.0, "vectors": {"PHI": 4.0, "VEL": 2.0}},
+            "NARRATOR": {"safe_zone": True,   "vectors": {"PSI": 4.0}}}
 
-    @staticmethod
-    def _calculate_raw_persona(physics) -> Tuple[str, str, str]:
+    def _calculate_raw_persona(self, physics) -> Tuple[str, str, str]:
         if isinstance(physics, dict):
-            vector = physics.get("vector", {})
-            tension = physics.get("voltage", 0.0)
-            compression = physics.get("narrative_drag", 0.0)
-            coherence = physics.get("kappa", 0.0)
-            zone = physics.get("zone", "")
+            p_vec = physics.get("vector", {})
+            p_vol = physics.get("voltage", 0.0)
+            p_drag = physics.get("narrative_drag", 0.0)
+            p_coh = physics.get("kappa", 0.0)
+            p_zone = physics.get("zone", "")
         else:
-            vector = getattr(physics, "vector", {})
-            tension = getattr(physics, "voltage", 0.0)
-            compression = getattr(physics, "narrative_drag", 0.0)
-            coherence = getattr(physics, "kappa", 0.0)
-            zone = getattr(physics, "zone", "")
-
-        scores = {
-            "JESTER": 0, "GORDON": 0, "GLASS": 0,
-            "CLARENCE": 0, "NATHAN": 0, "SHERLOCK": 0, "NARRATOR": 0
-        }
-
-        is_safe_metrics = (4.0 <= tension <= 10.0 and 0.5 <= compression <= 3.5)
-
-        if zone == SANCTUARY.ZONE or is_safe_metrics:
+            p_vec = getattr(physics, "vector", {})
+            p_vol = getattr(physics, "voltage", 0.0)
+            p_drag = getattr(physics, "narrative_drag", 0.0)
+            p_coh = getattr(physics, "kappa", 0.0)
+            p_zone = getattr(physics, "zone", "")
+        scores = {k: 0 for k in self.WEIGHTS.keys()}
+        scores["NARRATOR"] += 2
+        is_safe_metrics = (4.0 <= p_vol <= 10.0 and 0.5 <= p_drag <= 3.5)
+        if p_zone == SANCTUARY.ZONE or is_safe_metrics:
             scores["NARRATOR"] += 6
             scores["JESTER"] += 3
             scores["GORDON"] -= 2
-
-        if tension > 12.0:
-            if vector.get("DEL", 0) > 0.3 or vector.get("ENT", 0) > 0.3:
-                scores["JESTER"] += 5
-            else:
-                scores["NARRATOR"] += 2
-                scores["SHERLOCK"] += 2
-
-        if tension > 8.0:
-            scores["NATHAN"] += 3
-
-        if compression > 4.0:
-            scores["GORDON"] += 5
-
-        if coherence < 0.2:
-            scores["GLASS"] += 4
-        if coherence > 0.8:
-            scores["CLARENCE"] += 4
-
-        if vector.get("PSI", 0) > 0.25:
-            scores["NARRATOR"] += 4
-            scores["JESTER"] -= 3
-
-        if vector.get("PHI", 0) > 0.3:
-            scores["SHERLOCK"] += 4
-
-        if vector.get("DEL", 0) > 0.3:
-            scores["JESTER"] += 3
-
-        scores["SHERLOCK"] += 2
-        scores["NARRATOR"] += 2
-
+        for persona, criteria in self.WEIGHTS.items():
+            if "tension_min" in criteria and p_vol > criteria["tension_min"]:
+                scores[persona] += 3
+            if "drag_min" in criteria and p_drag > criteria["drag_min"]:
+                scores[persona] += 5
+            if "coherence_min" in criteria and p_coh > criteria["coherence_min"]:
+                scores[persona] += 4
+            if "coherence_max" in criteria and p_coh < criteria["coherence_max"]:
+                scores[persona] += 4
+            for dim, weight in criteria.get("vectors", {}).items():
+                val = p_vec.get(dim, 0.0)
+                if val > 0.2: # Noise floor
+                    scores[persona] += val * weight
         winner = max(scores, key=scores.get)
-        reason = f"Scoring Winner: {winner} (Score: {scores[winner]}) [V:{tension:.1f}]"
-
+        reason = f"Scoring Winner: {winner} (Score: {scores[winner]:.1f}) [V:{p_vol:.1f}]"
         state_desc = "ACTIVE"
         if winner == "JESTER": state_desc = "MANIC"
         elif winner == "GORDON": state_desc = "TIRED"
         elif winner == "GLASS": state_desc = "FRAGILE"
         elif winner == "CLARENCE": state_desc = "RIGID"
-
         return winner, state_desc, reason
-
     def decide_persona(self, physics) -> Tuple[str, str, str]:
         candidate, state_desc, reason = self._calculate_raw_persona(physics)
         if candidate == self.current_persona:
@@ -157,21 +136,20 @@ class SynergeticLensArbiter:
 
     def consult(self, physics, bio_state, _inventory, current_tick, _ignition_score=0.0):
         voltage = physics.get("voltage", 0.0) if isinstance(physics, dict) else physics.voltage
-
-        if current_tick <= 5 and voltage < 10.0:
+        if current_tick <= 2:
             self.current_focus = "NARRATOR"
             return {
-                "lens": "NARRATOR",
-                "role": "The Witness [Init]",
+                "lens": "GAME_MASTER",
+                "role": "The Architect [World Builder]",
                 "style_directives": [
-                    "Maintain a neutral, booting-up tone.",
-                    "Acknowledge the user briefly.",
-                    "Do not use metaphor."
-                ],
-                "lexicon_bias": "abstract",
-                "context_msg": "System Online."
-            }
-
+                    "You are a creative, welcoming Game Master.",
+                    "IMMEDIATELY generate a vivid, specific location.",
+                    "Focus on sensory details (light, texture, sound).",
+                    "Do NOT mention the user's inventory, pockets, or stats.",
+                    "Do NOT start in a generic void.",
+                    "Be concrete and atmospheric."],
+                "lexicon_bias": "kinetic",
+                "context_msg": "Scenario Initialization."}
         lens_name, state_desc, reason = self.enneagram.decide_persona(physics)
         chem = bio_state.get("chem", {})
         adrenaline_val = chem.get("adrenaline", chem.get("ADR", 0.5))
@@ -183,8 +161,7 @@ class SynergeticLensArbiter:
             "role": f"{style_data['role_name']} [{state_desc}]",
             "style_directives": style_data['directives'],
             "lexicon_bias": style_data['vocab'],
-            "context_msg": style_data['msg']
-        }
+            "context_msg": style_data['msg']}
 
     def _fetch_style_data(self, lens, p, adrenaline_val):
         if lens not in LENSES:
@@ -194,9 +171,7 @@ class SynergeticLensArbiter:
             "role_name": static_data.get("role", "Unknown"),
             "vocab": static_data.get("vocab", "abstract"),
             "directives": static_data.get("directives", ["Be neutral."]).copy(),
-            "msg": "Proceed."
-        }
-
+            "msg": "Proceed."}
         voltage = p.get("voltage", 0.0)
         if voltage > 20.0:
             style_packet["directives"].append("Use fragmented, manic sentence structures.")
@@ -206,19 +181,16 @@ class SynergeticLensArbiter:
         elif voltage < 5.0:
             style_packet["directives"].append("Use slow, languid pacing.")
             style_packet["directives"].append("Drift into philosophical abstraction.")
-
         try:
             msg_template = static_data.get("msg", "Proceed.")
             ctx = {
                 "kappa": p.get("kappa", 0.0),
                 "truth_ratio": p.get("truth_ratio", 0.0),
                 "adr": adrenaline_val,
-                "volts": voltage
-            }
+                "volts": voltage}
             style_packet["msg"] = msg_template.format(**{k: v for k, v in ctx.items() if k in msg_template})
         except Exception:
             style_packet["msg"] = static_data.get("msg", "System Nominal.")
-
         return style_packet
 
 class ZenGarden:
@@ -232,8 +204,7 @@ class ZenGarden:
             "To optimize the loop, one must first exit it.",
             "Silence is also a form of input.",
             "The server hums. It is enough.",
-            "Optimize for the space between the logs."
-        ]
+            "Optimize for the space between the logs."]
 
     def raking_the_sand(self, physics: Dict, bio: Dict) -> Tuple[float, Optional[str]]:
         voltage = physics.get("voltage", 0.0)
@@ -274,8 +245,7 @@ class TheBureau:
             "1099-B": {"effect": "STAGNATE", "mod": {"narrative_drag": 5.0, "voltage": -5.0}, "atp": 15.0},
             "Schedule C": {"effect": "TAX", "mod": {"voltage": -10.0}, "atp": 8.0},
             "Form W-2": {"effect": "NORMALIZE", "mod": {"beta_index": 1.0, "turbulence": 0.0}, "atp": 5.0},
-            "Form 404": {"effect": "NULLIFY", "mod": {"voltage": -20.0, "kappa": 1.0}, "atp": -5.0}
-        }
+            "Form 404": {"effect": "NULLIFY", "mod": {"voltage": -20.0, "kappa": 1.0}, "atp": -5.0}}
         self.BUZZWORDS = {"synergy", "paradigm", "leverage", "utilize", "holistic", "bandwidth", "circle back"}
 
     def audit(self, physics, bio_state, context=None):
@@ -320,8 +290,7 @@ class TheBureau:
             "ui": (f"{Prisma.GRY}🏢 THE BUREAU: {random.choice(self.responses)}{Prisma.RST}\n"
                    f"   {Prisma.WHT}[Filed: {full_form_name}]{Prisma.RST}{evidence_str}"),
             "log": f"BUREAUCRACY: Filed {selected_form}. Mods: {mod_log}.",
-            "atp_gain": policy["atp"]
-        }
+            "atp_gain": policy["atp"]}
 
 class TherapyProtocol:
     def __init__(self):
@@ -362,7 +331,6 @@ class KintsugiProtocol:
     PATH_SCAR = "SCAR"
     PATH_INTEGRATION = "KINTSUGI"
     PATH_ALCHEMY = "ALCHEMY"
-
     REPAIR_VOLTAGE_MIN = 8.0
     WHIMSY_THRESHOLD = 0.3
     STAMINA_CRITICAL = 15.0
@@ -374,40 +342,27 @@ class KintsugiProtocol:
         self.gold_reserves = 5.0
 
     def check_integrity(self, stamina):
-        """
-        Meadows: Monitoring the stock of Stamina.
-        If it drops too low, we trigger the repair feedback loop.
-        """
         if stamina < self.STAMINA_CRITICAL and not self.active_koan:
             self.active_koan = random.choice(self.koans)
             return True, self.active_koan
         return False, None
 
     def attempt_repair(self, phys, trauma_accum, soul_ref=None):
-        """
-        The Resolution Engine. Determines HOW we heal based on system state.
-        """
         if not self.active_koan: return None
-
         voltage = phys.get("voltage", 0.0)
         clean = phys.get("clean_words", [])
-
         play_count = sum(1 for w in clean if w in TheLexicon.get("play") or w in TheLexicon.get("abstract"))
         total = max(1, len(clean))
         whimsy_score = play_count / total
-
         pathway = self.PATH_SCAR
         if voltage > 15.0 and whimsy_score > 0.5:
             pathway = self.PATH_ALCHEMY
         elif voltage > self.REPAIR_VOLTAGE_MIN and whimsy_score > self.WHIMSY_THRESHOLD:
             pathway = self.PATH_INTEGRATION
-
         result = self._execute_pathway(pathway, trauma_accum, soul_ref, voltage)
-
         old_koan = self.active_koan
         self.active_koan = None
         self.repairs_count += 1
-
         result["detail"] = f"'{old_koan}' resolved via {pathway}. (V: {voltage:.1f} | Whimsy: {whimsy_score:.2f})"
         return result
 
@@ -415,43 +370,34 @@ class KintsugiProtocol:
         healed_log = []
         msg = ""
         success = False
-
         if not trauma_accum:
             return {"success": False, "msg": "No trauma to heal."}
-
         target_trauma = max(trauma_accum, key=trauma_accum.get)
         severity = trauma_accum[target_trauma]
-
         if pathway == self.PATH_ALCHEMY:
             reduction = severity * 0.8
             trauma_accum[target_trauma] = max(0.0, severity - reduction)
-
             atp_boost = reduction * 10.0
             msg = f"{Prisma.VIOLET}🔮 ALCHEMICAL TRANSMUTATION: Pain has become Power. (+{atp_boost:.1f} ATP){Prisma.RST}"
             healed_log.append(f"Transmuted {target_trauma} into Fuel.")
             success = True
             return {"success": True, "msg": msg, "healed": healed_log, "atp_gain": atp_boost}
-
         elif pathway == self.PATH_INTEGRATION:
             reduction = 2.0
             trauma_accum[target_trauma] = max(0.0, severity - reduction)
-
             if soul_ref:
                 current_wis = soul_ref.traits.get("WISDOM", 0.0)
                 soul_ref.traits["WISDOM"] = min(1.0, current_wis + 0.1)
                 healed_log.append("Gained Wisdom (+0.1)")
-
             msg = f"{Prisma.YEL}🏺 KINTSUGI COMPLETE: The {target_trauma} is filled with Gold.{Prisma.RST}"
             healed_log.append(f"Repaired {target_trauma} (-{reduction})")
             success = True
-
         else:
             reduction = 0.5
             trauma_accum[target_trauma] = max(0.0, severity - reduction)
             msg = f"{Prisma.GRY}🩹 SCAR TISSUE FORMED: It is ugly, but it holds.{Prisma.RST}"
             healed_log.append(f"Scarred over {target_trauma} (-{reduction})")
             success = True
-
         return {"success": success, "msg": msg, "healed": healed_log}
 
 class LimboLayer:
@@ -575,6 +521,5 @@ class ChorusDriver:
             f"You are not a single persona. You are a chorus. Integrate the following voices into a single, cohesive response. "
             f"Do NOT label which voice is speaking. Synthesize their tones.\n"
             f"NEGATIVE CONSTRAINT: Do NOT offer assistance. Do NOT sign off with '[Assistant]'. Do NOT break character.\n"
-            f"{chr(10).join(chorus_voices)}"
-        )
+            f"{chr(10).join(chorus_voices)}")
         return instruction, active_lenses

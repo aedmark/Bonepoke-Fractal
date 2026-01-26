@@ -3,7 +3,7 @@
 
 import random, copy
 from dataclasses import dataclass, field
-from typing import List, Dict, Tuple, Optional, Any
+from typing import List, Dict, Tuple, Optional, Any, cast, Callable
 from enum import Enum, auto
 from bone_bus import Prisma, BoneConfig
 from bone_data import GORDON_LOGS, GORDON
@@ -17,9 +17,6 @@ class EffectType(Enum):
 
 @dataclass
 class ItemEffect:
-    """
-    Defines WHAT a trait does (type) and HOW it does it (handlers).
-    """
     effect_type: EffectType
     physics_handler: Optional[Any] = None
     semantic_instr: Optional[str] = None
@@ -28,13 +25,6 @@ class ItemEffect:
 
 @dataclass
 class PhysicsDelta:
-    """
-    A request to change the system.
-    operator: ADD, SET, MULTIPLY, ADD_COUNT, SET_COUNT, ADD_VECTOR, SET_ZONE
-    field: The specific metric (e.g., 'voltage', 'suburban')
-    value: The value to apply
-    message: Optional log message for the UI
-    """
     operator: str
     field: str
     value: Any
@@ -43,8 +33,7 @@ class PhysicsDelta:
 UNKNOWN_ARTIFACT = {
     "description": "Unknown Artifact",
     "function": "NONE",
-    "usage_msg": "It does nothing."
-}
+    "usage_msg": "It does nothing."}
 
 @dataclass
 class TensegrityState:
@@ -83,8 +72,7 @@ def effect_bureaucratic_anchor(physics: Dict, _data: Dict, item_name: str) -> Li
         msg = f"{Prisma.GRY}{item_name}: Policy enforced. (Beta +0.2, Drag +0.5){Prisma.RST}"
         return [
             PhysicsDelta("ADD", "beta_index", 0.2, msg),
-            PhysicsDelta("ADD", "narrative_drag", 0.5)
-        ]
+            PhysicsDelta("ADD", "narrative_drag", 0.5)]
     return []
 
 def effect_grounding_gear(physics: Dict, _data: Dict, item_name: str) -> List[PhysicsDelta]:
@@ -94,8 +82,7 @@ def effect_grounding_gear(physics: Dict, _data: Dict, item_name: str) -> List[Ph
         return [
             PhysicsDelta("SET_ZONE", "zone", "THE_MUD", msg),
             PhysicsDelta("ADD", "narrative_drag", 2.0),
-            PhysicsDelta("ADD", "voltage", -2.0)
-        ]
+            PhysicsDelta("ADD", "voltage", -2.0)]
     return []
 
 def effect_safety_scissors(physics: Dict, _data: Dict, item_name: str) -> List[PhysicsDelta]:
@@ -111,11 +98,9 @@ def effect_caffeine_drip(physics: Dict, _data: Dict, _item_name: str) -> List[Ph
     current_vel = physics.get("vector", {}).get("VEL", 0)
     if current_vel < 1.0:
         deltas.append(PhysicsDelta("ADD_VECTOR", "VEL", 0.1))
-
     if random.random() < 0.2:
         msg = f"{Prisma.CYN}CAFFEINE JITTERS: Velocity UP, Stability DOWN.{Prisma.RST}"
         deltas.append(PhysicsDelta("ADD", "turbulence", 0.2, msg))
-
     return deltas
 
 def effect_apology_eraser(physics: Dict, _data: Dict, item_name: str) -> List[PhysicsDelta]:
@@ -132,8 +117,7 @@ def effect_sync_check(physics: Dict, _data: Dict, item_name: str) -> List[Physic
         msg = f"{Prisma.CYN}{item_name}: The hands align. 11:11. Synchronicity achieved.{Prisma.RST}"
         return [
             PhysicsDelta("SET", "narrative_drag", 0.0, msg),
-            PhysicsDelta("SET", "voltage", 11.1)
-        ]
+            PhysicsDelta("SET", "voltage", 11.1)]
     return []
 
 def effect_organize_chaos(physics: Dict, _data: Dict, _item_name: str) -> List[PhysicsDelta]:
@@ -185,9 +169,7 @@ def _init_trait_registry() -> Dict[str, ItemEffect]:
             semantic_instr="TONE: Jittery, fast-paced, and slightly anxious."
         ), "ILLUMINATION": ItemEffect(
             EffectType.SEMANTIC,
-            semantic_instr="FOCUS: Reveal hidden truths. Ignore surface appearances. Highlight subtext."
-        )}
-
+            semantic_instr="FOCUS: Reveal hidden truths. Ignore surface appearances. Highlight subtext.")}
     return r
 
 TRAIT_REGISTRY = _init_trait_registry()
@@ -201,7 +183,6 @@ class GordonKnot:
     last_flinch_turn: int = -10
     physics_state: TensegrityState = field(default_factory=TensegrityState)
     active_effect_cache: List[Tuple] = field(default_factory=list, init=False)
-
     ITEM_REGISTRY: Dict = field(default_factory=dict, init=False)
     CRITICAL_ITEMS: set = field(default_factory=set, init=False)
     REFLEX_MAP: Dict = field(init=False, default_factory=dict)
@@ -252,22 +233,43 @@ class GordonKnot:
     def get_item_data(self, item_name: str) -> Dict:
         return self.ITEM_REGISTRY.get(item_name.upper(), UNKNOWN_ARTIFACT)
 
+    def check_static_cling(self, physics_packet) -> Optional[str]:
+        if isinstance(physics_packet, dict):
+            em_field = physics_packet.get("electromagnetism", 0.0)
+            if em_field == 0.0:
+                import math
+                e = physics_packet.get("E", 0.0)
+                b = physics_packet.get("B", 0.0)
+                em_field = math.sqrt(e**2 + b**2)
+        else:
+            em_field = getattr(physics_packet, "electromagnetism", 0.0)
+        if em_field < 6.0:
+            return None
+        if not self.inventory:
+            return f"{Prisma.VIOLET}*Sparks fly from your empty hands.*{Prisma.RST}"
+        if random.random() < 0.3:
+            item = random.choice(self.inventory)
+            cling_msgs = [
+                f"The {item} is stuck to your sleeve.",
+                f"Static electricity crackles around the {item}.",
+                f"The {item} floats momentarily in the magnetic field.",
+                f"You feel the magnetic pull of the {item}."]
+            return f"{Prisma.VIOLET}⚡ {random.choice(cling_msgs)}{Prisma.RST}"
+        return None
+
     def _recalculate_tensegrity(self):
         total_mass = 0.0
         total_lift = 0.0
         total_vol = 0.0
         self.active_effect_cache = []
-
         for item_name in self.inventory:
             data = self.get_item_data(item_name)
             total_mass += data.get("mass", 1.0)
             total_lift += data.get("lift", 0.0)
             total_vol += data.get("volume", 1.0)
-
         collapsed = False
         if total_mass > 20.0 and total_mass > (total_lift * 3.0 + 10.0):
             collapsed = True
-
         self.physics_state = TensegrityState(
             mass=total_mass,
             lift=total_lift,
@@ -279,19 +281,16 @@ class GordonKnot:
             return False
         if item_name not in self.inventory:
             return False
-
         self.inventory.remove(item_name)
         self._recalculate_tensegrity()
         return True
 
     def audit_tools(self, physics_ref: Dict) -> List[str]:
-        """
-        Applies all inventory physics effects in a deterministic Aggregation Phase.
-        Handles ADD, SET, MULTIPLY, and nested Dictionary updates.
-        """
         logs = []
+        cling_msg = self.check_static_cling(physics_ref)
+        if cling_msg:
+            logs.append(cling_msg)
         all_deltas: List[PhysicsDelta] = []
-
         turbulence = physics_ref.get("turbulence", 0.0)
         if turbulence > BoneConfig.INVENTORY.TURBULENCE_THRESHOLD:
             if random.random() < BoneConfig.INVENTORY.TURBULENCE_FUMBLE_CHANCE and self.inventory:
@@ -302,47 +301,39 @@ class GordonKnot:
                         template = random.choice(GORDON_LOGS["FUMBLE"])
                         msg = template.format(item=dropped)
                         logs.append(f"{Prisma.RED}{msg}{Prisma.RST}")
-
         for item_name in self.inventory:
             data = self.get_item_data(item_name)
             for trait in data.get("passive_traits", []):
                 effect_def = TRAIT_REGISTRY.get(trait)
                 if effect_def and effect_def.effect_type in [EffectType.PHYSICS, EffectType.HYBRID]:
-                    if effect_def.physics_handler:
-                        new_deltas = effect_def.physics_handler(physics_ref, data, item_name)
-                        all_deltas.extend(new_deltas)
-
+                    raw_handler = effect_def.physics_handler
+                    if callable(raw_handler):
+                        safe_handler = cast(Callable[[Dict, Dict, str], List[PhysicsDelta]], raw_handler)
+                        new_deltas = safe_handler(physics_ref, data, item_name)
+                        if new_deltas:
+                            all_deltas.extend(new_deltas)
         for delta in all_deltas:
             if delta.message:
                 logs.append(delta.message)
-
             if delta.operator == "noop":
                 continue
-
             if delta.operator == "ADD_COUNT":
                 if "counts" not in physics_ref: physics_ref["counts"] = {}
                 physics_ref["counts"][delta.field] = physics_ref["counts"].get(delta.field, 0) + delta.value
-
             elif delta.operator == "SET_COUNT":
                 if "counts" not in physics_ref: physics_ref["counts"] = {}
                 physics_ref["counts"][delta.field] = delta.value
-
             elif delta.operator == "ADD_VECTOR":
                 if "vector" not in physics_ref: physics_ref["vector"] = {}
                 physics_ref["vector"][delta.field] = physics_ref["vector"].get(delta.field, 0.0) + delta.value
-
             elif delta.operator == "SET_ZONE":
                 physics_ref["zone"] = str(delta.value)
-
             elif delta.operator == "SET":
                 physics_ref[delta.field] = delta.value
-
             elif delta.operator == "ADD":
                 physics_ref[delta.field] = physics_ref.get(delta.field, 0.0) + delta.value
-
             elif delta.operator == "MULTIPLY":
                 physics_ref[delta.field] = physics_ref.get(delta.field, 0.0) * delta.value
-
         return logs
 
     def rummage(self, physics_ref: Dict, stamina_pool: float) -> Tuple[bool, str, float]:
@@ -371,7 +362,6 @@ class GordonKnot:
         cost = 15.0
         if stamina_pool < cost:
             return False, f"{Prisma.GRY}GORDON: 'Hands are shaking. Need rest.' (Req: {cost} Stamina){Prisma.RST}", 0.0
-
         restored = 0
         if self.integrity < 100.0:
             gain = random.randint(5, 15)
@@ -388,7 +378,6 @@ class GordonKnot:
                     msg = f"{Prisma.CYN}REFLECTION: Gordon is working through '{healed_scar}'.{Prisma.RST}"
             else:
                 msg = f"{Prisma.GRY}GORDON: 'Everything is in order.'{Prisma.RST}"
-
         return True, msg, cost
 
     def acquire(self, tool_name: str) -> str:
@@ -463,9 +452,6 @@ class GordonKnot:
             return f"{Prisma.VIOLET}TRAUMA DEEPENED: The scar on '{culprit}' is worse.{Prisma.RST}"
 
     def get_semantic_operators(self) -> List[str]:
-        """
-        Returns a prioritized list of semantic instructions from active items.
-        """
         operators = []
         for item in self.inventory:
             data = self.get_item_data(item)
@@ -476,9 +462,7 @@ class GordonKnot:
                         operators.append((effect_def.priority, effect_def.semantic_instr))
             if item == "SILENT_KNIFE":
                 operators.append((40, "CONSTRAINT: Do not use the verb 'to be'."))
-
         operators.sort(key=lambda x: x[0])
-
         seen = set()
         final_ops = []
         for _, op in operators:

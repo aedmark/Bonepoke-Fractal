@@ -60,6 +60,32 @@ class BioSystem:
     governor: 'MetabolicGovernor'
     shimmer: Any
     parasite: ParasiticSymbiont
+    events: Any = None
+    biometrics: Optional['Biometrics'] = None
+
+    def apply_environmental_entropy(self, physics_packet):
+        base_entropy = 2.0
+        if isinstance(physics_packet, dict):
+            em_field = physics_packet.get("electromagnetism", 0.0)
+            if em_field == 0.0:
+                import math
+                e = physics_packet.get("E", 0.0)
+                b = physics_packet.get("B", 0.0)
+                em_field = math.sqrt(e**2 + b**2)
+        else:
+            em_field = getattr(physics_packet, "electromagnetism", 0.0)
+        shield_strength = min(0.8, em_field * 0.1)
+        effective_entropy = base_entropy * (1.0 - shield_strength)
+        thermal_feedback = 0.0
+        if em_field > 8.0:
+            thermal_feedback = (em_field - 8.0) * 1.5
+            if self.events:
+                self.events.log(f"{Prisma.RED}⚠ INDUCTIVE HEATING: The air is ionizing around you.{Prisma.RST}", "BIO_WARN")
+        total_drain = effective_entropy + thermal_feedback
+        if self.biometrics:
+            self.biometrics.health = max(0.0, self.biometrics.health - total_drain)
+        if shield_strength > 0.2 and self.events:
+            self.events.log(f"{Prisma.CYN}🛡️ EM SHIELD ACTIVE: Mitigation {int(shield_strength*100)}%{Prisma.RST}", "PHYS")
 
 @dataclass
 class MitochondrialState:
@@ -222,6 +248,8 @@ class SomaticLoop:
         stamina = max(0.0, min(100.0, stamina))
         phys = self._normalize_physics(physics_data)
         logs = []
+        if hasattr(self.bio, "apply_environmental_entropy"):
+             self.bio.apply_environmental_entropy(phys)
         modifiers = self._gather_hormonal_modifiers(phys, logs)
         receipt = self.bio.mito.process_cycle(phys, external_modifiers=modifiers)
         resp_status = receipt.status
@@ -432,17 +460,14 @@ class EndocrineSystem:
     def _apply_semantic_pressure(self, signal: SemanticSignal):
         if signal.novelty > 0.3:
             self.dopamine += (signal.novelty * 0.3)
-
         if signal.resonance > 0.2:
             self.oxytocin += (signal.resonance * 0.4)
             self.cortisol -= (signal.resonance * 0.2)
-
         if signal.valence > 0.3:
             self.serotonin += (signal.valence * 0.3)
             self.oxytocin += (signal.valence * 0.2)
         elif signal.valence < -0.3:
             self.cortisol += (abs(signal.valence) * 0.2)
-
         if signal.coherence > 0.7:
             self.adrenaline -= 0.1
             self.cortisol -= 0.1
@@ -597,7 +622,7 @@ class ViralTracer:
         return self._walk(start_node, self.max_depth)
 
     def _walk(self, start, max_depth):
-        stack = [(start, [start], 0)] # (node, path, depth)
+        stack = [(start, [start], 0)]
         visited = {start}
         while stack:
             current, path, depth = stack.pop()

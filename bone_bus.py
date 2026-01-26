@@ -1,6 +1,7 @@
 """ bone_bus.py - All aboard the Magic Bone Bus! """
 
-import json, os, time, random, copy
+import json, os, time, random, copy, re
+import math
 from collections import deque
 from dataclasses import dataclass, field, fields
 from typing import List, Dict, Any, Optional, Counter, Tuple
@@ -19,22 +20,11 @@ class Prisma:
     OCHRE = "\033[33;2m"
     VIOLET = "\033[35;2m"
     SLATE = "\033[30;1m"
-    PUR = "\033[35m"
-    GREEN = GRN
-    GRAY = GRY
-    GREY = GRY
-    WHITE = WHT
-    CYAN = CYN
-    MAGENTA = MAG
-    YELLOW = YEL
-    BLUE = BLU
-    RESET = RST
     _COLOR_MAP = {
         "R": RED, "G": GRN, "Y": YEL, "B": BLU,
         "M": MAG, "C": CYN, "W": WHT, "0": GRY,
         "I": INDIGO, "O": OCHRE, "V": VIOLET,
-        "P": PUR
-    }
+        "S": SLATE}
 
     @classmethod
     def paint(cls, text, color_key="0"):
@@ -43,21 +33,30 @@ class Prisma:
         return f"{code}{safe_text}{cls.RST}"
 
     @classmethod
+    def strip(cls, text):
+        clean = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+        return clean.sub('', str(text))
+
+    @classmethod
     def tie_dye(cls, text):
-        colors = [cls.RED, cls.GRN, cls.YEL, cls.CYN, cls.MAG, cls.VIOLET, cls.OCHRE, cls.PUR]
-        words = text.split()
+        colors = [cls.RED, cls.GRN, cls.YEL, cls.CYN, cls.MAG, cls.VIOLET, cls.OCHRE]
+        tokens = re.split(r'(\s+)', str(text))
         painted = []
-        for w in words:
-            c = random.choice(colors)
-            painted.append(f"{c}{w}{cls.RST}")
-        return " ".join(painted)
+        for token in tokens:
+            if not token.strip():
+                painted.append(token)
+            else:
+                c = random.choice(colors)
+                painted.append(f"{c}{token}{cls.RST}")
+        return "".join(painted)
 
 class EventBus:
-    def __init__(self, max_memory=1024):
+    def __init__(self, max_memory=1024, max_gestation=500):
         self.buffer = deque(maxlen=max_memory)
         self.subscribers = {}
         self.dormant = False
         self.gestation_queue = []
+        self.max_gestation = max_gestation
 
     def set_dormancy(self, active: bool):
         self.dormant = active
@@ -74,6 +73,10 @@ class EventBus:
 
     def publish(self, event_type, data=None):
         if self.dormant:
+            if len(self.gestation_queue) >= self.max_gestation:
+                self.gestation_queue.pop(0)
+                if len(self.gestation_queue) % 50 == 0:
+                    print(f"{Prisma.YEL}[BUS WARNING]: Dormancy queue overflowing. Dropping old signals.{Prisma.RST}")
             self.gestation_queue.append((event_type, data))
             return
         if event_type in self.subscribers:
@@ -81,7 +84,7 @@ class EventBus:
                 try:
                     callback(data)
                 except Exception as e:
-                    print(f"Event Bus Error: {e}")
+                    print(f"{Prisma.RED}Event Bus Dispatch Error: {e}{Prisma.RST}")
 
     def log(self, text: str, category: str = "SYSTEM"):
         entry = {
@@ -143,8 +146,7 @@ class BoneConfig:
         "ollama": "http://127.0.0.1:11434/v1/chat/completions",
         "openai": "https://api.openai.com/v1/chat/completions",
         "lm_studio": "http://127.0.0.1:1234/v1/chat/completions",
-        "localai": "http://127.0.0.1:8080/v1/chat/completions"
-    }
+        "localai": "http://127.0.0.1:8080/v1/chat/completions"}
     VERBOSE_LOGGING = True
     PROVIDER = "openai"
     BASE_URL = None
@@ -262,8 +264,7 @@ class BoneConfig:
             "VOLTAGE_MAX": (10.0, 100.0, float),
             "STAMINA_REGEN": (0.1, 10.0, float),
             "MAX_MEMORY_CAPACITY": (10, 1000, int),
-            "VERBOSE_LOGGING": (0, 1, bool),
-        }
+            "VERBOSE_LOGGING": (0, 1, bool),}
         for key, value in data.items():
             full_key = f"{parent_key}.{key}" if parent_key else key
             if isinstance(value, dict):
@@ -289,22 +290,18 @@ class BoneConfig:
                     sanitized[key] = value
             else:
                 sanitized[key] = value
-
         return sanitized, "; ".join(logs) if logs else ""
 
     @classmethod
     def tune(cls, sector: str, parameter: str, value: Any) -> str:
         if not hasattr(cls, sector):
             return f"❌ SECTOR ERROR: '{sector}' does not exist."
-
         target_sector = getattr(cls, sector)
         if not hasattr(target_sector, parameter):
             return f"❌ PARAM ERROR: '{parameter}' not found in {sector}."
-
         current_val = getattr(target_sector, parameter)
         if type(current_val) != type(value) and not (isinstance(current_val, float) and isinstance(value, int)):
             return f"⚠️ TYPE MISMATCH: Cannot replace {type(current_val)} with {type(value)}."
-
         setattr(target_sector, parameter, value)
         return f"✅ TUNED: {sector}.{parameter} -> {value}"
 
@@ -353,8 +350,7 @@ class TheObserver:
             jokes = [
                 "BRAIN FOG (The neural net is buffering)",
                 "DEGRADED (Thinking... thinking...)",
-                "PONDEROUS (Is the LLM on a coffee break?)"
-            ]
+                "PONDEROUS (Is the LLM on a coffee break?)"]
             return random.choice(jokes)
         if avg_cycle > self.CYCLE_WARNING:
             return "SLUGGISH (The gears need oil)"
@@ -372,8 +368,7 @@ class TheObserver:
             "avg_llm_sec": round(avg_llm, 2),
             "status": status_msg,
             "errors": dict(self.error_counts),
-            "graph_size": self.memory_snapshots[-1] if self.memory_snapshots else 0
-        }
+            "graph_size": self.memory_snapshots[-1] if self.memory_snapshots else 0}
 
 @dataclass
 class SystemHealth:
@@ -409,8 +404,7 @@ class SystemHealth:
     def flush_feedback(self) -> Dict[str, List[str]]:
         feedback = {
             "warnings": list(self.warnings),
-            "hints": list(self.hints)
-        }
+            "hints": list(self.hints)}
         self.warnings.clear()
         self.hints.clear()
         return feedback
@@ -518,6 +512,10 @@ class PhysicsPacket:
     def to_dict(self):
         return {f.name: getattr(self, f.name) for f in fields(self)}
 
+    @property
+    def electromagnetism(self) -> float:
+        return math.sqrt(self.E**2 + self.B**2)
+
 @dataclass
 class CycleContext:
     input_text: str
@@ -558,8 +556,7 @@ class CycleContext:
                 "final": final,
                 "delta": delta,
                 "reason": reason,
-                "timestamp": time.time()
-            })
+                "timestamp": time.time()})
 
     def snapshot(self) -> 'CycleContext':
         new_ctx = CycleContext(
@@ -578,8 +575,7 @@ class CycleContext:
             is_bureaucratic=self.is_bureaucratic,
             bureau_ui=self.bureau_ui,
             timestamp=self.timestamp,
-            last_impulse=self.last_impulse
-        )
+            last_impulse=self.last_impulse)
         return new_ctx
 
 @dataclass

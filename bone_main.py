@@ -1,4 +1,4 @@
-""" BONEAMANITA 11.3.3 'The Smooth Operator'
+""" BONEAMANITA 11.3.4 'The Smooth Operator'
  Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark """
 
 import os
@@ -22,6 +22,11 @@ from bone_cycle import GeodesicOrchestrator
 from bone_viewer import Projector, GeodesicRenderer
 from bone_translation import SomaticInterface
 
+@dataclass
+class HostStats:
+    latency: float
+    efficiency_index: float
+
 def bootstrap_systems():
     print(f"{Prisma.GRY}...Bootstrapping Sub-Systems...{Prisma.RST}")
     TheLore.get_instance()
@@ -31,7 +36,7 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 11.3.3', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 11.3.4', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -240,20 +245,13 @@ class BoneAmanita:
             elif avg_cycle < 0.5 and reporter.current_mode == "PERFORMANCE":
                 self.events.log(f"{Prisma.GRN}⚡ LATENCY NOMINAL ({avg_cycle:.2f}s). Restoring High-Fidelity.{Prisma.RST}", "SYS")
                 reporter.switch_renderer("STANDARD")
-
-            @dataclass
-            class HostStats:
-                latency: float
-                efficiency_index: float
             host_stats = HostStats(
                 latency=perf_metrics.get("avg_llm_sec", 0.0),
-                efficiency_index=1.0
-            )
+                efficiency_index=1.0)
             self.tinkerer.audit_tool_use(
                 self.phys.tension.last_physics_packet,
                 self.gordon.inventory,
-                host_stats
-            )
+                host_stats)
         llm_start = self.observer.clock_in()
         cortex_packet = self.cortex.process(user_message)
         llm_duration = self.observer.clock_out(llm_start, "llm")
@@ -269,6 +267,8 @@ class BoneAmanita:
         cortex_packet["metrics"]["perf"] = report
         if self.tutorial:
             cortex_packet = self.tutorial.audit(user_message, cortex_packet)
+        if hasattr(self.mind, 'mem') and hasattr(self.mind.mem, 'session_trauma_vector'):
+            self.mind.mem.session_trauma_vector = self.trauma_accum.copy()
         return cortex_packet
 
     def _phase_check_commands(self, user_message):
@@ -295,8 +295,7 @@ class BoneAmanita:
                 joy_history=[],
                 mitochondria_traits=self.bio.mito.adapt(0),
                 antibodies=list(self.bio.immune.active_antibodies),
-                soul_data=self.soul.to_dict()
-            )
+                soul_data=self.soul.to_dict())
             death_log.append(f"{Prisma.WHT}   [LEGACY SAVED: {path}]{Prisma.RST}")
         except Exception as e:
             death_log.append(f"Save Failed: {e}")
@@ -340,15 +339,15 @@ class BoneAmanita:
                 path = self.mind.mem.loader.save_spore(f"emergency_{sess_id}.json", spore_data)
             else:
                 fname = self._get_crash_path("spore_emergency")
-                with open(fname, 'w') as f:
-                    json.dump(spore_data, f, default=str)
+                with open(fname, 'w') as spore_file:
+                    json.dump(spore_data, spore_file, default=str)
                 path = fname
             return f"✔ Spore encapsulated: {path}"
         except Exception as e:
             try:
                 fname = self._get_crash_path("panic_dump")
-                with open(fname, 'w') as f:
-                    json.dump({"error": str(e), "data": str(spore_data)}, f)
+                with open(fname, 'w') as panic_file:
+                    json.dump({"error": str(e), "data": str(spore_data)}, panic_file)
                 return f"✘ Encapsulation Failed. Panic dump written to {fname}"
             except:
                 return f"✘ TOTAL SYSTEM FAILURE: {e}"
@@ -382,22 +381,37 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 11.3.3', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 11.3.4', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")
-    print(f"Before we begin the descent... {Prisma.paint('what should I call you?', 'C')}")
-    try:
-        identity_input = input(f"{Prisma.paint('>', 'W')} ").strip()
-        final_identity = identity_input if identity_input else "TRAVELER"
-        if not identity_input:
-            print(f"\n{Prisma.paint('Silence accepted. You shall be known as TRAVELER.', 'GRY')}")
-        else:
-            print(f"\n{Prisma.paint(f'Protocol accepted. Welcome, {final_identity}.', 'G')}")
+    final_identity = "TRAVELER"
+    config_loaded = False
+    if os.path.exists("bone_config.json"):
+        try:
+            with open("bone_config.json", "r") as config_handle:
+                config = json.load(config_handle)
+                if config.get("user_name"):
+                    final_identity = config["user_name"]
+                    config_loaded = True
+        except Exception:
+            pass
+    if config_loaded:
+        print(f"Recognizing bio-signature... {Prisma.paint(f'Welcome back, {final_identity}.', 'G')}")
         time.sleep(1.0)
-    except (KeyboardInterrupt, EOFError):
-        print("\nAborted.")
-        exit()
+    else:
+        print(f"Before we begin the descent... {Prisma.paint('what should I call you?', 'C')}")
+        try:
+            identity_input = input(f"{Prisma.paint('>', 'W')} ").strip()
+            if identity_input:
+                final_identity = identity_input
+                print(f"\n{Prisma.paint(f'Protocol accepted. Welcome, {final_identity}.', 'G')}")
+            else:
+                print(f"\n{Prisma.paint('Silence accepted. You shall be known as TRAVELER.', 'GRY')}")
+            time.sleep(1.0)
+        except (KeyboardInterrupt, EOFError):
+            print("\nAborted.")
+            exit()
     engine_instance = BoneAmanita(user_name=final_identity)
     with SessionGuardian(engine_instance) as session_engine:
         first_look = session_engine.process_turn("LOOK")

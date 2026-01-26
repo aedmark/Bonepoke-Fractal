@@ -28,16 +28,14 @@ class TheEditor:
             "dark": "A bit melodramatic, isn't it? Very 19th-century gothic.",
             "love": "Whoa there, cowboy. Don't fall in love just yet!",
             "hope": "Careful. Optimism is a slippery slope to a musical number.",
-            "incident": "I hope you have the insurance forms for this 'incident'."
-        }
+            "incident": "I hope you have the insurance forms for this 'incident'."}
         self.random_critiques = [
             "Pacing is a bit slow in the second act.",
             "The character motivation seems muddy here.",
             "Are we sure this is the protagonist's true arc?",
             "This feels derivative of Kafka.",
             "Too much exposition. Show, don't tell.",
-            "The theme of 'entropy' is a bit heavy-handed."
-        ]
+            "The theme of 'entropy' is a bit heavy-handed."]
 
     def critique(self, chapter_title: str) -> str:
         lower_title = chapter_title.lower()
@@ -199,7 +197,6 @@ class NarrativeSelf:
         target_cat = "abstract"
         found_organic = False
         STOPLIST = {"look", "help", "exit", "wait", "inventory", "status", "quit"}
-
         if hasattr(self.eng, 'phys') and hasattr(self.eng.phys, 'tension'):
             packet = self.eng.phys.tension.last_physics_packet
             if packet and hasattr(packet, 'clean_words') and packet.clean_words:
@@ -230,17 +227,13 @@ class NarrativeSelf:
             "thermal": "cryo", "photo": "heavy", "sacred": "suburban",
             "play": "constructive", "meat": "abstract", "cryo": "thermal",
             "aerobic": "heavy", "suburban": "sacred", "constructive": "play",
-            "antigen": "abstract", "toxin": "vital"
-        }
-
+            "antigen": "abstract", "toxin": "vital"}
         if not found_organic or not focus_word:
             target_cat, _ = random.choice(list(negate_map.items()))
             focus_word = lexicon_ref.get_random(target_cat).title()
             if focus_word.lower() == "void": focus_word = target_cat.title()
-
         self.current_target_cat = target_cat
         self.current_negate_cat = negate_map.get(target_cat, "none")
-
         if found_organic:
             templates = [
                 f"The Theory of {focus_word.title()}",
@@ -248,44 +241,42 @@ class NarrativeSelf:
                 f"The Architecture of {focus_word.title()}",
                 f"Why {focus_word.title()} Matters",
                 f"A Treatise on {focus_word.title()}",
-                f"The Weight of {focus_word.title()}"
-            ]
+                f"The Weight of {focus_word.title()}"]
             source_tag = "ORGANIC"
         else:
             templates = [
                 f"The Pursuit of {focus_word.title()}",
                 f"Escaping the {self.current_negate_cat.title()}",
-                f"Meditations on {focus_word.title()}"
-            ]
+                f"Meditations on {focus_word.title()}"]
             source_tag = "SYNTHETIC"
-
         self.current_obsession = random.choice(templates)
         self.events.log(f"{Prisma.CYN}🧭 NEW MUSE ({source_tag}): {self.current_obsession}{Prisma.RST}", "SOUL")
         self.obsession_neglect = 0.0
         self.obsession_progress = 0.0
 
     def _generate_new_obsession(self):
-        """
-        Automated rotation of the Soul's focus.
-        Called when the user ignores the current obsession for too long (Drift).
-        """
+        old_obsession = self.current_obsession
         self.current_obsession = None
-
         lex_ref = None
         if hasattr(self.eng, 'lex'):
             lex_ref = self.eng.lex
         else:
             from bone_lexicon import TheLexicon
             lex_ref = TheLexicon
-
         self.find_obsession(lex_ref)
-
         if self.current_obsession:
-            pass
+            flux = 0.05
+            self.traits["CURIOSITY"] = min(1.0, self.traits["CURIOSITY"] + flux)
+            self.traits["DISCIPLINE"] = max(0.0, self.traits["DISCIPLINE"] - flux)
+            critique = self.editor.critique(f"The Shift to {self.current_obsession}")
+            if hasattr(self, 'events'):
+                self.events.log(
+                    f"{Prisma.CYN}Unknown directive... pivoting. Old Muse '{old_obsession}' abandoned.{Prisma.RST}",
+                    "SOUL_DRIFT")
+                self.events.log(critique, "EDIT")
 
     def pursue_obsession(self, physics: Dict) -> str | None:
         clean_words = physics.get("clean_words", [])
-
         hit = False
         if self.current_target_cat:
             hit = any(self.current_target_cat in w for w in clean_words)
@@ -294,13 +285,11 @@ class NarrativeSelf:
             self.obsession_neglect = 0.0
             return f"{Prisma.MAG}★ OBSESSION FULFILLED: You touched the '{self.current_obsession}'. (+Hope){Prisma.RST}"
         self.obsession_neglect += 1.0
-
         if self.obsession_neglect > 10.0:
             old_obsession = self.current_obsession
             self.chapters.append(f"The era of '{old_obsession}' ended quietly.")
             self._generate_new_obsession()
             return f"{Prisma.GRY}∞ DRIFT: '{old_obsession}' has drifted away. A new interest takes hold.{Prisma.RST}"
-
         return None
 
     def _get_feeling(self):
@@ -325,8 +314,7 @@ class NarrativeSelf:
             return f"{Prisma.CYN}[SOUL STATE]: We are the music. The code is writing itself.{Prisma.RST}"
         return (
             f"CURRENT OBSESSION: {self.current_obsession}\n"
-            f"FEELING: {self._get_feeling()}"
-        )
+            f"FEELING: {self._get_feeling()}")
 
     def to_dict(self) -> Dict:
         return {
@@ -339,9 +327,7 @@ class NarrativeSelf:
                 "progress": self.obsession_progress,
                 "neglect": self.obsession_neglect,
                 "target": self.current_target_cat,
-                "negate": self.current_negate_cat
-            }
-        }
+                "negate": self.current_negate_cat}}
 
     def load_from_dict(self, data: Dict):
         if not data: return
