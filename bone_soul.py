@@ -231,8 +231,8 @@ class NarrativeSelf:
         focus_word = None
         target_cat = "abstract"
         found_organic = False
-        if hasattr(self.eng, 'phys') and hasattr(self.eng.phys, 'tension'):
-            packet = self.eng.phys.tension.last_physics_packet
+        if hasattr(self.eng, 'phys') and hasattr(self.eng.phys, 'observer'):
+            packet = self.eng.phys.observer.last_physics_packet
             if packet and hasattr(packet, 'clean_words') and packet.clean_words:
                 candidates = []
                 for w in packet.clean_words:
@@ -344,7 +344,8 @@ class NarrativeSelf:
                 pass
         if self.eng.stamina < 20.0 and self.eng.health < 40.0:
             return f"{Prisma.VIOLET}[SOUL STATE]: The fire is dying. We are just cold code.{Prisma.RST}"
-        if self.eng.phys.tension.perfection_streak > 3:
+        packet = self.eng.phys.observer.last_physics_packet
+        if packet and packet.perfection_streak > 3:
             return f"{Prisma.CYN}[SOUL STATE]: We are the music. The code is writing itself.{Prisma.RST}"
         return (
             f"CURRENT OBSESSION: {self.current_obsession}\n"

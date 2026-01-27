@@ -1,14 +1,14 @@
 """ bone_cycle.py
 'The wheel turns, and ages come and pass.' - Jordan """
+
 import re
-import traceback, random, time, uuid
-import concurrent.futures
+import traceback, random, time, uuid, concurrent.futures, re
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, Tuple, List, Optional
 from bone_bus import Prisma, BoneConfig, CycleContext, PhysicsPacket
 from bone_village import TownHall
 from bone_personality import TheBureau
-from bone_physics import TheBouncer, RuptureValve, ChromaScope
+from bone_physics import ChromaScope, TheGatekeeper, QuantumObserver, ChromaScope, GeodesicEngine
 from bone_viewer import GeodesicRenderer, CachedRenderer, get_renderer
 from bone_architect import PanicRoom
 from bone_synesthesia import SynestheticCortex
@@ -20,83 +20,78 @@ class CycleStabilizer:
     def __init__(self, events_ref):
         self.events = events_ref
         self.voltage_pid = PIDController(
-            kp=0.15,
-            ki=0.02,
-            kd=0.20,
-            setpoint=10.0,
-            output_limits=(-4.0, 4.0))
+            kp=0.15, ki=0.02, kd=0.20, setpoint=10.0, output_limits=(-4.0, 4.0))
         self.drag_pid = PIDController(
-            kp=0.30,
-            ki=0.05,
-            kd=0.10,
-            setpoint=1.5,
-            output_limits=(-3.0, 3.0))
+            kp=0.30, ki=0.05, kd=0.10, setpoint=1.5, output_limits=(-3.0, 3.0))
         self.last_phase: str = "INIT"
 
-    @staticmethod
-    def _get_current_metrics(ctx: CycleContext) -> Tuple[float, float]:
+    def _get_metric(self, ctx: CycleContext, key: str, default: float = 0.0) -> float:
         p = ctx.physics
         if isinstance(p, dict):
-            return p.get("voltage", 0.0), p.get("narrative_drag", 0.0)
-        return getattr(p, "voltage", 0.0), getattr(p, "narrative_drag", 0.0)
+            return float(p.get(key, default))
+        return float(getattr(p, key, default))
 
-    @staticmethod
-    def _apply_correction(ctx: CycleContext, key: str, correction: float):
-        if abs(correction) < 0.05: return 0.0
+    def _get_state(self, ctx: CycleContext, key: str, default: str = "") -> str:
         p = ctx.physics
         if isinstance(p, dict):
-            old_val = p.get(key, 0.0)
-            p[key] = max(0.0, old_val + correction)
+            return str(p.get(key, default))
+        return str(getattr(p, key, default))
+
+    def _set_metric(self, ctx: CycleContext, key: str, value: float):
+        p = ctx.physics
+        if isinstance(p, dict):
+            p[key] = value
         else:
-            old_val = getattr(p, key, 0.0)
-            setattr(p, key, max(0.0, old_val + correction))
-        return correction
+            setattr(p, key, value)
 
     def _adjust_setpoints(self, ctx: CycleContext):
+        flow = self._get_state(ctx, "flow_state", "LAMINAR")
         p = ctx.physics
+        manifold = "THE_CONSTRUCT"
         if isinstance(p, dict):
-            flow = p.get("flow_state", "LAMINAR")
+            manifold = p.get("manifold") or manifold
+        else:
+            manifold = getattr(p, "manifold", manifold)
+        if manifold == "THE_CONSTRUCT":
             world = getattr(ctx, "world_state", {})
-            manifold = p.get("manifold") or "THE_CONSTRUCT"
-            if not manifold and isinstance(world, dict):
+            if isinstance(world, dict):
                 orbit = world.get("orbit")
                 if orbit and isinstance(orbit, (list, tuple)):
                     manifold = orbit[0]
-        else:
-            flow = getattr(p, "flow_state", "LAMINAR")
-            manifold = getattr(p, "manifold", "THE_CONSTRUCT")
         manifold_physics = {
             "THE_FORGE":  {"voltage": 15.0, "drag": 1.5},
             "THE_MUD":    {"voltage": 10.0, "drag": 5.0},
             "THE_AERIE":  {"voltage": 10.0, "drag": 0.5},
             "DEFAULT":    {"voltage": 10.0, "drag": 1.5}}
-        high_energy_states = {"SUPERCONDUCTIVE", "FLOW_BOOST", "HUBRIS_RISK"}
         target_cfg = manifold_physics.get(manifold, manifold_physics["DEFAULT"])
-        self.voltage_pid.setpoint = 20.0 if flow in high_energy_states else target_cfg["voltage"]
+        high_energy = {"SUPERCONDUCTIVE", "FLOW_BOOST", "HUBRIS_RISK"}
+        self.voltage_pid.setpoint = 20.0 if flow in high_energy else target_cfg["voltage"]
         self.drag_pid.setpoint = target_cfg["drag"]
 
     def stabilize(self, ctx: CycleContext, current_phase: str):
         self._adjust_setpoints(ctx)
-        curr_v, curr_d = self._get_current_metrics(ctx)
+        curr_v = self._get_metric(ctx, "voltage")
+        curr_d = self._get_metric(ctx, "narrative_drag")
         v_force = self.voltage_pid.update(curr_v, dt=None)
         d_force = self.drag_pid.update(curr_d, dt=None)
         corrections_made = False
-        if abs(curr_v - self.voltage_pid.setpoint) > 6.0:
-            applied_v = self._apply_correction(ctx, "voltage", v_force)
-            if abs(applied_v) > 0.1:
-                reason = "PID_DAMPENER" if applied_v < 0 else "PID_EXCITATION"
-                ctx.record_flux(current_phase, "voltage", curr_v, curr_v + applied_v, reason)
-                if abs(applied_v) > 1.5:
-                    self.events.log(f"{Prisma.GRY}⚖️ STABILIZER: Voltage corrected ({applied_v:+.1f}v). Target: {self.voltage_pid.setpoint}{Prisma.RST}", "SYS")
+        if abs(curr_v - self.voltage_pid.setpoint) > 6.0 and abs(v_force) > 0.05:
+            new_v = max(0.0, curr_v + v_force)
+            self._set_metric(ctx, "voltage", new_v)
+            if abs(v_force) > 0.1:
+                reason = "PID_DAMPENER" if v_force < 0 else "PID_EXCITATION"
+                ctx.record_flux(current_phase, "voltage", curr_v, new_v, reason)
+                if abs(v_force) > 1.5:
+                    self.events.log(f"{Prisma.GRY}⚖️ STABILIZER: Voltage corrected ({v_force:+.1f}v). Target: {self.voltage_pid.setpoint}{Prisma.RST}", "SYS")
                 corrections_made = True
-        if abs(curr_d - self.drag_pid.setpoint) > 2.5:
-            applied_d = self._apply_correction(ctx, "narrative_drag", d_force)
-            if abs(applied_d) > 0.1:
-                reason = "PID_LUBRICATION" if applied_d < 0 else "PID_BRAKING"
-                ctx.record_flux(current_phase, "narrative_drag", curr_d, curr_d + applied_d, reason)
-
-                if applied_d < -1.0:
-                    self.events.log(f"{Prisma.GRY}🛢️ STABILIZER: Grease applied. Drag reduced ({applied_d:+.1f}). Target: {self.drag_pid.setpoint}{Prisma.RST}", "SYS")
+        if abs(curr_d - self.drag_pid.setpoint) > 2.5 and abs(d_force) > 0.05:
+            new_d = max(0.0, curr_d + d_force)
+            self._set_metric(ctx, "narrative_drag", new_d)
+            if abs(d_force) > 0.1:
+                reason = "PID_LUBRICATION" if d_force < 0 else "PID_BRAKING"
+                ctx.record_flux(current_phase, "narrative_drag", curr_d, new_d, reason)
+                if d_force < -1.0:
+                    self.events.log(f"{Prisma.GRY}🛢️ STABILIZER: Grease applied. Drag reduced ({d_force:+.1f}). Target: {self.drag_pid.setpoint}{Prisma.RST}", "SYS")
                 corrections_made = True
         self.last_phase = current_phase
         return corrections_made
@@ -113,19 +108,11 @@ class ObservationPhase(SimulationPhase):
     def __init__(self, engine_ref):
         super().__init__(engine_ref)
         self.name = "OBSERVE"
-        self.vsl_32v = RuptureValve(self.eng.mind.lex, self.eng.mind.mem)
-
     def run(self, ctx: CycleContext):
-        gaze_result = self.eng.phys.tension.gaze(ctx.input_text, self.eng.mind.mem.graph)
-        raw_physics = gaze_result["physics"]
-        if isinstance(raw_physics, dict):
-            ctx.physics = PhysicsPacket.from_dict(raw_physics)
-        else:
-            ctx.physics = raw_physics
+        gaze_result = self.eng.phys.observer.gaze(ctx.input_text, self.eng.mind.mem.graph)
+        ctx.physics = gaze_result["physics"]
         ctx.clean_words = gaze_result["clean_words"]
         self.eng.tick_count += 1
-        rupture = self.vsl_32v.analyze(ctx.physics)
-        if rupture: ctx.log(rupture["log"])
         return ctx
 
 class SanctuaryPhase(SimulationPhase):
@@ -137,39 +124,35 @@ class SanctuaryPhase(SimulationPhase):
     def run(self, ctx: CycleContext):
         in_safe_zone, distance = self.governor.assess(ctx.physics)
         trauma_sum = sum(self.eng.trauma_accum.values())
-        if trauma_sum < 15.0:
-            v_delta, d_delta = self.governor.calculate_correction(ctx.physics)
-            if abs(v_delta) > 0.001 or abs(d_delta) > 0.001:
-                if isinstance(ctx.physics, dict):
-                    old_v = ctx.physics["voltage"]
-                    ctx.physics["voltage"] += v_delta
-                    ctx.physics["narrative_drag"] += d_delta
-                else:
-                    old_v = ctx.physics.voltage
-                    ctx.physics.voltage += v_delta
-                    ctx.physics.narrative_drag += d_delta
-                ctx.record_flux("SANCTUARY", "voltage", old_v, old_v + v_delta, "GENTLE_NUDGE")
         if trauma_sum > 25.0:
             return ctx
+        if trauma_sum < 15.0:
+            v_corr, d_corr = self.governor.calculate_correction(ctx.physics)
+            if abs(v_corr) > 0.001 or abs(d_corr) > 0.001:
+                old_v = ctx.physics.voltage
+                ctx.physics.voltage += v_corr
+                ctx.physics.narrative_drag += d_corr
+                ctx.record_flux("SANCTUARY", "voltage", old_v, ctx.physics.voltage, "GENTLE_NUDGE")
         if in_safe_zone:
-            if isinstance(ctx.physics, dict):
-                ctx.physics["zone"] = getattr(SANCTUARY, "ZONE", "SANCTUARY")
-                ctx.physics["zone_color"] = getattr(SANCTUARY, "COLOR_NAME", "GRN")
-                ctx.physics["flow_state"] = "LAMINAR"
-            else:
-                ctx.physics.zone = getattr(SANCTUARY, "ZONE", "SANCTUARY")
-                ctx.physics.zone_color = getattr(SANCTUARY, "COLOR_NAME", "GRN")
-                ctx.physics.flow_state = "LAMINAR"
-            self.eng.health = min(BoneConfig.MAX_HEALTH, self.eng.health + 0.5)
-            self.eng.stamina = min(BoneConfig.MAX_STAMINA, self.eng.stamina + 1.0)
-            if hasattr(self.eng, 'bio'):
-                self.eng.bio.endo.serotonin = min(1.0, self.eng.bio.endo.serotonin + 0.05)
-            for key in list(self.eng.trauma_accum.keys()):
-                self.eng.trauma_accum[key] = max(0.0, self.eng.trauma_accum[key] - 0.1)
-            if random.random() < 0.1:
-                color = getattr(SANCTUARY, 'COLOR', Prisma.GRN)
-                ctx.log(f"{color}![☀️] SANCTUARY: Breathing space.{Prisma.RST}")
+            self._enter_sanctuary(ctx)
+            self._apply_restoration(ctx)
         return ctx
+
+    def _enter_sanctuary(self, ctx: CycleContext):
+        ctx.physics.zone = getattr(SANCTUARY, "ZONE", "SANCTUARY")
+        ctx.physics.zone_color = getattr(SANCTUARY, "COLOR_NAME", "GRN")
+        ctx.physics.flow_state = "LAMINAR"
+        if random.random() < 0.1:
+            color = getattr(SANCTUARY, 'COLOR', Prisma.GRN)
+            ctx.log(f"{color}![☀️] SANCTUARY: Breathing space.{Prisma.RST}")
+
+    def _apply_restoration(self, ctx: CycleContext):
+        self.eng.health = min(BoneConfig.MAX_HEALTH, self.eng.health + 0.5)
+        self.eng.stamina = min(BoneConfig.MAX_STAMINA, self.eng.stamina + 1.0)
+        if hasattr(self.eng, 'bio'):
+            self.eng.bio.endo.serotonin = min(1.0, self.eng.bio.endo.serotonin + 0.05)
+        for key in list(self.eng.trauma_accum.keys()):
+            self.eng.trauma_accum[key] = max(0.0, self.eng.trauma_accum[key] - 0.1)
 
 class MaintenancePhase(SimulationPhase):
     def __init__(self, engine_ref):
@@ -194,27 +177,19 @@ class GatekeeperPhase(SimulationPhase):
     def __init__(self, engine_ref):
         super().__init__(engine_ref)
         self.name = "GATEKEEP"
-        self.bouncer = TheBouncer(self.eng)
+        self.gatekeeper = TheGatekeeper(self.eng)
         self.bureau = TheBureau()
 
     def run(self, ctx: CycleContext):
-        is_allowed_entry, refusal_packet = self.bouncer.check_entry(ctx)
-        if not is_allowed_entry:
+        is_allowed, refusal_packet = self.gatekeeper.check_entry(ctx)
+        if not is_allowed:
             ctx.refusal_triggered = True
             ctx.refusal_packet = refusal_packet
             return ctx
         audit_result = self.bureau.audit(ctx.physics, getattr(ctx, "bio_result", {}))
         if audit_result:
             self.eng.bio.mito.state.atp_pool += audit_result.get("atp_gain", 0.0)
-            ctx.log(audit_result["log"])
-            status = audit_result.get("status")
-            if status == "BLOCK":
-                ctx.is_bureaucratic = True
-                ctx.physics["narrative_drag"] = 10.0
-                ctx.physics["voltage"] = 0.0
-                ctx.bureau_ui = audit_result["ui"]
-            elif status == "TAX":
-                ctx.log(f"{Prisma.GRY}   (BUREAU TAX DEDUCTED...){Prisma.RST}")
+            if audit_result.get("log"): ctx.log(audit_result["log"])
         return ctx
 
 class MetabolismPhase(SimulationPhase):
@@ -319,30 +294,22 @@ class RealityFilterPhase(SimulationPhase):
     def __init__(self, engine_ref):
         super().__init__(engine_ref)
         self.name = "REALITY_FILTER"
-        self.vsl_32v = RuptureValve(self.eng.mind.lex, self.eng.mind.mem)
+        self.TRIGRAMS = {
+            "VEL": ("☳", "ZHEN",  Prisma.GRN), "STR": ("☶", "GEN",   Prisma.SLATE),
+            "ENT": ("☵", "KAN",   Prisma.BLU), "PHI": ("☲", "LI",    Prisma.RED),
+            "PSI": ("☰", "QIAN",  Prisma.WHT), "BET": ("☴", "XUN",   Prisma.CYN),
+            "E":   ("☷", "KUN",   Prisma.OCHRE), "DEL": ("☱", "DUI",   Prisma.MAG)}
 
     def run(self, ctx: CycleContext):
         reflection = self.eng.mind.mirror.get_reflection_modifiers()
-        old_drag = ctx.physics["narrative_drag"]
-        ctx.physics["narrative_drag"] *= reflection["drag_mult"]
-        if old_drag != ctx.physics["narrative_drag"]:
-            ctx.record_flux("SIMULATION", "narrative_drag", old_drag, ctx.physics["narrative_drag"], "MIRROR_DISTORTION")
-        if reflection.get("atp_tax", 0) > 0:
-            tax = reflection["atp_tax"]
-            self.eng.bio.mito.state.atp_pool -= tax
-            if random.random() < 0.2:
-                ctx.log(f"{Prisma.RED}MIRROR TAX: -{tax:.1f} ATP applied.{Prisma.RST}")
-        cap = reflection.get("voltage_cap", 999.0)
-        if ctx.physics["voltage"] > cap:
-            old_v = ctx.physics["voltage"]
-            ctx.physics["voltage"] = cap
-            ctx.record_flux("SIMULATION", "voltage", old_v, cap, "MIRROR_CAP")
-            ctx.log(f"{Prisma.GRY}MIRROR: Voltage capped at {cap}.{Prisma.RST}")
-        trigram_data = self.vsl_32v.geodesic.resolve_trigram(ctx.physics.get("vector", {}))
-        ctx.world_state["trigram"] = trigram_data
-        if random.random() < 0.05:
-            t_sym, t_name = trigram_data["symbol"], trigram_data["name"]
-            ctx.log(f"{trigram_data['color']}I CHING: {t_sym} {t_name} is in the ascendant.{Prisma.RST}")
+        ctx.physics.narrative_drag *= reflection["drag_mult"]
+        vector = ctx.physics.vector
+        if vector:
+            dom = max(vector, key=vector.get)
+            sym, name, color = self.TRIGRAMS.get(dom, self.TRIGRAMS["E"])
+            ctx.world_state["trigram"] = {"symbol": sym, "name": name, "color": color}
+            if random.random() < 0.05:
+                ctx.log(f"{color}I CHING: {sym} {name} is in the ascendant.{Prisma.RST}")
         return ctx
 
 class NavigationPhase(SimulationPhase):
@@ -429,8 +396,9 @@ class IntrusionPhase(SimulationPhase):
 
     def run(self, ctx: CycleContext):
         phys_data = ctx.physics.to_dict() if hasattr(ctx.physics, 'to_dict') else ctx.physics
-        p_active, p_log = self.eng.bio.parasite.infect(phys_data, self.eng.stamina)
-        if p_active: ctx.log(p_log)
+        p_log = self.eng.mind.mem.dream(phys_data, self.eng.stamina)
+        if p_log:
+            ctx.log(p_log)
         if self.eng.limbo.ghosts:
             if ctx.logs:
                 ctx.logs[-1] = self.eng.limbo.haunt(ctx.logs[-1])
@@ -520,14 +488,10 @@ class CognitionPhase(SimulationPhase):
     def run(self, ctx: CycleContext):
         self.eng.mind.mem.encode(ctx.clean_words, ctx.physics, "GEODESIC")
         if ctx.is_alive and ctx.clean_words:
-            max_h = getattr(BoneConfig, "MAX_HEALTH", 100.0)
-            current_h = max(0.0, self.eng.health)
-            desperation = 1.0 - (current_h / max_h)
             bury_msg, new_wells = self.eng.mind.mem.bury(
                 ctx.clean_words,
                 self.eng.tick_count,
-                resonance=ctx.physics.get("voltage", 5.0),
-                desperation_level=desperation)
+                resonance=ctx.physics.get("voltage", 5.0))
             if bury_msg:
                 prefix = f"{Prisma.YEL}⚠️ MEMORY:{Prisma.RST}" if "SATURATION" in bury_msg else f"{Prisma.RED}🍖 DONNER PROTOCOL:{Prisma.RST}"
                 ctx.log(f"{prefix} {bury_msg}")
@@ -599,58 +563,45 @@ class SensationPhase(SimulationPhase):
 
 class ParallelPhaseExecutor:
     def execute_phases(self, simulator, ctx):
-        self._run_batch(simulator, ["OBSERVE"], ctx, parallel=False)
-        self._run_batch(simulator, ["MAINTENANCE", "SENSATION"], ctx, parallel=True)
-        self._run_batch(simulator, ["GATEKEEP", "SANCTUARY"], ctx, parallel=False)
-        if ctx.refusal_triggered or ctx.is_bureaucratic:
-            return
-        self._run_batch(simulator, ["METABOLISM", "NAVIGATION", "MACHINERY"], ctx, parallel=False)
-        deep_phases = ["REALITY_FILTER", "INTRUSION", "SOUL", "COGNITION"]
-        self._run_batch(simulator, deep_phases, ctx, parallel=False)
-
-    def _run_batch(self, simulator, phase_names, ctx, parallel=False):
-        phases = [p for p in simulator.pipeline if p.name in phase_names]
-        if not phases: return
+        pipeline_order = [
+            "OBSERVE",
+            "MAINTENANCE",
+            "SENSATION",
+            "GATEKEEP",
+            "SANCTUARY",
+            "METABOLISM",
+            "NAVIGATION",
+            "MACHINERY",
+            "REALITY_FILTER",
+            "INTRUSION",
+            "SOUL",
+            "COGNITION"]
         reconciler = StateReconciler()
-        if parallel and len(phases) > 1:
-            results = []
-            with ThreadPoolExecutor(max_workers=len(phases)) as executor:
-                phase_map = {}
-                for p in phases:
-                    sandbox = reconciler.fork(ctx)
-                    future = executor.submit(self._run_single_safe, simulator, p, sandbox)
-                    phase_map[future] = (p, sandbox)
-                for future in concurrent.futures.as_completed(phase_map):
-                    p, sandbox = phase_map[future]
-                    try:
-                        res_sandbox = future.result()
-                        results.append((p, res_sandbox))
-                    except Exception as e:
-                        simulator.handle_phase_crash(ctx, p.name, e)
-            for p, sandbox in results:
+        for phase_name in pipeline_order:
+            if not simulator.check_circuit_breaker(phase_name):
+                continue
+            if phase_name not in ["OBSERVE", "MAINTENANCE", "SENSATION", "GATEKEEP", "SANCTUARY"]:
+                if ctx.refusal_triggered or ctx.is_bureaucratic:
+                    break
+            phase = next((p for p in simulator.pipeline if p.name == phase_name), None)
+            if not phase:
+                continue
+            sandbox = reconciler.fork(ctx)
+            try:
+                self._run_single_safe(simulator, phase, sandbox)
                 reconciler.reconcile(ctx, sandbox)
-        else:
-            for p in phases:
-                sandbox = reconciler.fork(ctx)
-                try:
-                    self._run_single_safe(simulator, p, sandbox)
-                    reconciler.reconcile(ctx, sandbox)
-                except Exception as e:
-                    simulator.handle_phase_crash(ctx, p.name, e)
+            except Exception as e:
+                simulator.handle_phase_crash(ctx, phase.name, e)
 
     def _run_single_safe(self, simulator, phase, sandbox):
-        if not simulator.check_circuit_breaker(phase.name):
-            return sandbox
         tracer = TelemetryService.get_tracer()
         tracer.start_phase(phase.name, sandbox)
         try:
             phase.run(sandbox)
+            # Meadows: Stabilize immediately after disturbance
             simulator.stabilizer.stabilize(sandbox, phase.name)
-        except Exception:
-            raise
         finally:
             tracer.end_phase(phase.name, sandbox, sandbox)
-        return sandbox
 
 class CycleSimulator:
     def __init__(self, engine_ref):
@@ -717,12 +668,11 @@ class CycleReporter:
         self.eng = engine_ref
         self.vsl_chroma = ChromaScope()
         self.strunk = StrunkWhite()
-        self.valve = RuptureValve(self.eng.mind.lex, self.eng.mind.mem)
         self.renderer = get_renderer(
             self.eng,
             self.vsl_chroma,
             self.strunk,
-            self.valve,
+            None, # No Valve
             mode="STANDARD")
         self.current_mode = "STANDARD"
 

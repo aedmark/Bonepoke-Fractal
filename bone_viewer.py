@@ -48,12 +48,11 @@ class Projector:
         return f"{color}{char * fill}{Prisma.GRY}{char * (width - fill)}{Prisma.RST}"
 
 class GeodesicRenderer:
-    def __init__(self, engine_ref, chroma_ref, strunk_ref, valve_ref):
+    def __init__(self, engine_ref, chroma_ref, strunk_ref, valve_ref=None):
         self.eng = engine_ref
         self.projector = self.eng.projector
         self.vsl_chroma = chroma_ref
         self.strunk_white = strunk_ref
-        self.vsl_32v = valve_ref
 
     @staticmethod
     def render_soul_strip(soul_ref) -> str:
@@ -105,21 +104,14 @@ class GeodesicRenderer:
         if hasattr(self.eng, 'soul'):
             soul_ui = self.render_soul_strip(self.eng.soul)
             clean_ui = f"{clean_ui}\n{soul_ui}"
-        if style_log:
-            self._punish_style_crime(style_log)
-        if physics.get("system_surge_event", False):
-            clean_ui = self._inject_rupture_warning(clean_ui)
         raw_logs = self.compose_logs(ctx.logs, current_events, current_tick)
-        if hasattr(self.eng, 'council'):
-            structured_logs = self.eng.council.annotate_logs(raw_logs)
-        else:
-            structured_logs = raw_logs
         return {
             "type": "GEODESIC_FRAME",
             "ui": clean_ui,
-            "logs": structured_logs,
+            "logs": raw_logs,
             "metrics": self.eng.get_metrics(bio.get("atp", 0.0)),
-            "system_instruction": self._get_chorus_instruction(physics)}
+            "system_instruction": self._get_chorus_instruction(physics)
+        }
 
     def _get_title_data(self, mind, physics, clean_words):
         return self.eng.mind.wise.architect(
@@ -139,9 +131,6 @@ class GeodesicRenderer:
             "timestamp": time.time()})
 
     def _inject_rupture_warning(self, ui_text):
-        rupture = self.vsl_32v.analyze(self.eng.phys.tension.last_physics_packet)
-        if rupture:
-            return f"{rupture['log']}\n\n{ui_text}"
         return ui_text
 
     def _get_chorus_instruction(self, physics):

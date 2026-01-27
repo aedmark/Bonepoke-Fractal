@@ -260,8 +260,9 @@ class LLMInterface:
 
     def _local_fallback(self, prompt: str, params: Dict) -> str:
         fallback_url = "http://127.0.0.1:11434/v1/chat/completions"
+        target_model = self.model if self.model else getattr(BoneConfig, "OLLAMA_MODEL_ID", "llama3")
         payload = {
-            "model": getattr(BoneConfig, "OLLAMA_MODEL_ID", "llama3"),
+            "model": target_model,
             "messages": [{"role": "user", "content": prompt}],
             "stream": False,
             "temperature": params.get('temperature', 0.7)}
@@ -273,7 +274,7 @@ class LLMInterface:
                 if response.status == 200:
                     result = json.loads(response.read().decode("utf-8"))
                     return result.get("choices", [{}])[0].get("message", {}).get("content", "")
-        except Exception:
+        except Exception as e:
             pass
         return self.mock_generation(prompt, reason="FALLBACK_DEAD")
 
@@ -480,10 +481,6 @@ class TheCortex:
             modifiers=modifiers)
         start_time = time.time()
         raw_response_text = self.llm.generate(final_prompt, llm_params)
-        if "LOOK" in user_input.upper() and "System blind" in raw_response_text:
-            raw_response_text = raw_response_text.replace("System blind. Awaiting command: LOOK.", "")
-            raw_response_text = raw_response_text.replace("System blind.", "")
-            raw_response_text = raw_response_text.strip()
         try:
             p_data = full_state.get("physics", {})
             def _get_p(k):
@@ -538,7 +535,7 @@ class TheCortex:
 
     def _gather_state(self, sim_result):
         current_tick = self.sub.tick_count if hasattr(self.sub, 'tick_count') else 0
-        phys_packet = self.sub.phys.tension.last_physics_packet
+        phys_packet = self.sub.phys.observer.last_physics_packet
         bio_state = {
             "chem": self.sub.bio.endo.get_state(),
             "atp": self.sub.bio.mito.state.atp_pool}

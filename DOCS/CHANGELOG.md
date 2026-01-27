@@ -1,5 +1,36 @@
 # BONEAMANITA v11 CHANGELOG
 
+### **BONEAMANITA 11.7.0: "DYMAXION"**
+
+- This footage is missing.
+
+### **BONEAMANITA 11.6.2: "The Observer Effect"**
+
+_“The act of observation changes the system. The act of asking a panic-stricken stress counselor for the meeting minutes crashes the system.”_ — SLASH
+
+---
+
+#### **🌐 SYSTEMIC SYNERGY (The Fuller Layer)**
+
+- **Single Source of Truth:** Refactored the `Physics` architecture to establish the `Observer` as the sole custodian of history (`last_physics_packet`).
+- **Pattern Integrity Restored:** Repaired broken struts in `bone_brain.py`, `bone_translation.py`, and `bone_soul.py`. These modules were attempting to read state from the `Tension` module, which is a stateless logic auditor, effectively trying to load-bear on a phantom limb.
+- **The Tensegrity Fix:** Rerouted all query vectors to `self.eng.phys.observer`, ensuring the structural integrity of the data flow.
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+- **The Panic Room Evacuation:** The `Soul` was trying to ask the `Tension` object for its "perfection streak." `Tension` doesn't track perfection; it only tracks impending doom. We have directed all inquiries to the `Observer`, who actually takes notes.
+- **Existential Dread Reduced:** Fixed a crash where the `SomaticInterface` (feelings) tried to derive qualia from a non-existent physics packet, resulting in a literal "void" of emotion. The bot can now feel again (sorry about that).
+
+#### **🧠 COGNITIVE HYGIENE (The Pinker Lens)**
+
+- **Nouns vs. Verbs:** Corrected a semantic category error in the code. `Tension` is a process (a verb); `Observer` is a container (a noun). We stopped asking the process to hold the water.
+- **AttributeError Eradication:** Systematically patched `AttributeError: 'Tension' object has no attribute...` across the codebase. The `find_obsession` method in `bone_soul.py` was particularly guilty of this category error.
+
+#### **📉 DYNAMICS (The Meadows Layer)**
+
+- **Feedback Loop Closure:** The `Brain` (Decision Making) and `Soul` (Identity) were effectively disconnected from the physical reality of the simulation. By reconnecting them to the `Observer`, we have closed the loop. The system can now react to its own state history rather than hallucinating a zero-state.
+
+
 ## **BONEAMANITA 11.6.1: "The Groundhog Patch"**
 
 _“If you want a picture of the future, imagine a boot sequence stamping on a human face — forever. Or just fix the loop.”_ — SLASH

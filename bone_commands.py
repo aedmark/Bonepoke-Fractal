@@ -127,7 +127,7 @@ class CommandProcessor:
         return self.registry.execute(text)
 
     def _cmd_help(self, _parts):
-        lines = [f"\n{self.P.CYN}:: BONEAMANITA 11.6.1 ::{self.P.RST}"]
+        lines = [f"\n{self.P.CYN}:: BONEAMANITA 11.7.0 ::{self.P.RST}"]
         for cmd, desc in self.registry.help_text.items():
             lines.append(f"{self.P.WHT}{cmd:<12}{self.P.RST} {desc}")
         self.interface.log("\n".join(lines))

@@ -5,7 +5,6 @@ from collections import deque, Counter
 from dataclasses import dataclass, field
 from typing import Set, Optional, Dict, List, Any, Tuple
 from bone_personality import SynergeticLensArbiter
-from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig
 from bone_data import BIO_NARRATIVE
@@ -53,13 +52,9 @@ class BioConstants:
 class BioSystem:
     mito: 'MitochondrialForge'
     endo: 'EndocrineSystem'
-    immune: MycotoxinFactory
-    lichen: LichenSymbiont
-    gut: HyphalInterface
     plasticity: Any
     governor: 'MetabolicGovernor'
     shimmer: Any
-    parasite: ParasiticSymbiont
     events: Any = None
     biometrics: Optional['Biometrics'] = None
 
@@ -68,7 +63,6 @@ class BioSystem:
         if isinstance(physics_packet, dict):
             em_field = physics_packet.get("electromagnetism", 0.0)
             if em_field == 0.0:
-                import math
                 e = physics_packet.get("E", 0.0)
                 b = physics_packet.get("B", 0.0)
                 em_field = math.sqrt(e**2 + b**2)

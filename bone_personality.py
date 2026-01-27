@@ -62,7 +62,7 @@ class EnneagramDriver:
             "JESTER":   {"tension_min": 12.0, "vectors": {"DEL": 3.0, "ENT": 3.0, "PSI": -3.0}},
             "GORDON":   {"drag_min": 4.0,     "vectors": {"STR": 2.0, "E": 2.0}},
             "GLASS":    {"coherence_max": 0.2,"vectors": {"LQ": 2.0}},
-            "CLARENCE": {"coherence_min": 0.8,"vectors": {"TEX": 4.0, "BET": 2.0}},
+            "CLARENCE": {"coherence_min": 0.8,"vectors": {"STR": 4.0, "BET": 2.0}},
             "NATHAN":   {"tension_min": 8.0,  "vectors": {"TMP": 3.0, "PHI": 1.0}},
             "SHERLOCK": {"tension_min": 10.0, "vectors": {"PHI": 4.0, "VEL": 2.0}},
             "NARRATOR": {"safe_zone": True,   "vectors": {"PSI": 4.0}}}
@@ -137,31 +137,25 @@ class SynergeticLensArbiter:
             "heavy", "kinetic", "abstract", "photo",
             "aerobic", "thermal", "cryo", "sacred", "play", "suburban"
         ])
+        self.stable_archetype = random.choice(SCENARIOS["ARCHETYPES"])
 
     def consult(self, physics, bio_state, _inventory, current_tick, _ignition_score=0.0):
         voltage = physics.get("voltage", 0.0) if isinstance(physics, dict) else physics.voltage
         if current_tick <= 2:
             self.current_focus = "NARRATOR"
-            archetype = random.choice(SCENARIOS["ARCHETYPES"])
-            bans = ", ".join(SCENARIOS["BANNED_CLICHES"])
-            gen_instruction = "IMMEDIATELY generate a vivid, specific location"
-            if current_tick > 0:
-                gen_instruction += " (OR describe the details of the current location if already established)"
             return {
                 "lens": "GAME_MASTER",
                 "role": "The Architect [World Builder]",
                 "style_directives": [
                     "You are a creative, welcoming Game Master.",
-                    f"CREATIVE SPARK: {archetype}.",
-                    f"{gen_instruction}.",
-                    "STYLE: Hemingway-lite. Simple, direct, and concrete",
-                    "Avoid flowery adjectives or 'purple prose'.",
-                    "Focus on physical reality over abstract metaphor.",
-                    "Do NOT mention the user's inventory, pockets, or stats.",
-                    f"NEGATIVE CONSTRAINT: Avoid these overused tropes: {bans}.",
+                    "MODE: SYSTEM_BOOT.",
+                    "INSTRUCTION: Wait for the user's sensory array to come online.",
+                    "Do NOT describe the physical location yet.",
+                    "Focus on internal system status, static, or the void.",
+                    "STYLE: Simple, direct, and concrete.",
                     "Be concrete. Be specific. Be Real. Be Honest. Have fun."],
                 "lexicon_bias": self.boot_flavor,
-                "context_msg": "Scenario Initialization."}
+                "context_msg": "System Boot."}
         lens_name, state_desc, reason = self.enneagram.decide_persona(physics)
         chem = bio_state.get("chem", {})
         adrenaline_val = chem.get("adrenaline", chem.get("ADR", 0.5))
@@ -308,13 +302,15 @@ class TherapyProtocol:
 
     def check_progress(self, phys, stamina, current_trauma_accum):
         healed_types = []
-        if phys["counts"].get("toxin", 0) == 0 and phys["vector"]["TEX"] > 0.3: self.streaks["SEPTIC"] += 1
-        else: self.streaks["SEPTIC"] = 0
+        if phys["counts"].get("toxin", 0) == 0 and phys["vector"].get("STR", 0.0) > 0.3:
+            self.streaks["SEPTIC"] += 1
+        else:
+            self.streaks["SEPTIC"] = 0
         if stamina > 40 and phys["counts"].get("photo", 0) > 0: self.streaks["CRYO"] += 1
         else: self.streaks["CRYO"] = 0
         if 2.0 <= phys["voltage"] <= 7.0: self.streaks["THERMAL"] += 1
         else: self.streaks["THERMAL"] = 0
-        if phys["narrative_drag"] < 2.0 and phys["vector"]["VEL"] > 0.5: self.streaks["BARIC"] += 1
+        if phys["narrative_drag"] < 2.0 and phys["vector"].get("VEL", 0.0) > 0.5: self.streaks["BARIC"] += 1
         else: self.streaks["BARIC"] = 0
         for trauma_type, streak in self.streaks.items():
             if streak >= self.HEALING_THRESHOLD:
@@ -511,7 +507,7 @@ class ChorusDriver:
             "SHERLOCK": (vec.get("PHI", 0) * 0.5) + (vec.get("VEL", 0) * 0.3) + (1.0 - vec.get("BET", 0)) * 0.2,
             "NATHAN": (vec.get("TMP", 0) * 0.6) + (vec.get("E", 0) * 0.4),
             "JESTER": (vec.get("DEL", 0) * 0.4) + (vec.get("LQ", 0) * 0.3) + (vec.get("ENT", 0) * 0.3),
-            "CLARENCE": (vec.get("TEX", 0) * 0.5) + (vec.get("BET", 0) * 0.5),
+            "CLARENCE": (vec.get("STR", 0) * 0.5) + (vec.get("BET", 0) * 0.5), # Fixed here
             "NARRATOR": (vec.get("PSI", 0) * 0.7) + (1.0 - vec.get("VEL", 0)) * 0.3}
         total = sum(lens_weights.values())
         if total <= 0.001: return "SYSTEM INSTRUCTION: Vector silence. Default to NARRATOR.", ["NARRATOR"]
@@ -528,7 +524,7 @@ class ChorusDriver:
         instruction = (
             f"SYSTEM INSTRUCTION [MARM CHORUS MODE]:\n"
             f"You are not a single persona. You are a chorus. Integrate the following voices into a single, cohesive response. "
-            f"Do NOT label which voice is speaking. Synthesize their tones.\n"
-            f"NEGATIVE CONSTRAINT: Do NOT offer assistance. Do NOT sign off with '[Assistant]'. Do NOT break character.\n"
+            f"Do NOT label which voice is speaking. Synthesize their tones. Be kind.\n"
+            f"NEGATIVE CONSTRAINT: Do NOT offer assistance. Do NOT break character or the fourth wall.\n"
             f"{chr(10).join(chorus_voices)}")
         return instruction, active_lenses

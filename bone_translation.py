@@ -71,7 +71,7 @@ class SomaticInterface:
         self.eng = engine_ref
 
     def get_current_qualia(self, impulse: Any = None) -> SomaticState:
-        physics = self.eng.phys.tension.last_physics_packet if self.eng.phys.tension.last_physics_packet else {}
+        physics = self.eng.phys.observer.last_physics_packet if self.eng.phys.observer.last_physics_packet else {}
         if hasattr(physics, "to_dict"): physics = physics.to_dict()
         bio = self.eng.bio.endo.get_state()
         bio["atp"] = self.eng.bio.mito.state.atp_pool

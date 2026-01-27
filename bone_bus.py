@@ -421,6 +421,9 @@ class PhysicsPacket:
     vector: Dict[str, float] = field(default_factory=dict)
     psi: float = 0.0
     kappa: float = 0.0
+    mass: float = 0.0
+    coherence: float = 0.0
+    abstraction: float = 0.0
     geodesic_mass: float = 0.0
     beta_index: float = 1.0
     gamma: float = 0.0
@@ -588,11 +591,11 @@ class MindSystem:
 
 @dataclass
 class PhysSystem:
-    tension: Any
+    observer: Any
     forge: Any
     crucible: Any
     theremin: Any
     pulse: Any
-    gate: Any
     dynamics: Any
     nav: Any
+    tension: Any
