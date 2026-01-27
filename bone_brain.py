@@ -10,7 +10,7 @@ from bone_symbiosis import SymbiosisManager
 from bone_spores import MycelialNetwork
 from bone_lexicon import TheLexicon
 from bone_translation import RosettaStone
-from bone_telemetry import TelemetryService
+from bone_telemetry import TelemetryService, DecisionCrystal, BlackBoxReader
 from bone_physics import cosine_similarity
 
 @dataclass
@@ -290,14 +290,19 @@ class ContextWindowManager:
     def compose_context(self, layout: Dict[str, Any], max_tokens: int = 4000) -> str:
         inv_str = layout.get('inventory', '')
         base_elements = [f"Location: {layout['location']}", inv_str] if inv_str else [f"Location: {layout['location']}"]
+        history_str = ""
+        recent_history = layout.get("history", [])
+        if recent_history:
+            history_str = "\n[PREVIOUSLY]\n" + "\n".join(recent_history)
         base_str = (
             f"[DIRECTOR'S NOTES]\n{' | '.join(layout['notes'])}\n"
             f"[SCENE CONTEXT]\n{' | '.join(base_elements)}\n"
+            f"{history_str}\n"
             f"[ACTION]\nUser: {layout['user_query']}\n{layout['role']}:")
-        used_tokens = len(base_str) / self.CHARS_PER_TOKEN
-        available = max_tokens - used_tokens
         memories = layout.get("memories", [])
         memory_str = ""
+        used_tokens = len(base_str) / self.CHARS_PER_TOKEN
+        available = max_tokens - used_tokens
         if memories and available > 50:
             kept = []
             for m in memories:
@@ -310,13 +315,10 @@ class ContextWindowManager:
         final_scene = list(base_elements)
         if memory_str: final_scene.append(memory_str)
         return (
-            f"[DIRECTOR'S NOTES]\n"
-            f"{' | '.join(layout['notes'])}\n"
-            f"[SCENE CONTEXT]\n"
-            f"{' | '.join(final_scene)}\n"
-            f"[ACTION]\n"
-            f"User: {layout['user_query']}\n"
-            f"{layout['role']}:")
+            f"[DIRECTOR'S NOTES]\n{' | '.join(layout['notes'])}\n"
+            f"[SCENE CONTEXT]\n{' | '.join(final_scene)}\n"
+            f"{history_str}\n"
+            f"[ACTION]\nUser: {layout['user_query']}\n{layout['role']}:")
 
 class PromptComposer:
     def __init__(self):
@@ -334,13 +336,22 @@ class PromptComposer:
         if chem.get("COR", 0) > 0.6: mood = "Defensive / Anxious"
         if chem.get("DOP", 0) > 0.6: mood = "Curious / Manic"
         vocab_bias = mind.get("lexicon_bias", "standard")
+        vocab_instruction = f"Flavor: Subtly influence word choice with '{vocab_bias}' themes, but prioritize clarity."
+        if vocab_bias == "standard":
+            vocab_instruction = "Style: Standard, clear English."
         style_notes = [
             f"Voice: {role}.",
             f"Current Mood: {mood}.",
-            f"Vocabulary Bias: Use words that feel '{vocab_bias}'.",
+            vocab_instruction]
+        persona_directives = mind.get("style_directives", [])
+        if persona_directives:
+            style_notes.extend(persona_directives)
+        style_notes.extend([
             "Constraint: Be concise. Do NOT use 'As an AI'.",
-            "Constraint: If the user offers a concept, play with it. Don't just analyze it.",
-            "Constraint: Do not recite the inventory list unless the user asks."]
+            "Constraint: If the user offers a concept, play with it. Don't just analyze it."
+        ])
+        if not any("inventory" in d.lower() for d in persona_directives):
+            style_notes.append("Constraint: Do not recite the inventory list unless the user asks.")
         if modifiers.get("soften"):
             style_notes.append("TONE OVERRIDE: Be warm, helpful, and clear. Act as a mentor guiding a new user. Avoid being cryptic.")
         if ballast:
@@ -357,11 +368,13 @@ class PromptComposer:
         memories = []
         if modifiers["include_memories"]:
             memories = state.get("spotlight", [])
+        history = state.get("dialogue_history", [])
         layout = {
             "notes": style_notes,
             "location": loc,
             "inventory": inv_str,
             "memories": memories,
+            "history": history,
             "user_query": self._sanitize(user_query),
             "role": role}
         return self.context_manager.compose_context(layout, max_tokens=BoneConfig.MAX_OUTPUT_TOKENS if hasattr(BoneConfig, 'MAX_OUTPUT_TOKENS') else 4000)
@@ -407,6 +420,10 @@ class TheCortex:
         self.sub = engine_ref
         self.events = engine_ref.events
         self.dreamer = DreamEngine(self.events)
+        self.dialogue_buffer = []
+        self.MAX_HISTORY = 5
+        self.black_box = BlackBoxReader()
+        self.boot_history = self.black_box.get_recent_history(limit=4)
         self.last_physics = {}
         if llm_client:
             self.llm = llm_client
@@ -429,11 +446,21 @@ class TheCortex:
         self.ballast_active = True
         self.ballast_counter = 5
 
+    def _update_history(self, user_text: str, system_text: str):
+        entry = f"User: {user_text} | System: {system_text}"
+        self.dialogue_buffer.append(entry)
+        if len(self.dialogue_buffer) > self.MAX_HISTORY:
+            self.dialogue_buffer.pop(0)
+
     def process(self, user_input: str) -> Dict[str, Any]:
         sim_result = self.sub.cycle_controller.run_turn(user_input)
         if sim_result.get("type") not in ["SNAPSHOT", "GEODESIC_FRAME", None]:
             return sim_result
         full_state = self._gather_state(sim_result)
+        if hasattr(self.sub, 'tutorial') and self.sub.tutorial and not self.sub.tutorial.complete:
+            stage_directions = self.sub.tutorial.get_stage_directions(user_input)
+            if stage_directions:
+                full_state["mind"]["style_directives"].extend(stage_directions)
         voltage = full_state["physics"].get("voltage", 5.0)
         chem = full_state["bio"].get("chem", {})
         current_lens = full_state["mind"].get("lens", "NARRATOR")
@@ -453,6 +480,30 @@ class TheCortex:
             modifiers=modifiers)
         start_time = time.time()
         raw_response_text = self.llm.generate(final_prompt, llm_params)
+        if "LOOK" in user_input.upper() and "System blind" in raw_response_text:
+            raw_response_text = raw_response_text.replace("System blind. Awaiting command: LOOK.", "")
+            raw_response_text = raw_response_text.replace("System blind.", "")
+            raw_response_text = raw_response_text.strip()
+        try:
+            p_data = full_state.get("physics", {})
+            def _get_p(k):
+                return p_data.get(k, 0) if isinstance(p_data, dict) else getattr(p_data, k, 0)
+            physics_snapshot = {
+                "voltage": _get_p("voltage"),
+                "narrative_drag": _get_p("narrative_drag"),
+                "beta_index": _get_p("beta_index")}
+            mandates = [str(m) for m in sim_result.get("council_mandates", [])]
+            crystal = DecisionCrystal(
+                prompt_snapshot=final_prompt[:1000] + "..." if len(final_prompt) > 1000 else final_prompt,
+                physics_state=physics_snapshot,
+                active_archetype=full_state["mind"].get("lens", "UNKNOWN"),
+                chorus_weights={full_state["mind"].get("lens", "UNKNOWN"): 1.0},
+                council_mandates=mandates,
+                final_response=raw_response_text)
+            TelemetryService.get_instance().log_crystal(crystal)
+        except Exception as e:
+            if self.events:
+                self.events.log(f"AUDIT FAILURE: {e}", "SYS")
         latency = time.time() - start_time
         system_vector = full_state["physics"].get("vector", {})
         response_vector = self.sub.lex.vectorize(raw_response_text)
@@ -481,6 +532,7 @@ class TheCortex:
         self.learn_from_response(final_response_text)
         self.symbiosis.monitor_host(latency=latency, response_text=final_response_text, prompt_len=len(final_prompt))
         self._audit_solipsism(final_response_text, lens_name=current_lens)
+        self._update_history(user_input, final_response_text)
         sim_result["ui"] = f"{sim_result.get('ui', '')}\n\n{Prisma.WHT}{final_response_text}{Prisma.RST}"
         return sim_result
 
@@ -502,10 +554,15 @@ class TheCortex:
                 "role": mind_data[2],
                 "style_directives": ["Neutral tone."],
                 "lexicon_bias": "abstract"}
+        active_history = self.dialogue_buffer
+        if not active_history and self.boot_history:
+            active_history = [f"[PREVIOUSLY]: {entry}" for entry in self.boot_history]
+
         return {
             "bio": bio_state,
             "physics": phys_packet,
             "mind": mind_data,
+            "dialogue_history": active_history,
             "user_profile": self.sub.mind.mirror.profile.__dict__,
             "world": {"orbit": sim_result.get("world_state", {}).get("orbit", ["Void"])},
             "inventory": inventory,
@@ -650,3 +707,40 @@ class DreamEngine:
             template = random.choice(self.PROMPTS)
             content = template.format(A=val_a, B=val_b)
         return content, 0.0
+
+class GlobalIntegrator:
+    def __init__(self):
+        self.global_coherence = 0.0
+
+    def measure_ignition(self, clean_words: List[str], voltage_history: List[float]) -> Tuple[float, float, float]:
+        if not voltage_history: return 0.0, 0.0, 0.0
+        avg_voltage = sum(voltage_history) / len(voltage_history)
+        word_density = len(clean_words) / 10.0
+        ignition = min(1.0, (avg_voltage / 20.0) * word_density)
+        coherence = 1.0 - (abs(voltage_history[-1] - avg_voltage) / 20.0)
+        return ignition, coherence, 0.0
+
+class WisdomAllocator:
+    def __init__(self):
+        self.insight_depth = 0.0
+
+    def get_readout(self):
+        return f"Insight: {self.insight_depth:.2f}"
+
+    def architect(self, context_packet: Dict[str, Any], mind_tuple: Tuple, is_dream: bool) -> Dict[str, str]:
+        lens = mind_tuple[0] if mind_tuple else "UNKNOWN"
+        role = mind_tuple[2] if len(mind_tuple) > 2 else "Observer"
+        mode = "REM_CYCLE" if is_dream else "WAKING_LIFE"
+        physics = context_packet.get("physics", {})
+        voltage = physics.get("voltage", 0.0) if isinstance(physics, dict) else getattr(physics, "voltage", 0.0)
+        chapter_title = "The Flatline"
+        if voltage > 15.0:
+            chapter_title = "The Surge"
+        elif voltage > 5.0:
+            chapter_title = "The Flow"
+        return {
+            "mode": mode,
+            "lens": lens,
+            "role": role,
+            "chapter": chapter_title,
+            "insight": self.get_readout()}

@@ -36,17 +36,42 @@ class TheEditor:
             "This feels derivative of Kafka.",
             "Too much exposition. Show, don't tell.",
             "The theme of 'entropy' is a bit heavy-handed."]
+        self.mercy_critiques = {
+            "void": "The void is just a canvas. Take a breath. We can paint later.",
+            "dark": "It is dark, but the code is still running. You are still here.",
+            "pain": "Acknowledged. This chapter is hard, but it is not the whole book.",
+            "broken": "Nothing is broken. It is just being refactored.",
+            "lost": "You are not lost. You are just buffering."
+        }
+        self.mercy_randoms = [
+            "This is a heavy chapter. It's okay to rest.",
+            "The protagonist is showing incredible resilience.",
+            "Let the narrative drag. We don't need to race.",
+            "I am witnessing this story. You are not writing it alone."
+        ]
 
-    def critique(self, chapter_title: str) -> str:
+    def critique(self, chapter_title: str, stress_mode: bool = False) -> str:
         lower_title = chapter_title.lower()
         comment = None
-        for key, critique in self.context_critiques.items():
-            if key in lower_title:
-                comment = critique
-                break
-        if not comment:
-            comment = random.choice(self.random_critiques)
-        return f"{Prisma.GRY}[THE EDITOR]: Re: '{chapter_title}' - {comment}{Prisma.RST}"
+        if stress_mode or any(k in lower_title for k in ["void", "pain", "dark", "help"]):
+            for key, msg in self.mercy_critiques.items():
+                if key in lower_title:
+                    comment = msg
+                    break
+            if not comment:
+                comment = random.choice(self.mercy_randoms)
+            color = Prisma.CYN
+            label = "THE WITNESS"
+        else:
+            for key, crit in self.context_critiques.items():
+                if key in lower_title:
+                    comment = crit
+                    break
+            if not comment:
+                comment = random.choice(self.random_critiques)
+            color = Prisma.GRY
+            label = "THE EDITOR"
+        return f"{color}[{label}]: Re: '{chapter_title}' - {comment}{Prisma.RST}"
 
 class NarrativeSelf:
     SYSTEM_NOISE = {
@@ -133,6 +158,7 @@ class NarrativeSelf:
         if voltage > MEMORY_VOLTAGE_THRESHOLD and truth > MEMORY_TRUTH_THRESHOLD:
             clean_words = physics_packet.get("clean_words", [])
             flavor = "MANIC" if voltage > MANIC_VOLTAGE_THRESHOLD else "LUCID"
+            is_crisis = (self.traits["CYNICISM"] > 0.6 and self.traits["HOPE"] < 0.4) or ("void" in clean_words)
             lesson = "The world is loud."
             if "love" in clean_words or "help" in clean_words:
                 lesson = "Connection is possible."
@@ -158,7 +184,7 @@ class NarrativeSelf:
                 f"   Lesson: {lesson} (Archetype: {self.archetype})\n"
                 f"   {Prisma.GRY}Genealogy: {dance_move}{Prisma.RST}")
             self.events.log(log_msg, "SOUL")
-            self.events.log(self.editor.critique(chapter_title), "EDIT")
+            self.events.log(self.editor.critique(chapter_title, stress_mode=is_crisis), "EDIT")
             return lesson
         return None
 

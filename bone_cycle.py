@@ -1,15 +1,15 @@
 """ bone_cycle.py
 'The wheel turns, and ages come and pass.' - Jordan """
-
+import re
 import traceback, random, time, uuid
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, Any, Tuple, List
+from typing import Dict, Any, Tuple, List, Optional
 from bone_bus import Prisma, BoneConfig, CycleContext, PhysicsPacket
 from bone_village import TownHall
 from bone_personality import TheBureau
 from bone_physics import TheBouncer, RuptureValve, ChromaScope
-from bone_viewer import GeodesicRenderer, CachedRenderer
+from bone_viewer import GeodesicRenderer, CachedRenderer, get_renderer
 from bone_architect import PanicRoom
 from bone_synesthesia import SynestheticCortex
 from bone_symbiosis import SymbiosisManager
@@ -484,6 +484,9 @@ class SoulPhase(SimulationPhase):
         if self.eng.gordon.inventory:
             self.eng.tinkerer.audit_tool_use(ctx.physics, self.eng.gordon.inventory)
         council_advice, adjustments, mandates = self.eng.council.convene(ctx.input_text, ctx.physics)
+        if mandates:
+            if not hasattr(ctx, 'council_mandates'): ctx.council_mandates = []
+            ctx.council_mandates.extend(mandates)
         for advice in council_advice:
             ctx.log(advice)
         for mandate in mandates:
@@ -698,16 +701,27 @@ class CycleSimulator:
             ctx.mind_state = PanicRoom.get_safe_mind()
         ctx.log(f"{Prisma.RED}⚠ {phase_name} FAILURE: Switching to Panic Protocol.{Prisma.RST}")
 
+class StrunkWhite:
+    def sanitize(self, text: str) -> Tuple[str, Optional[str]]:
+        clean = re.sub(r'\n\s*\n', '\n\n', text)
+        banned = ["large language model", "AI assistant", "cannot feel"]
+        violation = None
+        for b in banned:
+            if b in clean.lower():
+                clean = clean.replace(b, "[REDACTED]")
+                violation = f"Style Violation: Used forbidden phrase '{b}'."
+        return clean, violation
+
 class CycleReporter:
     def __init__(self, engine_ref):
         self.eng = engine_ref
         self.vsl_chroma = ChromaScope()
-        from bone_viewer import get_renderer
+        self.strunk = StrunkWhite()
         self.valve = RuptureValve(self.eng.mind.lex, self.eng.mind.mem)
         self.renderer = get_renderer(
             self.eng,
             self.vsl_chroma,
-            None,
+            self.strunk,
             self.valve,
             mode="STANDARD")
         self.current_mode = "STANDARD"
@@ -715,11 +729,10 @@ class CycleReporter:
     def switch_renderer(self, mode: str):
         if self.current_mode == mode:
             return
-        from bone_viewer import get_renderer
         self.renderer = get_renderer(
             self.eng,
             self.vsl_chroma,
-            None,
+            self.strunk,
             getattr(self, 'valve', None),
             mode=mode)
         self.current_mode = mode
@@ -805,15 +818,17 @@ class GeodesicOrchestrator:
         tracer = TelemetryService.get_tracer()
         cycle_id = str(uuid.uuid4())[:8]
         tracer.start_cycle(cycle_id)
-
         try:
             ctx = CycleContext(input_text=user_message)
             ctx.user_name = self.eng.user_name
+            ctx.council_mandates = []
             self.eng.events.flush()
             ctx = self.simulator.run_simulation(ctx)
             if not ctx.is_alive:
                 return self.eng.trigger_death(ctx.physics)
             snapshot = self.reporter.render_snapshot(ctx)
+            snapshot["council_mandates"] = getattr(ctx, "council_mandates", [])
+            snapshot["trace_id"] = cycle_id
             snapshot["enzyme"] = ctx.bio_result.get("enzyme", "NONE")
             snapshot["chemistry"] = ctx.bio_result.get("chemistry", {})
             snapshot["physics"] = ctx.physics.to_dict() if hasattr(ctx.physics, 'to_dict') else ctx.physics

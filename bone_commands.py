@@ -7,10 +7,6 @@ from dataclasses import dataclass
 
 
 class CommandStateInterface:
-    """
-    The Anti-Hydra. This interface wraps the messy Engine and exposes
-    ONLY what the command system needs to know.
-    """
     def __init__(self, engine_ref, prisma_ref, config_ref):
         self._eng = engine_ref
         self.P = prisma_ref
@@ -46,17 +42,14 @@ class CommandStateInterface:
             "stamina": self._eng.stamina,
             "atp": self._eng.bio.mito.state.atp_pool,
             "max_health": getattr(self.Config, "MAX_HEALTH", 100.0),
-            "max_stamina": getattr(self.Config, "MAX_STAMINA", 100.0)
-        }
+            "max_stamina": getattr(self.Config, "MAX_STAMINA", 100.0)}
 
     def get_inventory(self) -> List[str]:
-        """Safely retrieves inventory from Gordon."""
         if hasattr(self._eng, "gordon"):
             return getattr(self._eng.gordon, "inventory", [])
         return []
 
     def get_navigation_report(self) -> str:
-        """Coordinated retrieval of physics and navigation data."""
         if not hasattr(self._eng, "town_hall") or not hasattr(self._eng, "phys"):
             return "Navigation Offline."
         nav = getattr(self._eng.town_hall, "Navigator", None)
@@ -67,34 +60,29 @@ class CommandStateInterface:
         return "Navigation Systems Unresponsive."
 
     def get_soul_status(self) -> Optional[str]:
-        """Introspection request."""
         soul = getattr(self._eng, "soul", None)
         if soul:
             return soul.get_soul_state()
         return None
 
 class ResourceTax:
-    """Unified cost/check system."""
     def __init__(self, state: CommandStateInterface):
         self.state = state
 
     def levy(self, context: str, costs: Dict[str, float]) -> bool:
         stamina_cost = costs.get("stamina", 0.0)
         atp_cost = costs.get("atp", 0.0)
-
         if self.state.get_resource("stamina") < stamina_cost:
             self.state.log(f"{self.state.P.RED}🛑 EXHAUSTED: Requires {stamina_cost} Stamina.{self.state.P.RST}")
             return False
         if self.state.get_resource("atp") < atp_cost:
             self.state.log(f"{self.state.P.RED}🛑 STARVING: Requires {atp_cost} ATP.{self.state.P.RST}")
             return False
-
         if stamina_cost > 0: self.state.modify_resource("stamina", -stamina_cost)
         if atp_cost > 0: self.state.modify_resource("atp", -atp_cost)
         return True
 
 class CommandRegistry:
-    """Decoupled command dispatch."""
     def __init__(self, state: CommandStateInterface):
         self.state = state
         self.commands: Dict[str, Callable] = {}
@@ -118,7 +106,6 @@ class CommandRegistry:
             self.state.log(f"Unknown command '{cmd}'. Try /help.", "CMD")
             return True
 
-
 class CommandProcessor:
     def __init__(self, engine, prisma_ref, lexicon_ref, config_ref, cartographer_ref=None):
         self.interface = CommandStateInterface(engine, prisma_ref, config_ref)
@@ -140,7 +127,7 @@ class CommandProcessor:
         return self.registry.execute(text)
 
     def _cmd_help(self, _parts):
-        lines = [f"\n{self.P.CYN}:: BONEAMANITA MINIMAL ::{self.P.RST}"]
+        lines = [f"\n{self.P.CYN}:: BONEAMANITA 11.6.1 ::{self.P.RST}"]
         for cmd, desc in self.registry.help_text.items():
             lines.append(f"{self.P.WHT}{cmd:<12}{self.P.RST} {desc}")
         self.interface.log("\n".join(lines))
@@ -155,8 +142,7 @@ class CommandProcessor:
         self.interface.log(
             f"Health:  {bar(v['health'], v['max_health'], self.P.RED)} {v['health']:.0f}\n"
             f"Stamina: {bar(v['stamina'], v['max_stamina'], self.P.GRN)} {v['stamina']:.0f}\n"
-            f"Energy:  {bar(v['atp'], 200, self.P.YEL)} {v['atp']:.0f}"
-        )
+            f"Energy:  {bar(v['atp'], 200, self.P.YEL)} {v['atp']:.0f}")
         return True
 
     def _cmd_save(self, _parts):

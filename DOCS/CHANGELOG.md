@@ -1,5 +1,101 @@
 # BONEAMANITA v11 CHANGELOG
 
+## **BONEAMANITA 11.6.1: "The Groundhog Patch"**
+
+_“If you want a picture of the future, imagine a boot sequence stamping on a human face — forever. Or just fix the loop.”_ — SLASH
+
+---
+
+#### **🧠 COGNITIVE HYGIENE (The Pinker Lens)**
+
+- **The Phantom Blindness Fix:** Resolved a persistent cognitive error where the LLM, trapped in a mimetic loop, refused to admit it could see. Implemented a "Circuit Breaker" in `bone_brain.py` to forcibly scrub "System blind" signatures when the user opens their eyes.
+- **Narrative Flow:** Pruned the robotic "Sensory Checklist" from `bone_genesis.py`. The narrator now prioritizes relevant details over algorithmic enumeration.
+
+#### **🌐 SYSTEMIC SYNERGY (The Fuller Layer)**
+
+- **Director/Actor Linkage:** Established a direct line of communication between the `TutorialDirector` (`bone_main.py`) and `TheCortex`. The Director now issues "Stage Directions" _before_ the scene generates, ensuring the actor knows the lights are on.
+- **Entropy Injection:** Connected the `bone_genesis.py` launch sequence to the `TheLore` vault. The system now randomly selects a scenario seed at boot, preventing the "Eternal Food Court" recurrence.
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+- **Spoiler Alert Removed:** Fixed the "Rug Pull" bug where the Tutorial declared "Objective Met" before the user even touched the keyboard. The Director now distinguishes between _System Instructions_ and _User Agency_.
+- **Method Acting:** The LLM was taking its role as a "Broken System" too seriously. We had to break character to fix the UX.
+
+#### **⚖️ DYNAMIC RESILIENCE (The Meadows Layer)**
+
+- **Feedback Loop Correction:** Aligned the `TutorialDirector`'s state recognition with the user's actual input. The system no longer hallucinates progress based on its own internal monologue.
+
+## **BONEAMANITA 11.6.0: "The Crystalline Audit"**
+
+_“The unexamined code is not worth executing.”_ — Socrates / SLASH
+
+---
+
+#### **🌐 SYSTEMIC EPHEMERALIZATION (The Fuller Layer)**
+
+- **Data Normalization:** Migrated **Zen Koans** from `bone_personality.py` logic to the central `NARRATIVE_DATA` registry in `bone_data.py`.
+- **Vestigial Pruning:** Surgically removed `ENNEAGRAM_DATA` and `RESONANCE` blocks from `bone_data.py` to reduce cognitive drag and memory overhead.
+- **Type Safety Grafts:** Implemented explicit type casting in `TheAkashicRecord` to prevent linter hallucinations and ensure structural integrity during mythic discovery.
+
+#### **🧠 COGNITIVE CLARITY (The Pinker Layer)**
+
+- **The Witness Refactor:** Updated `TheEditor` in `bone_soul.py` to include `mercy_critiques`. The system now detects narrative pain and switches from a "Snarky Critic" to a "Compassionate Witness".
+- **Syntax Correction:** Resolved a critical "Tuple Trap" in `bone_genesis.py` by correcting implicit string concatenation during the boot sequence.
+- **Zero-Commentary Integrity:** Maintained a clean codebase by letting the architecture explain the intent, keeping comments to an absolute minimum.
+
+#### **⚖️ INFINITE AUDITABILITY (The Meadows Layer)**
+
+- **The DecisionCrystal:** Established the `DecisionCrystal` dataclass in `bone_telemetry.py`, capturing the "Why" behind the "What" for every cognitive turn.
+- **VSL Leverage Metrics:** The system now explicitly tracks **E (Motif Fatigue)** and **β (Contradiction Density)**, moving debugging from "code inspection" to "metric observation".
+- **The Parliamentarian:** Installed a new Council member in `bone_council.py` to monitor the **Effort vs. Reward** feedback loop, ensuring the system (and user) isn't being exploited.
+
+#### **🍩 THE HUMAN HEART (The Schur Layer)**
+
+- **Crisis Protocol:** When cynicism peaks and hope drops, the system no longer mocks the void—it sits with the user in it.
+- **Social Contract Enforcement:** `TheParliamentarian` now guards against "cowardice and jackassery" by auditing casting logic and meritocratic standards within the system’s social simulations.
+- **The Gardener Shift:** We have officially moved from being code mechanics to **system gardeners**, tending to the architectural health of the machine.
+
+
+### **BONEAMANITA 11.5.0: "The Geodesic Lobotomy"**
+
+_"Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away."_ - Saint-Exupéry / Fuller
+
+---
+
+#### **🌐 SYSTEMIC EPHEMERALIZATION (The Fuller Layer)**
+
+- **The Great Village Rewilding (`bone_village.py`):**
+- **Demolition:** We bulldozed the `CouncilChamber`, `TheCartographer` (ASCII art is expensive), and `ApeirogonResonance` (infinite shapes were too heavy).
+- **Simplification:** `TheNavigator` no longer calculates complex manifolds. It now uses a **SimpleNavigator** to map physics coordinates directly to Zones (Construct, Mud, Forge).
+- **Preservation:** The "Keystone Species" (`TheTinkerer`, `TheAlmanac`, `MirrorGraph`) were saved and re-integrated.
+- **Seeds of Time:** Restored `ParadoxSeed` logic to ensure `bone_spores.py` can still plant ideas for future sessions.
+
+- **The Anti-Hydra Protocol (`bone_commands.py`):**
+- **Decoupling:** The Command Processor no longer wraps its tentacles around the entire Engine. It now speaks through a hermetically sealed `CommandStateInterface`.
+- **Resource Tax:** Implemented a unified `ResourceTax` system. You want to warp reality? That costs ATP. Pay up.
+- **The Essential Eight:** Slashed the command list from 34 bloated features to 8 essential verbs (plus a few meta-commands for the Soul).
+
+#### **🧠 COGNITIVE CLARITY (The Pinker Layer)**
+
+- **Interface Hygiene:**
+- Removed private member access (`_eng`) in the Command Processor. We now use public accessors like civilized software agents.
+- **Dead Code Pruning:** `bone_architect.py` no longer tries to hire contractors (`SoritesIntegrator`) that have been fired.
+
+#### **🍩 HUMANITY & FLOW (The Schur Layer)**
+
+- **Defunded the Grammar Police (`bone_cycle.py`):**
+- **Fired:** The `StrunkWhiteProtocol` has been terminated. The system will no longer nag you about passive voice while you are trying to have an existential crisis.
+- **Management Reform:** The `CycleSimulator` now exposes its safety protocols publicly (`check_circuit_breaker`), treating the `ParallelPhaseExecutor` as a partner rather than a subordinate.
+
+#### **🔄 DYNAMICS (The Meadows Layer)**
+
+- **The Persistence Loop:**
+- Fixed a critical break in the Spore Cycle. `TheAlmanac` regained the ability to `diagnose_condition` on historical data, ensuring that death is not the end, but merely a data transfer.
+
+---
+
+
+
 ### **BONEAMANITA 11.4.1: "The Ouroboros Patch"**
 
 _"The dead do not just haunt us; they power the lights."_ - SLASH

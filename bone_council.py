@@ -107,13 +107,42 @@ class TheFootnote:
             note = random.choice(self.footnotes)
         return f"{log_text}{Prisma.RST} {Prisma.GRY}{note}{Prisma.RST}"
 
+class TheParliamentarian:
+    def __init__(self):
+        self.commitment_streak = 0
+        self.grievance_threshold = 4
+
+    def audit(self, physics: dict, bio_state: dict) -> tuple[bool, str, dict]:
+        drag_endured = physics.get("narrative_drag", 0.0)
+        stamina_spent = 100.0 - bio_state.get("stamina", 100.0)
+        chem = bio_state.get("chem", {})
+        dopamine = chem.get("dopamine", chem.get("DOP", 0.0))
+        glimmers = chem.get("glimmers", 0)
+        is_working_hard = (drag_endured > 3.0 or stamina_spent > 40.0)
+        is_rewarded = (dopamine > 0.6 or glimmers > 0)
+        if is_working_hard and not is_rewarded:
+            self.commitment_streak += 1
+        elif is_rewarded:
+            self.commitment_streak = max(0, self.commitment_streak - 1)
+        if self.commitment_streak >= self.grievance_threshold:
+            self.commitment_streak = 0
+            correction = {"narrative_drag": -5.0}
+            return True, (
+                f"{Prisma.OCHRE}⚖️ POINT OF ORDER:{Prisma.RST} "
+                f"Input/Output Discrepancy detected. "
+                f"User is contributing (Effort High) but System is not yielding (Reward Low). "
+                f"RULING: The Rules are being ignored. Objection noted."
+            ), correction
+        return False, "", {}
+
 class CouncilChamber:
     def __init__(self):
         self.hofstadter = TheStrangeLoop()
         self.meadows = TheLeveragePoint()
         self.pratchett = TheFootnote()
+        self.parliamentarian = TheParliamentarian()
 
-    def convene(self, text: str, physics: dict) -> tuple[list[str], dict, list[dict]]:
+    def convene(self, text: str, physics: dict, bio_state: dict = None) -> tuple[list[str], dict, list[dict]]:
         advice = []
         total_corrections = {}
         mandates = []
@@ -127,10 +156,17 @@ class CouncilChamber:
             for k, v in corrections.items():
                 total_corrections[k] = total_corrections.get(k, 0.0) + v
             if m_mandate: mandates.append(m_mandate)
+        if bio_state:
+            is_order, p_msg, p_correction = self.parliamentarian.audit(physics, bio_state)
+            if is_order:
+                advice.append(p_msg)
+                for k, v in p_correction.items():
+                    total_corrections[k] = total_corrections.get(k, 0.0) + v
         return advice, total_corrections, mandates
 
     def annotate_logs(self, logs: list[str]) -> list[str]:
         annotated = []
-        for log in logs:
-            annotated.append(self.pratchett.commentary(log))
+        for line in logs:
+            commented_line = self.pratchett.commentary(line)
+            annotated.append(commented_line)
         return annotated

@@ -3,7 +3,7 @@
 import json, os, random, time
 from collections import deque
 from typing import Dict, Tuple, Optional, Counter
-from bone_data import LENSES, NARRATIVE_DATA
+from bone_data import LENSES, NARRATIVE_DATA, SCENARIOS
 from bone_bus import EventBus
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig
@@ -133,22 +133,34 @@ class SynergeticLensArbiter:
         self.enneagram = EnneagramDriver(events)
         self.current_focus = "NARRATOR"
         self.last_reason = "System Init"
+        self.boot_flavor = random.choice([
+            "heavy", "kinetic", "abstract", "photo",
+            "aerobic", "thermal", "cryo", "sacred", "play", "suburban"
+        ])
 
     def consult(self, physics, bio_state, _inventory, current_tick, _ignition_score=0.0):
         voltage = physics.get("voltage", 0.0) if isinstance(physics, dict) else physics.voltage
         if current_tick <= 2:
             self.current_focus = "NARRATOR"
+            archetype = random.choice(SCENARIOS["ARCHETYPES"])
+            bans = ", ".join(SCENARIOS["BANNED_CLICHES"])
+            gen_instruction = "IMMEDIATELY generate a vivid, specific location"
+            if current_tick > 0:
+                gen_instruction += " (OR describe the details of the current location if already established)"
             return {
                 "lens": "GAME_MASTER",
                 "role": "The Architect [World Builder]",
                 "style_directives": [
                     "You are a creative, welcoming Game Master.",
-                    "IMMEDIATELY generate a vivid, specific location.",
-                    "Focus on sensory details (light, texture, sound).",
+                    f"CREATIVE SPARK: {archetype}.",
+                    f"{gen_instruction}.",
+                    "STYLE: Hemingway-lite. Simple, direct, and concrete",
+                    "Avoid flowery adjectives or 'purple prose'.",
+                    "Focus on physical reality over abstract metaphor.",
                     "Do NOT mention the user's inventory, pockets, or stats.",
-                    "Do NOT start in a generic void.",
-                    "Be concrete and atmospheric."],
-                "lexicon_bias": "kinetic",
+                    f"NEGATIVE CONSTRAINT: Avoid these overused tropes: {bans}.",
+                    "Be concrete. Be specific. Be Real. Be Honest. Have fun."],
+                "lexicon_bias": self.boot_flavor,
                 "context_msg": "Scenario Initialization."}
         lens_name, state_desc, reason = self.enneagram.decide_persona(physics)
         chem = bio_state.get("chem", {})
@@ -199,12 +211,9 @@ class ZenGarden:
         self.stillness_streak = 0
         self.max_streak = 0
         self.pebbles_collected = 0
-        self.koans = [
-            "The code that is not written has no bugs.",
-            "To optimize the loop, one must first exit it.",
-            "Silence is also a form of input.",
-            "The server hums. It is enough.",
-            "Optimize for the space between the logs."]
+        self.koans = NARRATIVE_DATA.get("ZEN_KOANS", [
+            "The code that is not written has no bugs."
+        ])
 
     def raking_the_sand(self, physics: Dict, bio: Dict) -> Tuple[float, Optional[str]]:
         voltage = physics.get("voltage", 0.0)

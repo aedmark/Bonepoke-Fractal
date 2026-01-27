@@ -1,8 +1,7 @@
-""" BONEAMANITA 11.4.1 'The Ouroboros Patch'
+""" BONEAMANITA 11.6.1 'The Groundhog Patch'
  Architects: SLASH, KISHO, The BonePoke Gods Humans: Taylor & Edmark """
 
-import os
-import time, json, uuid
+import os, time, json, uuid
 from dataclasses import dataclass
 from typing import Dict, Any
 from bone_bus import EventBus, Prisma, BoneConfig, SystemHealth, TheObserver, BonePresets
@@ -21,6 +20,7 @@ from bone_architect import BoneArchitect
 from bone_cycle import GeodesicOrchestrator
 from bone_viewer import Projector, GeodesicRenderer
 from bone_translation import SomaticInterface
+from bone_council  import CouncilChamber
 
 @dataclass
 class HostStats:
@@ -36,7 +36,7 @@ class SessionGuardian:
         self.engine_instance = engine_ref
 
     def __enter__(self):
-        print(f"{Prisma.paint('>>> BONEAMANITA 11.4.1', 'G')}")
+        print(f"{Prisma.paint('>>> BONEAMANITA 11.6.1', 'G')}")
         print(f"{Prisma.paint('System: LISTENING', '0')}")
         return self.engine_instance
 
@@ -72,7 +72,29 @@ class TutorialDirector:
             {"goal": "INSPECT", "msg": "Step 3: Introspection. You have a body. Type '/inventory' to check your belt."},
             {"goal": "GRADUATE", "msg": "Step 4: Integration. You are ready. The training wheels are coming off."}]
 
+    def get_stage_directions(self, user_input: str) -> list:
+        if self.complete: return []
+        input_upper = user_input.upper().strip()
+        directives = []
+        if self.step == 0:
+            if "LOOK" in input_upper:
+                directives.append("SYSTEM ALERT: OPTICAL SENSORS ONLINE.")
+                directives.append("INSTRUCTION: The aperture is open. Describe the scene vividly based on the seed data.")
+                directives.append("CONSTRAINT: Do NOT repeat 'System blind'. The system can SEE.")
+            else:
+                directives.append("STATUS: OPTICAL SENSORS OFFLINE. The system is blind.")
+                directives.append("INSTRUCTION: If the user types anything other than LOOK, remind them they cannot see.")
+        elif self.step == 1:
+            directives.append("STATUS: OPTICAL SENSORS ONLINE.")
+            if "WAIT" in input_upper or user_input == "":
+                directives.append("INSTRUCTION: Time is passing. Let the simulation breathe.")
+            else:
+                directives.append("INSTRUCTION: Encourage the user to type 'WAIT' to sync the clock.")
+        return directives
+
     def audit(self, input_text: str, cycle_result: Dict) -> Dict:
+        if "INIT_SEQUENCE" in input_text:
+            return cycle_result
         if self.complete: return cycle_result
         success = False
         if self.step == 0 and "LOOK" in input_text.upper(): success = True
@@ -161,6 +183,8 @@ class BoneAmanita:
         self.tinkerer = self.town_hall.Tinkerer
         self.almanac = self.town_hall.Almanac
         self.mirror = self.town_hall.Mirror
+        self.zen = self.town_hall.ZenGarden
+        self.council = CouncilChamber()
         self.repro = LiteraryReproduction()
         self.projector = Projector()
         self.kintsugi = KintsugiProtocol()
@@ -252,6 +276,11 @@ class BoneAmanita:
                 host_stats)
         llm_start = self.observer.clock_in()
         cortex_packet = self.cortex.process(user_message)
+        trailing_logs = [e['text'] for e in self.events.flush()]
+        if 'logs' in cortex_packet:
+            cortex_packet['logs'].extend(trailing_logs)
+        else:
+            cortex_packet['logs'] = trailing_logs
         llm_duration = self.observer.clock_out(llm_start, "llm")
         if llm_duration > 5.0:
             cortex_packet["logs"].append(f"{Prisma.GRY}[METRICS]: High Cognitive Latency ({llm_duration:.2f}s).{Prisma.RST}")
@@ -385,7 +414,7 @@ class BoneAmanita:
 
 if __name__ == "__main__":
     print("\n" + "="*40)
-    print(f"{Prisma.paint('♦ BONEAMANITA 11.4.1', 'M')}")
+    print(f"{Prisma.paint('♦ BONEAMANITA 11.6.1', 'M')}")
     print(f"{Prisma.paint('  System Bootstrapping...', 'GRY')}")
     print("="*40 + "\n")
     print("The aperture opens. The void stares back.")

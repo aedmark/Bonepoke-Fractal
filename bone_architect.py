@@ -7,7 +7,7 @@ from bone_bus import Prisma, MindSystem, PhysSystem, PhysicsPacket
 from bone_village import MirrorGraph, TheNavigator
 from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont, MycelialNetwork
 from bone_body import BioSystem, MitochondrialForge, MitochondrialState, EndocrineSystem, MetabolicGovernor, ViralTracer, ThePacemaker
-from bone_brain import DreamEngine, ShimmerState, NeuroPlasticity
+from bone_brain import DreamEngine, ShimmerState, NeuroPlasticity, GlobalIntegrator, WisdomAllocator
 from bone_personality import LimboLayer
 from bone_physics import TheTensionMeter, TheTangibilityGate, TemporalDynamics
 from bone_machine import TheCrucible, TheForge, TheTheremin
@@ -72,6 +72,9 @@ class BoneArchitect:
             dreamer=DreamEngine(events),
             mirror=MirrorGraph(events),
             tracer=ViralTracer(_mem))
+        mind.integrator = GlobalIntegrator()
+        mind.wise = WisdomAllocator()
+
         return mind, limbo
 
     @staticmethod

@@ -1,10 +1,11 @@
 """ bone_genesis.py 'Simplicity is the ultimate sophistication.' - Vinci """
 
-import sys, os, json, time, urllib.request, traceback
+import sys, os, json, time, urllib.request, traceback, random
 from typing import Optional, Dict, Any
 from bone_main import BoneAmanita, SessionGuardian
 from bone_brain import LLMInterface, TheCortex
 from bone_village import Prisma
+from bone_data import TheLore
 
 CONFIG_FILE = "bone_config.json"
 
@@ -15,13 +16,11 @@ class GenesisProtocol:
             "provider": "mock",
             "base_url": None,
             "api_key": "sk-dummy-key",
-            "model": "local-model"
-        }
+            "model": "local-model"}
         self.DISCOVERY_TARGETS = {
             "Ollama": {"url": "http://127.0.0.1:11434/v1/chat/completions", "check": "/api/tags"},
             "LM Studio": {"url": "http://127.0.0.1:1234/v1/chat/completions", "check": "/v1/models"},
-            "LocalAI": {"url": "http://127.0.0.1:8080/v1/chat/completions", "check": "/v1/models"},
-        }
+            "LocalAI": {"url": "http://127.0.0.1:8080/v1/chat/completions", "check": "/v1/models"},}
 
     def _save_config(self):
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
@@ -42,7 +41,6 @@ class GenesisProtocol:
         return found
 
     def setup_uplink(self) -> bool:
-        """The Unified Configuration Wizard."""
         print(f"\n{Prisma.CYN}=== GENESIS PROTOCOL SETUP ==={Prisma.RST}")
         local_brains = self.scan_local_brains()
         while True:
@@ -128,14 +126,30 @@ class GenesisProtocol:
         print(f"{Prisma.GRN}System Online. Welcome, {engine.user_name}.\n{Prisma.RST}")
         with SessionGuardian(engine) as session:
             if hasattr(engine, 'cortex'):
-                boot_prompt = (
-                    f"INIT_SEQUENCE. User: {engine.user_name}. "
-                    "IMMEDIATELY generate a vivid, specific location.",
-                    "Focus on sensory details (light, texture, sound).",
-                    "Do NOT mention the user's inventory or equipment unless asked. "
-                    "End with: 'What would you like to do?'")
+                scenarios = TheLore.get_instance().get("SCENARIOS")
+                archetypes = scenarios.get("ARCHETYPES", []) if scenarios else []
+                seed = random.choice(archetypes) if archetypes else "a vivid, specific location"
+                if self.tutorial_mode:
+                    boot_prompt = (
+                        f"INIT_SEQUENCE. User: {engine.user_name}. "
+                        f"LOCATION DATA LOADED: {seed}. "
+                        "STATUS: Visual sensors are OFFLINE. Audio/Olfactory sensors: LOW POWER. "
+                        "Do NOT describe the location yet. "
+                        "Generate a system startup log describing a pitch-black void or static. "
+                        "You may include a SINGLE, faint sound or smell that hints at the location, but keep it subtle. "
+                        "End with: 'System blind. Awaiting command: LOOK.'")
+                else:
+                    boot_prompt = (
+                        f"INIT_SEQUENCE. User: {engine.user_name}. "
+                        f"IMMEDIATELY generate: {seed}. "
+                        "Focus primarily on VISUAL atmosphere and lighting. "
+                        "Do NOT treat senses as a checklist (e.g. don't force smell/taste unless critical). "
+                        "Do NOT mention the user's inventory or equipment unless asked. "
+                        "End with: 'What would you like to do?'")
+
                 res = session.process_turn(boot_prompt)
                 if res.get("ui"): print(res["ui"])
+
             while True:
                 try:
                     u_in = input(f"{Prisma.paint('>', 'W')} ")
