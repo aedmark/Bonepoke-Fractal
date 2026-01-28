@@ -1,9 +1,5 @@
 # BONEAMANITA v11 CHANGELOG
 
-### **BONEAMANITA 11.7.0: "DYMAXION"**
-
-- This footage is missing.
-
 ### **BONEAMANITA 11.6.2: "The Observer Effect"**
 
 _“The act of observation changes the system. The act of asking a panic-stricken stress counselor for the meeting minutes crashes the system.”_ — SLASH

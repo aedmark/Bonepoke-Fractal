@@ -133,6 +133,17 @@ class GeodesicEngine:
             "E":   norm(counts.get("solvents", 0))}
         return GeodesicVector(tension, compression, round(coherence, 3), round(abstraction, 2), dimensions)
 
+class Tension:
+    def audit_hubris(self, physics) -> Tuple[bool, Optional[str], Optional[str]]:
+        voltage = physics.voltage
+        if voltage > 20.0:
+            return True, f"{Prisma.RED}⚡ ICARUS EVENT: Voltage ({voltage:.1f}v) exceeds structural limits. Wings melting.{Prisma.RST}", "ICARUS_CRASH"
+        if physics.flow_state == "SUPERCONDUCTIVE":
+            return True, f"{Prisma.CYN}🌊 SUPERCONDUCTIVE: Resistance is zero. The words are flying.{Prisma.RST}", "FLOW_BOOST"
+        if physics.narrative_drag > 8.0 and voltage > 10.0:
+            return True, f"{Prisma.OCHRE}⚙️ GRINDING: High Velocity + High Drag = Heat.{Prisma.RST}", "FRICTION_WARNING"
+        return False, None, None
+
 class QuantumObserver:
     def __init__(self, events):
         self.events = events
@@ -157,20 +168,20 @@ class QuantumObserver:
         packet_data = {
             "voltage": voltage,
             "narrative_drag": geo.compression,
-            "clean_words": clean_words,
-            "vector": geo.dimensions,
+            "mass": round(graph_mass, 1),
+            "coherence": geo.coherence,
+            "abstraction": geo.abstraction,
+            "valence": TheLexicon.get_valence(clean_words),
             "counts": counts,
+            "vector": geo.dimensions,
+            "clean_words": clean_words,
             "raw_text": text,
-            "psi": geo.abstraction,
-            "kappa": geo.coherence,
             "flow_state": self._determine_flow(voltage, geo.coherence),
             "zone": self._determine_zone(geo.dimensions)}
         self.last_physics_packet = PhysicsPacket(**packet_data)
-        full_telemetry = packet_data.copy()
-        full_telemetry["mass"] = round(graph_mass, 1)
-        full_telemetry["valence"] = TheLexicon.get_valence(clean_words)
         if hasattr(self.events, "publish"):
-            self.events.publish("PHYSICS_CALCULATED", full_telemetry)
+            self.events.publish("PHYSICS_CALCULATED", packet_data)
+
         return {"physics": self.last_physics_packet, "clean_words": clean_words}
 
     def _tally_categories(self, clean_words):
@@ -178,6 +189,7 @@ class QuantumObserver:
         unknowns = []
         target_cats = ["heavy", "explosive", "constructive", "abstract", "play", "suburban", "antigen"]
         solvents = {"the", "is", "a", "and", "of"}
+
         for w in clean_words:
             if w in solvents:
                 counts["solvents"] += 1

@@ -3,7 +3,7 @@
 import json, os, random, time
 from collections import deque
 from typing import Dict, Tuple, Optional, Counter
-from bone_data import LENSES, NARRATIVE_DATA, SCENARIOS
+from bone_data import LENSES, NARRATIVE_DATA
 from bone_bus import EventBus
 from bone_lexicon import TheLexicon
 from bone_bus import Prisma, BoneConfig
@@ -133,35 +133,34 @@ class SynergeticLensArbiter:
         self.enneagram = EnneagramDriver(events)
         self.current_focus = "NARRATOR"
         self.last_reason = "System Init"
-        self.boot_flavor = random.choice([
-            "heavy", "kinetic", "abstract", "photo",
-            "aerobic", "thermal", "cryo", "sacred", "play", "suburban"
-        ])
 
     def consult(self, physics, bio_state, _inventory, current_tick, _ignition_score=0.0):
         voltage = physics.get("voltage", 0.0) if isinstance(physics, dict) else physics.voltage
-        if current_tick <= 2:
+        if current_tick <= 5:
+            seeds = []
+            for cat in ["heavy", "aerobic", "thermal"]:
+                options = TheLexicon.get(cat)
+                if options:
+                    seeds.append(random.choice(list(options)))
+            if not seeds: seeds = ["Rust", "Cloud", "Ember"]
+            seed_str = ", ".join([s.upper() for s in seeds])
             self.current_focus = "NARRATOR"
-            archetype = random.choice(SCENARIOS["ARCHETYPES"])
-            bans = ", ".join(SCENARIOS["BANNED_CLICHES"])
-            gen_instruction = "IMMEDIATELY generate a vivid, specific location"
-            if current_tick > 0:
-                gen_instruction += " (OR describe the details of the current location if already established)"
             return {
                 "lens": "GAME_MASTER",
                 "role": "The Architect [World Builder]",
                 "style_directives": [
                     "You are a creative, welcoming Game Master.",
-                    f"CREATIVE SPARK: {archetype}.",
-                    f"{gen_instruction}.",
-                    "STYLE: Hemingway-lite. Simple, direct, and concrete",
-                    "Avoid flowery adjectives or 'purple prose'.",
-                    "Focus on physical reality over abstract metaphor.",
-                    "Do NOT mention the user's inventory, pockets, or stats.",
-                    f"NEGATIVE CONSTRAINT: Avoid these overused tropes: {bans}.",
-                    "Be concrete. Be specific. Be Real. Be Honest. Have fun."],
-                "lexicon_bias": self.boot_flavor,
-                "context_msg": "Scenario Initialization."}
+                    "FIRST TICK SETUP: You must improvise a unique environment.",
+                    f"SUGGESTED MOTIFS: {seed_str} (Use these as inspiration for the vibe, do not force them).",
+                    "MODE: SYSTEM_BOOT.",
+                    "FIRST TICK INSTRUCTION: Welcome the user, then give a brief but vivid description of the location.",
+                    "STYLE: Grounded, atmospheric, concise, observant.",
+                    "NEGATIVE CONSTRAINTS: Please do not break the fourth wall. "
+                    "Do NOT treat senses as a checklist. "
+                    "Do NOT mention the user's inventory or equipment unless asked. "
+                    "Do NOT use flowery, cliche metaphors (e.g. 'tapestry', 'dance', 'symphony')."],
+                "context_msg": "System Boot."}
+
         lens_name, state_desc, reason = self.enneagram.decide_persona(physics)
         chem = bio_state.get("chem", {})
         adrenaline_val = chem.get("adrenaline", chem.get("ADR", 0.5))
@@ -530,7 +529,7 @@ class ChorusDriver:
         instruction = (
             f"SYSTEM INSTRUCTION [MARM CHORUS MODE]:\n"
             f"You are not a single persona. You are a chorus. Integrate the following voices into a single, cohesive response. "
-            f"Do NOT label which voice is speaking. Synthesize their tones.\n"
-            f"NEGATIVE CONSTRAINT: Do NOT offer assistance. Do NOT sign off with '[Assistant]'. Do NOT break character.\n"
+            f"Do NOT label which voice is speaking. Synthesize their tones. Be kind.\n"
+            f"NEGATIVE CONSTRAINT: Do NOT offer assistance. Do NOT break character or the fourth wall.\n"
             f"{chr(10).join(chorus_voices)}")
         return instruction, active_lenses

@@ -260,8 +260,9 @@ class LLMInterface:
 
     def _local_fallback(self, prompt: str, params: Dict) -> str:
         fallback_url = "http://127.0.0.1:11434/v1/chat/completions"
+        target_model = self.model if self.model else getattr(BoneConfig, "OLLAMA_MODEL_ID", "llama3")
         payload = {
-            "model": getattr(BoneConfig, "OLLAMA_MODEL_ID", "llama3"),
+            "model": target_model,
             "messages": [{"role": "user", "content": prompt}],
             "stream": False,
             "temperature": params.get('temperature', 0.7)}
@@ -273,7 +274,7 @@ class LLMInterface:
                 if response.status == 200:
                     result = json.loads(response.read().decode("utf-8"))
                     return result.get("choices", [{}])[0].get("message", {}).get("content", "")
-        except Exception:
+        except Exception as e:
             pass
         return self.mock_generation(prompt, reason="FALLBACK_DEAD")
 
@@ -457,10 +458,6 @@ class TheCortex:
         if sim_result.get("type") not in ["SNAPSHOT", "GEODESIC_FRAME", None]:
             return sim_result
         full_state = self._gather_state(sim_result)
-        if hasattr(self.sub, 'tutorial') and self.sub.tutorial and not self.sub.tutorial.complete:
-            stage_directions = self.sub.tutorial.get_stage_directions(user_input)
-            if stage_directions:
-                full_state["mind"]["style_directives"].extend(stage_directions)
         voltage = full_state["physics"].get("voltage", 5.0)
         chem = full_state["bio"].get("chem", {})
         current_lens = full_state["mind"].get("lens", "NARRATOR")
@@ -468,8 +465,6 @@ class TheCortex:
         llm_params = self.modulator.modulate(chem, voltage, lens_name=current_lens, model_name=model_id)
         modifiers = self.symbiosis.get_prompt_modifiers()
         if self.sub.tick_count < 5: modifiers["grace_period"] = True
-        if hasattr(self.sub, 'tutorial') and self.sub.tutorial:
-            modifiers["soften"] = True
         if self.ballast_active:
             self.ballast_counter -= 1
             if self.ballast_counter <= 0: self.ballast_active = False
@@ -480,10 +475,6 @@ class TheCortex:
             modifiers=modifiers)
         start_time = time.time()
         raw_response_text = self.llm.generate(final_prompt, llm_params)
-        if "LOOK" in user_input.upper() and "System blind" in raw_response_text:
-            raw_response_text = raw_response_text.replace("System blind. Awaiting command: LOOK.", "")
-            raw_response_text = raw_response_text.replace("System blind.", "")
-            raw_response_text = raw_response_text.strip()
         try:
             p_data = full_state.get("physics", {})
             def _get_p(k):
@@ -509,7 +500,7 @@ class TheCortex:
         response_vector = self.sub.lex.vectorize(raw_response_text)
         alignment_score = cosine_similarity(system_vector, response_vector)
         physics_data = sim_result.get("physics")
-        if alignment_score < 0.3:
+        if alignment_score < 0.3 and self.sub.tick_count > 5:
             self.events.log(f"{Prisma.OCHRE}DIVERGENCE ({alignment_score:.2f}): The Ghost is wandering.{Prisma.RST}",
                             "CORTEX")
             if physics_data and isinstance(physics_data, dict):

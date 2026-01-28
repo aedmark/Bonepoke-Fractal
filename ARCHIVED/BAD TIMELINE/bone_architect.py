@@ -1,15 +1,14 @@
-""" bone_architect.py
- "We shape our buildings; thereafter they shape us." - Churchill """
+""" bone_architect.py - "We shape our buildings; thereafter they shape us." - Churchill """
 
 from typing import Tuple, Dict, Any, Optional
 from dataclasses import dataclass
 from bone_bus import Prisma, MindSystem, PhysSystem, PhysicsPacket
 from bone_village import MirrorGraph, TheNavigator
-from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, ParasiticSymbiont, MycelialNetwork
+from bone_spores import MycelialNetwork
 from bone_body import BioSystem, MitochondrialForge, MitochondrialState, EndocrineSystem, MetabolicGovernor, ViralTracer, ThePacemaker
 from bone_brain import DreamEngine, ShimmerState, NeuroPlasticity, GlobalIntegrator, WisdomAllocator
 from bone_personality import LimboLayer
-from bone_physics import TemporalDynamics, QuantumObserver
+from bone_physics import TemporalDynamics, QuantumObserver, Tension
 from bone_machine import TheCrucible, TheForge, TheTheremin
 
 @dataclass
@@ -74,7 +73,6 @@ class BoneArchitect:
             tracer=ViralTracer(_mem))
         mind.integrator = GlobalIntegrator()
         mind.wise = WisdomAllocator()
-
         return mind, limbo
 
     @staticmethod
@@ -83,13 +81,10 @@ class BoneArchitect:
         return BioSystem(
             mito=MitochondrialForge(mito_state, events),
             endo=EndocrineSystem(),
-            immune=MycotoxinFactory(),
-            lichen=LichenSymbiont(),
-            gut=HyphalInterface(),
             plasticity=NeuroPlasticity(),
             governor=MetabolicGovernor(),
             shimmer=ShimmerState(),
-            parasite=ParasiticSymbiont(mind.mem, lex))
+            events=events)
 
     @staticmethod
     def _construct_physics(events, bio) -> PhysSystem:
@@ -100,8 +95,8 @@ class BoneArchitect:
             theremin=TheTheremin(),
             pulse=ThePacemaker(),
             dynamics=TemporalDynamics(),
-            nav=TheNavigator(bio.shimmer)
-        )
+            nav=TheNavigator(bio.shimmer),
+            tension=Tension())
 
     @staticmethod
     def incubate(events, lex) -> SystemEmbryo:
@@ -124,19 +119,16 @@ class BoneArchitect:
         events = embryo.bio.mito.events
         load_result = embryo.mind.mem.autoload_last_spore()
         inherited_traits = {}
-        inherited_antibodies = set()
         soul_legacy = {}
         if load_result:
             if isinstance(load_result, tuple):
                 if len(load_result) >= 1: inherited_traits = load_result[0]
-                if len(load_result) >= 2: inherited_antibodies = load_result[1]
                 if len(load_result) >= 3: soul_legacy = load_result[2]
             events.log(f"{Prisma.CYN}[ARCHITECT]: Ancestral Spirit detected.{Prisma.RST}", "SYS")
         else:
             events.log(f"{Prisma.WHT}[ARCHITECT]: No ancestors found. A new lineage begins.{Prisma.RST}", "SYS")
         embryo.bio.mito.state.mother_hash = embryo.mind.mem.session_id
         embryo.bio.mito.apply_inheritance(inherited_traits)
-        embryo.bio.immune.active_antibodies = inherited_antibodies
         embryo.soul_legacy = soul_legacy
         embryo.is_gestating = False
         events.log(f"{Prisma.GRN}[ARCHITECT]: Embryo viable. Breaking the shell...{Prisma.RST}", "SYS")

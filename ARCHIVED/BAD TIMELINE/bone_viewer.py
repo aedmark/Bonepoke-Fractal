@@ -32,6 +32,8 @@ class Projector:
             f"VEL {vel:.1f} | STR {str_v:.1f} ENT {ent:.1f} | "
             f"PHI {phi:.1f} TMP {tmp:.1f} | PSI {psi:.1f}")
         zone = physics.get("zone", "UNKNOWN")
+        if isinstance(zone, (list, tuple)):
+            zone = zone[0]
         lens = mind_ctx[0] if mind_ctx else "RAW"
         sub_header = f"   🪐 {zone}  ({lens})"
         div = "—" * 40
@@ -48,7 +50,7 @@ class Projector:
         return f"{color}{char * fill}{Prisma.GRY}{char * (width - fill)}{Prisma.RST}"
 
 class GeodesicRenderer:
-    def __init__(self, engine_ref, chroma_ref, strunk_ref, valve_ref):
+    def __init__(self, engine_ref, chroma_ref, strunk_ref, valve_ref=None):
         self.eng = engine_ref
         self.projector = self.eng.projector
         self.vsl_chroma = chroma_ref
@@ -104,17 +106,11 @@ class GeodesicRenderer:
         if hasattr(self.eng, 'soul'):
             soul_ui = self.render_soul_strip(self.eng.soul)
             clean_ui = f"{clean_ui}\n{soul_ui}"
-        if style_log:
-            self._punish_style_crime(style_log)
         raw_logs = self.compose_logs(ctx.logs, current_events, current_tick)
-        if hasattr(self.eng, 'council'):
-            structured_logs = self.eng.council.annotate_logs(raw_logs)
-        else:
-            structured_logs = raw_logs
         return {
             "type": "GEODESIC_FRAME",
             "ui": clean_ui,
-            "logs": structured_logs,
+            "logs": raw_logs,
             "metrics": self.eng.get_metrics(bio.get("atp", 0.0)),
             "system_instruction": self._get_chorus_instruction(physics)}
 

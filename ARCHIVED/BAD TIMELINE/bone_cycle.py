@@ -396,8 +396,9 @@ class IntrusionPhase(SimulationPhase):
 
     def run(self, ctx: CycleContext):
         phys_data = ctx.physics.to_dict() if hasattr(ctx.physics, 'to_dict') else ctx.physics
-        p_active, p_log = self.eng.bio.parasite.infect(phys_data, self.eng.stamina)
-        if p_active: ctx.log(p_log)
+        p_log = self.eng.mind.mem.dream(phys_data, self.eng.stamina)
+        if p_log:
+            ctx.log(p_log)
         if self.eng.limbo.ghosts:
             if ctx.logs:
                 ctx.logs[-1] = self.eng.limbo.haunt(ctx.logs[-1])
@@ -487,14 +488,10 @@ class CognitionPhase(SimulationPhase):
     def run(self, ctx: CycleContext):
         self.eng.mind.mem.encode(ctx.clean_words, ctx.physics, "GEODESIC")
         if ctx.is_alive and ctx.clean_words:
-            max_h = getattr(BoneConfig, "MAX_HEALTH", 100.0)
-            current_h = max(0.0, self.eng.health)
-            desperation = 1.0 - (current_h / max_h)
             bury_msg, new_wells = self.eng.mind.mem.bury(
                 ctx.clean_words,
                 self.eng.tick_count,
-                resonance=ctx.physics.get("voltage", 5.0),
-                desperation_level=desperation)
+                resonance=ctx.physics.get("voltage", 5.0))
             if bury_msg:
                 prefix = f"{Prisma.YEL}⚠️ MEMORY:{Prisma.RST}" if "SATURATION" in bury_msg else f"{Prisma.RED}🍖 DONNER PROTOCOL:{Prisma.RST}"
                 ctx.log(f"{prefix} {bury_msg}")
@@ -785,6 +782,10 @@ class GeodesicOrchestrator:
             snapshot["enzyme"] = ctx.bio_result.get("enzyme", "NONE")
             snapshot["chemistry"] = ctx.bio_result.get("chemistry", {})
             snapshot["physics"] = ctx.physics.to_dict() if hasattr(ctx.physics, 'to_dict') else ctx.physics
+            if "metrics" in snapshot:
+                snapshot["metrics"] = self.eng.get_metrics(
+                    ctx.bio_result.get("atp", self.eng.bio.mito.state.atp_pool)
+                )
             if "ui" in snapshot:
                 self.symbiosis.monitor_host(latency, snapshot["ui"], len(user_message))
             return snapshot
