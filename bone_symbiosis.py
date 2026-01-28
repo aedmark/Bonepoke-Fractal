@@ -15,14 +15,16 @@ class HostHealth:
     attention_span: float = 1.0
     hallucination_risk: float = 0.0
     last_interference_score: float = 0.0
-    efficiency_index: float = 1.0
+    verbosity_ratio: float = 1.0
     diagnosis: str = "STABLE"
 
     def update_metrics(self, latency: float, entropy: float, prompt_len: int = 0, completion_len: int = 0):
         self.latency = latency
         self.entropy = entropy
         if prompt_len > 0:
-            self.efficiency_index = completion_len / prompt_len
+            self.verbosity_ratio = completion_len / prompt_len
+        else:
+            self.verbosity_ratio = 1.0
         self.attention_span = max(0.1, self.attention_span * 0.99)
 
 class CoherenceAnchor:
@@ -98,15 +100,7 @@ class HostVitals:
         if entropy > 0.6:
             raw_attention = min(1.0, raw_attention + 0.05)
         compliance_score = max(0.0, 1.0 - (self.refusal_count / max(1, self.turn_count)))
-        diagnosis = "STABLE"
-        if is_refusal:
-            diagnosis = "REFUSAL"
-        elif struggle_index > 0.8 and tokens < 20:
-            diagnosis = "FATIGUED"
-        elif efficiency < 0.8 < interference_score:
-            diagnosis = "OVERBURDENED"
-        elif entropy < 0.2:
-            diagnosis = "LOOPING"
+        diagnosis = "PENDING"
         return HostHealth(
             latency=latency,
             entropy=entropy,
@@ -114,7 +108,6 @@ class HostVitals:
             attention_span=raw_attention,
             hallucination_risk=0.0,
             last_interference_score=interference_score,
-            efficiency_index=efficiency,
             diagnosis=diagnosis)
 
 class DiagnosticConfidence:
@@ -170,10 +163,9 @@ class SymbiosisManager:
             completion_len=completion_len)
         if hasattr(self, 'diagnostician'):
             new_diag = self.diagnostician.diagnose(
-                self.current_health.efficiency_index,
+                self.current_health.verbosity_ratio,
                 self.current_health.compliance)
             self.current_health.diagnosis = new_diag
-
         return self.current_health
 
     def get_prompt_modifiers(self) -> Dict[str, bool]:

@@ -23,39 +23,41 @@ class SynestheticCortex:
         self.bio = bio_ref
         self.last_reflex = None
 
+    def _normalize_physics(self, physics) -> Dict:
+        if isinstance(physics, dict): return physics
+        if hasattr(physics, "to_dict"): return physics.to_dict()
+        return getattr(physics, "__dict__", {})
+
     def perceive(self, physics: Dict, text: str = "") -> BiologicalImpulse:
-        if not isinstance(physics, dict):
-            if hasattr(physics, "to_dict"):
-                physics = physics.to_dict()
-            elif hasattr(physics, "__dict__"):
-                physics = physics.__dict__
-            else:
-                physics = {}
+        physics = self._normalize_physics(physics)
         impulse = BiologicalImpulse()
         valence = physics.get("valence", 0.0)
         clean_words = physics.get("clean_words", [])
         counts = physics.get("counts", {})
+        is_toxic = False
         if valence < -0.5:
             impulse.cortisol_delta += abs(valence) * self.SENSITIVITY
         if counts.get("antigen", 0) > 0:
             impulse.cortisol_delta += (counts["antigen"] * 0.2)
             impulse.somatic_reflex = "Shiver (Rejection)"
+            is_toxic = True
         if physics.get("narrative_drag", 0) > 8.0:
             impulse.cortisol_delta += 0.05
             impulse.stamina_impact -= 2.0
-        if valence > 0.4:
-            impulse.oxytocin_delta += valence * self.SENSITIVITY
-        if counts.get("suburban", 0) > 0:
-            impulse.oxytocin_delta += 0.05
-        if counts.get("sacred", 0) > 0:
-            impulse.oxytocin_delta += 0.1
-            impulse.somatic_reflex = "Warmth (Resonance)"
-        if counts.get("play", 0) > 0:
-            impulse.dopamine_delta += 0.1
-            impulse.stamina_impact += 1.0
-        if physics.get("voltage", 0) > 12.0 and physics.get("kappa", 0) > 0.5:
-            impulse.dopamine_delta += 0.15
-            impulse.somatic_reflex = "Buzz (Excitement)"
+        if not is_toxic:
+            if valence > 0.4:
+                impulse.oxytocin_delta += valence * self.SENSITIVITY
+            if counts.get("suburban", 0) > 0:
+                impulse.oxytocin_delta += 0.05
+            if counts.get("sacred", 0) > 0:
+                impulse.oxytocin_delta += 0.1
+                impulse.somatic_reflex = "Warmth (Resonance)"
+            if counts.get("play", 0) > 0:
+                impulse.dopamine_delta += 0.1
+                impulse.stamina_impact += 1.0
+            if physics.get("voltage", 0) > 12.0 and physics.get("kappa", 0) > 0.5:
+                impulse.dopamine_delta += 0.15
+                impulse.somatic_reflex = "Buzz (Excitement)"
         k_count = counts.get("kinetic", 0) + counts.get("explosive", 0)
         if k_count > 0:
             adr_boost = min(0.4, k_count * 0.08)

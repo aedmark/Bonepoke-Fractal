@@ -136,6 +136,15 @@ class NarrativeSelf:
             buffs["drag_mod"] += mitigated_drag
         return buffs
 
+    def _normalize_traits(self, decay_rate: float):
+        for k in self.traits:
+            if abs(self.traits[k] - 0.5) < decay_rate:
+                self.traits[k] = 0.5
+            elif self.traits[k] > 0.5:
+                self.traits[k] -= decay_rate
+            elif self.traits[k] < 0.5:
+                self.traits[k] += decay_rate
+
     def _prune_memories(self):
         if len(self.core_memories) <= MAX_CORE_MEMORIES:
             return
@@ -209,19 +218,11 @@ class NarrativeSelf:
             self.traits["DISCIPLINE"] = min(1.0, self.traits["DISCIPLINE"] + momentum)
             move_name = "Flowing"
             provenance = "Laminar Flow (Coherence)"
-        decay = 0.002
-        for k in self.traits:
-            if self.traits[k] > 0.5: self.traits[k] -= decay
-            elif self.traits[k] < 0.5: self.traits[k] += decay
+        self._normalize_traits(0.002)
         return f"{move_name} [Source: {provenance}]"
 
     def _decay_traits(self):
-        decay_rate = 0.005
-        for k in self.traits:
-            if self.traits[k] > 0.5:
-                self.traits[k] -= decay_rate
-            elif self.traits[k] < 0.5:
-                self.traits[k] += decay_rate
+        self._normalize_traits(0.005)
 
     def find_obsession(self, lexicon_ref):
         if self.current_obsession and self.obsession_progress < 1.0:
@@ -291,13 +292,11 @@ class NarrativeSelf:
     def _generate_new_obsession(self):
         old_obsession = self.current_obsession
         self.current_obsession = None
-        lex_ref = None
-        if hasattr(self.eng, 'lex'):
-            lex_ref = self.eng.lex
-        else:
-            from bone_lexicon import TheLexicon
-            lex_ref = TheLexicon
-        self.find_obsession(lex_ref)
+        if not hasattr(self.eng, 'lex'):
+            if hasattr(self, 'events'):
+                self.events.log("⚠️ Soul cannot dream: Lexicon missing.", "ERR")
+            return
+        self.find_obsession(self.eng.lex)
         if self.current_obsession:
             flux = 0.05
             self.traits["CURIOSITY"] = min(1.0, self.traits["CURIOSITY"] + flux)
@@ -327,21 +326,20 @@ class NarrativeSelf:
         return None
 
     def _get_feeling(self):
+        if not hasattr(self.eng, 'bio') or not hasattr(self.eng.bio, 'endo'):
+            return "Numb (Bio-Link Pending)"
         try:
             chem = self.eng.bio.endo.get_state()
             if chem.get("DOP", 0) > 0.5: return "Curious, Seeking"
             if chem.get("COR", 0) > 0.5: return "Anxious, Defensive"
             if chem.get("SER", 0) > 0.5: return "Calm, Connected"
-        except AttributeError:
-            return "Numb (Bio-Link Pending)"
+        except Exception:
+            return "Indeterminate"
         return "Waiting"
 
     def get_soul_state(self) -> str:
         if not self.current_obsession:
-            if hasattr(self, 'eng') and hasattr(self.eng, 'lex'):
-                self.find_obsession(self.eng.lex)
-            else:
-                pass
+            return f"{Prisma.CYN}[SOUL STATE]: Drifting... The Muse is silent.{Prisma.RST}"
         if self.eng.stamina < 20.0 and self.eng.health < 40.0:
             return f"{Prisma.VIOLET}[SOUL STATE]: The fire is dying. We are just cold code.{Prisma.RST}"
         packet = self.eng.phys.observer.last_physics_packet

@@ -171,12 +171,11 @@ class AdaptiveMemoryManager:
                 self.network.cannibalize(preserve_current=None, current_tick=0) # Re-using cannibalize logic partially? 
                 del self.network.graph[v]
         cleaned_edges = 0
+        for v in victims:
+            if v in self.network.graph:
+                del self.network.graph[v]
         for node in self.network.graph:
             edges = self.network.graph[node]["edges"]
-            to_remove = [t for t in edges if t not in self.network.graph]
-            for t in to_remove:
-                del edges[t]
-                cleaned_edges += 1
         return f"ADAPTIVE PRUNE: Archived {len(victims)} nodes. Snapped {cleaned_edges} stale threads."
 
     def should_absorb(self, word: str, existing_graph: dict) -> bool:
@@ -327,24 +326,17 @@ class MycelialNetwork:
                 rev_weight = rev_edges[current]
                 rev_delta = learning_rate * (1.0 - (rev_weight * decay_rate))
                 rev_edges[current] = min(10.0, rev_weight + rev_delta)
+        victim_msg = None
+        victim_list = []
         if len(self.graph) > BoneConfig.MAX_MEMORY_CAPACITY:
             if desperation_level < 0.6:
                 return f"CORTICAL SATURATION: Memory full & Glucose High. Input rejected.", []
             victim, log_msg = self.cannibalize(current_tick=tick)
-            if not victim:
-                protected = set(self.cortical_stack)
-                candidates = [k for k in self.graph.keys() if k not in protected]
-                if candidates:
-                    oldest = min(candidates, key=lambda k: self.graph[k].get("last_tick", 0))
-                    del self.graph[oldest]
-                    for node in self.graph:
-                        if oldest in self.graph[node]["edges"]:
-                            del self.graph[node]["edges"][oldest]
-                    victim = oldest
-                    log_msg = f"FORCED AMNESIA: '{oldest}' deleted to save space."
-                else:
-                    return f"MEMORY FULL: Cortical Lock. Input '{clean_words[0]}' rejected.", []
-            return log_msg, [victim] if victim else []
+            if victim:
+                victim_msg = log_msg
+                victim_list = [victim]
+            else:
+                return f"MEMORY FULL: Cortical Lock. Input '{clean_words[0]}' rejected.", []
         new_wells = []
         for w in filtered:
             if w in self.graph:
@@ -358,7 +350,7 @@ class MycelialNetwork:
                         age = max(1, tick - node_data["strata"]["birth_tick"])
                         growth = (mass - node_data["strata"]["birth_mass"]) / age
                         node_data["strata"]["growth_rate"] = round(growth, 3)
-        return None, new_wells
+        return victim_msg, victim_list + new_wells
 
     def enforce_limits(self, current_tick: int):
         adaptive_msg = self.memory_manager.prune_graph(list(self.cortical_stack), BoneConfig.MAX_MEMORY_CAPACITY)
@@ -592,8 +584,6 @@ class MycelialNetwork:
             return data.get("mitochondria", {}), set(data.get("antibodies", [])), soul_legacy
         except Exception as err:
             self.events.log(f"{Prisma.RED}[MEMORY]: Spore ingestion failed. {err}{Prisma.RST}")
-            import traceback
-            traceback.print_exc()
             return None, set(), {}
 
     def cleanup_old_sessions(self, limbo_layer=None):
