@@ -1,5 +1,4 @@
-""" bone_view.py
- The Geodesic Viewport - Separation of Presentation and Logic """
+""" bone_view.py - The Geodesic Viewport - Separation of Presentation and Logic """
 
 import time
 from typing import Dict, List, Any
@@ -15,7 +14,7 @@ class Projector:
         title_data = data_ctx.get("title", {})
         health = data_ctx.get("health", 100)
         stamina = data_ctx.get("stamina", 100)
-        atp = data_ctx.get("bio", {}).get("atp", 0)
+        atp = data_ctx.get("bio", {}).get("atp") or 0
         vectors = data_ctx.get("vectors", {})
         hp_bar = self._bar(health, 100, 5, "█", Prisma.RED)
         stm_bar = self._bar(stamina, 100, 5, "█", Prisma.GRN)
@@ -25,8 +24,11 @@ class Projector:
         phi = vectors.get("PHI", 0.0)
         tmp = vectors.get("TMP", 0.0)
         psi = physics.get("psi", 0.0)
+        active_role = "NARRATOR"
+        if mind_ctx and len(mind_ctx) > 2:
+            active_role = str(mind_ctx[2]).upper()
         header = (
-            f"♦ NARRATOR  [HP: {hp_bar}] [STM: {stm_bar}] [ATP: {int(atp)}J] "
+            f"♦ {active_role}  [HP: {hp_bar}] [STM: {stm_bar}] [ATP: {int(atp)}J] "
             f"[V:{physics.get('voltage', 0):.1f}⚡] [D:{physics.get('narrative_drag', 0):.1f}⚓]")
         vector_row = (
             f"VEL {vel:.1f} | STR {str_v:.1f} ENT {ent:.1f} | "
@@ -75,11 +77,12 @@ class GeodesicRenderer:
         mind = ctx.mind_state
         bio = ctx.bio_result
         world = ctx.world_state
-
-        title_data = self.eng.mind.wise.architect(
-            {"physics": physics, "clean_words": ctx.clean_words},
-            (mind.get("lens"), mind.get("thought"), mind.get("role")),
-            False)
+        title_data = {}
+        if hasattr(self.eng, 'mind') and hasattr(self.eng.mind, 'wise'):
+            title_data = self.eng.mind.wise.architect(
+                {"physics": physics, "clean_words": ctx.clean_words},
+                (mind.get("lens"), mind.get("thought"), mind.get("role")),
+                False)
         raw_dashboard = self.projector.render(
             {"physics": physics},
             {
@@ -205,11 +208,7 @@ class CachedRenderer:
             "soul_strip": {"hash": 0, "content": ""},
             "dashboard": {"hash": 0, "content": ""},
             "last_tick": -1}
-        self.THEMES = {
-            "DEFAULT": {"border": "═", "accent": Prisma.CYN, "alert": Prisma.RED},
-            "NOIR": {"border": "-", "accent": Prisma.GRY, "alert": Prisma.WHT},
-            "RETRO": {"border": "*", "accent": Prisma.MAG, "alert": Prisma.YEL},
-            "MINIMAL": {"border": " ", "accent": Prisma.RST, "alert": Prisma.RST}}
+        self.THEMES = ThemeContext.THEMES 
         self.active_theme = self.THEMES["DEFAULT"]
 
     def _compute_hash(self, data: Any) -> int:

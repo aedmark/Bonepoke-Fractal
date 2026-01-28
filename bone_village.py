@@ -1,6 +1,4 @@
-""" bone_village.py
- 'It takes a village... to raise a simulation.'
- [SALVAGED MODULE: Ecosystem Rewilding + Seed Vault] """
+""" bone_village.py - 'It takes a village... to raise a simulation.' """
 
 import random, time
 from typing import List, Dict, Any, Tuple, Optional
@@ -16,15 +14,15 @@ class TheTinkerer:
         self.tool_confidence = {}
         self.akashic = TheAkashicRecord()
 
+    def _normalize_physics(self, packet):
+        if isinstance(packet, dict): return packet
+        return getattr(packet, "__dict__", {})
+    
     def audit_tool_use(self, physics_packet, inventory_list, host_health: Any = None):
-        if isinstance(physics_packet, dict):
-            voltage = physics_packet.get("voltage", 0.0)
-            drag = physics_packet.get("narrative_drag", 0.0)
-            vector = physics_packet.get("vector", {})
-        else:
-            voltage = getattr(physics_packet, "voltage", 0.0)
-            drag = getattr(physics_packet, "narrative_drag", 0.0)
-            vector = getattr(physics_packet, "vector", {})
+        p = self._normalize_physics(physics_packet)
+        voltage = p.get("voltage", 0.0)
+        drag = p.get("narrative_drag", 0.0)
+        vector = p.get("vector", {})
         for item in inventory_list:
             if item not in self.tool_confidence: self.tool_confidence[item] = 1.0
             if voltage > 12.0:
@@ -179,13 +177,25 @@ class TownHall:
 
 class DeathGen:
     @staticmethod
-    def load_protocols(): pass
-    @staticmethod
     def eulogy(physics, mito_state):
-        return "💀 TERMINAL STATE. The simulation has ended."
-
-class CouncilChamber:
-    def __init__(self): pass
-    def convene(self, text, physics): return [], {}, []
+        death_data = TheLore.get("DEATH")
+        if not death_data:
+            return "💀 TERMINAL STATE. The simulation has ended."
+        cause = "TRAUMA" # Default
+        if mito_state.get("atp", 0) <= 0:
+            cause = "STARVATION"
+        elif physics.get("voltage", 0) > 20.0:
+            cause = "GLUTTONY" # Exploded
+        elif physics.get("counts", {}).get("antigen", 0) > 5:
+            cause = "TOXICITY"
+        elif physics.get("narrative_drag", 0) > 8.0:
+            cause = "BOREDOM"
+        prefix = random.choice(death_data.get("PREFIXES", ["Alas."]))
+        specific_causes = death_data.get("CAUSES", {}).get(cause, ["System Failure"])
+        specific_cause = random.choice(specific_causes)
+        verdict_type = "HEAVY"
+        if physics.get("voltage", 0) > 10.0: verdict_type = "LIGHT"
+        verdict = random.choice(death_data.get("VERDICTS", {}).get(verdict_type, ["It is done."]))
+        return f"{prefix} CAUSE: {specific_cause}. {verdict}"
 
 TheNavigator = SimpleNavigator
