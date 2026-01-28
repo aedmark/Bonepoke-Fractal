@@ -340,20 +340,26 @@ class GordonKnot:
         cost = BoneConfig.INVENTORY.RUMMAGE_COST
         if stamina_pool < cost:
             return False, f"{Prisma.GRY}GORDON: 'Too tired to dig. Eat something first.'{Prisma.RST}", 0.0
+        loot_contexts = {
+            "VOLTAGE_CRITICAL": ["QUANTUM_GUM", "JAR_OF_FIREFLIES", "BROKEN_WATCH"],
+            "DRAG_HEAVY":       ["POCKET_ROCKS", "LEAD_BOOTS", "ANCHOR_STONE"],
+            "PSI_HIGH":         ["HORSE_PLUSHIE", "SPIDER_LOCUS", "WAFFLE_OF_PERSISTENCE"],
+            "STANDARD":         ["TRAPPERKEEPER_OF_VIGILANCE", "THE_RED_STAPLER", "PERMIT_A38", "DUCT_TAPE", "THE_STYLE_GUIDE"]
+        }
         stamina_penalty = cost
         vol = physics_ref.get("voltage", 0.0)
         drag = physics_ref.get("narrative_drag", 0.0)
         psi = physics_ref.get("psi", 0.0)
-        loot_table = ["TRAPPERKEEPER_OF_VIGILANCE", "THE_RED_STAPLER", "PERMIT_A38", "DUCT_TAPE", "THE_STYLE_GUIDE"]
+        loot_pool = loot_contexts["STANDARD"]
         if vol > BoneConfig.PHYSICS.VOLTAGE_CRITICAL:
-            loot_table = ["QUANTUM_GUM", "JAR_OF_FIREFLIES", "BROKEN_WATCH"]
+            loot_pool = loot_contexts["VOLTAGE_CRITICAL"]
         elif drag > BoneConfig.PHYSICS.DRAG_HEAVY:
-            loot_table = ["POCKET_ROCKS", "LEAD_BOOTS", "ANCHOR_STONE"]
+            loot_pool = loot_contexts["DRAG_HEAVY"]
         elif psi > 0.7:
-            loot_table = ["HORSE_PLUSHIE", "SPIDER_LOCUS", "WAFFLE_OF_PERSISTENCE"]
+            loot_pool = loot_contexts["PSI_HIGH"]
         if random.random() < 0.3:
             return True, f"{Prisma.GRY}RUMMAGE: Gordon dug through the trash. Just lint and old receipts.{Prisma.RST}", stamina_penalty
-        found_item = random.choice(loot_table)
+        found_item = random.choice(loot_pool)
         msg = self.acquire(found_item)
         prefix = f"{Prisma.OCHRE}RUMMAGE:{Prisma.RST} "
         return True, f"{prefix}{msg}", stamina_penalty

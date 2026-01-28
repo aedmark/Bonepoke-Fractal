@@ -71,8 +71,8 @@ class EventBus:
             self.subscribers[event_type] = []
         self.subscribers[event_type].append(callback)
 
-    def publish(self, event_type, data=None):
-        if self.dormant:
+    def publish(self, event_type, data=None, priority=False):
+        if self.dormant and not priority:
             if len(self.gestation_queue) >= self.max_gestation:
                 self.gestation_queue.pop(0)
                 if len(self.gestation_queue) % 50 == 0:
@@ -253,6 +253,28 @@ class BoneConfig:
             return True, f"Configuration loaded. {log}"
         except Exception as e:
             return False, f"Config load failed: {e}"
+
+    @classmethod
+    def save_to_file(cls, filepath="bone_config.json"):
+        data = {}
+        for attr_name in dir(cls):
+            attr = getattr(cls, attr_name)
+            if isinstance(attr, type):
+                data[attr_name] = {}
+                for sub_attr in dir(attr):
+                    if not sub_attr.startswith("__"):
+                        val = getattr(attr, sub_attr)
+                        if isinstance(val, (int, float, str, bool, list, dict)):
+                            data[attr_name][sub_attr] = val
+            elif not attr_name.startswith("__") and not callable(attr):
+                if isinstance(attr, (int, float, str, bool, list, dict)):
+                    data[attr_name] = attr
+        try:
+            with open(filepath, 'w') as f:
+                json.dump(data, f, indent=4)
+            return True, f"Config saved to {filepath}"
+        except Exception as e:
+            return False, f"Save failed: {e}"
 
     @classmethod
     def _validate_ranges(cls, data: Dict[str, Any], parent_key: str = "") -> Tuple[Dict[str, Any], str]:
@@ -443,7 +465,8 @@ class PhysicsPacket:
     raw_text_display: str = ""
     entropy: float = 0.0
 
-    def __getitem__(self, key): return getattr(self, key)
+    def __getitem__(self, key):
+        return getattr(self, key, None)
 
     def __setitem__(self, key, value): setattr(self, key, value)
 
@@ -528,6 +551,7 @@ class CycleContext:
     refusal_packet: Optional[Dict] = None
     is_bureaucratic: bool = False
     bio_result: Dict = field(default_factory=dict)
+    bio_snapshot: Optional[Dict] = None
     world_state: Dict = field(default_factory=dict)
     mind_state: Dict = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
@@ -585,14 +609,14 @@ class MindSystem:
     dreamer: Any
     mirror: Any
     tracer: Any
-
 @dataclass
 class PhysSystem:
-    tension: TheObserver
+    observer: Any
     forge: Any
     crucible: Any
     theremin: Any
     pulse: Any
-    gate: TheObserver
     dynamics: Any
     nav: Any
+    gate: Optional[Any] = None
+    tension: Optional[Any] = None

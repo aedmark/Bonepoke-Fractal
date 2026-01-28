@@ -259,7 +259,7 @@ class LLMInterface:
         return self.mock_generation(prompt, reason="SILENCE")
 
     def _local_fallback(self, prompt: str, params: Dict) -> str:
-        fallback_url = "http://127.0.0.1:11434/v1/chat/completions"
+        fallback_url = getattr(BoneConfig, "OLLAMA_URL", "http://127.0.0.1:11434/v1/chat/completions")
         payload = {
             "model": getattr(BoneConfig, "OLLAMA_MODEL_ID", "llama3"),
             "messages": [{"role": "user", "content": prompt}],
@@ -288,37 +288,26 @@ class ContextWindowManager:
     CHARS_PER_TOKEN = 3.5
 
     def compose_context(self, layout: Dict[str, Any], max_tokens: int = 4000) -> str:
-        inv_str = layout.get('inventory', '')
-        base_elements = [f"Location: {layout['location']}", inv_str] if inv_str else [f"Location: {layout['location']}"]
-        history_str = ""
+        location_block = f"CURRENT LOCATION: {layout['location']}"
+        inventory_block = f"INVENTORY: {layout['inventory']}" if layout.get('inventory') else "INVENTORY: Empty"
+        history_budget = max(1000, (max_tokens * 4) - 2000)
         recent_history = layout.get("history", [])
+        history_str = ""
         if recent_history:
-            history_str = "\n[PREVIOUSLY]\n" + "\n".join(recent_history)
-        base_str = (
-            f"[DIRECTOR'S NOTES]\n{' | '.join(layout['notes'])}\n"
-            f"[SCENE CONTEXT]\n{' | '.join(base_elements)}\n"
-            f"{history_str}\n"
-            f"[ACTION]\nUser: {layout['user_query']}\n{layout['role']}:")
-        memories = layout.get("memories", [])
-        memory_str = ""
-        used_tokens = len(base_str) / self.CHARS_PER_TOKEN
-        available = max_tokens - used_tokens
-        if memories and available > 50:
-            kept = []
-            for m in memories:
-                cost = len(m) / self.CHARS_PER_TOKEN
-                if cost < available:
-                    kept.append(m)
-                    available -= cost
-            if kept:
-                memory_str = "Memory Echoes: " + " | ".join(kept)
-        final_scene = list(base_elements)
-        if memory_str: final_scene.append(memory_str)
-        return (
-            f"[DIRECTOR'S NOTES]\n{' | '.join(layout['notes'])}\n"
-            f"[SCENE CONTEXT]\n{' | '.join(final_scene)}\n"
-            f"{history_str}\n"
-            f"[ACTION]\nUser: {layout['user_query']}\n{layout['role']}:")
+            full_hist = "\n".join(recent_history)
+            if len(full_hist) > history_budget:
+                full_hist = "...[TRUNCATED]...\n" + full_hist[-history_budget:]
+            history_str = "RECENT LOG:\n" + full_hist
+        style_block = "DIRECTIVES:\n" + "\n".join(layout['notes'])
+        final_prompt = (
+            f"=== SYSTEM KERNEL ===\n{style_block}\n\n"
+            f"=== WORLD STATE ===\n{location_block}\n{inventory_block}\n\n"
+            f"=== CHRONICLE ===\n{history_str}\n\n"
+            f"=== INPUT SIGNAL ===\nUser: {layout['user_query']}\n"
+            f"{layout['role']}:"
+        )
+
+        return final_prompt
 
 class PromptComposer:
     def __init__(self):
@@ -453,10 +442,21 @@ class TheCortex:
             self.dialogue_buffer.pop(0)
 
     def process(self, user_input: str) -> Dict[str, Any]:
+        is_boot_sequence = "SYSTEM_BOOT:" in user_input
         sim_result = self.sub.cycle_controller.run_turn(user_input)
         if sim_result.get("type") not in ["SNAPSHOT", "GEODESIC_FRAME", None]:
             return sim_result
         full_state = self._gather_state(sim_result)
+        if is_boot_sequence:
+            clean_prompt = user_input.replace("SYSTEM_BOOT:", "").strip()
+            full_state["mind"]["style_directives"] = [
+                "You are The Architect.",
+                "Generate the initial scene based on the seed.",
+                "Do not interact with the user yet, just build the world.",
+                "Be evocative but concise."
+            ]
+            full_state["dialogue_history"] = []
+            user_input = clean_prompt
         if hasattr(self.sub, 'tutorial') and self.sub.tutorial and not self.sub.tutorial.complete:
             stage_directions = self.sub.tutorial.get_stage_directions(user_input)
             if stage_directions:
@@ -480,6 +480,10 @@ class TheCortex:
             modifiers=modifiers)
         start_time = time.time()
         raw_response_text = self.llm.generate(final_prompt, llm_params)
+        if is_boot_sequence:
+            self._update_history("SYSTEM_INIT", raw_response_text)
+        else:
+            self._update_history(user_input, raw_response_text)
         if "LOOK" in user_input.upper() and "System blind" in raw_response_text:
             raw_response_text = raw_response_text.replace("System blind. Awaiting command: LOOK.", "")
             raw_response_text = raw_response_text.replace("System blind.", "")

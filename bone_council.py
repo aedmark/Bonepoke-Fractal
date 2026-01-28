@@ -57,10 +57,12 @@ class TheLeveragePoint:
         manic_d_floor = getattr(BoneConfig.COUNCIL, "MANIC_DRAG_FLOOR", 1.0)
         manic_turns = getattr(BoneConfig.COUNCIL, "MANIC_TURN_LIMIT", 2)
         if abs(delta) > osc_limit:
+            dampening_factor = min(0.5, (abs(delta) - osc_limit) * 0.1)
+            corrections = {"voltage_modifier": -dampening_factor}
             return True, (
                 f"{Prisma.CYN}⚖️ LEVERAGE POINT:{Prisma.RST} "
-                f"System oscillating wildly (Delta {delta:.1f}). "
-                f"Recommendation: Dampen inputs."
+                f"System oscillating (Delta {delta:.1f}). "
+                f"Applying dampener (-{dampening_factor:.2f})."
             ), corrections, {}
         if current_voltage > manic_v_trig and current_drag < manic_d_floor:
             self.static_flow_turns += 1
@@ -99,9 +101,11 @@ class TheFootnote:
             return log_text
         text_lower = log_text.lower()
         note = None
-        for trigger, notes in self.context_map.items():
+        triggers = list(self.context_map.keys())
+        random.shuffle(triggers)
+        for trigger in triggers:
             if trigger in text_lower:
-                note = random.choice(notes)
+                note = random.choice(self.context_map[trigger])
                 break
         if not note:
             note = random.choice(self.footnotes)
@@ -118,7 +122,7 @@ class TheParliamentarian:
         chem = bio_state.get("chem", {})
         dopamine = chem.get("dopamine", chem.get("DOP", 0.0))
         glimmers = chem.get("glimmers", 0)
-        is_working_hard = (drag_endured > 3.0 or stamina_spent > 40.0)
+        is_working_hard = (drag_endured > 3.0 or stamina_spent > 30.0)
         is_rewarded = (dopamine > 0.6 or glimmers > 0)
         if is_working_hard and not is_rewarded:
             self.commitment_streak += 1

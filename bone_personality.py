@@ -67,47 +67,51 @@ class EnneagramDriver:
             "SHERLOCK": {"tension_min": 10.0, "vectors": {"PHI": 4.0, "VEL": 2.0}},
             "NARRATOR": {"safe_zone": True,   "vectors": {"PSI": 4.0}}}
 
-    def _calculate_raw_persona(self, physics) -> Tuple[str, str, str]:
+    def _get_phys_attr(self, physics, key, default=None):
         if isinstance(physics, dict):
-            p_vec = physics.get("vector", {})
-            p_vol = physics.get("voltage", 0.0)
-            p_drag = physics.get("narrative_drag", 0.0)
-            p_coh = physics.get("kappa", 0.0)
-            p_zone = physics.get("zone", "")
-        else:
-            p_vec = getattr(physics, "vector", {})
-            p_vol = getattr(physics, "voltage", 0.0)
-            p_drag = getattr(physics, "narrative_drag", 0.0)
-            p_coh = getattr(physics, "kappa", 0.0)
-            p_zone = getattr(physics, "zone", "")
-        scores = {k: 0 for k in self.WEIGHTS.keys()}
-        scores["NARRATOR"] += 2
+            return physics.get(key, default)
+        return getattr(physics, key, default)
+
+    def _calculate_raw_persona(self, physics) -> Tuple[str, str, str]:
+        p_vec = self._get_phys_attr(physics, "vector", {})
+        p_vol = self._get_phys_attr(physics, "voltage", 0.0)
+        p_drag = self._get_phys_attr(physics, "narrative_drag", 0.0)
+        p_coh = self._get_phys_attr(physics, "kappa", 0.0)
+        p_zone = self._get_phys_attr(physics, "zone", "")
+        scores = {k: 0.0 for k in self.WEIGHTS.keys()}
+        scores["NARRATOR"] += 2.0
         is_safe_metrics = (4.0 <= p_vol <= 10.0 and 0.5 <= p_drag <= 3.5)
         if p_zone == SANCTUARY.ZONE or is_safe_metrics:
-            scores["NARRATOR"] += 6
-            scores["JESTER"] += 3
-            scores["GORDON"] -= 2
+            scores["NARRATOR"] += 6.0
+            scores["JESTER"] += 3.0
+            scores["GORDON"] -= 2.0
         for persona, criteria in self.WEIGHTS.items():
             if "tension_min" in criteria and p_vol > criteria["tension_min"]:
-                scores[persona] += 3
+                scores[persona] += 3.0
             if "drag_min" in criteria and p_drag > criteria["drag_min"]:
-                scores[persona] += 5
+                scores[persona] += 5.0
             if "coherence_min" in criteria and p_coh > criteria["coherence_min"]:
-                scores[persona] += 4
+                scores[persona] += 4.0
             if "coherence_max" in criteria and p_coh < criteria["coherence_max"]:
-                scores[persona] += 4
+                scores[persona] += 4.0
             for dim, weight in criteria.get("vectors", {}).items():
                 val = p_vec.get(dim, 0.0)
-                if val > 0.2: # Noise floor
+                if val > 0.2:
                     scores[persona] += val * weight
         winner = max(scores, key=scores.get)
-        reason = f"Scoring Winner: {winner} (Score: {scores[winner]:.1f}) [V:{p_vol:.1f}]"
-        state_desc = "ACTIVE"
-        if winner == "JESTER": state_desc = "MANIC"
-        elif winner == "GORDON": state_desc = "TIRED"
-        elif winner == "GLASS": state_desc = "FRAGILE"
-        elif winner == "CLARENCE": state_desc = "RIGID"
+        reason = f"Winner: {winner} ({scores[winner]:.1f}) [V:{p_vol:.1f} D:{p_drag:.1f}]"
+        state_map = {
+            "JESTER": "MANIC",
+            "GORDON": "TIRED",
+            "GLASS": "FRAGILE",
+            "CLARENCE": "RIGID",
+            "NATHAN": "WIRED",
+            "SHERLOCK": "FOCUSED",
+            "NARRATOR": "OBSERVING"
+        }
+        state_desc = state_map.get(winner, "ACTIVE")
         return winner, state_desc, reason
+
     def decide_persona(self, physics) -> Tuple[str, str, str]:
         candidate, state_desc, reason = self._calculate_raw_persona(physics)
         if candidate == self.current_persona:
@@ -125,7 +129,7 @@ class EnneagramDriver:
             self.pending_persona = None
             return self.current_persona, state_desc, f"SHIFT: {reason}"
         else:
-            return self.current_persona, "STABLE", f"Resisting shift to {candidate} ({self.stability_counter}/{self.HYSTERESIS_THRESHOLD})"
+            return self.current_persona, "STABLE", f"Resisting {candidate} ({self.stability_counter}/{self.HYSTERESIS_THRESHOLD})"
 
 class SynergeticLensArbiter:
     def __init__(self, events: EventBus):
@@ -154,7 +158,7 @@ class SynergeticLensArbiter:
                     "You are a creative, welcoming Game Master.",
                     f"CREATIVE SPARK: {archetype}.",
                     f"{gen_instruction}.",
-                    "STYLE: Hemingway-lite. Simple, direct, and concrete",
+                    "STYLE: Simple, direct, and concrete",
                     "Avoid flowery adjectives or 'purple prose'.",
                     "Focus on physical reality over abstract metaphor.",
                     "Do NOT mention the user's inventory, pockets, or stats.",
@@ -186,21 +190,21 @@ class SynergeticLensArbiter:
             "msg": "Proceed."}
         voltage = p.get("voltage", 0.0)
         if voltage > 20.0:
-            style_packet["directives"].append("Use fragmented, manic sentence structures.")
-            style_packet["directives"].append("Ignore punctuation rules.")
+            style_packet["directives"].extend(["Use fragmented, manic sentence structures.", "Ignore punctuation rules."])
         elif voltage > 12.0:
             style_packet["directives"].append("Keep sentences short and punchy.")
         elif voltage < 5.0:
-            style_packet["directives"].append("Use slow, languid pacing.")
-            style_packet["directives"].append("Drift into philosophical abstraction.")
+            style_packet["directives"].extend(["Use slow, languid pacing.", "Drift into philosophical abstraction."])
+        msg_template = static_data.get("msg", "Proceed.")
+        ctx = {
+            "kappa": p.get("kappa", 0.0),
+            "truth_ratio": p.get("truth_ratio", 0.0),
+            "adr": adrenaline_val,
+            "volts": voltage}
         try:
-            msg_template = static_data.get("msg", "Proceed.")
-            ctx = {
-                "kappa": p.get("kappa", 0.0),
-                "truth_ratio": p.get("truth_ratio", 0.0),
-                "adr": adrenaline_val,
-                "volts": voltage}
-            style_packet["msg"] = msg_template.format(**{k: v for k, v in ctx.items() if k in msg_template})
+            style_packet["msg"] = msg_template.format(**ctx)
+        except KeyError as e:
+            style_packet["msg"] = f"{msg_template} [DATA CORRUPTION: {e}]"
         except Exception:
             style_packet["msg"] = static_data.get("msg", "System Nominal.")
         return style_packet

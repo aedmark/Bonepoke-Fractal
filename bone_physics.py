@@ -43,7 +43,11 @@ class TheGatekeeper:
         return True, None
 
     def _check_thermodynamics(self, ctx):
-        return getattr(self.eng.bio.mito.state, "atp_pool", 10.0) > 1.0
+        if hasattr(ctx, "bio_snapshot") and ctx.bio_snapshot:
+            return ctx.bio_snapshot.get("atp", 10.0) > 1.0
+        if hasattr(self.eng, "get_vital_metric"):
+            return self.eng.get_vital_metric("atp") > 1.0
+        return True
 
     def _audit_bureaucracy(self, phys):
         return phys.voltage < 5.0 and random.randint(1, 50) == 42
@@ -99,39 +103,67 @@ class GeodesicVector:
     dimensions: Dict[str, float]
 
 class GeodesicEngine:
-    @staticmethod
-    def collapse_wavefunction(clean_words: List[str], counts: Dict[str, int], config) -> GeodesicVector:
+    @classmethod
+    def collapse_wavefunction(cls, clean_words: List[str], counts: Dict[str, int], config) -> GeodesicVector:
         volume = max(1, len(clean_words))
-        mass_heavy = counts.get("heavy", 0)
-        mass_kinetic = counts.get("explosive", 0) + counts.get("kinetic", 0)
-        mass_constructive = counts.get("constructive", 0)
-        mass_abstract = counts.get("abstract", 0)
-        mass_play = counts.get("play", 0)
-        mass_social = counts.get("suburban", 0) + counts.get("solvents", 0)
+        masses = cls._weigh_mass(counts)
+        forces = cls._calculate_forces(masses, counts, volume, config)
+        dimensions = cls._calculate_dimensions(masses, forces, counts, volume, config)
+        return GeodesicVector(
+            tension=forces['tension'],
+            compression=forces['compression'],
+            coherence=forces['coherence'],
+            abstraction=forces['abstraction'],
+            dimensions=dimensions
+        )
+
+    @staticmethod
+    def _weigh_mass(counts: Dict[str, int]) -> Dict[str, int]:
+        return {
+            "heavy": counts.get("heavy", 0),
+            "kinetic": counts.get("explosive", 0) + counts.get("kinetic", 0),
+            "constructive": counts.get("constructive", 0),
+            "abstract": counts.get("abstract", 0),
+            "play": counts.get("play", 0),
+            "social": counts.get("suburban", 0) + counts.get("solvents", 0)
+        }
+
+    @staticmethod
+    def _calculate_forces(masses, counts, volume, config) -> Dict[str, float]:
         raw_tension_mass = (
-                (mass_heavy * config.PHYSICS.WEIGHT_HEAVY) +
-                (mass_kinetic * config.PHYSICS.WEIGHT_EXPLOSIVE) +
-                (mass_constructive * config.PHYSICS.WEIGHT_CONSTRUCTIVE))
+                (masses["heavy"] * config.PHYSICS.WEIGHT_HEAVY) +
+                (masses["kinetic"] * config.PHYSICS.WEIGHT_EXPLOSIVE) +
+                (masses["constructive"] * config.PHYSICS.WEIGHT_CONSTRUCTIVE))
         tension = round(((raw_tension_mass / volume) * 25.0) * config.KINETIC_GAIN, 2)
         raw_friction = (counts.get("solvents", 0) * 0.2) + (counts.get("suburban", 0) * 2.0)
-        lift = (mass_play * 1.5) + (mass_kinetic * 0.5)
+        lift = (masses["play"] * 1.5) + (masses["kinetic"] * 0.5)
         raw_compression = ((raw_friction / volume) * 10.0) - ((lift / volume) * 10.0)
         compression = round(max(-5.0, min(config.PHYSICS.DRAG_HALT, raw_compression * config.SIGNAL_DRAG_MULTIPLIER)), 2)
-        structural_mass = mass_heavy + mass_constructive
+        structural_mass = masses["heavy"] + masses["constructive"]
         coherence = min(1.0, structural_mass / max(1, config.SHAPLEY_MASS_THRESHOLD))
-        abstraction = min(1.0, (mass_abstract / volume) + 0.2)
+        abstraction = min(1.0, (masses["abstract"] / volume) + 0.2)
 
+        return {
+            "tension": tension,
+            "compression": compression,
+            "coherence": round(coherence, 3),
+            "abstraction": round(abstraction, 2)
+        }
+
+    @staticmethod
+    def _calculate_dimensions(masses, forces, counts, volume, config) -> Dict[str, float]:
         def norm(val): return min(1.0, val / volume)
-        dimensions = {
-            "VEL": norm(mass_kinetic * 2.0 - compression),
-            "STR": norm(mass_heavy * 2.0 + mass_constructive),
+
+        return {
+            "VEL": norm(masses["kinetic"] * 2.0 - forces['compression']),
+            "STR": norm(masses["heavy"] * 2.0 + masses["constructive"]),
             "ENT": norm(counts.get("antigen", 0) * 3.0),
-            "PHI": norm(mass_heavy + mass_kinetic),
-            "PSI": abstraction,
-            "BET": norm(mass_social * 2.0),
-            "DEL": norm(mass_play * 3.0),
-            "E":   norm(counts.get("solvents", 0))}
-        return GeodesicVector(tension, compression, round(coherence, 3), round(abstraction, 2), dimensions)
+            "PHI": norm(masses["heavy"] + masses["kinetic"]),
+            "PSI": forces['abstraction'],
+            "BET": norm(masses["social"] * 2.0),
+            "DEL": norm(masses["play"] * 3.0),
+            "E":   norm(counts.get("solvents", 0))
+        }
 
 class QuantumObserver:
     def __init__(self, events):
@@ -216,12 +248,10 @@ class QuantumObserver:
         if dom in ["ENT", "VEL"]: return "THE_MUD"
         return "COURTYARD"
 
-class Humility:
+class SurfaceTension:
     def __init__(self):
-        self.BOUNDARIES = {
-            "FUTURE": ["predict", "future", "tomorrow", "will happen", "forecast"],
-            "SOUL": ["soul", "spirit", "afterlife", "heaven", "hell"],
-            "ABSOLUTE": ["always", "never", "everyone", "nobody", "proven"]}
+        self.ICARUS_THRESHOLD = 25.0
+        self.FLOW_THRESHOLD = 15.0
         self.HUMBLE_PHRASES = [
             "Based on the available data...",
             "As I understand the current coordinates...",
@@ -229,19 +259,19 @@ class Humility:
             "This is a probabilistic estimation...",
             "I could be misinterpreting the vector..."]
 
+    def audit_hubris(self, physics: Dict[str, Any]) -> Tuple[bool, str, str]:
+        voltage = physics.get("voltage", 0.0)
+        coherence = physics.get("kappa", 0.5)
+        if voltage > self.ICARUS_THRESHOLD and coherence < 0.4:
+            return True, f"⚠️ HUBRIS DETECTED: Voltage ({voltage:.1f}v) exceeds structural integrity. Wings melting.", "ICARUS_CRASH"
+        if voltage > self.FLOW_THRESHOLD and coherence > 0.8:
+            return True, "🌊 SURFACE TENSION OPTIMAL: Entering Flow State.", "FLOW_BOOST"
+        return False, "", ""
+
     def check_boundary(self, text, voltage):
-        text_lower = text.lower()
-        violation = None
-        for category, triggers in self.BOUNDARIES.items():
-            if any(t in text_lower for t in triggers):
-                violation = category
-                break
-        if violation or (voltage > 15.0):
+        if voltage > 20.0 and random.random() < 0.3:
             prefix = random.choice(self.HUMBLE_PHRASES)
-            new_text = f"{Prisma.CYN}{prefix}{Prisma.RST} {text}"
-            reason = f"Voltage ({voltage:.1f}v) > 15.0" if voltage > 15.0 else f"Boundary Violation ({violation})"
-            log_msg = f"HUMILITY INTERVENTION: Text modified. Reason: {reason}."
-            return True, new_text, log_msg
+            return True, f"{prefix} {text}", "VOLTAGE_DAMPENER"
         return False, text, None
 
 class GeodesicDome:
@@ -275,10 +305,10 @@ class GeodesicDome:
         if counts:
             heavy_words = counts.get("heavy", 0) + counts.get("constructive", 0) + counts.get("sacred", 0)
         structure_score = c_count + (heavy_words * 2)
-        base_b = min(1.0, math.log1p(structure_score + 1) / math.log1p(length * 0.1 + 1))
+        beta_index = min(1.0, math.log1p(structure_score + 1) / math.log1p(length * 0.1 + 1))
         if length < 50:
-            base_b *= (length / 50.0)
-        return round(e_metric, 3), round(base_b, 3)
+            beta_index *= (length / 50.0)
+        return round(e_metric, 3), round(beta_index, 3)
 
     def resolve_trigram(self, vector: Dict[str, float]) -> Dict[str, Any]:
         if not vector:

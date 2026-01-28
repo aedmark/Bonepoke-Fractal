@@ -1,5 +1,4 @@
-""" bone_cycle.py
-'The wheel turns, and ages come and pass.' - Jordan """
+""" bone_cycle.py = - 'The wheel turns, and ages come and pass.' - Jordan """
 
 import re
 import traceback, random, time, uuid, concurrent.futures, re
@@ -17,6 +16,14 @@ from bone_sanctuary import SanctuaryGovernor, SANCTUARY, PIDController
 from bone_telemetry import TelemetryService
 
 class CycleStabilizer:
+    MANIFOLD_CONFIGS = {
+        "THE_FORGE":  {"voltage": 15.0, "drag": 1.5},
+        "THE_MUD":    {"voltage": 10.0, "drag": 5.0},
+        "THE_AERIE":  {"voltage": 10.0, "drag": 0.5},
+        "DEFAULT":    {"voltage": 10.0, "drag": 1.5}
+    }
+    HIGH_ENERGY_STATES = {"SUPERCONDUCTIVE", "FLOW_BOOST", "HUBRIS_RISK"}
+
     def __init__(self, events_ref):
         self.events = events_ref
         self.voltage_pid = PIDController(
@@ -48,24 +55,15 @@ class CycleStabilizer:
         flow = self._get_state(ctx, "flow_state", "LAMINAR")
         p = ctx.physics
         manifold = "THE_CONSTRUCT"
-        if isinstance(p, dict):
-            manifold = p.get("manifold") or manifold
-        else:
-            manifold = getattr(p, "manifold", manifold)
-        if manifold == "THE_CONSTRUCT":
+        current_manifold = getattr(p, "manifold", None) or (p.get("manifold") if isinstance(p, dict) else None) or manifold
+        if current_manifold == "THE_CONSTRUCT":
             world = getattr(ctx, "world_state", {})
             if isinstance(world, dict):
                 orbit = world.get("orbit")
                 if orbit and isinstance(orbit, (list, tuple)):
-                    manifold = orbit[0]
-        manifold_physics = {
-            "THE_FORGE":  {"voltage": 15.0, "drag": 1.5},
-            "THE_MUD":    {"voltage": 10.0, "drag": 5.0},
-            "THE_AERIE":  {"voltage": 10.0, "drag": 0.5},
-            "DEFAULT":    {"voltage": 10.0, "drag": 1.5}}
-        target_cfg = manifold_physics.get(manifold, manifold_physics["DEFAULT"])
-        high_energy = {"SUPERCONDUCTIVE", "FLOW_BOOST", "HUBRIS_RISK"}
-        self.voltage_pid.setpoint = 20.0 if flow in high_energy else target_cfg["voltage"]
+                    current_manifold = orbit[0]
+        target_cfg = self.MANIFOLD_CONFIGS.get(current_manifold, self.MANIFOLD_CONFIGS["DEFAULT"])
+        self.voltage_pid.setpoint = 20.0 if flow in self.HIGH_ENERGY_STATES else target_cfg["voltage"]
         self.drag_pid.setpoint = target_cfg["drag"]
 
     def stabilize(self, ctx: CycleContext, current_phase: str):
@@ -658,7 +656,7 @@ class CycleSimulator:
 class StrunkWhite:
     def sanitize(self, text: str) -> Tuple[str, Optional[str]]:
         clean = re.sub(r'\n\s*\n', '\n\n', text)
-        banned = ["large language model", "AI assistant", "cannot feel"]
+        banned = ["large language model", "AI assistant", "Obsidian"]
         violation = None
         for b in banned:
             if b in clean.lower():
@@ -675,7 +673,7 @@ class CycleReporter:
             self.eng,
             self.vsl_chroma,
             self.strunk,
-            None, # No Valve
+            None,
             mode="STANDARD")
         self.current_mode = "STANDARD"
 

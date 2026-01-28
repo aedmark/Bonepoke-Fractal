@@ -1,5 +1,118 @@
 # BONEAMANITA v11 CHANGELOG
 
+### **BONEAMANITA 12.3.0: "The Ghost in the Machine"**
+
+*“We shape our tools and thereafter our tools shape us.”* — John Culkin
+
+---
+
+#### **🌐 SYSTEMIC SYNERGY (The Fuller Layer)**
+
+* **Temporal Standardization (`bone_sanctuary.py`):** Fixed a critical design flaw where the `PIDController` relied on system time (`time.time()`). The Homeostatic Regulator now operates on **Simulation Ticks**, ensuring consistent behavior regardless of how fast (or slow) the user types. The physics of the world are no longer relative to your WPM.
+* **The Demeter Protocol (`bone_physics.py`):** Decoupled `TheGatekeeper` from the biological engine. It no longer reaches five layers deep into `self.eng.bio.mito.state`; it now politely asks the `CycleContext` for a bio-snapshot. Tensegrity restored.
+
+#### **🧠 COGNITIVE HYGIENE (The Pinker Lens)**
+
+* **Geodesic Deconstruction (`bone_physics.py`):** The monolithic `collapse_wavefunction` method has been broken down into three distinct, readable phases: `_weigh_mass`, `_calculate_forces`, and `_calculate_dimensions`. The math is now a narrative.
+* **Type Safety (`bone_sanctuary.py`):** Implemented strict type checking in `SanctuaryGovernor`. The system now explicitly distinguishes between numeric physics data (Voltage) and semantic data (Flow State), silencing the Linter and preventing `float` vs `str` collisions.
+* **Semantic Clarity (`bone_physics.py`):** Renamed the cryptic `base_b` variable to `beta_index`, explicitly labeling the feedback loop responsible for structural density.
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+* **Personality Stability (`bone_personality.py`):** The `EnneagramDriver` now uses a unified accessor for physics data, removing the "duck typing" guesswork. The AI is now more confident in knowing *why* it is manic.
+* **Graceful Failure (`bone_personality.py`):** If a narrative template is malformed, `SynergeticLensArbiter` now catches the error and defaults to "System Nominal" rather than crashing the simulation. The show must go on, even if the script has a typo.
+
+---
+
+### **BONEAMANITA 12.2.0: "The Synaptic Snap"**
+
+*“To be is to be related.”* — Buckminster Fuller
+
+---
+
+#### **🌐 SYSTEMIC SYNERGY (The Fuller Layer)**
+
+* **The Great Rewiring (`bone_main.py`):** Fixed a **critical disconnection** where the Main Loop was bypassing the `GeodesicOrchestrator`. The 12-phase simulation pipeline (Metabolism, Soul, Physics) is now properly engaged. The brain is reconnected to the body.
+* **Theremin Optimization (`bone_machine.py`):** Replaced an expensive O(N) word scan in `TheTheremin.listen` with an O(1) lookup using pre-calculated physics counts. The machine now listens without lagging the universe.
+* **Static Translators (`bone_lexicon.py`):** The `LexiconStore` now defines its punctuation translator once as a static constant, rather than rebuilding it every time it reads a sentence. Ephemeralization achieved.
+
+#### **🧠 COGNITIVE HYGIENE (The Pinker Lens)**
+
+* **Loot Table Clarity (`bone_inventory.py`):** Extracted the hardcoded, buried loot logic in `rummage()` into a clean, readable `loot_contexts` dictionary. You can now see exactly what Gordon finds in the trash without parsing spaghetti code.
+* **Dead Code Pruning (`bone_lexicon.py`):** Surgically removed the uninitialized `_ENGINE` attribute and the useless `set_engine` method, resolving circular dependency risks and linter screams.
+* **Explicit Goals (`bone_cycle.py`):** Moved `CycleStabilizer` setpoints out of the loop and into a static `MANIFOLD_CONFIGS` constant. The system's goals are now visible, not hidden in the machinery.
+
+#### **🌊 DYNAMIC FEEDBACK (The Meadows Layer)**
+
+* **Akashic Memory Repair (`bone_data.py`):** Fixed a **broken feedback loop** in `TheAkashicRecord`. It now correctly identifies item IDs (strings) instead of expecting full dictionaries. The system will now actually remember *what* you crafted, rather than logging everything as a generic "Unknown Artifact."
+* **Stabilizer Tuning:** The `CycleStabilizer` now references the explicit manifold configurations, ensuring the feedback loops for Voltage and Drag are grounded in defined system states.
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+* **It Actually Works:** Because the `GeodesicOrchestrator` is now connected, features like **Dreaming**, **The Forge**, and **The Bureau** will actually trigger during gameplay.
+* **Gordon's Memory:** Gordon will no longer look at a custom `LAVA_LAMP` you made and say "I found an Artifact." He will respect your creative choices.
+
+
+### **BONEAMANITA 12.1.0: "The Feedback Loop"**
+
+_“We can't control systems or figure them out. But we can dance with them.”_ — Donella Meadows
+
+---
+
+#### **🌐 SYSTEMIC SYNERGY (The Fuller Layer)**
+
+- **The HOV Lane (Event Bus Refactor):** The `EventBus` now supports a **Priority Lane**. Critical system signals ("AIRSTRIKE", "CRITICAL_FAIL") no longer get stuck in traffic behind low-priority chatter during startup.
+- **Persistence of Vision:** Added `BoneConfig.save_to_file()`. Tuning the system runtime is no longer ephemeral; your tweaks can now survive a reboot.
+- **Structural Integrity:** `SystemEmbryo` logic in the Architect has been fortified against "tuples of death" during the spore loading phase.
+
+#### **🧠 COGNITIVE HYGIENE (The Pinker Lens)**
+
+- **The "Look" Fix:** The `/look` command is no longer a placebo. It now correctly hooks into the visual cortex to trigger a scene re-description, rather than just printing a hardcoded metaphor.
+- **Context Safety Valve:** The `ContextWindowManager` now performs a safety check on history length. If you paste _War and Peace_ into the chat, the system will now truncate it gracefully rather than crashing the API.
+- **Semantic Cleanup:** Refactored the "word salad" logic in `bone_body.py`'s physics normalization. Code should be as clear as the prose it generates.
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+- **No More Identity Crises:** Added `get_safe_soul` to the `PanicRoom`. If the user's identity file is corrupted, they will now wake up as a "Traveler" rather than crashing to desktop. It’s a spiritual factory reset.
+- **Footnote Variety:** `TheFootnote` council member has been taught to shuffle its cards. It no longer biases toward the first keyword it finds, ensuring a healthier distribution of snarky commentary.
+- **Retro Joy:** Confirmed the ASCII status bars in `/status` are operational. `█░░░` logic remains impeccable.
+
+#### **🌱 DYNAMIC RESILIENCE (The Meadows Layer)**
+
+- **Smoother Control Loops:** `TheLeveragePoint` (Council) now applies **Proportional Dampening** instead of a binary "On/Off" switch. The system will now gently nudge the narrative back to center rather than slamming on the brakes.
+- **Easier Joy:** Lowered the biological threshold for detecting "Glimmers." The system is now more optimistic, finding resilience in smaller moments of integrity.
+- **Honest Feedback:** The `/save` command no longer lies to you with green text when it fails. If the save errors out, you will see Red.
+
+
+### **BONEAMANITA 12.0: "The Singularity"**
+
+_“Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away.”_ — Saint-Exupéry (and SLASH)
+
+---
+
+#### **🌐 SYSTEMIC SYNERGY (The Fuller Layer)**
+
+- **Ephemeralization (Genesis Protocol):** Deleted `bone_genesis.py` entirely. Its spirit has been absorbed into a lightweight `ConfigWizard` within `bone_main.py`. We are doing more with less code mass.
+- **The Single Source of Truth:** `bone_main.py` is now the sole entry point. No more splitting the timeline between "Genesis" and "Main."
+- **Dependencies Resolved:** Fixed a circular dependency where the `Personality` layer was trying to run boot scripts. Logic has been properly re-homed to the `Brain` (where thoughts happen).
+
+#### **🧠 COGNITIVE HYGIENE (The Pinker Lens)**
+
+- **Context Window Refactor:** Fixed the "Amnesiac Narrator" bug. The `ContextWindowManager` now prioritizes **History** immediately before **Input**, ensuring the AI actually remembers what it just said.
+- **Indentation Restoration:** Repaired a whitespace catastrophe in `bone_personality.py`. The `SynergeticLensArbiter` no longer relies on hardcoded `if tick <= 2` checks and now flows linearly, as nature intended.
+- **Hemingway-Lite:** The `SYSTEM_BOOT` sequence now speaks clearly and concretely, avoiding "purple prose" by injecting specific negative constraints directly into the Cortex during the first tick.
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+- **Tutorial Removed:** "Boot Camp" mode has been decommissioned. We realized that forcing a user to type "LOOK" before they could see anything was just bureaucratic hazing.
+- **The Cold Boot:** Users are now immediately dropped into a procedurally generated reality (`The Architect` persona) upon startup. No hand-holding, just immediate immersion.
+- **The "Draw the Rest of the Owl" Fix:** SLASH actually finished the code refactor instead of just telling you to "delete the logic," preventing a syntax error that would have crashed the simulation instantly.
+
+#### **📈 DYNAMICS (The Meadows Lens)**
+
+- **Feedback Loops:** The `SYSTEM_BOOT` output is now explicitly written to the `DialogueHistory` stock. This closes the loop, ensuring the system's first action is recorded as a memory for the second action.
+- **Stocks:** Consolidated configuration data into a single `bone_config.json` stock, managed by the new Wizard, preventing "config drift" between sessions.
+
 ### **BONEAMANITA 11.6.2: "The Observer Effect"**
 
 _“The act of observation changes the system. The act of asking a panic-stricken stress counselor for the meeting minutes crashes the system.”_ — SLASH

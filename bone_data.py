@@ -793,7 +793,16 @@ class TheAkashicRecord:
         key = (ingredient_name, catalyst_type)
         if key not in self.recipe_candidates:
             self.recipe_candidates[key] = {}
-        result_name = result_item["description"] if isinstance(result_item, dict) else "Artifact"
+        result_name = "Unknown Artifact"
+        if isinstance(result_item, dict):
+            result_name = result_item.get("description", "Unknown Artifact")
+        elif isinstance(result_item, str):
+            gordon_data = self.lore.get("GORDON")
+            registry = gordon_data.get("ITEM_REGISTRY", {}) if gordon_data else {}
+            if result_item in registry:
+                result_name = registry[result_item].get("description", result_item)
+            else:
+                result_name = result_item
         self.recipe_candidates[key][result_name] = self.recipe_candidates[key].get(result_name, 0) + 1
         if self.recipe_candidates[key][result_name] >= self.RECIPE_THRESHOLD:
             self._crystallize_recipe(ingredient_name, catalyst_type, result_item)

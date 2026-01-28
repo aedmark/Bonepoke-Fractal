@@ -5,6 +5,7 @@ import random
 from typing import Tuple, Optional
 from bone_bus import Prisma
 from bone_lexicon import TheLexicon
+from bone_data import GORDON
 from dataclasses import dataclass
 
 class TheCrucible:
@@ -78,9 +79,9 @@ class TheCrucible:
         damage = voltage * 0.5
         return "MELTDOWN", damage, f"CRUCIBLE CRACKED: Fire lacks Structure (Kappa Low). Hull Breach. -{damage:.1f} Health."
 
+
 class TheForge:
     def __init__(self):
-        from bone_data import GORDON
         self.recipes = GORDON.get("RECIPES", [])
         self.PLANCK_CONSTANT = 0.1
 
@@ -158,13 +159,16 @@ class TheTheremin:
         self.is_stuck = False
 
     def listen(self, physics, governor_mode="COURTYARD"):
-        clean = physics["clean_words"]
+        counts = physics.get("counts", {})
         voltage = physics.get("voltage", 0.0)
-        ancient_mass = sum(1 for w in clean if w in TheLexicon.get("heavy") or w in TheLexicon.get("thermal") or w in TheLexicon.get("cryo"))
-        modern_mass = sum(1 for w in clean if w in TheLexicon.get("abstract"))
-        thermal_hits = sum(1 for w in clean if w in TheLexicon.get("thermal"))
+
+        ancient_mass = counts.get("heavy", 0) + counts.get("thermal", 0) + counts.get("cryo", 0)
+        modern_mass = counts.get("abstract", 0)
+        thermal_hits = counts.get("thermal", 0)
+
         solvent_active = False
         solvent_msg = ""
+
         if thermal_hits > 0 and self.decoherence_buildup > 5.0:
             dissolved = thermal_hits * 15.0
             self.decoherence_buildup = max(0.0, self.decoherence_buildup - dissolved)
@@ -174,16 +178,19 @@ class TheTheremin:
             if self.is_stuck and self.decoherence_buildup < self.AMBER_THRESHOLD:
                 self.is_stuck = False
                 solvent_msg += f" {Prisma.GRN}RELEASE: You burned your way out.{Prisma.RST}"
+
         raw_mix = min(ancient_mass, modern_mass)
         resin_flow = raw_mix * 2.0
         if governor_mode == "LABORATORY":
             resin_flow *= 0.5
         if voltage > 5.0:
             resin_flow = max(0.0, resin_flow - (voltage * 0.6))
+
         rep = physics.get("repetition", 0.0)
         complexity = physics.get("truth_ratio", 0.0)
         theremin_msg = None
         critical_event = None
+
         if rep > 0.5:
             self.classical_turns += 1
             slag = self.classical_turns * 4.0
@@ -194,37 +201,46 @@ class TheTheremin:
             relief = 15.0
             self.decoherence_buildup = max(0.0, self.decoherence_buildup - relief)
             theremin_msg = f"{Prisma.GRN}PERCUSSIVE MAINTENANCE: Calcification Shattered. Flow restored. (-{relief} Resin){Prisma.RST}"
+
         if solvent_active:
             theremin_msg = f"{theremin_msg} | {solvent_msg}" if theremin_msg else solvent_msg
         elif resin_flow > 0.5:
             self.decoherence_buildup += resin_flow
             if not theremin_msg:
                 theremin_msg = f"{Prisma.OCHRE}RESIN FLOW: Hybrid complexity (+{resin_flow:.1f}). Keep it hot to prevent sticking.{Prisma.RST}"
+
         if resin_flow == 0 and self.classical_turns == 0:
             self.decoherence_buildup = max(0.0, self.decoherence_buildup - 2.0)
+
         if self.decoherence_buildup > self.SHATTER_POINT:
             self.decoherence_buildup = 0.0
             self.classical_turns = 0
             return False, resin_flow, f"{Prisma.RED}WAVEFUNCTION COLLAPSE: System is solid amber. INITIATING AIRSTRIKE.{Prisma.RST}", "AIRSTRIKE"
+
         if self.classical_turns > 3:
             critical_event = "CORROSION"
             theremin_msg = f"{theremin_msg} | {Prisma.YEL}FOSSILIZATION IMMINENT{Prisma.RST}"
+
         if self.decoherence_buildup > self.AMBER_THRESHOLD:
             self.is_stuck = True
             if not theremin_msg:
                 theremin_msg = f"{Prisma.RED}AMBER TRAP: You are stuck in the resin. Increase Voltage to melt it.{Prisma.RST}"
+
         if self.is_stuck and self.decoherence_buildup < 5.0:
             self.is_stuck = False
             if not solvent_active:
                 theremin_msg = f"{Prisma.GRN}LIQUEFACTION: The Amber melts. You are free.{Prisma.RST}"
+
         turb = physics.get("turbulence", 0.0)
         if turb > 0.6 and self.decoherence_buildup > 0:
             shatter_amt = turb * 10.0
             self.decoherence_buildup = max(0.0, self.decoherence_buildup - shatter_amt)
             theremin_msg = f"{Prisma.CYN}TURBULENCE: Jagged rhythm broke the resin (-{shatter_amt:.1f}).{Prisma.RST}"
             self.classical_turns = 0
+
         if turb < 0.2:
             physics["narrative_drag"] = max(0.0, physics["narrative_drag"] - 1.0)
+
         return self.is_stuck, resin_flow, theremin_msg, critical_event
 
     def get_readout(self):

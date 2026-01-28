@@ -68,7 +68,6 @@ class BioSystem:
         if isinstance(physics_packet, dict):
             em_field = physics_packet.get("electromagnetism", 0.0)
             if em_field == 0.0:
-                import math
                 e = physics_packet.get("E", 0.0)
                 b = physics_packet.get("B", 0.0)
                 em_field = math.sqrt(e**2 + b**2)
@@ -491,11 +490,15 @@ class EndocrineSystem:
             self.melatonin = 0.0
 
     def check_for_glimmer(self, feedback: Dict, harvest_hits: int) -> Optional[str]:
-        if feedback.get("INTEGRITY", 0) > 0.9 and feedback.get("STATIC", 0) < 0.2:
+        if feedback.get("INTEGRITY", 0) > 0.85:
             self.glimmers += 1
             self.serotonin += 0.2
             return BIO_NARRATIVE["GLIMMER"]["INTEGRITY"]
-        if harvest_hits > 2 and self.dopamine > 0.8:
+        if feedback.get("NOVELTY", 0) > 0.8:
+            self.glimmers += 1
+            self.dopamine += 0.1
+            return BIO_NARRATIVE["GLIMMER"].get("DISCOVERY", "GLIMMER: A spark of the new.")
+        if harvest_hits > 2 and self.dopamine > 0.7:
             self.glimmers += 1
             self.oxytocin += 0.2
             return BIO_NARRATIVE["GLIMMER"]["ENTHUSIASM"]
@@ -765,4 +768,4 @@ class NoeticLoop:
             "role": mind_data.get("role"),
             "ignition": ignition_score,
             "physics": current_physics,
-            "bio": self.endo.get_state() if hasattr(self, 'endo') else {}}
+            "bio": self.bio.endo.get_state() if hasattr(self.bio, 'endo') else {}}

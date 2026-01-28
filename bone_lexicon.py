@@ -9,6 +9,8 @@ from functools import lru_cache
 
 class LexiconStore:
     HIVE_FILENAME = "cortex_hive.json"
+    _TRANSLATOR = str.maketrans(string.punctuation, " " * len(string.punctuation))
+
     def __init__(self):
         self.categories = {
             "heavy", "kinetic", "explosive", "constructive", "abstract",
@@ -20,7 +22,6 @@ class LexiconStore:
         self.ANTIGEN_REPLACEMENTS = {}
         self.SOLVENTS = set()
         self.REVERSE_INDEX: Dict[str, Set[str]] = {}
-        self._ENGINE = None
         self.hive_loaded = False
 
     def load_vocabulary(self):
@@ -67,8 +68,6 @@ class LexiconStore:
         except IOError:
             pass
 
-    def set_engine(self, engine_ref): self._ENGINE = engine_ref
-
     def get_raw(self, category):
         base = self.VOCAB.get(category, set())
         learned = set(self.LEARNED_VOCAB.get(category, {}).keys())
@@ -110,8 +109,7 @@ class LexiconStore:
     def harvest(self, text: str) -> Dict[str, List[str]]:
         results = {}
         if not text: return results
-        translator = str.maketrans(string.punctuation, " " * len(string.punctuation))
-        clean_text = text.translate(translator).lower()
+        clean_text = text.translate(self._TRANSLATOR).lower()
         words = clean_text.split()
         for w in words:
             cats = self.get_categories_for_word(w)
@@ -313,7 +311,6 @@ class LexiconService:
             cls._STORE = LexiconStore()
             cls._STORE.load_vocabulary()
             cls._ANALYZER = LinguisticAnalyzer(cls._STORE)
-            cls._STORE.set_engine(cls._ANALYZER)
             cls.compile_antigens()
             cls.SOLVENTS = cls._STORE.SOLVENTS
             print(f"{Prisma.GRN}[LEXICON]: Systems Nominal. Vocabulary Loaded.{Prisma.RST}")
@@ -433,134 +430,3 @@ class LexiconService:
         cls.compile_antigens()
 
 TheLexicon = LexiconService
-
-class LiteraryReproduction:
-    MUTATIONS = {}
-    JOY_CLADE = {}
-
-    @classmethod
-    def load_genetics(cls):
-        try:
-            genetics = TheLore.get("GENETICS")
-            cls.MUTATIONS = genetics.get("MUTATIONS", {})
-            cls.JOY_CLADE = genetics.get("JOY_CLADE", {})
-        except Exception:
-            cls.MUTATIONS = {}
-            cls.JOY_CLADE = {}
-
-    @staticmethod
-    def _extract_counts(physics_container):
-        if hasattr(physics_container, "counts"):
-            return physics_container.counts
-        return physics_container.get("counts", {})
-
-    @staticmethod
-    def mutate_config(current_config):
-        mutations = {}
-        if random.random() < 0.3:
-            mutations["MAX_DRAG_LIMIT"] = current_config.MAX_DRAG_LIMIT * random.uniform(0.9, 1.1)
-        if random.random() < 0.3:
-            mutations["TOXIN_WEIGHT"] = current_config.TOXIN_WEIGHT * random.uniform(0.9, 1.2)
-        if random.random() < 0.1:
-            mutations["MAX_HEALTH"] = current_config.MAX_HEALTH * random.uniform(0.8, 1.05)
-        if random.random() < 0.2:
-            current_v_max = getattr(current_config.PHYSICS, "VOLTAGE_MAX", 20.0)
-            mutations["PHYSICS.VOLTAGE_MAX"] = current_v_max * random.uniform(0.9, 1.15)
-        if random.random() < 0.2:
-            current_regen = getattr(current_config.BIO, "REWARD_MEDIUM", 0.10)
-            mutations["BIO.REWARD_MEDIUM"] = current_regen * random.uniform(0.8, 1.3)
-        if random.random() < 0.1:
-            current_trigger = getattr(current_config.COUNCIL, "MANIC_VOLTAGE_TRIGGER", 18.0)
-            mutations["COUNCIL.MANIC_VOLTAGE_TRIGGER"] = current_trigger * random.uniform(0.9, 1.1)
-        return mutations
-
-    @staticmethod
-    def mitosis(parent_id, bio_state, physics):
-        counts = LiteraryReproduction._extract_counts(physics)
-        dominant = max(counts, key=counts.get) if counts else "VOID"
-        mutation_data = LiteraryReproduction.MUTATIONS.get(
-            dominant.upper(),
-            {"trait": "NEUTRAL", "mod": {}})
-        child_id = f"{parent_id}_({mutation_data['trait']})"
-        config_mutations = LiteraryReproduction.mutate_config(BoneConfig)
-        trauma_vec = bio_state.get("trauma_vector", {})
-        child_genome = {
-            "source": "MITOSIS",
-            "parent_a": parent_id,
-            "parent_b": None,
-            "mutations": mutation_data["mod"],
-            "config_mutations": config_mutations,
-            "dominant_flavor": dominant,
-            "trauma_inheritance": trauma_vec}
-        return child_id, child_genome
-
-    @staticmethod
-    def crossover(parent_a_id, parent_a_bio, parent_b_path):
-        try:
-            with open(parent_b_path, "r") as f:
-                parent_b_data = json.load(f)
-        except (IOError, json.JSONDecodeError):
-            return None, "Dead Spore (Corrupt File)."
-        parent_b_id = parent_b_data.get("session_id", "UNKNOWN")
-        trauma_a = parent_a_bio.get("trauma_vector", {})
-        trauma_b = parent_b_data.get("trauma_vector", {})
-        child_trauma = {}
-        all_keys = set(trauma_a.keys()) | set(trauma_b.keys())
-        for k in all_keys:
-            child_trauma[k] = max(trauma_a.get(k, 0), trauma_b.get(k, 0))
-        enzymes_a = set()
-        if "mito" in parent_a_bio:
-            if hasattr(parent_a_bio["mito"], "state"):
-                enzymes_a = set(parent_a_bio["mito"].state.enzymes)
-            elif isinstance(parent_a_bio["mito"], dict):
-                enzymes_a = set(parent_a_bio["mito"].get("enzymes", []))
-        enzymes_b = set(parent_b_data.get("mitochondria", {}).get("enzymes", []))
-        child_enzymes = list(enzymes_a | enzymes_b)
-        config_mutations = LiteraryReproduction.mutate_config(BoneConfig)
-        short_a = parent_a_id[-4:] if len(parent_a_id) > 4 else parent_a_id
-        short_b = parent_b_id[-4:] if len(parent_b_id) > 4 else parent_b_id
-        child_id = f"HYBRID_{short_a}x{short_b}"
-        child_genome = {
-            "source": "CROSSOVER",
-            "parent_a": parent_a_id,
-            "parent_b": parent_b_id,
-            "trauma_inheritance": child_trauma,
-            "config_mutations": config_mutations,
-            "inherited_enzymes": child_enzymes}
-        return child_id, child_genome
-
-    def attempt_reproduction(self, engine_ref, mode="MITOSIS", target_spore=None) -> Tuple[str, Dict]:
-        mem = engine_ref.mind.mem
-        phys = engine_ref.phys.tension.last_physics_packet
-        child_id = None
-        genome = {}
-        log_msg = []
-        if mode == "MITOSIS":
-            bio_state = {"trauma_vector": engine_ref.trauma_accum}
-            child_id, genome = self.mitosis(mem.session_id, bio_state, phys)
-            log_msg = [f"   ► CHILD SPAWNED: {Prisma.WHT}{child_id}{Prisma.RST}",
-                       f"   ► TRAIT: {genome.get('mutations', 'None')}"]
-        elif mode == "CROSSOVER":
-            if not target_spore:
-                return f"{Prisma.RED}FERTILITY ERROR: No partner found.{Prisma.RST}", {}
-            current_bio = {"trauma_vector": engine_ref.trauma_accum, "mito": engine_ref.bio.mito}
-            child_id, genome = self.crossover(mem.session_id, current_bio, target_spore)
-            if not child_id:
-                return f"{Prisma.RED}REPRODUCTION ERROR: Mode '{mode}' yielded no offspring.{Prisma.RST}", {}
-            log_msg = [f"   HYBRID SPAWNED: {Prisma.WHT}{child_id}{Prisma.RST}"]
-        full_spore_data = {
-            "session_id": child_id,
-            "meta": {
-                "timestamp": time.time(),
-                "final_health": engine_ref.health,
-                "final_stamina": engine_ref.stamina},
-            "trauma_vector": genome.get("trauma_inheritance", {}),
-            "config_mutations": genome.get("config_mutations", {}),
-            "mitochondria": {"enzymes": list(genome.get("inherited_enzymes", []))},
-            "core_graph": mem.graph,
-            "antibodies": list(engine_ref.bio.immune.active_antibodies)}
-        filename = f"{child_id}.json"
-        saved_path = mem.loader.save_spore(filename, full_spore_data)
-        if saved_path:
-            log_msg.append(f"   {Prisma.GRN}SAVED: {saved_path}{Prisma.RST}")
-        return "\n".join(log_msg), genome.get("mutations", {})

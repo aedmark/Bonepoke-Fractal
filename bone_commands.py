@@ -18,6 +18,11 @@ class CommandStateInterface:
         else:
             print(f"[{category}] {text}")
 
+    def trigger_visual_cortex(self) -> Optional[Dict]:
+        if hasattr(self._eng, "process_turn"):
+            return self._eng.process_turn("LOOK")
+        return None
+
     def modify_resource(self, resource: str, delta: float):
         if resource == "stamina":
             self._eng.stamina = max(0.0, self._eng.stamina + delta)
@@ -107,7 +112,8 @@ class CommandRegistry:
             return True
 
 class CommandProcessor:
-    def __init__(self, engine, prisma_ref, lexicon_ref, config_ref, cartographer_ref=None):
+    def __init__(self, engine, prisma_ref, lexicon_ref=None, config_ref=None, cartographer_ref=None):
+        real_config = config_ref if config_ref else getattr(engine, "config", None)
         self.interface = CommandStateInterface(engine, prisma_ref, config_ref)
         self.tax = ResourceTax(self.interface)
         self.registry = CommandRegistry(self.interface)
@@ -147,7 +153,10 @@ class CommandProcessor:
 
     def _cmd_save(self, _parts):
         res = self.interface.save_state()
-        self.interface.log(f"{self.P.GRN}SAVED: {res}{self.P.RST}")
+        if "Error" in res or "Failed" in res:
+            self.interface.log(f"{self.P.RED}SAVE FAILED: {res}{self.P.RST}")
+        else:
+            self.interface.log(f"{self.P.GRN}SAVED: {res}{self.P.RST}")
         return True
 
     def _cmd_inventory(self, _parts):
@@ -183,5 +192,9 @@ class CommandProcessor:
         return True
 
     def _cmd_look(self, _parts):
-        self.interface.log("You see the code structure. It is cleaner now.")
+        result = self.interface.trigger_visual_cortex()
+        if result and result.get("ui"):
+            self.interface.log(result["ui"])
+        else:
+            self.interface.log("Blindness. The engine cannot see.")
         return True

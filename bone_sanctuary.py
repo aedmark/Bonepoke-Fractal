@@ -14,14 +14,9 @@ class PIDController:
         self.output_min, self.output_max = output_limits
         self._prev_error = 0.0
         self._integral = 0.0
-        self.last_time = time.time()
 
-    def update(self, measurement: float, dt: float = None) -> float:
-        now = time.time()
-        if dt is None:
-            dt = now - self.last_time
-        self.last_time = now
-        safe_dt = max(0.001, min(1.0, dt))
+    def update(self, measurement: float, dt: float = 1.0) -> float:
+        safe_dt = max(0.001, dt)
         error = self.setpoint - measurement
         self._integral += error * safe_dt
         self._integral = max(self.output_min, min(self.output_max, self._integral))
@@ -31,8 +26,6 @@ class PIDController:
         self._prev_error = error
         return output
 
-    def seed(self, measurement: float):
-        self._prev_error = self.setpoint - measurement
 
 class SanctuaryGovernor:
     def __init__(self, events_ref):
@@ -50,15 +43,22 @@ class SanctuaryGovernor:
         self.in_sanctuary = False
         self.consecutive_safe_ticks = 0
 
+    def _get_val(self, p, key, default):
+        if isinstance(p, dict):
+            return p.get(key, default)
+        return getattr(p, key, default)
+
+    def _get_num(self, p, key, default=0.0) -> float:
+        val = self._get_val(p, key, default)
+        try:
+            return float(val)
+        except (ValueError, TypeError):
+            return float(default)
+
     def assess(self, physics_packet):
-        if isinstance(physics_packet, dict):
-            v = physics_packet.get("voltage", 0.0)
-            d = physics_packet.get("narrative_drag", 0.0)
-            t = physics_packet.get("truth_ratio", 0.0)
-        else:
-            v = getattr(physics_packet, "voltage", 0.0)
-            d = getattr(physics_packet, "narrative_drag", 0.0)
-            t = getattr(physics_packet, "truth_ratio", 0.0)
+        v = self._get_num(physics_packet, "voltage", 0.0)
+        d = self._get_num(physics_packet, "narrative_drag", 0.0)
+        t = self._get_num(physics_packet, "truth_ratio", 0.0)
         v_tol = getattr(SANCTUARY, "VOLTAGE_TOLERANCE", 5.0) or 1.0
         d_tol = getattr(SANCTUARY, "DRAG_TOLERANCE", 2.0) or 1.0
         t_target = getattr(SANCTUARY, "TRUTH_TARGET", 0.8)
@@ -78,18 +78,13 @@ class SanctuaryGovernor:
         return self.in_sanctuary, avg_dist
 
     def calculate_correction(self, physics_packet) -> tuple:
-        if isinstance(physics_packet, dict):
-            curr_v = physics_packet.get("voltage", 0)
-            curr_d = physics_packet.get("narrative_drag", 0)
-            flow = physics_packet.get("flow_state", "")
-        else:
-            curr_v = getattr(physics_packet, "voltage", 0)
-            curr_d = getattr(physics_packet, "narrative_drag", 0)
-            flow = getattr(physics_packet, "flow_state", "")
+        curr_v = self._get_num(physics_packet, "voltage")
+        curr_d = self._get_num(physics_packet, "narrative_drag")
+        flow = self._get_val(physics_packet, "flow_state", "")
         if curr_v > 18.0 or curr_d > 8.0 or flow in ["SUPERCONDUCTIVE", "HUBRIS_RISK"]:
             return 0.0, 0.0
-        v_corr = self.voltage_pid.update(curr_v)
-        d_corr = self.drag_pid.update(curr_d)
+        v_corr = self.voltage_pid.update(curr_v, dt=1.0)
+        d_corr = self.drag_pid.update(curr_d, dt=1.0)
         v_delta = v_corr * 0.1
         d_delta = d_corr * 0.1
         return v_delta, d_delta

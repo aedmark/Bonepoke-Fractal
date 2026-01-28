@@ -9,7 +9,7 @@ from bone_spores import MycotoxinFactory, LichenSymbiont, HyphalInterface, Paras
 from bone_body import BioSystem, MitochondrialForge, MitochondrialState, EndocrineSystem, MetabolicGovernor, ViralTracer, ThePacemaker
 from bone_brain import DreamEngine, ShimmerState, NeuroPlasticity, GlobalIntegrator, WisdomAllocator
 from bone_personality import LimboLayer
-from bone_physics import TemporalDynamics, QuantumObserver
+from bone_physics import TemporalDynamics, QuantumObserver, SurfaceTension
 from bone_machine import TheCrucible, TheForge, TheTheremin
 
 @dataclass
@@ -60,6 +60,26 @@ class PanicRoom:
             "role": "The Backup System",
             "thought": "I cannot think clearly, therefore I still am, but barely.",}
 
+    @staticmethod
+    def get_safe_soul():
+        return {
+            "name": "Traveler",
+            "archetype": "The Survivor",
+            "virtues": {"resilience": 1.0},
+            "vices": {"amnesia": 1.0},
+            "narrative_arc": "RECOVERY",
+            "xp": 0
+        }
+
+    @staticmethod
+    def get_safe_limbo():
+        return {
+            "mood": "NEUTRAL",
+            "volatility": 0.0,
+            "mask": "DEFAULT",
+            "glitch_factor": 0.0
+        }
+
 class BoneArchitect:
     @staticmethod
     def _construct_mind(events, lex) -> Tuple[MindSystem, LimboLayer]:
@@ -100,7 +120,8 @@ class BoneArchitect:
             theremin=TheTheremin(),
             pulse=ThePacemaker(),
             dynamics=TemporalDynamics(),
-            nav=TheNavigator(bio.shimmer)
+            nav=TheNavigator(bio.shimmer),
+            tension=SurfaceTension()
         )
 
     @staticmethod
@@ -122,7 +143,11 @@ class BoneArchitect:
     @staticmethod
     def awaken(embryo: SystemEmbryo) -> SystemEmbryo:
         events = embryo.bio.mito.events
-        load_result = embryo.mind.mem.autoload_last_spore()
+        try:
+            load_result = embryo.mind.mem.autoload_last_spore()
+        except Exception as e:
+            events.log(f"{Prisma.RED}[ARCHITECT]: Spore corruption detected ({e}). Clearing heritage.{Prisma.RST}", "SYS")
+            load_result = None
         inherited_traits = {}
         inherited_antibodies = set()
         soul_legacy = {}
