@@ -1,7 +1,6 @@
 """ bone_cycle.py = - 'The wheel turns, and ages come and pass.' - Jordan """
 
-import re
-import traceback, random, time, uuid, concurrent.futures, re
+import traceback, random, time, uuid, re
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, Tuple, List, Optional
 from bone_bus import Prisma, BoneConfig, CycleContext, PhysicsPacket
@@ -237,10 +236,11 @@ class MetabolismPhase(SimulationPhase):
             dream_log = self.eng.mind.dreamer.enter_rem_cycle(self.eng.mind.mem, bio_readout=bio_packet)
             ctx.log(f"\n{Prisma.VIOLET}[AUTO-SLEEP]: {reason} initiated.{Prisma.RST}")
             ctx.log(dream_log)
-            self.eng.bio.mito.state.atp_pool = 33.0
+            EMERGENCY_REBOOT_ATP = 33.0
+            self.eng.bio.mito.state.atp_pool = EMERGENCY_REBOOT_ATP
             ctx.is_alive = True
             ctx.bio_result["respiration"] = "REM_CYCLE"
-            ctx.bio_result["atp"] = 33.0
+            ctx.bio_result["atp"] = EMERGENCY_REBOOT_ATP
             ctx.log(f"{Prisma.GRN}   (Microsleep / Defibrillator Active. ATP stabilized at 33.0){Prisma.RST}")
 
     @staticmethod
@@ -448,7 +448,10 @@ class SoulPhase(SimulationPhase):
         self.eng.soul.pursue_obsession(ctx.physics)
         if self.eng.gordon.inventory:
             self.eng.tinkerer.audit_tool_use(ctx.physics, self.eng.gordon.inventory)
-        council_advice, adjustments, mandates = self.eng.council.convene(ctx.input_text, ctx.physics)
+        council_advice, adjustments, mandates = self.eng.council.convene(
+            ctx.input_text, 
+            ctx.physics, 
+            ctx.bio_result)
         if mandates:
             if not hasattr(ctx, 'council_mandates'): ctx.council_mandates = []
             ctx.council_mandates.extend(mandates)

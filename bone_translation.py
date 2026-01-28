@@ -1,9 +1,10 @@
-""" bone_translation.py
- 'The limits of my language mean the limits of my world.' - Wittgenstein """
+""" bone_translation.py - 'The limits of my language mean the limits of my world.' - Wittgenstein """
 
+import random
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple, Any
 from bone_bus import Prisma, BoneConfig
+from bone_data import TheLore
 
 @dataclass
 class SomaticState:
@@ -23,11 +24,18 @@ class RosettaStone:
         coherence = physics.get("coherence", 0.5)
         tone = RosettaStone._derive_voltage_tone(voltage)
         sensation = RosettaStone._derive_drag_sensation(drag)
+        if impulse and hasattr(impulse, 'somatic_reflex') and impulse.somatic_reflex:
+            sensation = f"{sensation} ({impulse.somatic_reflex})"
         focus = RosettaStone._derive_coherence_focus(coherence)
         chem_state = bio.get("chem", {})
         flavor = RosettaStone._apply_chemistry(tone, chem_state)
-        pacing = "Frenetic" if voltage > 12 else "Languid"
-        metaphor = "A tightrope walk" if drag > 4 else "A calm ocean"
+        somatic_lib = TheLore.get("SOMATIC_LIBRARY")
+        pacing_key = "HIGH" if voltage > 12 else "LOW"
+        pacing_options = somatic_lib.get("PACING_RESERVOIR", {}).get(pacing_key, ["Normal"])
+        pacing = random.choice(pacing_options)
+        meta_key = "HIGH_DRAG" if drag > 4 else "LOW_DRAG"
+        meta_options = somatic_lib.get("METAPHOR_RESERVOIR", {}).get(meta_key, ["Stable"])
+        metaphor = random.choice(meta_options)
         hint = f"Focus on the {sensation.lower()} nature of this moment."
         return SomaticState(
             tone=tone,
@@ -36,7 +44,7 @@ class RosettaStone:
             somatic_sensation=sensation,
             metaphor=metaphor,
             internal_monologue_hint=hint,
-            color_code="\033[31m" if voltage > 15.0 else "\033[32m")
+            color_code=color)
 
     @staticmethod
     def _derive_voltage_tone(v):
@@ -73,8 +81,12 @@ class SomaticInterface:
     def get_current_qualia(self, impulse: Any = None) -> SomaticState:
         physics = self.eng.phys.observer.last_physics_packet if self.eng.phys.observer.last_physics_packet else {}
         if hasattr(physics, "to_dict"): physics = physics.to_dict()
-        bio = self.eng.bio.endo.get_state()
-        bio["atp"] = self.eng.bio.mito.state.atp_pool
+        bio = {}
+        if hasattr(self.eng, 'bio') and self.eng.bio:
+            if hasattr(self.eng.bio, 'endo'):
+                bio = self.eng.bio.endo.get_state()
+            if hasattr(self.eng.bio, 'mito') and hasattr(self.eng.bio.mito, 'state'):
+                bio["atp"] = self.eng.bio.mito.state.atp_pool      
         return RosettaStone.translate(physics, bio, impulse)
 
     def report(self):

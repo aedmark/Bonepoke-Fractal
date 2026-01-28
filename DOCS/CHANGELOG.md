@@ -1,5 +1,36 @@
 # BONEAMANITA v11 CHANGELOG
 
+### **BONEAMANITA 12.4.0: "KISHO'S LAMENT"**
+
+_“The system is not the sum of its parts, but the product of their interactions.”_ — Russell Ackoff
+
+---
+
+#### **🌐 SYSTEMIC SYNERGY (The Fuller Layer)**
+
+- **The Council Concordat (`bone_council.py`):** Standardized the Auditor Interface. Every member of the Council (Hofstadter, Meadows, Parliamentarian) now returns a strictly typed 4-tuple `(Triggered, Message, Corrections, Mandate)`. No more "off-by-one" unpacking errors in the governance layer.
+- **The Data/Logic Split (`bone_translation.py` & `bone_data.py`):** Extracted hardcoded metaphors and pacing strings from the translator logic and moved them into `TheLore`. The engine now "reads" its flavor text from the library rather than having it tattooed on its brain.
+- **Ephemeralization of Logs (`bone_telemetry.py`):** Deleted the redundant `StructuredLogger` class. The `TelemetryService` singleton now handles all black-box recording, adhering to the "Highlander Principle" (There can be only one).
+
+#### **⚖️ DYNAMICS & RESILIENCE (The Meadows Layer)**
+
+- **The Parliamentarian's Eyes (`bone_cycle.py`):** Fixed a critical feedback gap where the Council was convened without access to the User's biological state. The Parliamentarian can now see your ATP/Stamina levels and will properly file a grievance if the simulation is overworking you.
+- **The Crystal Bathtub (`bone_telemetry.py`):** Replaced the infinite list of `DecisionCrystals` with a `deque(maxlen=50)`. The system now forgets ancient history to prevent memory leaks (The Stock no longer overflows).
+- **Survival Priorities (`bone_synesthesia.py`):** Fixed the "Happy Poison" bug. The nervous system now prioritizes Toxicity/Pain signals over high-voltage excitement. You will no longer feel "Manic" while dying of septicemia.
+
+#### **🧠 COGNITIVE HYGIENE (The Pinker Lens)**
+
+- **Input Normalization (Global):** Implemented clean `_normalize_physics` helpers across `bone_village.py`, `bone_synesthesia.py`, and others. Replaced the "Defensive Blob" pattern (`if isinstance(dict)... elif hasattr...`) with a single, readable source of truth.
+- **Role Consistency (`bone_viewer.py`):** The HUD Header is no longer hardcoded to `♦ NARRATOR`. It now correctly displays the active Persona (e.g., `♦ THE SURGEON`, `♦ THE JESTER`), maintaining narrative coherence.
+- **Polite Failures (`bone_spores.py`):** Silenced the raw Python traceback scream when a Spore fails to load. The system now logs a dignified error message instead.
+
+#### **🍩 HUMAN EXPERIENCE (The Schur Layer)**
+
+- **Dynamic Eulogies (`bone_village.py`):** The `DeathGen` module now respects the actual cause of death. Instead of a generic "Game Over," you will receive a specific verdict based on whether you died of Gluttony (High Voltage), Boredom (High Drag), or Trauma.
+- **Somatic Richness (`bone_translation.py`):** Connected the "Ghost Input." Biological reflexes calculated in the Synesthesia layer (e.g., "Gut Tightening") are now actually passed to the Translator and displayed in the Somatic Report.
+- **The Semantic Reservoirs:** Expanded the vocabulary for Pacing and Metaphors. The system will no longer repeat "A tightrope walk" fifty times in a row; it now samples from a rich array of descriptors.
+
+
 ### **BONEAMANITA 12.3.0: "The Ghost in the Machine"**
 
 *“We shape our tools and thereafter our tools shape us.”* — John Culkin

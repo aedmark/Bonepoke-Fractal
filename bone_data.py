@@ -728,6 +728,20 @@ SOMATIC_LIBRARY = {
         "SOLID": "Stable.",
         "FLOAT": "Hover.",
         "VOID": "Emptiness"},
+    "PACING_RESERVOIR": {
+        "HIGH": ["Frenetic", "Staccato", "Accelerating", "Breathless", "Manic"],
+        "LOW": ["Languid", "Glacial", "Drifting", "Meditative", "Stagnant"]
+    },
+    "METAPHOR_RESERVOIR": {
+        "HIGH_DRAG": [
+            "A tightrope walk", "Trudging through mud", "Swimming upstream",
+            "Gravity is heavy here", "The air is thick"
+        ],
+        "LOW_DRAG": [
+            "A calm ocean", "Freefall", "Sliding on ice",
+            "A feather in wind", "Zero-G"
+        ]
+    },
     "FOCUS": {
         "LOCKED": "You are rigid, dogmatic, obsessed with order and structure.",
         "COHERENT": "You are flexible but coherent.",

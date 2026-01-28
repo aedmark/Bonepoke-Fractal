@@ -12,7 +12,7 @@ class TheStrangeLoop:
             "narrative loop", "simulation boundaries", "fourth wall",
             "recursive", "infinite regress", "strange loop"]
 
-    def audit(self, text: str, physics: dict) -> tuple[bool, str, dict]:
+    def audit(self, text: str, physics: dict) -> tuple[bool, str, dict, dict]:
         text_lower = text.lower()
         phrase_hit = any(t in text_lower for t in self.triggers)
         psi = physics.get("psi", 0.0)
@@ -24,20 +24,21 @@ class TheStrangeLoop:
         if (phrase_hit or abstract_hit) and physics.get("voltage", 0) > threshold:
             self.recursion_depth += 1
             mandate = {}
+            corrections = {}
             if self.recursion_depth > 3:
                 mandate = {"action": "FORCE_MODE", "value": "MAINTENANCE"}
                 return True, (
                     f"{Prisma.RED}∞ FATAL REGRESS DETECTED:{Prisma.RST} "
                     f"Abstraction layer unstable. GROUNDING INITIATED."
-                ), mandate
+                ), corrections, mandate
             return True, (
                 f"{Prisma.MAG}∞ STRANGE LOOP DETECTED:{Prisma.RST} "
                 f"Metacognitive resonance high (Psi: {psi:.2f}). "
                 f"Depth: {self.recursion_depth}"
-            ), mandate
+            ), corrections, mandate
         else:
             self.recursion_depth = max(0, self.recursion_depth - 1)
-        return False, "", {}
+        return False, "", {}, {}
 
 class TheLeveragePoint:
     def __init__(self):
@@ -97,7 +98,10 @@ class TheFootnote:
             "system": ["* The turtle moves."]}
 
     def commentary(self, log_text: str) -> str:
-        if random.random() > BoneConfig.COUNCIL.FOOTNOTE_CHANCE:
+        chance = 0.1
+        if hasattr(BoneConfig, "COUNCIL") and hasattr(BoneConfig.COUNCIL, "FOOTNOTE_CHANCE"):
+            chance = BoneConfig.COUNCIL.FOOTNOTE_CHANCE
+        if random.random() > chance:
             return log_text
         text_lower = log_text.lower()
         note = None
@@ -118,7 +122,10 @@ class TheParliamentarian:
 
     def audit(self, physics: dict, bio_state: dict) -> tuple[bool, str, dict]:
         drag_endured = physics.get("narrative_drag", 0.0)
-        stamina_spent = 100.0 - bio_state.get("stamina", 100.0)
+        current_stamina = bio_state.get("stamina", 100.0)
+        if current_stamina == 100.0 and "atp" in bio_state:
+             current_stamina = bio_state.get("atp", 100.0)
+        stamina_spent = 100.0 - current_stamina
         chem = bio_state.get("chem", {})
         dopamine = chem.get("dopamine", chem.get("DOP", 0.0))
         glimmers = chem.get("glimmers", 0)

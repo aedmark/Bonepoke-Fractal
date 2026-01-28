@@ -2,6 +2,7 @@
 
 import json, time, os, glob, uuid
 from typing import Any, Dict, List, Optional
+from collections import deque
 from dataclasses import dataclass, asdict, field
 from bone_bus import Prisma
 
@@ -42,41 +43,6 @@ class DecisionCrystal:
 
     def to_json(self):
         return json.dumps(asdict(self))
-
-class StructuredLogger:
-    def __init__(self, session_id: str, log_dir: str = "telemetry"):
-        self.session_id = session_id
-        filepath = os.path.join(log_dir, f"trace_{session_id}.jsonl")
-        self.manager = LogManager(filepath)
-        print(f"{Prisma.CYN}[TELEMETRY]: Observability Layer Active.{Prisma.RST}")
-        print(f"{Prisma.GRY}   > Managed by LogManager at: {filepath}{Prisma.RST}")
-
-    def capture_decision(self, component: str, decision_type: str,
-                         inputs: Dict, reasoning: str, outcome: str):
-        trace = DecisionTrace(
-            trace_id=str(uuid.uuid4())[:8],
-            timestamp=time.time(),
-            component=component,
-            decision_type=decision_type,
-            inputs=self._sanitize(inputs),
-            reasoning=reasoning,
-            outcome=outcome)
-        self.manager.write(trace.to_json())
-
-    def _sanitize(self, data: Any, depth: int = 0, max_depth: int = 3) -> Any:
-        if depth > max_depth:
-            return "<Max Depth Exceeded>"
-
-        if isinstance(data, (str, int, float, bool, type(None))):
-            return data
-        if isinstance(data, dict):
-            return {k: self._sanitize(v, depth + 1, max_depth)
-                    for k, v in data.items() if k != "graph"}
-        if isinstance(data, list):
-            return [self._sanitize(i, depth + 1, max_depth) for i in data]
-        if hasattr(data, '__dict__'):
-            return self._sanitize(vars(data), depth + 1, max_depth)
-        return str(data)
 
 @dataclass
 class PhaseTrace:
@@ -166,7 +132,7 @@ class TelemetryService:
         self.session_id = session_id
         filepath = os.path.join(log_dir, f"trace_{session_id}.jsonl")
         self.manager = LogManager(filepath)
-        self.crystals: List[DecisionCrystal] = []
+        self.crystals: Deque[DecisionCrystal] = deque(maxlen=50) 
         print(f"{Prisma.CYN}[TELEMETRY]: Observability Layer Active.{Prisma.RST}")
         print(f"{Prisma.GRY}   > Managed by LogManager at: {filepath}{Prisma.RST}")
 
@@ -212,6 +178,8 @@ class TelemetryService:
             return "<Max Depth Exceeded>"
         if isinstance(data, (str, int, float, bool, type(None))):
             return data
+        if isinstance(data, (set, tuple)):
+            return [self._sanitize(i, depth + 1, max_depth) for i in data]
         if isinstance(data, dict):
             return {k: self._sanitize(v, depth + 1, max_depth)
                     for k, v in data.items() if k != "graph"}
