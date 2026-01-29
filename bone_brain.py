@@ -131,7 +131,8 @@ class NeurotransmitterModulator:
         self.current_chem.decay(rate=decay_amount)
         plasticity = BrainConfig.BASE_PLASTICITY + (base_voltage * BrainConfig.VOLTAGE_SENSITIVITY)
         plasticity = max(0.1, min(BrainConfig.MAX_PLASTICITY, plasticity))
-        self.current_chem.mix(incoming_chem, weight=plasticity)
+        mixing_weight = min(0.5, plasticity)
+        self.current_chem.mix(incoming_chem, weight=mixing_weight)
         base_temp = BrainConfig.BASE_TEMP
         stress_dampener = self.current_chem.cortisol * 0.5
         curiosity_boost = self.current_chem.dopamine * 0.4

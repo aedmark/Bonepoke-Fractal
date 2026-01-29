@@ -31,50 +31,43 @@ class CycleStabilizer:
             kp=0.30, ki=0.05, kd=0.10, setpoint=1.5, output_limits=(-3.0, 3.0))
         self.last_phase: str = "INIT"
 
-    def _get_metric(self, ctx: CycleContext, key: str, default: float = 0.0) -> float:
-        p = ctx.physics
-        if isinstance(p, dict):
-            return float(p.get(key, default))
-        return float(getattr(p, key, default))
+    def _normalize_physics(self, ctx: CycleContext):
+        return ctx.physics
 
-    def _get_state(self, ctx: CycleContext, key: str, default: str = "") -> str:
-        p = ctx.physics
-        if isinstance(p, dict):
-            return str(p.get(key, default))
-        return str(getattr(p, key, default))
+    def _get_metric(self, p: Any, key: str, default: float = 0.0) -> float:
+        return float(p.get(key, default))
 
-    def _set_metric(self, ctx: CycleContext, key: str, value: float):
-        p = ctx.physics
-        if isinstance(p, dict):
-            p[key] = value
-        else:
-            setattr(p, key, value)
+    def _get_state(self, p: Any, key: str, default: str = "") -> str:
+        return str(p.get(key, default))
 
-    def _adjust_setpoints(self, ctx: CycleContext):
-        flow = self._get_state(ctx, "flow_state", "LAMINAR")
-        p = ctx.physics
+    def _set_metric(self, p: Any, key: str, value: float):
+        p[key] = value
+
+    def _adjust_setpoints(self, ctx: CycleContext, p: Any):
+        flow = self._get_state(p, "flow_state", "LAMINAR")
         manifold = "THE_CONSTRUCT"
-        current_manifold = getattr(p, "manifold", None) or (p.get("manifold") if isinstance(p, dict) else None) or manifold
+        current_manifold = p.get("manifold") or manifold
         if current_manifold == "THE_CONSTRUCT":
             world = getattr(ctx, "world_state", {})
             if isinstance(world, dict):
                 orbit = world.get("orbit")
                 if orbit and isinstance(orbit, (list, tuple)):
-                    current_manifold = orbit[0]
+                    current_manifold = orbit[0]  
         target_cfg = self.MANIFOLD_CONFIGS.get(current_manifold, self.MANIFOLD_CONFIGS["DEFAULT"])
         self.voltage_pid.setpoint = 20.0 if flow in self.HIGH_ENERGY_STATES else target_cfg["voltage"]
         self.drag_pid.setpoint = target_cfg["drag"]
 
     def stabilize(self, ctx: CycleContext, current_phase: str):
-        self._adjust_setpoints(ctx)
-        curr_v = self._get_metric(ctx, "voltage")
-        curr_d = self._get_metric(ctx, "narrative_drag")
+        p = self._normalize_physics(ctx)
+        self._adjust_setpoints(ctx, p)
+        curr_v = self._get_metric(p, "voltage")
+        curr_d = self._get_metric(p, "narrative_drag")
         v_force = self.voltage_pid.update(curr_v, dt=None)
         d_force = self.drag_pid.update(curr_d, dt=None)
         corrections_made = False
         if abs(curr_v - self.voltage_pid.setpoint) > 6.0 and abs(v_force) > 0.05:
             new_v = max(0.0, curr_v + v_force)
-            self._set_metric(ctx, "voltage", new_v)
+            self._set_metric(p, "voltage", new_v)
             if abs(v_force) > 0.1:
                 reason = "PID_DAMPENER" if v_force < 0 else "PID_EXCITATION"
                 ctx.record_flux(current_phase, "voltage", curr_v, new_v, reason)
@@ -83,7 +76,7 @@ class CycleStabilizer:
                 corrections_made = True
         if abs(curr_d - self.drag_pid.setpoint) > 2.5 and abs(d_force) > 0.05:
             new_d = max(0.0, curr_d + d_force)
-            self._set_metric(ctx, "narrative_drag", new_d)
+            self._set_metric(p, "narrative_drag", new_d)
             if abs(d_force) > 0.1:
                 reason = "PID_LUBRICATION" if d_force < 0 else "PID_BRAKING"
                 ctx.record_flux(current_phase, "narrative_drag", curr_d, new_d, reason)

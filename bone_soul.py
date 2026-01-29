@@ -91,6 +91,7 @@ class NarrativeSelf:
             "HOPE": 0.5,
             "DISCIPLINE": 0.5,
             "WISDOM": 0.1}
+        self.paradox_accum: float = 0.0
         self.archetype = "THE OBSERVER"
         self.current_obsession: Optional[str] = None
         self.obsession_progress: float = 0.0
@@ -200,26 +201,40 @@ class NarrativeSelf:
     def _synaptic_dance(self, physics: Dict) -> str:
         voltage = physics.get("voltage", 0.0)
         drag = physics.get("narrative_drag", 0.0)
-        momentum = 0.01
         move_name = "Drifting"
-        provenance = "Inertia"
-        if voltage > 15.0:
-            self.traits["CURIOSITY"] = min(1.0, self.traits["CURIOSITY"] + (momentum * 4))
-            self.traits["DISCIPLINE"] = max(0.0, self.traits["DISCIPLINE"] - (momentum * 2))
+        provenance = []
+        is_high_voltage = voltage > VOLTAGE_MANIC_THRESHOLD
+        is_high_drag = drag > DRAG_ENTROPY_THRESHOLD
+        if is_high_voltage:
+            self.traits["CURIOSITY"] = min(1.0, self.traits["CURIOSITY"] + (TRAIT_MOMENTUM * 4))
+            self.traits["DISCIPLINE"] = max(0.0, self.traits["DISCIPLINE"] - (TRAIT_MOMENTUM * 2))
+            provenance.append("Voltage")
+        if is_high_drag:
+            self.traits["CYNICISM"] = min(1.0, self.traits["CYNICISM"] + (TRAIT_MOMENTUM * 3))
+            self.traits["HOPE"] = max(0.0, self.traits["HOPE"] - (TRAIT_MOMENTUM * 3))
+            provenance.append("Drag")
+        if is_high_voltage and is_high_drag:
+            self.paradox_accum += 1.0
+            self.traits["WISDOM"] = min(1.0, self.traits["WISDOM"] + (TRAIT_MOMENTUM * 5))
+            move_name = "Vibrating (Paradox State)"
+            if self.paradox_accum > PARADOX_CRITICAL_MASS:
+                 move_name = "Transcending"
+                 self.paradox_accum = 0.0
+                 if hasattr(self.events, 'log'):
+                     self.events.log(f"{Prisma.MAG}∞ PARADOX HARVESTED: The friction generated Light.{Prisma.RST}", "SYS")
+        elif is_high_voltage:
             move_name = "Accelerating"
-            provenance = "High Voltage (Manic Pressure)"
-        elif drag > 4.0:
-            self.traits["CYNICISM"] = min(1.0, self.traits["CYNICISM"] + (momentum * 3))
-            self.traits["HOPE"] = max(0.0, self.traits["HOPE"] - (momentum * 3))
+            self.paradox_accum = max(0.0, self.paradox_accum - 0.1)
+        elif is_high_drag:
             move_name = "Enduring"
-            provenance = "High Drag (Entropy Accumulation)"
         elif 5.0 < voltage < 12.0 and drag < 2.0:
-            self.traits["WISDOM"] = min(1.0, self.traits["WISDOM"] + (momentum * 2))
-            self.traits["DISCIPLINE"] = min(1.0, self.traits["DISCIPLINE"] + momentum)
+            self.traits["WISDOM"] = min(1.0, self.traits["WISDOM"] + (TRAIT_MOMENTUM * 2))
+            self.traits["DISCIPLINE"] = min(1.0, self.traits["DISCIPLINE"] + TRAIT_MOMENTUM)
             move_name = "Flowing"
-            provenance = "Laminar Flow (Coherence)"
+            provenance.append("Laminar")
         self._normalize_traits(0.002)
-        return f"{move_name} [Source: {provenance}]"
+        source_str = " + ".join(provenance) if provenance else "Inertia"
+        return f"{move_name} [Source: {source_str}]"
 
     def _decay_traits(self):
         self._normalize_traits(0.005)
@@ -353,6 +368,7 @@ class NarrativeSelf:
         return {
             "traits": self.traits,
             "archetype": self.archetype,
+            "paradox_accum": self.paradox_accum,
             "chapters": self.chapters,
             "core_memories": [vars(m) for m in self.core_memories],
             "obsession": {
@@ -366,6 +382,7 @@ class NarrativeSelf:
         if not data: return
         self.traits = data.get("traits", self.traits)
         self.archetype = data.get("archetype", "THE OBSERVER")
+        self.paradox_accum = data.get("paradox_accum", 0.0)
         self.chapters = data.get("chapters", [])
         mem_data = data.get("core_memories", [])
         self.core_memories = [CoreMemory(**m) for m in mem_data]
